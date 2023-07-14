@@ -15,7 +15,7 @@ Differences:
 `docker-compose --env-file .env up -d`
 
 ### API
-API is nestjs and uses `yarn`. `yarn run start` to run.
+API is nestjs and uses `yarn`. `yarn set version berry` then `yarn run start` to run.
 `yarn dlx @yarnpkg/sdks vscode` is needed for vscode to find dependencies
 
 ### Frontend
