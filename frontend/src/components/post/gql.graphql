@@ -1,0 +1,40 @@
+fragment VersionFields on Version {
+  version_id
+  post_id
+  created_at
+  license_title
+  content
+}
+
+fragment PostFields on Post {
+  post_id
+  created_at
+  created_by 
+}
+
+mutation PostCreate ($content: String!, $parentId: Int){
+  postCreateResolver(input: { content: $content, parent_id: $parentId}) {
+    error
+    post {
+      ...PostFields
+    }
+  }
+}
+
+mutation VersionCreate ($postId: Int!, $content: String!, $license_title: String!){
+  versionCreateResolver(input:{post_id: $postId, content: $content, license_title: $license_title}){
+    error
+    version{
+      ...VersionFields
+    }
+  }
+}
+
+query PostRead ($postId: ID!){
+  postReadResolver(input: {post_id: $postId}) {
+    error
+    post {
+      ...PostFields
+    }
+  }
+}

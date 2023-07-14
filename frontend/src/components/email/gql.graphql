@@ -1,0 +1,5 @@
+mutation EmailResponse ($token: String!) {
+  emailResponseResolver(input:{token:$token}){
+    error
+  }
+}

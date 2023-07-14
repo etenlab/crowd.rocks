@@ -1,0 +1,9 @@
+.avatar-update-form-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.avatar-image {
+  max-width: 50px;
+  max-height: 50px;
+}

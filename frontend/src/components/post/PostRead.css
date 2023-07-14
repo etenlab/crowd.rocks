@@ -1,0 +1,128 @@
+.post-vote-header {
+  text-align: center;
+}
+
+.post-read-vote-wrap{
+  /* text-align: center;
+  display: flex; */
+
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.post-header-left{
+  display: flex;
+  align-items: center;
+}
+.post-read-rank{
+  display: flex;
+  align-items: center;
+}
+.rank{
+  font-weight: bolder;
+  font-size: 30px;
+  font-family: 'Times New Roman', Times, serif;
+}
+.light .rank{
+  color: darkred;
+}
+.dark .rank{
+  color: lightcyan;
+}
+.light .rank-suffix{
+  color: darkred;
+}
+.dark .rank-suffix{
+  color: lightcyan;
+}
+.avatar-image img{
+  height: 25px;
+  width: 25px;
+}
+.post-read-user-id{
+  font-weight: bold;
+  cursor: pointer;
+  margin: 0px 10px;
+}
+.light .post-read-user-id{
+  color: rgb(80, 6, 118);
+}
+.dark .post-read-user-id{
+  color: rgb(204, 161, 225);
+}
+.created-by{
+  font-size: x-small;
+  margin: 0px 0px;
+  cursor: pointer;
+}
+.light .created-by{
+  color: gray;
+}
+.dark .created-by{
+  color: lightgray;
+}
+
+.post-read-quill-wrap{
+  width: 100%;
+}
+.post-read-created-at{
+  text-align: right;
+  color: gray;
+  font-size: small;
+  /* margin-left: 8px; */
+  margin: 0px 10px;
+}
+
+.post-read-license {
+  text-align: right;
+}
+
+.post-read-body {
+  display: flex;
+  justify-content: space-between;
+}
+
+.post-read-html-wrap{
+  width: 100%;
+}
+
+.post-read-quill-editor {
+  padding: 0px;
+}
+
+.post-read-quill-editor .ql-editor {
+  padding: 0px;
+}
+
+.post-read-quill-editor .ql-container.ql-snow {
+  border: 0px;
+}
+
+.wiki-section .post-read-wrap{
+  font-size: 15px;
+  line-height: 1.5em;
+}
+
+.wiki-section .post-read-wrap a {
+  text-decoration: none;
+}
+
+.light .wiki-section .post-read-wrap a {
+  color: darkblue;
+}
+
+.dark .wiki-section .post-read-wrap a {
+  color: lightblue;
+}
+
+.wiki-section .post-read-html-wrap ion-accordion-group{
+  display: none;
+}
+
+.advise-login-to-vote {
+  color: gray;
+  font-size: small;
+}

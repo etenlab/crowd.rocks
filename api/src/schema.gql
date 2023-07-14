@@ -1,0 +1,190 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AvatarUpdateInput {
+  avatar: String!
+}
+
+type AvatarUpdateOutput {
+  error: ErrorType!
+  user: User
+}
+
+input EmailResponseInput {
+  token: String!
+}
+
+type EmailResponseOutput {
+  error: ErrorType!
+}
+
+enum ErrorType {
+  AvatarNotFound
+  AvatarTooLong
+  AvatarTooShort
+  AvatarUnavailable
+  CandidateNotFound
+  CandidateNotFoundInBallot
+  ElectionNotFound
+  EmailInvalid
+  EmailIsBlocked
+  EmailNotFound
+  EmailTooLong
+  EmailTooShort
+  EmailUnavailable
+  InvalidEmailOrPassword
+  LimitInvalid
+  NoError
+  OffsetInvalid
+  ParentElectionNotFound
+  PasswordInvalid
+  PasswordTooLong
+  PasswordTooShort
+  PositionInvalid
+  PostCreateFailed
+  PrefixInvalid
+  PrefixTooLong
+  PrefixTooShort
+  RankInvalid
+  RankUnchanged
+  TokenInvalid
+  Unauthorized
+  UnknownError
+}
+
+input FileUploadUrlRequest {
+  user_id: ID!
+}
+
+type FileUploadUrlResponse {
+  avatar_image_url: String!
+  error: ErrorType!
+  url: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type LoginOutput {
+  error: ErrorType!
+  session: Session
+}
+
+input LogoutInput {
+  token: String!
+}
+
+type LogoutOutput {
+  error: ErrorType!
+}
+
+type Mutation {
+  avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
+  emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
+  login(input: LoginInput!): LoginOutput!
+  logout(input: LogoutInput!): LogoutOutput!
+  passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
+  postCreateResolver(input: PostCreateInput!): PostCreateOutput!
+  register(input: RegisterInput!): RegisterOutput!
+  resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
+  versionCreateResolver(input: VersionCreateInput!): VersionCreateOutput!
+}
+
+input PasswordResetFormInput {
+  password: String!
+  token: String!
+}
+
+type Post {
+  created_at: String!
+  created_by: Int!
+  post_id: ID!
+}
+
+input PostCreateInput {
+  content: String!
+  parent_id: Int
+}
+
+type PostCreateOutput {
+  error: ErrorType!
+  post: Post
+}
+
+input PostReadInput {
+  post_id: ID!
+}
+
+type PostReadOutput {
+  error: ErrorType!
+  post: Post
+}
+
+type Query {
+  fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
+  postReadResolver(input: PostReadInput!): PostReadOutput!
+  userReadResolver(input: UserReadInput!): UserReadOutput!
+}
+
+input RegisterInput {
+  avatar: String!
+  email: String!
+  password: String!
+}
+
+type RegisterOutput {
+  error: ErrorType!
+  session: Session
+}
+
+input ResetEmailRequestInput {
+  email: String!
+}
+
+type ResetEmailRequestOutput {
+  error: ErrorType!
+}
+
+type Session {
+  avatar: String!
+  avatar_url: String
+  token: String!
+  user_id: ID!
+}
+
+type User {
+  avatar: String!
+  avatar_url: String
+  user_id: ID!
+}
+
+input UserReadInput {
+  user_id: ID!
+}
+
+type UserReadOutput {
+  error: ErrorType!
+  user: User
+}
+
+type Version {
+  content: String!
+  created_at: String!
+  license_title: String!
+  post_id: Int!
+  version_id: ID!
+}
+
+input VersionCreateInput {
+  content: String!
+  license_title: String!
+  post_id: Int!
+}
+
+type VersionCreateOutput {
+  error: ErrorType!
+  version: Version
+}

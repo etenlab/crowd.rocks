@@ -1,0 +1,45 @@
+fragment SessionFields on Session {
+  user_id
+  token
+  avatar
+  avatar_url
+}
+
+mutation Register ($email: String!, $avatar: String!, $password: String!){
+  register(input: {email:$email, avatar:$avatar, password:$password}){
+    error
+    session{
+      ...SessionFields
+    }
+  }
+}
+
+mutation Login ($email: String!, $password: String!){
+  login(input: {email:$email, password:$password}){
+    error
+    session{
+      ...SessionFields
+    }
+  }
+}
+
+mutation Logout ($token: String!) {
+  logout (input: { token:$token }){
+    error
+  }
+}
+
+mutation ResetEmailRequest($email: String!){
+  resetEmailRequest(input: {email: $email}) {
+    error
+  }
+}
+
+mutation PasswordResetFormRequest($token: String!, $password: String!){
+  passwordResetFormResolver(input: {token: $token, password: $password}) {
+    error
+    session{
+      ...SessionFields
+    }
+  }
+}

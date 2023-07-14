@@ -1,0 +1,36 @@
+.light {
+  color: var(--ca-menu-header-text);
+  background-color: var(--ca-menu-background-color);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  font-size: x-large;
+}
+
+.rocks {
+  font-weight: bolder;
+}
+
+.header-menu-item-holder div {
+  margin: 10px 0px;
+}
+
+.light .header-menu {
+  --ion-background-color: var(--ca-menu-background-color);
+}
+
+.theme-icon {
+  margin: 0px 7px;
+}
+
+.announcement{
+  text-align: center;
+  background-color: lightsalmon;
+  color: black
+}

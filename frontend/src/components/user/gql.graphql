@@ -1,0 +1,29 @@
+query UserRead($userId: ID!) {
+  userReadResolver(input: { user_id: $userId }) {
+    error
+    user {
+      avatar
+      avatar_url
+      user_id
+    }
+  }
+}
+
+mutation AvatarUpdate($avatar: String!) {
+  avatarUpdateResolver(input: { avatar: $avatar }) {
+    error
+    user {
+      avatar
+      avatar_url
+      user_id
+    }
+  }
+}
+
+query GetFileUploadUrl($userId: ID!) {
+  fileUploadUrlRequest(input: { user_id: $userId }) {
+    error
+    url
+    avatar_image_url
+  }
+}

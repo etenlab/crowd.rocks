@@ -1,0 +1,52 @@
+.home-hero-bar {
+  text-align: center;
+  font-style: italic;
+  font-family: cursive;
+  /* font-weight: bolder; */
+  font-size: x-large;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.search-box {
+  display: flex;
+  justify-content: space-between;
+}
+
+.search-result-item {
+  margin: 20px;
+}
+
+.home-loading-spinner-wrap {
+  text-align: center;
+}
+
+.home-no-results-advice {
+  text-align: center;
+}
+
+.home-footer {
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+  max-width: 777px;
+  /* display: flex;
+  justify-content: space-between;
+  align-items: flex-end; */
+}
+
+.home-footer a {
+  color: gray;
+  text-decoration: none;
+  font-size: smaller;
+}
+
+.home-footer-legal-button {
+  color: gray;
+  font-size: smaller;
+}
+
+.home-footer-create-button-wrap{
+  bottom: 40px;
+  right: 10px;
+}

@@ -1,0 +1,36 @@
+---
+version: '2'
+networks:
+  par_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.2.0.0/16
+
+services:
+  postgres_1:
+    image: postgres
+    networks:
+      par_net:
+        ipv4_address: 10.2.1.2
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: asdfasdf
+      POSTGRES_DB: crowdrocks
+    ports:
+      - "5434:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    networks:
+      par_net:
+        ipv4_address: 10.2.1.4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@crowd.rocks
+      PGADMIN_DEFAULT_PASSWORD: asdfasdf
+    ports:
+      - 8105:80
+    depends_on:
+      - postgres_1
