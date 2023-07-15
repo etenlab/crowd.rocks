@@ -93,6 +93,7 @@ type Mutation {
   register(input: RegisterInput!): RegisterOutput!
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
   versionCreateResolver(input: VersionCreateInput!): VersionCreateOutput!
+  wordUpsertResolver(input: WordUpsertInput!): WordUpsertOutput!
 }
 
 input PasswordResetFormInput {
@@ -129,6 +130,7 @@ type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
   postReadResolver(input: PostReadInput!): PostReadOutput!
   userReadResolver(input: UserReadInput!): UserReadOutput!
+  wordReadResolver(input: WordReadInput!): WordReadOutput!
 }
 
 input RegisterInput {
@@ -189,4 +191,39 @@ input VersionCreateInput {
 type VersionCreateOutput {
   error: ErrorType!
   version: Version
+}
+
+type Word {
+  definition: WordDefinition
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  word: String!
+  word_id: ID!
+}
+
+type WordDefinition {
+  definition: String!
+  word_definition_id: ID!
+}
+
+input WordReadInput {
+  word_id: ID!
+}
+
+type WordReadOutput {
+  error: ErrorType!
+  word: Word
+}
+
+input WordUpsertInput {
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  wordlike_string: String!
+}
+
+type WordUpsertOutput {
+  error: ErrorType!
+  word: Word
 }
