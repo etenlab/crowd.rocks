@@ -2,50 +2,40 @@ import { Field, ID, InputType, Int, ObjectType } from "@nestjs/graphql";
 import { GenericOutput } from "src/common/types";
 
 @ObjectType()
-export class Version {
-  @Field(type => ID) version_id: string
-  @Field(type => Int) post_id: string
-  @Field() created_at: string
-  @Field() license_title: string
-  @Field() content: string
-} 
+export class WordDefinition {
+  @Field(type => ID) word_definition_id: string
+  @Field(type => String) definition: string
+}
 
 @ObjectType()
-export class Post {
-  @Field(type => ID) post_id: string
-  @Field() created_at: string
-  @Field(type => Int) created_by: number
+export class Word {
+  @Field(type => ID) word_id: string
+  @Field(type => String) word: string
+  @Field(type => WordDefinition, { nullable: true }) definition: WordDefinition | null
+  @Field(type => String) language_code: string
+  @Field(type => String, { nullable: true }) dialect_code: string | null
+  @Field(type => String, { nullable: true }) geo_code: string | null
 }
 
 @InputType()
-export class PostCreateInput {
-  @Field(type => String) content: string
-  @Field(type => Int, { nullable: true }) parent_id: number | null
+export class WordUpsertInput {
+  @Field(type => String) wordlike_string: string
+  @Field(type => String) language_code: string
+  @Field(type => String) dialect_code: string
+  @Field(type => String) geo_code: string
 }
 
 @ObjectType()
-export class PostCreateOutput extends GenericOutput {
-  @Field(type => Post, { nullable: true }) post: Post | null
+export class WordUpsertOutput extends GenericOutput {
+  @Field(type => Word, { nullable: true }) word: Word | null
 }
 
 @InputType()
-export class PostReadInput {
-  @Field(type => ID) post_id: string
-} 
-
-@ObjectType()
-export class PostReadOutput extends GenericOutput {
-  @Field(type => Post, { nullable: true }) post: Post | null
-}
-
-@InputType()
-export class VersionCreateInput {
-  @Field(type => Int) post_id: number
-  @Field(type => String) license_title: string
-  @Field() content: string
+export class WordReadInput {
+  @Field(type => ID) word_id: string
 }
 
 @ObjectType()
-export class VersionCreateOutput extends GenericOutput {
-  @Field(type => Version, { nullable: true }) version: Version | null
+export class WordReadOutput extends GenericOutput {
+  @Field(type => Word, { nullable: true }) word: Word | null
 }

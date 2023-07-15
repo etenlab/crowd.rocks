@@ -51,6 +51,8 @@ enum ErrorType {
   TokenInvalid
   Unauthorized
   UnknownError
+  WordInsertFailed
+  WordLikeStringInsertFailed
 }
 
 input FileUploadUrlRequest {

@@ -1,17 +1,17 @@
 import { Module } from "@nestjs/common";
 import { CoreModule } from "src/core/core.module";
-import { PostReadResolver } from "./word-read.resolver";
-import { PostCreateResolver } from "./word-create.resolver";
+import { WordReadResolver } from "./word-read.resolver";
+import { WordUpsertResolver } from "./word-upsert.resolver";
 
 @Module({
   imports: [CoreModule],
   providers: [
-    PostReadResolver,
-    PostCreateResolver,
+    WordReadResolver,
+    WordUpsertResolver,
   ],
   exports: [
-    PostReadResolver,
-    PostCreateResolver,
+    WordReadResolver,
+    WordUpsertResolver,
   ]
 })
 export class PostModule { }

@@ -15,7 +15,6 @@ export class PostCreateResolver {
   async postCreateResolver(
     @Args('input') input: PostCreateInput,
     @Context() req: any,
-    contentType = 1,
   ): Promise<PostCreateOutput> {
     console.log('post create resolver')
     try {

@@ -35,6 +35,8 @@ export enum ErrorType {
   RankInvalid = 'RankInvalid',
   RankUnchanged = 'RankUnchanged',
   TokenInvalid = "TokenInvalid",
+  WordInsertFailed = "WordInsertFailed",
+  WordLikeStringInsertFailed = "WordLikeStringInsertFailed",
   Unauthorized = "Unauthorized",
   UnknownError = "UnknownError",
 }
