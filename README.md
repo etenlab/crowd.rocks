@@ -18,6 +18,7 @@ Differences:
 ### API
 API is nestjs and uses `yarn`. `yarn set version berry` then `yarn run start` to run.
 `yarn dlx @yarnpkg/sdks vscode` is needed for vscode to find dependencies
+GraphQL playground: `http://localhost:3000/graphql`
 
 ### Frontend
 Frontend is Ionic React and uses `npm`. `ionic serve` to run.
