@@ -14,4 +14,4 @@ import { WordUpsertResolver } from "./word-upsert.resolver";
     WordUpsertResolver,
   ]
 })
-export class PostModule { }
+export class WordModule { }

@@ -6,6 +6,7 @@ import { AuthenticationModule } from './components/authentication/authentication
 import { EmailModule } from './components/email/email.module'
 import { PostModule } from './components/post/post.module'
 import { UserModule } from './components/user/user.module'
+import { WordModule } from './components/words/words.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UserModule } from './components/user/user.module'
     UserModule,
     PostModule,
     EmailModule,
+    WordModule,
   ],
   controllers: [],
   providers: [],

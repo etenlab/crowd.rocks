@@ -21,8 +21,8 @@ export class Word {
 export class WordUpsertInput {
   @Field(type => String) wordlike_string: string
   @Field(type => String) language_code: string
-  @Field(type => String) dialect_code: string
-  @Field(type => String) geo_code: string
+  @Field(type => String, { nullable: true }) dialect_code: string | null
+  @Field(type => String, { nullable: true }) geo_code: string | null
 }
 
 @ObjectType()

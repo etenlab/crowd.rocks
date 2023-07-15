@@ -46,10 +46,10 @@ export class WordReadResolver {
           word: {
             word_id: input.word_id,
             word: res1.rows[0].word,
-            definition: {
+            definition: res1.rows[0].word_definition_id && res1.rows[0].definition ? {
               word_definition_id: res1.rows[0].word_definition_id,
               definition: res1.rows[0].definition,
-            },
+            } : null,
             language_code: res1.rows[0].language_code,
             dialect_code: res1.rows[0].dialect_code,
             geo_code: res1.rows[0].geo_code,
