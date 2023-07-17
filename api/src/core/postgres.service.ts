@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common'
-import { Pool } from 'pg'
-import { ConfigService } from './config.service'
+import { Injectable } from '@nestjs/common';
+import { Pool } from 'pg';
+import { ConfigService } from './config.service';
 
 @Injectable()
 export class PostgresService {
@@ -12,5 +12,5 @@ export class PostgresService {
     database: this.config.CR_DB,
     password: this.config.CR_DB_PASSWORD,
     port: this.config.CR_DB_PORT!,
-  })
+  });
 }

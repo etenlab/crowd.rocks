@@ -1,19 +1,20 @@
-import { Body, Controller, Get, Post } from '@nestjs/common'
-import { ConfigService } from 'src/core/config.service'
-import { PostgresService } from 'src/core/postgres.service'
-import { Bounce, Complaint, Delivery, SESNotificationPayload } from './types'
+import { Body, Controller, Get, Post } from '@nestjs/common';
+import { ConfigService } from 'src/core/config.service';
+import { PostgresService } from 'src/core/postgres.service';
+import { Bounce, Complaint, Delivery, SESNotificationPayload } from './types';
 
 @Controller()
 export class SnsController {
   constructor(private pg: PostgresService, private config: ConfigService) {}
 
   @Post('sns')
-  async sns_delivery(@Body() notification: SESNotificationPayload): Promise<string> {
+  async sns_delivery(
+    @Body() notification: SESNotificationPayload,
+  ): Promise<string> {
+    const message_id = notification?.mail?.messageId;
+    const email = notification?.mail?.destination[0];
 
-    const message_id = notification?.mail?.messageId
-    const email = notification?.mail?.destination[0]
-
-    if (!message_id || !email) return 'missing message id or recipient'
+    if (!message_id || !email) return 'missing message id or recipient';
 
     await this.pg.pool.query(
       `
@@ -23,18 +24,19 @@ export class SnsController {
         and email = $2;
       `,
       [message_id, email],
-    )
+    );
 
-    return 'delivery processed'
+    return 'delivery processed';
   }
 
   @Post('sns-bounce')
-  async sns_bounce(@Body() notification: SESNotificationPayload): Promise<string> {
+  async sns_bounce(
+    @Body() notification: SESNotificationPayload,
+  ): Promise<string> {
+    const message_id = notification?.mail?.messageId;
+    const email = notification?.bounce?.bouncedRecipients[0]?.emailAddress;
 
-    const message_id = notification?.mail?.messageId
-    const email = notification?.bounce?.bouncedRecipients[0]?.emailAddress
-
-    if (!message_id || !email) return 'missing message id or recipient'
+    if (!message_id || !email) return 'missing message id or recipient';
 
     await this.pg.pool.query(
       `
@@ -44,18 +46,20 @@ export class SnsController {
         and email = $2;
       `,
       [message_id, email],
-    )
+    );
 
-    return 'bounce processed'
+    return 'bounce processed';
   }
 
   @Post('sns-complaint')
-  async sns_complaint(@Body() notification: SESNotificationPayload): Promise<string> {
+  async sns_complaint(
+    @Body() notification: SESNotificationPayload,
+  ): Promise<string> {
+    const message_id = notification?.mail?.messageId;
+    const email =
+      notification?.complaint?.complainedRecipients[0]?.emailAddress;
 
-    const message_id = notification?.mail?.messageId
-    const email = notification?.complaint?.complainedRecipients[0]?.emailAddress
-
-    if (!message_id || !email) return 'missing message id or recipient'
+    if (!message_id || !email) return 'missing message id or recipient';
 
     await this.pg.pool.query(
       `
@@ -65,8 +69,8 @@ export class SnsController {
         and email = $2;
       `,
       [message_id, email],
-    )
+    );
 
-    return 'complaint processed'
+    return 'complaint processed';
   }
 }
