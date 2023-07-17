@@ -16,6 +16,7 @@ Differences:
 `docker-compose --env-file .env up -d`
 
 ### API
+run the env var exports in the API readme file. 
 API is nestjs and uses `yarn`. `yarn set version berry` then `yarn run start` to run.
 `yarn dlx @yarnpkg/sdks vscode` is needed for vscode to find dependencies
 GraphQL playground: `http://localhost:3000/graphql`
