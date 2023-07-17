@@ -2,9 +2,9 @@ import {
   SendEmailCommand,
   SendEmailRequest,
   SESv2Client,
-} from '@aws-sdk/client-sesv2'
-import { Injectable } from '@nestjs/common'
-import { ConfigService } from './config.service'
+} from '@aws-sdk/client-sesv2';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from './config.service';
 
 @Injectable()
 export class SesService {
@@ -16,7 +16,7 @@ export class SesService {
       secretAccessKey: this.config.AWS_SECRET_ACCESS_KEY,
     },
     region: this.config.AWS_REGION,
-  })
+  });
 
   async send_email(
     to_address: string,
@@ -49,12 +49,12 @@ export class SesService {
             },
           },
         }),
-      )
+      );
       // process data.
-      return data
+      return data;
     } catch (error) {
       // error handling.
-      console.log('error sending email', error)
+      console.log('error sending email', error);
     } finally {
       // finally.
     }
