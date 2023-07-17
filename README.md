@@ -16,10 +16,11 @@ Differences:
 `docker-compose --env-file .env up -d`
 
 ### API
-run the env var exports in the API readme file. 
-API is nestjs and uses `yarn`. `yarn set version berry` then `yarn run start` to run.
-`yarn dlx @yarnpkg/sdks vscode` is needed for vscode to find dependencies
-GraphQL playground: `http://localhost:3000/graphql`
+1. add env vars: run the env var exports in the API readme file
+1. install dependencies: `yarn set version berry` then `yarn` 
+1. setup vscode to find dependencies: `yarn dlx @yarnpkg/sdks vscode`
+1. run API: `yarn run start`
+1. GraphQL playground: `http://localhost:3000/graphql`
 
 ### Frontend
 Frontend is Ionic React and uses `npm`. `ionic serve` to run.
