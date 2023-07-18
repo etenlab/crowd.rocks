@@ -1,4 +1,8 @@
-export const siteText = {
+export const siteText: {
+  [key: string]: {
+    [lang: string]: string;
+  };
+} = {
   'crowd.rocks': {
     en: 'crowd.rocks',
     jp: '群衆. ',
@@ -642,7 +646,7 @@ export const siteText = {
     jp: 'С残したいものを選択してください:',
     zh: '选择您想要留下的要求：',
     hi: 'चुनें कि आप क्या माँगना छोड़ना चाहते हैं:',
-    de: 'Wählen Sie aus, wonach Sie fragen möchten:',
+    de: 'Wählen Sie aus, wonach Sie fragen möcht"en":',
   },
   Words: {
     en: 'Words',

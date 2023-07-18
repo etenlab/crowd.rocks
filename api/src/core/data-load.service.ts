@@ -1,14 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { Config } from 'apollo-server-core';
-import { readFileSync } from 'fs';
-import { justBearerHeader } from 'src/common/utility';
-import { RegisterResolver } from 'src/components/authentication/register.resolver';
-import { WordUpsertResolver } from 'src/components/words/word-upsert.resolver';
+// import { Config } from 'apollo-server-core';
+// import { readFileSync } from 'fs';
+// import { justBearerHeader } from 'src/common/utility';
+// import { RegisterResolver } from 'src/components/authentication/register.resolver';
+// import { WordUpsertResolver } from 'src/components/words/word-upsert.resolver';
+
+import { ErrorType } from 'src/common/types';
+
 import { ConfigService } from './config.service';
 import { PostgresService } from './postgres.service';
 import { SesService } from './ses.service';
+
 import { siteText } from './data/lang';
-import { ErrorType } from 'src/common/types';
+
+import { getAdminTokenSQL } from './sql-string';
+
+import {
+  callWordUpsertProcedure,
+  WordUpsertProcedureOutputRow,
+} from 'src/components/words/sql-string';
+import {
+  callPhraseUpsertProcedure,
+  PhraseUpsertProcedureOutputRow,
+} from 'src/components/phrases/sql-string';
 
 @Injectable()
 export class DataLoadService {
@@ -58,7 +72,11 @@ export class DataLoadService {
           }),
         );
 
-        const phraseId = await this.phraseUpsert(wordIds, token);
+        const phraseId = await this.phraseUpsert(
+          siteTextEntryKeyWordsArr.join(' '),
+          wordIds,
+          token,
+        );
 
         // create translated phrase
         await this.addTranslatedPhraseToPhraseFromSiteTextEntry(
@@ -72,12 +90,7 @@ export class DataLoadService {
 
   async getAdminToken(): Promise<string | null> {
     try {
-      const res = await this.pg.pool.query(
-        `
-            select token from tokens where user_id = 1
-          `,
-        [],
-      );
+      const res = await this.pg.pool.query(...getAdminTokenSQL());
 
       return res.rows[0].token;
     } catch (e) {
@@ -91,11 +104,14 @@ export class DataLoadService {
     token: string,
   ): Promise<number | null> {
     try {
-      const res = await this.pg.pool.query(
-        `
-          call word_upsert($1, $2, $3, $4, $5, 0, '');
-        `,
-        [word, langauge, null, null, token],
+      const res = await this.pg.pool.query<WordUpsertProcedureOutputRow>(
+        ...callWordUpsertProcedure({
+          wordlike_string: word,
+          language_code: langauge,
+          dialect_code: null,
+          geo_code: null,
+          token,
+        }),
       );
 
       const error = res.rows[0].p_error_type;
@@ -112,13 +128,18 @@ export class DataLoadService {
     }
   }
 
-  async phraseUpsert(wordArr: number[], token: string): Promise<number | null> {
+  async phraseUpsert(
+    phraselikeString: string,
+    wordArr: number[],
+    token: string,
+  ): Promise<number | null> {
     try {
-      const res = await this.pg.pool.query(
-        `
-          call phrase_upsert($1, $2, 0, '');
-        `,
-        [wordArr, token],
+      const res = await this.pg.pool.query<PhraseUpsertProcedureOutputRow>(
+        ...callPhraseUpsertProcedure({
+          phraselike_string: phraselikeString,
+          wordIds: wordArr,
+          token,
+        }),
       );
 
       const error = res.rows[0].p_error_type;
@@ -136,7 +157,7 @@ export class DataLoadService {
   }
 
   async addTranslatedWordOrPhraseToOneWordSiteTextEntry(
-    siteTextEntryObj: {},
+    siteTextEntryObj: object,
     onlyWordIdOfEntryKey: number,
     token: string,
   ): Promise<number | null> {
@@ -172,7 +193,11 @@ export class DataLoadService {
           }),
         );
 
-        const phraseId = await this.phraseUpsert(wordIds, token);
+        const phraseId = await this.phraseUpsert(
+          translatedWordOrPhraseInEntry.join(' '),
+          wordIds,
+          token,
+        );
 
         const wordToPhraseTranslationId =
           await this.wordToPhraseTranslationUpsert(
@@ -187,7 +212,7 @@ export class DataLoadService {
   }
 
   async addTranslatedPhraseToPhraseFromSiteTextEntry(
-    siteTextEntryObj: {},
+    siteTextEntryObj: object,
     phraseIdOfEntryKey: number,
     token: string,
   ): Promise<number | null> {
@@ -225,7 +250,11 @@ export class DataLoadService {
           }),
         );
 
-        const phraseId = await this.phraseUpsert(wordIds, token);
+        const phraseId = await this.phraseUpsert(
+          translatedWordOrPhraseInEntry.join(' '),
+          wordIds,
+          token,
+        );
 
         const phraseToPhraseTranslationId =
           await this.phraseToPhraseTranslationUpsert(

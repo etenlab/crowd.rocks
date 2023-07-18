@@ -9,6 +9,11 @@ import { PhraseReadResolver } from './phrase-read.resolver';
 import { Phrase, PhraseUpsertInput, PhraseUpsertOutput } from './types';
 
 import {
+  WordUpsertProcedureOutputRow,
+  callWordUpsertProcedure,
+} from 'src/components/words/sql-string';
+
+import {
   callPhraseUpsertProcedure,
   PhraseUpsertProcedureOutputRow,
 } from './sql-string';
@@ -17,7 +22,7 @@ import {
 export class PhraseUpsertResolver {
   constructor(
     private pg: PostgresService,
-    private wordRead: PhraseReadResolver,
+    private phraseRead: PhraseReadResolver,
   ) {}
 
   @Mutation(() => PhraseUpsertOutput)
@@ -28,12 +33,37 @@ export class PhraseUpsertResolver {
     console.log('word upsert resolver, string: ', input.phraselike_string);
 
     try {
+      const wordlikeStrings = input.phraselike_string.split(' ');
+      const wordIds: number[] = [];
+
+      for (const wordlikeStr of wordlikeStrings) {
+        const res = await this.pg.pool.query<WordUpsertProcedureOutputRow>(
+          ...callWordUpsertProcedure({
+            wordlike_string: wordlikeStr,
+            language_code: input.language_code,
+            dialect_code: input.dialect_code,
+            geo_code: input.geo_code,
+            token: getBearer(req),
+          }),
+        );
+
+        const error = res.rows[0].p_error_type;
+        const word_id = res.rows[0].p_word_id;
+
+        if (error !== ErrorType.NoError || !word_id) {
+          return {
+            error,
+            phrase: null,
+          };
+        }
+
+        wordIds.push(word_id);
+      }
+
       const res = await this.pg.pool.query<PhraseUpsertProcedureOutputRow>(
         ...callPhraseUpsertProcedure({
           phraselike_string: input.phraselike_string,
-          language_code: input.language_code,
-          dialect_code: input.dialect_code,
-          geo_code: input.geo_code,
+          wordIds: wordIds,
           token: getBearer(req),
         }),
       );
@@ -49,7 +79,7 @@ export class PhraseUpsertResolver {
       }
 
       const phrase = await (
-        await this.wordRead.phraseReadResolver({ phrase_id })
+        await this.phraseRead.phraseReadResolver({ phrase_id })
       ).phrase;
 
       return {

@@ -26,6 +26,7 @@ export class WordUpsertResolver {
     @Context() req: any,
   ): Promise<WordUpsertOutput> {
     console.log('word upsert resolver, string: ', input.wordlike_string);
+
     try {
       const res = await this.pg.pool.query<WordUpsertProcedureOutputRow>(
         ...callWordUpsertProcedure({

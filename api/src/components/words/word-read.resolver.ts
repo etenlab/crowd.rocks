@@ -18,6 +18,7 @@ export class WordReadResolver {
     @Args('input') input: WordReadInput,
   ): Promise<WordReadOutput> {
     console.log('word read resolver, word_id:', input.word_id);
+
     try {
       const res1 = await this.pg.pool.query(...getWordObjById(input.word_id));
 

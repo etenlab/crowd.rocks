@@ -1,4 +1,5 @@
 create or replace procedure phrase_upsert(
+  in p_phraselike_string text,
   in p_words bigint[],
   in p_token varchar(512),
   inout p_phrase_id bigint,
@@ -23,8 +24,8 @@ begin
   end if;
 
   -- insert phrase
-  insert into phrases(words, created_by)
-  values (p_words, v_user_id)
+  insert into phrases(phraselike_string, words, created_by)
+  values (p_phraselike_string, p_words, v_user_id)
   on conflict do nothing
   returning phrase_id
   into p_phrase_id;
