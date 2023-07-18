@@ -5,7 +5,7 @@ import { getBearer } from 'src/common/utility';
 import { PostgresService } from 'src/core/postgres.service';
 import { Word, WordReadInput, WordReadOutput } from './types';
 
-@Injectable()
+@Injectable() 
 @Resolver(Word)
 export class WordReadResolver {
   constructor(private pg: PostgresService) {}

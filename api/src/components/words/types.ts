@@ -1,7 +1,7 @@
 import { Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
 
-@ObjectType()
+@ObjectType()  
 export class WordDefinition {
   @Field((type) => ID) word_definition_id: string;
   @Field((type) => String) definition: string;
