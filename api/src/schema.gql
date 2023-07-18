@@ -34,6 +34,7 @@ enum ErrorType {
   EmailTooShort
   EmailUnavailable
   InvalidEmailOrPassword
+  InvalidInputs
   LimitInvalid
   NoError
   OffsetInvalid

@@ -31,7 +31,7 @@ export class DatabaseVersionControlService {
       await this.loadSchemaAndFunctions();
     }
 
-    console.log('Database version check complete');
+    console.log('Database version check complete'); 
   }
 
   async getIsDbInit(): Promise<boolean> {
@@ -41,9 +41,9 @@ export class DatabaseVersionControlService {
       SELECT FROM information_schema.tables 
       WHERE  table_name   = 'database_version_control');
     `,
-      [],
+      [], 
     );
-
+ 
     return res.rows[0].exists;
   }
 
@@ -81,9 +81,16 @@ export class DatabaseVersionControlService {
     // email
     await this.runSqlFile('./src/core/sql/email/verify_email.sql');
 
-    // post
+    // post 
     await this.runSqlFile('./src/core/sql/post/post_create.sql');
     await this.runSqlFile('./src/core/sql/post/version_create.sql');
+
+    // word
+    await this.runSqlFile('./src/core/sql/words/word_upsert.sql');
+
+    // translation
+    await this.runSqlFile('./src/core/sql/translation/word_to_word_translation_upsert.sql');
+
 
     // update db version
     await this.setVersionNumber(1);

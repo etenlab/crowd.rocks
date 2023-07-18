@@ -237,7 +237,7 @@ create table words(
   geo_code varchar(32),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique(wordlike_string_id, word_definition_id, language_code, dialect_code, geo_code)
+  unique nulls not distinct (wordlike_string_id, word_definition_id, language_code, dialect_code, geo_code)
 );
 
 -- tags
@@ -299,9 +299,6 @@ create table word_tags_votes(
 create table phrases(
   phrase_id bigserial primary key,
   words bigint[] not null, -- references words(word_id)
-  language_code varchar(32) not null,
-  dialect_code varchar(32),
-  geo_code varchar(32),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
@@ -322,7 +319,8 @@ create table word_to_word_translations(
   from_word bigint not null references words(word_id),
   to_word bigint not null references words(word_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (from_word, to_word)
 );
 
 create table word_to_phrase_translations(
@@ -330,7 +328,8 @@ create table word_to_phrase_translations(
   from_word bigint not null references words(word_id),
   to_phrase bigint not null references phrases(phrase_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (from_word, to_phrase)
 );
 
 create table phrase_to_word_translations(
@@ -338,7 +337,8 @@ create table phrase_to_word_translations(
   from_phrase bigint not null references phrases(phrase_id),
   to_word bigint not null references words(word_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (from_phrase, to_word)
 );
 
 create table phrase_to_phrase_translations(
@@ -346,7 +346,8 @@ create table phrase_to_phrase_translations(
   from_phrase bigint not null references phrases(phrase_id),
   to_phrase bigint not null references phrases(phrase_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (from_phrase, to_phrase)
 );
 
 -- votes

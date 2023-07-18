@@ -20,6 +20,7 @@ export enum ErrorType {
   EmailIsBlocked = 'EmailIsBlocked',
   EmailUnavailable = 'EmailUnavailable',
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
+  InvalidInputs = "InvalidInputs",
   LimitInvalid = 'LimitInvalid',
   NoError = 'NoError',
   OffsetInvalid = 'OffsetInvalid',
