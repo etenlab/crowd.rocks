@@ -1,15 +1,15 @@
-import { Field, Int, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
 
 @ObjectType()
 export class WordDefinition {
-  @Field(() => Int) word_definition_id: number;
+  @Field(() => ID) word_definition_id: number;
   @Field(() => String) definition: string;
 }
 
 @ObjectType()
 export class Word {
-  @Field(() => Int) word_id: number;
+  @Field(() => ID) word_id: number;
   @Field(() => String) word: string;
   @Field(() => WordDefinition, { nullable: true })
   definition: WordDefinition | null;
@@ -33,7 +33,7 @@ export class WordUpsertOutput extends GenericOutput {
 
 @InputType()
 export class WordReadInput {
-  @Field(() => Int) word_id: number;
+  @Field(() => ID) word_id: number;
 }
 
 @ObjectType()
