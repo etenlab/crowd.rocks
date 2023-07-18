@@ -24,7 +24,7 @@ export enum ErrorType {
   EmailUnavailable = 'EmailUnavailable',
 
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
-
+  InvalidInputs = 'InvalidInputs',
   LimitInvalid = 'LimitInvalid',
   NoError = 'NoError',
   OffsetInvalid = 'OffsetInvalid',

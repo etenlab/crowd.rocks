@@ -17,8 +17,8 @@ begin
 
   -- validate user
   select user_id
-  into v_user_id
   from tokens
+  into v_user_id
   where token = p_token;
 
   if v_user_id is null then
@@ -28,16 +28,24 @@ begin
 
   -- check for string existence
   select wordlike_string_id
-  into v_current_wordlike_string_id
   from wordlike_strings
-  where wordlike_string = p_wordlike_string;
+  where wordlike_string = p_wordlike_string
+  into v_current_wordlike_string_id;
 
   -- create wordlike string if needed
   if v_current_wordlike_string_id is null then
     insert into wordlike_strings (wordlike_string, created_by)
     values (p_wordlike_string, v_user_id)
+    on conflict do nothing
     returning wordlike_string_id
     into v_current_wordlike_string_id;
+
+    if v_current_wordlike_string_id is null then
+      select wordlike_string_id
+      from wordlike_strings
+      where wordlike_string = p_wordlike_string
+      into v_current_wordlike_string_id;
+    end if;
   end if;
 
   if v_current_wordlike_string_id is null then
@@ -46,13 +54,37 @@ begin
   end if;
 
   -- check for word existence
-  select word_id
-  into p_word_id
-  from words
-  where wordlike_string_id = v_current_wordlike_string_id
-    and language_code = p_language_code
-    and dialect_code = p_dialect_code
-    and geo_code = p_geo_code;
+  if p_dialect_code is null and p_geo_code is null then
+    select word_id
+    from words
+    where wordlike_string_id = v_current_wordlike_string_id
+      and language_code = p_language_code
+    into p_word_id;
+  elsif p_dialect_code is not null and p_geo_code is null then
+    select word_id
+    from words
+    where wordlike_string_id = v_current_wordlike_string_id
+      and language_code = p_language_code
+      and dialect_code = p_dialect_code
+      and geo_code is null
+    into p_word_id;
+  elsif p_dialect_code is null and p_geo_code is not null then
+    select word_id
+    from words
+    where wordlike_string_id = v_current_wordlike_string_id
+      and language_code = p_language_code
+      and dialect_code is null
+      and geo_code = p_geo_code
+    into p_word_id;
+  elsif p_dialect_code is not null and p_geo_code is not null then
+    select word_id
+    from words
+    where wordlike_string_id = v_current_wordlike_string_id
+      and language_code = p_language_code
+      and dialect_code = p_dialect_code
+      and geo_code = p_geo_code
+    into p_word_id;
+  end if;
 
   -- create word if needed
   if p_word_id is null then
@@ -69,6 +101,7 @@ begin
       p_geo_code,
       v_user_id
     )
+    on conflict do nothing
     returning word_id
     into p_word_id;
   end if;

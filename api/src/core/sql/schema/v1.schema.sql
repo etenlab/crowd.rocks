@@ -112,7 +112,13 @@ create table notifications (
 
 create index on notifications (user_id, is_notified);
 
--- GROUPS ---------------------------------------------------------
+-- AUTHZ & GROUPS ---------------------------------------------------------
+
+create table site_admins(
+  user_id bigint not null references users(user_id),
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id)
+);
 
 create table groups(
   group_id bigserial primary key,
@@ -130,6 +136,13 @@ create table group_memberships(
 );
 
 create table group_admins(
+  group_id bigint not null references groups(group_id),
+  user_id bigint not null references users(user_id),
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id)
+);
+
+create table project_managers(
   group_id bigint not null references groups(group_id),
   user_id bigint not null references users(user_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -224,7 +237,7 @@ create table words(
   geo_code varchar(32),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique(wordlike_string_id, word_definition_id, language_code, dialect_code, geo_code)
+  unique nulls not distinct (wordlike_string_id, word_definition_id, language_code, dialect_code, geo_code)
 );
 
 -- PHRASES -------------------------------------------------------------
@@ -367,7 +380,8 @@ create table word_to_word_translations(
   from_word bigint not null references words(word_id),
   to_word bigint not null references words(word_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (from_word, to_word)
 );
 
 create table word_to_phrase_translations(
@@ -375,7 +389,8 @@ create table word_to_phrase_translations(
   from_word bigint not null references words(word_id),
   to_phrase bigint not null references phrases(phrase_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (from_word, to_phrase)
 );
 
 create table phrase_to_word_translations(
@@ -383,7 +398,8 @@ create table phrase_to_word_translations(
   from_phrase bigint not null references phrases(phrase_id),
   to_word bigint not null references words(word_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (from_phrase, to_word)
 );
 
 create table phrase_to_phrase_translations(
@@ -391,7 +407,8 @@ create table phrase_to_phrase_translations(
   from_phrase bigint not null references phrases(phrase_id),
   to_phrase bigint not null references phrases(phrase_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (from_phrase, to_phrase)
 );
 
 -- votes
@@ -527,13 +544,19 @@ create table original_site_text (
   created_by bigint not null references users(user_id)
 );
 
+create table orignal_site_text_votes(
+  original_site_text_vote_id bigserial primary key,
+  user_id bigint not null references users(user_id),
+  original_site_text_id bigint not null references original_site_text(original_site_text_id),
+  vote bool,
+  last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  unique (user_id, original_site_text_id)
+);
+
 -- MAPS -------------------------------------------------------------
 
 create table original_maps(
   original_map_id bigserial primary key,
-  language_code varchar(32) not null,
-  dialect_code varchar(32),
-  geo_code varchar(32),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
   content text not null
@@ -541,6 +564,7 @@ create table original_maps(
 
 create table original_map_words(
   original_map_word_id bigserial primary key,
+  original_map_id bigint not null references original_maps(original_map_id),
   word_id bigint not null references words(word_id),
   updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
