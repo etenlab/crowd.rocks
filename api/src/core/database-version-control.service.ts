@@ -4,6 +4,7 @@ import { readFileSync } from 'fs';
 import { justBearerHeader } from 'src/common/utility';
 import { RegisterResolver } from 'src/components/authentication/register.resolver';
 import { ConfigService } from './config.service';
+import { DataLoadService } from './data-load.service';
 import { PostgresService } from './postgres.service';
 import { SesService } from './ses.service';
 
@@ -13,6 +14,7 @@ export class DatabaseVersionControlService {
     private pg: PostgresService,
     private ses: SesService,
     private config: ConfigService,
+    private dataloader: DataLoadService,
   ) {
     console.log('Database Version Control');
     this.init();
@@ -87,6 +89,9 @@ export class DatabaseVersionControlService {
     await this.setVersionNumber(1);
 
     await this.registerUser('michael@crowd.rocks', 'Michael', 'asdfasdf');
+
+    // load data
+    await this.dataloader.loadSiteTextData()
   }
 
   async registerUser(email: string, avatar: string, password: string) {

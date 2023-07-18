@@ -1,4 +1,12 @@
-{
+export const siteText: { Array<
+  keyof Object: {
+    keyof Object: string,
+    keyof Object: string,
+    keyof Object: string,
+    keyof Object: string,
+    keyof Object: string,
+  }>
+} = {
   "crowd.rocks": {
     "en": "crowd.rocks",
     "jp": "群衆. ",

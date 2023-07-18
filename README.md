@@ -31,10 +31,10 @@ Frontend is Ionic React
 
 ## Development
 
-1. Setup your environment and get the API and frontend projects running.
+1. Setup your docker environment and get the API and frontend projects running.
 1. Create database schema in `./api/src/core/sql/schema/v1.schema.sql`.
 1. Update the `core/database-version.control.service.ts` file as needed when adding new DB functions.
 1. Cretea a module folder in the API  `components` folder as needed.
 1. Add a GraphQL types file and create your resolvers as needed.
-1. run `npm run codegen` on the frontend to generate the new types within the frontend project.
+1. With the API running, run `npm run codegen` on the frontend to generate the new types within the frontend project.
 1. Create the Ionic React components necessary on the frontend.
