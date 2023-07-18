@@ -1,10 +1,7 @@
 import {
-  IonAccordion,
-  IonAccordionGroup,
   IonContent,
   IonHeader,
   IonIcon,
-  IonItem,
   IonPage,
   IonRouterOutlet,
   useIonRouter,
@@ -12,8 +9,9 @@ import {
   useIonViewWillLeave,
 } from '@ionic/react';
 import { menu, moon, sunny } from 'ionicons/icons';
-import { FormEvent, useEffect, useRef, useState } from 'react';
-import { Redirect, Route, useHistory } from 'react-router';
+import { useState } from 'react';
+import { Redirect, Route } from 'react-router';
+
 import './Body.css';
 import { ErrorType, useLogoutMutation } from './generated/graphql';
 import Home from './components/home/Home';
@@ -22,7 +20,7 @@ import Profile from './components/user/Profile';
 import Register from './components/authentication/Register';
 import { globals } from './services/globals';
 import { login_change } from './services/subscriptions';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import EmailResponsePage from './components/email/EmailResponse';
 import ResetEmailRequestPage from './components/authentication/ResetEmailRequest';
 import PasswordResetFormPage from './components/authentication/PasswordResetForm';
@@ -32,13 +30,13 @@ import './Body.css';
 import MapsPage from './components/map/MapsPage';
 
 const Body: React.FC = () => {
-  const history = useHistory();
   const router = useIonRouter();
 
   const [show_menu, set_show_menu] = useState(false);
   const [is_logged_in, set_is_logged_in] = useState(false);
   const [show_dark_mode, set_show_dark_mode] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [logoutMutation, { data, loading, error }] = useLogoutMutation();
 
   let sub: Subscription;
@@ -66,7 +64,7 @@ const Body: React.FC = () => {
 
     set_is_logged_in(globals.get_token() !== null);
     sub = login_change.subscribe({
-      next: (v) => {
+      next: () => {
         set_is_logged_in(globals.get_token() !== null);
       },
     });
@@ -249,7 +247,8 @@ const Body: React.FC = () => {
           />
           <Route
             path="/:nation_id/:language_id/:cluster_id/maps"
-            component={MapsPage}
+            // component={MapsPage}
+            render={(props) => <MapsPage {...props} />}
           />
 
           <Route exact path="/">

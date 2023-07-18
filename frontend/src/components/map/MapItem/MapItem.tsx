@@ -6,5 +6,9 @@ export type TMapItemProps = {
 };
 
 export const MapItem = ({ mapItem }: TMapItemProps) => {
-  return <IonItem>{mapItem.name}</IonItem>;
+  return (
+    <IonItem routerLink={`/US/eng/1/maps/${mapItem.id}`}>
+      {mapItem.name}
+    </IonItem>
+  );
 };
