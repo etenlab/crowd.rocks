@@ -5,31 +5,21 @@ import { Injectable } from '@nestjs/common';
 // import { RegisterResolver } from 'src/components/authentication/register.resolver';
 // import { WordUpsertResolver } from 'src/components/words/word-upsert.resolver';
 
-import { ErrorType } from 'src/common/types';
+import { WordsService } from 'src/components/words/words.service';
+import { PhrasesService } from 'src/components/phrases/phrases.service';
 
-import { ConfigService } from './config.service';
 import { PostgresService } from './postgres.service';
-import { SesService } from './ses.service';
 
 import { siteText } from './data/lang';
 
 import { getAdminTokenSQL } from './sql-string';
 
-import {
-  callWordUpsertProcedure,
-  WordUpsertProcedureOutputRow,
-} from 'src/components/words/sql-string';
-import {
-  callPhraseUpsertProcedure,
-  PhraseUpsertProcedureOutputRow,
-} from 'src/components/phrases/sql-string';
-
 @Injectable()
 export class DataLoadService {
   constructor(
     private pg: PostgresService,
-    private ses: SesService,
-    private config: ConfigService,
+    private wordService: WordsService,
+    private phraseService: PhrasesService,
   ) {
     // this.loadSiteTextData(); // I use this to easily rerun the load function
   }
@@ -52,36 +42,37 @@ export class DataLoadService {
 
       if (siteTextEntryKeyWordsArr.length == 1) {
         const onlyWordInEntryKey = siteTextEntryKeyWordsArr[0].trim();
-        const wordIdOfOnlyWord = await this.wordUpsert(
-          onlyWordInEntryKey,
-          'en',
+        const { word } = await this.wordService.upsert(
+          {
+            wordlike_string: onlyWordInEntryKey,
+            language_code: 'en',
+            dialect_code: null,
+            geo_code: null,
+          },
           token,
         );
+
         await this.addTranslatedWordOrPhraseToOneWordSiteTextEntry(
           siteText[siteTextEntryKey],
-          wordIdOfOnlyWord,
+          word.word_id,
           token,
         );
       } else if (siteTextEntryKeyWordsArr.length > 1) {
         // this is a phrase
-        const wordIds = await Promise.all(
-          siteTextEntryKeyWordsArr.map(async (value) => {
-            const newWord = value.trim();
-            const wordId = await this.wordUpsert(newWord, 'en', token);
-            return wordId;
-          }),
-        );
-
-        const phraseId = await this.phraseUpsert(
-          siteTextEntryKeyWordsArr.join(' '),
-          wordIds,
+        const { phrase } = await this.phraseService.upsert(
+          {
+            phraselike_string: siteTextEntryKeyWordsArr.join(' '),
+            language_code: 'en',
+            dialect_code: null,
+            geo_code: null,
+          },
           token,
         );
 
         // create translated phrase
         await this.addTranslatedPhraseToPhraseFromSiteTextEntry(
           siteText[siteTextEntryKey],
-          phraseId,
+          phrase.phrase_id,
           token,
         );
       }
@@ -93,64 +84,6 @@ export class DataLoadService {
       const res = await this.pg.pool.query(...getAdminTokenSQL());
 
       return res.rows[0].token;
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  async wordUpsert(
-    word: string,
-    langauge: string,
-    token: string,
-  ): Promise<number | null> {
-    try {
-      const res = await this.pg.pool.query<WordUpsertProcedureOutputRow>(
-        ...callWordUpsertProcedure({
-          wordlike_string: word,
-          language_code: langauge,
-          dialect_code: null,
-          geo_code: null,
-          token,
-        }),
-      );
-
-      const error = res.rows[0].p_error_type;
-      const word_id = res.rows[0].p_word_id;
-
-      if (error !== ErrorType.NoError || !word_id) {
-        console.error('error upserting word', word);
-        return;
-      }
-
-      return word_id;
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  async phraseUpsert(
-    phraselikeString: string,
-    wordArr: number[],
-    token: string,
-  ): Promise<number | null> {
-    try {
-      const res = await this.pg.pool.query<PhraseUpsertProcedureOutputRow>(
-        ...callPhraseUpsertProcedure({
-          phraselike_string: phraselikeString,
-          wordIds: wordArr,
-          token,
-        }),
-      );
-
-      const error = res.rows[0].p_error_type;
-      const prase_id = res.rows[0].p_phrase_id;
-
-      if (error !== ErrorType.NoError || !prase_id) {
-        console.error('error upserting phrase', wordArr);
-        return;
-      }
-
-      return prase_id;
     } catch (e) {
       console.error(e);
     }
@@ -170,39 +103,40 @@ export class DataLoadService {
 
       if (translatedWordOrPhraseInEntry.length == 1) {
         // the translation is a single word
-        const translatedWordId = await this.wordUpsert(
-          siteTextEntryObj[languageCode].trim(),
-          languageCode,
+
+        const { word: translatedWord } = await this.wordService.upsert(
+          {
+            wordlike_string: siteTextEntryObj[languageCode].trim(),
+            language_code: languageCode,
+            dialect_code: null,
+            geo_code: null,
+          },
           token,
         );
 
         const wordToWordTranslationId = await this.wordToWordTranslationUpsert(
           onlyWordIdOfEntryKey,
-          translatedWordId,
+          translatedWord.word_id,
           token,
         );
 
         return wordToWordTranslationId;
       } else if (translatedWordOrPhraseInEntry.length > 1) {
         // the translation is a phrase
-        const wordIds = await Promise.all(
-          translatedWordOrPhraseInEntry.map(async (value) => {
-            const newWord = value.trim();
-            const wordId = await this.wordUpsert(newWord, 'en', token);
-            return wordId;
-          }),
-        );
-
-        const phraseId = await this.phraseUpsert(
-          translatedWordOrPhraseInEntry.join(' '),
-          wordIds,
+        const { phrase } = await this.phraseService.upsert(
+          {
+            phraselike_string: translatedWordOrPhraseInEntry.join(' '),
+            language_code: 'en',
+            dialect_code: null,
+            geo_code: null,
+          },
           token,
         );
 
         const wordToPhraseTranslationId =
           await this.wordToPhraseTranslationUpsert(
             onlyWordIdOfEntryKey,
-            phraseId,
+            phrase.phrase_id,
             token,
           );
 
@@ -242,24 +176,20 @@ export class DataLoadService {
         // return wordToWordTranslationId;
       } else if (translatedWordOrPhraseInEntry.length > 1) {
         // the translation is a phrase
-        const wordIds = await Promise.all(
-          translatedWordOrPhraseInEntry.map(async (value) => {
-            const newWord = value.trim();
-            const wordId = await this.wordUpsert(newWord, 'en', token);
-            return wordId;
-          }),
-        );
-
-        const phraseId = await this.phraseUpsert(
-          translatedWordOrPhraseInEntry.join(' '),
-          wordIds,
+        const { phrase } = await this.phraseService.upsert(
+          {
+            phraselike_string: translatedWordOrPhraseInEntry.join(' '),
+            language_code: 'en',
+            dialect_code: null,
+            geo_code: null,
+          },
           token,
         );
 
         const phraseToPhraseTranslationId =
           await this.phraseToPhraseTranslationUpsert(
             phraseIdOfEntryKey,
-            phraseId,
+            phrase.phrase_id,
             token,
           );
 

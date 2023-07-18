@@ -90,6 +90,7 @@ type Mutation {
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
+  phraseUpsertResolver(input: PhraseUpsertInput!): PhraseUpsertOutput!
   postCreateResolver(input: PostCreateInput!): PostCreateOutput!
   register(input: RegisterInput!): RegisterOutput!
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
@@ -100,6 +101,41 @@ type Mutation {
 input PasswordResetFormInput {
   password: String!
   token: String!
+}
+
+type Phrase {
+  definition: PhraseDefinition
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  phrase: String!
+  phrase_id: Int!
+}
+
+type PhraseDefinition {
+  definition: String!
+  phrase_definition_id: Int!
+}
+
+input PhraseReadInput {
+  phrase_id: Int!
+}
+
+type PhraseReadOutput {
+  error: ErrorType!
+  phrase: Phrase
+}
+
+input PhraseUpsertInput {
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  phraselike_string: String!
+}
+
+type PhraseUpsertOutput {
+  error: ErrorType!
+  phrase: Phrase
 }
 
 type Post {
@@ -129,6 +165,7 @@ type PostReadOutput {
 
 type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
+  phraseReadResolver(input: PhraseReadInput!): PhraseReadOutput!
   postReadResolver(input: PostReadInput!): PostReadOutput!
   userReadResolver(input: UserReadInput!): UserReadOutput!
   wordReadResolver(input: WordReadInput!): WordReadOutput!
@@ -200,16 +237,16 @@ type Word {
   geo_code: String
   language_code: String!
   word: String!
-  word_id: ID!
+  word_id: Int!
 }
 
 type WordDefinition {
   definition: String!
-  word_definition_id: ID!
+  word_definition_id: Int!
 }
 
 input WordReadInput {
-  word_id: ID!
+  word_id: Int!
 }
 
 type WordReadOutput {
