@@ -79,7 +79,7 @@ export class PhraseUpsertResolver {
       }
 
       const phrase = await (
-        await this.phraseRead.phraseReadResolver({ phrase_id })
+        await this.phraseRead.phraseReadResolver({ phrase_id: phrase_id + '' })
       ).phrase;
 
       return {

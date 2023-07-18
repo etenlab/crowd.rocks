@@ -3,13 +3,13 @@ import { GenericOutput } from 'src/common/types';
 
 @ObjectType()
 export class WordDefinition {
-  @Field(() => ID) word_definition_id: number;
+  @Field(() => ID) word_definition_id: string;
   @Field(() => String) definition: string;
 }
 
 @ObjectType()
 export class Word {
-  @Field(() => ID) word_id: number;
+  @Field(() => ID) word_id: string;
   @Field(() => String) word: string;
   @Field(() => WordDefinition, { nullable: true })
   definition: WordDefinition | null;
@@ -33,7 +33,7 @@ export class WordUpsertOutput extends GenericOutput {
 
 @InputType()
 export class WordReadInput {
-  @Field(() => ID) word_id: number;
+  @Field(() => ID) word_id: string;
 }
 
 @ObjectType()

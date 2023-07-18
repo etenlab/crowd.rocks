@@ -49,7 +49,7 @@ export class WordUpsertResolver {
       }
 
       const word = await (
-        await this.wordRead.wordReadResolver({ word_id })
+        await this.wordRead.wordReadResolver({ word_id: word_id + '' })
       ).word;
 
       return {

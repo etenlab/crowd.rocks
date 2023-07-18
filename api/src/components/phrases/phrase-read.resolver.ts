@@ -20,7 +20,7 @@ export class PhraseReadResolver {
 
     try {
       const res1 = await this.pg.pool.query<GetPhraseObjByIdResultRow>(
-        ...getPhraseObjById(input.phrase_id),
+        ...getPhraseObjById(+input.phrase_id),
       );
 
       if (res1.rowCount !== 1) {
@@ -34,7 +34,7 @@ export class PhraseReadResolver {
             definition:
               res1.rows[0].definition_id && res1.rows[0].definition
                 ? {
-                    phrase_definition_id: res1.rows[0].definition_id,
+                    phrase_definition_id: res1.rows[0].definition_id + '',
                     definition: res1.rows[0].definition,
                   }
                 : null,

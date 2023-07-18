@@ -20,7 +20,7 @@ export class WordReadResolver {
     console.log('word read resolver, word_id:', input.word_id);
 
     try {
-      const res1 = await this.pg.pool.query(...getWordObjById(input.word_id));
+      const res1 = await this.pg.pool.query(...getWordObjById(+input.word_id));
 
       if (res1.rowCount !== 1) {
         console.error(`no word for id: ${input.word_id}`);
