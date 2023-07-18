@@ -54,7 +54,7 @@ export class DataLoadService {
 
         await this.addTranslatedWordOrPhraseToOneWordSiteTextEntry(
           siteText[siteTextEntryKey],
-          word.word_id,
+          +word.word_id,
           token,
         );
       } else if (siteTextEntryKeyWordsArr.length > 1) {
@@ -72,7 +72,7 @@ export class DataLoadService {
         // create translated phrase
         await this.addTranslatedPhraseToPhraseFromSiteTextEntry(
           siteText[siteTextEntryKey],
-          phrase.phrase_id,
+          +phrase.phrase_id,
           token,
         );
       }
@@ -116,7 +116,7 @@ export class DataLoadService {
 
         const wordToWordTranslationId = await this.wordToWordTranslationUpsert(
           onlyWordIdOfEntryKey,
-          translatedWord.word_id,
+          +translatedWord.word_id,
           token,
         );
 
@@ -136,7 +136,7 @@ export class DataLoadService {
         const wordToPhraseTranslationId =
           await this.wordToPhraseTranslationUpsert(
             onlyWordIdOfEntryKey,
-            phrase.phrase_id,
+            +phrase.phrase_id,
             token,
           );
 
@@ -189,7 +189,7 @@ export class DataLoadService {
         const phraseToPhraseTranslationId =
           await this.phraseToPhraseTranslationUpsert(
             phraseIdOfEntryKey,
-            phrase.phrase_id,
+            +phrase.phrase_id,
             token,
           );
 

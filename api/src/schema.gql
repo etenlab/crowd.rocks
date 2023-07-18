@@ -109,16 +109,16 @@ type Phrase {
   geo_code: String
   language_code: String!
   phrase: String!
-  phrase_id: Int!
+  phrase_id: ID!
 }
 
 type PhraseDefinition {
   definition: String!
-  phrase_definition_id: Int!
+  phrase_definition_id: ID!
 }
 
 input PhraseReadInput {
-  phrase_id: Int!
+  phrase_id: ID!
 }
 
 type PhraseReadOutput {
@@ -237,16 +237,16 @@ type Word {
   geo_code: String
   language_code: String!
   word: String!
-  word_id: Int!
+  word_id: ID!
 }
 
 type WordDefinition {
   definition: String!
-  word_definition_id: Int!
+  word_definition_id: ID!
 }
 
 input WordReadInput {
-  word_id: Int!
+  word_id: ID!
 }
 
 type WordReadOutput {
