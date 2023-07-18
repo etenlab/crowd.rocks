@@ -41,8 +41,9 @@ export function callPhraseUpsertProcedure({
 }): [string, [string, number[], string | null]] {
   return [
     `
-      call phrase_upsert($1, $2, $3, $4, $5, 0, '');
+      call phrase_upsert($1, $2, $3, 0, '');
     `,
     [phraselike_string, wordIds, token],
   ];
 }
+ 
