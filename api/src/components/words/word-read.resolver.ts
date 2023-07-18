@@ -1,23 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
+
 import { ErrorType } from 'src/common/types';
+
 import { PostgresService } from 'src/core/postgres.service';
+
 import { Word, WordReadInput, WordReadOutput } from './types';
-import { getWordObjByIdSQL } from './sql-string';
+import { getWordObjById } from './sql-string';
 
 @Injectable()
 @Resolver(Word)
 export class WordReadResolver {
   constructor(private pg: PostgresService) {}
+
   @Query(() => WordReadOutput)
   async wordReadResolver(
     @Args('input') input: WordReadInput,
   ): Promise<WordReadOutput> {
     console.log('word read resolver, word_id:', input.word_id);
     try {
-      const res1 = await this.pg.pool.query(
-        ...getWordObjByIdSQL(input.word_id),
-      );
+      const res1 = await this.pg.pool.query(...getWordObjById(input.word_id));
 
       if (res1.rowCount !== 1) {
         console.error(`no word for id: ${input.word_id}`);
