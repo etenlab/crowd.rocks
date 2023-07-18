@@ -228,6 +228,12 @@ create table words(
 );
 
 -- PHRASES -------------------------------------------------------------
+create table phraselike_strings (
+  phraselike_string_id bigserial primary key,
+  phraselike_string text unique not null,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id)
+);
 
 create table phrase_definitions(
   phrase_definition_id bigserial primary key,
@@ -239,6 +245,8 @@ create table phrase_definitions(
 create table phrases(
   phrase_id bigserial primary key,
   words bigint[] not null, -- references words(word_id)
+  phraselike_string_id bigint not null references phraselike_strings(phraselike_string_id),
+  phrase_definition_id bigint references phrase_definitions(phrase_definition_id),
   language_code varchar(32) not null,
   dialect_code varchar(32),
   geo_code varchar(32),
