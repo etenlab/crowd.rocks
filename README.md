@@ -16,6 +16,7 @@ Differences:
 `docker-compose --env-file .env up -d`
 
 ### API
+1. open API folder in new vscode window
 1. add env vars: run the env var exports in the API readme file
 1. install dependencies: `yarn set version berry` then `yarn` 
 1. setup vscode to find dependencies: `yarn dlx @yarnpkg/sdks vscode`
