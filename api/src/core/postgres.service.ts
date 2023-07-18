@@ -11,6 +11,6 @@ export class PostgresService {
     host: this.config.CR_DB_URL,
     database: this.config.CR_DB,
     password: this.config.CR_DB_PASSWORD,
-    port: this.config.CR_DB_PORT!,
+    port: this.config.CR_DB_PORT,
   });
 }

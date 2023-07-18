@@ -1,8 +1,8 @@
-import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 @ObjectType()
 export class GenericOutput {
-  @Field((type) => ErrorType) readonly error: ErrorType;
+  @Field(() => ErrorType) readonly error: ErrorType;
 }
 
 export enum ErrorType {
