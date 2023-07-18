@@ -91,7 +91,8 @@ export class DatabaseVersionControlService {
 
     // translation
     await this.runSqlFile('./src/core/sql/translation/word_to_word_translation_upsert.sql');
-
+    await this.runSqlFile('./src/core/sql/translation/word_to_phrase_translation_upsert.sql');
+    await this.runSqlFile('./src/core/sql/translation/phrase_to_phrase_translation_upsert.sql');
 
     // update db version
     await this.setVersionNumber(1);

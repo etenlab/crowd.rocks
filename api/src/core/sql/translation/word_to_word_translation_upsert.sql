@@ -2,7 +2,7 @@ create or replace procedure word_to_word_translation_upsert(
   in p_from_word_id bigint,
   in p_to_word_id bigint,
   in p_token varchar(512),
-  inout p_w2w_translation_id bigint,
+  inout p_word_to_word_translation_id bigint,
   inout p_error_type varchar(32)
 )
 language plpgsql
@@ -33,18 +33,18 @@ begin
   values (p_from_word_id, p_to_word_id, v_user_id)
   on conflict do nothing
   returning word_to_word_translation_id
-  into p_w2w_translation_id;
+  into p_word_to_word_translation_id;
 
-  if p_w2w_translation_id is null then
+  if p_word_to_word_translation_id is null then
     select word_to_word_translation_id
     from word_to_word_translations
     where 
       from_word = p_from_word_id
       and to_word = p_to_word_id
-    into p_w2w_translation_id;
+    into p_word_to_word_translation_id;
   end if;
 
-  if p_w2w_translation_id is null then
+  if p_word_to_word_translation_id is null then
     return;
   end if;
   

@@ -503,6 +503,7 @@ create table original_maps(
 
 create table original_map_words(
   original_map_word_id bigserial primary key,
+  original_map_id bigint not null references original_maps(original_map_id),
   word_id bigint not null references words(word_id),
   updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

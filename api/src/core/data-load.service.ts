@@ -17,7 +17,7 @@ export class DataLoadService {
     private ses: SesService,
     private config: ConfigService,
   ) {
-    this.loadSiteTextData(); // I use this to easily rerun the load function
+    // this.loadSiteTextData(); // I use this to easily rerun the load function
   }
 
   async loadSiteTextData() {
@@ -59,10 +59,17 @@ export class DataLoadService {
         );
 
         const phraseId = await this.phraseUpsert(wordIds, token);
+
+        // create translated phrase
+        await this.addTranslatedPhraseToPhraseFromSiteTextEntry(
+          siteText[siteTextEntryKey],
+          phraseId,
+          token,
+        );
       }
     }
   }
-
+ 
   async getAdminToken(): Promise<string | null> {
     try {
       const res = await this.pg.pool.query(
@@ -115,14 +122,14 @@ export class DataLoadService {
       );
 
       const error = res.rows[0].p_error_type;
-      const word_id = res.rows[0].p_word_id;
+      const prase_id = res.rows[0].p_phrase_id;
 
-      if (error !== ErrorType.NoError || !word_id) {
-        console.error('error upserting word', wordArr);
+      if (error !== ErrorType.NoError || !prase_id) {
+        console.error('error upserting phrase', wordArr);
         return;
       }
 
-      return word_id;
+      return prase_id;
     } catch (e) {
       console.error(e);
     }
@@ -157,6 +164,77 @@ export class DataLoadService {
         return wordToWordTranslationId;
       } else if (translatedWordOrPhraseInEntry.length > 1) {
         // the translation is a phrase
+        const wordIds = await Promise.all(
+          translatedWordOrPhraseInEntry.map(async (value) => {
+            const newWord = value.trim();
+            const wordId = await this.wordUpsert(newWord, 'en', token);
+            return wordId;
+          }),
+        );
+
+        const phraseId = await this.phraseUpsert(wordIds, token);
+
+        const wordToPhraseTranslationId =
+          await this.wordToPhraseTranslationUpsert(
+            onlyWordIdOfEntryKey,
+            phraseId,
+            token,
+          );
+
+        console.log('w2p', wordToPhraseTranslationId);
+      }
+    }
+  }
+
+  async addTranslatedPhraseToPhraseFromSiteTextEntry(
+    siteTextEntryObj: {},
+    phraseIdOfEntryKey: number,
+    token: string,
+  ): Promise<number | null> {
+    const keysInEntryObj = Object.keys(siteTextEntryObj);
+
+    for (let i = 0; i < keysInEntryObj.length; i++) {
+      const languageCode = keysInEntryObj[i];
+      const translatedWordOrPhraseInEntry =
+        siteTextEntryObj[languageCode].split(' ');
+
+      if (translatedWordOrPhraseInEntry.length == 1) {
+        // the translation is a single word
+
+        console.log('we have a phrase to word translation');
+        // const translatedWordId = await this.wordUpsert(
+        //   siteTextEntryObj[languageCode].trim(),
+        //   languageCode,
+        //   token,
+        // );
+
+        // const wordToWordTranslationId = await this.wordToWordTranslationUpsert(
+        //   phraseIdOfEntryKey,
+        //   translatedWordId,
+        //   token,
+        // );
+
+        // return wordToWordTranslationId;
+      } else if (translatedWordOrPhraseInEntry.length > 1) {
+        // the translation is a phrase
+        const wordIds = await Promise.all(
+          translatedWordOrPhraseInEntry.map(async (value) => {
+            const newWord = value.trim();
+            const wordId = await this.wordUpsert(newWord, 'en', token);
+            return wordId;
+          }),
+        );
+
+        const phraseId = await this.phraseUpsert(wordIds, token);
+
+        const phraseToPhraseTranslationId =
+          await this.phraseToPhraseTranslationUpsert(
+            phraseIdOfEntryKey,
+            phraseId,
+            token,
+          );
+
+        return phraseToPhraseTranslationId;
       }
     }
   }
@@ -174,10 +252,72 @@ export class DataLoadService {
         [fromWord, toWord, token],
       );
 
-      const translation_id = res.rows[0].p_w2w_translation_id;
+      const translation_id = res.rows[0].p_word_to_word_translation_id;
 
       if (!translation_id) {
-        console.error('failed to upsert w2w translation', fromWord, toWord);
+        console.error(
+          'failed to upsert word to word translation',
+          fromWord,
+          toWord,
+        );
+      }
+
+      return translation_id;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async wordToPhraseTranslationUpsert(
+    fromWord: number,
+    toPhrase: number,
+    token: string,
+  ): Promise<number | null> {
+    try {
+      const res = await this.pg.pool.query(
+        `
+          call word_to_phrase_translation_upsert($1, $2, $3, 0, '');
+        `,
+        [fromWord, toPhrase, token],
+      );
+
+      const translation_id = res.rows[0].p_word_to_phrase_translation_id;
+
+      if (!translation_id) {
+        console.error(
+          'failed to upsert word to phrase translation',
+          fromWord,
+          toPhrase,
+        );
+      }
+
+      return translation_id;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async phraseToPhraseTranslationUpsert(
+    fromPhrase: number,
+    toPhrase: number,
+    token: string,
+  ): Promise<number | null> {
+    try {
+      const res = await this.pg.pool.query(
+        `
+          call phrase_to_phrase_translation_upsert($1, $2, $3, 0, '');
+        `,
+        [fromPhrase, toPhrase, token],
+      );
+
+      const translation_id = res.rows[0].p_phrase_to_phrase_translation_id;
+
+      if (!translation_id) {
+        console.error(
+          'failed to upsert phrase to phrase translation',
+          fromPhrase,
+          toPhrase,
+        );
       }
 
       return translation_id;
