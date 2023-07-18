@@ -1,9 +1,17 @@
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+
 import { ErrorType } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
+
 import { PostgresService } from 'src/core/postgres.service';
-import { Word, WordUpsertInput, WordUpsertOutput } from './types';
 import { WordReadResolver } from './word-read.resolver';
+
+import { Word, WordUpsertInput, WordUpsertOutput } from './types';
+
+import {
+  WordUpsertProcedureOutputRow,
+  callWordUpsertProcedure,
+} from './sql-string';
 
 @Resolver(Word)
 export class WordUpsertResolver {
@@ -11,24 +19,23 @@ export class WordUpsertResolver {
     private pg: PostgresService,
     private wordRead: WordReadResolver,
   ) {}
+
   @Mutation(() => WordUpsertOutput)
   async wordUpsertResolver(
     @Args('input') input: WordUpsertInput,
     @Context() req: any,
   ): Promise<WordUpsertOutput> {
     console.log('word upsert resolver, string: ', input.wordlike_string);
+
     try {
-      const res = await this.pg.pool.query(
-        `
-          call word_upsert($1, $2, $3, $4, $5, 0, '');
-        `,
-        [
-          input.wordlike_string,
-          input.language_code,
-          input.dialect_code,
-          input.geo_code,
-          getBearer(req),
-        ],
+      const res = await this.pg.pool.query<WordUpsertProcedureOutputRow>(
+        ...callWordUpsertProcedure({
+          wordlike_string: input.wordlike_string,
+          language_code: input.language_code,
+          dialect_code: input.dialect_code,
+          geo_code: input.geo_code,
+          token: getBearer(req),
+        }),
       );
 
       const error = res.rows[0].p_error_type;
@@ -42,7 +49,7 @@ export class WordUpsertResolver {
       }
 
       const word = await (
-        await this.wordRead.wordReadResolver({ word_id }, req)
+        await this.wordRead.wordReadResolver({ word_id: word_id + '' })
       ).word;
 
       return {
