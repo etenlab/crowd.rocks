@@ -87,6 +87,7 @@ export class DatabaseVersionControlService {
 
     // word
     await this.runSqlFile('./src/core/sql/words/word_upsert.sql');
+    await this.runSqlFile('./src/core/sql/words/phrase_upsert.sql');
 
     // translation
     await this.runSqlFile('./src/core/sql/translation/word_to_word_translation_upsert.sql');

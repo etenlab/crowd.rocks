@@ -1,5 +1,5 @@
 create or replace procedure phrase_upsert(
-  in words bigint[],
+  in p_words bigint[],
   in p_token varchar(512),
   inout p_phrase_id bigint,
   inout p_error_type varchar(32)
@@ -22,8 +22,23 @@ begin
     return;
   end if;
 
-  -- check for phrase existence
+  -- insert phrase
+  insert into phrases(words, created_by)
+  values (p_words, v_user_id)
+  on conflict do nothing
+  returning phrase_id
+  into p_phrase_id;
 
+  if p_phrase_id is null then
+    select phrase_id
+    from phrases
+    where words = p_words
+    into p_phrase_id;
+  end if;
+
+  if p_phrase_id is null then
+    return;
+  end if;
 
   p_error_type := 'NoError';
 

@@ -50,12 +50,15 @@ export class DataLoadService {
         );
       } else if (siteTextEntryKeyWordsArr.length > 1) {
         // this is a phrase
-        // const wordIds = words.map(async (value) => {
-        //   const newWord = value.trim();
-        //   const wordId = await this.wordUpsert(newWord, 'en', token);
-        //   return wordId;
-        // });
-        // console.log('phrase array', wordIds);
+        const wordIds = await Promise.all(
+          siteTextEntryKeyWordsArr.map(async (value) => {
+            const newWord = value.trim();
+            const wordId = await this.wordUpsert(newWord, 'en', token);
+            return wordId;
+          }),
+        );
+
+        const phraseId = await this.phraseUpsert(wordIds, token);
       }
     }
   }
@@ -106,9 +109,9 @@ export class DataLoadService {
     try {
       const res = await this.pg.pool.query(
         `
-          call phrase_upsert($1, $2, $3, $4, $5, 0, '');
+          call phrase_upsert($1, $2, 0, '');
         `,
-        [wordArr, null, null, token],
+        [wordArr, token],
       );
 
       const error = res.rows[0].p_error_type;
@@ -183,4 +186,3 @@ export class DataLoadService {
     }
   }
 }
-   
