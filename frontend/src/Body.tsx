@@ -10,25 +10,26 @@ import {
   useIonRouter,
   useIonViewWillEnter,
   useIonViewWillLeave,
-} from "@ionic/react";
-import { menu, moon, sunny } from "ionicons/icons";
-import { FormEvent, useEffect, useRef, useState } from "react";
-import { Redirect, Route, useHistory } from "react-router";
-import "./Body.css";
-import { ErrorType, useLogoutMutation } from "./generated/graphql";
-import Home from "./components/home/Home";
-import Login from "./components/authentication/Login";
-import Profile from "./components/user/Profile";
-import Register from "./components/authentication/Register";
-import { globals } from "./services/globals";
-import { login_change } from "./services/subscriptions";
-import { Observable, Subscription } from "rxjs";
-import EmailResponsePage from "./components/email/EmailResponse";
-import ResetEmailRequestPage from "./components/authentication/ResetEmailRequest";
-import PasswordResetFormPage from "./components/authentication/PasswordResetForm";
-import { apollo_client } from "./main"
+} from '@ionic/react';
+import { menu, moon, sunny } from 'ionicons/icons';
+import { FormEvent, useEffect, useRef, useState } from 'react';
+import { Redirect, Route, useHistory } from 'react-router';
+import './Body.css';
+import { ErrorType, useLogoutMutation } from './generated/graphql';
+import Home from './components/home/Home';
+import Login from './components/authentication/Login';
+import Profile from './components/user/Profile';
+import Register from './components/authentication/Register';
+import { globals } from './services/globals';
+import { login_change } from './services/subscriptions';
+import { Observable, Subscription } from 'rxjs';
+import EmailResponsePage from './components/email/EmailResponse';
+import ResetEmailRequestPage from './components/authentication/ResetEmailRequest';
+import PasswordResetFormPage from './components/authentication/PasswordResetForm';
+import { apollo_client } from './main';
 
-import "./Body.css";
+import './Body.css';
+import MapsPage from './components/map/MapsPage';
 
 const Body: React.FC = () => {
   const history = useHistory();
@@ -43,18 +44,18 @@ const Body: React.FC = () => {
   let sub: Subscription;
 
   useIonViewWillEnter(() => {
-    const theme_storage = localStorage.getItem("theme");
+    const theme_storage = localStorage.getItem('theme');
     switch (theme_storage) {
       case null:
         set_show_dark_mode(false);
-        localStorage.setItem("theme", "light");
+        localStorage.setItem('theme', 'light');
         set_theme_classes(false);
         break;
-      case "light":
+      case 'light':
         set_show_dark_mode(false);
         set_theme_classes(false);
         break;
-      case "dark":
+      case 'dark':
         set_show_dark_mode(true);
         set_theme_classes(true);
         break;
@@ -81,17 +82,17 @@ const Body: React.FC = () => {
 
   const click_profile = () => {
     toggleMenu();
-    router.push("/US/eng/1/profile");
+    router.push('/US/eng/1/profile');
   };
 
   const click_register = () => {
     toggleMenu();
-    router.push("/US/eng/1/register");
+    router.push('/US/eng/1/register');
   };
 
   const click_login = () => {
     toggleMenu();
-    router.push("/US/eng/1/login");
+    router.push('/US/eng/1/login');
   };
 
   const click_logout = async () => {
@@ -104,7 +105,7 @@ const Body: React.FC = () => {
         variables: {
           token: token,
         },
-        errorPolicy: "all",
+        errorPolicy: 'all',
       });
 
       if (result.data?.logout.error !== ErrorType.NoError) {
@@ -115,29 +116,29 @@ const Body: React.FC = () => {
     globals.clear();
     login_change.next(false);
 
-    await apollo_client.clearStore()
-    await apollo_client.resetStore()
+    await apollo_client.clearStore();
+    await apollo_client.resetStore();
 
-    router.push("/US/eng/1/home");
+    router.push('/US/eng/1/home');
   };
 
   const toggle_theme = () => {
     set_show_dark_mode(!show_dark_mode);
     if (show_dark_mode) {
-      localStorage.setItem("theme", "light");
+      localStorage.setItem('theme', 'light');
     } else {
-      localStorage.setItem("theme", "dark");
+      localStorage.setItem('theme', 'dark');
     }
     set_theme_classes(!show_dark_mode);
   };
 
   const set_theme_classes = (is_dark: boolean) => {
-    document.documentElement.classList.toggle("dark", is_dark);
-    document.documentElement.classList.toggle("light", !is_dark);
+    document.documentElement.classList.toggle('dark', is_dark);
+    document.documentElement.classList.toggle('light', !is_dark);
   };
 
   const goHome = () => {
-    router.push("/US/eng/1/home");
+    router.push('/US/eng/1/home');
   };
 
   return (
@@ -245,6 +246,10 @@ const Body: React.FC = () => {
           <Route
             path="/:nation_id/:language_id/:cluster_id/password-reset-form/:token"
             component={PasswordResetFormPage}
+          />
+          <Route
+            path="/:nation_id/:language_id/:cluster_id/maps"
+            component={MapsPage}
           />
 
           <Route exact path="/">
