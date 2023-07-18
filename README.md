@@ -20,11 +20,14 @@ Differences:
 1. add env vars: run the env var exports in the API readme file
 1. install dependencies: `yarn set version berry` then `yarn` 
 1. setup vscode to find dependencies: `yarn dlx @yarnpkg/sdks vscode`
-1. run API: `yarn run start`
+1. run API: `yarn run start --watch`
 1. GraphQL playground: `http://localhost:3000/graphql`
 
 ### Frontend
-Frontend is Ionic React and uses `npm`. `ionic serve` to run.
+Frontend is Ionic React 
+1. install ionic globally: `npm install -g @ionic/cli`
+1. install dependencies: `npm i`
+1. run: `ionic serve` or `npm run dev`
 
 ## Development
 
