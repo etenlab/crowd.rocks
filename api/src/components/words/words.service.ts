@@ -19,7 +19,7 @@ export class WordsService {
   async read(input: WordReadInput): Promise<WordReadOutput> {
     try {
       const res1 = await this.pg.pool.query<GetWordObjectById>(
-        ...getWordObjById(input.word_id),
+        ...getWordObjById(+input.word_id),
       );
 
       if (res1.rowCount !== 1) {
@@ -33,7 +33,7 @@ export class WordsService {
             definition:
               res1.rows[0].word_definition_id && res1.rows[0].definition
                 ? {
-                    word_definition_id: res1.rows[0].word_definition_id,
+                    word_definition_id: res1.rows[0].word_definition_id + '',
                     definition: res1.rows[0].definition,
                   }
                 : null,
@@ -78,7 +78,9 @@ export class WordsService {
         };
       }
 
-      const { error: readingError, word } = await await this.read({ word_id });
+      const { error: readingError, word } = await await this.read({
+        word_id: word_id + '',
+      });
 
       return {
         error: readingError,

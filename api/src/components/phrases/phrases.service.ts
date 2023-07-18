@@ -22,7 +22,7 @@ export class PhrasesService {
   async read(input: PhraseReadInput): Promise<PhraseReadOutput> {
     try {
       const res1 = await this.pg.pool.query<GetPhraseObjByIdResultRow>(
-        ...getPhraseObjById(input.phrase_id),
+        ...getPhraseObjById(+input.phrase_id),
       );
 
       if (res1.rowCount !== 1) {
@@ -36,7 +36,7 @@ export class PhrasesService {
             definition:
               res1.rows[0].definition_id && res1.rows[0].definition
                 ? {
-                    phrase_definition_id: res1.rows[0].definition_id,
+                    phrase_definition_id: res1.rows[0].definition_id + '',
                     definition: res1.rows[0].definition,
                   }
                 : null,
@@ -82,7 +82,7 @@ export class PhrasesService {
           };
         }
 
-        wordIds.push(res.word.word_id);
+        wordIds.push(+res.word.word_id);
       }
 
       const res = await this.pg.pool.query<PhraseUpsertProcedureOutputRow>(
@@ -103,7 +103,9 @@ export class PhrasesService {
         };
       }
 
-      const phrase = await (await this.read({ phrase_id })).phrase;
+      const phrase = await (
+        await this.read({ phrase_id: phrase_id + '' })
+      ).phrase;
 
       return {
         error,
