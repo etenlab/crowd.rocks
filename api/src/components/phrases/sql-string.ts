@@ -15,7 +15,7 @@ export function getPhraseObjById(id: number): [string, [number]] {
       select 
         phrases.phraselike_string as phrase,
         phrase_definitions.phrase_definition_id as phrase_definition_id,
-        phrase_definitions.definition as definition,
+        phrase_definitions.definition as definition
       from phrases
       full outer join phrase_definitions
         on phrases.phrase_definition_id = phrase_definitions.phrase_definition_id
