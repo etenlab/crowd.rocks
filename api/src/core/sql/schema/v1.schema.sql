@@ -227,6 +227,25 @@ create table words(
   unique(wordlike_string_id, word_definition_id, language_code, dialect_code, geo_code)
 );
 
+-- PHRASES -------------------------------------------------------------
+
+create table phrase_definitions(
+  phrase_definition_id bigserial primary key,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id),
+  definition text not null
+);
+
+create table phrases(
+  phrase_id bigserial primary key,
+  words bigint[] not null, -- references words(word_id)
+  language_code varchar(32) not null,
+  dialect_code varchar(32),
+  geo_code varchar(32),
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id)
+);
+
 -- tags
 create table word_definition_tags (
   word_definition_tag_id bigserial primary key,
@@ -240,6 +259,22 @@ create table word_tags (
   word_tag_id bigserial primary key,
   word_id bigint not null references words(word_id),
   word_tag jsonb not null,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id)
+);
+
+create table phrase_definition_tags (
+  phrase_definition_tag_id bigserial primary key,
+  phrase_definition_id bigint not null references phrases(phrase_id),
+  phrase_definition_tag jsonb not null,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id)
+);
+
+create table phrase_tags (
+  phrase_tag_id bigserial primary key,
+  phrase_id bigint not null references phrases(phrase_id),
+  phrase_tag jsonb not null,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
@@ -281,25 +316,40 @@ create table word_tags_votes(
   unique (user_id, word_tag_id)
 );
 
--- PHRASES -------------------------------------------------------------
-
-create table phrases(
-  phrase_id bigserial primary key,
-  words bigint[] not null, -- references words(word_id)
-  language_code varchar(32) not null,
-  dialect_code varchar(32),
-  geo_code varchar(32),
-  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+create table phrase_definitions_votes(
+  phrase_definitions_vote_id bigserial primary key,
+  user_id bigint not null references users(user_id),
+  phrase_definition_id bigint not null references phrase_definitions(phrase_definition_id),
+  vote bool,
+  last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  unique (user_id, phrase_definition_id)
 );
 
--- tags
-create table phrase_tags (
-  phrase_tag_id bigserial primary key,
+create table phrase_votes(
+  phrase_vote_id bigserial primary key,
+  user_id bigint not null references users(user_id),
   phrase_id bigint not null references phrases(phrase_id),
-  phrase_tag jsonb not null,
-  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  vote bool,
+  last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  unique (user_id, phrase_id)
+);
+
+create table phrase_definition_tags_votes(
+  phrase_definition_tags_vote_id bigserial primary key,
+  user_id bigint not null references users(user_id),
+  phrase_definition_tag_id bigint not null references phrase_definition_tags(phrase_definition_tag_id),
+  vote bool,
+  last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  unique (user_id, phrase_definition_tag_id)
+);
+
+create table phrase_tags_votes(
+  phrase_tags_vote_id bigserial primary key,
+  user_id bigint not null references users(user_id),
+  phrase_tag_Id bigint not null references phrase_tags(phrase_tag_id),
+  vote bool,
+  last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  unique (user_id, phrase_tag_id)
 );
 
 -- TRANSLATION ---------------------------------------
