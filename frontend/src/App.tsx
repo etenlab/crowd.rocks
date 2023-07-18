@@ -26,15 +26,15 @@ import Body from './Body';
 setupIonicReact();
 
 const App: React.FC = () => (
-<IonApp>
-  <IonReactRouter>
-    <IonRouterOutlet>
-      <Route path="/">
-        <Body />
-      </Route>
-    </IonRouterOutlet>
-  </IonReactRouter>
-</IonApp>
+  <IonApp>
+    <IonReactRouter>
+      <IonRouterOutlet>
+        <Route path="/">
+          <Body />
+        </Route>
+      </IonRouterOutlet>
+    </IonReactRouter>
+  </IonApp>
 );
 
 export default App;

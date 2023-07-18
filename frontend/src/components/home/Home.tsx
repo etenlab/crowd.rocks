@@ -29,7 +29,7 @@ import {
   IonToolbar,
   useIonRouter,
   useIonViewWillEnter,
-} from "@ionic/react";
+} from '@ionic/react';
 import {
   add,
   book,
@@ -40,21 +40,19 @@ import {
   searchCircle,
   searchCircleOutline,
   searchOutline,
-} from "ionicons/icons";
-import { FormEvent, useEffect, useState } from "react";
-import { RouteComponentProps } from "react-router";
-import {
-  ErrorType,
-} from "../../generated/graphql";
-import { globals } from "../../services/globals";
+} from 'ionicons/icons';
+import { FormEvent, useEffect, useState } from 'react';
+import { RouteComponentProps } from 'react-router';
+import { ErrorType } from '../../generated/graphql';
+import { globals } from '../../services/globals';
 import { map } from 'ionicons/icons';
-import "./Home.css";
+import './Home.css';
 
 interface HomePageProps
   extends RouteComponentProps<{
     nation_id: string;
     language_id: string;
-  }> { }
+  }> {}
 
 const Home: React.FC<HomePageProps> = ({ match }) => {
   const router = useIonRouter();
@@ -62,7 +60,7 @@ const Home: React.FC<HomePageProps> = ({ match }) => {
   const [show_legal_menu, set_show_legal_menu] = useState(false);
 
   useIonViewWillEnter(() => {
-    document.title = "Home";
+    document.title = 'Home';
   });
 
   return (
@@ -70,29 +68,31 @@ const Home: React.FC<HomePageProps> = ({ match }) => {
       <IonContent>
         <div className="page">
           <div className="section">
-
             <IonItemGroup>
               <IonItemDivider>
-                <IonLabel>
-                  Media</IonLabel>
+                <IonLabel>Media</IonLabel>
               </IonItemDivider>
 
-              <IonItem lines='none'>
-                <IonCard>
+              <IonItem lines="none">
+                <IonCard
+                  onClick={() => {
+                    router.push(
+                      `/${match.params.nation_id}/${match.params.language_id}/1/maps`,
+                    );
+                  }}
+                >
                   <IonCardHeader>
                     <IonCardTitle>
                       <IonIcon icon={mapOutline}></IonIcon>
-                      <IonText>
-
-                        Maps
-                      </IonText>
+                      <IonText>Maps</IonText>
                     </IonCardTitle>
-                    <IonCardSubtitle>Upload .svg files and translate all their text into another language</IonCardSubtitle>
+                    <IonCardSubtitle>
+                      Upload .svg files and translate all their text into
+                      another language
+                    </IonCardSubtitle>
                   </IonCardHeader>
-
                 </IonCard>
               </IonItem>
-
             </IonItemGroup>
 
             <IonItemGroup>
@@ -100,33 +100,32 @@ const Home: React.FC<HomePageProps> = ({ match }) => {
                 <IonLabel>Language</IonLabel>
               </IonItemDivider>
 
-              <IonItem lines='none'>
+              <IonItem lines="none">
                 <IonCard>
                   <IonCardHeader>
                     <IonCardTitle>
                       <IonIcon icon={bookOutline}></IonIcon>
-                      <IonText>
-                        Dictionary
-                      </IonText>
+                      <IonText>Dictionary</IonText>
                     </IonCardTitle>
-                    <IonCardSubtitle>Manage the words and definitions in a language</IonCardSubtitle>
+                    <IonCardSubtitle>
+                      Manage the words and definitions in a language
+                    </IonCardSubtitle>
                   </IonCardHeader>
+                </IonCard>
+              </IonItem>
 
-                </IonCard>           
-             </IonItem>
-
-              <IonItem lines='none'>
+              <IonItem lines="none">
                 <IonCard onClick={() => console.log('asdf')}>
                   <IonCardHeader>
                     <IonCardTitle>
                       <IonIcon icon={chatbubbleEllipsesOutline}></IonIcon>
-                      <IonText>
-                        Phrase Book
-                      </IonText>
+                      <IonText>Phrase Book</IonText>
                     </IonCardTitle>
-                    <IonCardSubtitle>Helpful phrases in a lanuage</IonCardSubtitle>
+                    <IonCardSubtitle>
+                      Helpful phrases in a lanuage
+                    </IonCardSubtitle>
                   </IonCardHeader>
-                </IonCard>            
+                </IonCard>
               </IonItem>
             </IonItemGroup>
 
@@ -135,22 +134,19 @@ const Home: React.FC<HomePageProps> = ({ match }) => {
                 <IonLabel>User Interface</IonLabel>
               </IonItemDivider>
 
-              <IonItem lines='none'>
+              <IonItem lines="none">
                 <IonCard>
                   <IonCardHeader>
                     <IonCardTitle>
                       <IonIcon icon={codeWorkingOutline}></IonIcon>
-                      <IonText>
-
-                        Site Text Strings
-                      </IonText>
+                      <IonText>Site Text Strings</IonText>
                     </IonCardTitle>
-                    <IonCardSubtitle>Help us translate this app into more languages</IonCardSubtitle>
+                    <IonCardSubtitle>
+                      Help us translate this app into more languages
+                    </IonCardSubtitle>
                   </IonCardHeader>
-
                 </IonCard>
               </IonItem>
-
             </IonItemGroup>
 
             <div className="home-footer">
