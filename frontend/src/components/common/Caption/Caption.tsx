@@ -1,4 +1,12 @@
-import { IonIcon, IonText, IonTitle, useIonRouter } from '@ionic/react';
+import {
+  IonBackButton,
+  IonButtons,
+  IonHeader,
+  IonIcon,
+  IonText,
+  IonTitle,
+  useIonRouter,
+} from '@ionic/react';
 import { arrowBack } from 'ionicons/icons';
 import { ReactElement } from 'react';
 import { styled } from 'styled-components';
@@ -18,11 +26,11 @@ export const Caption = ({ handleBackClick, children }: TCaptionParams) => {
   }
   return (
     <StyledIonTitile>
-      <IonIcon
+      <StIonIcon
         color="black"
         icon={arrowBack}
         onClick={() => onClickAction()}
-      ></IonIcon>
+      ></StIonIcon>
       <StIonText>{children}</StIonText>
     </StyledIonTitile>
   );
@@ -37,4 +45,8 @@ const StyledIonTitile = styled(IonTitle)(() => ({
 
 const StIonText = styled(IonText)(() => ({
   marginLeft: '10px',
+}));
+
+const StIonIcon = styled(IonIcon)(() => ({
+  cursor: 'pointer',
 }));
