@@ -9,9 +9,14 @@ import { SesService } from './ses.service';
 
 import { PhraseModule } from 'src/components/phrases/phrases.module';
 import { WordModule } from 'src/components/words/words.module';
+import { TranslationsModule } from 'src/components/translations/translations.module';
 
 @Module({
-  imports: [forwardRef(() => PhraseModule), forwardRef(() => WordModule)],
+  imports: [
+    forwardRef(() => PhraseModule),
+    forwardRef(() => WordModule),
+    forwardRef(() => TranslationsModule),
+  ],
   providers: [
     PostgresService,
     DataLoadService,
