@@ -31,17 +31,19 @@ const MapsPage: React.FC<RouteComponentProps> = ({
   return (
     <IonPage>
       <IonContent>
-        <IonRouterOutlet>
-          <Route
-            exact
-            path={`${match.url}`}
-            render={() => <MapList mapList={mapList} />}
-          />
-          <Route
-            path={`${match.url}/:id`}
-            render={() => <MapDetails></MapDetails>}
-          />
-        </IonRouterOutlet>
+        <div className="page">
+          <div className="section">
+            <Route
+              exact
+              path={`${match.url}`}
+              render={() => <MapList mapList={mapList} />}
+            />
+            <Route
+              path={`${match.url}/:id`}
+              render={() => <MapDetails></MapDetails>}
+            />
+          </div>
+        </div>
       </IonContent>
     </IonPage>
   );
