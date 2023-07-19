@@ -29,70 +29,70 @@ export class DataLoadService {
     // this.loadSiteTextData(); // I use this to easily rerun the load function
   }
 
-  // async loadSiteTextData() {
-  //   console.log('loading site text data');
+  async loadSiteTextData() {
+    console.log('loading site text data');
 
-  //   const token = await this.getAdminToken();
+    const token = await this.getAdminToken();
 
-  //   if (token == null) {
-  //     console.error("Admin user hasn't been created yet");
-  //     return;
-  //   }
+    if (token == null) {
+      console.error("Admin user hasn't been created yet");
+      return;
+    }
 
-  //   const siteTextKeys = Object.keys(siteText);
+    // const siteTextKeys = Object.keys(siteText);
 
-  //   for (let i = 0; i < siteTextKeys.length; i++) {
-  //     const siteTextEntryKey = siteTextKeys[i];
-  //     const siteTextEntryKeyWordsArr = siteTextEntryKey.split(' ');
+    // for (let i = 0; i < siteTextKeys.length; i++) {
+    //   const siteTextEntryKey = siteTextKeys[i];
+    //   const siteTextEntryKeyWordsArr = siteTextEntryKey.split(' ');
 
-  //     if (siteTextEntryKeyWordsArr.length == 1) {
-  //       const onlyWordInEntryKey = siteTextEntryKeyWordsArr[0].trim();
-  //       const { word } = await this.wordService.upsert(
-  //         {
-  //           wordlike_string: onlyWordInEntryKey,
-  //           language_code: 'en',
-  //           dialect_code: null,
-  //           geo_code: null,
-  //         },
-  //         token,
-  //       );
+    //   if (siteTextEntryKeyWordsArr.length == 1) {
+    //     const onlyWordInEntryKey = siteTextEntryKeyWordsArr[0].trim();
+    //     const { word } = await this.wordService.upsert(
+    //       {
+    //         wordlike_string: onlyWordInEntryKey,
+    //         language_code: 'en',
+    //         dialect_code: null,
+    //         geo_code: null,
+    //       },
+    //       token,
+    //     );
 
-  //       await this.addTranslatedWordOrPhraseToOneWordSiteTextEntry(
-  //         siteText[siteTextEntryKey],
-  //         +word.word_id,
-  //         token,
-  //       );
-  //     } else if (siteTextEntryKeyWordsArr.length > 1) {
-  //       // this is a phrase
-  //       const { phrase } = await this.phraseService.upsert(
-  //         {
-  //           phraselike_string: siteTextEntryKeyWordsArr.join(' '),
-  //           language_code: 'en',
-  //           dialect_code: null,
-  //           geo_code: null,
-  //         },
-  //         token,
-  //       );
+    //     await this.addTranslatedWordOrPhraseToOneWordSiteTextEntry(
+    //       siteText[siteTextEntryKey],
+    //       +word.word_id,
+    //       token,
+    //     );
+    //   } else if (siteTextEntryKeyWordsArr.length > 1) {
+    //     // this is a phrase
+    //     const { phrase } = await this.phraseService.upsert(
+    //       {
+    //         phraselike_string: siteTextEntryKeyWordsArr.join(' '),
+    //         language_code: 'en',
+    //         dialect_code: null,
+    //         geo_code: null,
+    //       },
+    //       token,
+    //     );
 
-  //       // create translated phrase
-  //       await this.addTranslatedPhraseToPhraseFromSiteTextEntry(
-  //         siteText[siteTextEntryKey],
-  //         +phrase.phrase_id,
-  //         token,
-  //       );
-  //     }
-  //   }
-  // }
+    //     // create translated phrase
+    //     await this.addTranslatedPhraseToPhraseFromSiteTextEntry(
+    //       siteText[siteTextEntryKey],
+    //       +phrase.phrase_id,
+    //       token,
+    //     );
+    //   }
+    // }
+  }
 
-  // async getAdminToken(): Promise<string | null> {
-  //   try {
-  //     const res = await this.pg.pool.query(...getAdminTokenSQL());
+  async getAdminToken(): Promise<string | null> {
+    try {
+      const res = await this.pg.pool.query(...getAdminTokenSQL());
 
-  //     return res.rows[0].token;
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // }
+      return res.rows[0].token;
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   // async addTranslatedWordOrPhraseToOneWordSiteTextEntry(
   //   siteTextEntryObj: object,

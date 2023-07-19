@@ -221,14 +221,6 @@ create table wordlike_strings (
   created_by bigint not null references users(user_id)
 );
 
-create table word_definitions(
-  word_definition_id bigserial primary key,
-  word_id bigint not null references words(word_id),
-  definition text not null,
-  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
-);
-
 create table words(
   word_id bigserial primary key,
   wordlike_string_id bigint not null references wordlike_strings(wordlike_string_id),
@@ -237,7 +229,15 @@ create table words(
   geo_code varchar(32),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique nulls not distinct (wordlike_string_id, word_definition_id, language_code, dialect_code, geo_code)
+  unique nulls not distinct (wordlike_string_id, language_code, dialect_code, geo_code)
+);
+
+create table word_definitions(
+  word_definition_id bigserial primary key,
+  word_id bigint not null references words(word_id),
+  definition text not null,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id)
 );
 
 -- tags
@@ -295,13 +295,6 @@ create table word_tags_votes(
 );
 
 -- PHRASES -------------------------------------------------------------
-create table phrase_definitions(
-  phrase_definition_id bigserial primary key,
-  phrase_id bigint not null references phrases(phrase_id),
-  definition text not null,
-  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)  
-);
 
 create table phrases(
   phrase_id bigserial primary key,
@@ -309,6 +302,14 @@ create table phrases(
   phraselike_string text not null,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
+);
+
+create table phrase_definitions(
+  phrase_definition_id bigserial primary key,
+  phrase_id bigint not null references phrases(phrase_id),
+  definition text not null,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id)  
 );
 
 -- tags
@@ -551,7 +552,7 @@ create table site_text_translation_votes(
   from_type_is_word bool not null, -- true = word, false = phrase
   vote bool,
   last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  unique (user_id, site_text_id)
+  unique (user_id)
 );
 
 -- MAPS -------------------------------------------------------------

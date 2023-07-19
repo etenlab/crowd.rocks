@@ -42,6 +42,8 @@ enum ErrorType {
   PasswordInvalid
   PasswordTooLong
   PasswordTooShort
+  PhraseDefinitionNotFound
+  PhraseNotFound
   PositionInvalid
   PostCreateFailed
   PrefixInvalid
@@ -52,8 +54,10 @@ enum ErrorType {
   TokenInvalid
   Unauthorized
   UnknownError
+  WordDefinitionNotFound
   WordInsertFailed
   WordLikeStringInsertFailed
+  WordNotFound
 }
 
 input FileUploadUrlRequest {
@@ -90,12 +94,16 @@ type Mutation {
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
+  phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!
+  phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationUpsertOutput!
   phraseUpsert(input: PhraseUpsertInput!): PhraseUpsertOutput!
   postCreateResolver(input: PostCreateInput!): PostCreateOutput!
   register(input: RegisterInput!): RegisterOutput!
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
   versionCreateResolver(input: VersionCreateInput!): VersionCreateOutput!
-  wordToWordTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationUpsertOutput!
+  wordDefinitionUpsert(input: WordDefinitionUpsertInput!): WordDefinitionUpsertOutput!
+  wordToPhraseTranslationUpsert(input: WordToPhraseTranslationUpsertInput!): WordToPhraseTranslationUpsertOutput!
+  wordToWordTranslationUpsert(input: WordToWordTranslationUpsertInput!): WordToWordTranslationUpsertOutput!
   wordUpsert(input: WordUpsertInput!): WordUpsertOutput!
 }
 
@@ -105,17 +113,29 @@ input PasswordResetFormInput {
 }
 
 type Phrase {
-  definition: PhraseDefinition
-  dialect_code: String
-  geo_code: String
-  language_code: String!
   phrase: String!
   phrase_id: ID!
 }
 
 type PhraseDefinition {
   definition: String!
+  phrase: Phrase!
   phrase_definition_id: ID!
+}
+
+type PhraseDefinitionReadOutput {
+  error: ErrorType!
+  phrase_definition: PhraseDefinition
+}
+
+input PhraseDefinitionUpsertInput {
+  definition: String!
+  phrase_id: ID!
+}
+
+type PhraseDefinitionUpsertOutput {
+  error: ErrorType!
+  phrase_definition: PhraseDefinition
 }
 
 input PhraseReadInput {
@@ -128,9 +148,9 @@ type PhraseReadOutput {
 }
 
 type PhraseToPhraseTranslation {
-  from_phrase: Phrase!
+  from_phrase_definition: PhraseDefinition!
   phrase_to_phrase_translation_id: ID!
-  to_phrase: Phrase!
+  to_phrase_definition: PhraseDefinition!
 }
 
 type PhraseToPhraseTranslationReadOutput {
@@ -139,8 +159,8 @@ type PhraseToPhraseTranslationReadOutput {
 }
 
 input PhraseToPhraseTranslationUpsertInput {
-  from_phrase: ID!
-  to_phrase: ID!
+  from_phrase_definition_id: ID!
+  to_phrase_definition_id: ID!
 }
 
 type PhraseToPhraseTranslationUpsertOutput {
@@ -187,11 +207,15 @@ type PostReadOutput {
 
 type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
+  phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!
   phraseRead(input: PhraseReadInput!): PhraseReadOutput!
+  phraseToPhraseTranslationRead(id: ID!): PhraseToPhraseTranslationReadOutput!
   postReadResolver(input: PostReadInput!): PostReadOutput!
   userReadResolver(input: UserReadInput!): UserReadOutput!
+  wordDefinitionRead(id: ID!): WordDefinitionReadOutput!
   wordRead(input: WordReadInput!): WordReadOutput!
-  wordToWordTranslationRead(id: ID!): PhraseToPhraseTranslationReadOutput!
+  wordToPhraseTranslationRead(id: ID!): WordToPhraseTranslationReadOutput!
+  wordToWordTranslationRead(id: ID!): WordToWordTranslationReadOutput!
 }
 
 input RegisterInput {
@@ -255,7 +279,6 @@ type VersionCreateOutput {
 }
 
 type Word {
-  definition: WordDefinition
   dialect_code: String
   geo_code: String
   language_code: String!
@@ -265,7 +288,23 @@ type Word {
 
 type WordDefinition {
   definition: String!
+  word: Word!
   word_definition_id: ID!
+}
+
+type WordDefinitionReadOutput {
+  error: ErrorType!
+  word_definition: WordDefinition
+}
+
+input WordDefinitionUpsertInput {
+  definition: String!
+  word_id: ID!
+}
+
+type WordDefinitionUpsertOutput {
+  error: ErrorType!
+  word_definition: WordDefinition
 }
 
 input WordReadInput {
@@ -278,8 +317,8 @@ type WordReadOutput {
 }
 
 type WordToPhraseTranslation {
-  from_word: Word!
-  to_phrase: Phrase!
+  from_word_definition: WordDefinition!
+  to_phrase_definition: PhraseDefinition!
   word_to_phrase_translation_id: ID!
 }
 
@@ -288,20 +327,30 @@ type WordToPhraseTranslationReadOutput {
   word_to_phrase_translation: WordToPhraseTranslation
 }
 
+input WordToPhraseTranslationUpsertInput {
+  from_word_definition_id: ID!
+  to_phrase_definition_id: ID!
+}
+
 type WordToPhraseTranslationUpsertOutput {
   error: ErrorType!
   word_to_phrase_translation: WordToPhraseTranslation
 }
 
 type WordToWordTranslation {
-  from_word: Word!
-  to_word: Word!
+  from_word_definition: WordDefinition!
+  to_word_definition: WordDefinition!
   word_to_word_translation_id: ID!
 }
 
 type WordToWordTranslationReadOutput {
   error: ErrorType!
   word_to_word_translation: WordToWordTranslation
+}
+
+input WordToWordTranslationUpsertInput {
+  from_word_definition_id: ID!
+  to_word_definition_id: ID!
 }
 
 type WordToWordTranslationUpsertOutput {
