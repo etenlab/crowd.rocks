@@ -4,6 +4,15 @@ import { mockMapWords } from '../mocks/mapData.mock';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { styled } from 'styled-components';
+import {
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonGrid,
+} from '@ionic/react';
+import { WordTranslationCard } from '../../common/WordTranslationCard/WordTranslationCard';
 
 interface MapTranslationProps extends RouteComponentProps<{}> {}
 
@@ -23,19 +32,35 @@ export const MapTranslation: React.FC<MapTranslationProps> = () => {
   return (
     <>
       <Caption>Map Translation</Caption>
-      <StDiv>
+      <LangSelectorBox>
         <LangSelector
           onChange={(langTag, langInfo) => {
             getMapWords(langInfo);
           }}
         ></LangSelector>
-      </StDiv>
+      </LangSelectorBox>
+      <WordsBox>
+        {mapsWords?.map((mw) => (
+          <WordTranslationCard
+            key={mw.id}
+            wordWithTranslations={{
+              word: { content: mw.content, id: mw.id, languageCode: 'en' },
+              translations: [
+                { id: 3, content: 'some translation3', languageCode: 'en' },
+                { id: 4, content: 'some translation4', languageCode: 'en' },
+              ],
+            }}
+          />
+        ))}
+      </WordsBox>
     </>
   );
 };
 
-const StDiv = styled.div`
-  margin: 20px 50px;
+const LangSelectorBox = styled.div`
+  margin-top: 10px;
+`;
 
-  border: 1px solid gray;
+const WordsBox = styled.div`
+  margin-top: 10px;
 `;

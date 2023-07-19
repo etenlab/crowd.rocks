@@ -1,3 +1,9 @@
+type TLangCodes = {
+  languageCode: string;
+  dialectCode?: string;
+  geoCode?: string;
+};
+
 interface TagInfo {
   tag: string | null;
   descriptions?: Array<string>;

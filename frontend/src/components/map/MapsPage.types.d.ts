@@ -1,9 +1,6 @@
-type TMap = {
+type TMap = TLangCodes & {
   id: number;
   name: string;
-  languageCode: string;
-  dialectCode?: string;
-  geoCode?: string;
   createdAt: Date;
   createdByUserId?: number;
 };
