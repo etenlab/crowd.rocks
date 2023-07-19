@@ -1,11 +1,12 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { CoreModule } from 'src/core/core.module';
-import { WordReadResolver } from './word-read.resolver';
-import { WordUpsertResolver } from './word-upsert.resolver';
+
+import { WordsResolver } from './words.resolver';
+import { WordsService } from './words.service';
 
 @Module({
-  imports: [CoreModule],
-  providers: [WordReadResolver, WordUpsertResolver],
-  exports: [WordReadResolver, WordUpsertResolver],
+  imports: [forwardRef(() => CoreModule)],
+  providers: [WordsService, WordsResolver],
+  exports: [WordsService],
 })
 export class WordModule {}

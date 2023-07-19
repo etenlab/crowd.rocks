@@ -34,6 +34,7 @@ enum ErrorType {
   EmailTooShort
   EmailUnavailable
   InvalidEmailOrPassword
+  InvalidInputs
   LimitInvalid
   NoError
   OffsetInvalid
@@ -89,6 +90,7 @@ type Mutation {
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
+  phraseUpsertResolver(input: PhraseUpsertInput!): PhraseUpsertOutput!
   postCreateResolver(input: PostCreateInput!): PostCreateOutput!
   register(input: RegisterInput!): RegisterOutput!
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
@@ -99,6 +101,41 @@ type Mutation {
 input PasswordResetFormInput {
   password: String!
   token: String!
+}
+
+type Phrase {
+  definition: PhraseDefinition
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  phrase: String!
+  phrase_id: ID!
+}
+
+type PhraseDefinition {
+  definition: String!
+  phrase_definition_id: ID!
+}
+
+input PhraseReadInput {
+  phrase_id: ID!
+}
+
+type PhraseReadOutput {
+  error: ErrorType!
+  phrase: Phrase
+}
+
+input PhraseUpsertInput {
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  phraselike_string: String!
+}
+
+type PhraseUpsertOutput {
+  error: ErrorType!
+  phrase: Phrase
 }
 
 type Post {
@@ -128,6 +165,7 @@ type PostReadOutput {
 
 type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
+  phraseReadResolver(input: PhraseReadInput!): PhraseReadOutput!
   postReadResolver(input: PostReadInput!): PostReadOutput!
   userReadResolver(input: UserReadInput!): UserReadOutput!
   wordReadResolver(input: WordReadInput!): WordReadOutput!
