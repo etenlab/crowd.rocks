@@ -54,7 +54,7 @@ interface HomePageProps
     language_id: string;
   }> {}
 
-const Home: React.FC<HomePageProps> = ({ match }) => {
+const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
   const router = useIonRouter();
 
   const [show_legal_menu, set_show_legal_menu] = useState(false);
