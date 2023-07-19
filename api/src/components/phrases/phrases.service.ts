@@ -33,16 +33,6 @@ export class PhrasesService {
           phrase: {
             phrase_id: input.phrase_id,
             phrase: res1.rows[0].phrase,
-            definition:
-              res1.rows[0].definition_id && res1.rows[0].definition
-                ? {
-                    phrase_definition_id: res1.rows[0].definition_id + '',
-                    definition: res1.rows[0].definition,
-                  }
-                : null,
-            language_code: res1.rows[0].language_code,
-            dialect_code: res1.rows[0].dialect_code,
-            geo_code: res1.rows[0].geo_code,
           },
         };
       }
