@@ -534,14 +534,16 @@ create table site_text_words (
   site_text_id bigserial primary key,
   word_id bigint not null references words(word_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (word_id)
 );
 
 create table site_text_phrases (
   site_text_id bigserial primary key,
   phrase_id bigint not null references phrases(phrase_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (phrase_id)
 );
 
 create table site_text_translation_votes(
@@ -550,9 +552,10 @@ create table site_text_translation_votes(
   from_id bigint not null,
   to_id bigint not null,
   from_type_is_word bool not null, -- true = word, false = phrase
+  to_type_is_word bool not null, -- true = word, false = phrase
   vote bool,
   last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  unique (user_id)
+  unique (user_id, from_id, to_id, from_type_is_word, to_type_is_word)
 );
 
 -- MAPS -------------------------------------------------------------
