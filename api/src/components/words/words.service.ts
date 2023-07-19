@@ -30,13 +30,6 @@ export class WordsService {
           word: {
             word_id: input.word_id,
             word: res1.rows[0].word,
-            definition:
-              res1.rows[0].word_definition_id && res1.rows[0].definition
-                ? {
-                    word_definition_id: res1.rows[0].word_definition_id + '',
-                    definition: res1.rows[0].definition,
-                  }
-                : null,
             language_code: res1.rows[0].language_code,
             dialect_code: res1.rows[0].dialect_code,
             geo_code: res1.rows[0].geo_code,
@@ -78,7 +71,7 @@ export class WordsService {
         };
       }
 
-      const { error: readingError, word } = await await this.read({
+      const { error: readingError, word } = await this.read({
         word_id: word_id + '',
       });
 
