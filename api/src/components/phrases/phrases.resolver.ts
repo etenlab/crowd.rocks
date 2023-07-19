@@ -19,7 +19,7 @@ export class PhrasesResolver {
   constructor(private phraseService: PhrasesService) {}
 
   @Query(() => PhraseReadOutput)
-  async phraseReadResolver(
+  async phraseRead(
     @Args('input') input: PhraseReadInput,
   ): Promise<PhraseReadOutput> {
     console.log('phrase read resolver, phrase_id:', input.phrase_id);
@@ -28,7 +28,7 @@ export class PhrasesResolver {
   }
 
   @Mutation(() => PhraseUpsertOutput)
-  async phraseUpsertResolver(
+  async phraseUpsert(
     @Args('input') input: PhraseUpsertInput,
     @Context() req: any,
   ): Promise<PhraseUpsertOutput> {

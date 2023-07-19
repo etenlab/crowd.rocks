@@ -18,16 +18,14 @@ export class WordsResolver {
   constructor(private wordService: WordsService) {}
 
   @Query(() => WordReadOutput)
-  async wordReadResolver(
-    @Args('input') input: WordReadInput,
-  ): Promise<WordReadOutput> {
+  async wordRead(@Args('input') input: WordReadInput): Promise<WordReadOutput> {
     console.log('word read resolver, word_id:', input.word_id);
 
     return this.wordService.read(input);
   }
 
   @Mutation(() => WordUpsertOutput)
-  async wordUpsertResolver(
+  async wordUpsert(
     @Args('input') input: WordUpsertInput,
     @Context() req: any,
   ): Promise<WordUpsertOutput> {

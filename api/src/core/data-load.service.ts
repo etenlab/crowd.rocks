@@ -5,10 +5,12 @@ import { Injectable } from '@nestjs/common';
 // import { RegisterResolver } from 'src/components/authentication/register.resolver';
 // import { WordUpsertResolver } from 'src/components/words/word-upsert.resolver';
 
+import { PostgresService } from './postgres.service';
 import { WordsService } from 'src/components/words/words.service';
 import { PhrasesService } from 'src/components/phrases/phrases.service';
-
-import { PostgresService } from './postgres.service';
+import { WordToWordTranslationsService } from 'src/components/translations/word-to-word-translations.service';
+import { WordToPhraseTranslationsService } from 'src/components/translations/word-to-phrase-translations.service';
+import { PhraseToPhraseTranslationsService } from 'src/components/translations/phrase-to-phrase-translations.service';
 
 import { siteText } from './data/lang';
 
@@ -20,6 +22,9 @@ export class DataLoadService {
     private pg: PostgresService,
     private wordService: WordsService,
     private phraseService: PhrasesService,
+    private wordToWordTransService: WordToWordTranslationsService,
+    private wordToPhraseTransService: WordToPhraseTranslationsService,
+    private phraseToPhraseTransService: PhraseToPhraseTranslationsService,
   ) {
     // this.loadSiteTextData(); // I use this to easily rerun the load function
   }
@@ -114,13 +119,15 @@ export class DataLoadService {
           token,
         );
 
-        const wordToWordTranslationId = await this.wordToWordTranslationUpsert(
-          onlyWordIdOfEntryKey,
-          +translatedWord.word_id,
-          token,
-        );
+        const wordToWordTranslationUpsertOutput =
+          await this.wordToWordTransService.upsert(
+            onlyWordIdOfEntryKey,
+            +translatedWord.word_id,
+            token,
+          );
 
-        return wordToWordTranslationId;
+        return +wordToWordTranslationUpsertOutput.word_to_word_translation
+          .word_to_word_translation_id;
       } else if (translatedWordOrPhraseInEntry.length > 1) {
         // the translation is a phrase
         const { phrase } = await this.phraseService.upsert(
@@ -133,14 +140,18 @@ export class DataLoadService {
           token,
         );
 
-        const wordToPhraseTranslationId =
-          await this.wordToPhraseTranslationUpsert(
+        const wordToPhraseTranslationUpsertOutput =
+          await this.wordToPhraseTransService.upsert(
             onlyWordIdOfEntryKey,
             +phrase.phrase_id,
             token,
           );
 
-        console.log('w2p', wordToPhraseTranslationId);
+        console.log(
+          'w2p',
+          wordToPhraseTranslationUpsertOutput.word_to_phrase_translation
+            .word_to_phrase_translation_id,
+        );
       }
     }
   }
@@ -186,102 +197,16 @@ export class DataLoadService {
           token,
         );
 
-        const phraseToPhraseTranslationId =
-          await this.phraseToPhraseTranslationUpsert(
+        const phraseToPhraseTranslationUpsertOutput =
+          await this.phraseToPhraseTransService.upsert(
             phraseIdOfEntryKey,
             +phrase.phrase_id,
             token,
           );
 
-        return phraseToPhraseTranslationId;
+        return +phraseToPhraseTranslationUpsertOutput
+          .phrase_to_phrase_translation.phrase_to_phrase_translation_id;
       }
-    }
-  }
-
-  async wordToWordTranslationUpsert(
-    fromWord: number,
-    toWord: number,
-    token: string,
-  ): Promise<number | null> {
-    try {
-      const res = await this.pg.pool.query(
-        `
-          call word_to_word_translation_upsert($1, $2, $3, 0, '');
-        `,
-        [fromWord, toWord, token],
-      );
-
-      const translation_id = res.rows[0].p_word_to_word_translation_id;
-
-      if (!translation_id) {
-        console.error(
-          'failed to upsert word to word translation',
-          fromWord,
-          toWord,
-        );
-      }
-
-      return translation_id;
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  async wordToPhraseTranslationUpsert(
-    fromWord: number,
-    toPhrase: number,
-    token: string,
-  ): Promise<number | null> {
-    try {
-      const res = await this.pg.pool.query(
-        `
-          call word_to_phrase_translation_upsert($1, $2, $3, 0, '');
-        `,
-        [fromWord, toPhrase, token],
-      );
-
-      const translation_id = res.rows[0].p_word_to_phrase_translation_id;
-
-      if (!translation_id) {
-        console.error(
-          'failed to upsert word to phrase translation',
-          fromWord,
-          toPhrase,
-        );
-      }
-
-      return translation_id;
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  async phraseToPhraseTranslationUpsert(
-    fromPhrase: number,
-    toPhrase: number,
-    token: string,
-  ): Promise<number | null> {
-    try {
-      const res = await this.pg.pool.query(
-        `
-          call phrase_to_phrase_translation_upsert($1, $2, $3, 0, '');
-        `,
-        [fromPhrase, toPhrase, token],
-      );
-
-      const translation_id = res.rows[0].p_phrase_to_phrase_translation_id;
-
-      if (!translation_id) {
-        console.error(
-          'failed to upsert phrase to phrase translation',
-          fromPhrase,
-          toPhrase,
-        );
-      }
-
-      return translation_id;
-    } catch (e) {
-      console.error(e);
     }
   }
 }
