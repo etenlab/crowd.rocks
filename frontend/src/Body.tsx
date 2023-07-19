@@ -247,8 +247,7 @@ const Body: React.FC = () => {
           />
           <Route
             path="/:nation_id/:language_id/:cluster_id/maps"
-            // component={MapsPage}
-            render={(props) => <MapsPage {...props} />}
+            component={MapsPage}
           />
 
           <Route exact path="/">

@@ -1,31 +1,24 @@
-import { IonContent, IonPage, IonRouterOutlet } from '@ionic/react';
-import { useEffect, useState } from 'react';
-import { mockMapList } from './mocks/mapData.mock';
+import { IonContent, IonPage } from '@ionic/react';
+import { useCallback, useEffect, useState } from 'react';
+import { mockMapWithContentList } from './mocks/mapData.mock';
 import { MapList } from './MapList/MapsList';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import { MapDetails } from './MapDetails/MapDetails';
-
-export type TMap = {
-  id: number;
-  name: string;
-  languageCode: string;
-  dialectCode?: string;
-  geoCode?: string;
-  createdAt: Date;
-  createdByUserId?: number;
-  content: string;
-};
-
-export type TMapList = TMap[];
+import { MapTranslation } from './MapTranslation/MapTranslation';
 
 const MapsPage: React.FC<RouteComponentProps> = ({
   match,
 }: RouteComponentProps) => {
   const [mapList, setMapList] = useState<TMapList>();
+  const [selectedMapId, setSelectedMapId] = useState<number>();
 
   useEffect(() => {
     // mocked data gathering
-    setMapList(mockMapList);
+    setMapList(mockMapWithContentList);
+  }, []);
+
+  const handleSelectMapId = useCallback((id: number) => {
+    setSelectedMapId(id);
   }, []);
 
   return (
@@ -36,11 +29,19 @@ const MapsPage: React.FC<RouteComponentProps> = ({
             <Route
               exact
               path={`${match.url}`}
-              render={() => <MapList mapList={mapList} />}
+              render={() => (
+                <MapList mapList={mapList} onSelectMapId={handleSelectMapId} />
+              )}
             />
             <Route
-              path={`${match.url}/:id`}
-              render={() => <MapDetails></MapDetails>}
+              exact
+              path={`${match.url}/translation`}
+              component={MapTranslation}
+            />
+            <Route
+              exact
+              path={`${match.url}/details/:id`}
+              component={MapDetails}
             />
           </div>
         </div>

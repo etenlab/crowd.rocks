@@ -1,22 +1,14 @@
-import {
-  IonBackButton,
-  IonButtons,
-  IonHeader,
-  IonIcon,
-  IonText,
-  IonTitle,
-  useIonRouter,
-} from '@ionic/react';
+import { IonIcon, IonText, IonTitle, useIonRouter } from '@ionic/react';
 import { arrowBack } from 'ionicons/icons';
 import { ReactElement } from 'react';
 import { styled } from 'styled-components';
 
-export type TCaptionParams = {
+export type TCaptionProps = {
   handleBackClick?: () => void;
-  children: ReactElement | string;
+  children: ReactElement | string | string[];
 };
 
-export const Caption = ({ handleBackClick, children }: TCaptionParams) => {
+export const Caption = ({ handleBackClick, children }: TCaptionProps) => {
   const router = useIonRouter();
   let onClickAction: () => void;
   if (handleBackClick) {
