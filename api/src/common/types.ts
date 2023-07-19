@@ -49,6 +49,11 @@ export enum ErrorType {
   WordInsertFailed = 'WordInsertFailed',
   WordLikeStringInsertFailed = 'WordLikeStringInsertFailed',
 
+  WordNotFound = 'WordNotFound',
+  WordDefinitionNotFound = 'WordDefinitionNotFound',
+  PhraseDefinitionNotFound = 'PhraseDefinitionNotFound',
+  PhraseNotFound = 'PhraseNotFound',
+
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
 }

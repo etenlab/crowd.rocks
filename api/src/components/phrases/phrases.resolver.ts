@@ -32,7 +32,7 @@ export class PhrasesResolver {
     @Args('input') input: PhraseUpsertInput,
     @Context() req: any,
   ): Promise<PhraseUpsertOutput> {
-    console.log('word upsert resolver, string: ', input.phraselike_string);
+    console.log('phrase upsert resolver, string: ', input.phraselike_string);
 
     return this.phraseService.upsert(input, getBearer(req));
   }

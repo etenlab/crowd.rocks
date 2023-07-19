@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
-import { PhrasesService } from 'src/components/phrases/phrases.service';
+import { PhraseDefinitionsService } from 'src/components/definitions/phrase-definitions.service';
 
 import {
   PhraseToPhraseTranslationReadOutput,
@@ -20,7 +20,7 @@ import {
 export class PhraseToPhraseTranslationsService {
   constructor(
     private pg: PostgresService,
-    private phraseService: PhrasesService,
+    private phraseDefinitionService: PhraseDefinitionsService,
   ) {}
 
   async read(id: number): Promise<PhraseToPhraseTranslationReadOutput> {
@@ -33,24 +33,25 @@ export class PhraseToPhraseTranslationsService {
       if (res1.rowCount !== 1) {
         console.error(`no phrase-to-phrase-translation for id: ${id}`);
       } else {
-        const fromPhraseOutput = await this.phraseService.read({
-          phrase_id: res1.rows[0].from_phrase + '',
-        });
+        const fromPhraseDefinitionOutput =
+          await this.phraseDefinitionService.read(
+            res1.rows[0].from_phrase_definition_id,
+          );
 
-        const toPhraseOuput = await this.phraseService.read({
-          phrase_id: res1.rows[0].to_phrase + '',
-        });
+        const toPhraseDefinitionOuput = await this.phraseDefinitionService.read(
+          res1.rows[0].to_phrase_definition_id,
+        );
 
-        if (fromPhraseOutput.error !== ErrorType.NoError) {
+        if (fromPhraseDefinitionOutput.error !== ErrorType.NoError) {
           return {
-            error: fromPhraseOutput.error,
+            error: fromPhraseDefinitionOutput.error,
             phrase_to_phrase_translation: null,
           };
         }
 
-        if (toPhraseOuput.error !== ErrorType.NoError) {
+        if (toPhraseDefinitionOuput.error !== ErrorType.NoError) {
           return {
-            error: toPhraseOuput.error,
+            error: toPhraseDefinitionOuput.error,
             phrase_to_phrase_translation: null,
           };
         }
@@ -59,8 +60,9 @@ export class PhraseToPhraseTranslationsService {
           error: ErrorType.NoError,
           phrase_to_phrase_translation: {
             phrase_to_phrase_translation_id: id + '',
-            from_phrase: fromPhraseOutput.phrase,
-            to_phrase: toPhraseOuput.phrase,
+            from_phrase_definition:
+              fromPhraseDefinitionOutput.phrase_definition,
+            to_phrase_definition: toPhraseDefinitionOuput.phrase_definition,
           },
         };
       }
@@ -75,16 +77,16 @@ export class PhraseToPhraseTranslationsService {
   }
 
   async upsert(
-    fromPhrase: number,
-    toPhrase: number,
+    fromPhraseDefinitionId: number,
+    toPhraseDefinitionId: number,
     token: string,
   ): Promise<PhraseToPhraseTranslationUpsertOutput> {
     try {
       const res =
         await this.pg.pool.query<PhraseToPhraseTranslationUpsertProcedureOutputRow>(
           ...callPhraseToPhraseTranslationUpsertProcedure({
-            fromPhrase,
-            toPhrase,
+            fromPhraseDefinitionId,
+            toPhraseDefinitionId,
             token,
           }),
         );

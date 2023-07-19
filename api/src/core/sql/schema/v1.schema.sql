@@ -221,23 +221,23 @@ create table wordlike_strings (
   created_by bigint not null references users(user_id)
 );
 
-create table word_definitions(
-  word_definition_id bigserial primary key,
-  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id),
-  definition text not null
-);
-
 create table words(
   word_id bigserial primary key,
   wordlike_string_id bigint not null references wordlike_strings(wordlike_string_id),
-  word_definition_id bigint references word_definitions(word_definition_id),
   language_code varchar(32) not null,
   dialect_code varchar(32),
   geo_code varchar(32),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique nulls not distinct (wordlike_string_id, word_definition_id, language_code, dialect_code, geo_code)
+  unique nulls not distinct (wordlike_string_id, language_code, dialect_code, geo_code)
+);
+
+create table word_definitions(
+  word_definition_id bigserial primary key,
+  word_id bigint not null references words(word_id),
+  definition text not null,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id)
 );
 
 -- tags
@@ -295,20 +295,21 @@ create table word_tags_votes(
 );
 
 -- PHRASES -------------------------------------------------------------
-create table phrase_definitions(
-  phrase_definition_id bigserial primary key,
-  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id),
-  definition text not null
-);
 
 create table phrases(
   phrase_id bigserial primary key,
   words bigint[] not null, -- references words(word_id)
   phraselike_string text not null,
-  phrase_definition_id bigint references phrase_definitions(phrase_definition_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
+);
+
+create table phrase_definitions(
+  phrase_definition_id bigserial primary key,
+  phrase_id bigint not null references phrases(phrase_id),
+  definition text not null,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id)  
 );
 
 -- tags
@@ -369,38 +370,38 @@ create table phrase_tags_votes(
 
 create table word_to_word_translations(
   word_to_word_translation_id bigserial primary key,
-  from_word bigint not null references words(word_id),
-  to_word bigint not null references words(word_id),
+  from_word_definition_id bigint not null references word_definitions(word_definition_id),
+  to_word_definition_id bigint not null references word_definitions(word_definition_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique (from_word, to_word)
+  unique (from_word_definition_id, to_word_definition_id)
 );
 
 create table word_to_phrase_translations(
   word_to_phrase_translation_id bigserial primary key,
-  from_word bigint not null references words(word_id),
-  to_phrase bigint not null references phrases(phrase_id),
+  from_word_definition_id bigint not null references word_definitions(word_definition_id),
+  to_phrase_definition_id bigint not null references phrase_definitions(phrase_definition_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique (from_word, to_phrase)
+  unique (from_word_definition_id, to_phrase_definition_id)
 );
 
 create table phrase_to_word_translations(
   phrase_to_word_translation_id bigserial primary key,
-  from_phrase bigint not null references phrases(phrase_id),
-  to_word bigint not null references words(word_id),
+  from_phrase_definition_id bigint not null references phrase_definitions(phrase_definition_id),
+  to_word_definition_id bigint not null references word_definitions(word_definition_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique (from_phrase, to_word)
+  unique (from_phrase_definition_id, to_word_definition_id)
 );
 
 create table phrase_to_phrase_translations(
   phrase_to_phrase_translation_id bigserial primary key,
-  from_phrase bigint not null references phrases(phrase_id),
-  to_phrase bigint not null references phrases(phrase_id),
+  from_phrase_definition_id bigint not null references phrase_definitions(phrase_definition_id),
+  to_phrase_definition_id bigint not null references phrase_definitions(phrase_definition_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique (from_phrase, to_phrase)
+  unique (from_phrase_definition_id, to_phrase_definition_id)
 );
 
 -- votes
@@ -529,20 +530,32 @@ create table word_range_tags_votes(
 
 -- SITE TEXT -------------------------------------------------------------
 
-create table original_site_text (
-  original_site_text_id bigserial primary key,
+create table site_text_words (
+  site_text_id bigserial primary key,
   word_id bigint not null references words(word_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (word_id)
 );
 
-create table orignal_site_text_votes(
-  original_site_text_vote_id bigserial primary key,
+create table site_text_phrases (
+  site_text_id bigserial primary key,
+  phrase_id bigint not null references phrases(phrase_id),
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id),
+  unique (phrase_id)
+);
+
+create table site_text_translation_votes(
+  site_text_vote_id bigserial primary key,
   user_id bigint not null references users(user_id),
-  original_site_text_id bigint not null references original_site_text(original_site_text_id),
+  from_id bigint not null,
+  to_id bigint not null,
+  from_type_is_word bool not null, -- true = word, false = phrase
+  to_type_is_word bool not null, -- true = word, false = phrase
   vote bool,
   last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  unique (user_id, original_site_text_id)
+  unique (user_id, from_id, to_id, from_type_is_word, to_type_is_word)
 );
 
 -- MAPS -------------------------------------------------------------

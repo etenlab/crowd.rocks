@@ -59,6 +59,8 @@ export enum ErrorType {
   PasswordInvalid = 'PasswordInvalid',
   PasswordTooLong = 'PasswordTooLong',
   PasswordTooShort = 'PasswordTooShort',
+  PhraseDefinitionNotFound = 'PhraseDefinitionNotFound',
+  PhraseNotFound = 'PhraseNotFound',
   PositionInvalid = 'PositionInvalid',
   PostCreateFailed = 'PostCreateFailed',
   PrefixInvalid = 'PrefixInvalid',
@@ -69,8 +71,10 @@ export enum ErrorType {
   TokenInvalid = 'TokenInvalid',
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
+  WordDefinitionNotFound = 'WordDefinitionNotFound',
   WordInsertFailed = 'WordInsertFailed',
-  WordLikeStringInsertFailed = 'WordLikeStringInsertFailed'
+  WordLikeStringInsertFailed = 'WordLikeStringInsertFailed',
+  WordNotFound = 'WordNotFound'
 }
 
 export type FileUploadUrlRequest = {
@@ -111,12 +115,16 @@ export type Mutation = {
   login: LoginOutput;
   logout: LogoutOutput;
   passwordResetFormResolver: LoginOutput;
+  phraseDefinitionUpsert: PhraseDefinitionUpsertOutput;
+  phraseToPhraseTranslationUpsert: PhraseToPhraseTranslationUpsertOutput;
   phraseUpsert: PhraseUpsertOutput;
   postCreateResolver: PostCreateOutput;
   register: RegisterOutput;
   resetEmailRequest: ResetEmailRequestOutput;
   versionCreateResolver: VersionCreateOutput;
-  wordToWordTranslationUpsert: PhraseToPhraseTranslationUpsertOutput;
+  wordDefinitionUpsert: WordDefinitionUpsertOutput;
+  wordToPhraseTranslationUpsert: WordToPhraseTranslationUpsertOutput;
+  wordToWordTranslationUpsert: WordToWordTranslationUpsertOutput;
   wordUpsert: WordUpsertOutput;
 };
 
@@ -146,6 +154,16 @@ export type MutationPasswordResetFormResolverArgs = {
 };
 
 
+export type MutationPhraseDefinitionUpsertArgs = {
+  input: PhraseDefinitionUpsertInput;
+};
+
+
+export type MutationPhraseToPhraseTranslationUpsertArgs = {
+  input: PhraseToPhraseTranslationUpsertInput;
+};
+
+
 export type MutationPhraseUpsertArgs = {
   input: PhraseUpsertInput;
 };
@@ -171,8 +189,18 @@ export type MutationVersionCreateResolverArgs = {
 };
 
 
+export type MutationWordDefinitionUpsertArgs = {
+  input: WordDefinitionUpsertInput;
+};
+
+
+export type MutationWordToPhraseTranslationUpsertArgs = {
+  input: WordToPhraseTranslationUpsertInput;
+};
+
+
 export type MutationWordToWordTranslationUpsertArgs = {
-  input: PhraseToPhraseTranslationUpsertInput;
+  input: WordToWordTranslationUpsertInput;
 };
 
 
@@ -187,10 +215,6 @@ export type PasswordResetFormInput = {
 
 export type Phrase = {
   __typename?: 'Phrase';
-  definition?: Maybe<PhraseDefinition>;
-  dialect_code?: Maybe<Scalars['String']['output']>;
-  geo_code?: Maybe<Scalars['String']['output']>;
-  language_code: Scalars['String']['output'];
   phrase: Scalars['String']['output'];
   phrase_id: Scalars['ID']['output'];
 };
@@ -198,7 +222,25 @@ export type Phrase = {
 export type PhraseDefinition = {
   __typename?: 'PhraseDefinition';
   definition: Scalars['String']['output'];
+  phrase: Phrase;
   phrase_definition_id: Scalars['ID']['output'];
+};
+
+export type PhraseDefinitionReadOutput = {
+  __typename?: 'PhraseDefinitionReadOutput';
+  error: ErrorType;
+  phrase_definition?: Maybe<PhraseDefinition>;
+};
+
+export type PhraseDefinitionUpsertInput = {
+  definition: Scalars['String']['input'];
+  phrase_id: Scalars['ID']['input'];
+};
+
+export type PhraseDefinitionUpsertOutput = {
+  __typename?: 'PhraseDefinitionUpsertOutput';
+  error: ErrorType;
+  phrase_definition?: Maybe<PhraseDefinition>;
 };
 
 export type PhraseReadInput = {
@@ -213,9 +255,9 @@ export type PhraseReadOutput = {
 
 export type PhraseToPhraseTranslation = {
   __typename?: 'PhraseToPhraseTranslation';
-  from_phrase: Phrase;
+  from_phrase_definition: PhraseDefinition;
   phrase_to_phrase_translation_id: Scalars['ID']['output'];
-  to_phrase: Phrase;
+  to_phrase_definition: PhraseDefinition;
 };
 
 export type PhraseToPhraseTranslationReadOutput = {
@@ -225,8 +267,8 @@ export type PhraseToPhraseTranslationReadOutput = {
 };
 
 export type PhraseToPhraseTranslationUpsertInput = {
-  from_phrase: Scalars['ID']['input'];
-  to_phrase: Scalars['ID']['input'];
+  from_phrase_definition_id: Scalars['ID']['input'];
+  to_phrase_definition_id: Scalars['ID']['input'];
 };
 
 export type PhraseToPhraseTranslationUpsertOutput = {
@@ -279,11 +321,15 @@ export type PostReadOutput = {
 export type Query = {
   __typename?: 'Query';
   fileUploadUrlRequest: FileUploadUrlResponse;
+  phraseDefinitionRead: PhraseDefinitionReadOutput;
   phraseRead: PhraseReadOutput;
+  phraseToPhraseTranslationRead: PhraseToPhraseTranslationReadOutput;
   postReadResolver: PostReadOutput;
   userReadResolver: UserReadOutput;
+  wordDefinitionRead: WordDefinitionReadOutput;
   wordRead: WordReadOutput;
-  wordToWordTranslationRead: PhraseToPhraseTranslationReadOutput;
+  wordToPhraseTranslationRead: WordToPhraseTranslationReadOutput;
+  wordToWordTranslationRead: WordToWordTranslationReadOutput;
 };
 
 
@@ -292,8 +338,18 @@ export type QueryFileUploadUrlRequestArgs = {
 };
 
 
+export type QueryPhraseDefinitionReadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type QueryPhraseReadArgs = {
   input: PhraseReadInput;
+};
+
+
+export type QueryPhraseToPhraseTranslationReadArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -307,8 +363,18 @@ export type QueryUserReadResolverArgs = {
 };
 
 
+export type QueryWordDefinitionReadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type QueryWordReadArgs = {
   input: WordReadInput;
+};
+
+
+export type QueryWordToPhraseTranslationReadArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -385,7 +451,6 @@ export type VersionCreateOutput = {
 
 export type Word = {
   __typename?: 'Word';
-  definition?: Maybe<WordDefinition>;
   dialect_code?: Maybe<Scalars['String']['output']>;
   geo_code?: Maybe<Scalars['String']['output']>;
   language_code: Scalars['String']['output'];
@@ -396,7 +461,25 @@ export type Word = {
 export type WordDefinition = {
   __typename?: 'WordDefinition';
   definition: Scalars['String']['output'];
+  word: Word;
   word_definition_id: Scalars['ID']['output'];
+};
+
+export type WordDefinitionReadOutput = {
+  __typename?: 'WordDefinitionReadOutput';
+  error: ErrorType;
+  word_definition?: Maybe<WordDefinition>;
+};
+
+export type WordDefinitionUpsertInput = {
+  definition: Scalars['String']['input'];
+  word_id: Scalars['ID']['input'];
+};
+
+export type WordDefinitionUpsertOutput = {
+  __typename?: 'WordDefinitionUpsertOutput';
+  error: ErrorType;
+  word_definition?: Maybe<WordDefinition>;
 };
 
 export type WordReadInput = {
@@ -411,8 +494,8 @@ export type WordReadOutput = {
 
 export type WordToPhraseTranslation = {
   __typename?: 'WordToPhraseTranslation';
-  from_word: Word;
-  to_phrase: Phrase;
+  from_word_definition: WordDefinition;
+  to_phrase_definition: PhraseDefinition;
   word_to_phrase_translation_id: Scalars['ID']['output'];
 };
 
@@ -420,6 +503,11 @@ export type WordToPhraseTranslationReadOutput = {
   __typename?: 'WordToPhraseTranslationReadOutput';
   error: ErrorType;
   word_to_phrase_translation?: Maybe<WordToPhraseTranslation>;
+};
+
+export type WordToPhraseTranslationUpsertInput = {
+  from_word_definition_id: Scalars['ID']['input'];
+  to_phrase_definition_id: Scalars['ID']['input'];
 };
 
 export type WordToPhraseTranslationUpsertOutput = {
@@ -430,8 +518,8 @@ export type WordToPhraseTranslationUpsertOutput = {
 
 export type WordToWordTranslation = {
   __typename?: 'WordToWordTranslation';
-  from_word: Word;
-  to_word: Word;
+  from_word_definition: WordDefinition;
+  to_word_definition: WordDefinition;
   word_to_word_translation_id: Scalars['ID']['output'];
 };
 
@@ -439,6 +527,11 @@ export type WordToWordTranslationReadOutput = {
   __typename?: 'WordToWordTranslationReadOutput';
   error: ErrorType;
   word_to_word_translation?: Maybe<WordToWordTranslation>;
+};
+
+export type WordToWordTranslationUpsertInput = {
+  from_word_definition_id: Scalars['ID']['input'];
+  to_word_definition_id: Scalars['ID']['input'];
 };
 
 export type WordToWordTranslationUpsertOutput = {

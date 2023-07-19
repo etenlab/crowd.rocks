@@ -2,17 +2,9 @@ import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
 
 @ObjectType()
-export class WordDefinition {
-  @Field(() => ID) word_definition_id: string;
-  @Field(() => String) definition: string;
-}
-
-@ObjectType()
 export class Word {
   @Field(() => ID) word_id: string;
   @Field(() => String) word: string;
-  @Field(() => WordDefinition, { nullable: true })
-  definition: WordDefinition | null;
   @Field(() => String) language_code: string;
   @Field(() => String, { nullable: true }) dialect_code: string | null;
   @Field(() => String, { nullable: true }) geo_code: string | null;
