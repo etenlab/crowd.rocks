@@ -1,8 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 
 import { CoreModule } from 'src/core/core.module';
-import { WordModule } from 'src/components/words/words.module';
-import { PhraseModule } from 'src/components/phrases/phrases.module';
+import { DefinitionsModule } from 'src/components/definitions/definitions.module';
 
 import { WordToWordTranslationResolver } from './word-to-word-translations.resolver';
 import { WordToWordTranslationsService } from './word-to-word-translations.service';
@@ -14,7 +13,7 @@ import { PhraseToPhraseTranslationResolver } from './phrase-to-phrase-translatio
 import { PhraseToPhraseTranslationsService } from './phrase-to-phrase-translations.service';
 
 @Module({
-  imports: [forwardRef(() => CoreModule), WordModule, PhraseModule],
+  imports: [forwardRef(() => CoreModule), DefinitionsModule],
   providers: [
     WordToWordTranslationResolver,
     WordToWordTranslationsService,

@@ -20,7 +20,7 @@ export class PhraseToPhraseTranslationResolver {
   ) {}
 
   @Query(() => PhraseToPhraseTranslationReadOutput)
-  async wordToWordTranslationRead(
+  async phraseToPhraseTranslationRead(
     @Args('id', { type: () => ID }) id: string,
   ): Promise<PhraseToPhraseTranslationReadOutput> {
     console.log(
@@ -32,17 +32,17 @@ export class PhraseToPhraseTranslationResolver {
   }
 
   @Mutation(() => PhraseToPhraseTranslationUpsertOutput)
-  async wordToWordTranslationUpsert(
+  async phraseToPhraseTranslationUpsert(
     @Args('input') input: PhraseToPhraseTranslationUpsertInput,
     @Context() req: any,
   ): Promise<PhraseToPhraseTranslationUpsertOutput> {
     console.log(
-      `phrase-to-phrase-translation upsert resolver, from_phrase: ${input.from_phrase}, to_phrase: ${input.to_phrase} `,
+      `phrase-to-phrase-translation upsert resolver, from_phrase_definition_id: ${input.from_phrase_definition_id}, to_phrase_definition_id: ${input.to_phrase_definition_id}`,
     );
 
     return this.phraseToPhraseTranslationService.upsert(
-      +input.from_phrase,
-      +input.to_phrase,
+      +input.from_phrase_definition_id,
+      +input.to_phrase_definition_id,
       getBearer(req),
     );
   }

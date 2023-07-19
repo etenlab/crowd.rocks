@@ -2,46 +2,46 @@ import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
 
-import { Word } from 'src/components/words/types';
-import { Phrase } from 'src/components/phrases/types';
+import { WordDefinition } from 'src/components/definitions/types';
+import { PhraseDefinition } from 'src/components/definitions/types';
 
 @ObjectType()
 export class WordToWordTranslation {
   @Field(() => ID) word_to_word_translation_id: string;
-  @Field(() => Word) from_word: Word;
-  @Field(() => Word) to_word: Word;
+  @Field(() => WordDefinition) from_word_definition: WordDefinition;
+  @Field(() => WordDefinition) to_word_definition: WordDefinition;
 }
 
 @ObjectType()
 export class WordToPhraseTranslation {
   @Field(() => ID) word_to_phrase_translation_id: string;
-  @Field(() => Word) from_word: Word;
-  @Field(() => Phrase) to_phrase: Phrase;
+  @Field(() => WordDefinition) from_word_definition: WordDefinition;
+  @Field(() => PhraseDefinition) to_phrase_definition: PhraseDefinition;
 }
 
 @ObjectType()
 export class PhraseToPhraseTranslation {
   @Field(() => ID) phrase_to_phrase_translation_id: string;
-  @Field(() => Phrase) from_phrase: Phrase;
-  @Field(() => Phrase) to_phrase: Phrase;
+  @Field(() => PhraseDefinition) from_phrase_definition: PhraseDefinition;
+  @Field(() => PhraseDefinition) to_phrase_definition: PhraseDefinition;
 }
 
 @InputType()
 export class WordToWordTranslationUpsertInput {
-  @Field(() => ID) from_word: string;
-  @Field(() => ID) to_word: string;
+  @Field(() => ID) from_word_definition_id: string;
+  @Field(() => ID) to_word_definition_id: string;
 }
 
 @InputType()
 export class WordToPhraseTranslationUpsertInput {
-  @Field(() => ID) from_word: string;
-  @Field(() => ID) to_phrase: string;
+  @Field(() => ID) from_word_definition_id: string;
+  @Field(() => ID) to_phrase_definition_id: string;
 }
 
 @InputType()
 export class PhraseToPhraseTranslationUpsertInput {
-  @Field(() => ID) from_phrase: string;
-  @Field(() => ID) to_phrase: string;
+  @Field(() => ID) from_phrase_definition_id: string;
+  @Field(() => ID) to_phrase_definition_id: string;
 }
 
 @ObjectType()

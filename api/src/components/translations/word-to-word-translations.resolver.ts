@@ -37,12 +37,12 @@ export class WordToWordTranslationResolver {
     @Context() req: any,
   ): Promise<WordToWordTranslationUpsertOutput> {
     console.log(
-      `word-to-word-translation upsert resolver, from_word: ${input.from_word}, to_word: ${input.to_word} `,
+      `word-to-word-translation upsert resolver, from_word_definition_id: ${input.from_word_definition_id}, to_word_definition_id: ${input.to_word_definition_id}`,
     );
 
     return this.wordToWordTranslationService.upsert(
-      +input.from_word,
-      +input.to_word,
+      +input.from_word_definition_id,
+      +input.to_word_definition_id,
       getBearer(req),
     );
   }
