@@ -4,12 +4,12 @@ import { mockMapWords } from '../mocks/mapData.mock';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { styled } from 'styled-components';
-import { WordTranslatedCard } from '../../word/WordTranslatedCard/WordTranslatedCard';
+import { TranslatedWordCards } from '../../word/TranslatedWordCards/TranslatedWordCards';
 
 interface MapTranslationProps extends RouteComponentProps<{}> {}
 
 export const MapTranslation: React.FC<MapTranslationProps> = () => {
-  const [mapsWords, setMapsWords] = useState<TWordTranslated[]>();
+  const [mapsWords, setMapsWords] = useState<TWordTranslated[] | undefined>();
   const [sourceLang, setSourceLang] = useState<LanguageInfo>();
   const [targetLang, setTargetLang] = useState<LanguageInfo>();
 
@@ -17,7 +17,17 @@ export const MapTranslation: React.FC<MapTranslationProps> = () => {
     async (sourceLang?: LanguageInfo, targetLang?: LanguageInfo) => {
       console.log(`mock words for source lang ${JSON.stringify(sourceLang)}`);
       console.log(`mock words for target lang ${JSON.stringify(targetLang)}`);
-      const words = mockMapWords;
+      let words = mockMapWords;
+      if (sourceLang) {
+        words = words.filter(
+          (w) => w.word.languageCode === sourceLang?.lang.tag,
+        );
+      }
+      if (targetLang) {
+        words = words.filter(
+          (w) => w.translation?.word.languageCode === targetLang?.lang.tag,
+        );
+      }
       setMapsWords(words);
     },
     [setMapsWords],
@@ -53,7 +63,11 @@ export const MapTranslation: React.FC<MapTranslationProps> = () => {
       </LangSelectorBox>
       <WordsBox>
         {mapsWords?.map((mw) => (
-          <WordTranslatedCard key={mw.word.id} wordTranslated={mw} />
+          <TranslatedWordCards
+            key={mw.word.id}
+            wordTranslated={mw}
+            targetLang={targetLang}
+          />
         ))}
       </WordsBox>
     </>

@@ -5,8 +5,9 @@ import { MapList } from './MapList/MapsList';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import { MapDetails } from './MapDetails/MapDetails';
 import { MapTranslation } from './MapTranslation/MapTranslation';
+import { WordTranslations } from './WordTranslations/WordTranslations';
 
-const MapsPage: React.FC<RouteComponentProps> = ({
+export const MapsPage: React.FC<RouteComponentProps> = ({
   match,
 }: RouteComponentProps) => {
   const [mapList, setMapList] = useState<TMapList>();
@@ -43,11 +44,14 @@ const MapsPage: React.FC<RouteComponentProps> = ({
               path={`${match.url}/details/:id`}
               component={MapDetails}
             />
+            <Route
+              exact
+              path={`${match.url}/word-translations/:id/:fullLangTag`}
+              component={WordTranslations}
+            />
           </div>
         </div>
       </IonContent>
     </IonPage>
   );
 };
-
-export default MapsPage;
