@@ -1,5 +1,8 @@
 -- schema.sql
+create schema IF NOT EXISTS "public";
 
+SET
+  search_path TO "public";
 -- GENERAL ------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION random_between(low INT ,high INT)
