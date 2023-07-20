@@ -4,53 +4,56 @@ import { mockMapWords } from '../mocks/mapData.mock';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { styled } from 'styled-components';
-import {
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonGrid,
-} from '@ionic/react';
-import { WordTranslationCard } from '../../common/WordTranslationCard/WordTranslationCard';
+import { WordTranslatedCard } from '../../word/WordTranslatedCard/WordTranslatedCard';
 
 interface MapTranslationProps extends RouteComponentProps<{}> {}
 
 export const MapTranslation: React.FC<MapTranslationProps> = () => {
-  const [mapsWords, setMapsWords] = useState<TMapWords>();
+  const [mapsWords, setMapsWords] = useState<TWordTranslated[]>();
+  const [sourceLang, setSourceLang] = useState<LanguageInfo>();
+  const [targetLang, setTargetLang] = useState<LanguageInfo>();
 
-  const getMapWords = useCallback(async (langInfo?: LanguageInfo) => {
-    console.log(`mock words for lang ${JSON.stringify(langInfo)}`);
-    const words = mockMapWords;
-    setMapsWords(words);
-  }, []);
+  const getMapWords = useCallback(
+    async (sourceLang?: LanguageInfo, targetLang?: LanguageInfo) => {
+      console.log(`mock words for source lang ${JSON.stringify(sourceLang)}`);
+      console.log(`mock words for target lang ${JSON.stringify(targetLang)}`);
+      const words = mockMapWords;
+      setMapsWords(words);
+    },
+    [setMapsWords],
+  );
 
   useEffect(() => {
-    getMapWords();
-  }, [getMapWords]);
+    getMapWords(sourceLang, targetLang);
+  }, [getMapWords, sourceLang, targetLang]);
 
   return (
     <>
       <Caption>Map Translation</Caption>
       <LangSelectorBox>
         <LangSelector
-          onChange={(langTag, langInfo) => {
-            getMapWords(langInfo);
+          title="Select source language"
+          langSelectorId="sourceLangSelector"
+          selected={sourceLang}
+          onChange={(sourcseLangTag, sourceLangInfo) => {
+            setSourceLang(sourceLangInfo);
+          }}
+        ></LangSelector>
+      </LangSelectorBox>
+
+      <LangSelectorBox>
+        <LangSelector
+          title="Select target language"
+          langSelectorId="targetLangSelector"
+          selected={targetLang}
+          onChange={(targetLangTag, targetLangInfo) => {
+            setTargetLang(targetLangInfo);
           }}
         ></LangSelector>
       </LangSelectorBox>
       <WordsBox>
         {mapsWords?.map((mw) => (
-          <WordTranslationCard
-            key={mw.id}
-            wordWithTranslations={{
-              word: { content: mw.content, id: mw.id, languageCode: 'en' },
-              translations: [
-                { id: 3, content: 'some translation3', languageCode: 'en' },
-                { id: 4, content: 'some translation4', languageCode: 'en' },
-              ],
-            }}
-          />
+          <WordTranslatedCard key={mw.word.id} wordTranslated={mw} />
         ))}
       </WordsBox>
     </>

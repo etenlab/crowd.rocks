@@ -11,11 +11,3 @@ type TMapWithContent = TMap & {
 
 type TMapList = TMap[];
 type TMapWithContentList = TMapWithContent[];
-
-type TMapWord = {
-  id: number;
-  mapId: number;
-  content: string;
-};
-
-type TMapWords = TMapWord[];

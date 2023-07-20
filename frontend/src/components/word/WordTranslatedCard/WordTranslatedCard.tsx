@@ -7,21 +7,19 @@ import {
 import { styled } from 'styled-components';
 
 export type TWordTranslationCardProps = {
-  wordWithTranslations: TWordWithTranslations;
+  wordTranslated: TWordTranslated;
 };
 
-export const WordTranslationCard = ({
-  wordWithTranslations,
+export const WordTranslatedCard = ({
+  wordTranslated,
 }: TWordTranslationCardProps) => {
-  const { translations } = wordWithTranslations;
+  const { translation } = wordTranslated;
   return (
     <WordCard>
       <IonCardHeader>
-        <IonCardTitle>{wordWithTranslations.word.content}</IonCardTitle>
+        <IonCardTitle>{wordTranslated.word.content}</IonCardTitle>
         <IonCardSubtitle>
-          {translations.map((tr) => (
-            <div key={tr.id}>{tr.content}</div>
-          ))}
+          <div>{translation.word.content}</div>
         </IonCardSubtitle>
       </IonCardHeader>
     </WordCard>

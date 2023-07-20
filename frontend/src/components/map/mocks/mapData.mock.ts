@@ -51,10 +51,62 @@ export const mockMapList: TMapList = mockMapWithContentList.map((m) => {
   return n;
 });
 
-export const mockMapWords: TMapWords = [
-  { id: 1, mapId: 1, content: 'Athens' },
-  { id: 2, mapId: 1, content: 'asdf' },
-  { id: 3, mapId: 2, content: 'qwer' },
-  { id: 4, mapId: 2, content: 'zxcv' },
-  { id: 5, mapId: 3, content: 'rety' },
+export const mockMapWords: TWordTranslated[] = [
+  {
+    word: { id: 1, content: 'Athens', languageCode: 'en' },
+    translation: {
+      word: { id: 11, content: 'uk-Athens11', languageCode: 'uk' },
+    },
+  },
+  {
+    word: { id: 2, content: 'Rome', languageCode: 'en' },
+    translation: {
+      word: { id: 21, content: 'uk-Rome11', languageCode: 'uk' },
+    },
+  },
+  {
+    word: { id: 3, content: '3Rome', languageCode: 'en' },
+    translation: {
+      word: { id: 31, content: 'uk-3Rome11', languageCode: 'uk' },
+    },
+  },
 ];
+
+export const mockWordTranslations: TWordWithTranslations = {
+  word: { id: 1, content: 'Athens', languageCode: 'en' },
+  translationsVoted: [
+    {
+      word: {
+        id: 11,
+        content: 'uk-Athens11',
+        languageCode: 'uk',
+      },
+      votes: { up: 2, down: 3 },
+      description: 'nice uk translations',
+    },
+    {
+      word: {
+        id: 12,
+        content: 'uk-Athens12',
+        languageCode: 'uk',
+      },
+      votes: { up: 2, down: 3 },
+    },
+    {
+      word: {
+        id: 13,
+        content: 'uk-Athens13',
+        languageCode: 'uk',
+      },
+      votes: { up: 2, down: 3 },
+    },
+    {
+      word: {
+        id: 14,
+        content: 'apq-Athens14',
+        languageCode: 'apq',
+      },
+      votes: { up: 2, down: 3 },
+    },
+  ],
+};
