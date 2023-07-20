@@ -1,5 +1,11 @@
 import { IonIcon } from '@ionic/react';
-import { add, filter, logoAlipay, logoAmplify } from 'ionicons/icons';
+import {
+  add,
+  funnel,
+  funnelOutline,
+  logoAlipay,
+  logoAmplify,
+} from 'ionicons/icons';
 import React from 'react';
 import { styled } from 'styled-components';
 
@@ -17,7 +23,7 @@ export const MapTools: React.FC<TMapToolsParams> = ({
   return (
     <StyledMapsToolsBox>
       {onFilterClick ? (
-        <StIonIcon icon={filter} onClick={() => onFilterClick()} />
+        <StIonIcon icon={funnelOutline} onClick={() => onFilterClick()} />
       ) : (
         <div></div>
       )}

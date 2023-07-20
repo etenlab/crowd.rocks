@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import tags from 'language-tags';
-import { sortTagInfosFn } from '../../../common/langUtils';
+import { langInfo2tag, sortTagInfosFn } from '../../../common/langUtils';
 import AppTypeahead from './TypeAhead';
 import {
   DESCRIPTIONS_JOINER,
@@ -11,20 +11,18 @@ import {
 import { IonItem, IonLabel, IonModal } from '@ionic/react';
 
 export type LangSelectorProps = {
-  label?: string;
-  selected?: LanguageInfo;
-  fullRendered?: boolean;
+  title?: string;
+  langSelectorId: string;
+  selected: LanguageInfo | undefined;
   onChange(langTag: string | null, selected: LanguageInfo): void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setLoadingState?(isLoading: boolean): any;
-  withInscriptions?: boolean;
-  gap?: string;
 };
 
 type LangsRegistry = {
-  langs: Array<Lang>;
-  dialects: Array<Dialect>;
-  regions: Array<Region>;
+  langs: Array<TLang>;
+  dialects: Array<TDialect>;
+  regions: Array<TRegion>;
 };
 
 const emptyLangsRegistry: LangsRegistry = {
@@ -43,6 +41,8 @@ enum TagSpecialDescriptions {
 }
 
 export function LangSelector({
+  title = 'Select language',
+  langSelectorId,
   selected,
   onChange,
   setLoadingState,
@@ -50,9 +50,9 @@ export function LangSelector({
   const [langsRegistry, setLangsRegistry] =
     useState<LangsRegistry>(emptyLangsRegistry);
 
-  const [selectedLang, setSelectedLang] = useState<Lang | null>(null);
-  const [selectedDialect, setSelectedDialect] = useState<Dialect | null>(null);
-  const [selectedRegion, setSelectedRegion] = useState<Region | null>(null);
+  const [selectedLang, setSelectedLang] = useState<TLang | null>(null);
+  const [selectedDialect, setSelectedDialect] = useState<TDialect | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<TRegion | null>(null);
 
   const modal = useRef<HTMLIonModalElement>(null);
 
@@ -64,11 +64,11 @@ export function LangSelector({
     const getLangsRegistry = async (): Promise<LangsRegistry> => {
       return new Promise((resolve) => {
         const allTags = tags.search(/.*/);
-        const langs: Array<Lang> = [];
-        const dialects: Array<Dialect> = [
+        const langs: Array<TLang> = [];
+        const dialects: Array<TDialect> = [
           { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
         ];
-        const regions: Array<Region> = [
+        const regions: Array<TRegion> = [
           { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
         ];
         for (const currTag of allTags) {
@@ -134,12 +134,15 @@ export function LangSelector({
     let langTag = selectedLang.tag;
     selectedRegion?.tag && (langTag += '-' + selectedRegion.tag);
     selectedDialect?.tag && (langTag += '-' + selectedDialect.tag);
-    onChange(tags(langTag).format(), {
+    const langTagFormatted = tags(langTag).format();
+
+    if (langInfo2tag(selected) === langTagFormatted) return;
+    onChange(langTagFormatted, {
       lang: selectedLang,
       dialect: selectedDialect?.tag ? selectedDialect : undefined,
       region: selectedRegion?.tag ? selectedRegion : undefined,
     });
-  }, [onChange, selectedDialect, selectedLang, selectedRegion]);
+  }, [onChange, selected, selectedDialect, selectedLang, selectedRegion]);
 
   const handleSetLanguage = useCallback(
     (tag: string | undefined) => {
@@ -153,16 +156,16 @@ export function LangSelector({
   );
 
   const selectedLangValue =
-    selectedLang?.descriptions?.join(DESCRIPTIONS_JOINER) || 'Language';
+    selectedLang?.descriptions?.join(DESCRIPTIONS_JOINER) || title;
 
   return (
     <>
-      <IonItem button={true} detail={false} id="lang-selector">
+      <IonItem button={true} detail={false} id={langSelectorId}>
         <IonLabel>{selectedLangValue}</IonLabel>
       </IonItem>
-      <IonModal trigger="lang-selector" ref={modal}>
+      <IonModal trigger={langSelectorId} ref={modal}>
         <AppTypeahead
-          title="Select language"
+          title={title}
           items={langsRegistry.langs.map((l) => ({
             text: l.descriptions
               ? l.descriptions.join(DESCRIPTIONS_JOINER)
