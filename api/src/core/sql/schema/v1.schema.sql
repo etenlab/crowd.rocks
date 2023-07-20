@@ -572,7 +572,14 @@ create table original_maps(
 create table original_map_words(
   original_map_word_id bigserial primary key,
   original_map_id bigint not null references original_maps(original_map_id),
-  word_id bigint not null references words(word_id),
+  word_definition_id bigint not null references word_definitions(word_definition_id),
+  updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+create table original_map_phrases(
+  original_map_phrase_id bigserial primary key,
+  original_map_id bigint not null references original_maps(original_map_id),
+  phrase_definition_id bigint not null references phrase_definitions(phrase_definition_id),
   updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
