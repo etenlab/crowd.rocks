@@ -1,5 +1,7 @@
 -- schema.sql
+create schema IF NOT EXISTS "public";
 
+SET search_path TO "public";
 -- GENERAL ------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION random_between(low INT ,high INT)
@@ -530,32 +532,32 @@ create table word_range_tags_votes(
 
 -- SITE TEXT -------------------------------------------------------------
 
-create table site_text_words (
+create table site_text_word_definitions (
   site_text_id bigserial primary key,
-  word_id bigint not null references words(word_id),
+  word_definition_id bigint not null references word_definitions(word_definition_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique (word_id)
+  unique (word_definition_id)
 );
 
-create table site_text_phrases (
+create table site_text_phrase_definitions (
   site_text_id bigserial primary key,
-  phrase_id bigint not null references phrases(phrase_id),
+  phrase_definition_id bigint not null references phrase_definitions(phrase_definition_id),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique (phrase_id)
+  unique (phrase_definition_id)
 );
 
 create table site_text_translation_votes(
   site_text_vote_id bigserial primary key,
   user_id bigint not null references users(user_id),
-  from_id bigint not null,
-  to_id bigint not null,
+  from_definition_id bigint not null,
+  to_definition_id bigint not null,
   from_type_is_word bool not null, -- true = word, false = phrase
   to_type_is_word bool not null, -- true = word, false = phrase
   vote bool,
   last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  unique (user_id, from_id, to_id, from_type_is_word, to_type_is_word)
+  unique (user_id, from_definition_id, to_definition_id, from_type_is_word, to_type_is_word)
 );
 
 -- MAPS -------------------------------------------------------------
