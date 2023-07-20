@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
-import { WordsService } from 'src/components/words/words.service';
+import { WordDefinitionsService } from 'src/components/definitions/word-definitions.service';
 
 import {
   WordToWordTranslationReadOutput,
@@ -18,7 +18,10 @@ import {
 
 @Injectable()
 export class WordToWordTranslationsService {
-  constructor(private pg: PostgresService, private wordService: WordsService) {}
+  constructor(
+    private pg: PostgresService,
+    private wordDefinitionService: WordDefinitionsService,
+  ) {}
 
   async read(id: number): Promise<WordToWordTranslationReadOutput> {
     try {
@@ -30,24 +33,24 @@ export class WordToWordTranslationsService {
       if (res1.rowCount !== 1) {
         console.error(`no word-to-word-translation for id: ${id}`);
       } else {
-        const fromWordOutput = await this.wordService.read({
-          word_id: res1.rows[0].from_word + '',
-        });
+        const fromWordDefinitionOutput = await this.wordDefinitionService.read(
+          res1.rows[0].from_word_definition_id,
+        );
 
-        const toWordOuput = await this.wordService.read({
-          word_id: res1.rows[0].to_word + '',
-        });
+        const toWordDefinitionOuput = await this.wordDefinitionService.read(
+          res1.rows[0].to_word_definition_id,
+        );
 
-        if (fromWordOutput.error !== ErrorType.NoError) {
+        if (fromWordDefinitionOutput.error !== ErrorType.NoError) {
           return {
-            error: fromWordOutput.error,
+            error: fromWordDefinitionOutput.error,
             word_to_word_translation: null,
           };
         }
 
-        if (toWordOuput.error !== ErrorType.NoError) {
+        if (toWordDefinitionOuput.error !== ErrorType.NoError) {
           return {
-            error: toWordOuput.error,
+            error: toWordDefinitionOuput.error,
             word_to_word_translation: null,
           };
         }
@@ -56,8 +59,8 @@ export class WordToWordTranslationsService {
           error: ErrorType.NoError,
           word_to_word_translation: {
             word_to_word_translation_id: id + '',
-            from_word: fromWordOutput.word,
-            to_word: toWordOuput.word,
+            from_word_definition: fromWordDefinitionOutput.word_definition,
+            to_word_definition: toWordDefinitionOuput.word_definition,
           },
         };
       }
@@ -72,16 +75,16 @@ export class WordToWordTranslationsService {
   }
 
   async upsert(
-    fromWord: number,
-    toWord: number,
+    fromWordDefinitionId: number,
+    toWordDefinitionId: number,
     token: string,
   ): Promise<WordToWordTranslationUpsertOutput> {
     try {
       const res =
         await this.pg.pool.query<WordToWordTranslationUpsertProcedureOutputRow>(
           ...callWordToWordTranslationUpsertProcedure({
-            fromWord,
-            toWord,
+            fromWordDefinitionId,
+            toWordDefinitionId,
             token,
           }),
         );

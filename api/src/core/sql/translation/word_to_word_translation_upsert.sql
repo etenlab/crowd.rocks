@@ -1,6 +1,6 @@
 create or replace procedure word_to_word_translation_upsert(
-  in p_from_word_id bigint,
-  in p_to_word_id bigint,
+  in p_from_word_definition_id bigint,
+  in p_to_word_definition_id bigint,
   in p_token varchar(512),
   inout p_word_to_word_translation_id bigint,
   inout p_error_type varchar(32)
@@ -9,6 +9,7 @@ language plpgsql
 as $$
 declare
   v_user_id bigint;
+  v_word_definition_id bigint;
 begin
   p_error_type := 'UnknownError';
 
@@ -24,13 +25,37 @@ begin
   end if;
 
   -- validate inpus
-  if p_from_word_id is null or p_to_word_id is null then
+  if p_from_word_definition_id is null or p_to_word_definition_id is null then
     p_error_type := 'InvalidInputs';
     return;
   end if;
 
-  insert into word_to_word_translations(from_word, to_word, created_by)
-  values (p_from_word_id, p_to_word_id, v_user_id)
+  v_word_definition_id := null;
+  -- check for from_word_definition_id existence
+  select word_definition_id
+  from word_definitions
+  where word_definition_id = p_from_word_definition_id
+  into v_word_definition_id;
+
+  if v_word_definition_id is null then
+    p_error_type := 'WordDefinitionNotFound';
+    return;
+  end if;
+
+  v_word_definition_id := null;
+  -- check for to_word_definition_id existence
+  select word_definition_id
+  from word_definitions
+  where word_definition_id = p_to_word_definition_id
+  into v_word_definition_id;
+
+  if v_word_definition_id is null then
+    p_error_type := 'WordDefinitionNotFound';
+    return;
+  end if;
+
+  insert into word_to_word_translations(from_word_definition_id, to_word_definition_id, created_by)
+  values (p_from_word_definition_id, p_to_word_definition_id, v_user_id)
   on conflict do nothing
   returning word_to_word_translation_id
   into p_word_to_word_translation_id;
@@ -39,8 +64,8 @@ begin
     select word_to_word_translation_id
     from word_to_word_translations
     where 
-      from_word = p_from_word_id
-      and to_word = p_to_word_id
+      from_word_definition_id = p_word_definition_id
+      and to_word_definition_id = p_to_word_definition_id
     into p_word_to_word_translation_id;
   end if;
 

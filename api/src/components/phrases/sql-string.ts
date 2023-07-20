@@ -2,11 +2,6 @@ import { ErrorType } from 'src/common/types';
 
 export type GetPhraseObjByIdResultRow = {
   phrase: string;
-  definition_id?: number;
-  definition?: string;
-  language_code: string;
-  dialect_code?: string;
-  geo_code?: string;
 };
 
 export function getPhraseObjById(id: number): [string, [number]] {
@@ -14,11 +9,7 @@ export function getPhraseObjById(id: number): [string, [number]] {
     `
       select 
         phrases.phraselike_string as phrase,
-        phrase_definitions.phrase_definition_id as phrase_definition_id,
-        phrase_definitions.definition as definition
       from phrases
-      full outer join phrase_definitions
-        on phrases.phrase_definition_id = phrase_definitions.phrase_definition_id
       where phrases.phrase_id = $1
     `,
     [id],
