@@ -1,4 +1,10 @@
-import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import {
+  Field,
+  ID,
+  InputType,
+  ObjectType,
+  createUnionType,
+} from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
 
@@ -18,6 +24,20 @@ export class PhraseDefinition {
   @Field(() => String) definition: string;
   @Field(() => Phrase) phrase: Phrase;
 }
+
+export const Definition = createUnionType({
+  name: 'Definition',
+  types: () => [WordDefinition, PhraseDefinition] as const,
+  resolveType(value) {
+    if (value.phrase_definition_id) {
+      return PhraseDefinition;
+    }
+    if (value.word_definition_id) {
+      return WordDefinition;
+    }
+    return null;
+  },
+});
 
 @InputType()
 export class WordDefinitionUpsertInput {
@@ -53,4 +73,22 @@ export class WordDefinitionReadOutput extends GenericOutput {
 export class PhraseDefinitionReadOutput extends GenericOutput {
   @Field(() => PhraseDefinition, { nullable: true })
   phrase_definition: PhraseDefinition | null;
+}
+
+@InputType()
+export class FromWordAndDefintionlikeStringUpsertInput {
+  @Field(() => String) wordlike_string: string;
+  @Field(() => String) definitionlike_string: string;
+  @Field(() => String) language_code: string;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
+}
+
+@InputType()
+export class FromPhraseAndDefintionlikeStringUpsertInput {
+  @Field(() => String) phraselike_string: string;
+  @Field(() => String) definitionlike_string: string;
+  @Field(() => String) language_code: string;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
 }

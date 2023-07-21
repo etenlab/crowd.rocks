@@ -4,23 +4,24 @@ import { CoreModule } from 'src/core/core.module';
 import { WordModule } from '../words/words.module';
 import { PhraseModule } from '../phrases/phrases.module';
 
-import { WordDefinitionsResolver } from './word-definitions.resolver';
 import { WordDefinitionsService } from './word-definitions.service';
-import { PhraseDefinitionsResolver } from './phrase-definitions.resolver';
 import { PhraseDefinitionsService } from './phrase-definitions.service';
+import { DefinitionsService } from './definitions.service';
+
+import { DefinitionsResolver } from './definitions.resolver';
 
 @Module({
-  imports: [
-    forwardRef(() => CoreModule),
-    forwardRef(() => WordModule),
-    forwardRef(() => PhraseModule),
-  ],
+  imports: [forwardRef(() => CoreModule), WordModule, PhraseModule],
   providers: [
-    WordDefinitionsResolver,
-    WordDefinitionsService,
-    PhraseDefinitionsResolver,
+    DefinitionsResolver,
     PhraseDefinitionsService,
+    DefinitionsService,
+    WordDefinitionsService,
   ],
-  exports: [WordDefinitionsService, PhraseDefinitionsService],
+  exports: [
+    WordDefinitionsService,
+    PhraseDefinitionsService,
+    DefinitionsService,
+  ],
 })
 export class DefinitionsModule {}
