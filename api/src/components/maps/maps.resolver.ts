@@ -1,28 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Resolver, Mutation, Int } from '@nestjs/graphql';
+import { Args, Resolver, Mutation, Int, Context } from '@nestjs/graphql';
 
 import { MapsService } from './maps.service';
 
-import { TMapFile } from './gqlTypes';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
+import { getBearer } from '../../common/utility';
+import { MapFileInput, MapFileOutput } from './types';
 
 @Injectable()
 @Resolver(Map)
 export class MapsResolver {
   constructor(private mapService: MapsService) {}
 
-  @Mutation(() => TMapFile)
+  @Mutation(() => MapFileOutput)
   async mapUpload(
-    @Args({ name: 'mapFile', type: () => GraphQLUpload })
-    { createReadStream, filename: map_file_name }: FileUpload,
-  ): Promise<MapMetadata> {
+    @Args('input') input: MapFileInput,
+    @Context() req: any,
+  ): Promise<MapFileOutput> {
+    const { createReadStream, filename: map_file_name } = input.mapFile;
     const map = await this.mapService.createAndSaveMap(
       createReadStream(),
       map_file_name,
+      getBearer(req),
     );
     return map;
   }
-
 
   // @Mutation(() => TMapFile)
   // async mapUpdate(

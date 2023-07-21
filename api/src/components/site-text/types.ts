@@ -1,0 +1,142 @@
+import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+
+import { GenericOutput } from 'src/common/types';
+import {
+  Definition,
+  WordDefinition,
+  PhraseDefinition,
+} from 'src/components/definitions/types';
+
+@ObjectType()
+export class SiteTextWordDefinition {
+  @Field(() => ID) site_text_id: string;
+  @Field(() => WordDefinition) word_definition: WordDefinition;
+}
+
+@ObjectType()
+export class SiteTextPhraseDefinition {
+  @Field(() => ID) site_text_id: string;
+  @Field(() => PhraseDefinition) phrase_definition: PhraseDefinition;
+}
+
+@InputType()
+export class SiteTextWordDefinitionUpsertInput {
+  @Field(() => ID) word_definition_id: string;
+}
+
+@InputType()
+export class SiteTextPhraseDefinitionUpsertInput {
+  @Field(() => ID) phrase_definition_id: string;
+}
+
+@ObjectType()
+export class SiteTextWordDefinitionReadOutput extends GenericOutput {
+  @Field(() => SiteTextWordDefinition, { nullable: true })
+  site_text_word_definition: SiteTextWordDefinition | null;
+}
+
+@ObjectType()
+export class SiteTextPhraseDefinitionReadOutput extends GenericOutput {
+  @Field(() => SiteTextPhraseDefinition, { nullable: true })
+  site_text_phrase_definition: SiteTextPhraseDefinition | null;
+}
+
+@ObjectType()
+export class SiteTextWordDefinitionUpsertOutput extends GenericOutput {
+  @Field(() => SiteTextWordDefinition, { nullable: true })
+  site_text_word_definition: SiteTextWordDefinition | null;
+}
+
+@ObjectType()
+export class SiteTextPhraseDefinitionUpsertOutput extends GenericOutput {
+  @Field(() => SiteTextPhraseDefinition, { nullable: true })
+  site_text_phrase_definition: SiteTextPhraseDefinition | null;
+}
+
+@InputType()
+export class SiteTextUpsertInput {
+  @Field(() => String) siteTextlike_string: string;
+  @Field(() => String) definitionlike_string: string;
+  @Field(() => String) language_code: string;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
+}
+
+@ObjectType()
+export class SiteTextUpsertOutput extends GenericOutput {
+  @Field(() => SiteTextWordDefinition, { nullable: true })
+  site_text_word_definition: SiteTextWordDefinition | null;
+  @Field(() => SiteTextPhraseDefinition, { nullable: true })
+  site_text_phrase_definition: SiteTextPhraseDefinition | null;
+}
+
+@InputType()
+export class SiteTextTranslationsFromInput {
+  @Field(() => ID) from_definition_id: string;
+  @Field(() => Boolean) from_type_is_word: boolean;
+}
+
+@InputType()
+export class SiteTextTranslationsToInput {
+  @Field(() => String) translationlike_string: string;
+  @Field(() => String) definitionlike_string: string;
+  @Field(() => String) language_code: string;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
+}
+
+@ObjectType()
+export class SiteTextTranslation {
+  @Field(() => ID) site_text_translation_id: string;
+  @Field(() => Definition) from_definition: WordDefinition | PhraseDefinition;
+  @Field(() => Definition) to_definition: WordDefinition | PhraseDefinition;
+  @Field(() => Boolean) from_type_is_word: boolean;
+  @Field(() => Boolean) to_type_is_word: boolean;
+}
+
+@ObjectType()
+export class SiteTextTranslationUpsertOutput extends GenericOutput {
+  @Field(() => SiteTextTranslation, { nullable: true })
+  site_text_translation: SiteTextTranslation;
+}
+
+@ObjectType()
+export class SiteTextTranslationReadOutput extends GenericOutput {
+  @Field(() => SiteTextTranslation, { nullable: true })
+  site_text_translation: SiteTextTranslation;
+}
+
+@InputType()
+export class SiteTextTranslationInput {
+  @Field(() => ID) from_definition_id: string;
+  @Field(() => ID) to_definition_id: string;
+  @Field(() => Boolean) from_type_is_word: boolean;
+  @Field(() => Boolean) to_type_is_word: boolean;
+}
+
+@ObjectType()
+export class SiteTextTranslationVote {
+  @Field(() => ID) site_text_translation_vote_id: string;
+  @Field(() => ID) site_text_translation_id: string;
+  @Field(() => ID) user_id: string;
+  @Field(() => Boolean) vote: boolean;
+  @Field(() => Date) last_updated_at: Date;
+}
+
+@InputType()
+export class SiteTextTranslationVoteUpsertInput {
+  @Field(() => ID) site_text_translation_id: string;
+  @Field(() => Boolean) vote: boolean;
+}
+
+@ObjectType()
+export class SiteTextTranslationVoteUpsertOutput extends GenericOutput {
+  @Field(() => SiteTextTranslation, { nullable: true })
+  site_text_translation_vote: SiteTextTranslationVote;
+}
+
+@ObjectType()
+export class SiteTextTranslationVoteReadOutput extends GenericOutput {
+  @Field(() => SiteTextTranslation, { nullable: true })
+  site_text_translation_vote: SiteTextTranslationVote;
+}
