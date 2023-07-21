@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Config } from 'apollo-server-core';
+
 import { readFileSync } from 'fs';
 import { justBearerHeader } from 'src/common/utility';
 import { RegisterResolver } from 'src/components/authentication/register.resolver';
+
 import { ConfigService } from './config.service';
 import { DataLoadService } from './data-load.service';
 import { PostgresService } from './postgres.service';
@@ -88,6 +89,8 @@ export class DatabaseVersionControlService {
     // word
     await this.runSqlFile('./src/core/sql/words/word_upsert.sql');
     await this.runSqlFile('./src/core/sql/words/phrase_upsert.sql');
+    await this.runSqlFile('./src/core/sql/words/word_definition_upsert.sql');
+    await this.runSqlFile('./src/core/sql/words/phrase_definition_upsert.sql');
 
     // translation
     await this.runSqlFile(
@@ -98,6 +101,20 @@ export class DatabaseVersionControlService {
     );
     await this.runSqlFile(
       './src/core/sql/translation/phrase_to_phrase_translation_upsert.sql',
+    );
+
+    // data
+    await this.runSqlFile(
+      './src/core/sql/data/site-text-word-definition-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/data/site-text-phrase-definition-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/data/site-text-translation-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/data/site-text-translation-vote-upsert.sql',
     );
 
     // update db version
@@ -126,7 +143,7 @@ export class DatabaseVersionControlService {
   }
 
   async setVersionNumber(version: number) {
-    const res = await this.pg.pool.query(
+    await this.pg.pool.query(
       `
       insert into database_version_control(version) values($1);
     `,
@@ -137,6 +154,6 @@ export class DatabaseVersionControlService {
   async runSqlFile(path: string) {
     console.log('loading SQL:', path);
     const data = readFileSync(path, 'utf8');
-    const res = await this.pg.pool.query(data, []);
+    await this.pg.pool.query(data, []);
   }
 }
