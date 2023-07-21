@@ -51,10 +51,92 @@ export const mockMapList: TMapList = mockMapWithContentList.map((m) => {
   return n;
 });
 
-export const mockMapWords: TMapWords = [
-  { id: 1, mapId: 1, content: 'Athens' },
-  { id: 2, mapId: 1, content: 'asdf' },
-  { id: 3, mapId: 2, content: 'qwer' },
-  { id: 4, mapId: 2, content: 'zxcv' },
-  { id: 5, mapId: 3, content: 'rety' },
+export const mockMapWords: TWordTranslated[] = [
+  {
+    word: {
+      id: 1,
+      content: 'Athens',
+      languageCode: 'en',
+      description: 'description for Athens',
+    },
+    translation: {
+      word: {
+        id: 11,
+        content: 'uk-Athens11',
+        languageCode: 'uk',
+        description: 'nice description uk-Athens11',
+      },
+    },
+  },
+  {
+    word: {
+      id: 2,
+      content: 'Rome',
+      languageCode: 'en',
+      description: 'description for Rome',
+    },
+    translation: {
+      word: {
+        id: 21,
+        content: 'uk-Rome',
+        languageCode: 'uk',
+        description: 'nice description uk-Rome',
+      },
+    },
+  },
+  {
+    word: {
+      id: 3,
+      content: '3Rome',
+      languageCode: 'en',
+      description: 'description for 3Rome',
+    },
+  },
 ];
+
+export const mockWordTranslations: TWordWithTranslations = {
+  word: {
+    id: 1,
+    content: 'Athens',
+    languageCode: 'en',
+    description: 'nice description Athens',
+  },
+  translationsVoted: [
+    {
+      word: {
+        id: 11,
+        content: 'uk-Athens11',
+        languageCode: 'uk',
+        description: 'nice description uk-Athens11',
+      },
+      votes: { up: 2, down: 3 },
+    },
+    {
+      word: {
+        id: 12,
+        content: 'uk-Athens12',
+        languageCode: 'uk',
+        description: 'nice description uk-Athens12',
+      },
+      votes: { up: 2, down: 3 },
+    },
+    {
+      word: {
+        id: 13,
+        content: 'uk-Athens13',
+        languageCode: 'uk',
+        description: 'nice description uk-Athens13',
+      },
+      votes: { up: 2, down: 3 },
+    },
+    {
+      word: {
+        id: 14,
+        content: 'apq-Athens14',
+        languageCode: 'apq',
+        description: 'nice description apq-Athens14',
+      },
+      votes: { up: 2, down: 3 },
+    },
+  ],
+};

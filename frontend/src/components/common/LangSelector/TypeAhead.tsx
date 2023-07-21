@@ -13,11 +13,6 @@ import {
 } from '@ionic/react';
 import type { CheckboxCustomEvent } from '@ionic/react';
 
-// export interface Item {
-//   text: string;
-//   value: string;
-// }
-
 interface TypeaheadProps<T> {
   items: T[];
   selectedItem?: string | undefined;

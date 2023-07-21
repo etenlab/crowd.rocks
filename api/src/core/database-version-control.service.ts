@@ -120,7 +120,7 @@ export class DatabaseVersionControlService {
     // update db version
     await this.setVersionNumber(1);
 
-    await this.registerUser('michael@crowd.rocks', 'Michael', 'asdfasdf');
+    await this.registerUser('admin@crowd.rocks', 'Admin', 'asdfasdf');
 
     // load data
     await this.dataloader.loadSiteTextData();

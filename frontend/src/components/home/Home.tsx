@@ -1,51 +1,27 @@
 import {
-  IonButton,
-  IonButtons,
   IonCard,
-  IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
   IonContent,
-  IonFab,
-  IonFabButton,
-  IonHeader,
   IonIcon,
-  IonInput,
   IonItem,
   IonItemDivider,
   IonItemGroup,
   IonLabel,
-  IonList,
-  IonMenu,
-  IonMenuButton,
-  IonMenuToggle,
   IonPage,
-  IonRouterOutlet,
-  IonSearchbar,
-  IonSpinner,
   IonText,
-  IonTitle,
-  IonToolbar,
   useIonRouter,
   useIonViewWillEnter,
 } from '@ionic/react';
 import {
-  add,
-  book,
   bookOutline,
   chatbubbleEllipsesOutline,
   codeWorkingOutline,
   mapOutline,
-  searchCircle,
-  searchCircleOutline,
-  searchOutline,
 } from 'ionicons/icons';
-import { FormEvent, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { RouteComponentProps } from 'react-router';
-import { ErrorType } from '../../generated/graphql';
-import { globals } from '../../services/globals';
-import { map } from 'ionicons/icons';
 import './Home.css';
 
 interface HomePageProps

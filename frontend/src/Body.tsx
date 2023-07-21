@@ -27,7 +27,7 @@ import PasswordResetFormPage from './components/authentication/PasswordResetForm
 import { apollo_client } from './main';
 
 import './Body.css';
-import MapsPage from './components/map/MapsPage';
+import { MapsPage } from './components/map/MapsPage';
 
 const Body: React.FC = () => {
   const router = useIonRouter();
