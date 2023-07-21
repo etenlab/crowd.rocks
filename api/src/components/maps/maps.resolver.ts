@@ -15,7 +15,7 @@ export class MapsResolver {
   async mapUpload(
     @Args({ name: 'mapFile', type: () => GraphQLUpload })
     { createReadStream, filename: map_file_name }: FileUpload,
-  ): Promise<File> {
+  ): Promise<MapMetadata> {
     const map = await this.mapService.createAndSaveMap(
       createReadStream(),
       map_file_name,

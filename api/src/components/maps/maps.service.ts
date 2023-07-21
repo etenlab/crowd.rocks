@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ReadStream } from 'fs';
 
 import { PostgresService } from 'src/core/postgres.service';
 
@@ -8,5 +9,23 @@ export class MapsService {
   async createAndSaveMap(
     readStream: ReadStream,
     mapFileName: string,
-  ): Promise<MapMetadata> {}
+  ): Promise<MapMetadata> {
+    console.log(`mapFileName: `, mapFileName);
+    console.log(`readStream:`, readStream);
+
+    let fileBody: string;
+
+    readStream.on('data', (cunk) => {
+      fileBody += cunk;
+    });
+
+    readStream.on('end', () => {
+      console.log(`mapFileName:`, mapFileName, `fileBody: `, fileBody);
+    });
+
+    return {
+      fileName: 'asdf',
+      id: 'asdf',
+    };
+  }
 }
