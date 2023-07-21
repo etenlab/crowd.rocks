@@ -30,6 +30,8 @@ export class DataLoadService {
       return;
     }
 
+    console.log(`Admin token ${token}`);
+
     for (const [siteTextlike_string, translationObj] of Object.entries(
       siteText,
     )) {
@@ -46,6 +48,10 @@ export class DataLoadService {
         );
 
       if (error !== ErrorType.NoError) {
+        console.log(
+          `creating site text got error: ${error}`,
+          `params: siteTextlike_string: ${siteTextlike_string}`,
+        );
         continue;
       }
 
@@ -57,20 +63,28 @@ export class DataLoadService {
       for (const [langTag, translationlike_string] of Object.entries(
         translationObj,
       )) {
-        await this.siteTextTranslationService.upsertFromTranslationlikeString(
-          {
-            from_type_is_word,
-            from_definition_id,
-          },
-          {
-            translationlike_string: translationlike_string,
-            definitionlike_string: 'Site User Interface Text Translation',
-            language_code: langTag,
-            dialect_code: null,
-            geo_code: null,
-          },
-          token,
-        );
+        const { error } =
+          await this.siteTextTranslationService.upsertFromTranslationlikeString(
+            {
+              from_type_is_word,
+              from_definition_id,
+            },
+            {
+              translationlike_string: translationlike_string,
+              definitionlike_string: 'Site User Interface Text Translation',
+              language_code: langTag,
+              dialect_code: null,
+              geo_code: null,
+            },
+            token,
+          );
+
+        if (error !== ErrorType.NoError) {
+          console.log(
+            `creating site text translation got error: ${error}`,
+            `params: siteTextlike_string: ${siteTextlike_string}, translationlike_string: ${translationlike_string}`,
+          );
+        }
       }
     }
   }

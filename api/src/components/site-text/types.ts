@@ -113,3 +113,30 @@ export class SiteTextTranslationInput {
   @Field(() => Boolean) from_type_is_word: boolean;
   @Field(() => Boolean) to_type_is_word: boolean;
 }
+
+@ObjectType()
+export class SiteTextTranslationVote {
+  @Field(() => ID) site_text_translation_vote_id: string;
+  @Field(() => ID) site_text_translation_id: string;
+  @Field(() => ID) user_id: string;
+  @Field(() => Boolean) vote: boolean;
+  @Field(() => Date) last_updated_at: Date;
+}
+
+@InputType()
+export class SiteTextTranslationVoteUpsertInput {
+  @Field(() => ID) site_text_translation_id: string;
+  @Field(() => Boolean) vote: boolean;
+}
+
+@ObjectType()
+export class SiteTextTranslationVoteUpsertOutput extends GenericOutput {
+  @Field(() => SiteTextTranslation, { nullable: true })
+  site_text_translation_vote: SiteTextTranslationVote;
+}
+
+@ObjectType()
+export class SiteTextTranslationVoteReadOutput extends GenericOutput {
+  @Field(() => SiteTextTranslation, { nullable: true })
+  site_text_translation_vote: SiteTextTranslationVote;
+}

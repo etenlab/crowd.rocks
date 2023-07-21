@@ -28,15 +28,18 @@ export class DefinitionsService {
 
   async upsertFromWordAndDefinitionlikeString(
     input: FromWordAndDefintionlikeStringUpsertInput,
-    token?: string,
+    token: string,
   ): Promise<WordDefinitionUpsertOutput> {
     try {
-      const wordOuptut = await this.wordService.upsert({
-        wordlike_string: input.wordlike_string,
-        language_code: input.language_code,
-        dialect_code: input.dialect_code,
-        geo_code: input.geo_code,
-      });
+      const wordOuptut = await this.wordService.upsert(
+        {
+          wordlike_string: input.wordlike_string,
+          language_code: input.language_code,
+          dialect_code: input.dialect_code,
+          geo_code: input.geo_code,
+        },
+        token,
+      );
 
       if (wordOuptut.error !== ErrorType.NoError) {
         return {
@@ -64,15 +67,18 @@ export class DefinitionsService {
 
   async upsertFromPhraseAndDefinitionlikeString(
     input: FromPhraseAndDefintionlikeStringUpsertInput,
-    token?: string,
+    token: string,
   ): Promise<PhraseDefinitionUpsertOutput> {
     try {
-      const phraseOuptut = await this.phraseService.upsert({
-        phraselike_string: input.phraselike_string,
-        language_code: input.language_code,
-        dialect_code: input.dialect_code,
-        geo_code: input.geo_code,
-      });
+      const phraseOuptut = await this.phraseService.upsert(
+        {
+          phraselike_string: input.phraselike_string,
+          language_code: input.language_code,
+          dialect_code: input.dialect_code,
+          geo_code: input.geo_code,
+        },
+        token,
+      );
 
       if (phraseOuptut.error !== ErrorType.NoError) {
         return {

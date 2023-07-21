@@ -6,7 +6,7 @@ export const siteText: {
   'crowd.rocks': {
     en: 'crowd.rocks',
     jp: '群衆. ',
-    zh: ' ',
+    zh: '人群搖滾',
     hi: 'भीड़. ',
     de: 'Menschenmenge. ',
   },

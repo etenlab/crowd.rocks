@@ -8,7 +8,7 @@ export function getPhraseObjById(id: number): [string, [number]] {
   return [
     `
       select 
-        phrases.phraselike_string as phrase,
+        phrases.phraselike_string as phrase
       from phrases
       where phrases.phrase_id = $1
     `,
@@ -28,8 +28,8 @@ export function callPhraseUpsertProcedure({
 }: {
   phraselike_string: string;
   wordIds: number[];
-  token?: string;
-}): [string, [string, number[], string | null]] {
+  token: string;
+}): [string, [string, number[], string]] {
   return [
     `
       call phrase_upsert($1, $2, $3, 0, '');

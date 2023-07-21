@@ -58,7 +58,7 @@ export class PhraseDefinitionsService {
 
   async upsert(
     input: PhraseDefinitionUpsertInput,
-    token?: string,
+    token: string,
   ): Promise<PhraseDefinitionUpsertOutput> {
     try {
       const res =

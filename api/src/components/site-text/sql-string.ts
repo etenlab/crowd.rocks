@@ -30,11 +30,11 @@ export function callSiteTextWordDefinitionUpsertProcedure({
   token,
 }: {
   word_definition_id: number;
-  token?: string;
-}): [string, [number, string | null]] {
+  token: string;
+}): [string, [number, string]] {
   return [
     `
-      call site_text_word_definition_upsert($1, $2, $3, $4, $5, 0, '');
+      call site_text_word_definition_upsert($1, $2, 0, '');
     `,
     [word_definition_id, token],
   ];
@@ -70,11 +70,11 @@ export function callSiteTextPhraseDefinitionUpsertProcedure({
   token,
 }: {
   phrase_definition_id: number;
-  token?: string;
-}): [string, [number, string | null]] {
+  token: string;
+}): [string, [number, string]] {
   return [
     `
-      call site_text_phrase_definition_upsert($1, $2, $3, $4, $5, 0, '');
+      call site_text_phrase_definition_upsert($1, $2, 0, '');
     `,
     [phrase_definition_id, token],
   ];
@@ -120,8 +120,8 @@ export function callSiteTextTranslationUpsertProcedure({
   to_definition_id: number;
   from_type_is_word: boolean;
   to_type_is_word: boolean;
-  token?: string;
-}): [string, [number, number, boolean, boolean, string | null]] {
+  token: string;
+}): [string, [number, number, boolean, boolean, string]] {
   return [
     `
       call site_text_translation_upsert($1, $2, $3, $4, $5, 0, '');
@@ -133,5 +133,53 @@ export function callSiteTextTranslationUpsertProcedure({
       to_type_is_word,
       token,
     ],
+  ];
+}
+
+export type GetSiteTextTranslationVoteObjectById = {
+  site_text_translation_vote_id: number;
+  site_text_translation_id: number;
+  user_id: number;
+  vote: boolean;
+  last_updated_at: string;
+};
+
+export function getSiteTextTranslationVoteObjById(
+  id: number,
+): [string, [number]] {
+  return [
+    `
+      select 
+        site_text_translation_vote_id,
+        site_text_translation_id,
+        user_id,
+        vote,
+        last_updated_at
+      from site_text_translation_votes
+      where site_text_translation_vote_id = $1
+    `,
+    [id],
+  ];
+}
+
+export type SiteTextTranslationVoteUpsertProcedureOutputRow = {
+  p_site_text_translation_vote_id: number;
+  p_error_type: ErrorType;
+};
+
+export function callSiteTextTranslationVoteUpsertProcedure({
+  site_text_translation_id,
+  vote,
+  token,
+}: {
+  site_text_translation_id: number;
+  vote: boolean;
+  token: string;
+}): [string, [number, boolean, string]] {
+  return [
+    `
+      call site_text_translation_vote_upsert($1, $2, $3, 0, '');
+    `,
+    [site_text_translation_id, vote, token],
   ];
 }
