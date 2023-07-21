@@ -3,7 +3,6 @@ import { Args, Resolver, Mutation, Int, Context } from '@nestjs/graphql';
 
 import { MapsService } from './maps.service';
 
-import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { getBearer } from '../../common/utility';
 import { MapFileInput, MapFileOutput } from './types';
 

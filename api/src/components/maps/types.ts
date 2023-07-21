@@ -1,7 +1,7 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 
-@ObjectType()
+@InputType()
 export class MapFileInput {
   @Field(() => GraphQLUpload) mapFile: FileUpload;
 }
