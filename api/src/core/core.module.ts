@@ -7,16 +7,10 @@ import { PostgresService } from './postgres.service';
 import { S3Service } from './s3.service';
 import { SesService } from './ses.service';
 
-import { PhraseModule } from 'src/components/phrases/phrases.module';
-import { WordModule } from 'src/components/words/words.module';
-import { TranslationsModule } from 'src/components/translations/translations.module';
+import { SiteTextsModule } from 'src/components/site-text/site-texts.module';
 
 @Module({
-  imports: [
-    forwardRef(() => PhraseModule),
-    forwardRef(() => WordModule),
-    forwardRef(() => TranslationsModule),
-  ],
+  imports: [forwardRef(() => SiteTextsModule)],
   providers: [
     PostgresService,
     DataLoadService,

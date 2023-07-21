@@ -32,11 +32,11 @@ export function callWordDefinitionUpsertProcedure({
 }: {
   word_id: number;
   definition: string;
-  token?: string;
+  token: string;
 }): [string, [number, string, string | null]] {
   return [
     `
-      call word_definition_upsert($1, $2, $3, $4, $5, 0, '');
+      call word_definition_upsert($1, $2, $3, 0, '');
     `,
     [word_id, definition, token],
   ];
@@ -74,11 +74,11 @@ export function callPhraseDefinitionUpsertProcedure({
 }: {
   phrase_id: number;
   definition: string;
-  token?: string;
-}): [string, [number, string, string | null]] {
+  token: string;
+}): [string, [number, string, string]] {
   return [
     `
-      call phrase_definition_upsert($1, $2, $3, $4, $5, 0, '');
+      call phrase_definition_upsert($1, $2, $3, 0, '');
     `,
     [phrase_id, definition, token],
   ];

@@ -40,8 +40,8 @@ export function callWordUpsertProcedure({
   language_code: string;
   dialect_code?: string;
   geo_code?: string;
-  token?: string;
-}): [string, [string, string, string | null, string | null, string | null]] {
+  token: string;
+}): [string, [string, string, string | null, string | null, string]] {
   return [
     `
       call word_upsert($1, $2, $3, $4, $5, 0, '');

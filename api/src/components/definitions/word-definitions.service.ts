@@ -55,7 +55,7 @@ export class WordDefinitionsService {
 
   async upsert(
     input: WordDefinitionUpsertInput,
-    token?: string,
+    token: string,
   ): Promise<WordDefinitionUpsertOutput> {
     try {
       const res =

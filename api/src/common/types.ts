@@ -54,6 +54,8 @@ export enum ErrorType {
   PhraseDefinitionNotFound = 'PhraseDefinitionNotFound',
   PhraseNotFound = 'PhraseNotFound',
 
+  SiteTextTranslationNotFound = 'SiteTextTranslationNotFound',
+
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
 }

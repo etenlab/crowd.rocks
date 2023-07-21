@@ -1,5 +1,5 @@
-create or replace procedure site_text_phrase_upsert(
-  in p_phrase_id bigint,
+create or replace procedure site_text_word_definition_upsert(
+  in p_word_definition_id bigint,
   in p_token varchar(512),
   inout p_site_text_id bigint,
   inout p_error_type varchar(32)
@@ -8,7 +8,7 @@ language plpgsql
 as $$
 declare
   v_user_id bigint;
-  v_phrase_id bigint;
+  v_word_definition_id bigint;
 begin
   p_error_type := 'UnknownError';
 
@@ -24,32 +24,32 @@ begin
   end if;
 
   -- validate inpus
-  if p_word_id is null then
+  if p_word_definition_id is null then
     p_error_type := 'InvalidInputs';
     return;
   end if;
 
-  -- check for phrase existence
-  select phrase_id
-  from phrases
-  where phrase_id = p_phrase_id
-  into v_phrase_id;
+  -- check for word existence
+  select word_definition_id
+  from word_definitions
+  where word_definition_id = p_word_definition_id
+  into v_word_definition_id;
 
-  if v_phrase_id is null then
-    p_error_type := 'PhraseNotFound';
+  if v_word_definition_id is null then
+    p_error_type := 'WordDefinitionNotFound';
     return;
   end if;
 
-  insert into site_text_phrases(phrase_id, created_by)
-  values (p_phrase_id, v_user_id)
+  insert into site_text_word_definitions(word_definition_id, created_by)
+  values (p_word_definition_id, v_user_id)
   on conflict do nothing
   returning site_text_id
   into p_site_text_id;
 
   if p_site_text_id is null then
-    select p_site_text_id
-    from site_text_phrases
-    where phrase_id = p_phrase_id
+    select site_text_id
+    from site_text_word_definitions
+    where word_definition_id = p_word_definition_id
     into p_site_text_id;
   end if;
 

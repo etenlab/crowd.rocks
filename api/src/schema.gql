@@ -11,6 +11,8 @@ type AvatarUpdateOutput {
   user: User
 }
 
+union Definition = PhraseDefinition | WordDefinition
+
 input EmailResponseInput {
   token: String!
 }
@@ -51,6 +53,7 @@ enum ErrorType {
   PrefixTooShort
   RankInvalid
   RankUnchanged
+  SiteTextTranslationNotFound
   TokenInvalid
   Unauthorized
   UnknownError
@@ -68,6 +71,22 @@ type FileUploadUrlResponse {
   avatar_image_url: String!
   error: ErrorType!
   url: String!
+}
+
+input FromPhraseAndDefintionlikeStringUpsertInput {
+  definitionlike_string: String!
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  phraselike_string: String!
+}
+
+input FromWordAndDefintionlikeStringUpsertInput {
+  definitionlike_string: String!
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  wordlike_string: String!
 }
 
 input LoginInput {
@@ -95,15 +114,19 @@ type Mutation {
   logout(input: LogoutInput!): LogoutOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!
-  phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationUpsertOutput!
   phraseUpsert(input: PhraseUpsertInput!): PhraseUpsertOutput!
   postCreateResolver(input: PostCreateInput!): PostCreateOutput!
   register(input: RegisterInput!): RegisterOutput!
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
+  siteTextPhraseDefinitionUpsert(input: SiteTextPhraseDefinitionUpsertInput!): SiteTextPhraseDefinitionUpsertOutput!
+  siteTextTranslationUpsert(input: SiteTextTranslationInput!): SiteTextTranslationUpsertOutput!
+  siteTextUpsert(input: SiteTextUpsertInput!): SiteTextUpsertOutput!
+  siteTextWordDefinitionUpsert(input: SiteTextWordDefinitionUpsertInput!): SiteTextWordDefinitionUpsertOutput!
+  upsertFromTranslationlikeString: SiteTextTranslationUpsertOutput!
+  upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(input: FromPhraseAndDefintionlikeStringUpsertInput!): PhraseDefinitionUpsertOutput!
+  upsertWordDefinitionFromWordAndDefinitionlikeString(input: FromWordAndDefintionlikeStringUpsertInput!): WordDefinitionUpsertOutput!
   versionCreateResolver(input: VersionCreateInput!): VersionCreateOutput!
   wordDefinitionUpsert(input: WordDefinitionUpsertInput!): WordDefinitionUpsertOutput!
-  wordToPhraseTranslationUpsert(input: WordToPhraseTranslationUpsertInput!): WordToPhraseTranslationUpsertOutput!
-  wordToWordTranslationUpsert(input: WordToWordTranslationUpsertInput!): WordToWordTranslationUpsertOutput!
   wordUpsert(input: WordUpsertInput!): WordUpsertOutput!
 }
 
@@ -147,27 +170,6 @@ type PhraseReadOutput {
   phrase: Phrase
 }
 
-type PhraseToPhraseTranslation {
-  from_phrase_definition: PhraseDefinition!
-  phrase_to_phrase_translation_id: ID!
-  to_phrase_definition: PhraseDefinition!
-}
-
-type PhraseToPhraseTranslationReadOutput {
-  error: ErrorType!
-  phrase_to_phrase_translation: PhraseToPhraseTranslation
-}
-
-input PhraseToPhraseTranslationUpsertInput {
-  from_phrase_definition_id: ID!
-  to_phrase_definition_id: ID!
-}
-
-type PhraseToPhraseTranslationUpsertOutput {
-  error: ErrorType!
-  phrase_to_phrase_translation: PhraseToPhraseTranslation
-}
-
 input PhraseUpsertInput {
   dialect_code: String
   geo_code: String
@@ -209,13 +211,13 @@ type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
   phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!
   phraseRead(input: PhraseReadInput!): PhraseReadOutput!
-  phraseToPhraseTranslationRead(id: ID!): PhraseToPhraseTranslationReadOutput!
   postReadResolver(input: PostReadInput!): PostReadOutput!
+  siteTextPhraseDefinitionRead(id: String!): SiteTextPhraseDefinitionReadOutput!
+  siteTextTranslationRead(id: String!): SiteTextTranslationReadOutput!
+  siteTextWordDefinitionRead(id: String!): SiteTextWordDefinitionReadOutput!
   userReadResolver(input: UserReadInput!): UserReadOutput!
   wordDefinitionRead(id: ID!): WordDefinitionReadOutput!
   wordRead(input: WordReadInput!): WordReadOutput!
-  wordToPhraseTranslationRead(id: ID!): WordToPhraseTranslationReadOutput!
-  wordToWordTranslationRead(id: ID!): WordToWordTranslationReadOutput!
 }
 
 input RegisterInput {
@@ -242,6 +244,83 @@ type Session {
   avatar_url: String
   token: String!
   user_id: ID!
+}
+
+type SiteTextPhraseDefinition {
+  phrase_definition: PhraseDefinition!
+  site_text_id: ID!
+}
+
+type SiteTextPhraseDefinitionReadOutput {
+  error: ErrorType!
+  site_text_phrase_definition: SiteTextPhraseDefinition
+}
+
+input SiteTextPhraseDefinitionUpsertInput {
+  phrase_definition_id: ID!
+}
+
+type SiteTextPhraseDefinitionUpsertOutput {
+  error: ErrorType!
+  site_text_phrase_definition: SiteTextPhraseDefinition
+}
+
+type SiteTextTranslation {
+  from_definition: Definition!
+  from_type_is_word: Boolean!
+  site_text_translation_id: ID!
+  to_definition: Definition!
+  to_type_is_word: Boolean!
+}
+
+input SiteTextTranslationInput {
+  from_definition_id: ID!
+  from_type_is_word: Boolean!
+  to_definition_id: ID!
+  to_type_is_word: Boolean!
+}
+
+type SiteTextTranslationReadOutput {
+  error: ErrorType!
+  site_text_translation: SiteTextTranslation
+}
+
+type SiteTextTranslationUpsertOutput {
+  error: ErrorType!
+  site_text_translation: SiteTextTranslation
+}
+
+input SiteTextUpsertInput {
+  definitionlike_string: String!
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  siteTextlike_string: String!
+}
+
+type SiteTextUpsertOutput {
+  error: ErrorType!
+  site_text_phrase_definition: SiteTextPhraseDefinition
+  site_text_word_definition: SiteTextWordDefinition
+}
+
+type SiteTextWordDefinition {
+  site_text_id: ID!
+  word_definition: WordDefinition!
+}
+
+type SiteTextWordDefinitionReadOutput {
+  error: ErrorType!
+  site_text_word_definition: SiteTextWordDefinition
+}
+
+input SiteTextWordDefinitionUpsertInput {
+  word_definition_id: ID!
+}
+
+type SiteTextWordDefinitionUpsertOutput {
+  error: ErrorType!
+  site_text_word_definition: SiteTextWordDefinition
 }
 
 type User {
@@ -314,48 +393,6 @@ input WordReadInput {
 type WordReadOutput {
   error: ErrorType!
   word: Word
-}
-
-type WordToPhraseTranslation {
-  from_word_definition: WordDefinition!
-  to_phrase_definition: PhraseDefinition!
-  word_to_phrase_translation_id: ID!
-}
-
-type WordToPhraseTranslationReadOutput {
-  error: ErrorType!
-  word_to_phrase_translation: WordToPhraseTranslation
-}
-
-input WordToPhraseTranslationUpsertInput {
-  from_word_definition_id: ID!
-  to_phrase_definition_id: ID!
-}
-
-type WordToPhraseTranslationUpsertOutput {
-  error: ErrorType!
-  word_to_phrase_translation: WordToPhraseTranslation
-}
-
-type WordToWordTranslation {
-  from_word_definition: WordDefinition!
-  to_word_definition: WordDefinition!
-  word_to_word_translation_id: ID!
-}
-
-type WordToWordTranslationReadOutput {
-  error: ErrorType!
-  word_to_word_translation: WordToWordTranslation
-}
-
-input WordToWordTranslationUpsertInput {
-  from_word_definition_id: ID!
-  to_word_definition_id: ID!
-}
-
-type WordToWordTranslationUpsertOutput {
-  error: ErrorType!
-  word_to_word_translation: WordToWordTranslation
 }
 
 input WordUpsertInput {

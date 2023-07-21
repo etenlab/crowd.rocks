@@ -48,7 +48,7 @@ export class PhrasesService {
 
   async upsert(
     input: PhraseUpsertInput,
-    token?: string,
+    token: string,
   ): Promise<PhraseReadOutput> {
     try {
       const wordlikeStrings = input.phraselike_string.split(' ');

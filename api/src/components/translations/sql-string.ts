@@ -34,8 +34,8 @@ export function callWordToWordTranslationUpsertProcedure({
 }: {
   fromWordDefinitionId: number;
   toWordDefinitionId: number;
-  token?: string;
-}): [string, [number, number, string | null]] {
+  token: string;
+}): [string, [number, number, string]] {
   return [
     `
       call word_to_word_translation_upsert($1, $2, $3, 0, '');
@@ -78,8 +78,8 @@ export function callWordToPhraseTranslationUpsertProcedure({
 }: {
   fromWordDefinitionId: number;
   toPhraseDefinitionId: number;
-  token?: string;
-}): [string, [number, number, string | null]] {
+  token: string;
+}): [string, [number, number, string]] {
   return [
     `
       call word_to_phrase_translation_upsert($1, $2, $3, 0, '');
@@ -122,8 +122,8 @@ export function callPhraseToPhraseTranslationUpsertProcedure({
 }: {
   fromPhraseDefinitionId: number;
   toPhraseDefinitionId: number;
-  token?: string;
-}): [string, [number, number, string | null]] {
+  token: string;
+}): [string, [number, number, string]] {
   return [
     `
       call phrase_to_phrase_translation_upsert($1, $2, $3, 0, '');
