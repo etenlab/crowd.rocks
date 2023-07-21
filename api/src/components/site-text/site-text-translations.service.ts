@@ -48,7 +48,7 @@ export class SiteTextTranslationsService {
       } else {
         const site_text_translation_id = res1.rows[0].site_text_translation_id;
         const from_definition_id = res1.rows[0].from_definition_id;
-        const to_definition_id = res1.rows[1].to_definition_id;
+        const to_definition_id = res1.rows[0].to_definition_id;
         const from_type_is_word = res1.rows[0].from_type_is_word;
         const to_type_is_word = res1.rows[0].to_type_is_word;
 
@@ -123,7 +123,7 @@ export class SiteTextTranslationsService {
 
   async upsert(
     input: SiteTextTranslationInput,
-    token?: string,
+    token: string,
   ): Promise<SiteTextTranslationUpsertOutput> {
     try {
       const res =
@@ -161,7 +161,7 @@ export class SiteTextTranslationsService {
   async upsertFromTranslationlikeString(
     fromInput: SiteTextTranslationsFromInput,
     toInput: SiteTextTranslationsToInput,
-    token?: string,
+    token: string,
   ): Promise<SiteTextTranslationUpsertOutput> {
     if (toInput.translationlike_string.trim() === '') {
       return {
@@ -175,13 +175,16 @@ export class SiteTextTranslationsService {
 
       if (words.length > 1) {
         const { error, phrase_definition } =
-          await this.definitionService.upsertFromPhraseAndDefinitionlikeString({
-            phraselike_string: toInput.translationlike_string.trim(),
-            definitionlike_string: toInput.definitionlike_string,
-            language_code: toInput.language_code,
-            dialect_code: toInput.dialect_code,
-            geo_code: toInput.geo_code,
-          });
+          await this.definitionService.upsertFromPhraseAndDefinitionlikeString(
+            {
+              phraselike_string: toInput.translationlike_string.trim(),
+              definitionlike_string: toInput.definitionlike_string,
+              language_code: toInput.language_code,
+              dialect_code: toInput.dialect_code,
+              geo_code: toInput.geo_code,
+            },
+            token,
+          );
 
         if (error !== ErrorType.NoError || phrase_definition === null) {
           return {
@@ -201,13 +204,16 @@ export class SiteTextTranslationsService {
         );
       } else {
         const { error, word_definition } =
-          await this.definitionService.upsertFromWordAndDefinitionlikeString({
-            wordlike_string: toInput.translationlike_string.trim(),
-            definitionlike_string: toInput.definitionlike_string,
-            language_code: toInput.language_code,
-            dialect_code: toInput.dialect_code,
-            geo_code: toInput.geo_code,
-          });
+          await this.definitionService.upsertFromWordAndDefinitionlikeString(
+            {
+              wordlike_string: toInput.translationlike_string.trim(),
+              definitionlike_string: toInput.definitionlike_string,
+              language_code: toInput.language_code,
+              dialect_code: toInput.dialect_code,
+              geo_code: toInput.geo_code,
+            },
+            token,
+          );
 
         if (error !== ErrorType.NoError || word_definition === null) {
           return {

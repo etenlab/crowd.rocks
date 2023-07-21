@@ -59,7 +59,7 @@ export class SiteTextWordDefinitionsService {
 
   async upsert(
     input: SiteTextWordDefinitionUpsertInput,
-    token?: string,
+    token: string,
   ): Promise<SiteTextWordDefinitionUpsertOutput> {
     try {
       const res =

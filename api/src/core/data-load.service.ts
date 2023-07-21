@@ -33,6 +33,7 @@ export class DataLoadService {
     for (const [siteTextlike_string, translationObj] of Object.entries(
       siteText,
     )) {
+      console.log('1', siteTextlike_string)
       const { site_text_word_definition, site_text_phrase_definition, error } =
         await this.siteTextService.upsert(
           {
@@ -46,6 +47,7 @@ export class DataLoadService {
         );
 
       if (error !== ErrorType.NoError) {
+        console.error(error)
         continue;
       }
 
@@ -57,6 +59,7 @@ export class DataLoadService {
       for (const [langTag, translationlike_string] of Object.entries(
         translationObj,
       )) {
+        console.log('2', langTag, translationlike_string)
         await this.siteTextTranslationService.upsertFromTranslationlikeString(
           {
             from_type_is_word,
@@ -85,3 +88,4 @@ export class DataLoadService {
     }
   }
 }
+    

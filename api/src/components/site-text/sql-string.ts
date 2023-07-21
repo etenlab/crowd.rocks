@@ -30,11 +30,11 @@ export function callSiteTextWordDefinitionUpsertProcedure({
   token,
 }: {
   word_definition_id: number;
-  token?: string;
+  token: string;
 }): [string, [number, string | null]] {
   return [
     `
-      call site_text_word_definition_upsert($1, $2, $3, $4, $5, 0, '');
+      call site_text_word_definition_upsert($1, $2, 0, '');
     `,
     [word_definition_id, token],
   ];
@@ -70,11 +70,11 @@ export function callSiteTextPhraseDefinitionUpsertProcedure({
   token,
 }: {
   phrase_definition_id: number;
-  token?: string;
+  token: string;
 }): [string, [number, string | null]] {
   return [
     `
-      call site_text_phrase_definition_upsert($1, $2, $3, $4, $5, 0, '');
+      call site_text_phrase_definition_upsert($1, $2, 0, '');
     `,
     [phrase_definition_id, token],
   ];
@@ -120,7 +120,7 @@ export function callSiteTextTranslationUpsertProcedure({
   to_definition_id: number;
   from_type_is_word: boolean;
   to_type_is_word: boolean;
-  token?: string;
+  token: string;
 }): [string, [number, number, boolean, boolean, string | null]] {
   return [
     `

@@ -34,7 +34,7 @@ export function callWordToWordTranslationUpsertProcedure({
 }: {
   fromWordDefinitionId: number;
   toWordDefinitionId: number;
-  token?: string;
+  token: string;
 }): [string, [number, number, string | null]] {
   return [
     `
@@ -78,7 +78,7 @@ export function callWordToPhraseTranslationUpsertProcedure({
 }: {
   fromWordDefinitionId: number;
   toPhraseDefinitionId: number;
-  token?: string;
+  token: string;
 }): [string, [number, number, string | null]] {
   return [
     `
@@ -104,7 +104,7 @@ export function getPhraseToPhraseTranslationObjById(
         from_phrase_definition_id,
         to_phrase_definition_id
       from phrase_to_phrase_translations
-      where phrase_to_phrase_translation_id = $1
+      where phrase_to_phrase_translation_id = $1 
     `,
     [id],
   ];
@@ -122,7 +122,7 @@ export function callPhraseToPhraseTranslationUpsertProcedure({
 }: {
   fromPhraseDefinitionId: number;
   toPhraseDefinitionId: number;
-  token?: string;
+  token: string;
 }): [string, [number, number, string | null]] {
   return [
     `

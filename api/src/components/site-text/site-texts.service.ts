@@ -21,7 +21,7 @@ export class SiteTextsService {
 
   async upsert(
     input: SiteTextUpsertInput,
-    token?: string,
+    token: string,
   ): Promise<SiteTextUpsertOutput> {
     if (input.siteTextlike_string.trim() === '') {
       return {
@@ -36,13 +36,16 @@ export class SiteTextsService {
 
       if (words.length > 1) {
         const { error, phrase_definition } =
-          await this.definitionService.upsertFromPhraseAndDefinitionlikeString({
-            phraselike_string: input.siteTextlike_string.trim(),
-            definitionlike_string: input.definitionlike_string,
-            language_code: input.language_code,
-            dialect_code: input.dialect_code,
-            geo_code: input.geo_code,
-          });
+          await this.definitionService.upsertFromPhraseAndDefinitionlikeString(
+            {
+              phraselike_string: input.siteTextlike_string.trim(),
+              definitionlike_string: input.definitionlike_string,
+              language_code: input.language_code,
+              dialect_code: input.dialect_code,
+              geo_code: input.geo_code,
+            },
+            token,
+          );
 
         if (error !== ErrorType.NoError || phrase_definition === null) {
           return {
@@ -69,13 +72,16 @@ export class SiteTextsService {
         };
       } else {
         const { error, word_definition } =
-          await this.definitionService.upsertFromWordAndDefinitionlikeString({
-            wordlike_string: input.siteTextlike_string.trim(),
-            definitionlike_string: input.definitionlike_string,
-            language_code: input.language_code,
-            dialect_code: input.dialect_code,
-            geo_code: input.geo_code,
-          });
+          await this.definitionService.upsertFromWordAndDefinitionlikeString(
+            {
+              wordlike_string: input.siteTextlike_string.trim(),
+              definitionlike_string: input.definitionlike_string,
+              language_code: input.language_code,
+              dialect_code: input.dialect_code,
+              geo_code: input.geo_code,
+            },
+            token,
+          );
 
         if (error !== ErrorType.NoError || word_definition === null) {
           return {

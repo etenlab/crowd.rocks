@@ -48,7 +48,7 @@ export class WordsService {
 
   async upsert(
     input: WordUpsertInput,
-    token?: string,
+    token: string,
   ): Promise<WordReadOutput> {
     try {
       const res = await this.pg.pool.query<WordUpsertProcedureOutputRow>(
