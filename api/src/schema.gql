@@ -121,11 +121,17 @@ type LogoutOutput {
   error: ErrorType!
 }
 
+type MapFileOutput {
+  map_file_name: String!
+  original_map_id: ID!
+}
+
 type Mutation {
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
+  mapUpload(file: Upload!): MapFileOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!
   phraseUpsert(input: PhraseUpsertInput!): PhraseUpsertOutput!
@@ -374,6 +380,9 @@ type SiteTextWordDefinitionUpsertOutput {
   error: ErrorType!
   site_text_word_definition: SiteTextWordDefinition
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 type User {
   avatar: String!

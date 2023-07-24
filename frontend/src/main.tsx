@@ -1,17 +1,29 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
-import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  // createHttpLink,
+} from '@apollo/client';
+import { createUploadLink } from 'apollo-upload-client';
 import { setContext } from '@apollo/client/link/context';
 
-let server_url = 'http://localhost:3000/graphql'
+let server_url = 'http://localhost:3000/graphql';
 
 if (process.env.NODE_ENV == 'production') {
-  server_url = 'https://api.crowd.rocks/graphql'
+  server_url = 'https://api.crowd.rocks/graphql';
 }
 
-const httpLink = createHttpLink({
+// const httpLink = createHttpLink({
+//   uri: server_url,
+// });
+const httpLink = createUploadLink({
   uri: server_url,
+  headers: {
+    'Apollo-Require-Preflight': 'true',
+  },
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -21,14 +33,14 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    }
-  }
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
 });
 
 export const apollo_client = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(),
 });
 
 // const client = new ApolloClient({
@@ -43,5 +55,5 @@ root.render(
     <ApolloProvider client={apollo_client}>
       <App />
     </ApolloProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
