@@ -1,18 +1,13 @@
 import { IonIcon } from '@ionic/react';
-import {
-  add,
-  funnel,
-  funnelOutline,
-  logoAlipay,
-  logoAmplify,
-} from 'ionicons/icons';
+import { funnelOutline, logoAlipay, logoAmplify } from 'ionicons/icons';
 import React from 'react';
 import { styled } from 'styled-components';
+import { FileUploadBtn } from '../../common/LangSelector/FileUploadBtn';
 
 type TMapToolsParams = {
   onFilterClick?: () => void;
   onTranslationsClick?: () => void;
-  onAddClick?: () => void;
+  onAddClick?: (file: File) => void;
 };
 
 export const MapTools: React.FC<TMapToolsParams> = ({
@@ -36,7 +31,7 @@ export const MapTools: React.FC<TMapToolsParams> = ({
         <div></div>
       )}
       {onAddClick ? (
-        <StIonIcon icon={add} onClick={() => onAddClick()} />
+        <FileUploadBtn accept=".svg" onSelect={onAddClick} />
       ) : (
         <div></div>
       )}

@@ -15,6 +15,8 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** The `Upload` scalar type represents a file upload. */
+  Upload: { input: any; output: any; }
 };
 
 export type AvatarUpdateInput = {
@@ -127,12 +129,19 @@ export type LogoutOutput = {
   error: ErrorType;
 };
 
+export type MapFileOutput = {
+  __typename?: 'MapFileOutput';
+  map_file_name: Scalars['String']['output'];
+  original_map_id: Scalars['ID']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   avatarUpdateResolver: AvatarUpdateOutput;
   emailResponseResolver: EmailResponseOutput;
   login: LoginOutput;
   logout: LogoutOutput;
+  mapUpload: MapFileOutput;
   passwordResetFormResolver: LoginOutput;
   phraseDefinitionUpsert: PhraseDefinitionUpsertOutput;
   phraseUpsert: PhraseUpsertOutput;
@@ -169,6 +178,11 @@ export type MutationLoginArgs = {
 
 export type MutationLogoutArgs = {
   input: LogoutInput;
+};
+
+
+export type MutationMapUploadArgs = {
+  file: Scalars['Upload']['input'];
 };
 
 

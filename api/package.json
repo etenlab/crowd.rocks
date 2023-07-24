@@ -44,6 +44,7 @@
     "argon2": "^0.30.3",
     "dotenv": "^16.3.1",
     "graphql": "^16.7.1",
+    "graphql-upload-ts": "^2.0.9",
     "jsonwebtoken": "^9.0.1",
     "pg": "^8.11.1",
     "reflect-metadata": "^0.1.13",
