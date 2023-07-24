@@ -4,7 +4,8 @@ import { Args, Resolver, Mutation, Int, Context } from '@nestjs/graphql';
 import { MapsService } from './maps.service';
 
 import { getBearer } from '../../common/utility';
-import { MapFileInput, MapFileOutput } from './types';
+import { MapFileOutput } from './types';
+import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 
 @Injectable()
 @Resolver(Map)
@@ -13,10 +14,10 @@ export class MapsResolver {
 
   @Mutation(() => MapFileOutput)
   async mapUpload(
-    @Args('input') input: MapFileInput,
+    @Args({ name: 'file', type: () => GraphQLUpload })
+    { createReadStream, filename: map_file_name }: FileUpload,
     @Context() req: any,
   ): Promise<MapFileOutput> {
-    const { createReadStream, filename: map_file_name } = input.mapFile;
     const map = await this.mapService.createAndSaveMap(
       createReadStream(),
       map_file_name,

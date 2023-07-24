@@ -2,8 +2,8 @@ import { gql, useApolloClient } from '@apollo/client';
 import { useCallback } from 'react';
 
 export const UPLOAD_FILE_MUTATION = gql`
-  mutation UploadFile($mapFile: Upload!) {
-    uploadFile(mapFile: $mapFile) {
+  mutation MapUpload($file: Upload!) {
+    mapUpload(file: $file) {
       original_map_id
       map_file_name
     }
@@ -27,8 +27,6 @@ export function useMapTranslationTools() {
           mutation: UPLOAD_FILE_MUTATION,
           variables: {
             file,
-            file_size: file.size,
-            file_type: file.type,
           },
         })
         .then((res) => {

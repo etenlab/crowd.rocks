@@ -129,10 +129,6 @@ export type LogoutOutput = {
   error: ErrorType;
 };
 
-export type MapFileInput = {
-  mapFile: Scalars['Upload']['input'];
-};
-
 export type MapFileOutput = {
   __typename?: 'MapFileOutput';
   map_file_name: Scalars['String']['output'];
@@ -186,7 +182,7 @@ export type MutationLogoutArgs = {
 
 
 export type MutationMapUploadArgs = {
-  input: MapFileInput;
+  file: Scalars['Upload']['input'];
 };
 
 

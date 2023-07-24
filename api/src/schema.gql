@@ -107,10 +107,6 @@ type LogoutOutput {
   error: ErrorType!
 }
 
-input MapFileInput {
-  mapFile: Upload!
-}
-
 type MapFileOutput {
   map_file_name: String!
   original_map_id: ID!
@@ -121,7 +117,7 @@ type Mutation {
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
-  mapUpload(input: MapFileInput!): MapFileOutput!
+  mapUpload(file: Upload!): MapFileOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!
   phraseUpsert(input: PhraseUpsertInput!): PhraseUpsertOutput!

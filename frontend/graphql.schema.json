@@ -813,33 +813,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "INPUT_OBJECT",
-        "name": "MapFileInput",
-        "description": null,
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "mapFile",
-            "description": null,
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Upload",
-                "ofType": null
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "OBJECT",
         "name": "MapFileOutput",
         "description": null,
@@ -1024,14 +997,14 @@
             "description": null,
             "args": [
               {
-                "name": "input",
+                "name": "file",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "MapFileInput",
+                    "kind": "SCALAR",
+                    "name": "Upload",
                     "ofType": null
                   }
                 },
