@@ -8,6 +8,7 @@ import {
   PhraseDefinitionUpsertInput,
   PhraseDefinitionReadOutput,
   PhraseDefinitionUpsertOutput,
+  PhraseDefinitionUpdateInput,
 } from './types';
 
 import {
@@ -15,6 +16,8 @@ import {
   GetPhraseDefinitionObjectById,
   callPhraseDefinitionUpsertProcedure,
   PhraseDefinitionUpsertProcedureOutputRow,
+  PhraseDefinitionUpdateProcedureOutputRow,
+  callPhraseDefinitionUpdateProcedure,
 } from './sql-string';
 
 @Injectable()
@@ -82,6 +85,47 @@ export class PhraseDefinitionsService {
 
       const { error: readingError, phrase_definition } = await this.read(
         phrase_definition_id,
+      );
+
+      return {
+        error: readingError,
+        phrase_definition,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      phrase_definition: null,
+    };
+  }
+
+  async update(
+    input: PhraseDefinitionUpdateInput,
+    token: string,
+  ): Promise<PhraseDefinitionUpsertOutput> {
+    try {
+      const res =
+        await this.pg.pool.query<PhraseDefinitionUpdateProcedureOutputRow>(
+          ...callPhraseDefinitionUpdateProcedure({
+            phrase_definition_id: +input.phrase_definition_id,
+            definition: input.definitionlike_string,
+            token: token,
+          }),
+        );
+
+      const updatingError = res.rows[0].p_error_type;
+
+      if (updatingError !== ErrorType.NoError) {
+        return {
+          error: updatingError,
+          phrase_definition: null,
+        };
+      }
+
+      const { error: readingError, phrase_definition } = await this.read(
+        +input.phrase_definition_id,
       );
 
       return {

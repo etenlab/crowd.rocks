@@ -1,4 +1,4 @@
-import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, InputType, ObjectType } from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
 import {
@@ -139,4 +139,48 @@ export class SiteTextTranslationVoteUpsertOutput extends GenericOutput {
 export class SiteTextTranslationVoteReadOutput extends GenericOutput {
   @Field(() => SiteTextTranslation, { nullable: true })
   site_text_translation_vote: SiteTextTranslationVote;
+}
+
+@ObjectType()
+export class VoteStatus {
+  @Field(() => String) site_text_translation_id: string;
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class VoteStatusOutputRow extends GenericOutput {
+  @Field(() => VoteStatus, { nullable: true })
+  vote_status: VoteStatus;
+}
+
+@ObjectType()
+export class SiteTextTranslationWithVote extends SiteTextTranslation {
+  @Field(() => String) created_at: string;
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class SiteTextTranslationWithVoteOutput extends GenericOutput {
+  @Field(() => SiteTextTranslationWithVote, { nullable: true })
+  site_text_translation_with_vote: SiteTextTranslationWithVote;
+}
+
+@ObjectType()
+export class SiteTextTranslationWithVoteListOutput extends GenericOutput {
+  @Field(() => [SiteTextTranslationWithVote], { nullable: 'items' })
+  site_text_translation_with_vote_list: SiteTextTranslationWithVote[];
+}
+
+@InputType()
+export class SiteTextPhraseDefinitionUpdateInput {
+  @Field(() => ID) phrase_definition_id: string;
+  @Field(() => String) definitionlike_string: string;
+}
+
+@InputType()
+export class SiteTextWordDefinitionUpdateInput {
+  @Field(() => ID) word_definition_id: string;
+  @Field(() => String) definitionlike_string: string;
 }

@@ -14,6 +14,8 @@ import {
   PhraseDefinitionUpsertOutput,
   FromWordAndDefintionlikeStringUpsertInput,
   FromPhraseAndDefintionlikeStringUpsertInput,
+  DefinitionUpdateaInput,
+  DefinitionUpdateOutput,
 } from './types';
 import { getBearer } from 'src/common/utility';
 
@@ -96,5 +98,15 @@ export class DefinitionsResolver {
       input,
       getBearer(req),
     );
+  }
+
+  @Mutation(() => PhraseDefinitionUpsertOutput)
+  async updateDefinition(
+    @Args('input') input: DefinitionUpdateaInput,
+    @Context() req: any,
+  ): Promise<DefinitionUpdateOutput> {
+    console.log(`update definition`);
+
+    return this.definitionService.updateDefinition(input, getBearer(req));
   }
 }
