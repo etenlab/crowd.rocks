@@ -83,3 +83,45 @@ export function callPhraseDefinitionUpsertProcedure({
     [phrase_id, definition, token],
   ];
 }
+
+export type WordDefinitionUpdateProcedureOutputRow = {
+  p_error_type: ErrorType;
+};
+
+export function callWordDefinitionUpdateProcedure({
+  word_definition_id,
+  definition,
+  token,
+}: {
+  word_definition_id: number;
+  definition: string;
+  token: string;
+}): [string, [number, string, string]] {
+  return [
+    `
+      call word_definition_update($1, $2, $3, '');
+    `,
+    [word_definition_id, definition, token],
+  ];
+}
+
+export type PhraseDefinitionUpdateProcedureOutputRow = {
+  p_error_type: ErrorType;
+};
+
+export function callPhraseDefinitionUpdateProcedure({
+  phrase_definition_id,
+  definition,
+  token,
+}: {
+  phrase_definition_id: number;
+  definition: string;
+  token: string;
+}): [string, [number, string, string]] {
+  return [
+    `
+      call phrase_definition_update($1, $2, $3, '');
+    `,
+    [phrase_definition_id, definition, token],
+  ];
+}

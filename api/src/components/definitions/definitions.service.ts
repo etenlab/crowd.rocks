@@ -14,6 +14,8 @@ import {
   FromPhraseAndDefintionlikeStringUpsertInput,
   PhraseDefinitionUpsertOutput,
   WordDefinitionUpsertOutput,
+  DefinitionUpdateaInput,
+  DefinitionUpdateOutput,
 } from './types';
 
 @Injectable()
@@ -101,6 +103,53 @@ export class DefinitionsService {
     return {
       error: ErrorType.UnknownError,
       phrase_definition: null,
+    };
+  }
+
+  async updateDefinition(
+    input: DefinitionUpdateaInput,
+    token: string,
+  ): Promise<DefinitionUpdateOutput> {
+    try {
+      if (input.definition_type_is_word) {
+        const { error, word_definition } =
+          await this.wordDefinitionService.update(
+            {
+              word_definition_id: input.definition_id,
+              definitionlike_string: input.definitionlike_string,
+            },
+            token,
+          );
+
+        return {
+          error: error,
+          word_definition: word_definition,
+          phrase_definition: null,
+        };
+      } else {
+        const { error, phrase_definition } =
+          await this.phraseDefinitionService.update(
+            {
+              phrase_definition_id: input.definition_id,
+              definitionlike_string: input.definitionlike_string,
+            },
+            token,
+          );
+
+        return {
+          error: error,
+          word_definition: null,
+          phrase_definition: phrase_definition,
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      phrase_definition: null,
+      word_definition: null,
     };
   }
 }
