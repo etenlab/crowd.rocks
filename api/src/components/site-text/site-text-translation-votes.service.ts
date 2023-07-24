@@ -7,6 +7,7 @@ import {
   SiteTextTranslationVoteUpsertInput,
   SiteTextTranslationVoteUpsertOutput,
   SiteTextTranslationVoteReadOutput,
+  VoteStatusOutputRow,
 } from './types';
 
 import {
@@ -14,6 +15,8 @@ import {
   callSiteTextTranslationVoteUpsertProcedure,
   GetSiteTextTranslationVoteObjectById,
   getSiteTextTranslationVoteObjById,
+  GetSiteTextTranslationVoteStatus,
+  getSiteTextTranslationVoteStatus,
 } from './sql-string';
 
 @Injectable()
@@ -88,6 +91,39 @@ export class SiteTextTranslationVotesService {
     return {
       error: ErrorType.UnknownError,
       site_text_translation_vote: null,
+    };
+  }
+
+  async getVoteStatus(
+    site_text_translation_id: number,
+  ): Promise<VoteStatusOutputRow> {
+    try {
+      const res1 = await this.pg.pool.query<GetSiteTextTranslationVoteStatus>(
+        ...getSiteTextTranslationVoteStatus(site_text_translation_id),
+      );
+
+      if (res1.rowCount !== 1) {
+        console.error(
+          `failed at getting vote status with translation_id: ${site_text_translation_id}`,
+        );
+      } else {
+        return {
+          error: ErrorType.NoError,
+          vote_status: {
+            site_text_translation_id:
+              res1.rows[0].site_text_translation_id + '',
+            upvotes: res1.rows[0].upvotes,
+            downvotes: res1.rows[0].downvotes,
+          },
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      vote_status: null,
     };
   }
 }

@@ -183,3 +183,218 @@ export function callSiteTextTranslationVoteUpsertProcedure({
     [site_text_translation_id, vote, token],
   ];
 }
+
+export type GetSiteTextTranslationVoteStatus = {
+  site_text_translation_id: number;
+  upvotes: number;
+  downvotes: number;
+};
+
+export function getSiteTextTranslationVoteStatus(
+  site_text_translation_id: number,
+): [string, [number]] {
+  return [
+    `
+      select 
+        v.site_text_translation_id as site_text_translation_id, 
+        count(
+          case when v.vote = true then 1 else null end
+        ) as upvotes, 
+        count(
+          case when v.vote = false then 1 else null end
+        ) as downvotes 
+      from 
+        site_text_translation_votes AS v 
+      where 
+        v.candidate_id = $1
+      group BY 
+        v.candidate_id 
+      order by 
+        count(
+          case when v.vote = true then 1 when v.vote = false then 0 else null end
+        ) desc;
+    `,
+    [site_text_translation_id],
+  ];
+}
+
+export type GetAllSiteTextTranslation = {
+  site_text_translation_id: number;
+  created_at: string;
+};
+
+export function getAllSiteTextWordTranslation({
+  site_text_id,
+  language_code,
+  dialect_code,
+  geo_code,
+}: {
+  site_text_id: number;
+  language_code: string;
+  dialect_code: string;
+  geo_code: string;
+}): [string, [number, string, string, string]] {
+  return [
+    `
+      select 
+        stts.site_text_translation_id,
+        stts.created_at
+      from site_text_translations as stts
+      join (
+        select site_text_word_definitions.word_definition_id
+        from site_text_word_definitions
+        where site_text_word_definitions.site_text_id = $1
+      ) as stwds
+      on stts.from_definition_id = stwds.word_definition_id
+      join (
+        select word_definitions.word_definition_id
+        from word_definitions
+        join (
+          select words.word_id
+          from words
+          where words.language_code = $2
+            and words.dialect_code = $3
+            and words.geo_code = $4
+        ) as ws
+        on ws.word_id = word_definitions.word_id
+      ) as wds
+      on wds.word_definition_id = stts.to_definition_id
+      where from_type_is_word = true
+        and to_type_is_word = true
+
+      union
+
+      select 
+        stts.site_text_translation_id,
+        stts.created_at
+      from site_text_translations as stts
+      join (
+        select site_text_word_definitions.word_definition_id
+        from site_text_word_definitions
+        where site_text_word_definitions.site_text_id = $1
+      ) as stwds
+      on stts.from_definition_id = stwds.word_definition_id
+      join (
+        select phrase_definitions.phrase_definition_id
+        from phrase_definitions
+        join (
+          select phrases.word_id
+          from phrases
+          join words
+          on words.word_id = any(phrases.words)
+          where words.language_code = $2
+            and words.dialect_code = $3
+            and words.geo_code = $4
+        ) as ps
+        on ps.phrase_id = phrase_definitions.phrase_id
+      ) as pds
+      on pds.phrase_definition_id = stts.to_definition_id
+      where from_type_is_word = true
+        and to_type_is_word = false;
+    `,
+    [site_text_id, language_code, dialect_code, geo_code],
+  ];
+}
+
+export function getAllSiteTextPhraseTranslation({
+  site_text_id,
+  language_code,
+  dialect_code,
+  geo_code,
+}: {
+  site_text_id: number;
+  language_code: string;
+  dialect_code: string;
+  geo_code: string;
+}): [string, [number, string, string, string]] {
+  return [
+    `
+      select 
+        stts.site_text_translation_id,
+        stts.created_at
+      from site_text_translations as stts
+      join (
+        select site_text_phrase_definitions.phrase_definition_id
+        from site_text_phrase_definitions
+        where site_text_phrase_definitions.site_text_id = $1
+      ) as stpds
+      on stts.from_definition_id = stpds.phrase_definition_id
+      join (
+        select word_definitions.word_definition_id
+        from word_definitions
+        join (
+          select words.word_id
+          from words
+          where words.language_code = $2
+            and words.dialect_code = $3
+            and words.geo_code = $4
+        ) as ws
+        on ws.word_id = word_definitions.word_id
+      ) as wds
+      on wds.word_definition_id = stts.to_definition_id
+      where from_type_is_word = false
+        and to_type_is_word = true
+
+      union
+
+      select 
+        stts.site_text_translation_id,
+        stts.created_at
+      from site_text_translations as stts
+      join (
+        select site_text_phrase_definitions.phrase_definition_id
+        from site_text_phrase_definitions
+        where site_text_phrase_definitions.site_text_id = $1
+      ) as stpds
+      on stts.from_definition_id = stpds.phrase_definition_id
+      join (
+        select phrase_definitions.phrase_definition_id
+        from phrase_definitions
+        join (
+          select phrases.word_id
+          from phrases
+          join words
+          on words.word_id = any(phrases.words)
+          where words.language_code = $2
+            and words.dialect_code = $3
+            and words.geo_code = $4
+        ) as ps
+        on ps.phrase_id = phrase_definitions.phrase_id
+      ) as pds
+      on pds.phrase_definition_id = stts.to_definition_id
+      where from_type_is_word = false
+        and to_type_is_word = false;
+    `,
+    [site_text_id, language_code, dialect_code, geo_code],
+  ];
+}
+
+export type GetAllSiteTextWordDefinition = {
+  site_text_id: number;
+};
+
+export function getAllSiteTextWordDefinition(): [string, []] {
+  return [
+    `
+      select 
+        site_text_id
+      from site_text_word_definitions;
+    `,
+    [],
+  ];
+}
+
+export type GetAllSiteTextPhraseDefinition = {
+  site_text_id: number;
+};
+
+export function getAllSiteTextPhraseDefinition(): [string, []] {
+  return [
+    `
+      select 
+        site_text_id
+      from site_text_word_definitions;
+    `,
+    [],
+  ];
+}
