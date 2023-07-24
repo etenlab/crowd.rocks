@@ -8,6 +8,7 @@ import {
   WordDefinitionUpsertInput,
   WordDefinitionReadOutput,
   WordDefinitionUpsertOutput,
+  WordDefinitionUpdateInput,
 } from './types';
 
 import {
@@ -15,6 +16,8 @@ import {
   GetWordDefinitionObjectById,
   callWordDefinitionUpsertProcedure,
   WordDefinitionUpsertProcedureOutputRow,
+  WordDefinitionUpdateProcedureOutputRow,
+  callWordDefinitionUpdateProcedure,
 } from './sql-string';
 
 @Injectable()
@@ -79,6 +82,47 @@ export class WordDefinitionsService {
 
       const { error: readingError, word_definition } = await this.read(
         word_definition_id,
+      );
+
+      return {
+        error: readingError,
+        word_definition,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_definition: null,
+    };
+  }
+
+  async update(
+    input: WordDefinitionUpdateInput,
+    token: string,
+  ): Promise<WordDefinitionUpsertOutput> {
+    try {
+      const res =
+        await this.pg.pool.query<WordDefinitionUpdateProcedureOutputRow>(
+          ...callWordDefinitionUpdateProcedure({
+            word_definition_id: +input.word_definition_id,
+            definition: input.definitionlike_string,
+            token: token,
+          }),
+        );
+
+      const updatingError = res.rows[0].p_error_type;
+
+      if (updatingError !== ErrorType.NoError) {
+        return {
+          error: updatingError,
+          word_definition: null,
+        };
+      }
+
+      const { error: readingError, word_definition } = await this.read(
+        +input.word_definition_id,
       );
 
       return {

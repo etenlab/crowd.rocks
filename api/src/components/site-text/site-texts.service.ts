@@ -10,6 +10,11 @@ import { DefinitionsService } from 'src/components/definitions/definitions.servi
 
 import { SiteTextUpsertInput, SiteTextUpsertOutput } from './types';
 
+import {
+  DefinitionUpdateaInput,
+  DefinitionUpdateOutput,
+} from 'src/components/definitions/types';
+
 @Injectable()
 export class SiteTextsService {
   constructor(
@@ -116,5 +121,12 @@ export class SiteTextsService {
       site_text_phrase_definition: null,
       site_text_word_definition: null,
     };
+  }
+
+  async updateDefinition(
+    input: DefinitionUpdateaInput,
+    token: string,
+  ): Promise<DefinitionUpdateOutput> {
+    return this.definitionService.updateDefinition(input, token);
   }
 }

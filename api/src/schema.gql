@@ -13,6 +13,18 @@ type AvatarUpdateOutput {
 
 union Definition = PhraseDefinition | WordDefinition
 
+type DefinitionUpdateOutput {
+  error: ErrorType!
+  phrase_definition: PhraseDefinition
+  word_definition: WordDefinition
+}
+
+input DefinitionUpdateaInput {
+  definition_id: ID!
+  definition_type_is_word: Boolean!
+  definitionlike_string: String!
+}
+
 input EmailResponseInput {
   token: String!
 }
@@ -54,6 +66,8 @@ enum ErrorType {
   RankInvalid
   RankUnchanged
   SiteTextTranslationNotFound
+  SiteTextWordDefinitionAlreadyExists
+  SiteTextWordDefinitionNotFound
   TokenInvalid
   Unauthorized
   UnknownError
@@ -126,8 +140,10 @@ type Mutation {
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
   siteTextPhraseDefinitionUpsert(input: SiteTextPhraseDefinitionUpsertInput!): SiteTextPhraseDefinitionUpsertOutput!
   siteTextTranslationUpsert(input: SiteTextTranslationInput!): SiteTextTranslationUpsertOutput!
+  siteTextTranslationVoteUpsert: SiteTextTranslationVoteUpsertOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextUpsertOutput!
   siteTextWordDefinitionUpsert(input: SiteTextWordDefinitionUpsertInput!): SiteTextWordDefinitionUpsertOutput!
+  updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
   upsertFromTranslationlikeString: SiteTextTranslationUpsertOutput!
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(input: FromPhraseAndDefintionlikeStringUpsertInput!): PhraseDefinitionUpsertOutput!
   upsertWordDefinitionFromWordAndDefinitionlikeString(input: FromWordAndDefintionlikeStringUpsertInput!): WordDefinitionUpsertOutput!
@@ -215,11 +231,16 @@ type PostReadOutput {
 
 type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
+  getAllRecommendedTranslation(dialect_code: String!, geo_code: String!, language_code: String!): SiteTextTranslationWithVoteListOutput!
+  getAllTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
+  getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
+  getVoteStatus(site_text_translation_id: String!): SiteTextTranslationVoteReadOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!
   phraseRead(input: PhraseReadInput!): PhraseReadOutput!
   postReadResolver(input: PostReadInput!): PostReadOutput!
   siteTextPhraseDefinitionRead(id: String!): SiteTextPhraseDefinitionReadOutput!
   siteTextTranslationRead(id: String!): SiteTextTranslationReadOutput!
+  siteTextTranslationVoteRead(id: String!): SiteTextTranslationVoteReadOutput!
   siteTextWordDefinitionRead(id: String!): SiteTextWordDefinitionReadOutput!
   userReadResolver(input: UserReadInput!): UserReadOutput!
   wordDefinitionRead(id: ID!): WordDefinitionReadOutput!
@@ -296,6 +317,37 @@ type SiteTextTranslationUpsertOutput {
   site_text_translation: SiteTextTranslation
 }
 
+type SiteTextTranslationVoteReadOutput {
+  error: ErrorType!
+  site_text_translation_vote: SiteTextTranslation
+}
+
+type SiteTextTranslationVoteUpsertOutput {
+  error: ErrorType!
+  site_text_translation_vote: SiteTextTranslation
+}
+
+type SiteTextTranslationWithVote {
+  created_at: String!
+  downvotes: Int!
+  from_definition: Definition!
+  from_type_is_word: Boolean!
+  site_text_translation_id: ID!
+  to_definition: Definition!
+  to_type_is_word: Boolean!
+  upvotes: Int!
+}
+
+type SiteTextTranslationWithVoteListOutput {
+  error: ErrorType!
+  site_text_translation_with_vote_list: [SiteTextTranslationWithVote]!
+}
+
+type SiteTextTranslationWithVoteOutput {
+  error: ErrorType!
+  site_text_translation_with_vote: SiteTextTranslationWithVote
+}
+
 input SiteTextUpsertInput {
   definitionlike_string: String!
   dialect_code: String
@@ -364,6 +416,12 @@ input VersionCreateInput {
 type VersionCreateOutput {
   error: ErrorType!
   version: Version
+}
+
+type VoteStatus {
+  downvotes: Int!
+  site_text_translation_id: String!
+  upvotes: Int!
 }
 
 type Word {

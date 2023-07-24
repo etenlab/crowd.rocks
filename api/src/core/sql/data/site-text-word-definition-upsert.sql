@@ -8,6 +8,7 @@ language plpgsql
 as $$
 declare
   v_user_id bigint;
+  v_word_id bigint;
   v_word_definition_id bigint;
 begin
   p_error_type := 'UnknownError';
@@ -29,14 +30,28 @@ begin
     return;
   end if;
 
-  -- check for word existence
-  select word_definition_id
+  -- check for word_definition existence
+  select word_id
   from word_definitions
   where word_definition_id = p_word_definition_id
+  into v_word_id;
+
+  if v_word_id is null then
+    p_error_type := 'WordDefinitionNotFound';
+    return;
+  end if;
+
+  -- check for word_id duplication
+  select wds.word_definition_id
+  from site_text_word_definitions as stwds
+  join word_definitions as wds
+  on wds.word_definition_id = stwds.word_definition_id
+  where wds.word_id = v_word_id
+    and stwds.word_definition_id <> p_word_definition_id
   into v_word_definition_id;
 
-  if v_word_definition_id is null then
-    p_error_type := 'WordDefinitionNotFound';
+  if v_word_definition_id is not null then
+    p_error_type := 'SiteTextWordDefinitionAlreadyExists';
     return;
   end if;
 
@@ -54,6 +69,7 @@ begin
   end if;
 
   if p_site_text_id is null then
+    p_error_type := 'SiteTextWordDefinitionNotFound';
     return;
   end if;
   

@@ -31,6 +31,19 @@ export type AvatarUpdateOutput = {
 
 export type Definition = PhraseDefinition | WordDefinition;
 
+export type DefinitionUpdateOutput = {
+  __typename?: 'DefinitionUpdateOutput';
+  error: ErrorType;
+  phrase_definition?: Maybe<PhraseDefinition>;
+  word_definition?: Maybe<WordDefinition>;
+};
+
+export type DefinitionUpdateaInput = {
+  definition_id: Scalars['ID']['input'];
+  definition_type_is_word: Scalars['Boolean']['input'];
+  definitionlike_string: Scalars['String']['input'];
+};
+
 export type EmailResponseInput = {
   token: Scalars['String']['input'];
 };
@@ -73,6 +86,8 @@ export enum ErrorType {
   RankInvalid = 'RankInvalid',
   RankUnchanged = 'RankUnchanged',
   SiteTextTranslationNotFound = 'SiteTextTranslationNotFound',
+  SiteTextWordDefinitionAlreadyExists = 'SiteTextWordDefinitionAlreadyExists',
+  SiteTextWordDefinitionNotFound = 'SiteTextWordDefinitionNotFound',
   TokenInvalid = 'TokenInvalid',
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
@@ -150,8 +165,10 @@ export type Mutation = {
   resetEmailRequest: ResetEmailRequestOutput;
   siteTextPhraseDefinitionUpsert: SiteTextPhraseDefinitionUpsertOutput;
   siteTextTranslationUpsert: SiteTextTranslationUpsertOutput;
+  siteTextTranslationVoteUpsert: SiteTextTranslationVoteUpsertOutput;
   siteTextUpsert: SiteTextUpsertOutput;
   siteTextWordDefinitionUpsert: SiteTextWordDefinitionUpsertOutput;
+  updateDefinition: PhraseDefinitionUpsertOutput;
   upsertFromTranslationlikeString: SiteTextTranslationUpsertOutput;
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString: PhraseDefinitionUpsertOutput;
   upsertWordDefinitionFromWordAndDefinitionlikeString: WordDefinitionUpsertOutput;
@@ -233,6 +250,11 @@ export type MutationSiteTextUpsertArgs = {
 
 export type MutationSiteTextWordDefinitionUpsertArgs = {
   input: SiteTextWordDefinitionUpsertInput;
+};
+
+
+export type MutationUpdateDefinitionArgs = {
+  input: DefinitionUpdateaInput;
 };
 
 
@@ -349,11 +371,16 @@ export type PostReadOutput = {
 export type Query = {
   __typename?: 'Query';
   fileUploadUrlRequest: FileUploadUrlResponse;
+  getAllRecommendedTranslation: SiteTextTranslationWithVoteListOutput;
+  getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
+  getRecommendedTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteOutput;
+  getVoteStatus: SiteTextTranslationVoteReadOutput;
   phraseDefinitionRead: PhraseDefinitionReadOutput;
   phraseRead: PhraseReadOutput;
   postReadResolver: PostReadOutput;
   siteTextPhraseDefinitionRead: SiteTextPhraseDefinitionReadOutput;
   siteTextTranslationRead: SiteTextTranslationReadOutput;
+  siteTextTranslationVoteRead: SiteTextTranslationVoteReadOutput;
   siteTextWordDefinitionRead: SiteTextWordDefinitionReadOutput;
   userReadResolver: UserReadOutput;
   wordDefinitionRead: WordDefinitionReadOutput;
@@ -363,6 +390,36 @@ export type Query = {
 
 export type QueryFileUploadUrlRequestArgs = {
   input: FileUploadUrlRequest;
+};
+
+
+export type QueryGetAllRecommendedTranslationArgs = {
+  dialect_code: Scalars['String']['input'];
+  geo_code: Scalars['String']['input'];
+  language_code: Scalars['String']['input'];
+};
+
+
+export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
+  dialect_code: Scalars['String']['input'];
+  geo_code: Scalars['String']['input'];
+  language_code: Scalars['String']['input'];
+  site_text_id: Scalars['String']['input'];
+  site_text_type_is_word: Scalars['Boolean']['input'];
+};
+
+
+export type QueryGetRecommendedTranslationFromSiteTextDefinitionIdArgs = {
+  dialect_code: Scalars['String']['input'];
+  geo_code: Scalars['String']['input'];
+  language_code: Scalars['String']['input'];
+  site_text_id: Scalars['String']['input'];
+  site_text_type_is_word: Scalars['Boolean']['input'];
+};
+
+
+export type QueryGetVoteStatusArgs = {
+  site_text_translation_id: Scalars['String']['input'];
 };
 
 
@@ -387,6 +444,11 @@ export type QuerySiteTextPhraseDefinitionReadArgs = {
 
 
 export type QuerySiteTextTranslationReadArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type QuerySiteTextTranslationVoteReadArgs = {
   id: Scalars['String']['input'];
 };
 
@@ -489,6 +551,42 @@ export type SiteTextTranslationUpsertOutput = {
   site_text_translation?: Maybe<SiteTextTranslation>;
 };
 
+export type SiteTextTranslationVoteReadOutput = {
+  __typename?: 'SiteTextTranslationVoteReadOutput';
+  error: ErrorType;
+  site_text_translation_vote?: Maybe<SiteTextTranslation>;
+};
+
+export type SiteTextTranslationVoteUpsertOutput = {
+  __typename?: 'SiteTextTranslationVoteUpsertOutput';
+  error: ErrorType;
+  site_text_translation_vote?: Maybe<SiteTextTranslation>;
+};
+
+export type SiteTextTranslationWithVote = {
+  __typename?: 'SiteTextTranslationWithVote';
+  created_at: Scalars['String']['output'];
+  downvotes: Scalars['Int']['output'];
+  from_definition: Definition;
+  from_type_is_word: Scalars['Boolean']['output'];
+  site_text_translation_id: Scalars['ID']['output'];
+  to_definition: Definition;
+  to_type_is_word: Scalars['Boolean']['output'];
+  upvotes: Scalars['Int']['output'];
+};
+
+export type SiteTextTranslationWithVoteListOutput = {
+  __typename?: 'SiteTextTranslationWithVoteListOutput';
+  error: ErrorType;
+  site_text_translation_with_vote_list: Array<Maybe<SiteTextTranslationWithVote>>;
+};
+
+export type SiteTextTranslationWithVoteOutput = {
+  __typename?: 'SiteTextTranslationWithVoteOutput';
+  error: ErrorType;
+  site_text_translation_with_vote?: Maybe<SiteTextTranslationWithVote>;
+};
+
 export type SiteTextUpsertInput = {
   definitionlike_string: Scalars['String']['input'];
   dialect_code?: InputMaybe<Scalars['String']['input']>;
@@ -562,6 +660,13 @@ export type VersionCreateOutput = {
   __typename?: 'VersionCreateOutput';
   error: ErrorType;
   version?: Maybe<Version>;
+};
+
+export type VoteStatus = {
+  __typename?: 'VoteStatus';
+  downvotes: Scalars['Int']['output'];
+  site_text_translation_id: Scalars['String']['output'];
+  upvotes: Scalars['Int']['output'];
 };
 
 export type Word = {

@@ -92,3 +92,30 @@ export class FromPhraseAndDefintionlikeStringUpsertInput {
   @Field(() => String, { nullable: true }) dialect_code: string | null;
   @Field(() => String, { nullable: true }) geo_code: string | null;
 }
+
+@InputType()
+export class DefinitionUpdateaInput {
+  @Field(() => ID) definition_id: string;
+  @Field(() => Boolean) definition_type_is_word: boolean;
+  @Field(() => String) definitionlike_string: string;
+}
+
+@InputType()
+export class WordDefinitionUpdateInput {
+  @Field(() => ID) word_definition_id: string;
+  @Field(() => String) definitionlike_string: string;
+}
+
+@InputType()
+export class PhraseDefinitionUpdateInput {
+  @Field(() => ID) phrase_definition_id: string;
+  @Field(() => String) definitionlike_string: string;
+}
+
+@ObjectType()
+export class DefinitionUpdateOutput extends GenericOutput {
+  @Field(() => WordDefinition, { nullable: true })
+  word_definition: WordDefinition | null;
+  @Field(() => PhraseDefinition, { nullable: true })
+  phrase_definition: PhraseDefinition | null;
+}
