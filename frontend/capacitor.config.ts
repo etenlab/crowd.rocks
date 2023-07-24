@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
+  appId: 'rocks.crowd',
   appName: 'frontend',
   webDir: 'dist',
   server: {

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.7.17",
+    "@capacitor/android": "5.1.1",
     "@capacitor/app": "5.0.5",
     "@capacitor/core": "5.1.1",
     "@capacitor/haptics": "5.0.5",
