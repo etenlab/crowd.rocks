@@ -56,6 +56,9 @@ export enum ErrorType {
 
   SiteTextTranslationNotFound = 'SiteTextTranslationNotFound',
 
+  MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
+  MapInsertFailed = 'MapInsertFailed',
+
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
 }

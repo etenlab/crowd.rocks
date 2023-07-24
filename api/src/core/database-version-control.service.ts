@@ -92,6 +92,9 @@ export class DatabaseVersionControlService {
     await this.runSqlFile('./src/core/sql/words/word_definition_upsert.sql');
     await this.runSqlFile('./src/core/sql/words/phrase_definition_upsert.sql');
 
+    // map
+    await this.runSqlFile('./src/core/sql/map/original_map_create.sql');
+
     // translation
     await this.runSqlFile(
       './src/core/sql/translation/word_to_word_translation_upsert.sql',

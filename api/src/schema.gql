@@ -38,6 +38,8 @@ enum ErrorType {
   InvalidEmailOrPassword
   InvalidInputs
   LimitInvalid
+  MapFilenameAlreadyExists
+  MapInsertFailed
   NoError
   OffsetInvalid
   ParentElectionNotFound

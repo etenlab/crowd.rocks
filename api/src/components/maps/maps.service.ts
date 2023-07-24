@@ -12,23 +12,35 @@ export class MapsService {
     mapFileName: string,
     token: string,
   ): Promise<MapFileOutput> {
-    console.log(`mapFileName: `, mapFileName);
-    console.log(`readStream:`, readStream);
-    console.log(`token:`, token);
-
     let fileBody: string;
+    for await (const chunk of readStream) {
+      if (!fileBody) {
+        fileBody = chunk;
+      } else {
+        fileBody += chunk;
+      }
+    }
+    let res;
 
-    readStream.on('data', (cunk) => {
-      fileBody += cunk;
-    });
-
-    readStream.on('end', () => {
-      console.log(`mapFileName:`, mapFileName, `fileBody: `, fileBody);
-    });
+    try {
+      //TODO: make some abstraction on DB procedures call with errors handling
+      res = await this.pg.pool.query(
+        `
+          call original_map_create($1,$2,$3, null,null)
+        `,
+        [mapFileName, fileBody, token],
+      );
+      console.log(
+        'sql stored proc message: ',
+        JSON.stringify(res.rows[0].p_error_type),
+      );
+    } catch (error) {
+      console.log(`Caught error ${error}`);
+    }
 
     return {
-      map_file_name: 'asdf',
-      original_map_id: 'asdf',
+      map_file_name: mapFileName,
+      original_map_id: res.rows[0].p_original_map_id,
     };
   }
 }

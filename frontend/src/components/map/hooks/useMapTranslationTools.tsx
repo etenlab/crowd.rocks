@@ -31,7 +31,7 @@ export function useMapTranslationTools() {
         })
         .then((res) => {
           console.log(`Map file (name:${file.name}) is uploaded.`);
-          const { original_map_id, map_file_name } = res.data.uploadFile;
+          const { original_map_id, map_file_name } = res.data.mapUpload;
           afterSuccess({ id: original_map_id, fileName: map_file_name });
         })
         .catch((error) => {

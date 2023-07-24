@@ -6,11 +6,15 @@ import { MapsService } from './maps.service';
 import { getBearer } from '../../common/utility';
 import { MapFileOutput } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
+import { AuthenticationService } from '../authentication/authentication.service';
 
 @Injectable()
 @Resolver(Map)
 export class MapsResolver {
-  constructor(private mapService: MapsService) {}
+  constructor(
+    private mapService: MapsService,
+    private authenticationService: AuthenticationService,
+  ) {}
 
   @Mutation(() => MapFileOutput)
   async mapUpload(
@@ -18,10 +22,18 @@ export class MapsResolver {
     { createReadStream, filename: map_file_name }: FileUpload,
     @Context() req: any,
   ): Promise<MapFileOutput> {
+    // const userToken = getBearer(req);
+    console.log(
+      `request bearer token: `,
+      getBearer(req),
+      ` but temporary using mocked admin token`,
+    );
+    const userToken = await this.authenticationService.getAdminToken();
+
     const map = await this.mapService.createAndSaveMap(
       createReadStream(),
       map_file_name,
-      getBearer(req),
+      userToken,
     );
     return map;
   }
