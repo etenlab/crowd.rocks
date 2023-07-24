@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { ReadStream } from 'fs';
 
 import { PostgresService } from 'src/core/postgres.service';
-import { MapFileOutput } from './types';
+import {
+  GetOrigMapContentOutput,
+  GetOrigMapsListOutput,
+  MapFileOutput,
+} from './types';
 
 @Injectable()
 export class MapsService {
@@ -26,7 +30,7 @@ export class MapsService {
       //TODO: make some abstraction on DB procedures call with errors handling
       res = await this.pg.pool.query(
         `
-          call original_map_create($1,$2,$3, null,null)
+          call original_map_create($1,$2,$3, null,null,null,null)
         `,
         [mapFileName, fileBody, token],
       );
@@ -41,6 +45,42 @@ export class MapsService {
     return {
       map_file_name: mapFileName,
       original_map_id: res.rows[0].p_original_map_id,
+      created_at: res.rows[0].p_created_at,
+      created_by: res.rows[0].p_created_by,
+    };
+  }
+
+  async getOrigMaps(): Promise<GetOrigMapsListOutput> {
+    const resQ = await this.pg.pool.query(
+      `
+        select original_map_id, map_file_name, created_at, created_by from original_maps
+      `,
+      [],
+    );
+
+    const origMapList = resQ.rows.map(
+      ({ original_map_id, map_file_name, created_at, created_by }) => ({
+        original_map_id,
+        map_file_name,
+        created_at,
+        created_by,
+      }),
+    );
+
+    return { origMapList };
+  }
+
+  async getOrigMap(id: number): Promise<GetOrigMapContentOutput> {
+    const resQ = await this.pg.pool.query(
+      `
+        select content, map_file_name, created_at, created_by from original_maps where original_map_id = $1
+      `,
+      [id],
+    );
+
+    return {
+      content: resQ.rows[0].content,
+      map_file_name: resQ.rows[0].map_file_name,
     };
   }
 }

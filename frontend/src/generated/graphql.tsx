@@ -57,6 +57,8 @@ export enum ErrorType {
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
   InvalidInputs = 'InvalidInputs',
   LimitInvalid = 'LimitInvalid',
+  MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
+  MapInsertFailed = 'MapInsertFailed',
   NoError = 'NoError',
   OffsetInvalid = 'OffsetInvalid',
   ParentElectionNotFound = 'ParentElectionNotFound',
@@ -109,6 +111,11 @@ export type FromWordAndDefintionlikeStringUpsertInput = {
   wordlike_string: Scalars['String']['input'];
 };
 
+export type GetOrigMapsListOutput = {
+  __typename?: 'GetOrigMapsListOutput';
+  origMapList: Array<MapFileOutput>;
+};
+
 export type LoginInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -131,6 +138,8 @@ export type LogoutOutput = {
 
 export type MapFileOutput = {
   __typename?: 'MapFileOutput';
+  created_at: Scalars['String']['output'];
+  created_by: Scalars['Int']['output'];
   map_file_name: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
 };
@@ -349,6 +358,7 @@ export type PostReadOutput = {
 export type Query = {
   __typename?: 'Query';
   fileUploadUrlRequest: FileUploadUrlResponse;
+  getOrigMapsList: GetOrigMapsListOutput;
   phraseDefinitionRead: PhraseDefinitionReadOutput;
   phraseRead: PhraseReadOutput;
   postReadResolver: PostReadOutput;

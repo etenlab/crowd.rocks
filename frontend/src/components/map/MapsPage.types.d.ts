@@ -1,4 +1,4 @@
-type TMap = TLangCodes & {
+type TMap = {
   id: number;
   name: string;
   createdAt: Date;
@@ -9,5 +9,5 @@ type TMapWithContent = TMap & {
   content: string;
 };
 
-type TMapList = TMap[];
+type TMapsList = TMap[];
 type TMapWithContentList = TMapWithContent[];

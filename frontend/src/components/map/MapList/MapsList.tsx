@@ -1,4 +1,4 @@
-import { IonItem, IonLabel, IonList, useIonRouter } from '@ionic/react';
+import { IonList, useIonRouter } from '@ionic/react';
 import { MapItem } from './MapItem';
 import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
@@ -6,7 +6,7 @@ import { useCallback } from 'react';
 import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 
 export type TMapListProps = {
-  mapList: TMapList | undefined;
+  mapList: TMapsList | undefined;
   onSelectMapId: (id: number) => void;
 };
 
@@ -31,10 +31,6 @@ export const MapList = ({ mapList, onSelectMapId }: TMapListProps) => {
     [sendMapFile],
   );
 
-  if (!mapList?.length || mapList?.length < 1) {
-    return <div> No maps found </div>;
-  }
-
   return (
     <>
       <Caption>Maps</Caption>
@@ -48,14 +44,17 @@ export const MapList = ({ mapList, onSelectMapId }: TMapListProps) => {
         onAddClick={handleAddMap}
       />
       <IonList lines="none">
-        {mapList &&
+        {mapList?.length && mapList?.length > 0 ? (
           mapList.map((m) => (
             <MapItem
               mapItem={m}
               key={m.id}
               onClick={() => onSelectMapId(m.id)}
             ></MapItem>
-          ))}
+          ))
+        ) : (
+          <div> No maps found </div>
+        )}
       </IonList>
     </>
   );

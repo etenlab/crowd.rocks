@@ -91,6 +91,10 @@ input FromWordAndDefintionlikeStringUpsertInput {
   wordlike_string: String!
 }
 
+type GetOrigMapsListOutput {
+  origMapList: [MapFileOutput!]!
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -110,6 +114,8 @@ type LogoutOutput {
 }
 
 type MapFileOutput {
+  created_at: String!
+  created_by: Int!
   map_file_name: String!
   original_map_id: ID!
 }
@@ -217,6 +223,7 @@ type PostReadOutput {
 
 type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
+  getOrigMapsList: GetOrigMapsListOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!
   phraseRead(input: PhraseReadInput!): PhraseReadOutput!
   postReadResolver(input: PostReadInput!): PostReadOutput!

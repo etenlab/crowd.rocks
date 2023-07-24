@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Resolver, Mutation, Int, Context } from '@nestjs/graphql';
+import { Args, Resolver, Mutation, Query, Context } from '@nestjs/graphql';
 
 import { MapsService } from './maps.service';
 
 import { getBearer } from '../../common/utility';
-import { MapFileOutput } from './types';
+import { GetOrigMapsListOutput, MapFileOutput } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
 
@@ -36,6 +36,15 @@ export class MapsResolver {
       userToken,
     );
     return map;
+  }
+
+  @Query(() => GetOrigMapsListOutput)
+  async getOrigMapsList(): Promise<GetOrigMapsListOutput> {
+    // TODO: make global auth system. existing sysyem via passing token to sql proc is unconvinient
+    // when no need in sql proc (request too small - just single-line select)
+
+    const maps = await this.mapService.getOrigMaps();
+    return maps;
   }
 
   // @Mutation(() => TMapFile)

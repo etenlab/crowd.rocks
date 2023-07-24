@@ -4,6 +4,8 @@ or replace procedure original_map_create(
   in p_map_content text,
   in p_token varchar(512),
   inout p_original_map_id bigint,
+  inout p_creater_at varchar(32),
+  inout p_created_by varchar(32),
   inout p_error_type varchar(32)
 ) 
 language plpgsql as $$ 
@@ -31,7 +33,7 @@ select
 from
   original_maps
 where
-  original_map_file_name = p_map_file_name into v_current_map_id;
+  map_file_name = p_map_file_name into v_current_map_id;
 
 -- create wordlike string if needed
 if v_current_map_id is not null then p_error_type := 'MapFilenameAlreadyExists';
@@ -43,7 +45,7 @@ end if;
 -- create map
 insert into
   original_maps(
-    original_map_file_name,
+    map_file_name,
     content,
     created_by
   )
@@ -52,7 +54,11 @@ values
     p_map_file_name,
     p_map_content,
     v_user_id
-  ) on conflict do nothing returning original_map_id into p_original_map_id;
+  ) on conflict do nothing 
+returning 
+  original_map_id, created_by, created_at 
+into 
+  p_original_map_id, p_created_by, p_creater_at;
 
 if p_original_map_id is null then p_error_type := 'MapInsertFailed';
 
