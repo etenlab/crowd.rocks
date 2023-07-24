@@ -58,6 +58,9 @@ export enum ErrorType {
   SiteTextWordDefinitionAlreadyExists = 'SiteTextWordDefinitionAlreadyExists',
   SiteTextWordDefinitionNotFound = 'SiteTextWordDefinitionNotFound',
 
+  MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
+  MapInsertFailed = 'MapInsertFailed',
+
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
 }

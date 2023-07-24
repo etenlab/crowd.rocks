@@ -50,6 +50,8 @@ enum ErrorType {
   InvalidEmailOrPassword
   InvalidInputs
   LimitInvalid
+  MapFilenameAlreadyExists
+  MapInsertFailed
   NoError
   OffsetInvalid
   ParentElectionNotFound
@@ -103,6 +105,10 @@ input FromWordAndDefintionlikeStringUpsertInput {
   wordlike_string: String!
 }
 
+type GetOrigMapsListOutput {
+  origMapList: [MapFileOutput!]!
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -122,6 +128,8 @@ type LogoutOutput {
 }
 
 type MapFileOutput {
+  created_at: String!
+  created_by: Int!
   map_file_name: String!
   original_map_id: ID!
 }
@@ -235,6 +243,7 @@ type Query {
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
   getVoteStatus(site_text_translation_id: String!): SiteTextTranslationVoteReadOutput!
+  getOrigMapsList: GetOrigMapsListOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!
   phraseRead(input: PhraseReadInput!): PhraseReadOutput!
   postReadResolver(input: PostReadInput!): PostReadOutput!
