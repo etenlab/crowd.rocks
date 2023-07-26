@@ -143,6 +143,15 @@ export type GetOrigMapListInput = {
   search?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type GetOrigMapWordsInput = {
+  original_map_id: Scalars['ID']['input'];
+};
+
+export type GetOrigMapWordsOutput = {
+  __typename?: 'GetOrigMapWordsOutput';
+  origMapwords: Array<Word>;
+};
+
 export type GetOrigMapsListOutput = {
   __typename?: 'GetOrigMapsListOutput';
   origMapList: Array<MapFileOutput>;
@@ -407,6 +416,7 @@ export type Query = {
   getAllSiteTextDefinitions: SiteTextDefinitionListOutput;
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
   getOrigMapContent: GetOrigMapContentOutput;
+  getOrigMapWords: GetOrigMapWordsOutput;
   getOrigMapsList: GetOrigMapsListOutput;
   getRecommendedTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteOutput;
   getVoteStatus: SiteTextTranslationVoteReadOutput;
@@ -446,6 +456,11 @@ export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
 
 export type QueryGetOrigMapContentArgs = {
   input: GetOrigMapContentInput;
+};
+
+
+export type QueryGetOrigMapWordsArgs = {
+  input: GetOrigMapWordsInput;
 };
 
 

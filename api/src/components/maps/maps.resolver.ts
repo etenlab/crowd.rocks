@@ -9,6 +9,8 @@ import {
   GetOrigMapContentOutput,
   GetOrigMapListInput,
   GetOrigMapsListOutput,
+  GetOrigMapWordsInput,
+  GetOrigMapWordsOutput,
   MapFileOutput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
@@ -71,17 +73,11 @@ export class MapsResolver {
     return mapContent;
   }
 
-  // @Mutation(() => TMapFile)
-  // async mapUpdate(
-  //   @Args({ name: 'file', type: () => GraphQLUpload })
-  //   { createReadStream, filename: file_name }: FileUpload,
-  //   @Args({ name: 'id', type: () => Int }) id: number,
-  // ): Promise<File> {
-  //   const file = await this.mapService.updateMapContent(
-  //     createReadStream(),
-  //     id,
-  //     file_name,
-  //   );
-  //   return file;
-  // }
+  @Query(() => GetOrigMapWordsOutput)
+  async getOrigMapWords(
+    @Args('input') input: GetOrigMapWordsInput,
+  ): Promise<GetOrigMapWordsOutput> {
+    const words = await this.mapService.getOrigMapWords(input.original_map_id);
+    return words;
+  }
 }

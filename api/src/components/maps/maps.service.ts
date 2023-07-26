@@ -4,6 +4,7 @@ import { ReadStream } from 'fs';
 import {
   GetOrigMapContentOutput,
   GetOrigMapsListOutput,
+  GetOrigMapWordsOutput,
   MapFileOutput,
   OriginalMapWordInput,
 } from './types';
@@ -106,7 +107,6 @@ export class MapsService {
 
         const savedOrginalMapWord = await this.saveOriginalMapWordInTrn(
           { word_id: savedWord.word_id, original_map_id },
-          token,
           dbPoolClient,
         );
       }
@@ -193,9 +193,14 @@ export class MapsService {
 
   async saveOriginalMapWordInTrn(
     input: OriginalMapWordInput,
-    token: string,
     dbPoolClient: PoolClient,
   ): Promise<{ original_map_word_id: string | null } & GenericOutput> {
     return this.mapsRepository.saveOriginalMapWordInTrn(input, dbPoolClient);
+  }
+
+  async getOrigMapWords(
+    original_map_id: string,
+  ): Promise<GetOrigMapWordsOutput> {
+    return this.mapsRepository.getOrigMapWords(original_map_id);
   }
 }

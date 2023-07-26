@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { PoolClient } from 'pg';
 import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
+import { Word } from '../words/types';
 import {
   GetOrigMapContentOutput,
   GetOrigMapsListOutput,
+  GetOrigMapWordsOutput,
   OriginalMapWordInput,
 } from './types';
 
@@ -26,6 +28,10 @@ interface ISaveMapRes {
 export class MapsRepository {
   constructor(private pg: PostgresService) {}
 
+  /**
+   * dbPoolClient is optional. If providerd, then it will be used to run query (useful for SQL transactions)
+   * if not - then new client will be get from pg.pool
+   */
   async saveOriginalMap({
     mapFileName,
     fileBody,
@@ -108,6 +114,42 @@ export class MapsRepository {
     return {
       original_map_word_id: resQ.rows[0].original_map_word_id,
       error: ErrorType.NoError,
+    };
+  }
+
+  async getOrigMapWords(
+    original_map_id: string,
+  ): Promise<GetOrigMapWordsOutput> {
+    const resQ = await this.pg.pool.query(
+      `
+        select
+          w.word_id,
+          ws.wordlike_string as word
+          w.language_code,
+          w.dialect_code,
+          w.geo_code,
+        from
+          words w
+        left join original_map_words omw on
+          w.word_id = omw.word_id
+        left join wordlike_strings ws on
+          w.wordlike_string_id = ws.wordlike_string_id
+        where
+          omw.original_map_id = $1
+      `,
+      [original_map_id],
+    );
+
+    const words: Word[] = resQ.rows.map((r) => ({
+      word_id: r.word_id,
+      word: r.word,
+      language_code: r.language_code,
+      dialect_code: r.dialect_code,
+      geo_code: r.geo_code,
+    }));
+
+    return {
+      origMapwords: words,
     };
   }
 }

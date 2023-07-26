@@ -1,4 +1,5 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { Word } from '../words/types';
 
 @ObjectType()
 export class MapFileOutput {
@@ -7,24 +8,33 @@ export class MapFileOutput {
   @Field(() => String) created_at: string;
   @Field(() => ID) created_by: string;
 }
+@InputType()
+export class GetOrigMapListInput {
+  @Field(() => String, { nullable: true }) search?: string;
+}
 
 @ObjectType()
 export class GetOrigMapsListOutput {
   @Field(() => [MapFileOutput]) origMapList: MapFileOutput[];
 }
 
+@InputType()
+export class GetOrigMapContentInput {
+  @Field(() => ID) original_map_id: string;
+}
 @ObjectType()
 export class GetOrigMapContentOutput extends MapFileOutput {
   @Field(() => String) content: string;
 }
 
+
 @InputType()
-export class GetOrigMapListInput {
-  @Field(() => String, { nullable: true }) search?: string;
-}
-@InputType()
-export class GetOrigMapContentInput {
+export class GetOrigMapWordsInput {
   @Field(() => ID) original_map_id: string;
+}
+@ObjectType()
+export class GetOrigMapWordsOutput {
+  @Field(() => [Word]) origMapwords: Word[];
 }
 
 export type OriginalMapWordInput = {
