@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { PoolClient } from 'pg';
+import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
-import { GetOrigMapContentOutput, GetOrigMapsListOutput } from './types';
+import {
+  GetOrigMapContentOutput,
+  GetOrigMapsListOutput,
+  OriginalMapWordInput,
+} from './types';
 
 interface ISaveMapParams {
   mapFileName: string;
   fileBody: string;
   token: string;
+  dbPoolClient?: PoolClient;
 }
 
 interface ISaveMapRes {
@@ -23,22 +30,22 @@ export class MapsRepository {
     mapFileName,
     fileBody,
     token,
+    dbPoolClient,
   }: ISaveMapParams): Promise<ISaveMapRes> {
-    let res;
-    try {
-      res = await this.pg.pool.query(
-        `
+    const poolClient = dbPoolClient
+      ? dbPoolClient // use given pool client
+      : this.pg.pool; //some `random` client from pool will be used
+
+    const res = await poolClient.query(
+      `
           call original_map_create($1,$2,$3, null,null,null,null)
         `,
-        [mapFileName, fileBody, token],
-      );
-      console.log(
-        'sql stored proc message: ',
-        JSON.stringify(res.rows[0].p_error_type),
-      );
-    } catch (error) {
-      console.log(`MapRepository#saveMap error: ${error}`);
-    }
+      [mapFileName, fileBody, token],
+    );
+    console.log(
+      'sql stored proc message: ',
+      JSON.stringify(res.rows[0].p_error_type),
+    );
 
     return {
       map_file_name: mapFileName,
@@ -82,6 +89,25 @@ export class MapsRepository {
       created_at: resQ.rows[0].created_at,
       created_by: resQ.rows[0].created_by,
       content: resQ.rows[0].content,
+    };
+  }
+
+  async saveOriginalMapWordInTrn(
+    { word_id, original_map_id }: OriginalMapWordInput,
+    dbPoolClient: PoolClient,
+  ): Promise<{ original_map_word_id: string | null } & GenericOutput> {
+    const resQ = await dbPoolClient.query(
+      `
+        insert into original_map_words(word_id , original_map_id )  values($1, $2) 
+        on conflict (word_id, original_map_id) do update set word_id = excluded.word_id 
+        returning original_map_word_id  
+      `,
+      [word_id, original_map_id],
+    );
+
+    return {
+      original_map_word_id: resQ.rows[0].original_map_word_id,
+      error: ErrorType.NoError,
     };
   }
 }

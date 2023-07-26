@@ -36,11 +36,11 @@ export class MapsResolver {
     );
     const userToken = await this.authenticationService.getAdminToken();
 
-    const map = await this.mapService.parseAndSaveNewMap(
-      createReadStream(),
-      map_file_name,
-      userToken,
-    );
+    const map = await this.mapService.parseAndSaveNewMap({
+      readStream: createReadStream(),
+      mapFileName: map_file_name,
+      token: userToken,
+    });
     return map;
   }
 

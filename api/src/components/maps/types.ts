@@ -26,3 +26,8 @@ export class GetOrigMapListInput {
 export class GetOrigMapContentInput {
   @Field(() => ID) original_map_id: string;
 }
+
+export type OriginalMapWordInput = {
+  word_id: string;
+  original_map_id: string;
+};

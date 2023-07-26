@@ -1,31 +1,49 @@
 import { Injectable } from '@nestjs/common';
 import { ReadStream } from 'fs';
 
-import { PostgresService } from 'src/core/postgres.service';
 import {
   GetOrigMapContentOutput,
   GetOrigMapsListOutput,
   MapFileOutput,
+  OriginalMapWordInput,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg } from 'svgson';
 import { WordsService } from '../words/words.service';
 import { MapsRepository } from './maps.repository';
+import { Word, WordUpsertInput } from '../words/types';
+import { ErrorType, GenericOutput, LanguageInfo } from '../../common/types';
+import { DEFAULT_NEW_MAP_LANGUAGE } from '../../common/const';
+import { PostgresService } from '../../core/postgres.service';
+import { DefinitionsService } from '../definitions/definitions.service';
+import { WordDefinitionsService } from '../definitions/word-definitions.service';
+import { PoolClient } from 'pg';
 
 const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
+const DEFAULT_MAP_WORD_DEFINITION = 'Geographical place';
 
+interface parseAndSaveNewMapParams {
+  readStream: ReadStream;
+  mapFileName: string;
+  mapLanguage?: LanguageInfo;
+  token: string;
+}
 @Injectable()
 export class MapsService {
   constructor(
+    private pg: PostgresService,
     private mapsRepository: MapsRepository,
     private wordsService: WordsService,
+    private wordDefinitionsService: WordDefinitionsService,
   ) {}
-  async parseAndSaveNewMap(
-    readStream: ReadStream,
-    mapFileName: string,
-    token: string,
-  ): Promise<MapFileOutput> {
+
+  async parseAndSaveNewMap({
+    readStream,
+    mapFileName,
+    mapLanguage = DEFAULT_NEW_MAP_LANGUAGE,
+    token,
+  }: parseAndSaveNewMapParams): Promise<MapFileOutput> {
     let fileBody: string;
     for await (const chunk of readStream) {
       if (!fileBody) {
@@ -38,19 +56,76 @@ export class MapsService {
     const { transformedSvgINode, foundWords } =
       this.parseSvgMapString(fileBody);
 
-    const { map_file_name, original_map_id, created_at, created_by } =
-      await this.mapsRepository.saveOriginalMap({
-        mapFileName,
-        fileBody,
-        token,
-      });
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      dbPoolClient.query('BEGIN');
+      const savedWordIds: string[] = [];
+      const savedDefinitionIds: string[] = [];
 
-    return {
-      map_file_name,
-      original_map_id,
-      created_at,
-      created_by,
-    };
+      const { map_file_name, original_map_id, created_at, created_by } =
+        await this.mapsRepository.saveOriginalMap({
+          mapFileName,
+          fileBody,
+          token,
+          dbPoolClient,
+        });
+
+      for (const word of foundWords) {
+        const wordInput: WordUpsertInput = {
+          wordlike_string: word,
+          language_code: mapLanguage.lang.tag,
+        };
+        const savedWord = await this.wordsService.upsertInTrn(
+          wordInput,
+          token,
+          dbPoolClient,
+        );
+        if (!savedWord.word_id) {
+          console.error(
+            `MapsService#parseAndSaveNewMap: Error ${savedWord.error} with saving word ${wordInput}`,
+          );
+          continue;
+        }
+        savedWordIds.push(savedWord.word_id);
+
+        const savedDefinition = await this.wordDefinitionsService.upsertInTrn(
+          {
+            definition: DEFAULT_MAP_WORD_DEFINITION,
+            word_id: savedWord.word_id,
+          },
+          token,
+          dbPoolClient,
+        );
+        if (!savedDefinition.word_definition_id) {
+          console.error(
+            `MapsService#parseAndSaveNewMap: Error ${savedDefinition.error} with saving definition for word ${wordInput}`,
+          );
+          continue;
+        }
+        savedDefinitionIds.push(savedDefinition.word_definition_id);
+
+        const savedOrginalMapWord = await this.saveOriginalMapWordInTrn(
+          { word_id: savedWord.word_id, original_map_id },
+          token,
+          dbPoolClient,
+        );
+      }
+
+      // todo bind words to map and sustain other relations
+
+      await dbPoolClient.query('COMMIT');
+
+      return {
+        map_file_name,
+        original_map_id,
+        created_at,
+        created_by,
+      };
+    } catch (error) {
+      await dbPoolClient.query('ROLLBACK');
+    } finally {
+      dbPoolClient.release();
+    }
   }
 
   async getOrigMaps(): Promise<GetOrigMapsListOutput> {
@@ -114,5 +189,13 @@ export class MapsService {
     for (const child of node.children || []) {
       this.iterateOverINode(child, skipNodeNames, cb);
     }
+  }
+
+  async saveOriginalMapWordInTrn(
+    input: OriginalMapWordInput,
+    token: string,
+    dbPoolClient: PoolClient,
+  ): Promise<{ original_map_word_id: string | null } & GenericOutput> {
+    return this.mapsRepository.saveOriginalMapWordInTrn(input, dbPoolClient);
   }
 }

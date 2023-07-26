@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { ErrorType } from 'src/common/types';
+import { ErrorType, GenericOutput } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 
 import { WordReadInput, WordReadOutput, WordUpsertInput } from './types';
@@ -11,6 +11,7 @@ import {
   callWordUpsertProcedure,
   WordUpsertProcedureOutputRow,
 } from './sql-string';
+import { PoolClient } from 'pg';
 
 @Injectable()
 export class WordsService {
@@ -83,6 +84,47 @@ export class WordsService {
     return {
       error: ErrorType.UnknownError,
       word: null,
+    };
+  }
+
+  /**
+   * Same as upsert but can be used in transaction, thus returns only IDs due to impossibility of dirty reads in PG
+   * Sql statement will be executed using given dbPoolClient .
+   * It is useful if you need to make this operation as part of some SQL transaction (to transaction work properly,
+   * all opertations of this transaction should be executed in  the same PoolClient instance)
+   */
+  async upsertInTrn(
+    input: WordUpsertInput,
+    token: string,
+    dbPoolClient: PoolClient,
+  ): Promise<{ word_id: string | null } & GenericOutput> {
+    try {
+      const res = await dbPoolClient.query<WordUpsertProcedureOutputRow>(
+        ...callWordUpsertProcedure({
+          wordlike_string: input.wordlike_string,
+          language_code: input.language_code,
+          dialect_code: input.dialect_code,
+          geo_code: input.geo_code,
+          token: token,
+        }),
+      );
+
+      const creatingError = res.rows[0].p_error_type;
+      const word_id = res.rows[0].p_word_id
+        ? String(res.rows[0].p_word_id)
+        : null;
+
+      return {
+        error: creatingError,
+        word_id,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_id: null,
     };
   }
 }

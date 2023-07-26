@@ -6,8 +6,14 @@ import { MapsResolver } from './maps.resolver';
 import { MapsService } from './maps.service';
 import { WordsModule } from '../words/words.module';
 import { MapsRepository } from './maps.repository';
+import { DefinitionsModule } from '../definitions/definitions.module';
 @Module({
-  imports: [forwardRef(() => CoreModule), AuthenticationModule, WordsModule],
+  imports: [
+    forwardRef(() => CoreModule),
+    AuthenticationModule,
+    WordsModule,
+    DefinitionsModule,
+  ],
   providers: [MapsService, MapsResolver, MapsRepository],
   exports: [MapsService],
 })
