@@ -21,7 +21,7 @@ http://ionicframework.com/docs/theming/ */
   flex-grow: 1;
   width: 100%;
   max-width: 777px;
-  padding: 5px;
+  padding: 16px;
 }
 
 /** Ionic CSS Variables **/
