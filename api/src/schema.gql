@@ -105,6 +105,22 @@ input FromWordAndDefintionlikeStringUpsertInput {
   wordlike_string: String!
 }
 
+input GetOrigMapContentInput {
+  original_map_id: ID!
+}
+
+type GetOrigMapContentOutput {
+  content: String!
+  created_at: String!
+  created_by: ID!
+  map_file_name: String!
+  original_map_id: ID!
+}
+
+input GetOrigMapListInput {
+  search: String
+}
+
 type GetOrigMapsListOutput {
   origMapList: [MapFileOutput!]!
 }
@@ -129,7 +145,7 @@ type LogoutOutput {
 
 type MapFileOutput {
   created_at: String!
-  created_by: Int!
+  created_by: ID!
   map_file_name: String!
   original_map_id: ID!
 }
@@ -243,7 +259,8 @@ type Query {
   getAllRecommendedTranslation(dialect_code: String!, geo_code: String!, language_code: String!): SiteTextTranslationWithVoteListOutput!
   getAllSiteTextDefinitions: SiteTextDefinitionListOutput!
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
-  getOrigMapsList: GetOrigMapsListOutput!
+  getOrigMapContent(input: GetOrigMapContentInput!): GetOrigMapContentOutput!
+  getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
   getVoteStatus(site_text_translation_id: String!): SiteTextTranslationVoteReadOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!

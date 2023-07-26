@@ -70,7 +70,7 @@ export class MapsService {
     return { origMapList };
   }
 
-  async getOrigMap(id: number): Promise<GetOrigMapContentOutput> {
+  async getOrigMapContent(id: string): Promise<GetOrigMapContentOutput> {
     const resQ = await this.pg.pool.query(
       `
         select content, map_file_name, created_at, created_by from original_maps where original_map_id = $1
@@ -79,8 +79,11 @@ export class MapsService {
     );
 
     return {
-      content: resQ.rows[0].content,
+      original_map_id: String(id),
       map_file_name: resQ.rows[0].map_file_name,
+      created_at: resQ.rows[0].created_at,
+      created_by: resQ.rows[0].created_by,
+      content: resQ.rows[0].content,
     };
   }
 }

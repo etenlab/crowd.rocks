@@ -126,6 +126,23 @@ export type FromWordAndDefintionlikeStringUpsertInput = {
   wordlike_string: Scalars['String']['input'];
 };
 
+export type GetOrigMapContentInput = {
+  original_map_id: Scalars['ID']['input'];
+};
+
+export type GetOrigMapContentOutput = {
+  __typename?: 'GetOrigMapContentOutput';
+  content: Scalars['String']['output'];
+  created_at: Scalars['String']['output'];
+  created_by: Scalars['ID']['output'];
+  map_file_name: Scalars['String']['output'];
+  original_map_id: Scalars['ID']['output'];
+};
+
+export type GetOrigMapListInput = {
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type GetOrigMapsListOutput = {
   __typename?: 'GetOrigMapsListOutput';
   origMapList: Array<MapFileOutput>;
@@ -154,7 +171,7 @@ export type LogoutOutput = {
 export type MapFileOutput = {
   __typename?: 'MapFileOutput';
   created_at: Scalars['String']['output'];
-  created_by: Scalars['Int']['output'];
+  created_by: Scalars['ID']['output'];
   map_file_name: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
 };
@@ -389,6 +406,7 @@ export type Query = {
   getAllRecommendedTranslation: SiteTextTranslationWithVoteListOutput;
   getAllSiteTextDefinitions: SiteTextDefinitionListOutput;
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
+  getOrigMapContent: GetOrigMapContentOutput;
   getOrigMapsList: GetOrigMapsListOutput;
   getRecommendedTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteOutput;
   getVoteStatus: SiteTextTranslationVoteReadOutput;
@@ -423,6 +441,16 @@ export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
   language_code: Scalars['String']['input'];
   site_text_id: Scalars['String']['input'];
   site_text_type_is_word: Scalars['Boolean']['input'];
+};
+
+
+export type QueryGetOrigMapContentArgs = {
+  input: GetOrigMapContentInput;
+};
+
+
+export type QueryGetOrigMapsListArgs = {
+  input: GetOrigMapListInput;
 };
 
 

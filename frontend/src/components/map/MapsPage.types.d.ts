@@ -1,8 +1,8 @@
 type TMap = {
-  id: number;
+  id: string;
   name: string;
-  createdAt: Date;
-  createdByUserId?: number;
+  createdAt: string;
+  createdByUserId?: string;
 };
 
 type TMapWithContent = TMap & {

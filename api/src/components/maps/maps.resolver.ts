@@ -4,7 +4,13 @@ import { Args, Resolver, Mutation, Query, Context } from '@nestjs/graphql';
 import { MapsService } from './maps.service';
 
 import { getBearer } from '../../common/utility';
-import { GetOrigMapsListOutput, MapFileOutput } from './types';
+import {
+  GetOrigMapContentInput,
+  GetOrigMapContentOutput,
+  GetOrigMapListInput,
+  GetOrigMapsListOutput,
+  MapFileOutput,
+} from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
 
@@ -39,12 +45,30 @@ export class MapsResolver {
   }
 
   @Query(() => GetOrigMapsListOutput)
-  async getOrigMapsList(): Promise<GetOrigMapsListOutput> {
-    // TODO: make global auth system. existing sysyem via passing token to sql proc is unconvinient
+  async getOrigMapsList(
+    @Args('input') input: GetOrigMapListInput,
+  ): Promise<GetOrigMapsListOutput> {
+    // TODO: refactor auth system. existing sysyem via passing token to sql proc is unconvinient
     // when no need in sql proc (request too small - just single-line select)
+
+    // TODO: search by pattern
+    console.log(input.search);
 
     const maps = await this.mapService.getOrigMaps();
     return maps;
+  }
+
+  @Query(() => GetOrigMapContentOutput)
+  async getOrigMapContent(
+    @Args('input') input: GetOrigMapContentInput,
+  ): Promise<GetOrigMapContentOutput> {
+    // TODO: refactor auth system. existing sysyem via passing token to sql proc is unconvinient
+    // when no need in sql proc (request too small - just single-line select)
+
+    const mapContent = await this.mapService.getOrigMapContent(
+      input.original_map_id,
+    );
+    return mapContent;
   }
 
   // @Mutation(() => TMapFile)
