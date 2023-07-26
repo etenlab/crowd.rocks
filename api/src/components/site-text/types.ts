@@ -184,3 +184,24 @@ export class SiteTextWordDefinitionUpdateInput {
   @Field(() => ID) word_definition_id: string;
   @Field(() => String) definitionlike_string: string;
 }
+
+@ObjectType()
+export class SiteTextPhraseDefinitionListOutput extends GenericOutput {
+  @Field(() => [SiteTextPhraseDefinition], { nullable: 'items' })
+  site_text_phrase_definition_list: SiteTextPhraseDefinition[];
+}
+
+@ObjectType()
+export class SiteTextWordDefinitionListOutput extends GenericOutput {
+  @Field(() => [SiteTextWordDefinition], { nullable: 'items' })
+  site_text_word_definition_list: SiteTextWordDefinition[];
+}
+
+@ObjectType()
+export class SiteTextDefinitionListOutput extends GenericOutput {
+  @Field(() => [SiteTextWordDefinition], { nullable: 'items' })
+  site_text_word_definition_list: SiteTextWordDefinition[];
+
+  @Field(() => [SiteTextPhraseDefinition], { nullable: 'items' })
+  site_text_phrase_definition_list: SiteTextPhraseDefinition[];
+}

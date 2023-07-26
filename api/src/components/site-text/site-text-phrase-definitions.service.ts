@@ -9,6 +9,7 @@ import {
   SiteTextPhraseDefinitionReadOutput,
   SiteTextPhraseDefinitionUpsertInput,
   SiteTextPhraseDefinitionUpsertOutput,
+  SiteTextPhraseDefinitionListOutput,
 } from './types';
 
 import {
@@ -16,6 +17,8 @@ import {
   GetSiteTextPhraseDefinitionObjectById,
   callSiteTextPhraseDefinitionUpsertProcedure,
   SiteTextPhraseDefinitionUpsertProcedureOutputRow,
+  GetAllSiteTextPhraseDefinition,
+  getAllSiteTextPhraseDefinition,
 } from './sql-string';
 
 @Injectable()
@@ -94,6 +97,43 @@ export class SiteTextPhraseDefinitionsService {
     return {
       error: ErrorType.UnknownError,
       site_text_phrase_definition: null,
+    };
+  }
+
+  async getAllSiteTextPhraseDefinitions(): Promise<SiteTextPhraseDefinitionListOutput> {
+    try {
+      const res1 = await this.pg.pool.query<GetAllSiteTextPhraseDefinition>(
+        ...getAllSiteTextPhraseDefinition(),
+      );
+
+      const siteTextPhraseDefinitionList = [];
+
+      for (let i = 0; i < res1.rowCount; i++) {
+        const { error, site_text_phrase_definition } = await this.read(
+          res1.rows[i].site_text_id,
+        );
+
+        if (error !== ErrorType.NoError) {
+          return {
+            error,
+            site_text_phrase_definition_list: [],
+          };
+        }
+
+        siteTextPhraseDefinitionList.push(site_text_phrase_definition);
+      }
+
+      return {
+        error: ErrorType.NoError,
+        site_text_phrase_definition_list: siteTextPhraseDefinitionList,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      site_text_phrase_definition_list: [],
     };
   }
 }

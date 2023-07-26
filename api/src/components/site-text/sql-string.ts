@@ -206,9 +206,9 @@ export function getSiteTextTranslationVoteStatus(
       from 
         site_text_translation_votes AS v 
       where 
-        v.candidate_id = $1
+        v.site_text_translation_id = $1
       group BY 
-        v.candidate_id 
+        v.site_text_translation_id 
       order by 
         count(
           case when v.vote = true then 1 when v.vote = false then 0 else null end
@@ -231,12 +231,46 @@ export function getAllSiteTextWordTranslation({
 }: {
   site_text_id: number;
   language_code: string;
-  dialect_code: string;
-  geo_code: string;
-}): [string, [number, string, string, string]] {
+  dialect_code?: string;
+  geo_code?: string;
+}): [
+  string,
+  (
+    | [number, string, string, string]
+    | [number, string, string]
+    | [number, string]
+  ),
+] {
+  let wherePlsStr = '';
+  let returnArr:
+    | [number, string, string, string]
+    | [number, string, string]
+    | [number, string] = [site_text_id, language_code];
+
+  if (dialect_code && geo_code) {
+    wherePlsStr = `
+      and words.dialect_code = $3
+      and words.geo_code = $4
+    `;
+    returnArr = [...returnArr, dialect_code, geo_code];
+  } else if (dialect_code && !geo_code) {
+    wherePlsStr = `
+      and words.dialect_code = $3
+    `;
+    returnArr = [...returnArr, dialect_code];
+  } else if (!dialect_code && geo_code) {
+    wherePlsStr = `
+      and words.geo_code = $3
+    `;
+    returnArr = [...returnArr, geo_code];
+  } else if (!!dialect_code && !geo_code) {
+    wherePlsStr = ``;
+    returnArr = [...returnArr];
+  }
+
   return [
     `
-      select 
+      select
         stts.site_text_translation_id,
         stts.created_at
       from site_text_translations as stts
@@ -253,8 +287,7 @@ export function getAllSiteTextWordTranslation({
           select words.word_id
           from words
           where words.language_code = $2
-            and words.dialect_code = $3
-            and words.geo_code = $4
+            ${wherePlsStr}
         ) as ws
         on ws.word_id = word_definitions.word_id
       ) as wds
@@ -264,7 +297,7 @@ export function getAllSiteTextWordTranslation({
 
       union
 
-      select 
+      select
         stts.site_text_translation_id,
         stts.created_at
       from site_text_translations as stts
@@ -278,13 +311,12 @@ export function getAllSiteTextWordTranslation({
         select phrase_definitions.phrase_definition_id
         from phrase_definitions
         join (
-          select phrases.word_id
+          select phrases.phrase_id
           from phrases
           join words
           on words.word_id = any(phrases.words)
           where words.language_code = $2
-            and words.dialect_code = $3
-            and words.geo_code = $4
+            ${wherePlsStr}
         ) as ps
         on ps.phrase_id = phrase_definitions.phrase_id
       ) as pds
@@ -292,7 +324,7 @@ export function getAllSiteTextWordTranslation({
       where from_type_is_word = true
         and to_type_is_word = false;
     `,
-    [site_text_id, language_code, dialect_code, geo_code],
+    returnArr,
   ];
 }
 
@@ -306,7 +338,41 @@ export function getAllSiteTextPhraseTranslation({
   language_code: string;
   dialect_code: string;
   geo_code: string;
-}): [string, [number, string, string, string]] {
+}): [
+  string,
+  (
+    | [number, string, string, string]
+    | [number, string, string]
+    | [number, string]
+  ),
+] {
+  let wherePlsStr = '';
+  let returnArr:
+    | [number, string, string, string]
+    | [number, string, string]
+    | [number, string] = [site_text_id, language_code];
+
+  if (dialect_code && geo_code) {
+    wherePlsStr = `
+      and words.dialect_code = $3
+      and words.geo_code = $4
+    `;
+    returnArr = [...returnArr, dialect_code, geo_code];
+  } else if (dialect_code && !geo_code) {
+    wherePlsStr = `
+      and words.dialect_code = $3
+    `;
+    returnArr = [...returnArr, dialect_code];
+  } else if (!dialect_code && geo_code) {
+    wherePlsStr = `
+      and words.geo_code = $3
+    `;
+    returnArr = [...returnArr, geo_code];
+  } else if (!!dialect_code && !geo_code) {
+    wherePlsStr = ``;
+    returnArr = [...returnArr];
+  }
+
   return [
     `
       select 
@@ -326,8 +392,7 @@ export function getAllSiteTextPhraseTranslation({
           select words.word_id
           from words
           where words.language_code = $2
-            and words.dialect_code = $3
-            and words.geo_code = $4
+            ${wherePlsStr}
         ) as ws
         on ws.word_id = word_definitions.word_id
       ) as wds
@@ -351,13 +416,12 @@ export function getAllSiteTextPhraseTranslation({
         select phrase_definitions.phrase_definition_id
         from phrase_definitions
         join (
-          select phrases.word_id
+          select phrases.phrase_id
           from phrases
           join words
           on words.word_id = any(phrases.words)
           where words.language_code = $2
-            and words.dialect_code = $3
-            and words.geo_code = $4
+            ${wherePlsStr}
         ) as ps
         on ps.phrase_id = phrase_definitions.phrase_id
       ) as pds
@@ -365,7 +429,7 @@ export function getAllSiteTextPhraseTranslation({
       where from_type_is_word = false
         and to_type_is_word = false;
     `,
-    [site_text_id, language_code, dialect_code, geo_code],
+    returnArr,
   ];
 }
 
@@ -396,5 +460,25 @@ export function getAllSiteTextPhraseDefinition(): [string, []] {
       from site_text_word_definitions;
     `,
     [],
+  ];
+}
+
+export type ToggleSiteTextTranslationVoteStatus = {
+  p_site_text_translation_vote_id: number;
+  p_error_type: ErrorType;
+};
+
+export function toggleSiteTextTranslationVoteStatus({
+  site_text_translation_id,
+  token,
+}: {
+  site_text_translation_id: number;
+  token: string;
+}): [string, [number, string]] {
+  return [
+    `
+      call site_text_translation_vote_toggle($1, $2, 0, '');
+    `,
+    [site_text_translation_id, token],
   ];
 }

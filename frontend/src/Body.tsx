@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Redirect, Route } from 'react-router';
 import {
   IonContent,
   IonHeader,
@@ -9,25 +11,27 @@ import {
   useIonViewWillLeave,
 } from '@ionic/react';
 import { menu, moon, sunny } from 'ionicons/icons';
-import { useState } from 'react';
-import { Redirect, Route } from 'react-router';
+import { Subscription } from 'rxjs';
 
 import './Body.css';
+
 import { ErrorType, useLogoutMutation } from './generated/graphql';
+
+import { globals } from './services/globals';
+import { login_change } from './services/subscriptions';
+
+import { apollo_client } from './main';
+
 import Home from './components/home/Home';
 import Login from './components/authentication/Login';
 import Profile from './components/user/Profile';
 import Register from './components/authentication/Register';
-import { globals } from './services/globals';
-import { login_change } from './services/subscriptions';
-import { Subscription } from 'rxjs';
 import EmailResponsePage from './components/email/EmailResponse';
 import ResetEmailRequestPage from './components/authentication/ResetEmailRequest';
 import PasswordResetFormPage from './components/authentication/PasswordResetForm';
-import { apollo_client } from './main';
-
-import './Body.css';
 import { MapsPage } from './components/map/MapsPage';
+import { SiteTextListPage } from './components/site-text/SiteTextListPage';
+import { SiteTextDetailPage } from './components/site-text/SiteTextDetailPage';
 
 const Body: React.FC = () => {
   const router = useIonRouter();
@@ -248,6 +252,15 @@ const Body: React.FC = () => {
           <Route
             path="/:nation_id/:language_id/:cluster_id/maps"
             component={MapsPage}
+          />
+          <Route
+            path="/:nation_id/:language_id/:cluster_id/site-text-list"
+            component={SiteTextListPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/site-text-detail/:definition_type/:site_text_id"
+            component={SiteTextDetailPage}
           />
 
           <Route exact path="/">

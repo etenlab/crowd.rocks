@@ -8,7 +8,11 @@ import { SiteTextPhraseDefinitionsService } from './site-text-phrase-definitions
 
 import { DefinitionsService } from 'src/components/definitions/definitions.service';
 
-import { SiteTextUpsertInput, SiteTextUpsertOutput } from './types';
+import {
+  SiteTextUpsertInput,
+  SiteTextUpsertOutput,
+  SiteTextDefinitionListOutput,
+} from './types';
 
 import {
   DefinitionUpdateaInput,
@@ -128,5 +132,45 @@ export class SiteTextsService {
     token: string,
   ): Promise<DefinitionUpdateOutput> {
     return this.definitionService.updateDefinition(input, token);
+  }
+
+  async getAllSiteTextDefinitions(): Promise<SiteTextDefinitionListOutput> {
+    try {
+      const { error: wordError, site_text_word_definition_list } =
+        await this.siteTextWordDefinitionService.getAllSiteTextWordDefinitions();
+
+      if (wordError !== ErrorType.NoError) {
+        return {
+          error: wordError,
+          site_text_phrase_definition_list: [],
+          site_text_word_definition_list: [],
+        };
+      }
+
+      const { error: phraseError, site_text_phrase_definition_list } =
+        await this.siteTextPhraseDefinitionService.getAllSiteTextPhraseDefinitions();
+
+      if (phraseError !== ErrorType.NoError) {
+        return {
+          error: phraseError,
+          site_text_phrase_definition_list: [],
+          site_text_word_definition_list: [],
+        };
+      }
+
+      return {
+        error: ErrorType.NoError,
+        site_text_word_definition_list,
+        site_text_phrase_definition_list,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      site_text_word_definition_list: [],
+      site_text_phrase_definition_list: [],
+    };
   }
 }

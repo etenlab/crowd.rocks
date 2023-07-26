@@ -14,24 +14,24 @@ import {
   useIonToast,
   useIonViewDidEnter,
   useIonViewWillLeave,
-} from "@ionic/react";
+} from '@ionic/react';
 import {
   FormEvent,
   PropsWithChildren,
   useEffect,
   useRef,
   useState,
-} from "react";
-import { globals } from "../../services/globals";
+} from 'react';
+import { globals } from '../../services/globals';
 import {
   ErrorType,
   namedOperations,
   usePostCreateMutation,
   useVersionCreateMutation,
-} from "../../generated/graphql";
-import "react-quill/dist/quill.snow.css";
-import "./PartImageCreate.css";
-import { licenses } from "./licenses";
+} from '../../generated/graphql';
+import 'react-quill/dist/quill.snow.css';
+import './PartImageCreate.css';
+import { licenses } from './licenses';
 
 type PartImageCreateProps = {
   readonly parent_election: number;
@@ -42,7 +42,7 @@ type PartImageCreateProps = {
 };
 
 const PartImageCreate: React.FC<PropsWithChildren<PartImageCreateProps>> = (
-  props
+  props,
 ) => {
   return <div className="part-image-create-wrap"></div>;
 };
