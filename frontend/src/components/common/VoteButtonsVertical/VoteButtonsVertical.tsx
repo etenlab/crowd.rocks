@@ -19,7 +19,7 @@ export const VoteButtonsVertical = ({
     <StButtonsDiv>
       <StThumbDiv>
         <StIonIcon
-          color="black"
+          color="green"
           icon={thumbsUp}
           onClick={() => onVoteUpClick()}
         />
@@ -27,7 +27,7 @@ export const VoteButtonsVertical = ({
       </StThumbDiv>
       <StThumbDiv>
         <StIonIcon
-          color="black"
+          color="red"
           icon={thumbsDown}
           onClick={() => onVoteDownClick()}
         />
@@ -43,18 +43,19 @@ const StButtonsDiv = styled.div`
   align-items: center;
   justify-content: center;
   margin-right: 10px;
+  gap: 10px;
 `;
 
 const StIonIcon = styled(IonIcon)(() => ({
   cursor: 'pointer',
-  fontSize: '26px',
+  fontSize: '20px',
   padding: '5px',
 }));
 
 const StThumbDiv = styled.div`
-  width: 80px;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  gap: 5px;
 `;

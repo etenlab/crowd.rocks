@@ -205,3 +205,14 @@ export class SiteTextDefinitionListOutput extends GenericOutput {
   @Field(() => [SiteTextPhraseDefinition], { nullable: 'items' })
   site_text_phrase_definition_list: SiteTextPhraseDefinition[];
 }
+
+@InputType()
+export class SiteTextTranslationUpsertInput {
+  @Field(() => ID) site_text_id: string;
+  @Field(() => Boolean) is_word_definition: boolean;
+  @Field(() => String) translationlike_string: string;
+  @Field(() => String) definitionlike_string: string;
+  @Field(() => String) language_code: string;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
+}

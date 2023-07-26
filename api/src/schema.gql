@@ -172,13 +172,14 @@ type Mutation {
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
   siteTextPhraseDefinitionUpsert(input: SiteTextPhraseDefinitionUpsertInput!): SiteTextPhraseDefinitionUpsertOutput!
   siteTextTranslationUpsert(input: SiteTextTranslationInput!): SiteTextTranslationUpsertOutput!
-  siteTextTranslationVoteUpsert: SiteTextTranslationVoteUpsertOutput!
+  siteTextTranslationVoteUpsert(input: SiteTextTranslationVoteUpsertInput!): SiteTextTranslationVoteUpsertOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextUpsertOutput!
   siteTextWordDefinitionUpsert(input: SiteTextWordDefinitionUpsertInput!): SiteTextWordDefinitionUpsertOutput!
-  toggleVoteStatus(site_text_translation_id: String!): VoteStatusOutputRow!
+  toggleVoteStatus(site_text_translation_id: String!, vote: Boolean!): VoteStatusOutputRow!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
-  upsertFromTranslationlikeString: SiteTextTranslationUpsertOutput!
+  upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): SiteTextTranslationUpsertOutput!
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(input: FromPhraseAndDefintionlikeStringUpsertInput!): PhraseDefinitionUpsertOutput!
+  upsertTranslation(input: SiteTextTranslationUpsertInput!): SiteTextTranslationUpsertOutput!
   upsertWordDefinitionFromWordAndDefinitionlikeString(input: FromWordAndDefintionlikeStringUpsertInput!): WordDefinitionUpsertOutput!
   versionCreateResolver(input: VersionCreateInput!): VersionCreateOutput!
   wordDefinitionUpsert(input: WordDefinitionUpsertInput!): WordDefinitionUpsertOutput!
@@ -355,6 +356,16 @@ type SiteTextTranslationReadOutput {
   site_text_translation: SiteTextTranslation
 }
 
+input SiteTextTranslationUpsertInput {
+  definitionlike_string: String!
+  dialect_code: String
+  geo_code: String
+  is_word_definition: Boolean!
+  language_code: String!
+  site_text_id: ID!
+  translationlike_string: String!
+}
+
 type SiteTextTranslationUpsertOutput {
   error: ErrorType!
   site_text_translation: SiteTextTranslation
@@ -363,6 +374,11 @@ type SiteTextTranslationUpsertOutput {
 type SiteTextTranslationVoteReadOutput {
   error: ErrorType!
   site_text_translation_vote: SiteTextTranslation
+}
+
+input SiteTextTranslationVoteUpsertInput {
+  site_text_translation_id: ID!
+  vote: Boolean!
 }
 
 type SiteTextTranslationVoteUpsertOutput {
@@ -389,6 +405,19 @@ type SiteTextTranslationWithVoteListOutput {
 type SiteTextTranslationWithVoteOutput {
   error: ErrorType!
   site_text_translation_with_vote: SiteTextTranslationWithVote
+}
+
+input SiteTextTranslationsFromInput {
+  from_definition_id: ID!
+  from_type_is_word: Boolean!
+}
+
+input SiteTextTranslationsToInput {
+  definitionlike_string: String!
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  translationlike_string: String!
 }
 
 input SiteTextUpsertInput {

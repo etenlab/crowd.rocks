@@ -470,15 +470,43 @@ export type ToggleSiteTextTranslationVoteStatus = {
 
 export function toggleSiteTextTranslationVoteStatus({
   site_text_translation_id,
+  vote,
   token,
 }: {
   site_text_translation_id: number;
+  vote: boolean;
   token: string;
-}): [string, [number, string]] {
+}): [string, [number, boolean, string]] {
   return [
     `
-      call site_text_translation_vote_toggle($1, $2, 0, '');
+      call site_text_translation_vote_toggle($1, $2, $3, 0, '');
     `,
-    [site_text_translation_id, token],
+    [site_text_translation_id, vote, token],
+  ];
+}
+
+export type GetDefinitionIdBySiteTextId = {
+  definition_id: number;
+};
+
+export function getDefinitionIdBySiteTextId(
+  site_text_id: number,
+  is_word_definition: boolean,
+): [string, [number]] {
+  const columnStr = is_word_definition
+    ? 'word_definition_id'
+    : 'phrase_definition_id';
+
+  const tablename = is_word_definition
+    ? 'site_text_word_definitions'
+    : 'site_text_phrase_definitions';
+  return [
+    `
+      select 
+        ${columnStr} as definition_id
+      from ${tablename}
+      where site_text_id = $1;
+    `,
+    [site_text_id],
   ];
 }

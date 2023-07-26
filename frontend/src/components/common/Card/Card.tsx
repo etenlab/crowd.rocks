@@ -1,13 +1,8 @@
 import { IonCardHeader } from '@ionic/react';
 
-import {
-  CustomCard,
-  CustomCardTitle,
-  Layout,
-  CustomCardContent,
-} from './styled';
+import { CustomCard, CustomCardTitle, CustomCardContent } from './styled';
 
-import { VoteButtonsVertical } from '../VoteButtonsVertical/VoteButtonsVertical';
+import { VoteButtonsHerizontal } from '../VoteButtonsHerizontal';
 
 type CardProps = {
   content?: string;
@@ -30,14 +25,14 @@ export function Card({
   vote,
 }: CardProps) {
   return (
-    <Layout>
-      <CustomCard onClick={() => onClick && onClick()} routerLink={routerLink}>
-        <IonCardHeader>
-          <CustomCardTitle>{content || ''}</CustomCardTitle>
-        </IonCardHeader>
-        <CustomCardContent>{description || ''}</CustomCardContent>
-      </CustomCard>
-      {vote ? <VoteButtonsVertical {...vote} /> : null}
-    </Layout>
+    <CustomCard onClick={() => onClick && onClick()} routerLink={routerLink}>
+      <IonCardHeader>
+        <CustomCardTitle>{content || ''}</CustomCardTitle>
+      </IonCardHeader>
+
+      <CustomCardContent>
+        {description || ''} {vote ? <VoteButtonsHerizontal {...vote} /> : null}
+      </CustomCardContent>
+    </CustomCard>
   );
 }
