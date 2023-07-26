@@ -27,14 +27,13 @@ export class GetOrigMapContentOutput extends MapFileOutput {
   @Field(() => String) content: string;
 }
 
-
 @InputType()
 export class GetOrigMapWordsInput {
-  @Field(() => ID) original_map_id: string;
+  @Field(() => ID, { nullable: true }) original_map_id?: string;
 }
 @ObjectType()
 export class GetOrigMapWordsOutput {
-  @Field(() => [Word]) origMapwords: Word[];
+  @Field(() => [Word]) origMapWords: Word[];
 }
 
 export type OriginalMapWordInput = {

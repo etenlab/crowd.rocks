@@ -118,27 +118,33 @@ export class MapsRepository {
   }
 
   async getOrigMapWords(
-    original_map_id: string,
+    original_map_id?: string,
   ): Promise<GetOrigMapWordsOutput> {
-    const resQ = await this.pg.pool.query(
-      `
-        select
-          w.word_id,
-          ws.wordlike_string as word
-          w.language_code,
-          w.dialect_code,
-          w.geo_code,
-        from
-          words w
-        left join original_map_words omw on
-          w.word_id = omw.word_id
-        left join wordlike_strings ws on
-          w.wordlike_string_id = ws.wordlike_string_id
+    let sqlStr = `
+      select
+        w.word_id,
+        ws.wordlike_string as word,
+        w.language_code,
+        w.dialect_code,
+        w.geo_code
+      from
+        words w
+      left join original_map_words omw on
+        w.word_id = omw.word_id
+      left join wordlike_strings ws on
+        w.wordlike_string_id = ws.wordlike_string_id
+    `;
+    const params = [];
+
+    if (original_map_id) {
+      sqlStr += `
         where
           omw.original_map_id = $1
-      `,
-      [original_map_id],
-    );
+      `;
+      params.push(original_map_id);
+    }
+
+    const resQ = await this.pg.pool.query(sqlStr, params);
 
     const words: Word[] = resQ.rows.map((r) => ({
       word_id: r.word_id,
@@ -149,7 +155,7 @@ export class MapsRepository {
     }));
 
     return {
-      origMapwords: words,
+      origMapWords: words,
     };
   }
 }

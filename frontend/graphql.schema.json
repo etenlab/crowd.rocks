@@ -941,13 +941,9 @@
             "name": "original_map_id",
             "description": null,
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "ID",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -964,7 +960,7 @@
         "description": null,
         "fields": [
           {
-            "name": "origMapwords",
+            "name": "origMapWords",
             "description": null,
             "args": [],
             "type": {
@@ -2918,13 +2914,9 @@
                 "name": "input",
                 "description": null,
                 "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "GetOrigMapWordsInput",
-                    "ofType": null
-                  }
+                  "kind": "INPUT_OBJECT",
+                  "name": "GetOrigMapWordsInput",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,

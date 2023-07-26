@@ -4,7 +4,7 @@ type TVotes = {
 };
 
 type TWord = TLangCodes & {
-  id: number;
+  id: string;
   content: string;
   description?: string;
 };

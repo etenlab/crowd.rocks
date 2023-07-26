@@ -144,12 +144,12 @@ export type GetOrigMapListInput = {
 };
 
 export type GetOrigMapWordsInput = {
-  original_map_id: Scalars['ID']['input'];
+  original_map_id?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type GetOrigMapWordsOutput = {
   __typename?: 'GetOrigMapWordsOutput';
-  origMapwords: Array<Word>;
+  origMapWords: Array<Word>;
 };
 
 export type GetOrigMapsListOutput = {
@@ -460,7 +460,7 @@ export type QueryGetOrigMapContentArgs = {
 
 
 export type QueryGetOrigMapWordsArgs = {
-  input: GetOrigMapWordsInput;
+  input?: InputMaybe<GetOrigMapWordsInput>;
 };
 
 
@@ -845,6 +845,13 @@ export type EmailResponseMutationVariables = Exact<{
 
 
 export type EmailResponseMutation = { __typename?: 'Mutation', emailResponseResolver: { __typename?: 'EmailResponseOutput', error: ErrorType } };
+
+export type GetOrigMapWordsQueryVariables = Exact<{
+  original_map_id?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'Word', word: string, word_id: string, language_code: string }> } };
 
 export type VersionFieldsFragment = { __typename?: 'Version', version_id: string, post_id: number, created_at: string, license_title: string, content: string };
 
@@ -1242,6 +1249,45 @@ export function useEmailResponseMutation(baseOptions?: Apollo.MutationHookOption
 export type EmailResponseMutationHookResult = ReturnType<typeof useEmailResponseMutation>;
 export type EmailResponseMutationResult = Apollo.MutationResult<EmailResponseMutation>;
 export type EmailResponseMutationOptions = Apollo.BaseMutationOptions<EmailResponseMutation, EmailResponseMutationVariables>;
+export const GetOrigMapWordsDocument = gql`
+    query GetOrigMapWords($original_map_id: ID) {
+  getOrigMapWords(input: {original_map_id: $original_map_id}) {
+    origMapWords {
+      word
+      word_id
+      language_code
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetOrigMapWordsQuery__
+ *
+ * To run a query within a React component, call `useGetOrigMapWordsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOrigMapWordsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOrigMapWordsQuery({
+ *   variables: {
+ *      original_map_id: // value for 'original_map_id'
+ *   },
+ * });
+ */
+export function useGetOrigMapWordsQuery(baseOptions?: Apollo.QueryHookOptions<GetOrigMapWordsQuery, GetOrigMapWordsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetOrigMapWordsQuery, GetOrigMapWordsQueryVariables>(GetOrigMapWordsDocument, options);
+      }
+export function useGetOrigMapWordsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOrigMapWordsQuery, GetOrigMapWordsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetOrigMapWordsQuery, GetOrigMapWordsQueryVariables>(GetOrigMapWordsDocument, options);
+        }
+export type GetOrigMapWordsQueryHookResult = ReturnType<typeof useGetOrigMapWordsQuery>;
+export type GetOrigMapWordsLazyQueryHookResult = ReturnType<typeof useGetOrigMapWordsLazyQuery>;
+export type GetOrigMapWordsQueryResult = Apollo.QueryResult<GetOrigMapWordsQuery, GetOrigMapWordsQueryVariables>;
 export const PostCreateDocument = gql`
     mutation PostCreate($content: String!, $parentId: Int) {
   postCreateResolver(input: {content: $content, parent_id: $parentId}) {
@@ -1655,6 +1701,7 @@ export type GetFileUploadUrlQueryResult = Apollo.QueryResult<GetFileUploadUrlQue
     
 export const namedOperations = {
   Query: {
+    GetOrigMapWords: 'GetOrigMapWords',
     PostRead: 'PostRead',
     GetAllSiteTextDefinitions: 'GetAllSiteTextDefinitions',
     GetAllTranslationFromSiteTextDefinitionID: 'GetAllTranslationFromSiteTextDefinitionID',
