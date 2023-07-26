@@ -18,6 +18,7 @@ import {
   SiteTextTranslationWithVoteOutput,
   SiteTextTranslationWithVoteListOutput,
   SiteTextTranslationWithVote,
+  SiteTextTranslationUpsertInput,
 } from './types';
 
 import {
@@ -32,6 +33,8 @@ import {
   getAllSiteTextPhraseDefinition,
   GetAllSiteTextWordDefinition,
   getAllSiteTextWordDefinition,
+  GetDefinitionIdBySiteTextId,
+  getDefinitionIdBySiteTextId,
 } from './sql-string';
 import {
   PhraseDefinition,
@@ -245,6 +248,49 @@ export class SiteTextTranslationsService {
             to_definition_id: word_definition.word_definition_id,
             from_type_is_word: fromInput.from_type_is_word,
             to_type_is_word: true,
+          },
+          token,
+        );
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      site_text_translation: null,
+    };
+  }
+
+  async upsertTranslation(
+    input: SiteTextTranslationUpsertInput,
+    token: string,
+  ): Promise<SiteTextTranslationUpsertOutput> {
+    try {
+      const res1 = await this.pg.pool.query<GetDefinitionIdBySiteTextId>(
+        ...getDefinitionIdBySiteTextId(
+          +input.site_text_id,
+          input.is_word_definition,
+        ),
+      );
+
+      if (res1.rowCount !== 1) {
+        console.error(`no site-text-definition for id: ${input.site_text_id}`);
+      } else {
+        const from_definition_id = res1.rows[0].definition_id;
+        const from_type_is_word = input.is_word_definition;
+
+        return this.upsertFromTranslationlikeString(
+          {
+            from_definition_id: from_definition_id + '',
+            from_type_is_word,
+          },
+          {
+            translationlike_string: input.translationlike_string,
+            definitionlike_string: input.definitionlike_string,
+            language_code: input.language_code,
+            dialect_code: input.dialect_code,
+            geo_code: input.geo_code,
           },
           token,
         );
