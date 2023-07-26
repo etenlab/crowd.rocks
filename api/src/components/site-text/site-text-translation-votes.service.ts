@@ -17,6 +17,8 @@ import {
   getSiteTextTranslationVoteObjById,
   GetSiteTextTranslationVoteStatus,
   getSiteTextTranslationVoteStatus,
+  ToggleSiteTextTranslationVoteStatus,
+  toggleSiteTextTranslationVoteStatus,
 } from './sql-string';
 
 @Injectable()
@@ -103,9 +105,14 @@ export class SiteTextTranslationVotesService {
       );
 
       if (res1.rowCount !== 1) {
-        console.error(
-          `failed at getting vote status with translation_id: ${site_text_translation_id}`,
-        );
+        return {
+          error: ErrorType.NoError,
+          vote_status: {
+            site_text_translation_id: site_text_translation_id + '',
+            upvotes: 0,
+            downvotes: 0,
+          },
+        };
       } else {
         return {
           error: ErrorType.NoError,
@@ -117,6 +124,44 @@ export class SiteTextTranslationVotesService {
           },
         };
       }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      vote_status: null,
+    };
+  }
+
+  async toggleVoteStatus(
+    site_text_translation_id: number,
+    token: string,
+  ): Promise<VoteStatusOutputRow> {
+    try {
+      const res1 =
+        await this.pg.pool.query<ToggleSiteTextTranslationVoteStatus>(
+          ...toggleSiteTextTranslationVoteStatus({
+            site_text_translation_id,
+            token,
+          }),
+        );
+
+      const creatingError = res1.rows[0].p_error_type;
+      const site_text_translation_vote_id =
+        res1.rows[0].p_site_text_translation_vote_id;
+
+      if (
+        creatingError !== ErrorType.NoError ||
+        !site_text_translation_vote_id
+      ) {
+        return {
+          error: creatingError,
+          vote_status: null,
+        };
+      }
+
+      return this.getVoteStatus(site_text_translation_id);
     } catch (e) {
       console.error(e);
     }
