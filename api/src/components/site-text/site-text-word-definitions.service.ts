@@ -9,6 +9,7 @@ import {
   SiteTextWordDefinitionReadOutput,
   SiteTextWordDefinitionUpsertInput,
   SiteTextWordDefinitionUpsertOutput,
+  SiteTextWordDefinitionListOutput,
 } from './types';
 
 import {
@@ -16,6 +17,8 @@ import {
   GetSiteTextWordDefinitionObjectById,
   callSiteTextWordDefinitionUpsertProcedure,
   SiteTextWordDefinitionUpsertProcedureOutputRow,
+  getAllSiteTextWordDefinition,
+  GetAllSiteTextWordDefinition,
 } from './sql-string';
 
 @Injectable()
@@ -94,6 +97,43 @@ export class SiteTextWordDefinitionsService {
     return {
       error: ErrorType.UnknownError,
       site_text_word_definition: null,
+    };
+  }
+
+  async getAllSiteTextWordDefinitions(): Promise<SiteTextWordDefinitionListOutput> {
+    try {
+      const res1 = await this.pg.pool.query<GetAllSiteTextWordDefinition>(
+        ...getAllSiteTextWordDefinition(),
+      );
+
+      const siteTextWordDefinitionList = [];
+
+      for (let i = 0; i < res1.rowCount; i++) {
+        const { error, site_text_word_definition } = await this.read(
+          res1.rows[i].site_text_id,
+        );
+
+        if (error !== ErrorType.NoError) {
+          return {
+            error,
+            site_text_word_definition_list: [],
+          };
+        }
+
+        siteTextWordDefinitionList.push(site_text_word_definition);
+      }
+
+      return {
+        error: ErrorType.NoError,
+        site_text_word_definition_list: siteTextWordDefinitionList,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      site_text_word_definition_list: [],
     };
   }
 }
