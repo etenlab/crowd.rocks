@@ -1,9 +1,9 @@
-import { IonButton, IonContent, IonPage, useIonToast } from "@ionic/react";
-import { useEffect } from "react";
-import { RouteComponentProps, useHistory } from "react-router";
-import { useEmailResponseMutation } from "../../generated/graphql";
+import { IonButton, IonContent, IonPage, useIonToast } from '@ionic/react';
+import { useEffect } from 'react';
+import { RouteComponentProps, useHistory } from 'react-router';
+import { useEmailResponseMutation } from '../../generated/graphql';
 
-import "./EmailResponse.css";
+import './EmailResponse.css';
 
 interface EmailResponsePageProps
   extends RouteComponentProps<{
@@ -24,9 +24,9 @@ const EmailResponsePage: React.FC<EmailResponsePageProps> = ({ match }) => {
     send_token();
   }, []);
 
-  const presentToast = (position: "top" | "middle" | "bottom") => {
+  const presentToast = (position: 'top' | 'middle' | 'bottom') => {
     present({
-      message: "Thank you!",
+      message: 'Thank you!',
       duration: 4000,
       position: position,
     });
@@ -45,13 +45,13 @@ const EmailResponsePage: React.FC<EmailResponsePageProps> = ({ match }) => {
 
       // presentToast("bottom");
     } catch (e) {
-      console.error("error", e);
+      console.error('error', e);
     }
   };
 
   const click_go_home = () => {
     history.push(
-      `/${match.params.nation_id}/${match.params.language_id}/1/home`
+      `/${match.params.nation_id}/${match.params.language_id}/1/home`,
     );
   };
 

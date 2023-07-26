@@ -14,15 +14,15 @@ import {
   useIonToast,
   useIonViewDidEnter,
   useIonViewWillLeave,
-} from "@ionic/react";
+} from '@ionic/react';
 import {
   FormEvent,
   PropsWithChildren,
   useEffect,
   useRef,
   useState,
-} from "react";
-import { globals } from "../../services/globals";
+} from 'react';
+import { globals } from '../../services/globals';
 import {
   ErrorType,
   PartCreateDto,
@@ -30,12 +30,12 @@ import {
   namedOperations,
   usePostCreateMutation,
   useVersionCreateMutation,
-} from "../../generated/graphql";
-import "react-quill/dist/quill.snow.css";
-import "./PostCreate2.css";
-import { licenses } from "./licenses";
-import { Lexitor } from "./Lexitor";
-import PartTextCreate2 from "./PartTextCreate";
+} from '../../generated/graphql';
+import 'react-quill/dist/quill.snow.css';
+import './PostCreate2.css';
+import { licenses } from './licenses';
+import { Lexitor } from './Lexitor';
+import PartTextCreate2 from './PartTextCreate';
 
 type PostCreateProps = {
   readonly parent_election: number;
@@ -57,20 +57,23 @@ const PostCreate2: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
   const [is_unknown_error, set_is_unknown_error] = useState(false);
 
   const [parts_arr, set_parts_arr] = useState<Array<PartCreateDto>>(
-    props.post ?
-    props.post.parts!.map((part, index, arr) => {
-      return {
-        part_id: +part!.part_id,
-        content_type: part!.content_type,
-        position: +part!.position,
-        value: part!.current_version.content,
-      }
-    }) : [{
-      part_id: props.part_id ? +props.part_id : null,
-      content_type: 'lexical-text',
-      position: 1,
-      value: props.default_value,
-    }]
+    props.post
+      ? props.post.parts!.map((part, index, arr) => {
+          return {
+            part_id: +part!.part_id,
+            content_type: part!.content_type,
+            position: +part!.position,
+            value: part!.current_version.content,
+          };
+        })
+      : [
+          {
+            part_id: props.part_id ? +props.part_id : null,
+            content_type: 'lexical-text',
+            position: 1,
+            value: props.default_value,
+          },
+        ],
   );
 
   async function handle_submit(event: FormEvent) {
@@ -84,10 +87,12 @@ const PostCreate2: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
     let post_id: number | null = null;
 
     try {
-      const newVersionContent = parts_arr.find((part) => part.part_id == props.part_id)?.value
+      const newVersionContent = parts_arr.find(
+        (part) => part.part_id == props.part_id,
+      )?.value;
 
       if (props.default_value && props.part_id && newVersionContent) {
-        console.log("version create")
+        console.log('version create');
         result = await versionCreateMutation({
           variables: {
             partId: props.part_id,
@@ -102,7 +107,7 @@ const PostCreate2: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
         });
         error = result?.data?.versionCreateResolver.error;
       } else {
-        console.log("post create")
+        console.log('post create');
         result = await postCreateMutation({
           variables: {
             parentElection: props.parent_election,
@@ -115,7 +120,7 @@ const PostCreate2: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
           : null;
       }
     } catch (e) {
-      console.error("error", e);
+      console.error('error', e);
     }
 
     if (error === ErrorType.NoError) {
@@ -150,8 +155,12 @@ const PostCreate2: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
               return (
                 <PartTextCreate2
                   key={value.position}
-                  default_value={value.value ? JSON.stringify(value.value) : null}
-                  update_content={(state) => update_content(value.position, state)}
+                  default_value={
+                    value.value ? JSON.stringify(value.value) : null
+                  }
+                  update_content={(state) =>
+                    update_content(value.position, state)
+                  }
                 />
               );
             case 'image-url':
@@ -194,9 +203,8 @@ const PostCreate2: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
 
       <div>
         <IonButton onClick={handle_submit}>
-          {
-            props.post ? 'Update' : 'Create'
-          }</IonButton>
+          {props.post ? 'Update' : 'Create'}
+        </IonButton>
       </div>
     </div>
   );
