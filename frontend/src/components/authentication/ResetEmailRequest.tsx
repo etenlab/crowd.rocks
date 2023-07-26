@@ -5,11 +5,11 @@ import {
   IonItem,
   IonLabel,
   IonPage,
-} from "@ionic/react";
-import { FormEvent, useState } from "react";
-import { RouteComponentProps, useHistory } from "react-router";
-import { useResetEmailRequestMutation } from "../../generated/graphql";
-import "./ResetEmailRequest.css";
+} from '@ionic/react';
+import { FormEvent, useState } from 'react';
+import { RouteComponentProps, useHistory } from 'react-router';
+import { useResetEmailRequestMutation } from '../../generated/graphql';
+import './ResetEmailRequest.css';
 
 interface ResetEmailRequestProps
   extends RouteComponentProps<{
@@ -19,7 +19,7 @@ interface ResetEmailRequestProps
 
 const ResetEmailRequestPage: React.FC<ResetEmailRequestProps> = ({ match }) => {
   let history = useHistory();
-  const [email, set_email] = useState("");
+  const [email, set_email] = useState('');
   const [show_response, set_show_response] = useState(false);
 
   const [resetEmailRequestMutation, { data, loading, error }] =
@@ -37,7 +37,7 @@ const ResetEmailRequestPage: React.FC<ResetEmailRequestProps> = ({ match }) => {
         },
       });
     } catch (e) {
-      console.error("error", e);
+      console.error('error', e);
     }
 
     const error = result?.data?.resetEmailRequest.error;
