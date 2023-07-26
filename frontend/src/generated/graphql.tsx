@@ -198,6 +198,7 @@ export type Mutation = {
   updateDefinition: PhraseDefinitionUpsertOutput;
   upsertFromTranslationlikeString: SiteTextTranslationUpsertOutput;
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString: PhraseDefinitionUpsertOutput;
+  upsertTranslation: SiteTextTranslationUpsertOutput;
   upsertWordDefinitionFromWordAndDefinitionlikeString: WordDefinitionUpsertOutput;
   versionCreateResolver: VersionCreateOutput;
   wordDefinitionUpsert: WordDefinitionUpsertOutput;
@@ -270,6 +271,11 @@ export type MutationSiteTextTranslationUpsertArgs = {
 };
 
 
+export type MutationSiteTextTranslationVoteUpsertArgs = {
+  input: SiteTextTranslationVoteUpsertInput;
+};
+
+
 export type MutationSiteTextUpsertArgs = {
   input: SiteTextUpsertInput;
 };
@@ -282,6 +288,7 @@ export type MutationSiteTextWordDefinitionUpsertArgs = {
 
 export type MutationToggleVoteStatusArgs = {
   site_text_translation_id: Scalars['String']['input'];
+  vote: Scalars['Boolean']['input'];
 };
 
 
@@ -290,8 +297,19 @@ export type MutationUpdateDefinitionArgs = {
 };
 
 
+export type MutationUpsertFromTranslationlikeStringArgs = {
+  fromInput: SiteTextTranslationsFromInput;
+  toInput: SiteTextTranslationsToInput;
+};
+
+
 export type MutationUpsertPhraseDefinitionFromPhraseAndDefinitionlikeStringArgs = {
   input: FromPhraseAndDefintionlikeStringUpsertInput;
+};
+
+
+export type MutationUpsertTranslationArgs = {
+  input: SiteTextTranslationUpsertInput;
 };
 
 
@@ -597,6 +615,16 @@ export type SiteTextTranslationReadOutput = {
   site_text_translation?: Maybe<SiteTextTranslation>;
 };
 
+export type SiteTextTranslationUpsertInput = {
+  definitionlike_string: Scalars['String']['input'];
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  geo_code?: InputMaybe<Scalars['String']['input']>;
+  is_word_definition: Scalars['Boolean']['input'];
+  language_code: Scalars['String']['input'];
+  site_text_id: Scalars['ID']['input'];
+  translationlike_string: Scalars['String']['input'];
+};
+
 export type SiteTextTranslationUpsertOutput = {
   __typename?: 'SiteTextTranslationUpsertOutput';
   error: ErrorType;
@@ -607,6 +635,11 @@ export type SiteTextTranslationVoteReadOutput = {
   __typename?: 'SiteTextTranslationVoteReadOutput';
   error: ErrorType;
   site_text_translation_vote?: Maybe<SiteTextTranslation>;
+};
+
+export type SiteTextTranslationVoteUpsertInput = {
+  site_text_translation_id: Scalars['ID']['input'];
+  vote: Scalars['Boolean']['input'];
 };
 
 export type SiteTextTranslationVoteUpsertOutput = {
@@ -637,6 +670,19 @@ export type SiteTextTranslationWithVoteOutput = {
   __typename?: 'SiteTextTranslationWithVoteOutput';
   error: ErrorType;
   site_text_translation_with_vote?: Maybe<SiteTextTranslationWithVote>;
+};
+
+export type SiteTextTranslationsFromInput = {
+  from_definition_id: Scalars['ID']['input'];
+  from_type_is_word: Scalars['Boolean']['input'];
+};
+
+export type SiteTextTranslationsToInput = {
+  definitionlike_string: Scalars['String']['input'];
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  geo_code?: InputMaybe<Scalars['String']['input']>;
+  language_code: Scalars['String']['input'];
+  translationlike_string: Scalars['String']['input'];
 };
 
 export type SiteTextUpsertInput = {
@@ -873,6 +919,10 @@ export type SiteTextWordDefinitionFragmentFragment = { __typename?: 'SiteTextWor
 
 export type SiteTextTranslationWithVoteFragmentFragment = { __typename?: 'SiteTextTranslationWithVote', site_text_translation_id: string, from_type_is_word: boolean, to_type_is_word: boolean, upvotes: number, downvotes: number, created_at: string, from_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
 
+export type SiteTextTranslationFragmentFragment = { __typename?: 'SiteTextTranslation', site_text_translation_id: string, from_type_is_word: boolean, to_type_is_word: boolean, from_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+
+export type VoteStatusFragmentFragment = { __typename?: 'VoteStatus', upvotes: number, downvotes: number, site_text_translation_id: string };
+
 export type GetAllSiteTextDefinitionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -902,6 +952,27 @@ export type SiteTextPhraseDefinitionReadQueryVariables = Exact<{
 
 
 export type SiteTextPhraseDefinitionReadQuery = { __typename?: 'Query', siteTextPhraseDefinitionRead: { __typename?: 'SiteTextPhraseDefinitionReadOutput', error: ErrorType, site_text_phrase_definition?: { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | null } };
+
+export type UpsertTranslationMutationVariables = Exact<{
+  site_text_id: Scalars['ID']['input'];
+  is_word_definition: Scalars['Boolean']['input'];
+  translationlike_string: Scalars['String']['input'];
+  definitionlike_string: Scalars['String']['input'];
+  language_code: Scalars['String']['input'];
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  geo_code?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type UpsertTranslationMutation = { __typename?: 'Mutation', upsertTranslation: { __typename?: 'SiteTextTranslationUpsertOutput', error: ErrorType, site_text_translation?: { __typename?: 'SiteTextTranslation', site_text_translation_id: string, from_type_is_word: boolean, to_type_is_word: boolean, from_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null } };
+
+export type ToggleVoteStatusMutationVariables = Exact<{
+  site_text_translation_id: Scalars['String']['input'];
+  vote: Scalars['Boolean']['input'];
+}>;
+
+
+export type ToggleVoteStatusMutation = { __typename?: 'Mutation', toggleVoteStatus: { __typename?: 'VoteStatusOutputRow', error: ErrorType, vote_status?: { __typename?: 'VoteStatus', upvotes: number, downvotes: number, site_text_translation_id: string } | null } };
 
 export type UserReadQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -1016,6 +1087,29 @@ export const SiteTextTranslationWithVoteFragmentFragmentDoc = gql`
 }
     ${WordDefinitionFragmentFragmentDoc}
 ${PhraseDefinitionFragmentFragmentDoc}`;
+export const SiteTextTranslationFragmentFragmentDoc = gql`
+    fragment SiteTextTranslationFragment on SiteTextTranslation {
+  site_text_translation_id
+  from_definition {
+    ...WordDefinitionFragment
+    ...PhraseDefinitionFragment
+  }
+  to_definition {
+    ...WordDefinitionFragment
+    ...PhraseDefinitionFragment
+  }
+  from_type_is_word
+  to_type_is_word
+}
+    ${WordDefinitionFragmentFragmentDoc}
+${PhraseDefinitionFragmentFragmentDoc}`;
+export const VoteStatusFragmentFragmentDoc = gql`
+    fragment VoteStatusFragment on VoteStatus {
+  upvotes
+  downvotes
+  site_text_translation_id
+}
+    `;
 export const RegisterDocument = gql`
     mutation Register($email: String!, $avatar: String!, $password: String!) {
   register(input: {email: $email, avatar: $avatar, password: $password}) {
@@ -1507,6 +1601,90 @@ export function useSiteTextPhraseDefinitionReadLazyQuery(baseOptions?: Apollo.La
 export type SiteTextPhraseDefinitionReadQueryHookResult = ReturnType<typeof useSiteTextPhraseDefinitionReadQuery>;
 export type SiteTextPhraseDefinitionReadLazyQueryHookResult = ReturnType<typeof useSiteTextPhraseDefinitionReadLazyQuery>;
 export type SiteTextPhraseDefinitionReadQueryResult = Apollo.QueryResult<SiteTextPhraseDefinitionReadQuery, SiteTextPhraseDefinitionReadQueryVariables>;
+export const UpsertTranslationDocument = gql`
+    mutation UpsertTranslation($site_text_id: ID!, $is_word_definition: Boolean!, $translationlike_string: String!, $definitionlike_string: String!, $language_code: String!, $dialect_code: String, $geo_code: String) {
+  upsertTranslation(
+    input: {site_text_id: $site_text_id, is_word_definition: $is_word_definition, translationlike_string: $translationlike_string, definitionlike_string: $definitionlike_string, language_code: $language_code, dialect_code: $dialect_code, geo_code: $geo_code}
+  ) {
+    error
+    site_text_translation {
+      ...SiteTextTranslationFragment
+    }
+  }
+}
+    ${SiteTextTranslationFragmentFragmentDoc}`;
+export type UpsertTranslationMutationFn = Apollo.MutationFunction<UpsertTranslationMutation, UpsertTranslationMutationVariables>;
+
+/**
+ * __useUpsertTranslationMutation__
+ *
+ * To run a mutation, you first call `useUpsertTranslationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertTranslationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertTranslationMutation, { data, loading, error }] = useUpsertTranslationMutation({
+ *   variables: {
+ *      site_text_id: // value for 'site_text_id'
+ *      is_word_definition: // value for 'is_word_definition'
+ *      translationlike_string: // value for 'translationlike_string'
+ *      definitionlike_string: // value for 'definitionlike_string'
+ *      language_code: // value for 'language_code'
+ *      dialect_code: // value for 'dialect_code'
+ *      geo_code: // value for 'geo_code'
+ *   },
+ * });
+ */
+export function useUpsertTranslationMutation(baseOptions?: Apollo.MutationHookOptions<UpsertTranslationMutation, UpsertTranslationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertTranslationMutation, UpsertTranslationMutationVariables>(UpsertTranslationDocument, options);
+      }
+export type UpsertTranslationMutationHookResult = ReturnType<typeof useUpsertTranslationMutation>;
+export type UpsertTranslationMutationResult = Apollo.MutationResult<UpsertTranslationMutation>;
+export type UpsertTranslationMutationOptions = Apollo.BaseMutationOptions<UpsertTranslationMutation, UpsertTranslationMutationVariables>;
+export const ToggleVoteStatusDocument = gql`
+    mutation ToggleVoteStatus($site_text_translation_id: String!, $vote: Boolean!) {
+  toggleVoteStatus(
+    site_text_translation_id: $site_text_translation_id
+    vote: $vote
+  ) {
+    error
+    vote_status {
+      ...VoteStatusFragment
+    }
+  }
+}
+    ${VoteStatusFragmentFragmentDoc}`;
+export type ToggleVoteStatusMutationFn = Apollo.MutationFunction<ToggleVoteStatusMutation, ToggleVoteStatusMutationVariables>;
+
+/**
+ * __useToggleVoteStatusMutation__
+ *
+ * To run a mutation, you first call `useToggleVoteStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useToggleVoteStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [toggleVoteStatusMutation, { data, loading, error }] = useToggleVoteStatusMutation({
+ *   variables: {
+ *      site_text_translation_id: // value for 'site_text_translation_id'
+ *      vote: // value for 'vote'
+ *   },
+ * });
+ */
+export function useToggleVoteStatusMutation(baseOptions?: Apollo.MutationHookOptions<ToggleVoteStatusMutation, ToggleVoteStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ToggleVoteStatusMutation, ToggleVoteStatusMutationVariables>(ToggleVoteStatusDocument, options);
+      }
+export type ToggleVoteStatusMutationHookResult = ReturnType<typeof useToggleVoteStatusMutation>;
+export type ToggleVoteStatusMutationResult = Apollo.MutationResult<ToggleVoteStatusMutation>;
+export type ToggleVoteStatusMutationOptions = Apollo.BaseMutationOptions<ToggleVoteStatusMutation, ToggleVoteStatusMutationVariables>;
 export const UserReadDocument = gql`
     query UserRead($userId: ID!) {
   userReadResolver(input: {user_id: $userId}) {
@@ -1657,6 +1835,8 @@ export const namedOperations = {
     EmailResponse: 'EmailResponse',
     PostCreate: 'PostCreate',
     VersionCreate: 'VersionCreate',
+    UpsertTranslation: 'UpsertTranslation',
+    ToggleVoteStatus: 'ToggleVoteStatus',
     AvatarUpdate: 'AvatarUpdate'
   },
   Fragment: {
@@ -1669,6 +1849,8 @@ export const namedOperations = {
     PhraseDefinitionFragment: 'PhraseDefinitionFragment',
     SiteTextPhraseDefinitionFragment: 'SiteTextPhraseDefinitionFragment',
     SiteTextWordDefinitionFragment: 'SiteTextWordDefinitionFragment',
-    SiteTextTranslationWithVoteFragment: 'SiteTextTranslationWithVoteFragment'
+    SiteTextTranslationWithVoteFragment: 'SiteTextTranslationWithVoteFragment',
+    SiteTextTranslationFragment: 'SiteTextTranslationFragment',
+    VoteStatusFragment: 'VoteStatusFragment'
   }
 }
