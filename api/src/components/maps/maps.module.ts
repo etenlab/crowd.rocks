@@ -4,10 +4,11 @@ import { AuthenticationModule } from '../authentication/authentication.module';
 
 import { MapsResolver } from './maps.resolver';
 import { MapsService } from './maps.service';
-
+import { WordsModule } from '../words/words.module';
+import { MapsRepository } from './maps.repository';
 @Module({
-  imports: [forwardRef(() => CoreModule), AuthenticationModule],
-  providers: [MapsService, MapsResolver],
+  imports: [forwardRef(() => CoreModule), AuthenticationModule, WordsModule],
+  providers: [MapsService, MapsResolver, MapsRepository],
   exports: [MapsService],
 })
 export class MapModule {}

@@ -36,7 +36,7 @@ export class MapsResolver {
     );
     const userToken = await this.authenticationService.getAdminToken();
 
-    const map = await this.mapService.createAndSaveMap(
+    const map = await this.mapService.parseAndSaveNewMap(
       createReadStream(),
       map_file_name,
       userToken,
@@ -52,7 +52,7 @@ export class MapsResolver {
     // when no need in sql proc (request too small - just single-line select)
 
     // TODO: search by pattern
-    console.log(input.search);
+    // console.log(input.search);
 
     const maps = await this.mapService.getOrigMaps();
     return maps;

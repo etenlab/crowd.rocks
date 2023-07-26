@@ -9,14 +9,19 @@ import {
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg } from 'svgson';
+import { WordsService } from '../words/words.service';
+import { MapsRepository } from './maps.repository';
 
 const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
 
 @Injectable()
 export class MapsService {
-  constructor(private pg: PostgresService) {}
-  async createAndSaveMap(
+  constructor(
+    private mapsRepository: MapsRepository,
+    private wordsService: WordsService,
+  ) {}
+  async parseAndSaveNewMap(
     readStream: ReadStream,
     mapFileName: string,
     token: string,
@@ -33,69 +38,27 @@ export class MapsService {
     const { transformedSvgINode, foundWords } =
       this.parseSvgMapString(fileBody);
 
-    console.log('transformedSvgINode ', transformedSvgINode);
-    console.log('foundWords ', foundWords);
-
-    let res;
-    try {
-      //TODO: make some abstraction on DB procedures call with errors handling
-      res = await this.pg.pool.query(
-        `
-          call original_map_create($1,$2,$3, null,null,null,null)
-        `,
-        [mapFileName, fileBody, token],
-      );
-      console.log(
-        'sql stored proc message: ',
-        JSON.stringify(res.rows[0].p_error_type),
-      );
-    } catch (error) {
-      console.log(`Caught error ${error}`);
-    }
+    const { map_file_name, original_map_id, created_at, created_by } =
+      await this.mapsRepository.saveOriginalMap({
+        mapFileName,
+        fileBody,
+        token,
+      });
 
     return {
-      map_file_name: mapFileName,
-      original_map_id: res.rows[0].p_original_map_id,
-      created_at: res.rows[0].p_created_at,
-      created_by: res.rows[0].p_created_by,
+      map_file_name,
+      original_map_id,
+      created_at,
+      created_by,
     };
   }
 
   async getOrigMaps(): Promise<GetOrigMapsListOutput> {
-    const resQ = await this.pg.pool.query(
-      `
-        select original_map_id, map_file_name, created_at, created_by from original_maps
-      `,
-      [],
-    );
-
-    const origMapList = resQ.rows.map(
-      ({ original_map_id, map_file_name, created_at, created_by }) => ({
-        original_map_id,
-        map_file_name,
-        created_at,
-        created_by,
-      }),
-    );
-
-    return { origMapList };
+    return this.mapsRepository.getOrigMaps();
   }
 
   async getOrigMapContent(id: string): Promise<GetOrigMapContentOutput> {
-    const resQ = await this.pg.pool.query(
-      `
-        select content, map_file_name, created_at, created_by from original_maps where original_map_id = $1
-      `,
-      [id],
-    );
-
-    return {
-      original_map_id: String(id),
-      map_file_name: resQ.rows[0].map_file_name,
-      created_at: resQ.rows[0].created_at,
-      created_by: resQ.rows[0].created_by,
-      content: resQ.rows[0].content,
-    };
+    return this.mapsRepository.getOrigMapContent(id);
   }
 
   /**
