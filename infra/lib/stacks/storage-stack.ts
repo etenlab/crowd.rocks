@@ -3,13 +3,14 @@ import { Construct } from 'constructs';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 
 import { importVpc } from '../helpers';
 
 /**
  * Properties required to create Aurora database
  */
-export interface DatabaseStackProps extends cdk.StackProps {
+export interface StorageStackProps extends cdk.StackProps {
   /** Name of the application assigned to logical id of CloudFormation components */
   readonly appPrefix: string;
 
@@ -27,13 +28,16 @@ export interface DatabaseStackProps extends cdk.StackProps {
 
   /** SSM param name to store database security group id */
   readonly dbSecurityGroupSsmParam: string;
+
+  /** Bucket name for storing public files */
+  readonly publicFilesBucketName: string;
 }
 
 /**
  * Creates PostgreSQL Aurora cluster with a single database
  */
-export class DatabaseStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props: DatabaseStackProps) {
+export class StorageStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props: StorageStackProps) {
     super(scope, id, props);
 
     const vpc = importVpc(this, props.vpcSsmParam);
@@ -73,19 +77,17 @@ export class DatabaseStack extends cdk.Stack {
         parameterGroup: rds.ParameterGroup.fromParameterGroupName(
           this,
           'DbParamGroup',
-          'default.aurora-postgresql14',
+          'default.aurora-postgresql15',
         ),
         engine: rds.DatabaseClusterEngine.auroraPostgres({
-          version: rds.AuroraPostgresEngineVersion.VER_14_5, // TODO: do we need a newer version (latest is 15.3)
+          version: rds.AuroraPostgresEngineVersion.VER_15_3,
         }),
         storageEncrypted: true,
         vpc,
         vpcSubnets: {
-          // subnets: vpc.selectSubnets({
-            subnetType: props.isPubliclyAccessible
-              ? ec2.SubnetType.PUBLIC
-              : ec2.SubnetType.PRIVATE_ISOLATED,
-          // }).subnets,
+          subnetType: props.isPubliclyAccessible
+            ? ec2.SubnetType.PUBLIC
+            : ec2.SubnetType.PRIVATE_ISOLATED,
         },
         securityGroups: [databaseSg],
         credentials: rds.Credentials.fromGeneratedSecret('postgres', {
@@ -104,5 +106,36 @@ export class DatabaseStack extends cdk.Stack {
       description: 'Database security group',
       parameterName: props.dbSecurityGroupSsmParam,
     });
+
+    /** Create public S3 bucket for files */
+    const publicFilesBucket = new s3.Bucket(
+      this,
+      `${props.appPrefix}FilesBucket`,
+      {
+        bucketName: props.publicFilesBucketName,
+        removalPolicy: cdk.RemovalPolicy.RETAIN,
+        blockPublicAccess: new s3.BlockPublicAccess({
+          blockPublicAcls: false,
+          blockPublicPolicy: false,
+          ignorePublicAcls: false,
+          restrictPublicBuckets: false,
+        }),
+        objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
+        cors: [
+          {
+            allowedHeaders: ['*'],
+            allowedOrigins: ['*'],
+            exposedHeaders: ['ETag', 'x-amz-meta-custom-header'],
+            allowedMethods: [
+              s3.HttpMethods.HEAD,
+              s3.HttpMethods.GET,
+              s3.HttpMethods.PUT,
+              s3.HttpMethods.POST,
+              s3.HttpMethods.DELETE,
+            ],
+          },
+        ],
+      },
+    );
   }
 }

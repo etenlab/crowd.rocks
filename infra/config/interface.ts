@@ -15,11 +15,10 @@ export interface EnvConfig {
   albSecurityGroupSsmParam: string;
   albListenerSsmParam: string;
   dbSecurityGroupSsmParam: string;
-
   dbCredentialSecret: string;
+  appSecrets: string;
   dbPublicAccess: boolean;
-  fargateApiServices: { [key: string]: FargateServiceConfig };
-  frontendServices: { [key: string]: FrontendAppConfig };
+  apiService: FargateServiceConfig;
   dns: DNSConfig[];
 }
 
@@ -41,14 +40,6 @@ export interface FargateServiceConfig {
   dockerLabels?: { [key: string]: string };
   command?: string[];
   projectTag: string;
-}
-
-export interface FrontendAppConfig {
-  domainName: string;
-  appId: string;
-  enabled: boolean;
-  projectTag: string;
-  createCustomDomain: boolean;
 }
 
 export interface DNSConfig {

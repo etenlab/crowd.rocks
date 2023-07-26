@@ -15,6 +15,9 @@ envSubdomain: 'dev'
 # App ECS cluster name
 ecsClusterName: 'dev-cluster'
 
+# S3 bucket names
+publicFilesBucketName: 'crowdrocks-public-files-dev'
+
 # System Manager params to create
 vpcSsmParam: '/dev/app-vpc-id'
 defaultEcsExecRoleSsmParam: '/dev/ecs-default-execution-role'
@@ -26,6 +29,7 @@ dbSecurityGroupSsmParam: '/dev/db-sg-id'
 
 # Secrets Manager params to create
 dbCredentialSecret: 'dev/db/credentials'
+appSecrets: 'dev/crowdrocks/secrets'
 
 # Whether database is accessible outside of VPC
 dbPublicAccess: true
@@ -35,64 +39,14 @@ dns:
   - existingRootHostedZone: 'dev.crowd.rocks'
     rootDomainCertSsmParam: '/dev/dev.crowd.rocks/root-domain-certificate'
 
-DatabaseApiStack:
-  projectTag: 'Common'
-  albPort: 3001
-  dockerPort: 8101
-  priority: 10
-  rootdomain: 'dev.crowd.rocks'
-  subdomain: 'db-api'
-  serviceName: 'databaseApi'
-  dockerImageUrl: 'etenlab/database-api'
-  healthCheckPath: '/'
-  environment:
-    PORT: 8101
-    RUN_MIGRATIONS: false
-  secrets:
-    DB_HOST: host
-    DB_PORT: port
-    DB_USERNAME: username
-    DB_PASSWORD: password
-    DB_NAME: dbname
-    KEYCLOAK_URL: keycloak-url
-    KEYCLOAK_REALM: keycloak-realm
-    KEYCLOAK_CLIENTS: keycloak-clients
-    CORS_ALLOW_ORIGINS: database-api-cors-allow-origins
-
-ApiServerStack:
-  projectTag: 'Crowd'
+apiService:
   albPort: 3003
   dockerPort: 80
-  priority: 30
+  priority: 10
   rootdomain: 'dev.crowd.rocks'
   subdomain: 'api'
-  serviceName: 'cpgServer'
-  dockerImageUrl: 'etenlab/cpg-server'
+  serviceName: 'crowdrocksApiServer'
+  dockerImageUrl: 'etenlab/crowdrocks-api'
   cpu: 2048
   memory: 4096
   healthCheckPath: '/'
-  environment:
-    PORT: 80
-    CORS_ALLOW_ORIGINS: ''
-    MAX_FILE_SIZE: 1073741824 # 1024 * 1024 * 1024
-    MAX_FILES: 10
-    FRONTEND_URL: https://dev.crowd.rocks
-    FROM_EMAIL_ADDRESS: aslambabu@gmail.com
-  # TODO: create a secret per app rather than one shared across all apps
-  secrets:
-    DB_HOST: host
-    DB_PORT: port
-    DB_USERNAME: username
-    DB_PASSWORD: password
-    DB_NAME: dbname
-    AWS_S3_REGION: aws-s3-region
-    AWS_S3_BUCKET_NAME: aws-s3-bucket-name
-    AWS_S3_ACCESS_ID: aws-s3-access-id
-    AWS_S3_SECRET_KEY: aws-s3-secret-key
-    KEYCLOAK_URL: keycloak-url
-    KEYCLOAK_REALM: keycloak-realm
-    KEYCLOAK_CLIENT_ID: keycloak-client-id
-    KEYCLOAK_CLIENT_SECRET: keyloak-client-secret-cpg
-    JWT_KEY: jwt-key-cpg
-    AWS_ACCESS_KEY_ID: aws-key-id-cpg
-    AWS_SECRET_ACCESS_KEY: aws-secret-key-cpg

@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { DatabaseStack } from '../../lib/stacks/database-stack';
+import { StorageStack } from '../../lib/stacks/storage-stack';
 import * as VpcMock from '../mocks/vpc-mock';
 import * as SsmMock from '../mocks/ssm-mock';
 
@@ -23,7 +23,7 @@ describe('DatabaseStack', () => {
   test('Creates database cluster with public access', () => {
     const app = new cdk.App();
 
-    const databaseStack = new DatabaseStack(app, 'DatabaseStack', stackParams);
+    const databaseStack = new StorageStack(app, 'DatabaseStack', stackParams);
 
     const template = Template.fromStack(databaseStack);
 
@@ -114,7 +114,7 @@ describe('DatabaseStack', () => {
 
     const app = new cdk.App();
 
-    const databaseStack = new DatabaseStack(app, 'DatabaseStack', params);
+    const databaseStack = new StorageStack(app, 'DatabaseStack', params);
 
     const template = Template.fromStack(databaseStack);
 
