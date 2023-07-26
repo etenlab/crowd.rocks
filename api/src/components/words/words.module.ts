@@ -9,4 +9,4 @@ import { WordsService } from './words.service';
   providers: [WordsService, WordsResolver],
   exports: [WordsService],
 })
-export class WordModule {}
+export class WordsModule {}

@@ -584,6 +584,7 @@ create table original_map_words(
   word_id bigint not null references words(word_id),
   updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE public.original_map_words ADD CONSTRAINT original_map_word_unq UNIQUE (word_id,original_map_id);
 
 create table translated_maps(
   translated_map_id bigserial primary key,

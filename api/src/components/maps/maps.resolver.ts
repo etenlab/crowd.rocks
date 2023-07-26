@@ -9,6 +9,8 @@ import {
   GetOrigMapContentOutput,
   GetOrigMapListInput,
   GetOrigMapsListOutput,
+  GetOrigMapWordsInput,
+  GetOrigMapWordsOutput,
   MapFileOutput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
@@ -36,11 +38,11 @@ export class MapsResolver {
     );
     const userToken = await this.authenticationService.getAdminToken();
 
-    const map = await this.mapService.createAndSaveMap(
-      createReadStream(),
-      map_file_name,
-      userToken,
-    );
+    const map = await this.mapService.parseAndSaveNewMap({
+      readStream: createReadStream(),
+      mapFileName: map_file_name,
+      token: userToken,
+    });
     return map;
   }
 
@@ -52,7 +54,7 @@ export class MapsResolver {
     // when no need in sql proc (request too small - just single-line select)
 
     // TODO: search by pattern
-    console.log(input.search);
+    // console.log(input.search);
 
     const maps = await this.mapService.getOrigMaps();
     return maps;
@@ -71,17 +73,11 @@ export class MapsResolver {
     return mapContent;
   }
 
-  // @Mutation(() => TMapFile)
-  // async mapUpdate(
-  //   @Args({ name: 'file', type: () => GraphQLUpload })
-  //   { createReadStream, filename: file_name }: FileUpload,
-  //   @Args({ name: 'id', type: () => Int }) id: number,
-  // ): Promise<File> {
-  //   const file = await this.mapService.updateMapContent(
-  //     createReadStream(),
-  //     id,
-  //     file_name,
-  //   );
-  //   return file;
-  // }
+  @Query(() => GetOrigMapWordsOutput)
+  async getOrigMapWords(
+    @Args('input', { nullable: true }) input?: GetOrigMapWordsInput,
+  ): Promise<GetOrigMapWordsOutput> {
+    const words = await this.mapService.getOrigMapWords(input?.original_map_id);
+    return words;
+  }
 }
