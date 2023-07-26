@@ -1,49 +1,27 @@
 import {
   IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
   IonIcon,
   IonImg,
   IonInput,
   IonItem,
   IonLabel,
-  IonList,
-  IonMenu,
-  IonMenuButton,
-  IonMenuToggle,
   IonPage,
-  IonRouterOutlet,
-  IonTitle,
-  IonToolbar,
   useIonViewWillEnter,
-} from "@ionic/react";
+} from '@ionic/react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
+
 import {
-  ChangeEvent,
-  ChangeEventHandler,
-  FormEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { useHistory } from "react-router";
-import {
-  ErrorType,
   useAvatarUpdateMutation,
   useGetFileUploadUrlLazyQuery,
-  useGetFileUploadUrlQuery,
-} from "../../generated/graphql";
-import { globals } from "../../services/globals";
-import "./Profile.css";
-import Cropper from "cropperjs";
-import { imageOutline } from "ionicons/icons";
-import { CropperComp } from "../post/Cropper";
+} from '../../generated/graphql';
+import { globals } from '../../services/globals';
+import './Profile.css';
+import { imageOutline } from 'ionicons/icons';
+import { CropperComp } from '../post/Cropper';
 
 const Profile: React.FC = () => {
-  let history = useHistory();
-
-  const [avatarUpdateMutation, { data, loading, error }] =
-    useAvatarUpdateMutation();
+  const [avatarUpdateMutation] = useAvatarUpdateMutation();
 
   const [show_update_avatar_form, set_show_update_avatar_form] =
     useState(false);
@@ -51,7 +29,7 @@ const Profile: React.FC = () => {
 
   const fileInput = useRef(null);
 
-  const [file_url, set_file_url] = useState("");
+  const [file_url, set_file_url] = useState('');
 
   const [blob, set_blob] = useState<any>();
 
@@ -65,12 +43,12 @@ const Profile: React.FC = () => {
     useGetFileUploadUrlLazyQuery();
 
   useIonViewWillEnter(() => {
-    document.title = "Profile";
+    document.title = 'Profile';
   });
 
   useEffect(() => {
     if (globals.get_token() === null) {
-      history.push("/US/eng/1/home");
+      history.push('/US/eng/1/home');
     }
   }, []);
 
@@ -94,12 +72,12 @@ const Profile: React.FC = () => {
         },
       });
     } catch (e) {
-      console.error("error", e);
+      console.error('error', e);
     }
 
     const error = result?.data?.avatarUpdateResolver.error;
 
-    if (error == "NoError") {
+    if (error == 'NoError') {
       globals.set_avatar(result?.data?.avatarUpdateResolver.user?.avatar!);
       set_show_update_avatar_form(false);
     }
@@ -129,12 +107,12 @@ const Profile: React.FC = () => {
           res.data?.fileUploadUrlRequest.avatar_image_url;
 
         const put = await fetch(url, {
-          method: "PUT",
+          method: 'PUT',
           headers: {
-            "Content-Type": "image/png",
+            'Content-Type': 'image/png',
           },
           body: blob,
-          mode: "cors",
+          mode: 'cors',
         });
 
         globals.set_profile_url(avatar_image_url);
@@ -265,7 +243,7 @@ const Profile: React.FC = () => {
                 </IonLabel>
 
                 <IonButton
-                  color={"danger"}
+                  color={'danger'}
                   onClick={() => {
                     set_show_image_update_form(false);
                   }}

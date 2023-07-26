@@ -2,34 +2,21 @@ import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
-export type Exact<T extends { [key: string]: unknown }> = {
-  [K in keyof T]: T[K];
-};
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
-  [SubKey in K]?: Maybe<T[SubKey]>;
-};
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
-  [SubKey in K]: Maybe<T[SubKey]>;
-};
-export type MakeEmpty<
-  T extends { [key: string]: unknown },
-  K extends keyof T,
-> = { [_ in K]?: never };
-export type Incremental<T> =
-  | T
-  | {
-      [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never;
-    };
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string };
-  String: { input: string; output: string };
-  Boolean: { input: boolean; output: boolean };
-  Int: { input: number; output: number };
-  Float: { input: number; output: number };
+  ID: { input: string; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
   /** The `Upload` scalar type represents a file upload. */
-  Upload: { input: any; output: any };
+  Upload: { input: any; output: any; }
 };
 
 export type AvatarUpdateInput = {
@@ -109,7 +96,7 @@ export enum ErrorType {
   WordDefinitionNotFound = 'WordDefinitionNotFound',
   WordInsertFailed = 'WordInsertFailed',
   WordLikeStringInsertFailed = 'WordLikeStringInsertFailed',
-  WordNotFound = 'WordNotFound',
+  WordNotFound = 'WordNotFound'
 }
 
 export type FileUploadUrlRequest = {
@@ -190,6 +177,7 @@ export type Mutation = {
   siteTextTranslationVoteUpsert: SiteTextTranslationVoteUpsertOutput;
   siteTextUpsert: SiteTextUpsertOutput;
   siteTextWordDefinitionUpsert: SiteTextWordDefinitionUpsertOutput;
+  toggleVoteStatus: VoteStatusOutputRow;
   updateDefinition: PhraseDefinitionUpsertOutput;
   upsertFromTranslationlikeString: SiteTextTranslationUpsertOutput;
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString: PhraseDefinitionUpsertOutput;
@@ -199,86 +187,111 @@ export type Mutation = {
   wordUpsert: WordUpsertOutput;
 };
 
+
 export type MutationAvatarUpdateResolverArgs = {
   input: AvatarUpdateInput;
 };
+
 
 export type MutationEmailResponseResolverArgs = {
   input: EmailResponseInput;
 };
 
+
 export type MutationLoginArgs = {
   input: LoginInput;
 };
+
 
 export type MutationLogoutArgs = {
   input: LogoutInput;
 };
 
+
 export type MutationMapUploadArgs = {
   file: Scalars['Upload']['input'];
 };
+
 
 export type MutationPasswordResetFormResolverArgs = {
   input: PasswordResetFormInput;
 };
 
+
 export type MutationPhraseDefinitionUpsertArgs = {
   input: PhraseDefinitionUpsertInput;
 };
+
 
 export type MutationPhraseUpsertArgs = {
   input: PhraseUpsertInput;
 };
 
+
 export type MutationPostCreateResolverArgs = {
   input: PostCreateInput;
 };
+
 
 export type MutationRegisterArgs = {
   input: RegisterInput;
 };
 
+
 export type MutationResetEmailRequestArgs = {
   input: ResetEmailRequestInput;
 };
+
 
 export type MutationSiteTextPhraseDefinitionUpsertArgs = {
   input: SiteTextPhraseDefinitionUpsertInput;
 };
 
+
 export type MutationSiteTextTranslationUpsertArgs = {
   input: SiteTextTranslationInput;
 };
+
 
 export type MutationSiteTextUpsertArgs = {
   input: SiteTextUpsertInput;
 };
 
+
 export type MutationSiteTextWordDefinitionUpsertArgs = {
   input: SiteTextWordDefinitionUpsertInput;
 };
+
+
+export type MutationToggleVoteStatusArgs = {
+  site_text_translation_id: Scalars['String']['input'];
+};
+
 
 export type MutationUpdateDefinitionArgs = {
   input: DefinitionUpdateaInput;
 };
 
-export type MutationUpsertPhraseDefinitionFromPhraseAndDefinitionlikeStringArgs =
-  {
-    input: FromPhraseAndDefintionlikeStringUpsertInput;
-  };
+
+export type MutationUpsertPhraseDefinitionFromPhraseAndDefinitionlikeStringArgs = {
+  input: FromPhraseAndDefintionlikeStringUpsertInput;
+};
+
 
 export type MutationUpsertWordDefinitionFromWordAndDefinitionlikeStringArgs = {
   input: FromWordAndDefintionlikeStringUpsertInput;
 };
 
+
 export type MutationVersionCreateResolverArgs = {
   input: VersionCreateInput;
 };
 
+
 export type MutationWordDefinitionUpsertArgs = {
   input: WordDefinitionUpsertInput;
 };
+
 
 export type MutationWordUpsertArgs = {
   input: WordUpsertInput;
@@ -374,10 +387,11 @@ export type Query = {
   __typename?: 'Query';
   fileUploadUrlRequest: FileUploadUrlResponse;
   getAllRecommendedTranslation: SiteTextTranslationWithVoteListOutput;
+  getAllSiteTextDefinitions: SiteTextDefinitionListOutput;
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
+  getOrigMapsList: GetOrigMapsListOutput;
   getRecommendedTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteOutput;
   getVoteStatus: SiteTextTranslationVoteReadOutput;
-  getOrigMapsList: GetOrigMapsListOutput;
   phraseDefinitionRead: PhraseDefinitionReadOutput;
   phraseRead: PhraseReadOutput;
   postReadResolver: PostReadOutput;
@@ -390,9 +404,11 @@ export type Query = {
   wordRead: WordReadOutput;
 };
 
+
 export type QueryFileUploadUrlRequestArgs = {
   input: FileUploadUrlRequest;
 };
+
 
 export type QueryGetAllRecommendedTranslationArgs = {
   dialect_code: Scalars['String']['input'];
@@ -400,13 +416,15 @@ export type QueryGetAllRecommendedTranslationArgs = {
   language_code: Scalars['String']['input'];
 };
 
+
 export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
-  dialect_code: Scalars['String']['input'];
-  geo_code: Scalars['String']['input'];
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  geo_code?: InputMaybe<Scalars['String']['input']>;
   language_code: Scalars['String']['input'];
   site_text_id: Scalars['String']['input'];
   site_text_type_is_word: Scalars['Boolean']['input'];
 };
+
 
 export type QueryGetRecommendedTranslationFromSiteTextDefinitionIdArgs = {
   dialect_code: Scalars['String']['input'];
@@ -416,45 +434,56 @@ export type QueryGetRecommendedTranslationFromSiteTextDefinitionIdArgs = {
   site_text_type_is_word: Scalars['Boolean']['input'];
 };
 
+
 export type QueryGetVoteStatusArgs = {
   site_text_translation_id: Scalars['String']['input'];
 };
+
 
 export type QueryPhraseDefinitionReadArgs = {
   id: Scalars['ID']['input'];
 };
 
+
 export type QueryPhraseReadArgs = {
   input: PhraseReadInput;
 };
+
 
 export type QueryPostReadResolverArgs = {
   input: PostReadInput;
 };
 
+
 export type QuerySiteTextPhraseDefinitionReadArgs = {
   id: Scalars['String']['input'];
 };
+
 
 export type QuerySiteTextTranslationReadArgs = {
   id: Scalars['String']['input'];
 };
 
+
 export type QuerySiteTextTranslationVoteReadArgs = {
   id: Scalars['String']['input'];
 };
+
 
 export type QuerySiteTextWordDefinitionReadArgs = {
   id: Scalars['String']['input'];
 };
 
+
 export type QueryUserReadResolverArgs = {
   input: UserReadInput;
 };
 
+
 export type QueryWordDefinitionReadArgs = {
   id: Scalars['ID']['input'];
 };
+
 
 export type QueryWordReadArgs = {
   input: WordReadInput;
@@ -487,6 +516,13 @@ export type Session = {
   avatar_url?: Maybe<Scalars['String']['output']>;
   token: Scalars['String']['output'];
   user_id: Scalars['ID']['output'];
+};
+
+export type SiteTextDefinitionListOutput = {
+  __typename?: 'SiteTextDefinitionListOutput';
+  error: ErrorType;
+  site_text_phrase_definition_list: Array<Maybe<SiteTextPhraseDefinition>>;
+  site_text_word_definition_list: Array<Maybe<SiteTextWordDefinition>>;
 };
 
 export type SiteTextPhraseDefinition = {
@@ -566,9 +602,7 @@ export type SiteTextTranslationWithVote = {
 export type SiteTextTranslationWithVoteListOutput = {
   __typename?: 'SiteTextTranslationWithVoteListOutput';
   error: ErrorType;
-  site_text_translation_with_vote_list: Array<
-    Maybe<SiteTextTranslationWithVote>
-  >;
+  site_text_translation_with_vote_list: Array<Maybe<SiteTextTranslationWithVote>>;
 };
 
 export type SiteTextTranslationWithVoteOutput = {
@@ -659,6 +693,12 @@ export type VoteStatus = {
   upvotes: Scalars['Int']['output'];
 };
 
+export type VoteStatusOutputRow = {
+  __typename?: 'VoteStatusOutputRow';
+  error: ErrorType;
+  vote_status?: Maybe<VoteStatus>;
+};
+
 export type Word = {
   __typename?: 'Word';
   dialect_code?: Maybe<Scalars['String']['output']>;
@@ -715,13 +755,7 @@ export type WordUpsertOutput = {
   word?: Maybe<Word>;
 };
 
-export type SessionFieldsFragment = {
-  __typename?: 'Session';
-  user_id: string;
-  token: string;
-  avatar: string;
-  avatar_url?: string | null;
-};
+export type SessionFieldsFragment = { __typename?: 'Session', user_id: string, token: string, avatar: string, avatar_url?: string | null };
 
 export type RegisterMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -729,128 +763,57 @@ export type RegisterMutationVariables = Exact<{
   password: Scalars['String']['input'];
 }>;
 
-export type RegisterMutation = {
-  __typename?: 'Mutation';
-  register: {
-    __typename?: 'RegisterOutput';
-    error: ErrorType;
-    session?: {
-      __typename?: 'Session';
-      user_id: string;
-      token: string;
-      avatar: string;
-      avatar_url?: string | null;
-    } | null;
-  };
-};
+
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'RegisterOutput', error: ErrorType, session?: { __typename?: 'Session', user_id: string, token: string, avatar: string, avatar_url?: string | null } | null } };
 
 export type LoginMutationVariables = Exact<{
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
 }>;
 
-export type LoginMutation = {
-  __typename?: 'Mutation';
-  login: {
-    __typename?: 'LoginOutput';
-    error: ErrorType;
-    session?: {
-      __typename?: 'Session';
-      user_id: string;
-      token: string;
-      avatar: string;
-      avatar_url?: string | null;
-    } | null;
-  };
-};
+
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginOutput', error: ErrorType, session?: { __typename?: 'Session', user_id: string, token: string, avatar: string, avatar_url?: string | null } | null } };
 
 export type LogoutMutationVariables = Exact<{
   token: Scalars['String']['input'];
 }>;
 
-export type LogoutMutation = {
-  __typename?: 'Mutation';
-  logout: { __typename?: 'LogoutOutput'; error: ErrorType };
-};
+
+export type LogoutMutation = { __typename?: 'Mutation', logout: { __typename?: 'LogoutOutput', error: ErrorType } };
 
 export type ResetEmailRequestMutationVariables = Exact<{
   email: Scalars['String']['input'];
 }>;
 
-export type ResetEmailRequestMutation = {
-  __typename?: 'Mutation';
-  resetEmailRequest: {
-    __typename?: 'ResetEmailRequestOutput';
-    error: ErrorType;
-  };
-};
+
+export type ResetEmailRequestMutation = { __typename?: 'Mutation', resetEmailRequest: { __typename?: 'ResetEmailRequestOutput', error: ErrorType } };
 
 export type PasswordResetFormRequestMutationVariables = Exact<{
   token: Scalars['String']['input'];
   password: Scalars['String']['input'];
 }>;
 
-export type PasswordResetFormRequestMutation = {
-  __typename?: 'Mutation';
-  passwordResetFormResolver: {
-    __typename?: 'LoginOutput';
-    error: ErrorType;
-    session?: {
-      __typename?: 'Session';
-      user_id: string;
-      token: string;
-      avatar: string;
-      avatar_url?: string | null;
-    } | null;
-  };
-};
+
+export type PasswordResetFormRequestMutation = { __typename?: 'Mutation', passwordResetFormResolver: { __typename?: 'LoginOutput', error: ErrorType, session?: { __typename?: 'Session', user_id: string, token: string, avatar: string, avatar_url?: string | null } | null } };
 
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
 }>;
 
-export type EmailResponseMutation = {
-  __typename?: 'Mutation';
-  emailResponseResolver: {
-    __typename?: 'EmailResponseOutput';
-    error: ErrorType;
-  };
-};
 
-export type VersionFieldsFragment = {
-  __typename?: 'Version';
-  version_id: string;
-  post_id: number;
-  created_at: string;
-  license_title: string;
-  content: string;
-};
+export type EmailResponseMutation = { __typename?: 'Mutation', emailResponseResolver: { __typename?: 'EmailResponseOutput', error: ErrorType } };
 
-export type PostFieldsFragment = {
-  __typename?: 'Post';
-  post_id: string;
-  created_at: string;
-  created_by: number;
-};
+export type VersionFieldsFragment = { __typename?: 'Version', version_id: string, post_id: number, created_at: string, license_title: string, content: string };
+
+export type PostFieldsFragment = { __typename?: 'Post', post_id: string, created_at: string, created_by: number };
 
 export type PostCreateMutationVariables = Exact<{
   content: Scalars['String']['input'];
   parentId?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
-export type PostCreateMutation = {
-  __typename?: 'Mutation';
-  postCreateResolver: {
-    __typename?: 'PostCreateOutput';
-    error: ErrorType;
-    post?: {
-      __typename?: 'Post';
-      post_id: string;
-      created_at: string;
-      created_by: number;
-    } | null;
-  };
-};
+
+export type PostCreateMutation = { __typename?: 'Mutation', postCreateResolver: { __typename?: 'PostCreateOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, created_at: string, created_by: number } | null } };
 
 export type VersionCreateMutationVariables = Exact<{
   postId: Scalars['Int']['input'];
@@ -858,129 +821,184 @@ export type VersionCreateMutationVariables = Exact<{
   license_title: Scalars['String']['input'];
 }>;
 
-export type VersionCreateMutation = {
-  __typename?: 'Mutation';
-  versionCreateResolver: {
-    __typename?: 'VersionCreateOutput';
-    error: ErrorType;
-    version?: {
-      __typename?: 'Version';
-      version_id: string;
-      post_id: number;
-      created_at: string;
-      license_title: string;
-      content: string;
-    } | null;
-  };
-};
+
+export type VersionCreateMutation = { __typename?: 'Mutation', versionCreateResolver: { __typename?: 'VersionCreateOutput', error: ErrorType, version?: { __typename?: 'Version', version_id: string, post_id: number, created_at: string, license_title: string, content: string } | null } };
 
 export type PostReadQueryVariables = Exact<{
   postId: Scalars['ID']['input'];
 }>;
 
-export type PostReadQuery = {
-  __typename?: 'Query';
-  postReadResolver: {
-    __typename?: 'PostReadOutput';
-    error: ErrorType;
-    post?: {
-      __typename?: 'Post';
-      post_id: string;
-      created_at: string;
-      created_by: number;
-    } | null;
-  };
-};
+
+export type PostReadQuery = { __typename?: 'Query', postReadResolver: { __typename?: 'PostReadOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, created_at: string, created_by: number } | null } };
+
+export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string };
+
+export type WordFragmentFragment = { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
+
+export type WordDefinitionFragmentFragment = { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } };
+
+export type PhraseDefinitionFragmentFragment = { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } };
+
+export type SiteTextPhraseDefinitionFragmentFragment = { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } };
+
+export type SiteTextWordDefinitionFragmentFragment = { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+
+export type SiteTextTranslationWithVoteFragmentFragment = { __typename?: 'SiteTextTranslationWithVote', site_text_translation_id: string, from_type_is_word: boolean, to_type_is_word: boolean, upvotes: number, downvotes: number, created_at: string, from_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+
+export type GetAllSiteTextDefinitionsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllSiteTextDefinitionsQuery = { __typename?: 'Query', getAllSiteTextDefinitions: { __typename?: 'SiteTextDefinitionListOutput', error: ErrorType, site_text_phrase_definition_list: Array<{ __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | null>, site_text_word_definition_list: Array<{ __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null> } };
+
+export type GetAllTranslationFromSiteTextDefinitionIdQueryVariables = Exact<{
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  geo_code?: InputMaybe<Scalars['String']['input']>;
+  language_code: Scalars['String']['input'];
+  site_text_id: Scalars['String']['input'];
+  site_text_type_is_word: Scalars['Boolean']['input'];
+}>;
+
+
+export type GetAllTranslationFromSiteTextDefinitionIdQuery = { __typename?: 'Query', getAllTranslationFromSiteTextDefinitionID: { __typename?: 'SiteTextTranslationWithVoteListOutput', error: ErrorType, site_text_translation_with_vote_list: Array<{ __typename?: 'SiteTextTranslationWithVote', site_text_translation_id: string, from_type_is_word: boolean, to_type_is_word: boolean, upvotes: number, downvotes: number, created_at: string, from_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null> } };
+
+export type SiteTextWordDefinitionReadQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type SiteTextWordDefinitionReadQuery = { __typename?: 'Query', siteTextWordDefinitionRead: { __typename?: 'SiteTextWordDefinitionReadOutput', error: ErrorType, site_text_word_definition?: { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null } };
+
+export type SiteTextPhraseDefinitionReadQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type SiteTextPhraseDefinitionReadQuery = { __typename?: 'Query', siteTextPhraseDefinitionRead: { __typename?: 'SiteTextPhraseDefinitionReadOutput', error: ErrorType, site_text_phrase_definition?: { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | null } };
 
 export type UserReadQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
 }>;
 
-export type UserReadQuery = {
-  __typename?: 'Query';
-  userReadResolver: {
-    __typename?: 'UserReadOutput';
-    error: ErrorType;
-    user?: {
-      __typename?: 'User';
-      avatar: string;
-      avatar_url?: string | null;
-      user_id: string;
-    } | null;
-  };
-};
+
+export type UserReadQuery = { __typename?: 'Query', userReadResolver: { __typename?: 'UserReadOutput', error: ErrorType, user?: { __typename?: 'User', avatar: string, avatar_url?: string | null, user_id: string } | null } };
 
 export type AvatarUpdateMutationVariables = Exact<{
   avatar: Scalars['String']['input'];
 }>;
 
-export type AvatarUpdateMutation = {
-  __typename?: 'Mutation';
-  avatarUpdateResolver: {
-    __typename?: 'AvatarUpdateOutput';
-    error: ErrorType;
-    user?: {
-      __typename?: 'User';
-      avatar: string;
-      avatar_url?: string | null;
-      user_id: string;
-    } | null;
-  };
-};
+
+export type AvatarUpdateMutation = { __typename?: 'Mutation', avatarUpdateResolver: { __typename?: 'AvatarUpdateOutput', error: ErrorType, user?: { __typename?: 'User', avatar: string, avatar_url?: string | null, user_id: string } | null } };
 
 export type GetFileUploadUrlQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
 }>;
 
-export type GetFileUploadUrlQuery = {
-  __typename?: 'Query';
-  fileUploadUrlRequest: {
-    __typename?: 'FileUploadUrlResponse';
-    error: ErrorType;
-    url: string;
-    avatar_image_url: string;
-  };
-};
+
+export type GetFileUploadUrlQuery = { __typename?: 'Query', fileUploadUrlRequest: { __typename?: 'FileUploadUrlResponse', error: ErrorType, url: string, avatar_image_url: string } };
 
 export const SessionFieldsFragmentDoc = gql`
-  fragment SessionFields on Session {
-    user_id
-    token
-    avatar
-    avatar_url
-  }
-`;
+    fragment SessionFields on Session {
+  user_id
+  token
+  avatar
+  avatar_url
+}
+    `;
 export const VersionFieldsFragmentDoc = gql`
-  fragment VersionFields on Version {
-    version_id
-    post_id
-    created_at
-    license_title
-    content
-  }
-`;
+    fragment VersionFields on Version {
+  version_id
+  post_id
+  created_at
+  license_title
+  content
+}
+    `;
 export const PostFieldsFragmentDoc = gql`
-  fragment PostFields on Post {
-    post_id
-    created_at
-    created_by
+    fragment PostFields on Post {
+  post_id
+  created_at
+  created_by
+}
+    `;
+export const PhraseFragmentFragmentDoc = gql`
+    fragment PhraseFragment on Phrase {
+  phrase_id
+  phrase
+}
+    `;
+export const PhraseDefinitionFragmentFragmentDoc = gql`
+    fragment PhraseDefinitionFragment on PhraseDefinition {
+  phrase_definition_id
+  definition
+  phrase {
+    ...PhraseFragment
   }
-`;
+}
+    ${PhraseFragmentFragmentDoc}`;
+export const SiteTextPhraseDefinitionFragmentFragmentDoc = gql`
+    fragment SiteTextPhraseDefinitionFragment on SiteTextPhraseDefinition {
+  site_text_id
+  phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+}
+    ${PhraseDefinitionFragmentFragmentDoc}`;
+export const WordFragmentFragmentDoc = gql`
+    fragment WordFragment on Word {
+  word_id
+  word
+  language_code
+  dialect_code
+  geo_code
+}
+    `;
+export const WordDefinitionFragmentFragmentDoc = gql`
+    fragment WordDefinitionFragment on WordDefinition {
+  word_definition_id
+  word {
+    ...WordFragment
+  }
+  definition
+}
+    ${WordFragmentFragmentDoc}`;
+export const SiteTextWordDefinitionFragmentFragmentDoc = gql`
+    fragment SiteTextWordDefinitionFragment on SiteTextWordDefinition {
+  site_text_id
+  word_definition {
+    ...WordDefinitionFragment
+  }
+}
+    ${WordDefinitionFragmentFragmentDoc}`;
+export const SiteTextTranslationWithVoteFragmentFragmentDoc = gql`
+    fragment SiteTextTranslationWithVoteFragment on SiteTextTranslationWithVote {
+  site_text_translation_id
+  from_definition {
+    ...WordDefinitionFragment
+    ...PhraseDefinitionFragment
+  }
+  to_definition {
+    ...WordDefinitionFragment
+    ...PhraseDefinitionFragment
+  }
+  from_type_is_word
+  to_type_is_word
+  upvotes
+  downvotes
+  created_at
+}
+    ${WordDefinitionFragmentFragmentDoc}
+${PhraseDefinitionFragmentFragmentDoc}`;
 export const RegisterDocument = gql`
-  mutation Register($email: String!, $avatar: String!, $password: String!) {
-    register(input: { email: $email, avatar: $avatar, password: $password }) {
-      error
-      session {
-        ...SessionFields
-      }
+    mutation Register($email: String!, $avatar: String!, $password: String!) {
+  register(input: {email: $email, avatar: $avatar, password: $password}) {
+    error
+    session {
+      ...SessionFields
     }
   }
-  ${SessionFieldsFragmentDoc}
-`;
-export type RegisterMutationFn = Apollo.MutationFunction<
-  RegisterMutation,
-  RegisterMutationVariables
->;
+}
+    ${SessionFieldsFragmentDoc}`;
+export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, RegisterMutationVariables>;
 
 /**
  * __useRegisterMutation__
@@ -1001,39 +1019,24 @@ export type RegisterMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useRegisterMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    RegisterMutation,
-    RegisterMutationVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useMutation<RegisterMutation, RegisterMutationVariables>(
-    RegisterDocument,
-    options,
-  );
-}
+export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<RegisterMutation, RegisterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument, options);
+      }
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
-export type RegisterMutationOptions = Apollo.BaseMutationOptions<
-  RegisterMutation,
-  RegisterMutationVariables
->;
+export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
 export const LoginDocument = gql`
-  mutation Login($email: String!, $password: String!) {
-    login(input: { email: $email, password: $password }) {
-      error
-      session {
-        ...SessionFields
-      }
+    mutation Login($email: String!, $password: String!) {
+  login(input: {email: $email, password: $password}) {
+    error
+    session {
+      ...SessionFields
     }
   }
-  ${SessionFieldsFragmentDoc}
-`;
-export type LoginMutationFn = Apollo.MutationFunction<
-  LoginMutation,
-  LoginMutationVariables
->;
+}
+    ${SessionFieldsFragmentDoc}`;
+export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
 
 /**
  * __useLoginMutation__
@@ -1053,35 +1056,21 @@ export type LoginMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useLoginMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    LoginMutation,
-    LoginMutationVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useMutation<LoginMutation, LoginMutationVariables>(
-    LoginDocument,
-    options,
-  );
-}
+export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginMutation, LoginMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, options);
+      }
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
 export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
-export type LoginMutationOptions = Apollo.BaseMutationOptions<
-  LoginMutation,
-  LoginMutationVariables
->;
+export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
 export const LogoutDocument = gql`
-  mutation Logout($token: String!) {
-    logout(input: { token: $token }) {
-      error
-    }
+    mutation Logout($token: String!) {
+  logout(input: {token: $token}) {
+    error
   }
-`;
-export type LogoutMutationFn = Apollo.MutationFunction<
-  LogoutMutation,
-  LogoutMutationVariables
->;
+}
+    `;
+export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMutationVariables>;
 
 /**
  * __useLogoutMutation__
@@ -1100,35 +1089,21 @@ export type LogoutMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useLogoutMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    LogoutMutation,
-    LogoutMutationVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(
-    LogoutDocument,
-    options,
-  );
-}
+export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<LogoutMutation, LogoutMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, options);
+      }
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
-export type LogoutMutationOptions = Apollo.BaseMutationOptions<
-  LogoutMutation,
-  LogoutMutationVariables
->;
+export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
 export const ResetEmailRequestDocument = gql`
-  mutation ResetEmailRequest($email: String!) {
-    resetEmailRequest(input: { email: $email }) {
-      error
-    }
+    mutation ResetEmailRequest($email: String!) {
+  resetEmailRequest(input: {email: $email}) {
+    error
   }
-`;
-export type ResetEmailRequestMutationFn = Apollo.MutationFunction<
-  ResetEmailRequestMutation,
-  ResetEmailRequestMutationVariables
->;
+}
+    `;
+export type ResetEmailRequestMutationFn = Apollo.MutationFunction<ResetEmailRequestMutation, ResetEmailRequestMutationVariables>;
 
 /**
  * __useResetEmailRequestMutation__
@@ -1147,42 +1122,24 @@ export type ResetEmailRequestMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useResetEmailRequestMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    ResetEmailRequestMutation,
-    ResetEmailRequestMutationVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useMutation<
-    ResetEmailRequestMutation,
-    ResetEmailRequestMutationVariables
-  >(ResetEmailRequestDocument, options);
-}
-export type ResetEmailRequestMutationHookResult = ReturnType<
-  typeof useResetEmailRequestMutation
->;
-export type ResetEmailRequestMutationResult =
-  Apollo.MutationResult<ResetEmailRequestMutation>;
-export type ResetEmailRequestMutationOptions = Apollo.BaseMutationOptions<
-  ResetEmailRequestMutation,
-  ResetEmailRequestMutationVariables
->;
-export const PasswordResetFormRequestDocument = gql`
-  mutation PasswordResetFormRequest($token: String!, $password: String!) {
-    passwordResetFormResolver(input: { token: $token, password: $password }) {
-      error
-      session {
-        ...SessionFields
+export function useResetEmailRequestMutation(baseOptions?: Apollo.MutationHookOptions<ResetEmailRequestMutation, ResetEmailRequestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ResetEmailRequestMutation, ResetEmailRequestMutationVariables>(ResetEmailRequestDocument, options);
       }
+export type ResetEmailRequestMutationHookResult = ReturnType<typeof useResetEmailRequestMutation>;
+export type ResetEmailRequestMutationResult = Apollo.MutationResult<ResetEmailRequestMutation>;
+export type ResetEmailRequestMutationOptions = Apollo.BaseMutationOptions<ResetEmailRequestMutation, ResetEmailRequestMutationVariables>;
+export const PasswordResetFormRequestDocument = gql`
+    mutation PasswordResetFormRequest($token: String!, $password: String!) {
+  passwordResetFormResolver(input: {token: $token, password: $password}) {
+    error
+    session {
+      ...SessionFields
     }
   }
-  ${SessionFieldsFragmentDoc}
-`;
-export type PasswordResetFormRequestMutationFn = Apollo.MutationFunction<
-  PasswordResetFormRequestMutation,
-  PasswordResetFormRequestMutationVariables
->;
+}
+    ${SessionFieldsFragmentDoc}`;
+export type PasswordResetFormRequestMutationFn = Apollo.MutationFunction<PasswordResetFormRequestMutation, PasswordResetFormRequestMutationVariables>;
 
 /**
  * __usePasswordResetFormRequestMutation__
@@ -1202,39 +1159,21 @@ export type PasswordResetFormRequestMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function usePasswordResetFormRequestMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    PasswordResetFormRequestMutation,
-    PasswordResetFormRequestMutationVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useMutation<
-    PasswordResetFormRequestMutation,
-    PasswordResetFormRequestMutationVariables
-  >(PasswordResetFormRequestDocument, options);
-}
-export type PasswordResetFormRequestMutationHookResult = ReturnType<
-  typeof usePasswordResetFormRequestMutation
->;
-export type PasswordResetFormRequestMutationResult =
-  Apollo.MutationResult<PasswordResetFormRequestMutation>;
-export type PasswordResetFormRequestMutationOptions =
-  Apollo.BaseMutationOptions<
-    PasswordResetFormRequestMutation,
-    PasswordResetFormRequestMutationVariables
-  >;
+export function usePasswordResetFormRequestMutation(baseOptions?: Apollo.MutationHookOptions<PasswordResetFormRequestMutation, PasswordResetFormRequestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PasswordResetFormRequestMutation, PasswordResetFormRequestMutationVariables>(PasswordResetFormRequestDocument, options);
+      }
+export type PasswordResetFormRequestMutationHookResult = ReturnType<typeof usePasswordResetFormRequestMutation>;
+export type PasswordResetFormRequestMutationResult = Apollo.MutationResult<PasswordResetFormRequestMutation>;
+export type PasswordResetFormRequestMutationOptions = Apollo.BaseMutationOptions<PasswordResetFormRequestMutation, PasswordResetFormRequestMutationVariables>;
 export const EmailResponseDocument = gql`
-  mutation EmailResponse($token: String!) {
-    emailResponseResolver(input: { token: $token }) {
-      error
-    }
+    mutation EmailResponse($token: String!) {
+  emailResponseResolver(input: {token: $token}) {
+    error
   }
-`;
-export type EmailResponseMutationFn = Apollo.MutationFunction<
-  EmailResponseMutation,
-  EmailResponseMutationVariables
->;
+}
+    `;
+export type EmailResponseMutationFn = Apollo.MutationFunction<EmailResponseMutation, EmailResponseMutationVariables>;
 
 /**
  * __useEmailResponseMutation__
@@ -1253,42 +1192,24 @@ export type EmailResponseMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useEmailResponseMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    EmailResponseMutation,
-    EmailResponseMutationVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useMutation<
-    EmailResponseMutation,
-    EmailResponseMutationVariables
-  >(EmailResponseDocument, options);
-}
-export type EmailResponseMutationHookResult = ReturnType<
-  typeof useEmailResponseMutation
->;
-export type EmailResponseMutationResult =
-  Apollo.MutationResult<EmailResponseMutation>;
-export type EmailResponseMutationOptions = Apollo.BaseMutationOptions<
-  EmailResponseMutation,
-  EmailResponseMutationVariables
->;
-export const PostCreateDocument = gql`
-  mutation PostCreate($content: String!, $parentId: Int) {
-    postCreateResolver(input: { content: $content, parent_id: $parentId }) {
-      error
-      post {
-        ...PostFields
+export function useEmailResponseMutation(baseOptions?: Apollo.MutationHookOptions<EmailResponseMutation, EmailResponseMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EmailResponseMutation, EmailResponseMutationVariables>(EmailResponseDocument, options);
       }
+export type EmailResponseMutationHookResult = ReturnType<typeof useEmailResponseMutation>;
+export type EmailResponseMutationResult = Apollo.MutationResult<EmailResponseMutation>;
+export type EmailResponseMutationOptions = Apollo.BaseMutationOptions<EmailResponseMutation, EmailResponseMutationVariables>;
+export const PostCreateDocument = gql`
+    mutation PostCreate($content: String!, $parentId: Int) {
+  postCreateResolver(input: {content: $content, parent_id: $parentId}) {
+    error
+    post {
+      ...PostFields
     }
   }
-  ${PostFieldsFragmentDoc}
-`;
-export type PostCreateMutationFn = Apollo.MutationFunction<
-  PostCreateMutation,
-  PostCreateMutationVariables
->;
+}
+    ${PostFieldsFragmentDoc}`;
+export type PostCreateMutationFn = Apollo.MutationFunction<PostCreateMutation, PostCreateMutationVariables>;
 
 /**
  * __usePostCreateMutation__
@@ -1308,52 +1229,26 @@ export type PostCreateMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function usePostCreateMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    PostCreateMutation,
-    PostCreateMutationVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useMutation<PostCreateMutation, PostCreateMutationVariables>(
-    PostCreateDocument,
-    options,
-  );
-}
-export type PostCreateMutationHookResult = ReturnType<
-  typeof usePostCreateMutation
->;
-export type PostCreateMutationResult =
-  Apollo.MutationResult<PostCreateMutation>;
-export type PostCreateMutationOptions = Apollo.BaseMutationOptions<
-  PostCreateMutation,
-  PostCreateMutationVariables
->;
+export function usePostCreateMutation(baseOptions?: Apollo.MutationHookOptions<PostCreateMutation, PostCreateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PostCreateMutation, PostCreateMutationVariables>(PostCreateDocument, options);
+      }
+export type PostCreateMutationHookResult = ReturnType<typeof usePostCreateMutation>;
+export type PostCreateMutationResult = Apollo.MutationResult<PostCreateMutation>;
+export type PostCreateMutationOptions = Apollo.BaseMutationOptions<PostCreateMutation, PostCreateMutationVariables>;
 export const VersionCreateDocument = gql`
-  mutation VersionCreate(
-    $postId: Int!
-    $content: String!
-    $license_title: String!
+    mutation VersionCreate($postId: Int!, $content: String!, $license_title: String!) {
+  versionCreateResolver(
+    input: {post_id: $postId, content: $content, license_title: $license_title}
   ) {
-    versionCreateResolver(
-      input: {
-        post_id: $postId
-        content: $content
-        license_title: $license_title
-      }
-    ) {
-      error
-      version {
-        ...VersionFields
-      }
+    error
+    version {
+      ...VersionFields
     }
   }
-  ${VersionFieldsFragmentDoc}
-`;
-export type VersionCreateMutationFn = Apollo.MutationFunction<
-  VersionCreateMutation,
-  VersionCreateMutationVariables
->;
+}
+    ${VersionFieldsFragmentDoc}`;
+export type VersionCreateMutationFn = Apollo.MutationFunction<VersionCreateMutation, VersionCreateMutationVariables>;
 
 /**
  * __useVersionCreateMutation__
@@ -1374,38 +1269,23 @@ export type VersionCreateMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useVersionCreateMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    VersionCreateMutation,
-    VersionCreateMutationVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useMutation<
-    VersionCreateMutation,
-    VersionCreateMutationVariables
-  >(VersionCreateDocument, options);
-}
-export type VersionCreateMutationHookResult = ReturnType<
-  typeof useVersionCreateMutation
->;
-export type VersionCreateMutationResult =
-  Apollo.MutationResult<VersionCreateMutation>;
-export type VersionCreateMutationOptions = Apollo.BaseMutationOptions<
-  VersionCreateMutation,
-  VersionCreateMutationVariables
->;
-export const PostReadDocument = gql`
-  query PostRead($postId: ID!) {
-    postReadResolver(input: { post_id: $postId }) {
-      error
-      post {
-        ...PostFields
+export function useVersionCreateMutation(baseOptions?: Apollo.MutationHookOptions<VersionCreateMutation, VersionCreateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<VersionCreateMutation, VersionCreateMutationVariables>(VersionCreateDocument, options);
       }
+export type VersionCreateMutationHookResult = ReturnType<typeof useVersionCreateMutation>;
+export type VersionCreateMutationResult = Apollo.MutationResult<VersionCreateMutation>;
+export type VersionCreateMutationOptions = Apollo.BaseMutationOptions<VersionCreateMutation, VersionCreateMutationVariables>;
+export const PostReadDocument = gql`
+    query PostRead($postId: ID!) {
+  postReadResolver(input: {post_id: $postId}) {
+    error
+    post {
+      ...PostFields
     }
   }
-  ${PostFieldsFragmentDoc}
-`;
+}
+    ${PostFieldsFragmentDoc}`;
 
 /**
  * __usePostReadQuery__
@@ -1423,47 +1303,194 @@ export const PostReadDocument = gql`
  *   },
  * });
  */
-export function usePostReadQuery(
-  baseOptions: Apollo.QueryHookOptions<PostReadQuery, PostReadQueryVariables>,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useQuery<PostReadQuery, PostReadQueryVariables>(
-    PostReadDocument,
-    options,
-  );
-}
-export function usePostReadLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<
-    PostReadQuery,
-    PostReadQueryVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useLazyQuery<PostReadQuery, PostReadQueryVariables>(
-    PostReadDocument,
-    options,
-  );
-}
-export type PostReadQueryHookResult = ReturnType<typeof usePostReadQuery>;
-export type PostReadLazyQueryHookResult = ReturnType<
-  typeof usePostReadLazyQuery
->;
-export type PostReadQueryResult = Apollo.QueryResult<
-  PostReadQuery,
-  PostReadQueryVariables
->;
-export const UserReadDocument = gql`
-  query UserRead($userId: ID!) {
-    userReadResolver(input: { user_id: $userId }) {
-      error
-      user {
-        avatar
-        avatar_url
-        user_id
+export function usePostReadQuery(baseOptions: Apollo.QueryHookOptions<PostReadQuery, PostReadQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PostReadQuery, PostReadQueryVariables>(PostReadDocument, options);
       }
+export function usePostReadLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostReadQuery, PostReadQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PostReadQuery, PostReadQueryVariables>(PostReadDocument, options);
+        }
+export type PostReadQueryHookResult = ReturnType<typeof usePostReadQuery>;
+export type PostReadLazyQueryHookResult = ReturnType<typeof usePostReadLazyQuery>;
+export type PostReadQueryResult = Apollo.QueryResult<PostReadQuery, PostReadQueryVariables>;
+export const GetAllSiteTextDefinitionsDocument = gql`
+    query GetAllSiteTextDefinitions {
+  getAllSiteTextDefinitions {
+    error
+    site_text_phrase_definition_list {
+      ...SiteTextPhraseDefinitionFragment
+    }
+    site_text_word_definition_list {
+      ...SiteTextWordDefinitionFragment
     }
   }
-`;
+}
+    ${SiteTextPhraseDefinitionFragmentFragmentDoc}
+${SiteTextWordDefinitionFragmentFragmentDoc}`;
+
+/**
+ * __useGetAllSiteTextDefinitionsQuery__
+ *
+ * To run a query within a React component, call `useGetAllSiteTextDefinitionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllSiteTextDefinitionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllSiteTextDefinitionsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAllSiteTextDefinitionsQuery(baseOptions?: Apollo.QueryHookOptions<GetAllSiteTextDefinitionsQuery, GetAllSiteTextDefinitionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllSiteTextDefinitionsQuery, GetAllSiteTextDefinitionsQueryVariables>(GetAllSiteTextDefinitionsDocument, options);
+      }
+export function useGetAllSiteTextDefinitionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllSiteTextDefinitionsQuery, GetAllSiteTextDefinitionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllSiteTextDefinitionsQuery, GetAllSiteTextDefinitionsQueryVariables>(GetAllSiteTextDefinitionsDocument, options);
+        }
+export type GetAllSiteTextDefinitionsQueryHookResult = ReturnType<typeof useGetAllSiteTextDefinitionsQuery>;
+export type GetAllSiteTextDefinitionsLazyQueryHookResult = ReturnType<typeof useGetAllSiteTextDefinitionsLazyQuery>;
+export type GetAllSiteTextDefinitionsQueryResult = Apollo.QueryResult<GetAllSiteTextDefinitionsQuery, GetAllSiteTextDefinitionsQueryVariables>;
+export const GetAllTranslationFromSiteTextDefinitionIdDocument = gql`
+    query GetAllTranslationFromSiteTextDefinitionID($dialect_code: String, $geo_code: String, $language_code: String!, $site_text_id: String!, $site_text_type_is_word: Boolean!) {
+  getAllTranslationFromSiteTextDefinitionID(
+    dialect_code: $dialect_code
+    geo_code: $geo_code
+    language_code: $language_code
+    site_text_id: $site_text_id
+    site_text_type_is_word: $site_text_type_is_word
+  ) {
+    error
+    site_text_translation_with_vote_list {
+      ...SiteTextTranslationWithVoteFragment
+    }
+  }
+}
+    ${SiteTextTranslationWithVoteFragmentFragmentDoc}`;
+
+/**
+ * __useGetAllTranslationFromSiteTextDefinitionIdQuery__
+ *
+ * To run a query within a React component, call `useGetAllTranslationFromSiteTextDefinitionIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllTranslationFromSiteTextDefinitionIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllTranslationFromSiteTextDefinitionIdQuery({
+ *   variables: {
+ *      dialect_code: // value for 'dialect_code'
+ *      geo_code: // value for 'geo_code'
+ *      language_code: // value for 'language_code'
+ *      site_text_id: // value for 'site_text_id'
+ *      site_text_type_is_word: // value for 'site_text_type_is_word'
+ *   },
+ * });
+ */
+export function useGetAllTranslationFromSiteTextDefinitionIdQuery(baseOptions: Apollo.QueryHookOptions<GetAllTranslationFromSiteTextDefinitionIdQuery, GetAllTranslationFromSiteTextDefinitionIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllTranslationFromSiteTextDefinitionIdQuery, GetAllTranslationFromSiteTextDefinitionIdQueryVariables>(GetAllTranslationFromSiteTextDefinitionIdDocument, options);
+      }
+export function useGetAllTranslationFromSiteTextDefinitionIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllTranslationFromSiteTextDefinitionIdQuery, GetAllTranslationFromSiteTextDefinitionIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllTranslationFromSiteTextDefinitionIdQuery, GetAllTranslationFromSiteTextDefinitionIdQueryVariables>(GetAllTranslationFromSiteTextDefinitionIdDocument, options);
+        }
+export type GetAllTranslationFromSiteTextDefinitionIdQueryHookResult = ReturnType<typeof useGetAllTranslationFromSiteTextDefinitionIdQuery>;
+export type GetAllTranslationFromSiteTextDefinitionIdLazyQueryHookResult = ReturnType<typeof useGetAllTranslationFromSiteTextDefinitionIdLazyQuery>;
+export type GetAllTranslationFromSiteTextDefinitionIdQueryResult = Apollo.QueryResult<GetAllTranslationFromSiteTextDefinitionIdQuery, GetAllTranslationFromSiteTextDefinitionIdQueryVariables>;
+export const SiteTextWordDefinitionReadDocument = gql`
+    query SiteTextWordDefinitionRead($id: String!) {
+  siteTextWordDefinitionRead(id: $id) {
+    error
+    site_text_word_definition {
+      ...SiteTextWordDefinitionFragment
+    }
+  }
+}
+    ${SiteTextWordDefinitionFragmentFragmentDoc}`;
+
+/**
+ * __useSiteTextWordDefinitionReadQuery__
+ *
+ * To run a query within a React component, call `useSiteTextWordDefinitionReadQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSiteTextWordDefinitionReadQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSiteTextWordDefinitionReadQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useSiteTextWordDefinitionReadQuery(baseOptions: Apollo.QueryHookOptions<SiteTextWordDefinitionReadQuery, SiteTextWordDefinitionReadQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SiteTextWordDefinitionReadQuery, SiteTextWordDefinitionReadQueryVariables>(SiteTextWordDefinitionReadDocument, options);
+      }
+export function useSiteTextWordDefinitionReadLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SiteTextWordDefinitionReadQuery, SiteTextWordDefinitionReadQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SiteTextWordDefinitionReadQuery, SiteTextWordDefinitionReadQueryVariables>(SiteTextWordDefinitionReadDocument, options);
+        }
+export type SiteTextWordDefinitionReadQueryHookResult = ReturnType<typeof useSiteTextWordDefinitionReadQuery>;
+export type SiteTextWordDefinitionReadLazyQueryHookResult = ReturnType<typeof useSiteTextWordDefinitionReadLazyQuery>;
+export type SiteTextWordDefinitionReadQueryResult = Apollo.QueryResult<SiteTextWordDefinitionReadQuery, SiteTextWordDefinitionReadQueryVariables>;
+export const SiteTextPhraseDefinitionReadDocument = gql`
+    query SiteTextPhraseDefinitionRead($id: String!) {
+  siteTextPhraseDefinitionRead(id: $id) {
+    error
+    site_text_phrase_definition {
+      ...SiteTextPhraseDefinitionFragment
+    }
+  }
+}
+    ${SiteTextPhraseDefinitionFragmentFragmentDoc}`;
+
+/**
+ * __useSiteTextPhraseDefinitionReadQuery__
+ *
+ * To run a query within a React component, call `useSiteTextPhraseDefinitionReadQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSiteTextPhraseDefinitionReadQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSiteTextPhraseDefinitionReadQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useSiteTextPhraseDefinitionReadQuery(baseOptions: Apollo.QueryHookOptions<SiteTextPhraseDefinitionReadQuery, SiteTextPhraseDefinitionReadQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SiteTextPhraseDefinitionReadQuery, SiteTextPhraseDefinitionReadQueryVariables>(SiteTextPhraseDefinitionReadDocument, options);
+      }
+export function useSiteTextPhraseDefinitionReadLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SiteTextPhraseDefinitionReadQuery, SiteTextPhraseDefinitionReadQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SiteTextPhraseDefinitionReadQuery, SiteTextPhraseDefinitionReadQueryVariables>(SiteTextPhraseDefinitionReadDocument, options);
+        }
+export type SiteTextPhraseDefinitionReadQueryHookResult = ReturnType<typeof useSiteTextPhraseDefinitionReadQuery>;
+export type SiteTextPhraseDefinitionReadLazyQueryHookResult = ReturnType<typeof useSiteTextPhraseDefinitionReadLazyQuery>;
+export type SiteTextPhraseDefinitionReadQueryResult = Apollo.QueryResult<SiteTextPhraseDefinitionReadQuery, SiteTextPhraseDefinitionReadQueryVariables>;
+export const UserReadDocument = gql`
+    query UserRead($userId: ID!) {
+  userReadResolver(input: {user_id: $userId}) {
+    error
+    user {
+      avatar
+      avatar_url
+      user_id
+    }
+  }
+}
+    `;
 
 /**
  * __useUserReadQuery__
@@ -1481,51 +1508,30 @@ export const UserReadDocument = gql`
  *   },
  * });
  */
-export function useUserReadQuery(
-  baseOptions: Apollo.QueryHookOptions<UserReadQuery, UserReadQueryVariables>,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useQuery<UserReadQuery, UserReadQueryVariables>(
-    UserReadDocument,
-    options,
-  );
-}
-export function useUserReadLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<
-    UserReadQuery,
-    UserReadQueryVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useLazyQuery<UserReadQuery, UserReadQueryVariables>(
-    UserReadDocument,
-    options,
-  );
-}
-export type UserReadQueryHookResult = ReturnType<typeof useUserReadQuery>;
-export type UserReadLazyQueryHookResult = ReturnType<
-  typeof useUserReadLazyQuery
->;
-export type UserReadQueryResult = Apollo.QueryResult<
-  UserReadQuery,
-  UserReadQueryVariables
->;
-export const AvatarUpdateDocument = gql`
-  mutation AvatarUpdate($avatar: String!) {
-    avatarUpdateResolver(input: { avatar: $avatar }) {
-      error
-      user {
-        avatar
-        avatar_url
-        user_id
+export function useUserReadQuery(baseOptions: Apollo.QueryHookOptions<UserReadQuery, UserReadQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserReadQuery, UserReadQueryVariables>(UserReadDocument, options);
       }
+export function useUserReadLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserReadQuery, UserReadQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserReadQuery, UserReadQueryVariables>(UserReadDocument, options);
+        }
+export type UserReadQueryHookResult = ReturnType<typeof useUserReadQuery>;
+export type UserReadLazyQueryHookResult = ReturnType<typeof useUserReadLazyQuery>;
+export type UserReadQueryResult = Apollo.QueryResult<UserReadQuery, UserReadQueryVariables>;
+export const AvatarUpdateDocument = gql`
+    mutation AvatarUpdate($avatar: String!) {
+  avatarUpdateResolver(input: {avatar: $avatar}) {
+    error
+    user {
+      avatar
+      avatar_url
+      user_id
     }
   }
-`;
-export type AvatarUpdateMutationFn = Apollo.MutationFunction<
-  AvatarUpdateMutation,
-  AvatarUpdateMutationVariables
->;
+}
+    `;
+export type AvatarUpdateMutationFn = Apollo.MutationFunction<AvatarUpdateMutation, AvatarUpdateMutationVariables>;
 
 /**
  * __useAvatarUpdateMutation__
@@ -1544,36 +1550,22 @@ export type AvatarUpdateMutationFn = Apollo.MutationFunction<
  *   },
  * });
  */
-export function useAvatarUpdateMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    AvatarUpdateMutation,
-    AvatarUpdateMutationVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useMutation<
-    AvatarUpdateMutation,
-    AvatarUpdateMutationVariables
-  >(AvatarUpdateDocument, options);
-}
-export type AvatarUpdateMutationHookResult = ReturnType<
-  typeof useAvatarUpdateMutation
->;
-export type AvatarUpdateMutationResult =
-  Apollo.MutationResult<AvatarUpdateMutation>;
-export type AvatarUpdateMutationOptions = Apollo.BaseMutationOptions<
-  AvatarUpdateMutation,
-  AvatarUpdateMutationVariables
->;
+export function useAvatarUpdateMutation(baseOptions?: Apollo.MutationHookOptions<AvatarUpdateMutation, AvatarUpdateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AvatarUpdateMutation, AvatarUpdateMutationVariables>(AvatarUpdateDocument, options);
+      }
+export type AvatarUpdateMutationHookResult = ReturnType<typeof useAvatarUpdateMutation>;
+export type AvatarUpdateMutationResult = Apollo.MutationResult<AvatarUpdateMutation>;
+export type AvatarUpdateMutationOptions = Apollo.BaseMutationOptions<AvatarUpdateMutation, AvatarUpdateMutationVariables>;
 export const GetFileUploadUrlDocument = gql`
-  query GetFileUploadUrl($userId: ID!) {
-    fileUploadUrlRequest(input: { user_id: $userId }) {
-      error
-      url
-      avatar_image_url
-    }
+    query GetFileUploadUrl($userId: ID!) {
+  fileUploadUrlRequest(input: {user_id: $userId}) {
+    error
+    url
+    avatar_image_url
   }
-`;
+}
+    `;
 
 /**
  * __useGetFileUploadUrlQuery__
@@ -1591,58 +1583,42 @@ export const GetFileUploadUrlDocument = gql`
  *   },
  * });
  */
-export function useGetFileUploadUrlQuery(
-  baseOptions: Apollo.QueryHookOptions<
-    GetFileUploadUrlQuery,
-    GetFileUploadUrlQueryVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useQuery<GetFileUploadUrlQuery, GetFileUploadUrlQueryVariables>(
-    GetFileUploadUrlDocument,
-    options,
-  );
-}
-export function useGetFileUploadUrlLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<
-    GetFileUploadUrlQuery,
-    GetFileUploadUrlQueryVariables
-  >,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useLazyQuery<
-    GetFileUploadUrlQuery,
-    GetFileUploadUrlQueryVariables
-  >(GetFileUploadUrlDocument, options);
-}
-export type GetFileUploadUrlQueryHookResult = ReturnType<
-  typeof useGetFileUploadUrlQuery
->;
-export type GetFileUploadUrlLazyQueryHookResult = ReturnType<
-  typeof useGetFileUploadUrlLazyQuery
->;
-export type GetFileUploadUrlQueryResult = Apollo.QueryResult<
-  GetFileUploadUrlQuery,
-  GetFileUploadUrlQueryVariables
->;
+export function useGetFileUploadUrlQuery(baseOptions: Apollo.QueryHookOptions<GetFileUploadUrlQuery, GetFileUploadUrlQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetFileUploadUrlQuery, GetFileUploadUrlQueryVariables>(GetFileUploadUrlDocument, options);
+      }
+export function useGetFileUploadUrlLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetFileUploadUrlQuery, GetFileUploadUrlQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetFileUploadUrlQuery, GetFileUploadUrlQueryVariables>(GetFileUploadUrlDocument, options);
+        }
+export type GetFileUploadUrlQueryHookResult = ReturnType<typeof useGetFileUploadUrlQuery>;
+export type GetFileUploadUrlLazyQueryHookResult = ReturnType<typeof useGetFileUploadUrlLazyQuery>;
+export type GetFileUploadUrlQueryResult = Apollo.QueryResult<GetFileUploadUrlQuery, GetFileUploadUrlQueryVariables>;
 
-export interface PossibleTypesResultData {
-  possibleTypes: {
-    [key: string]: string[];
-  };
-}
-const result: PossibleTypesResultData = {
-  possibleTypes: {
-    Definition: ['PhraseDefinition', 'WordDefinition'],
-  },
+      export interface PossibleTypesResultData {
+        possibleTypes: {
+          [key: string]: string[]
+        }
+      }
+      const result: PossibleTypesResultData = {
+  "possibleTypes": {
+    "Definition": [
+      "PhraseDefinition",
+      "WordDefinition"
+    ]
+  }
 };
-export default result;
-
+      export default result;
+    
 export const namedOperations = {
   Query: {
     PostRead: 'PostRead',
+    GetAllSiteTextDefinitions: 'GetAllSiteTextDefinitions',
+    GetAllTranslationFromSiteTextDefinitionID: 'GetAllTranslationFromSiteTextDefinitionID',
+    SiteTextWordDefinitionRead: 'SiteTextWordDefinitionRead',
+    SiteTextPhraseDefinitionRead: 'SiteTextPhraseDefinitionRead',
     UserRead: 'UserRead',
-    GetFileUploadUrl: 'GetFileUploadUrl',
+    GetFileUploadUrl: 'GetFileUploadUrl'
   },
   Mutation: {
     Register: 'Register',
@@ -1653,11 +1629,18 @@ export const namedOperations = {
     EmailResponse: 'EmailResponse',
     PostCreate: 'PostCreate',
     VersionCreate: 'VersionCreate',
-    AvatarUpdate: 'AvatarUpdate',
+    AvatarUpdate: 'AvatarUpdate'
   },
   Fragment: {
     SessionFields: 'SessionFields',
     VersionFields: 'VersionFields',
     PostFields: 'PostFields',
-  },
-};
+    PhraseFragment: 'PhraseFragment',
+    WordFragment: 'WordFragment',
+    WordDefinitionFragment: 'WordDefinitionFragment',
+    PhraseDefinitionFragment: 'PhraseDefinitionFragment',
+    SiteTextPhraseDefinitionFragment: 'SiteTextPhraseDefinitionFragment',
+    SiteTextWordDefinitionFragment: 'SiteTextWordDefinitionFragment',
+    SiteTextTranslationWithVoteFragment: 'SiteTextTranslationWithVoteFragment'
+  }
+}
