@@ -136,6 +136,7 @@ export class SiteTextTranslationVotesService {
 
   async toggleVoteStatus(
     site_text_translation_id: number,
+    vote: boolean,
     token: string,
   ): Promise<VoteStatusOutputRow> {
     try {
@@ -143,6 +144,7 @@ export class SiteTextTranslationVotesService {
         await this.pg.pool.query<ToggleSiteTextTranslationVoteStatus>(
           ...toggleSiteTextTranslationVoteStatus({
             site_text_translation_id,
+            vote,
             token,
           }),
         );

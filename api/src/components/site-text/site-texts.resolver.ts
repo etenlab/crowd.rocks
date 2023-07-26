@@ -28,6 +28,7 @@ import {
   SiteTextTranslationWithVoteListOutput,
   SiteTextTranslationWithVoteOutput,
   SiteTextDefinitionListOutput,
+  SiteTextTranslationUpsertInput,
   VoteStatusOutputRow,
 } from './types';
 
@@ -129,12 +130,12 @@ export class SiteTextsResolver {
 
   @Mutation(() => SiteTextTranslationUpsertOutput)
   async upsertFromTranslationlikeString(
-    fromInput: SiteTextTranslationsFromInput,
-    toInput: SiteTextTranslationsToInput,
+    @Args('fromInput') fromInput: SiteTextTranslationsFromInput,
+    @Args('toInput') toInput: SiteTextTranslationsToInput,
     @Context() req: any,
   ): Promise<SiteTextTranslationUpsertOutput> {
     console.log(
-      `site text word definition upsert resolver`,
+      `site text upsertFromTranslationlikeString resolver`,
       JSON.stringify(fromInput, null, 2),
       JSON.stringify(toInput, null, 2),
     );
@@ -142,6 +143,22 @@ export class SiteTextsResolver {
     return this.siteTextTranslationService.upsertFromTranslationlikeString(
       fromInput,
       toInput,
+      getBearer(req),
+    );
+  }
+
+  @Mutation(() => SiteTextTranslationUpsertOutput)
+  async upsertTranslation(
+    @Args('input') input: SiteTextTranslationUpsertInput,
+    @Context() req: any,
+  ): Promise<SiteTextTranslationUpsertOutput> {
+    console.log(
+      `site text upsertTranslation upsert resolver`,
+      JSON.stringify(input, null, 2),
+    );
+
+    return this.siteTextTranslationService.upsertTranslation(
+      input,
       getBearer(req),
     );
   }
@@ -170,19 +187,21 @@ export class SiteTextsResolver {
   @Mutation(() => VoteStatusOutputRow)
   async toggleVoteStatus(
     @Args('site_text_translation_id') site_text_translation_id: string,
+    @Args('vote') vote: boolean,
     @Context() req: any,
   ): Promise<VoteStatusOutputRow> {
     console.log('site text toggleVoteStatus resolver');
 
     return this.siteTextTranslationVoteService.toggleVoteStatus(
       +site_text_translation_id,
+      vote,
       getBearer(req),
     );
   }
 
   @Mutation(() => SiteTextTranslationVoteUpsertOutput)
   async siteTextTranslationVoteUpsert(
-    input: SiteTextTranslationVoteUpsertInput,
+    @Args('input') input: SiteTextTranslationVoteUpsertInput,
     @Context() req: any,
   ): Promise<SiteTextTranslationVoteUpsertOutput> {
     console.log(
@@ -254,7 +273,7 @@ export class SiteTextsResolver {
 
   @Mutation(() => DefinitionUpdateOutput)
   async updateDefinition(
-    input: DefinitionUpdateaInput,
+    @Args('input') input: DefinitionUpdateaInput,
     @Context() req: any,
   ): Promise<DefinitionUpdateOutput> {
     console.log(
