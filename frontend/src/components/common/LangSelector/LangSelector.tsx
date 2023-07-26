@@ -1,14 +1,17 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { IonItem, IonLabel, IonModal } from '@ionic/react';
 
 import tags from 'language-tags';
+
 import { langInfo2tag, sortTagInfosFn } from '../../../common/langUtils';
+
 import AppTypeahead from './TypeAhead';
+
 import {
   DESCRIPTIONS_JOINER,
   LOADING_TAG_PLACEHOLDER,
   NOT_DEFINED_PLACEHOLDER,
 } from '../../../const/langConst';
-import { IonItem, IonLabel, IonModal } from '@ionic/react';
 
 export type LangSelectorProps = {
   title?: string;
@@ -74,7 +77,16 @@ export function LangSelector({
         for (const currTag of allTags) {
           // TODO temporary limitation - need to optimize to allow full list
           //----------
-          const enabledTags = ['en', 'uk', 'apq', 'aas'];
+          const enabledTags = [
+            'en',
+            'uk',
+            'apq',
+            'aas',
+            'jp',
+            'zh',
+            'hi',
+            'de',
+          ];
           if (!enabledTags.includes(currTag.format())) continue;
           //----------
 

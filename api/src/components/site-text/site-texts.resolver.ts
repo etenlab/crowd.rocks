@@ -27,6 +27,8 @@ import {
   SiteTextTranslationVoteUpsertInput,
   SiteTextTranslationWithVoteListOutput,
   SiteTextTranslationWithVoteOutput,
+  SiteTextDefinitionListOutput,
+  VoteStatusOutputRow,
 } from './types';
 
 import {
@@ -165,6 +167,19 @@ export class SiteTextsResolver {
     return this.siteTextTranslationVoteService.read(+site_text_translation_id);
   }
 
+  @Mutation(() => VoteStatusOutputRow)
+  async toggleVoteStatus(
+    @Args('site_text_translation_id') site_text_translation_id: string,
+    @Context() req: any,
+  ): Promise<VoteStatusOutputRow> {
+    console.log('site text toggleVoteStatus resolver');
+
+    return this.siteTextTranslationVoteService.toggleVoteStatus(
+      +site_text_translation_id,
+      getBearer(req),
+    );
+  }
+
   @Mutation(() => SiteTextTranslationVoteUpsertOutput)
   async siteTextTranslationVoteUpsert(
     input: SiteTextTranslationVoteUpsertInput,
@@ -184,8 +199,8 @@ export class SiteTextsResolver {
     @Args('site_text_type_is_word', { type: () => Boolean })
     site_text_type_is_word,
     @Args('language_code') language_code: string,
-    @Args('dialect_code') dialect_code: string,
-    @Args('geo_code') geo_code: string,
+    @Args('dialect_code', { nullable: true }) dialect_code: string,
+    @Args('geo_code', { nullable: true }) geo_code: string,
   ): Promise<SiteTextTranslationWithVoteListOutput> {
     console.log(
       'site text translation getAllTranslationFromSiteTextDefinitionID resolver',
@@ -248,5 +263,12 @@ export class SiteTextsResolver {
     );
 
     return this.siteTextService.updateDefinition(input, getBearer(req));
+  }
+
+  @Query(() => SiteTextDefinitionListOutput)
+  async getAllSiteTextDefinitions(): Promise<SiteTextDefinitionListOutput> {
+    console.log('site text getAllSiteTextDefinitions resolver');
+
+    return this.siteTextService.getAllSiteTextDefinitions();
   }
 }

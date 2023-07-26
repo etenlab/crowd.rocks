@@ -14,25 +14,25 @@ import {
   useIonToast,
   useIonViewDidEnter,
   useIonViewWillLeave,
-} from "@ionic/react";
+} from '@ionic/react';
 import {
   FormEvent,
   PropsWithChildren,
   useEffect,
   useRef,
   useState,
-} from "react";
-import { globals } from "../../services/globals";
+} from 'react';
+import { globals } from '../../services/globals';
 import {
   ErrorType,
   namedOperations,
   usePostCreateMutation,
   useVersionCreateMutation,
-} from "../../generated/graphql";
-import ReactQuill, { Quill } from "react-quill";
-import "react-quill/dist/quill.snow.css";
-import "./PostCreate.css";
-import { licenses } from "./licenses";
+} from '../../generated/graphql';
+import ReactQuill, { Quill } from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import './PostCreate.css';
+import { licenses } from './licenses';
 
 export type PartCreateDTO = {
   content_type: number;
@@ -49,9 +49,9 @@ type PostCreateProps = {
 };
 
 const PostCreate: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
-  const [content, set_content] = useState("");
+  const [content, set_content] = useState('');
 
-  const [quill_delta, set_quill_delta] = useState("");
+  const [quill_delta, set_quill_delta] = useState('');
 
   const [postCreateMutation, { data, loading, error }] =
     usePostCreateMutation();
@@ -63,7 +63,7 @@ const PostCreate: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
   const [show_license_options, set_show_license_options] = useState(false);
 
   const [license_id, set_license_id] = useState(
-    props.license_id ? props.license_id : 1
+    props.license_id ? props.license_id : 1,
   );
 
   const [is_unknown_error, set_is_unknown_error] = useState(false);
@@ -73,14 +73,14 @@ const PostCreate: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
       content_type: 2,
       rank: 1,
       value: '',
-    }
+    },
   ]);
 
   const [present] = useIonToast();
 
-  const presentToast = (position: "top" | "middle" | "bottom") => {
+  const presentToast = (position: 'top' | 'middle' | 'bottom') => {
     present({
-      message: "Create Success!!",
+      message: 'Create Success!!',
       duration: 2000,
       position: position,
     });
@@ -89,15 +89,15 @@ const PostCreate: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
   const modules = {
     toolbar: [
       [{ header: [1, 2, false] }],
-      ["bold", "italic", "underline", "strike", "blockquote"],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
       [
-        { list: "ordered" },
-        { list: "bullet" },
-        { indent: "-1" },
-        { indent: "+1" },
+        { list: 'ordered' },
+        { list: 'bullet' },
+        { indent: '-1' },
+        { indent: '+1' },
       ],
-      ["link", "image"],
-      ["clean"],
+      ['link', 'image'],
+      ['clean'],
     ],
   };
 
@@ -106,16 +106,16 @@ const PostCreate: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
   // // }
 
   const formats = [
-    "header",
-    "bold",
-    "italic",
-    "underline",
-    "strike",
-    "blockquote",
-    "list",
-    "bullet",
-    "indent",
-    "link",
+    'header',
+    'bold',
+    'italic',
+    'underline',
+    'strike',
+    'blockquote',
+    'list',
+    'bullet',
+    'indent',
+    'link',
   ];
 
   async function handle_submit(event: FormEvent) {
@@ -152,7 +152,7 @@ const PostCreate: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
           : null;
       }
     } catch (e) {
-      console.error("error", e);
+      console.error('error', e);
     }
 
     if (error === ErrorType.NoError) {
@@ -169,7 +169,7 @@ const PostCreate: React.FC<PropsWithChildren<PostCreateProps>> = (props) => {
 
   const quill_update = (
     content: string,
-    editor: ReactQuill.UnprivilegedEditor
+    editor: ReactQuill.UnprivilegedEditor,
   ) => {
     const delta = JSON.stringify(editor.getContents());
     set_content(content);

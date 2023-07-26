@@ -167,6 +167,7 @@ type Mutation {
   siteTextTranslationVoteUpsert: SiteTextTranslationVoteUpsertOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextUpsertOutput!
   siteTextWordDefinitionUpsert(input: SiteTextWordDefinitionUpsertInput!): SiteTextWordDefinitionUpsertOutput!
+  toggleVoteStatus(site_text_translation_id: String!): VoteStatusOutputRow!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
   upsertFromTranslationlikeString: SiteTextTranslationUpsertOutput!
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(input: FromPhraseAndDefintionlikeStringUpsertInput!): PhraseDefinitionUpsertOutput!
@@ -256,7 +257,8 @@ type PostReadOutput {
 type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
   getAllRecommendedTranslation(dialect_code: String!, geo_code: String!, language_code: String!): SiteTextTranslationWithVoteListOutput!
-  getAllTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
+  getAllSiteTextDefinitions: SiteTextDefinitionListOutput!
+  getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
   getOrigMapContent(input: GetOrigMapContentInput!): GetOrigMapContentOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
@@ -297,6 +299,12 @@ type Session {
   avatar_url: String
   token: String!
   user_id: ID!
+}
+
+type SiteTextDefinitionListOutput {
+  error: ErrorType!
+  site_text_phrase_definition_list: [SiteTextPhraseDefinition]!
+  site_text_word_definition_list: [SiteTextWordDefinition]!
 }
 
 type SiteTextPhraseDefinition {
@@ -448,6 +456,11 @@ type VoteStatus {
   downvotes: Int!
   site_text_translation_id: String!
   upvotes: Int!
+}
+
+type VoteStatusOutputRow {
+  error: ErrorType!
+  vote_status: VoteStatus
 }
 
 type Word {

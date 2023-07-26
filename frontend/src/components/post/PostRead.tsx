@@ -4,29 +4,29 @@ import {
   IonButton,
   IonIcon,
   useIonRouter,
-} from "@ionic/react";
-import { Maybe } from "graphql/jsutils/Maybe";
+} from '@ionic/react';
+import { Maybe } from 'graphql/jsutils/Maybe';
 import {
   chevronBack,
   chevronDown,
   create,
   createOutline,
-} from "ionicons/icons";
-import { PropsWithChildren, useEffect, useRef, useState } from "react";
-import { Post, Section, usePostReadLazyQuery } from "../../generated/graphql";
-import PostCreate from "../post/PostCreate";
-import VoteBox from "../voting/VoteBox";
-import "./PostRead.css";
+} from 'ionicons/icons';
+import { PropsWithChildren, useEffect, useRef, useState } from 'react';
+import { Post, Section, usePostReadLazyQuery } from '../../generated/graphql';
+import PostCreate from '../post/PostCreate';
+import VoteBox from '../voting/VoteBox';
+import './PostRead.css';
 import {
   get_cardinal_suffix,
   get_datetime_string,
   useForceUpdate,
-} from "../../common/utility";
-import UserRead from "../user/UserRead";
-import { globals } from "../../services/globals";
-import { licenses } from "./licenses";
-import PostCreate2 from "./PostCreate2";
-import { Lexitor } from "./Lexitor";
+} from '../../common/utility';
+import UserRead from '../user/UserRead';
+import { globals } from '../../services/globals';
+import { licenses } from './licenses';
+import PostCreate2 from './PostCreate2';
+import { Lexitor } from './Lexitor';
 
 type PostReadProps = {
   post: Post;
@@ -89,12 +89,12 @@ const PostRead: React.FC<PropsWithChildren<PostReadProps>> = (props) => {
               {active_post.parts.map((part) => {
                 if (part) {
                   return (
-                      <Lexitor
-                        key={part.current_version.version_id + "-lexitor"}
-                        initial_state={part.current_version.content}
-                        on_change={() => { }}
-                        editable={false}
-                      />
+                    <Lexitor
+                      key={part.current_version.version_id + '-lexitor'}
+                      initial_state={part.current_version.content}
+                      on_change={() => {}}
+                      editable={false}
+                    />
                   );
                 }
               })}
@@ -139,8 +139,7 @@ const PostRead: React.FC<PropsWithChildren<PostReadProps>> = (props) => {
                 </div>
               )}
           </div>
-        )
-      }
+        )}
 
       {/* HTML VIEW */}
       {/* {!show_create &&
@@ -186,7 +185,7 @@ const PostRead: React.FC<PropsWithChildren<PostReadProps>> = (props) => {
             <PostCreate2
               key={
                 active_post.parts[0]?.current_version.version_id +
-                "-post-create"
+                '-post-create'
               }
               parent_election={active_post.parent_election}
               create_success={post_create_success}
@@ -203,9 +202,7 @@ const PostRead: React.FC<PropsWithChildren<PostReadProps>> = (props) => {
               Cancel
             </IonButton>
           </div>
-        )
-      }
-
+        )}
     </div>
   );
 };

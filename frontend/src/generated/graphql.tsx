@@ -194,6 +194,7 @@ export type Mutation = {
   siteTextTranslationVoteUpsert: SiteTextTranslationVoteUpsertOutput;
   siteTextUpsert: SiteTextUpsertOutput;
   siteTextWordDefinitionUpsert: SiteTextWordDefinitionUpsertOutput;
+  toggleVoteStatus: VoteStatusOutputRow;
   updateDefinition: PhraseDefinitionUpsertOutput;
   upsertFromTranslationlikeString: SiteTextTranslationUpsertOutput;
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString: PhraseDefinitionUpsertOutput;
@@ -276,6 +277,11 @@ export type MutationSiteTextUpsertArgs = {
 
 export type MutationSiteTextWordDefinitionUpsertArgs = {
   input: SiteTextWordDefinitionUpsertInput;
+};
+
+
+export type MutationToggleVoteStatusArgs = {
+  site_text_translation_id: Scalars['String']['input'];
 };
 
 
@@ -398,6 +404,7 @@ export type Query = {
   __typename?: 'Query';
   fileUploadUrlRequest: FileUploadUrlResponse;
   getAllRecommendedTranslation: SiteTextTranslationWithVoteListOutput;
+  getAllSiteTextDefinitions: SiteTextDefinitionListOutput;
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
   getOrigMapContent: GetOrigMapContentOutput;
   getOrigMapsList: GetOrigMapsListOutput;
@@ -429,8 +436,8 @@ export type QueryGetAllRecommendedTranslationArgs = {
 
 
 export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
-  dialect_code: Scalars['String']['input'];
-  geo_code: Scalars['String']['input'];
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  geo_code?: InputMaybe<Scalars['String']['input']>;
   language_code: Scalars['String']['input'];
   site_text_id: Scalars['String']['input'];
   site_text_type_is_word: Scalars['Boolean']['input'];
@@ -537,6 +544,13 @@ export type Session = {
   avatar_url?: Maybe<Scalars['String']['output']>;
   token: Scalars['String']['output'];
   user_id: Scalars['ID']['output'];
+};
+
+export type SiteTextDefinitionListOutput = {
+  __typename?: 'SiteTextDefinitionListOutput';
+  error: ErrorType;
+  site_text_phrase_definition_list: Array<Maybe<SiteTextPhraseDefinition>>;
+  site_text_word_definition_list: Array<Maybe<SiteTextWordDefinition>>;
 };
 
 export type SiteTextPhraseDefinition = {
@@ -707,6 +721,12 @@ export type VoteStatus = {
   upvotes: Scalars['Int']['output'];
 };
 
+export type VoteStatusOutputRow = {
+  __typename?: 'VoteStatusOutputRow';
+  error: ErrorType;
+  vote_status?: Maybe<VoteStatus>;
+};
+
 export type Word = {
   __typename?: 'Word';
   dialect_code?: Maybe<Scalars['String']['output']>;
@@ -839,6 +859,50 @@ export type PostReadQueryVariables = Exact<{
 
 export type PostReadQuery = { __typename?: 'Query', postReadResolver: { __typename?: 'PostReadOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, created_at: string, created_by: number } | null } };
 
+export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string };
+
+export type WordFragmentFragment = { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
+
+export type WordDefinitionFragmentFragment = { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } };
+
+export type PhraseDefinitionFragmentFragment = { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } };
+
+export type SiteTextPhraseDefinitionFragmentFragment = { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } };
+
+export type SiteTextWordDefinitionFragmentFragment = { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+
+export type SiteTextTranslationWithVoteFragmentFragment = { __typename?: 'SiteTextTranslationWithVote', site_text_translation_id: string, from_type_is_word: boolean, to_type_is_word: boolean, upvotes: number, downvotes: number, created_at: string, from_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+
+export type GetAllSiteTextDefinitionsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllSiteTextDefinitionsQuery = { __typename?: 'Query', getAllSiteTextDefinitions: { __typename?: 'SiteTextDefinitionListOutput', error: ErrorType, site_text_phrase_definition_list: Array<{ __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | null>, site_text_word_definition_list: Array<{ __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null> } };
+
+export type GetAllTranslationFromSiteTextDefinitionIdQueryVariables = Exact<{
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  geo_code?: InputMaybe<Scalars['String']['input']>;
+  language_code: Scalars['String']['input'];
+  site_text_id: Scalars['String']['input'];
+  site_text_type_is_word: Scalars['Boolean']['input'];
+}>;
+
+
+export type GetAllTranslationFromSiteTextDefinitionIdQuery = { __typename?: 'Query', getAllTranslationFromSiteTextDefinitionID: { __typename?: 'SiteTextTranslationWithVoteListOutput', error: ErrorType, site_text_translation_with_vote_list: Array<{ __typename?: 'SiteTextTranslationWithVote', site_text_translation_id: string, from_type_is_word: boolean, to_type_is_word: boolean, upvotes: number, downvotes: number, created_at: string, from_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null> } };
+
+export type SiteTextWordDefinitionReadQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type SiteTextWordDefinitionReadQuery = { __typename?: 'Query', siteTextWordDefinitionRead: { __typename?: 'SiteTextWordDefinitionReadOutput', error: ErrorType, site_text_word_definition?: { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null } };
+
+export type SiteTextPhraseDefinitionReadQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type SiteTextPhraseDefinitionReadQuery = { __typename?: 'Query', siteTextPhraseDefinitionRead: { __typename?: 'SiteTextPhraseDefinitionReadOutput', error: ErrorType, site_text_phrase_definition?: { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | null } };
+
 export type UserReadQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
 }>;
@@ -884,6 +948,74 @@ export const PostFieldsFragmentDoc = gql`
   created_by
 }
     `;
+export const PhraseFragmentFragmentDoc = gql`
+    fragment PhraseFragment on Phrase {
+  phrase_id
+  phrase
+}
+    `;
+export const PhraseDefinitionFragmentFragmentDoc = gql`
+    fragment PhraseDefinitionFragment on PhraseDefinition {
+  phrase_definition_id
+  definition
+  phrase {
+    ...PhraseFragment
+  }
+}
+    ${PhraseFragmentFragmentDoc}`;
+export const SiteTextPhraseDefinitionFragmentFragmentDoc = gql`
+    fragment SiteTextPhraseDefinitionFragment on SiteTextPhraseDefinition {
+  site_text_id
+  phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+}
+    ${PhraseDefinitionFragmentFragmentDoc}`;
+export const WordFragmentFragmentDoc = gql`
+    fragment WordFragment on Word {
+  word_id
+  word
+  language_code
+  dialect_code
+  geo_code
+}
+    `;
+export const WordDefinitionFragmentFragmentDoc = gql`
+    fragment WordDefinitionFragment on WordDefinition {
+  word_definition_id
+  word {
+    ...WordFragment
+  }
+  definition
+}
+    ${WordFragmentFragmentDoc}`;
+export const SiteTextWordDefinitionFragmentFragmentDoc = gql`
+    fragment SiteTextWordDefinitionFragment on SiteTextWordDefinition {
+  site_text_id
+  word_definition {
+    ...WordDefinitionFragment
+  }
+}
+    ${WordDefinitionFragmentFragmentDoc}`;
+export const SiteTextTranslationWithVoteFragmentFragmentDoc = gql`
+    fragment SiteTextTranslationWithVoteFragment on SiteTextTranslationWithVote {
+  site_text_translation_id
+  from_definition {
+    ...WordDefinitionFragment
+    ...PhraseDefinitionFragment
+  }
+  to_definition {
+    ...WordDefinitionFragment
+    ...PhraseDefinitionFragment
+  }
+  from_type_is_word
+  to_type_is_word
+  upvotes
+  downvotes
+  created_at
+}
+    ${WordDefinitionFragmentFragmentDoc}
+${PhraseDefinitionFragmentFragmentDoc}`;
 export const RegisterDocument = gql`
     mutation Register($email: String!, $avatar: String!, $password: String!) {
   register(input: {email: $email, avatar: $avatar, password: $password}) {
@@ -1210,6 +1342,171 @@ export function usePostReadLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<P
 export type PostReadQueryHookResult = ReturnType<typeof usePostReadQuery>;
 export type PostReadLazyQueryHookResult = ReturnType<typeof usePostReadLazyQuery>;
 export type PostReadQueryResult = Apollo.QueryResult<PostReadQuery, PostReadQueryVariables>;
+export const GetAllSiteTextDefinitionsDocument = gql`
+    query GetAllSiteTextDefinitions {
+  getAllSiteTextDefinitions {
+    error
+    site_text_phrase_definition_list {
+      ...SiteTextPhraseDefinitionFragment
+    }
+    site_text_word_definition_list {
+      ...SiteTextWordDefinitionFragment
+    }
+  }
+}
+    ${SiteTextPhraseDefinitionFragmentFragmentDoc}
+${SiteTextWordDefinitionFragmentFragmentDoc}`;
+
+/**
+ * __useGetAllSiteTextDefinitionsQuery__
+ *
+ * To run a query within a React component, call `useGetAllSiteTextDefinitionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllSiteTextDefinitionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllSiteTextDefinitionsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAllSiteTextDefinitionsQuery(baseOptions?: Apollo.QueryHookOptions<GetAllSiteTextDefinitionsQuery, GetAllSiteTextDefinitionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllSiteTextDefinitionsQuery, GetAllSiteTextDefinitionsQueryVariables>(GetAllSiteTextDefinitionsDocument, options);
+      }
+export function useGetAllSiteTextDefinitionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllSiteTextDefinitionsQuery, GetAllSiteTextDefinitionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllSiteTextDefinitionsQuery, GetAllSiteTextDefinitionsQueryVariables>(GetAllSiteTextDefinitionsDocument, options);
+        }
+export type GetAllSiteTextDefinitionsQueryHookResult = ReturnType<typeof useGetAllSiteTextDefinitionsQuery>;
+export type GetAllSiteTextDefinitionsLazyQueryHookResult = ReturnType<typeof useGetAllSiteTextDefinitionsLazyQuery>;
+export type GetAllSiteTextDefinitionsQueryResult = Apollo.QueryResult<GetAllSiteTextDefinitionsQuery, GetAllSiteTextDefinitionsQueryVariables>;
+export const GetAllTranslationFromSiteTextDefinitionIdDocument = gql`
+    query GetAllTranslationFromSiteTextDefinitionID($dialect_code: String, $geo_code: String, $language_code: String!, $site_text_id: String!, $site_text_type_is_word: Boolean!) {
+  getAllTranslationFromSiteTextDefinitionID(
+    dialect_code: $dialect_code
+    geo_code: $geo_code
+    language_code: $language_code
+    site_text_id: $site_text_id
+    site_text_type_is_word: $site_text_type_is_word
+  ) {
+    error
+    site_text_translation_with_vote_list {
+      ...SiteTextTranslationWithVoteFragment
+    }
+  }
+}
+    ${SiteTextTranslationWithVoteFragmentFragmentDoc}`;
+
+/**
+ * __useGetAllTranslationFromSiteTextDefinitionIdQuery__
+ *
+ * To run a query within a React component, call `useGetAllTranslationFromSiteTextDefinitionIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllTranslationFromSiteTextDefinitionIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllTranslationFromSiteTextDefinitionIdQuery({
+ *   variables: {
+ *      dialect_code: // value for 'dialect_code'
+ *      geo_code: // value for 'geo_code'
+ *      language_code: // value for 'language_code'
+ *      site_text_id: // value for 'site_text_id'
+ *      site_text_type_is_word: // value for 'site_text_type_is_word'
+ *   },
+ * });
+ */
+export function useGetAllTranslationFromSiteTextDefinitionIdQuery(baseOptions: Apollo.QueryHookOptions<GetAllTranslationFromSiteTextDefinitionIdQuery, GetAllTranslationFromSiteTextDefinitionIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllTranslationFromSiteTextDefinitionIdQuery, GetAllTranslationFromSiteTextDefinitionIdQueryVariables>(GetAllTranslationFromSiteTextDefinitionIdDocument, options);
+      }
+export function useGetAllTranslationFromSiteTextDefinitionIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllTranslationFromSiteTextDefinitionIdQuery, GetAllTranslationFromSiteTextDefinitionIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllTranslationFromSiteTextDefinitionIdQuery, GetAllTranslationFromSiteTextDefinitionIdQueryVariables>(GetAllTranslationFromSiteTextDefinitionIdDocument, options);
+        }
+export type GetAllTranslationFromSiteTextDefinitionIdQueryHookResult = ReturnType<typeof useGetAllTranslationFromSiteTextDefinitionIdQuery>;
+export type GetAllTranslationFromSiteTextDefinitionIdLazyQueryHookResult = ReturnType<typeof useGetAllTranslationFromSiteTextDefinitionIdLazyQuery>;
+export type GetAllTranslationFromSiteTextDefinitionIdQueryResult = Apollo.QueryResult<GetAllTranslationFromSiteTextDefinitionIdQuery, GetAllTranslationFromSiteTextDefinitionIdQueryVariables>;
+export const SiteTextWordDefinitionReadDocument = gql`
+    query SiteTextWordDefinitionRead($id: String!) {
+  siteTextWordDefinitionRead(id: $id) {
+    error
+    site_text_word_definition {
+      ...SiteTextWordDefinitionFragment
+    }
+  }
+}
+    ${SiteTextWordDefinitionFragmentFragmentDoc}`;
+
+/**
+ * __useSiteTextWordDefinitionReadQuery__
+ *
+ * To run a query within a React component, call `useSiteTextWordDefinitionReadQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSiteTextWordDefinitionReadQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSiteTextWordDefinitionReadQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useSiteTextWordDefinitionReadQuery(baseOptions: Apollo.QueryHookOptions<SiteTextWordDefinitionReadQuery, SiteTextWordDefinitionReadQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SiteTextWordDefinitionReadQuery, SiteTextWordDefinitionReadQueryVariables>(SiteTextWordDefinitionReadDocument, options);
+      }
+export function useSiteTextWordDefinitionReadLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SiteTextWordDefinitionReadQuery, SiteTextWordDefinitionReadQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SiteTextWordDefinitionReadQuery, SiteTextWordDefinitionReadQueryVariables>(SiteTextWordDefinitionReadDocument, options);
+        }
+export type SiteTextWordDefinitionReadQueryHookResult = ReturnType<typeof useSiteTextWordDefinitionReadQuery>;
+export type SiteTextWordDefinitionReadLazyQueryHookResult = ReturnType<typeof useSiteTextWordDefinitionReadLazyQuery>;
+export type SiteTextWordDefinitionReadQueryResult = Apollo.QueryResult<SiteTextWordDefinitionReadQuery, SiteTextWordDefinitionReadQueryVariables>;
+export const SiteTextPhraseDefinitionReadDocument = gql`
+    query SiteTextPhraseDefinitionRead($id: String!) {
+  siteTextPhraseDefinitionRead(id: $id) {
+    error
+    site_text_phrase_definition {
+      ...SiteTextPhraseDefinitionFragment
+    }
+  }
+}
+    ${SiteTextPhraseDefinitionFragmentFragmentDoc}`;
+
+/**
+ * __useSiteTextPhraseDefinitionReadQuery__
+ *
+ * To run a query within a React component, call `useSiteTextPhraseDefinitionReadQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSiteTextPhraseDefinitionReadQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSiteTextPhraseDefinitionReadQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useSiteTextPhraseDefinitionReadQuery(baseOptions: Apollo.QueryHookOptions<SiteTextPhraseDefinitionReadQuery, SiteTextPhraseDefinitionReadQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SiteTextPhraseDefinitionReadQuery, SiteTextPhraseDefinitionReadQueryVariables>(SiteTextPhraseDefinitionReadDocument, options);
+      }
+export function useSiteTextPhraseDefinitionReadLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SiteTextPhraseDefinitionReadQuery, SiteTextPhraseDefinitionReadQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SiteTextPhraseDefinitionReadQuery, SiteTextPhraseDefinitionReadQueryVariables>(SiteTextPhraseDefinitionReadDocument, options);
+        }
+export type SiteTextPhraseDefinitionReadQueryHookResult = ReturnType<typeof useSiteTextPhraseDefinitionReadQuery>;
+export type SiteTextPhraseDefinitionReadLazyQueryHookResult = ReturnType<typeof useSiteTextPhraseDefinitionReadLazyQuery>;
+export type SiteTextPhraseDefinitionReadQueryResult = Apollo.QueryResult<SiteTextPhraseDefinitionReadQuery, SiteTextPhraseDefinitionReadQueryVariables>;
 export const UserReadDocument = gql`
     query UserRead($userId: ID!) {
   userReadResolver(input: {user_id: $userId}) {
@@ -1344,6 +1641,10 @@ export type GetFileUploadUrlQueryResult = Apollo.QueryResult<GetFileUploadUrlQue
 export const namedOperations = {
   Query: {
     PostRead: 'PostRead',
+    GetAllSiteTextDefinitions: 'GetAllSiteTextDefinitions',
+    GetAllTranslationFromSiteTextDefinitionID: 'GetAllTranslationFromSiteTextDefinitionID',
+    SiteTextWordDefinitionRead: 'SiteTextWordDefinitionRead',
+    SiteTextPhraseDefinitionRead: 'SiteTextPhraseDefinitionRead',
     UserRead: 'UserRead',
     GetFileUploadUrl: 'GetFileUploadUrl'
   },
@@ -1361,6 +1662,13 @@ export const namedOperations = {
   Fragment: {
     SessionFields: 'SessionFields',
     VersionFields: 'VersionFields',
-    PostFields: 'PostFields'
+    PostFields: 'PostFields',
+    PhraseFragment: 'PhraseFragment',
+    WordFragment: 'WordFragment',
+    WordDefinitionFragment: 'WordDefinitionFragment',
+    PhraseDefinitionFragment: 'PhraseDefinitionFragment',
+    SiteTextPhraseDefinitionFragment: 'SiteTextPhraseDefinitionFragment',
+    SiteTextWordDefinitionFragment: 'SiteTextWordDefinitionFragment',
+    SiteTextTranslationWithVoteFragment: 'SiteTextTranslationWithVoteFragment'
   }
 }
