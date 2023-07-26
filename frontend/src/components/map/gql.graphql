@@ -1,0 +1,9 @@
+query GetOrigMapWords($original_map_id: ID) {
+  getOrigMapWords(input: { original_map_id: $original_map_id }) {
+    origMapWords {
+      word
+      word_id
+      language_code
+    }
+  }
+}

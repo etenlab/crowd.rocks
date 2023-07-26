@@ -15,7 +15,7 @@ export const UPLOAD_FILE_MUTATION = gql`
 `;
 
 export const GET_ORIGINAL_MAPS_QUERY = gql`
-  query GetOrigMapsList($search: String) {
+  query GetOrigMapsList($search: String!) {
     getOrigMapsList(input: { search: $search }) {
       origMapList {
         original_map_id

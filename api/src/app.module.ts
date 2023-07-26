@@ -6,7 +6,7 @@ import { AuthenticationModule } from './components/authentication/authentication
 import { EmailModule } from './components/email/email.module';
 import { PostModule } from './components/post/post.module';
 import { UserModule } from './components/user/user.module';
-import { WordModule } from './components/words/words.module';
+import { WordsModule } from './components/words/words.module';
 import { MapModule } from './components/maps/maps.module';
 
 @Module({
@@ -20,7 +20,7 @@ import { MapModule } from './components/maps/maps.module';
     UserModule,
     PostModule,
     EmailModule,
-    WordModule,
+    WordsModule,
     MapModule,
   ],
   controllers: [],

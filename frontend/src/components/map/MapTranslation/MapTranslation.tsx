@@ -1,41 +1,30 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
-import { mockMapWords } from '../mocks/mapData.mock';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { styled } from 'styled-components';
 import { TranslatedWordCards } from '../../word/TranslatedWordCards/TranslatedWordCards';
+import { useGetOrigMapWordsLazyQuery } from '../../../generated/graphql';
 
 interface MapTranslationProps extends RouteComponentProps<{}> {}
 
 export const MapTranslation: React.FC<MapTranslationProps> = () => {
-  const [mapsWords, setMapsWords] = useState<TWordTranslated[] | undefined>();
   const [sourceLang, setSourceLang] = useState<LanguageInfo>();
   const [targetLang, setTargetLang] = useState<LanguageInfo>();
 
-  const getMapWords = useCallback(
-    async (sourceLang?: LanguageInfo, targetLang?: LanguageInfo) => {
-      console.log(`mock words for source lang ${JSON.stringify(sourceLang)}`);
-      console.log(`mock words for target lang ${JSON.stringify(targetLang)}`);
-      let words = mockMapWords;
-      if (sourceLang) {
-        words = words.filter(
-          (w) => w.word.languageCode === sourceLang?.lang.tag,
-        );
-      }
-      if (targetLang) {
-        words = words.filter(
-          (w) => w.translation?.word.languageCode === targetLang?.lang.tag,
-        );
-      }
-      setMapsWords(words);
+  const [
+    origMapWordsRead,
+    {
+      data: wordsData,
+      // error: wordsError,
+      // loading: wordsLoading,
+      // called: wordsCalled,
     },
-    [setMapsWords],
-  );
+  ] = useGetOrigMapWordsLazyQuery();
 
   useEffect(() => {
-    getMapWords(sourceLang, targetLang);
-  }, [getMapWords, sourceLang, targetLang]);
+    origMapWordsRead();
+  }, [origMapWordsRead]);
 
   return (
     <>
@@ -62,13 +51,27 @@ export const MapTranslation: React.FC<MapTranslationProps> = () => {
         ></LangSelector>
       </LangSelectorBox>
       <WordsBox>
-        {mapsWords?.map((mw) => (
-          <TranslatedWordCards
-            key={mw.word.id}
-            wordTranslated={mw}
-            targetLang={targetLang}
-          />
-        ))}
+        {wordsData &&
+          wordsData.getOrigMapWords.origMapWords.map((mw) => (
+            <TranslatedWordCards
+              key={mw.word_id}
+              wordTranslated={{
+                word: {
+                  content: mw.word,
+                  id: mw.word_id,
+                  languageCode: mw.language_code,
+                },
+                translation: {
+                  word: {
+                    content: 'tr mw.word mocked',
+                    id: 'tr mw.word_id mocked',
+                    languageCode: 'tr mw.language_code mocked',
+                  },
+                },
+              }}
+              targetLang={targetLang}
+            />
+          ))}
       </WordsBox>
     </>
   );
