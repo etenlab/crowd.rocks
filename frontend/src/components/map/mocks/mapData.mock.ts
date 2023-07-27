@@ -57,15 +57,15 @@ export const mockMapWords: TWordTranslated[] = [
       id: '1',
       content: 'Athens',
       languageCode: 'en',
-      description: 'description for Athens',
+      definition: 'description for Athens',
     },
     translation: {
-      word: {
-        id: '11',
-        content: 'uk-Athens11',
-        languageCode: 'uk',
-        description: 'nice description uk-Athens11',
-      },
+      id: '11',
+      content: 'uk-Athens11',
+      languageCode: 'uk',
+      definition: 'nice description uk-Athens11',
+      upVotes: 0,
+      downVotes: 0,
     },
   },
   {
@@ -73,15 +73,15 @@ export const mockMapWords: TWordTranslated[] = [
       id: '2',
       content: 'Rome',
       languageCode: 'en',
-      description: 'description for Rome',
+      definition: 'description for Rome',
     },
     translation: {
-      word: {
-        id: '21',
-        content: 'uk-Rome',
-        languageCode: 'uk',
-        description: 'nice description uk-Rome',
-      },
+      id: '21',
+      content: 'uk-Rome',
+      languageCode: 'uk',
+      definition: 'nice description uk-Rome',
+      upVotes: 0,
+      downVotes: 0,
     },
   },
   {
@@ -89,7 +89,7 @@ export const mockMapWords: TWordTranslated[] = [
       id: '3',
       content: '3Rome',
       languageCode: 'en',
-      description: 'description for 3Rome',
+      definition: 'description for 3Rome',
     },
   },
 ];
@@ -99,7 +99,7 @@ export const mockWordTranslations: TWordWithTranslations = {
     id: '1',
     content: 'Athens',
     languageCode: 'en',
-    description: 'nice description Athens',
+    definition: 'nice description Athens',
   },
   translationsVoted: [
     {
@@ -107,36 +107,36 @@ export const mockWordTranslations: TWordWithTranslations = {
         id: '11',
         content: 'uk-Athens11',
         languageCode: 'uk',
-        description: 'nice description uk-Athens11',
+        definition: 'nice description uk-Athens11',
       },
-      votes: { up: 2, down: 3 },
+      votes: { upVotes: 2, downVotes: 3 },
     },
     {
       word: {
         id: '12',
         content: 'uk-Athens12',
         languageCode: 'uk',
-        description: 'nice description uk-Athens12',
+        definition: 'nice description uk-Athens12',
       },
-      votes: { up: 2, down: 3 },
+      votes: { upVotes: 2, downVotes: 3 },
     },
     {
       word: {
         id: '13',
         content: 'uk-Athens13',
         languageCode: 'uk',
-        description: 'nice description uk-Athens13',
+        definition: 'nice description uk-Athens13',
       },
-      votes: { up: 2, down: 3 },
+      votes: { upVotes: 2, downVotes: 3 },
     },
     {
       word: {
         id: '14',
         content: 'apq-Athens14',
         languageCode: 'apq',
-        description: 'nice description apq-Athens14',
+        definition: 'nice description apq-Athens14',
       },
-      votes: { up: 2, down: 3 },
+      votes: { upVotes: 2, downVotes: 3 },
     },
   ],
 };
