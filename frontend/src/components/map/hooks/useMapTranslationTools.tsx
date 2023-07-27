@@ -65,6 +65,7 @@ export function useMapTranslationTools() {
         createdAt: created_at,
         createdByUserId: created_by,
         content: content,
+        languageCode: 'en',
       };
     },
     [apolloClient],
@@ -84,6 +85,7 @@ export function useMapTranslationTools() {
         name: r.map_file_name,
         createdAt: r.created_at,
         createdByUserId: r.created_by,
+        languageCode: 'en',
       }));
     },
     [apolloClient],

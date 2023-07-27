@@ -1,4 +1,3 @@
-import { useMutation } from '@apollo/client';
 import {
   IonButton,
   IonContent,
@@ -10,16 +9,13 @@ import {
 } from '@ionic/react';
 import { FormEvent, useState } from 'react';
 import { useHistory } from 'react-router';
-import result, {
-  ErrorType,
-  useRegisterMutation,
-} from '../../generated/graphql';
+import { ErrorType, useRegisterMutation } from '../../generated/graphql';
 import { globals } from '../../services/globals';
 import { login_change } from '../../services/subscriptions';
 import './Register.css';
 
 const Register: React.FC = () => {
-  let history = useHistory();
+  const history = useHistory();
 
   useIonViewWillEnter(() => {
     document.title = 'Register';
@@ -37,8 +33,10 @@ const Register: React.FC = () => {
   const [is_avatar_unavailable, set_is_avatar_unavailable] = useState(false);
   const [is_password_too_long, set_is_password_too_long] = useState(false);
   const [is_password_too_short, set_is_password_too_short] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [is_unknown_error, set_is_unknown_error] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [registerMutation, { data, loading, error }] = useRegisterMutation();
 
   async function handle_submit(event: FormEvent) {
@@ -55,7 +53,9 @@ const Register: React.FC = () => {
         },
         errorPolicy: 'all',
       });
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+    }
 
     const error = result?.data?.register.error;
 
@@ -72,12 +72,13 @@ const Register: React.FC = () => {
       set_avatar('');
       set_email('');
       set_password('');
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       const session = result?.data?.register.session!;
       globals.set_token(session.token);
       globals.set_user_id(+session.user_id);
       globals.set_avatar(session.avatar);
-      if (session.profile_url) {
-        globals.set_profile_url(session.profile_url);
+      if (session.avatar_url) {
+        globals.set_profile_url(session.avatar_url);
       }
 
       login_change.next(true);

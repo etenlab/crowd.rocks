@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AuthenticationModule } from './components/authentication/authentication.module';
 import { EmailModule } from './components/email/email.module';
@@ -15,6 +16,9 @@ import { MapModule } from './components/maps/maps.module';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'frontend', 'dist'),
     }),
     AuthenticationModule,
     UserModule,
