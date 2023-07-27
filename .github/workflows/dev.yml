@@ -2,7 +2,7 @@ name: Build, Dockerize, Upload
 on:
   push:
     branches:
-      - workflow
+      - dev
 
 jobs:
   package:
@@ -11,23 +11,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-
-      - name: Prepare Node 16
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-
-      - name: Install dependencies for frontend
-        run: cd frontend && npm install
-
-      - name: Build frontend
-        run: cd frontend && npm run build
-
-      - name: Install dependencies for api
-        run: cd api && yarn install
-
-      - name: Build api
-        run: cd api && yarn run build
 
       - name: Log in to Docker Hub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
