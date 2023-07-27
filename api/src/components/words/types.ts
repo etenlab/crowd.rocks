@@ -9,6 +9,21 @@ export class Word {
   @Field(() => String, { nullable: true }) dialect_code: string | null;
   @Field(() => String, { nullable: true }) geo_code: string | null;
 }
+@ObjectType()
+export class WordWithDefinition extends Word {
+  @Field(() => String, { nullable: true }) definition: string;
+  @Field(() => String, { nullable: true }) definition_id: string;
+}
+@ObjectType()
+export class WordWithVotes extends WordWithDefinition {
+  @Field(() => String) up_votes: string;
+  @Field(() => String) down_votes: string;
+}
+@ObjectType()
+export class WordTranslations extends WordWithDefinition {
+  @Field(() => [WordWithVotes], { nullable: true })
+  translations?: WordWithVotes[];
+}
 
 @InputType()
 export class WordUpsertInput {

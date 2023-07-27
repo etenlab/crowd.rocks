@@ -21,10 +21,7 @@ export const TranslatedWordCards = ({
         <WordCard word={wordTranslated.word} routerLink={routerLink} />
       </StCard>
       <StCard>
-        <WordCard
-          word={wordTranslated.translation?.word}
-          routerLink={routerLink}
-        />
+        <WordCard word={wordTranslated.translation} routerLink={routerLink} />
       </StCard>
     </StCards>
   );

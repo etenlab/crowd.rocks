@@ -52,21 +52,27 @@ export const MapTranslation: React.FC<MapTranslationProps> = () => {
       </LangSelectorBox>
       <WordsBox>
         {wordsData &&
-          wordsData.getOrigMapWords.origMapWords.map((mw) => (
+          wordsData.getOrigMapWords.origMapWords.map((omw) => (
             <TranslatedWordCards
-              key={mw.word_id}
+              key={omw.word_id}
               wordTranslated={{
                 word: {
-                  content: mw.word,
-                  id: mw.word_id,
-                  languageCode: mw.language_code,
+                  content: omw.word,
+                  id: omw.word_id,
+                  languageCode: omw.language_code,
+                  dialectCode: omw.dialect_code || undefined,
+                  geoCode: omw.geo_code || undefined,
+                  definition: omw.definition || '',
                 },
                 translation: {
-                  word: {
-                    content: 'tr mw.word mocked',
-                    id: 'tr mw.word_id mocked',
-                    languageCode: 'tr mw.language_code mocked',
-                  },
+                  content: omw.translations?.[0]?.word || '',
+                  id: omw.translations?.[0]?.word_id || '',
+                  languageCode: omw.translations?.[0]?.language_code || '',
+                  dialectCode: omw.translations?.[0]?.dialect_code || undefined,
+                  geoCode: omw.translations?.[0]?.geo_code || undefined,
+                  definition: omw.translations?.[0]?.definition || '',
+                  upVotes: Number(omw.translations?.[0]?.up_votes || 0),
+                  downVotes: Number(omw.translations?.[0]?.down_votes || 0),
                 },
               }}
               targetLang={targetLang}

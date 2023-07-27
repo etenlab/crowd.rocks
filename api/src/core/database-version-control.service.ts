@@ -108,6 +108,10 @@ export class DatabaseVersionControlService {
       './src/core/sql/translation/phrase_to_phrase_translation_upsert.sql',
     );
 
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word_translation_votes_count.sql',
+    );
+
     // data
     await this.runSqlFile(
       './src/core/sql/data/site-text-word-definition-upsert.sql',
