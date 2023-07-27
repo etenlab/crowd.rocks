@@ -144,12 +144,18 @@ export type GetOrigMapListInput = {
 };
 
 export type GetOrigMapWordsInput = {
+  o_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  o_geo_code?: InputMaybe<Scalars['String']['input']>;
+  o_language_code?: InputMaybe<Scalars['String']['input']>;
   original_map_id?: InputMaybe<Scalars['ID']['input']>;
+  t_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  t_geo_code?: InputMaybe<Scalars['String']['input']>;
+  t_language_code?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GetOrigMapWordsOutput = {
   __typename?: 'GetOrigMapWordsOutput';
-  origMapWords: Array<Word>;
+  origMapWords: Array<WordTranslations>;
 };
 
 export type GetOrigMapsListOutput = {
@@ -831,6 +837,18 @@ export type WordReadOutput = {
   word?: Maybe<Word>;
 };
 
+export type WordTranslations = {
+  __typename?: 'WordTranslations';
+  definition?: Maybe<Scalars['String']['output']>;
+  definition_id?: Maybe<Scalars['String']['output']>;
+  dialect_code?: Maybe<Scalars['String']['output']>;
+  geo_code?: Maybe<Scalars['String']['output']>;
+  language_code: Scalars['String']['output'];
+  translations?: Maybe<Array<WordWithVotes>>;
+  word: Scalars['String']['output'];
+  word_id: Scalars['ID']['output'];
+};
+
 export type WordUpsertInput = {
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
@@ -842,6 +860,19 @@ export type WordUpsertOutput = {
   __typename?: 'WordUpsertOutput';
   error: ErrorType;
   word?: Maybe<Word>;
+};
+
+export type WordWithVotes = {
+  __typename?: 'WordWithVotes';
+  definition?: Maybe<Scalars['String']['output']>;
+  definition_id?: Maybe<Scalars['String']['output']>;
+  dialect_code?: Maybe<Scalars['String']['output']>;
+  down_votes: Scalars['String']['output'];
+  geo_code?: Maybe<Scalars['String']['output']>;
+  language_code: Scalars['String']['output'];
+  up_votes: Scalars['String']['output'];
+  word: Scalars['String']['output'];
+  word_id: Scalars['ID']['output'];
 };
 
 export type SessionFieldsFragment = { __typename?: 'Session', user_id: string, token: string, avatar: string, avatar_url?: string | null };
@@ -897,7 +928,7 @@ export type GetOrigMapWordsQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'Word', word: string, word_id: string, language_code: string }> } };
+export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'WordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, translations?: Array<{ __typename?: 'WordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, up_votes: string, down_votes: string }> | null }> } };
 
 export type VersionFieldsFragment = { __typename?: 'Version', version_id: string, post_id: number, created_at: string, license_title: string, content: string };
 
@@ -1350,6 +1381,19 @@ export const GetOrigMapWordsDocument = gql`
       word
       word_id
       language_code
+      dialect_code
+      geo_code
+      definition
+      translations {
+        word
+        word_id
+        language_code
+        dialect_code
+        geo_code
+        definition
+        up_votes
+        down_votes
+      }
     }
   }
 }

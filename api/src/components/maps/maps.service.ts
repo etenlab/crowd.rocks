@@ -201,6 +201,6 @@ export class MapsService {
   async getOrigMapWords(
     original_map_id?: string,
   ): Promise<GetOrigMapWordsOutput> {
-    return this.mapsRepository.getOrigMapWords(original_map_id);
+    return this.mapsRepository.getOrigMapWords(original_map_id, {});
   }
 }

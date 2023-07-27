@@ -122,11 +122,17 @@ input GetOrigMapListInput {
 }
 
 input GetOrigMapWordsInput {
+  o_dialect_code: String
+  o_geo_code: String
+  o_language_code: String
   original_map_id: ID
+  t_dialect_code: String
+  t_geo_code: String
+  t_language_code: String
 }
 
 type GetOrigMapWordsOutput {
-  origMapWords: [Word!]!
+  origMapWords: [WordTranslations!]!
 }
 
 type GetOrigMapsListOutput {
@@ -539,6 +545,17 @@ type WordReadOutput {
   word: Word
 }
 
+type WordTranslations {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  translations: [WordWithVotes!]
+  word: String!
+  word_id: ID!
+}
+
 input WordUpsertInput {
   dialect_code: String
   geo_code: String
@@ -549,4 +566,16 @@ input WordUpsertInput {
 type WordUpsertOutput {
   error: ErrorType!
   word: Word
+}
+
+type WordWithVotes {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  down_votes: String!
+  geo_code: String
+  language_code: String!
+  up_votes: String!
+  word: String!
+  word_id: ID!
 }

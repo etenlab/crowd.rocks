@@ -18,7 +18,7 @@ export const WordCard = ({ word, onClick, routerLink }: TWordCardProps) => {
       <IonCardHeader>
         <IonCardTitle>{word?.content || ''}</IonCardTitle>
         <IonCardSubtitle>
-          <div>{word?.description || ''}</div>
+          <div>{word?.definition || ''}</div>
         </IonCardSubtitle>
       </IonCardHeader>
     </StCard>
