@@ -3,6 +3,9 @@ type TMap = {
   name: string;
   createdAt: string;
   createdByUserId?: string;
+  languageCode: string;
+  dialectCode?: string;
+  geoCode?: string;
 };
 
 type TMapWithContent = TMap & {

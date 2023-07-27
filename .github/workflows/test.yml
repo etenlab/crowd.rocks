@@ -1,0 +1,29 @@
+name: Pre-Test Workflow
+on:
+  pull_request:
+    branches: [dev]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  buildable-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Prepare Node 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install dependencies for frontend
+        run: cd frontend && npm install
+
+      - name: Build frontend
+        run: cd frontend && npm run build
+
+      - name: Install dependencies for api
+        run: cd api && yarn install
+
+      - name: Build api
+        run: cd api && yarn run build

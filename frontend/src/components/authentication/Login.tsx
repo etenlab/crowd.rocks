@@ -16,7 +16,7 @@ import { login_change } from '../../services/subscriptions';
 import './Login.css';
 
 const Login: React.FC = () => {
-  let history = useHistory();
+  const history = useHistory();
 
   useIonViewWillEnter(() => {
     document.title = 'Login';
@@ -32,8 +32,10 @@ const Login: React.FC = () => {
   const [is_password_too_short, set_is_password_too_short] = useState(false);
   const [is_invalid_email_or_password, set_is_invalid_email_or_password] =
     useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [is_unknown_error, set_is_unknown_error] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loginMutation, { data, loading, error }] = useLoginMutation();
 
   async function handle_submit(event: FormEvent) {
@@ -49,6 +51,7 @@ const Login: React.FC = () => {
         },
         errorPolicy: 'all',
       });
+      // eslint-disable-next-line no-empty
     } catch (e) {}
 
     const error = result?.data?.login.error;
@@ -63,12 +66,13 @@ const Login: React.FC = () => {
     if (error === ErrorType.NoError) {
       set_email('');
       set_password('');
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       const session = result?.data?.login.session!;
       globals.set_token(session.token);
       globals.set_user_id(+session.user_id);
       globals.set_avatar(session.avatar);
-      if (session.profile_url) {
-        globals.set_profile_url(session.profile_url);
+      if (session.avatar_url) {
+        globals.set_profile_url(session.avatar_url);
       }
 
       login_change.next(true);
