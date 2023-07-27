@@ -4,6 +4,19 @@ query GetOrigMapWords($original_map_id: ID) {
       word
       word_id
       language_code
+      dialect_code
+      geo_code
+      definition
+      translations {
+        word
+        word_id
+        language_code
+        dialect_code
+        geo_code
+        definition
+        up_votes
+        down_votes
+      }
     }
   }
 }
