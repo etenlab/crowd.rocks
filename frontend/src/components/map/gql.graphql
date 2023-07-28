@@ -21,6 +21,7 @@ query GetOrigMapWords(
       dialect_code
       geo_code
       definition
+      definition_id
       translations {
         word
         word_id
@@ -28,9 +29,27 @@ query GetOrigMapWords(
         dialect_code
         geo_code
         definition
+        definition_id
         up_votes
         down_votes
       }
     }
+  }
+}
+
+mutation AddWordAsTranslationForWord(
+  $originalDefinitionId: String!
+  $translationDefinition: String!
+  $translationWord: WordUpsertInput!
+) {
+  addWordAsTranslationForWord(
+    input: {
+      originalDefinitionId: $originalDefinitionId
+      translationDefinition: $translationDefinition
+      translationWord: $translationWord
+    }
+  ) {
+    wordTranslationId
+    error
   }
 }

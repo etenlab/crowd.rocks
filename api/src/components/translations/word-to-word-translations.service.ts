@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { ErrorType } from 'src/common/types';
+import { ErrorType, GenericOutput } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 import { WordDefinitionsService } from 'src/components/definitions/word-definitions.service';
 
 import {
+  AddWordAsTranslationForWordOutput,
   WordToWordTranslationReadOutput,
   WordToWordTranslationUpsertOutput,
 } from './types';
@@ -15,12 +16,16 @@ import {
   callWordToWordTranslationUpsertProcedure,
   WordToWordTranslationUpsertProcedureOutputRow,
 } from './sql-string';
+import { WordsService } from '../words/words.service';
+import { WordUpsertInput } from '../words/types';
+import { PoolClient } from 'pg';
 
 @Injectable()
 export class WordToWordTranslationsService {
   constructor(
     private pg: PostgresService,
     private wordDefinitionService: WordDefinitionsService,
+    private wordsService: WordsService,
   ) {}
 
   async read(id: number): Promise<WordToWordTranslationReadOutput> {
@@ -118,4 +123,97 @@ export class WordToWordTranslationsService {
       word_to_word_translation: null,
     };
   }
+
+  async upsertInTrn(
+    fromWordDefinitionId: number,
+    toWordDefinitionId: number,
+    token: string,
+    dbPoolClient: PoolClient,
+  ): Promise<{ word_to_word_translation_id: string | null } & GenericOutput> {
+    try {
+      const res =
+        await dbPoolClient.query<WordToWordTranslationUpsertProcedureOutputRow>(
+          ...callWordToWordTranslationUpsertProcedure({
+            fromWordDefinitionId,
+            toWordDefinitionId,
+            token,
+          }),
+        );
+
+      const error = res.rows[0].p_error_type;
+      const word_to_word_translation_id =
+        res.rows[0].p_word_to_word_translation_id;
+
+      if (error !== ErrorType.NoError || !word_to_word_translation_id) {
+        return {
+          error: error,
+          word_to_word_translation_id: null,
+        };
+      }
+
+      return {
+        error,
+        word_to_word_translation_id: String(word_to_word_translation_id),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_to_word_translation_id: null,
+    };
+  }
+
+  addWordAsTranslationForWord = async (
+    originalDefinitionId: string,
+    tWord: WordUpsertInput,
+    tDefinitionText: string,
+    token: string,
+  ): Promise<AddWordAsTranslationForWordOutput> => {
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      dbPoolClient.query('BEGIN');
+
+      const { word_id, error: wordErr } = await this.wordsService.upsertInTrn(
+        tWord,
+        token,
+        dbPoolClient,
+      );
+
+      const { word_definition_id, error: definitionErr } =
+        await this.wordDefinitionService.upsertInTrn(
+          {
+            word_id,
+            definition: tDefinitionText,
+          },
+          token,
+          dbPoolClient,
+        );
+
+      const { error: translationErr } = await this.upsertInTrn(
+        Number(originalDefinitionId),
+        Number(word_definition_id),
+        token,
+        dbPoolClient,
+      );
+
+      if (
+        wordErr !== ErrorType.NoError ||
+        definitionErr !== ErrorType.NoError ||
+        translationErr !== ErrorType.NoError
+      ) {
+        throw new Error('Error with adding translation');
+      }
+
+      dbPoolClient.query('COMMIT');
+      return { wordTranslationId: word_id, error: ErrorType.NoError };
+    } catch (error) {
+      await dbPoolClient.query('ROLLBACK');
+      console.log('[error]', error);
+      return { wordTranslationId: null, error: ErrorType.WordInsertFailed };
+    } finally {
+      dbPoolClient.release();
+    }
+  };
 }

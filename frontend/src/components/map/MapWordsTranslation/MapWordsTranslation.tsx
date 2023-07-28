@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -27,7 +27,7 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
     },
   ] = useGetOrigMapWordsLazyQuery();
 
-  useEffect(() => {
+  const fetchMapWords = useCallback(() => {
     if (!targetLang?.lang.tag) {
       return;
     }
@@ -40,13 +40,17 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
     targetLang?.region?.tag &&
       Object.assign(variables, { t_geo_code: targetLang.region.tag });
 
-    origMapWordsRead({ variables });
+    origMapWordsRead({ variables, fetchPolicy: 'no-cache' });
   }, [
     origMapWordsRead,
     targetLang?.dialect?.tag,
     targetLang?.lang.tag,
     targetLang?.region?.tag,
   ]);
+
+  useEffect(() => {
+    fetchMapWords();
+  }, [fetchMapWords]);
 
   return (
     <>
@@ -88,7 +92,10 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
         <WordTranslationsCom
           tLangInfo={targetLang}
           wordWithTranslations={selectedWord}
-          onBackClick={() => setSelectedWord(undefined)}
+          onBackClick={() => {
+            setSelectedWord(undefined);
+          }}
+          fetchMapWordsFn={() => fetchMapWords()}
         />
       )}
     </>

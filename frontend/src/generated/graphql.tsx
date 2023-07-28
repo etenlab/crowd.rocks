@@ -19,6 +19,18 @@ export type Scalars = {
   Upload: { input: any; output: any; }
 };
 
+export type AddWordAsTranslationForWordInput = {
+  originalDefinitionId: Scalars['String']['input'];
+  translationDefinition: Scalars['String']['input'];
+  translationWord: WordUpsertInput;
+};
+
+export type AddWordAsTranslationForWordOutput = {
+  __typename?: 'AddWordAsTranslationForWordOutput';
+  error: ErrorType;
+  wordTranslationId: Scalars['String']['output'];
+};
+
 export type AvatarUpdateInput = {
   avatar: Scalars['String']['input'];
 };
@@ -193,6 +205,7 @@ export type MapFileOutput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  addWordAsTranslationForWord: AddWordAsTranslationForWordOutput;
   avatarUpdateResolver: AvatarUpdateOutput;
   emailResponseResolver: EmailResponseOutput;
   login: LoginOutput;
@@ -200,6 +213,7 @@ export type Mutation = {
   mapUpload: MapFileOutput;
   passwordResetFormResolver: LoginOutput;
   phraseDefinitionUpsert: PhraseDefinitionUpsertOutput;
+  phraseToPhraseTranslationUpsert: PhraseToPhraseTranslationUpsertOutput;
   phraseUpsert: PhraseUpsertOutput;
   postCreateResolver: PostCreateOutput;
   register: RegisterOutput;
@@ -217,7 +231,14 @@ export type Mutation = {
   upsertWordDefinitionFromWordAndDefinitionlikeString: WordDefinitionUpsertOutput;
   versionCreateResolver: VersionCreateOutput;
   wordDefinitionUpsert: WordDefinitionUpsertOutput;
+  wordToPhraseTranslationUpsert: WordToPhraseTranslationUpsertOutput;
+  wordToWordTranslationUpsert: WordToWordTranslationUpsertOutput;
   wordUpsert: WordUpsertOutput;
+};
+
+
+export type MutationAddWordAsTranslationForWordArgs = {
+  input: AddWordAsTranslationForWordInput;
 };
 
 
@@ -253,6 +274,11 @@ export type MutationPasswordResetFormResolverArgs = {
 
 export type MutationPhraseDefinitionUpsertArgs = {
   input: PhraseDefinitionUpsertInput;
+};
+
+
+export type MutationPhraseToPhraseTranslationUpsertArgs = {
+  input: PhraseToPhraseTranslationUpsertInput;
 };
 
 
@@ -343,6 +369,16 @@ export type MutationWordDefinitionUpsertArgs = {
 };
 
 
+export type MutationWordToPhraseTranslationUpsertArgs = {
+  input: WordToPhraseTranslationUpsertInput;
+};
+
+
+export type MutationWordToWordTranslationUpsertArgs = {
+  input: WordToWordTranslationUpsertInput;
+};
+
+
 export type MutationWordUpsertArgs = {
   input: WordUpsertInput;
 };
@@ -390,6 +426,30 @@ export type PhraseReadOutput = {
   __typename?: 'PhraseReadOutput';
   error: ErrorType;
   phrase?: Maybe<Phrase>;
+};
+
+export type PhraseToPhraseTranslation = {
+  __typename?: 'PhraseToPhraseTranslation';
+  from_phrase_definition: PhraseDefinition;
+  phrase_to_phrase_translation_id: Scalars['ID']['output'];
+  to_phrase_definition: PhraseDefinition;
+};
+
+export type PhraseToPhraseTranslationReadOutput = {
+  __typename?: 'PhraseToPhraseTranslationReadOutput';
+  error: ErrorType;
+  phrase_to_phrase_translation?: Maybe<PhraseToPhraseTranslation>;
+};
+
+export type PhraseToPhraseTranslationUpsertInput = {
+  from_phrase_definition_id: Scalars['ID']['input'];
+  to_phrase_definition_id: Scalars['ID']['input'];
+};
+
+export type PhraseToPhraseTranslationUpsertOutput = {
+  __typename?: 'PhraseToPhraseTranslationUpsertOutput';
+  error: ErrorType;
+  phrase_to_phrase_translation?: Maybe<PhraseToPhraseTranslation>;
 };
 
 export type PhraseUpsertInput = {
@@ -446,6 +506,7 @@ export type Query = {
   getVoteStatus: SiteTextTranslationVoteReadOutput;
   phraseDefinitionRead: PhraseDefinitionReadOutput;
   phraseRead: PhraseReadOutput;
+  phraseToPhraseTranslationRead: PhraseToPhraseTranslationReadOutput;
   postReadResolver: PostReadOutput;
   siteTextPhraseDefinitionRead: SiteTextPhraseDefinitionReadOutput;
   siteTextTranslationRead: SiteTextTranslationReadOutput;
@@ -454,6 +515,8 @@ export type Query = {
   userReadResolver: UserReadOutput;
   wordDefinitionRead: WordDefinitionReadOutput;
   wordRead: WordReadOutput;
+  wordToPhraseTranslationRead: WordToPhraseTranslationReadOutput;
+  wordToWordTranslationRead: WordToWordTranslationReadOutput;
 };
 
 
@@ -517,6 +580,11 @@ export type QueryPhraseReadArgs = {
 };
 
 
+export type QueryPhraseToPhraseTranslationReadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type QueryPostReadResolverArgs = {
   input: PostReadInput;
 };
@@ -554,6 +622,16 @@ export type QueryWordDefinitionReadArgs = {
 
 export type QueryWordReadArgs = {
   input: WordReadInput;
+};
+
+
+export type QueryWordToPhraseTranslationReadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryWordToWordTranslationReadArgs = {
+  id: Scalars['ID']['input'];
 };
 
 export type RegisterInput = {
@@ -837,6 +915,54 @@ export type WordReadOutput = {
   word?: Maybe<Word>;
 };
 
+export type WordToPhraseTranslation = {
+  __typename?: 'WordToPhraseTranslation';
+  from_word_definition: WordDefinition;
+  to_phrase_definition: PhraseDefinition;
+  word_to_phrase_translation_id: Scalars['ID']['output'];
+};
+
+export type WordToPhraseTranslationReadOutput = {
+  __typename?: 'WordToPhraseTranslationReadOutput';
+  error: ErrorType;
+  word_to_phrase_translation?: Maybe<WordToPhraseTranslation>;
+};
+
+export type WordToPhraseTranslationUpsertInput = {
+  from_word_definition_id: Scalars['ID']['input'];
+  to_phrase_definition_id: Scalars['ID']['input'];
+};
+
+export type WordToPhraseTranslationUpsertOutput = {
+  __typename?: 'WordToPhraseTranslationUpsertOutput';
+  error: ErrorType;
+  word_to_phrase_translation?: Maybe<WordToPhraseTranslation>;
+};
+
+export type WordToWordTranslation = {
+  __typename?: 'WordToWordTranslation';
+  from_word_definition: WordDefinition;
+  to_word_definition: WordDefinition;
+  word_to_word_translation_id: Scalars['ID']['output'];
+};
+
+export type WordToWordTranslationReadOutput = {
+  __typename?: 'WordToWordTranslationReadOutput';
+  error: ErrorType;
+  word_to_word_translation?: Maybe<WordToWordTranslation>;
+};
+
+export type WordToWordTranslationUpsertInput = {
+  from_word_definition_id: Scalars['ID']['input'];
+  to_word_definition_id: Scalars['ID']['input'];
+};
+
+export type WordToWordTranslationUpsertOutput = {
+  __typename?: 'WordToWordTranslationUpsertOutput';
+  error: ErrorType;
+  word_to_word_translation?: Maybe<WordToWordTranslation>;
+};
+
 export type WordTranslations = {
   __typename?: 'WordTranslations';
   definition?: Maybe<Scalars['String']['output']>;
@@ -932,7 +1058,16 @@ export type GetOrigMapWordsQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'WordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, translations?: Array<{ __typename?: 'WordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, up_votes: string, down_votes: string }> | null }> } };
+export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'WordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'WordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string }> | null }> } };
+
+export type AddWordAsTranslationForWordMutationVariables = Exact<{
+  originalDefinitionId: Scalars['String']['input'];
+  translationDefinition: Scalars['String']['input'];
+  translationWord: WordUpsertInput;
+}>;
+
+
+export type AddWordAsTranslationForWordMutation = { __typename?: 'Mutation', addWordAsTranslationForWord: { __typename?: 'AddWordAsTranslationForWordOutput', wordTranslationId: string, error: ErrorType } };
 
 export type VersionFieldsFragment = { __typename?: 'Version', version_id: string, post_id: number, created_at: string, license_title: string, content: string };
 
@@ -1390,6 +1525,7 @@ export const GetOrigMapWordsDocument = gql`
       dialect_code
       geo_code
       definition
+      definition_id
       translations {
         word
         word_id
@@ -1397,6 +1533,7 @@ export const GetOrigMapWordsDocument = gql`
         dialect_code
         geo_code
         definition
+        definition_id
         up_votes
         down_votes
       }
@@ -1436,6 +1573,44 @@ export function useGetOrigMapWordsLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type GetOrigMapWordsQueryHookResult = ReturnType<typeof useGetOrigMapWordsQuery>;
 export type GetOrigMapWordsLazyQueryHookResult = ReturnType<typeof useGetOrigMapWordsLazyQuery>;
 export type GetOrigMapWordsQueryResult = Apollo.QueryResult<GetOrigMapWordsQuery, GetOrigMapWordsQueryVariables>;
+export const AddWordAsTranslationForWordDocument = gql`
+    mutation AddWordAsTranslationForWord($originalDefinitionId: String!, $translationDefinition: String!, $translationWord: WordUpsertInput!) {
+  addWordAsTranslationForWord(
+    input: {originalDefinitionId: $originalDefinitionId, translationDefinition: $translationDefinition, translationWord: $translationWord}
+  ) {
+    wordTranslationId
+    error
+  }
+}
+    `;
+export type AddWordAsTranslationForWordMutationFn = Apollo.MutationFunction<AddWordAsTranslationForWordMutation, AddWordAsTranslationForWordMutationVariables>;
+
+/**
+ * __useAddWordAsTranslationForWordMutation__
+ *
+ * To run a mutation, you first call `useAddWordAsTranslationForWordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddWordAsTranslationForWordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addWordAsTranslationForWordMutation, { data, loading, error }] = useAddWordAsTranslationForWordMutation({
+ *   variables: {
+ *      originalDefinitionId: // value for 'originalDefinitionId'
+ *      translationDefinition: // value for 'translationDefinition'
+ *      translationWord: // value for 'translationWord'
+ *   },
+ * });
+ */
+export function useAddWordAsTranslationForWordMutation(baseOptions?: Apollo.MutationHookOptions<AddWordAsTranslationForWordMutation, AddWordAsTranslationForWordMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddWordAsTranslationForWordMutation, AddWordAsTranslationForWordMutationVariables>(AddWordAsTranslationForWordDocument, options);
+      }
+export type AddWordAsTranslationForWordMutationHookResult = ReturnType<typeof useAddWordAsTranslationForWordMutation>;
+export type AddWordAsTranslationForWordMutationResult = Apollo.MutationResult<AddWordAsTranslationForWordMutation>;
+export type AddWordAsTranslationForWordMutationOptions = Apollo.BaseMutationOptions<AddWordAsTranslationForWordMutation, AddWordAsTranslationForWordMutationVariables>;
 export const PostCreateDocument = gql`
     mutation PostCreate($content: String!, $parentId: Int) {
   postCreateResolver(input: {content: $content, parent_id: $parentId}) {
@@ -1949,6 +2124,7 @@ export const namedOperations = {
     ResetEmailRequest: 'ResetEmailRequest',
     PasswordResetFormRequest: 'PasswordResetFormRequest',
     EmailResponse: 'EmailResponse',
+    AddWordAsTranslationForWord: 'AddWordAsTranslationForWord',
     PostCreate: 'PostCreate',
     VersionCreate: 'VersionCreate',
     UpsertTranslation: 'UpsertTranslation',

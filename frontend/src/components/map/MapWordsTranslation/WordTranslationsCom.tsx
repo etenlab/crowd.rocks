@@ -1,57 +1,79 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { mockWordTranslations } from '../mocks/mapData.mock';
 import { Caption } from '../../common/Caption/Caption';
 import { WordCard } from '../../word/WordCard/WordCard';
 import { IonButton, IonIcon, IonInput } from '@ionic/react';
 import { chatbubbleEllipses } from 'ionicons/icons';
 import { VoteButtonsVertical } from '../../common/VoteButtonsVertical/VoteButtonsVertical';
-import { WordTranslations } from '../../../generated/graphql';
+import {
+  WordTranslations,
+  useAddWordAsTranslationForWordMutation,
+} from '../../../generated/graphql';
 
 interface WordTranslationsComProps {
   wordWithTranslations: WordTranslations;
   tLangInfo: LanguageInfo;
   onBackClick: () => void;
+  fetchMapWordsFn: () => void;
 }
 
 export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
   wordWithTranslations,
   tLangInfo,
   onBackClick,
+  fetchMapWordsFn,
 }: WordTranslationsComProps) => {
   const newTrRef = useRef<HTMLIonInputElement | null>(null);
-  const newDescRef = useRef<HTMLIonInputElement | null>(null);
+  const newDefinitionRef = useRef<HTMLIonInputElement | null>(null);
 
-  // useEffect(() => {
-  //   const getWordWithTranslations = async (
-  //     _wordId: string,
-  //     _targetLang: LanguageInfo,
-  //   ) => {
-  //     console.log(
-  //       `mocked loading word with translations for ${_wordId} to lang ${JSON.stringify(
-  //         _targetLang,
-  //       )}`,
-  //     );
-  //     const word = mockWordTranslations;
-  //     setWordWithTranslations(word);
-  //   };
-  //   getWordWithTranslations(wordId, tLangInfo);
-  // }, [wordId, tLangInfo]);
+  const [addWordAsTranslation, { data, loading, called, error }] =
+    useAddWordAsTranslationForWordMutation();
+
+  useEffect(() => {
+    if (
+      called &&
+      !loading &&
+      !error &&
+      data?.addWordAsTranslationForWord.wordTranslationId
+    ) {
+      onBackClick();
+    }
+  }, [data, loading, called, error, onBackClick]);
 
   const handleNewTranslation = async () => {
     if (!newTrRef?.current?.value) {
       alert(`New translation value is mandatory`);
       return;
     }
-    console.log(
-      `mock send new transation (${newTrRef.current.value}) and description (${newDescRef?.current?.value})`,
-    );
+    if (!wordWithTranslations.definition_id) {
+      alert(`Not found wordWithTranslations.definition_id`);
+      return;
+    }
+    if (!newDefinitionRef.current?.value) {
+      alert(`Not found newDefinitionRef.current?.value`);
+      return;
+    }
+
+    await addWordAsTranslation({
+      variables: {
+        originalDefinitionId: wordWithTranslations.definition_id,
+        translationWord: {
+          wordlike_string: String(newTrRef.current.value),
+          language_code: tLangInfo.lang.tag,
+          dialect_code: tLangInfo.dialect?.tag,
+          geo_code: tLangInfo.region?.tag,
+        },
+        translationDefinition: String(newDefinitionRef.current.value),
+      },
+    });
+
+    fetchMapWordsFn();
 
     if (newTrRef.current?.value) {
       newTrRef.current.value = '';
     }
-    if (newDescRef.current?.value) {
-      newDescRef.current.value = '';
+    if (newDefinitionRef.current?.value) {
+      newDefinitionRef.current.value = '';
     }
   };
 
@@ -90,7 +112,7 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
         <IonInput
           label="Description"
           labelPlacement="floating"
-          ref={newDescRef}
+          ref={newDefinitionRef}
         />
         <StButton onClick={() => handleNewTranslation()}>Submit</StButton>
       </StNewTranslationDiv>
