@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -15,7 +15,7 @@ interface MapWordsTranslationProps extends RouteComponentProps<{}> {}
 export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   // const [sourceLang, setSourceLang] = useState<LanguageInfo>();
   const [targetLang, setTargetLang] = useState<LanguageInfo>();
-  const [selectedWord, setSelectedWord] = useState<WordTranslations>();
+  const [selectedWordId, setSelectedWordId] = useState<string>();
 
   const [
     origMapWordsRead,
@@ -52,6 +52,14 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
     fetchMapWords();
   }, [fetchMapWords]);
 
+  const selectedWord = useMemo(
+    () =>
+      wordsData?.getOrigMapWords.origMapWords.find(
+        (omw) => omw.word_id === selectedWordId,
+      ),
+    [selectedWordId, wordsData?.getOrigMapWords.origMapWords],
+  );
+
   return (
     <>
       {!selectedWord || !targetLang ? (
@@ -83,7 +91,7 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
                 <TranslatedWordCards
                   key={omw.word_id}
                   wordTranslated={omw}
-                  onClick={() => setSelectedWord(omw)}
+                  onClick={() => setSelectedWordId(omw.word_id)}
                 />
               ))}
           </WordsBox>
@@ -93,7 +101,7 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
           tLangInfo={targetLang}
           wordWithTranslations={selectedWord}
           onBackClick={() => {
-            setSelectedWord(undefined);
+            setSelectedWordId(undefined);
           }}
           fetchMapWordsFn={() => fetchMapWords()}
         />

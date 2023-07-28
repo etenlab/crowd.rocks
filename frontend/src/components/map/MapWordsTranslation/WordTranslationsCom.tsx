@@ -26,19 +26,15 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
   const newTrRef = useRef<HTMLIonInputElement | null>(null);
   const newDefinitionRef = useRef<HTMLIonInputElement | null>(null);
 
-  const [addWordAsTranslation, { data, loading, called, error }] =
+  const [addWordAsTranslation, { data, loading, called, error, reset }] =
     useAddWordAsTranslationForWordMutation();
 
   useEffect(() => {
-    if (
-      called &&
-      !loading &&
-      !error &&
-      data?.addWordAsTranslationForWord.wordTranslationId
-    ) {
-      onBackClick();
+    if (data?.addWordAsTranslationForWord.wordTranslationId) {
+      fetchMapWordsFn();
+      reset();
     }
-  }, [data, loading, called, error, onBackClick]);
+  }, [data, reset, fetchMapWordsFn]);
 
   const handleNewTranslation = async () => {
     if (!newTrRef?.current?.value) {
@@ -66,8 +62,6 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
         translationDefinition: String(newDefinitionRef.current.value),
       },
     });
-
-    fetchMapWordsFn();
 
     if (newTrRef.current?.value) {
       newTrRef.current.value = '';
