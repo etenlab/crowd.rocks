@@ -3,7 +3,7 @@ import { MapList } from './MapList/MapsList';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import { MapDetails } from './MapDetails/MapDetails';
 import { MapWordsTranslation } from './MapWordsTranslation/MapWordsTranslation';
-import { WordTranslations } from './MapWordsTranslation/WordTranslations';
+import { WordTranslationsComponent } from './MapWordsTranslation/WordTranslationsCom';
 
 export const MapsPage: React.FC<RouteComponentProps> = ({
   match,

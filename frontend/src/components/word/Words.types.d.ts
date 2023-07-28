@@ -18,9 +18,5 @@ type TWordTranslated = {
 
 type TWordWithTranslations = {
   word: TWord;
-  translationsVoted: Array<{
-    word: TWord;
-    votes: TVotes;
-    definition?: string;
-  }>;
+  translations: Array<TWordWithVotes>;
 };

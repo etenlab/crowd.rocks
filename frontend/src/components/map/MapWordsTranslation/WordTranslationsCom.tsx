@@ -6,40 +6,37 @@ import { WordCard } from '../../word/WordCard/WordCard';
 import { IonButton, IonIcon, IonInput } from '@ionic/react';
 import { chatbubbleEllipses } from 'ionicons/icons';
 import { VoteButtonsVertical } from '../../common/VoteButtonsVertical/VoteButtonsVertical';
+import { WordTranslations } from '../../../generated/graphql';
 
-interface WordTranslationsProps {
-  wordId: string;
+interface WordTranslationsComProps {
+  wordWithTranslations: WordTranslations;
   tLangInfo: LanguageInfo;
   onBackClick: () => void;
 }
 
-export const WordTranslations: React.FC<WordTranslationsProps> = ({
-  wordId,
+export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
+  wordWithTranslations,
   tLangInfo,
   onBackClick,
-}: WordTranslationsProps) => {
-  const [wordWithTranslations, setWordWithTranslations] = useState<
-    TWordWithTranslations | undefined
-  >();
-
+}: WordTranslationsComProps) => {
   const newTrRef = useRef<HTMLIonInputElement | null>(null);
   const newDescRef = useRef<HTMLIonInputElement | null>(null);
 
-  useEffect(() => {
-    const getWordWithTranslations = async (
-      _wordId: string,
-      _targetLang: LanguageInfo,
-    ) => {
-      console.log(
-        `mocked loading word with translations for ${_wordId} to lang ${JSON.stringify(
-          _targetLang,
-        )}`,
-      );
-      const word = mockWordTranslations;
-      setWordWithTranslations(word);
-    };
-    getWordWithTranslations(wordId, tLangInfo);
-  }, [wordId, tLangInfo]);
+  // useEffect(() => {
+  //   const getWordWithTranslations = async (
+  //     _wordId: string,
+  //     _targetLang: LanguageInfo,
+  //   ) => {
+  //     console.log(
+  //       `mocked loading word with translations for ${_wordId} to lang ${JSON.stringify(
+  //         _targetLang,
+  //       )}`,
+  //     );
+  //     const word = mockWordTranslations;
+  //     setWordWithTranslations(word);
+  //   };
+  //   getWordWithTranslations(wordId, tLangInfo);
+  // }, [wordId, tLangInfo]);
 
   const handleNewTranslation = async () => {
     if (!newTrRef?.current?.value) {
@@ -70,15 +67,15 @@ export const WordTranslations: React.FC<WordTranslationsProps> = ({
       </StSourceWordDiv>
 
       <StTranslationsDiv>
-        {wordWithTranslations &&
-          wordWithTranslations.translationsVoted.map((trv) => (
-            <StTranslationDiv key={trv.word.id}>
-              <WordCard word={trv.word} />
+        {wordWithTranslations.translations &&
+          wordWithTranslations.translations.map((trv) => (
+            <StTranslationDiv key={trv.word_id}>
+              <WordCard word={trv.word} definition={trv.definition} />
               <VoteButtonsVertical
-                onVoteUpClick={() => alert(`up ${trv.word.id}`)}
-                onVoteDownClick={() => alert(`down ${trv.word.id}`)}
-                upVotes={50}
-                downVotes={245}
+                onVoteUpClick={() => alert(`up ${trv.word_id}`)}
+                onVoteDownClick={() => alert(`down ${trv.word_id}`)}
+                upVotes={Number(trv.up_votes || 0)}
+                downVotes={Number(trv.down_votes || 0)}
               />
             </StTranslationDiv>
           ))}

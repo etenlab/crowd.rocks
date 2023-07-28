@@ -1,18 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { styled } from 'styled-components';
 import { TranslatedWordCards } from '../../word/TranslatedWordCards/TranslatedWordCards';
-import { useGetOrigMapWordsLazyQuery } from '../../../generated/graphql';
-import { WordTranslations } from './WordTranslations';
+import {
+  WordTranslations,
+  useGetOrigMapWordsLazyQuery,
+} from '../../../generated/graphql';
+import { WordTranslationsCom } from './WordTranslationsCom';
 
 interface MapWordsTranslationProps extends RouteComponentProps<{}> {}
 
 export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   // const [sourceLang, setSourceLang] = useState<LanguageInfo>();
   const [targetLang, setTargetLang] = useState<LanguageInfo>();
-  const [selectedWordId, setSelectedWordId] = useState<string | undefined>();
+  const [selectedWord, setSelectedWord] = useState<WordTranslations>();
 
   const [
     origMapWordsRead,
@@ -47,7 +50,7 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
 
   return (
     <>
-      {!selectedWordId || !targetLang ? (
+      {!selectedWord || !targetLang ? (
         <>
           <Caption>Map Translation</Caption>
           {/* <LangSelectorBox>  // source language is always 'English' for now, so we don't need this selector yet
@@ -75,37 +78,17 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
               wordsData.getOrigMapWords.origMapWords.map((omw) => (
                 <TranslatedWordCards
                   key={omw.word_id}
-                  wordTranslated={{
-                    word: {
-                      content: omw.word,
-                      id: omw.word_id,
-                      languageCode: omw.language_code,
-                      dialectCode: omw.dialect_code || undefined,
-                      geoCode: omw.geo_code || undefined,
-                      definition: omw.definition || '',
-                    },
-                    translation: {
-                      content: omw.translations?.[0]?.word || '',
-                      id: omw.translations?.[0]?.word_id || '',
-                      languageCode: omw.translations?.[0]?.language_code || '',
-                      dialectCode:
-                        omw.translations?.[0]?.dialect_code || undefined,
-                      geoCode: omw.translations?.[0]?.geo_code || undefined,
-                      definition: omw.translations?.[0]?.definition || '',
-                      upVotes: Number(omw.translations?.[0]?.up_votes || 0),
-                      downVotes: Number(omw.translations?.[0]?.down_votes || 0),
-                    },
-                  }}
-                  onClick={() => setSelectedWordId(omw.word_id)}
+                  wordTranslated={omw}
+                  onClick={() => setSelectedWord(omw)}
                 />
               ))}
           </WordsBox>
         </>
       ) : (
-        <WordTranslations
+        <WordTranslationsCom
           tLangInfo={targetLang}
-          wordId={selectedWordId}
-          onBackClick={() => setSelectedWordId(undefined)}
+          wordWithTranslations={selectedWord}
+          onBackClick={() => setSelectedWord(undefined)}
         />
       )}
     </>

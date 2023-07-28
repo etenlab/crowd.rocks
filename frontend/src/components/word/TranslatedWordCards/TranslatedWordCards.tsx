@@ -1,8 +1,9 @@
+import { WordTranslations } from '../../../generated/graphql';
 import { WordCard } from '../WordCard/WordCard';
 import { styled } from 'styled-components';
 
 export type TWordTranslationCardProps = {
-  wordTranslated: TWordTranslated;
+  wordTranslated: WordTranslations;
   routerLink?: string;
   onClick?: () => void;
 };
@@ -17,15 +18,17 @@ export const TranslatedWordCards = ({
       <StCard>
         <WordCard
           word={wordTranslated.word}
-          routerLink={routerLink}
+          definition={wordTranslated.definition}
           onClick={onClick}
+          routerLink={routerLink}
         />
       </StCard>
       <StCard>
         <WordCard
-          word={wordTranslated.translation}
-          routerLink={routerLink}
+          word={wordTranslated?.translations?.[0]?.word || ''}
+          definition={wordTranslated?.translations?.[0]?.definition || ''}
           onClick={onClick}
+          routerLink={routerLink}
         />
       </StCard>
     </StCards>
