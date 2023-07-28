@@ -3,12 +3,16 @@ import { Injectable } from '@nestjs/common';
 import { ErrorType, GenericOutput } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 import { WordsService } from 'src/components/words/words.service';
+import { WordDefinitionVotesService } from './word-definition-votes.service';
 
 import {
   WordDefinitionUpsertInput,
   WordDefinitionReadOutput,
   WordDefinitionUpsertOutput,
   WordDefinitionUpdateInput,
+  WordDefinitionWithVoteListOutput,
+  WordDefinitionWithVote,
+  LanguageInput,
 } from './types';
 
 import {
@@ -18,12 +22,18 @@ import {
   WordDefinitionUpsertProcedureOutputRow,
   WordDefinitionUpdateProcedureOutputRow,
   callWordDefinitionUpdateProcedure,
+  GetWordDefinitionListByLang,
+  getWordDefinitionListByLang,
 } from './sql-string';
 import { PoolClient } from 'pg';
 
 @Injectable()
 export class WordDefinitionsService {
-  constructor(private pg: PostgresService, private wordService: WordsService) {}
+  constructor(
+    private pg: PostgresService,
+    private wordService: WordsService,
+    private wordDefinitionVoteService: WordDefinitionVotesService,
+  ) {}
 
   async read(id: number): Promise<WordDefinitionReadOutput> {
     try {
@@ -177,6 +187,62 @@ export class WordDefinitionsService {
     return {
       error: ErrorType.UnknownError,
       word_definition: null,
+    };
+  }
+
+  async getWordDefinitionsByLanguage(
+    input: LanguageInput,
+  ): Promise<WordDefinitionWithVoteListOutput> {
+    try {
+      const res1 = await this.pg.pool.query<GetWordDefinitionListByLang>(
+        ...getWordDefinitionListByLang({
+          ...input,
+        }),
+      );
+
+      const definitionsWithVoteList: WordDefinitionWithVote[] = [];
+
+      for (let i = 0; i < res1.rowCount; i++) {
+        const { word_definition_id, created_at } = res1.rows[i];
+        const { error, vote_status } =
+          await this.wordDefinitionVoteService.getVoteStatus(
+            word_definition_id,
+          );
+
+        if (error !== ErrorType.NoError) {
+          return {
+            error,
+            word_definition_list: [],
+          };
+        }
+
+        const { error: readError, word_definition } = await this.read(
+          word_definition_id,
+        );
+
+        if (readError !== ErrorType.NoError) {
+          continue;
+        }
+
+        definitionsWithVoteList.push({
+          ...word_definition,
+          upvotes: vote_status.upvotes,
+          downvotes: vote_status.downvotes,
+          created_at: created_at,
+        });
+      }
+
+      return {
+        error: ErrorType.NoError,
+        word_definition_list: definitionsWithVoteList,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_definition_list: [],
     };
   }
 }
