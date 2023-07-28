@@ -1,32 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { mockWordTranslations } from '../mocks/mapData.mock';
 import { Caption } from '../../common/Caption/Caption';
-import { RouteComponentProps } from 'react-router';
-import { tag2langInfo } from '../../../common/langUtils';
 import { WordCard } from '../../word/WordCard/WordCard';
 import { IonButton, IonIcon, IonInput } from '@ionic/react';
 import { chatbubbleEllipses } from 'ionicons/icons';
 import { VoteButtonsVertical } from '../../common/VoteButtonsVertical/VoteButtonsVertical';
 
-interface WordTranslationsProps
-  extends RouteComponentProps<{
-    id: string;
-    fullLangTag: string;
-  }> {}
+interface WordTranslationsProps {
+  wordId: string;
+  tLangInfo: LanguageInfo;
+  onBackClick: () => void;
+}
 
 export const WordTranslations: React.FC<WordTranslationsProps> = ({
-  match: {
-    params: { id, fullLangTag },
-  },
+  wordId,
+  tLangInfo,
+  onBackClick,
 }: WordTranslationsProps) => {
-  const wordId = Number(id);
-
-  const targetLang: LanguageInfo = useMemo(
-    () => tag2langInfo(fullLangTag),
-    [fullLangTag],
-  );
-
   const [wordWithTranslations, setWordWithTranslations] = useState<
     TWordWithTranslations | undefined
   >();
@@ -36,7 +27,7 @@ export const WordTranslations: React.FC<WordTranslationsProps> = ({
 
   useEffect(() => {
     const getWordWithTranslations = async (
-      _wordId: number,
+      _wordId: string,
       _targetLang: LanguageInfo,
     ) => {
       console.log(
@@ -47,8 +38,8 @@ export const WordTranslations: React.FC<WordTranslationsProps> = ({
       const word = mockWordTranslations;
       setWordWithTranslations(word);
     };
-    getWordWithTranslations(wordId, targetLang);
-  }, [wordId, targetLang]);
+    getWordWithTranslations(wordId, tLangInfo);
+  }, [wordId, tLangInfo]);
 
   const handleNewTranslation = async () => {
     if (!newTrRef?.current?.value) {
@@ -69,7 +60,7 @@ export const WordTranslations: React.FC<WordTranslationsProps> = ({
 
   return (
     <>
-      <Caption>Translations</Caption>
+      <Caption handleBackClick={() => onBackClick()}>Translations</Caption>
       <StSourceWordDiv>
         <WordCard word={wordWithTranslations?.word} />
         <StIonIcon

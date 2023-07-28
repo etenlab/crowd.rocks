@@ -28,4 +28,5 @@ export const WordCard = ({ word, onClick, routerLink }: TWordCardProps) => {
 const StCard = styled(IonCard)(() => ({
   width: '90%',
   height: '90px',
+  cursor: 'pointer',
 }));
