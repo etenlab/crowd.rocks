@@ -5,6 +5,7 @@ import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { styled } from 'styled-components';
 import { TranslatedWordCards } from '../../word/TranslatedWordCards/TranslatedWordCards';
 import { useGetOrigMapWordsLazyQuery } from '../../../generated/graphql';
+import { langInfo2tag } from '../../../common/langUtils';
 
 interface MapTranslationProps extends RouteComponentProps<{}> {}
 
@@ -23,9 +24,13 @@ export const MapTranslation: React.FC<MapTranslationProps> = () => {
   ] = useGetOrigMapWordsLazyQuery();
 
   useEffect(() => {
-    const variables = { o_language_code: 'en' };
-    targetLang?.lang.tag &&
-      Object.assign(variables, { t_language_code: targetLang.lang.tag });
+    if (!targetLang?.lang.tag) {
+      return;
+    }
+    const variables = {
+      o_language_code: 'en',
+      t_language_code: targetLang.lang.tag,
+    };
     targetLang?.dialect?.tag &&
       Object.assign(variables, { t_dialect_code: targetLang.dialect.tag });
     targetLang?.region?.tag &&
@@ -89,7 +94,9 @@ export const MapTranslation: React.FC<MapTranslationProps> = () => {
                   downVotes: Number(omw.translations?.[0]?.down_votes || 0),
                 },
               }}
-              targetLang={targetLang}
+              routerLink={`/US/eng/1/maps/word-translations/${
+                omw.word_id
+              }/${langInfo2tag(targetLang)}`}
             />
           ))}
       </WordsBox>

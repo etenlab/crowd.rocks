@@ -1,27 +1,32 @@
 import { WordCard } from '../WordCard/WordCard';
-import { langInfo2tag } from '../../../common/langUtils';
 import { styled } from 'styled-components';
 
 export type TWordTranslationCardProps = {
   wordTranslated: TWordTranslated;
-  targetLang?: LanguageInfo;
+  routerLink?: string;
+  onClick?: () => void;
 };
 
 export const TranslatedWordCards = ({
   wordTranslated,
-  targetLang,
+  routerLink,
+  onClick,
 }: TWordTranslationCardProps) => {
-  const routerLink = `/US/eng/1/maps/word-translations/${
-    wordTranslated.word.id
-  }/${langInfo2tag(targetLang)}`;
-
   return (
     <StCards>
       <StCard>
-        <WordCard word={wordTranslated.word} routerLink={routerLink} />
+        <WordCard
+          word={wordTranslated.word}
+          routerLink={routerLink}
+          onClick={onClick}
+        />
       </StCard>
       <StCard>
-        <WordCard word={wordTranslated.translation} routerLink={routerLink} />
+        <WordCard
+          word={wordTranslated.translation}
+          routerLink={routerLink}
+          onClick={onClick}
+        />
       </StCard>
     </StCards>
   );
