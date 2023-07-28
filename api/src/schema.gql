@@ -22,6 +22,11 @@ type AvatarUpdateOutput {
   user: User
 }
 
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 union Definition = PhraseDefinition | WordDefinition
 
 type DefinitionUpdateOutput {
@@ -34,6 +39,17 @@ input DefinitionUpdateaInput {
   definition_id: ID!
   definition_type_is_word: Boolean!
   definitionlike_string: String!
+}
+
+type DefinitionVoteStatus {
+  definition_id: ID!
+  downvotes: Int!
+  upvotes: Int!
+}
+
+type DefinitionVoteStatusOutputRow {
+  error: ErrorType!
+  vote_status: DefinitionVoteStatus
 }
 
 input EmailResponseInput {
@@ -150,6 +166,12 @@ type GetOrigMapsListOutput {
   origMapList: [MapFileOutput!]!
 }
 
+input LanguageInput {
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -179,6 +201,8 @@ type Mutation {
   addWordAsTranslationForWord(input: AddWordAsTranslationForWordInput!): AddWordAsTranslationForWordOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
+  getPhraseDefinitonToggleVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
+  getWordDefinitonToggleVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
   mapUpload(file: Upload!): MapFileOutput!
@@ -236,6 +260,28 @@ input PhraseDefinitionUpsertInput {
 type PhraseDefinitionUpsertOutput {
   error: ErrorType!
   phrase_definition: PhraseDefinition
+}
+
+type PhraseDefinitionVote {
+  last_updated_at: DateTime!
+  phrase_definition_id: ID!
+  phrase_definitions_vote_id: ID!
+  user_id: ID!
+  vote: Boolean!
+}
+
+type PhraseDefinitionWithVote {
+  created_at: String!
+  definition: String!
+  downvotes: Int!
+  phrase: Phrase!
+  phrase_definition_id: ID!
+  upvotes: Int!
+}
+
+type PhraseDefinitionWithVoteListOutput {
+  error: ErrorType!
+  phrase_definition_list: [PhraseDefinitionWithVote]!
 }
 
 input PhraseReadInput {
@@ -313,8 +359,12 @@ type Query {
   getOrigMapContent(input: GetOrigMapContentInput!): GetOrigMapContentOutput!
   getOrigMapWords(input: GetOrigMapWordsInput): GetOrigMapWordsOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
+  getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!
+  getPhraseDefinitionsByLanguage(input: LanguageInput!): PhraseDefinitionWithVoteListOutput!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
   getVoteStatus(site_text_translation_id: String!): SiteTextTranslationVoteReadOutput!
+  getWordDefinitionVoteStatus(word_definition_id: ID!): DefinitionVoteStatusOutputRow!
+  getWordDefinitionsByLanguage(input: LanguageInput!): WordDefinitionWithVoteListOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!
   phraseRead(input: PhraseReadInput!): PhraseReadOutput!
   phraseToPhraseTranslationRead(id: ID!): PhraseToPhraseTranslationReadOutput!
@@ -416,9 +466,17 @@ type SiteTextTranslationUpsertOutput {
   site_text_translation: SiteTextTranslation
 }
 
+type SiteTextTranslationVote {
+  last_updated_at: DateTime!
+  site_text_translation_id: ID!
+  site_text_translation_vote_id: ID!
+  user_id: ID!
+  vote: Boolean!
+}
+
 type SiteTextTranslationVoteReadOutput {
   error: ErrorType!
-  site_text_translation_vote: SiteTextTranslation
+  site_text_translation_vote: SiteTextTranslationVote
 }
 
 input SiteTextTranslationVoteUpsertInput {
@@ -428,7 +486,7 @@ input SiteTextTranslationVoteUpsertInput {
 
 type SiteTextTranslationVoteUpsertOutput {
   error: ErrorType!
-  site_text_translation_vote: SiteTextTranslation
+  site_text_translation_vote: SiteTextTranslationVote
 }
 
 type SiteTextTranslationWithVote {
@@ -573,6 +631,28 @@ input WordDefinitionUpsertInput {
 type WordDefinitionUpsertOutput {
   error: ErrorType!
   word_definition: WordDefinition
+}
+
+type WordDefinitionVote {
+  last_updated_at: DateTime!
+  user_id: ID!
+  vote: Boolean!
+  word_definition_id: ID!
+  word_definitions_vote_id: ID!
+}
+
+type WordDefinitionWithVote {
+  created_at: String!
+  definition: String!
+  downvotes: Int!
+  upvotes: Int!
+  word: Word!
+  word_definition_id: ID!
+}
+
+type WordDefinitionWithVoteListOutput {
+  error: ErrorType!
+  word_definition_list: [WordDefinitionWithVote]!
 }
 
 input WordReadInput {

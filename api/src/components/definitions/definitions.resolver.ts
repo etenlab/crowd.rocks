@@ -4,6 +4,8 @@ import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
 import { WordDefinitionsService } from './word-definitions.service';
 import { PhraseDefinitionsService } from './phrase-definitions.service';
 import { DefinitionsService } from './definitions.service';
+import { WordDefinitionVotesService } from './word-definition-votes.service';
+import { PhraseDefinitionVotesService } from './phrase-definition-votes.service';
 
 import {
   WordDefinitionReadOutput,
@@ -16,6 +18,10 @@ import {
   FromPhraseAndDefintionlikeStringUpsertInput,
   DefinitionUpdateaInput,
   DefinitionUpdateOutput,
+  LanguageInput,
+  WordDefinitionWithVoteListOutput,
+  PhraseDefinitionWithVoteListOutput,
+  DefinitionVoteStatusOutputRow,
 } from './types';
 import { getBearer } from 'src/common/utility';
 
@@ -26,6 +32,8 @@ export class DefinitionsResolver {
     private wordDefinitionsService: WordDefinitionsService,
     private phraseDefinitionsService: PhraseDefinitionsService,
     private definitionService: DefinitionsService,
+    private wordDefinitionVoteService: WordDefinitionVotesService,
+    private phraseDefinitionVoteService: PhraseDefinitionVotesService,
   ) {}
 
   @Query(() => WordDefinitionReadOutput)
@@ -108,5 +116,81 @@ export class DefinitionsResolver {
     console.log(`update definition`);
 
     return this.definitionService.updateDefinition(input, getBearer(req));
+  }
+
+  @Query(() => WordDefinitionWithVoteListOutput)
+  async getWordDefinitionsByLanguage(
+    @Args('input', { type: () => LanguageInput }) input: LanguageInput,
+  ): Promise<WordDefinitionWithVoteListOutput> {
+    console.log(
+      'getWordDefinitionsByLanguage resolver',
+      JSON.stringify(input, null, 2),
+    );
+
+    return this.wordDefinitionsService.getWordDefinitionsByLanguage(input);
+  }
+
+  @Query(() => PhraseDefinitionWithVoteListOutput)
+  async getPhraseDefinitionsByLanguage(
+    @Args('input', { type: () => LanguageInput }) input: LanguageInput,
+  ): Promise<PhraseDefinitionWithVoteListOutput> {
+    console.log(
+      'getPhraseDefinitionsByLanguage resolver',
+      JSON.stringify(input, null, 2),
+    );
+
+    return this.phraseDefinitionsService.getPhraseDefinitionsByLanguage(input);
+  }
+
+  @Query(() => DefinitionVoteStatusOutputRow)
+  async getWordDefinitionVoteStatus(
+    @Args('word_definition_id', { type: () => ID }) word_definition_id: string,
+  ): Promise<DefinitionVoteStatusOutputRow> {
+    console.log('getWordDefinitionVoteStatus resolver', word_definition_id);
+
+    return this.wordDefinitionVoteService.getVoteStatus(+word_definition_id);
+  }
+
+  @Query(() => DefinitionVoteStatusOutputRow)
+  async getPhraseDefinitionVoteStatus(
+    @Args('phrase_definition_id', { type: () => ID })
+    phrase_definition_id: string,
+  ): Promise<DefinitionVoteStatusOutputRow> {
+    console.log('getPhraseDefinitionVoteStatus resolver', phrase_definition_id);
+
+    return this.phraseDefinitionVoteService.getVoteStatus(
+      +phrase_definition_id,
+    );
+  }
+
+  @Mutation(() => DefinitionVoteStatusOutputRow)
+  async getWordDefinitonToggleVoteStatus(
+    @Args('word_definition_id', { type: () => ID }) word_definition_id: string,
+    @Args('vote', { type: () => Boolean }) vote: boolean,
+    @Context() req: any,
+  ): Promise<DefinitionVoteStatusOutputRow> {
+    console.log('getWordDefinitionToggleVote');
+
+    return this.wordDefinitionVoteService.toggleVoteStatus(
+      +word_definition_id,
+      vote,
+      getBearer(req),
+    );
+  }
+
+  @Mutation(() => DefinitionVoteStatusOutputRow)
+  async getPhraseDefinitonToggleVoteStatus(
+    @Args('phrase_definition_id', { type: () => ID })
+    phrase_definition_id: string,
+    @Args('vote', { type: () => Boolean }) vote: boolean,
+    @Context() req: any,
+  ): Promise<DefinitionVoteStatusOutputRow> {
+    console.log('getWordDefinitionToggleVote');
+
+    return this.phraseDefinitionVoteService.toggleVoteStatus(
+      +phrase_definition_id,
+      vote,
+      getBearer(req),
+    );
   }
 }
