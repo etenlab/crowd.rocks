@@ -17,7 +17,10 @@ import {
   PhraseToPhraseTranslationReadOutput,
   PhraseToPhraseTranslationUpsertOutput,
   PhraseToPhraseTranslationUpsertInput,
+  AddWordAsTranslationForWordOutput,
+  AddWordAsTranslationForWordInput,
 } from './types';
+import { AuthenticationService } from '../authentication/authentication.service';
 
 @Injectable()
 @Resolver()
@@ -26,6 +29,7 @@ export class TranslationsResolver {
     private wordToWordTranslationService: WordToWordTranslationsService,
     private wordToPhraseTranslationService: WordToPhraseTranslationsService,
     private phraseToPhraseTranslationService: PhraseToPhraseTranslationsService,
+    private authenticationService: AuthenticationService,
   ) {}
 
   @Query(() => WordToWordTranslationReadOutput)
@@ -109,6 +113,22 @@ export class TranslationsResolver {
       +input.from_phrase_definition_id,
       +input.to_phrase_definition_id,
       getBearer(req),
+    );
+  }
+
+  @Mutation(() => AddWordAsTranslationForWordOutput)
+  async addWordAsTranslationForWord(
+    @Args('input') input: AddWordAsTranslationForWordInput,
+    @Context() req: any,
+  ): Promise<AddWordAsTranslationForWordOutput> {
+    // const token = getBearer(req);
+    const token = await this.authenticationService.getAdminToken();
+
+    return this.wordToWordTranslationService.addWordAsTranslationForWord(
+      input.originalDefinitionId,
+      input.translationWord,
+      input.translationDefinition,
+      token,
     );
   }
 }

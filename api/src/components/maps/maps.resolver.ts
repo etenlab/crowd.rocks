@@ -77,7 +77,7 @@ export class MapsResolver {
   async getOrigMapWords(
     @Args('input', { nullable: true }) input?: GetOrigMapWordsInput,
   ): Promise<GetOrigMapWordsOutput> {
-    const words = await this.mapService.getOrigMapWords(input?.original_map_id);
+    const words = await this.mapService.getOrigMapWords(input);
     return words;
   }
 }

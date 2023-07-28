@@ -9,6 +9,7 @@ import { PostModule } from './components/post/post.module';
 import { UserModule } from './components/user/user.module';
 import { WordsModule } from './components/words/words.module';
 import { MapModule } from './components/maps/maps.module';
+import { TranslationsModule } from './components/translations/translations.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { MapModule } from './components/maps/maps.module';
     EmailModule,
     WordsModule,
     MapModule,
+    TranslationsModule,
   ],
   controllers: [],
   providers: [],

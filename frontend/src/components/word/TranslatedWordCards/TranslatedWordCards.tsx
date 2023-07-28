@@ -1,27 +1,35 @@
+import { WordTranslations } from '../../../generated/graphql';
 import { WordCard } from '../WordCard/WordCard';
-import { langInfo2tag } from '../../../common/langUtils';
 import { styled } from 'styled-components';
 
 export type TWordTranslationCardProps = {
-  wordTranslated: TWordTranslated;
-  targetLang?: LanguageInfo;
+  wordTranslated: WordTranslations;
+  routerLink?: string;
+  onClick?: () => void;
 };
 
 export const TranslatedWordCards = ({
   wordTranslated,
-  targetLang,
+  routerLink,
+  onClick,
 }: TWordTranslationCardProps) => {
-  const routerLink = `/US/eng/1/maps/word-translations/${
-    wordTranslated.word.id
-  }/${langInfo2tag(targetLang)}`;
-
   return (
     <StCards>
       <StCard>
-        <WordCard word={wordTranslated.word} routerLink={routerLink} />
+        <WordCard
+          word={wordTranslated.word}
+          definition={wordTranslated.definition}
+          onClick={onClick}
+          routerLink={routerLink}
+        />
       </StCard>
       <StCard>
-        <WordCard word={wordTranslated.translation} routerLink={routerLink} />
+        <WordCard
+          word={wordTranslated?.translations?.[0]?.word || ''}
+          definition={wordTranslated?.translations?.[0]?.definition || ''}
+          onClick={onClick}
+          routerLink={routerLink}
+        />
       </StCard>
     </StCards>
   );

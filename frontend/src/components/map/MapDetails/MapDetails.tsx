@@ -1,7 +1,6 @@
 import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { useEffect, useState } from 'react';
-import { mockMapWithContentList } from '../mocks/mapData.mock';
 import styled from 'styled-components';
 import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 
