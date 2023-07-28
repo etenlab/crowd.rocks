@@ -15,6 +15,8 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
+  DateTime: { input: any; output: any; }
   /** The `Upload` scalar type represents a file upload. */
   Upload: { input: any; output: any; }
 };
@@ -42,6 +44,19 @@ export type DefinitionUpdateaInput = {
   definition_id: Scalars['ID']['input'];
   definition_type_is_word: Scalars['Boolean']['input'];
   definitionlike_string: Scalars['String']['input'];
+};
+
+export type DefinitionVoteStatus = {
+  __typename?: 'DefinitionVoteStatus';
+  definition_id: Scalars['ID']['output'];
+  downvotes: Scalars['Int']['output'];
+  upvotes: Scalars['Int']['output'];
+};
+
+export type DefinitionVoteStatusOutputRow = {
+  __typename?: 'DefinitionVoteStatusOutputRow';
+  error: ErrorType;
+  vote_status?: Maybe<DefinitionVoteStatus>;
 };
 
 export type EmailResponseInput = {
@@ -163,6 +178,12 @@ export type GetOrigMapsListOutput = {
   origMapList: Array<MapFileOutput>;
 };
 
+export type LanguageInput = {
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  geo_code?: InputMaybe<Scalars['String']['input']>;
+  language_code: Scalars['String']['input'];
+};
+
 export type LoginInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -195,6 +216,8 @@ export type Mutation = {
   __typename?: 'Mutation';
   avatarUpdateResolver: AvatarUpdateOutput;
   emailResponseResolver: EmailResponseOutput;
+  getPhraseDefinitonToggleVoteStatus: DefinitionVoteStatusOutputRow;
+  getWordDefinitonToggleVoteStatus: DefinitionVoteStatusOutputRow;
   login: LoginOutput;
   logout: LogoutOutput;
   mapUpload: MapFileOutput;
@@ -228,6 +251,18 @@ export type MutationAvatarUpdateResolverArgs = {
 
 export type MutationEmailResponseResolverArgs = {
   input: EmailResponseInput;
+};
+
+
+export type MutationGetPhraseDefinitonToggleVoteStatusArgs = {
+  phrase_definition_id: Scalars['ID']['input'];
+  vote: Scalars['Boolean']['input'];
+};
+
+
+export type MutationGetWordDefinitonToggleVoteStatusArgs = {
+  vote: Scalars['Boolean']['input'];
+  word_definition_id: Scalars['ID']['input'];
 };
 
 
@@ -382,6 +417,31 @@ export type PhraseDefinitionUpsertOutput = {
   phrase_definition?: Maybe<PhraseDefinition>;
 };
 
+export type PhraseDefinitionVote = {
+  __typename?: 'PhraseDefinitionVote';
+  last_updated_at: Scalars['DateTime']['output'];
+  phrase_definition_id: Scalars['ID']['output'];
+  phrase_definitions_vote_id: Scalars['ID']['output'];
+  user_id: Scalars['ID']['output'];
+  vote: Scalars['Boolean']['output'];
+};
+
+export type PhraseDefinitionWithVote = {
+  __typename?: 'PhraseDefinitionWithVote';
+  created_at: Scalars['String']['output'];
+  definition: Scalars['String']['output'];
+  downvotes: Scalars['Int']['output'];
+  phrase: Phrase;
+  phrase_definition_id: Scalars['ID']['output'];
+  upvotes: Scalars['Int']['output'];
+};
+
+export type PhraseDefinitionWithVoteListOutput = {
+  __typename?: 'PhraseDefinitionWithVoteListOutput';
+  error: ErrorType;
+  phrase_definition_list: Array<Maybe<PhraseDefinitionWithVote>>;
+};
+
 export type PhraseReadInput = {
   phrase_id: Scalars['ID']['input'];
 };
@@ -442,8 +502,12 @@ export type Query = {
   getOrigMapContent: GetOrigMapContentOutput;
   getOrigMapWords: GetOrigMapWordsOutput;
   getOrigMapsList: GetOrigMapsListOutput;
+  getPhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
+  getPhraseDefinitionsByLanguage: PhraseDefinitionWithVoteListOutput;
   getRecommendedTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteOutput;
   getVoteStatus: SiteTextTranslationVoteReadOutput;
+  getWordDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
+  getWordDefinitionsByLanguage: WordDefinitionWithVoteListOutput;
   phraseDefinitionRead: PhraseDefinitionReadOutput;
   phraseRead: PhraseReadOutput;
   postReadResolver: PostReadOutput;
@@ -493,6 +557,16 @@ export type QueryGetOrigMapsListArgs = {
 };
 
 
+export type QueryGetPhraseDefinitionVoteStatusArgs = {
+  phrase_definition_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetPhraseDefinitionsByLanguageArgs = {
+  input: LanguageInput;
+};
+
+
 export type QueryGetRecommendedTranslationFromSiteTextDefinitionIdArgs = {
   dialect_code: Scalars['String']['input'];
   geo_code: Scalars['String']['input'];
@@ -504,6 +578,16 @@ export type QueryGetRecommendedTranslationFromSiteTextDefinitionIdArgs = {
 
 export type QueryGetVoteStatusArgs = {
   site_text_translation_id: Scalars['String']['input'];
+};
+
+
+export type QueryGetWordDefinitionVoteStatusArgs = {
+  word_definition_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetWordDefinitionsByLanguageArgs = {
+  input: LanguageInput;
 };
 
 
@@ -652,10 +736,19 @@ export type SiteTextTranslationUpsertOutput = {
   site_text_translation?: Maybe<SiteTextTranslation>;
 };
 
+export type SiteTextTranslationVote = {
+  __typename?: 'SiteTextTranslationVote';
+  last_updated_at: Scalars['DateTime']['output'];
+  site_text_translation_id: Scalars['ID']['output'];
+  site_text_translation_vote_id: Scalars['ID']['output'];
+  user_id: Scalars['ID']['output'];
+  vote: Scalars['Boolean']['output'];
+};
+
 export type SiteTextTranslationVoteReadOutput = {
   __typename?: 'SiteTextTranslationVoteReadOutput';
   error: ErrorType;
-  site_text_translation_vote?: Maybe<SiteTextTranslation>;
+  site_text_translation_vote?: Maybe<SiteTextTranslationVote>;
 };
 
 export type SiteTextTranslationVoteUpsertInput = {
@@ -666,7 +759,7 @@ export type SiteTextTranslationVoteUpsertInput = {
 export type SiteTextTranslationVoteUpsertOutput = {
   __typename?: 'SiteTextTranslationVoteUpsertOutput';
   error: ErrorType;
-  site_text_translation_vote?: Maybe<SiteTextTranslation>;
+  site_text_translation_vote?: Maybe<SiteTextTranslationVote>;
 };
 
 export type SiteTextTranslationWithVote = {
@@ -825,6 +918,31 @@ export type WordDefinitionUpsertOutput = {
   __typename?: 'WordDefinitionUpsertOutput';
   error: ErrorType;
   word_definition?: Maybe<WordDefinition>;
+};
+
+export type WordDefinitionVote = {
+  __typename?: 'WordDefinitionVote';
+  last_updated_at: Scalars['DateTime']['output'];
+  user_id: Scalars['ID']['output'];
+  vote: Scalars['Boolean']['output'];
+  word_definition_id: Scalars['ID']['output'];
+  word_definitions_vote_id: Scalars['ID']['output'];
+};
+
+export type WordDefinitionWithVote = {
+  __typename?: 'WordDefinitionWithVote';
+  created_at: Scalars['String']['output'];
+  definition: Scalars['String']['output'];
+  downvotes: Scalars['Int']['output'];
+  upvotes: Scalars['Int']['output'];
+  word: Word;
+  word_definition_id: Scalars['ID']['output'];
+};
+
+export type WordDefinitionWithVoteListOutput = {
+  __typename?: 'WordDefinitionWithVoteListOutput';
+  error: ErrorType;
+  word_definition_list: Array<Maybe<WordDefinitionWithVote>>;
 };
 
 export type WordReadInput = {
