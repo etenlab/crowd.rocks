@@ -4,6 +4,7 @@ import { ReadStream } from 'fs';
 import {
   GetOrigMapContentOutput,
   GetOrigMapsListOutput,
+  GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
   MapFileOutput,
   OriginalMapWordInput,
@@ -199,8 +200,12 @@ export class MapsService {
   }
 
   async getOrigMapWords(
-    original_map_id?: string,
+    input: GetOrigMapWordsInput,
   ): Promise<GetOrigMapWordsOutput> {
-    return this.mapsRepository.getOrigMapWords(original_map_id, {});
+    const { original_map_id, ...langRestrictions } = input;
+    return this.mapsRepository.getOrigMapWords(
+      original_map_id,
+      langRestrictions,
+    );
   }
 }

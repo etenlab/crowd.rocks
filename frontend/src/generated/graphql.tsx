@@ -925,6 +925,10 @@ export type EmailResponseMutation = { __typename?: 'Mutation', emailResponseReso
 
 export type GetOrigMapWordsQueryVariables = Exact<{
   original_map_id?: InputMaybe<Scalars['ID']['input']>;
+  o_language_code?: InputMaybe<Scalars['String']['input']>;
+  t_language_code?: InputMaybe<Scalars['String']['input']>;
+  t_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  t_geo_code?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -1375,8 +1379,10 @@ export type EmailResponseMutationHookResult = ReturnType<typeof useEmailResponse
 export type EmailResponseMutationResult = Apollo.MutationResult<EmailResponseMutation>;
 export type EmailResponseMutationOptions = Apollo.BaseMutationOptions<EmailResponseMutation, EmailResponseMutationVariables>;
 export const GetOrigMapWordsDocument = gql`
-    query GetOrigMapWords($original_map_id: ID) {
-  getOrigMapWords(input: {original_map_id: $original_map_id}) {
+    query GetOrigMapWords($original_map_id: ID, $o_language_code: String, $t_language_code: String, $t_dialect_code: String, $t_geo_code: String) {
+  getOrigMapWords(
+    input: {original_map_id: $original_map_id, o_language_code: $o_language_code, t_language_code: $t_language_code, t_dialect_code: $t_dialect_code, t_geo_code: $t_geo_code}
+  ) {
     origMapWords {
       word
       word_id
@@ -1412,6 +1418,10 @@ export const GetOrigMapWordsDocument = gql`
  * const { data, loading, error } = useGetOrigMapWordsQuery({
  *   variables: {
  *      original_map_id: // value for 'original_map_id'
+ *      o_language_code: // value for 'o_language_code'
+ *      t_language_code: // value for 't_language_code'
+ *      t_dialect_code: // value for 't_dialect_code'
+ *      t_geo_code: // value for 't_geo_code'
  *   },
  * });
  */

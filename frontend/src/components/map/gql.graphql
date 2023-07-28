@@ -1,5 +1,19 @@
-query GetOrigMapWords($original_map_id: ID) {
-  getOrigMapWords(input: { original_map_id: $original_map_id }) {
+query GetOrigMapWords(
+  $original_map_id: ID
+  $o_language_code: String
+  $t_language_code: String
+  $t_dialect_code: String
+  $t_geo_code: String
+) {
+  getOrigMapWords(
+    input: {
+      original_map_id: $original_map_id
+      o_language_code: $o_language_code
+      t_language_code: $t_language_code
+      t_dialect_code: $t_dialect_code
+      t_geo_code: $t_geo_code
+    }
+  ) {
     origMapWords {
       word
       word_id

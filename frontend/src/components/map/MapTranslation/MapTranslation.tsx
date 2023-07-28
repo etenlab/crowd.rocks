@@ -9,7 +9,7 @@ import { useGetOrigMapWordsLazyQuery } from '../../../generated/graphql';
 interface MapTranslationProps extends RouteComponentProps<{}> {}
 
 export const MapTranslation: React.FC<MapTranslationProps> = () => {
-  const [sourceLang, setSourceLang] = useState<LanguageInfo>();
+  // const [sourceLang, setSourceLang] = useState<LanguageInfo>();
   const [targetLang, setTargetLang] = useState<LanguageInfo>();
 
   const [
@@ -23,13 +23,27 @@ export const MapTranslation: React.FC<MapTranslationProps> = () => {
   ] = useGetOrigMapWordsLazyQuery();
 
   useEffect(() => {
-    origMapWordsRead();
-  }, [origMapWordsRead]);
+    const variables = { o_language_code: 'en' };
+    targetLang?.lang.tag &&
+      Object.assign(variables, { t_language_code: targetLang.lang.tag });
+    targetLang?.dialect?.tag &&
+      Object.assign(variables, { t_dialect_code: targetLang.dialect.tag });
+    targetLang?.region?.tag &&
+      Object.assign(variables, { t_geo_code: targetLang.region.tag });
+
+    origMapWordsRead({ variables });
+  }, [
+    origMapWordsRead,
+    targetLang?.dialect?.tag,
+    targetLang?.lang.tag,
+    targetLang?.region?.tag,
+  ]);
 
   return (
     <>
       <Caption>Map Translation</Caption>
-      <LangSelectorBox>
+
+      {/* <LangSelectorBox>  // source language is always 'English' for now, so we don't need this selector yet
         <LangSelector
           title="Select source language"
           langSelectorId="sourceLangSelector"
@@ -38,7 +52,7 @@ export const MapTranslation: React.FC<MapTranslationProps> = () => {
             setSourceLang(sourceLangInfo);
           }}
         ></LangSelector>
-      </LangSelectorBox>
+      </LangSelectorBox> */}
 
       <LangSelectorBox>
         <LangSelector

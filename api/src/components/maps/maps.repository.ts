@@ -25,12 +25,12 @@ interface ISaveMapRes {
 }
 
 interface ILangsRestrictions {
-  source_lang_code?: string;
-  source_dialect_code?: string;
-  source_geo_code?: string;
-  target_lang_code?: string;
-  target_dialect_code?: string;
-  target_geo_code?: string;
+  o_language_code?: string;
+  o_dialect_code?: string;
+  o_geo_code?: string;
+  t_language_code?: string;
+  t_dialect_code?: string;
+  t_geo_code?: string;
 }
 
 @Injectable()
@@ -126,17 +126,36 @@ export class MapsRepository {
     };
   }
 
+  /**
+   * Note that orginal language params restrict whole selection on language that pass this params
+   * instead target language params restrict only left join words.
+   */
   async getOrigMapWords(
     original_map_id: string,
     {
-      source_lang_code,
-      source_dialect_code,
-      source_geo_code,
-      target_lang_code,
-      target_dialect_code,
-      target_geo_code,
+      o_language_code,
+      o_dialect_code,
+      o_geo_code,
+      t_language_code,
+      t_dialect_code,
+      t_geo_code,
     }: ILangsRestrictions,
   ): Promise<GetOrigMapWordsOutput> {
+    const params = [];
+    let tLanguageRestrictionClause = '';
+    if (t_language_code) {
+      params.push(t_language_code);
+      tLanguageRestrictionClause += ` and tw.language_code =  $${params.length} `;
+    }
+    if (t_dialect_code) {
+      params.push(t_dialect_code);
+      tLanguageRestrictionClause += ` and tw.dialect_code =  $${params.length} `;
+    }
+    if (t_geo_code) {
+      params.push(t_geo_code);
+      tLanguageRestrictionClause += ` and tw.geo_code =  $${params.length} `;
+    }
+
     let sqlStr = `
       select
         w.word_id,
@@ -169,42 +188,29 @@ export class MapsRepository {
       left join
       	word_definitions twd on wtwt.to_word_definition_id = twd.word_definition_id
       left join 
-      	words tw on twd.word_id = tw.word_id 
+      	words tw on twd.word_id = tw.word_id ${tLanguageRestrictionClause}
       left join
       	wordlike_strings tws on tw.wordlike_string_id = tws.wordlike_string_id      
       left join v_word_to_word_translations_upvotes_count up on wtwt.word_to_word_translation_id = up.word_to_word_translation_id
       left join v_word_to_word_translations_downvotes_count down on wtwt.word_to_word_translation_id = down.word_to_word_translation_id
       where true
     `;
-    const params = [];
 
     if (original_map_id) {
       params.push(original_map_id);
       sqlStr += ` and omw.original_map_id = $${params.length}`;
     }
-    if (source_lang_code) {
-      params.push(source_lang_code);
+    if (o_language_code) {
+      params.push(o_language_code);
       sqlStr += ` and w.language_code = $${params.length}`;
     }
-    if (source_dialect_code) {
-      params.push(source_dialect_code);
+    if (o_dialect_code) {
+      params.push(o_dialect_code);
       sqlStr += ` and w.dialect_code = $${params.length}`;
     }
-    if (source_geo_code) {
-      params.push(source_geo_code);
+    if (o_geo_code) {
+      params.push(o_geo_code);
       sqlStr += ` and w.geo_code = $${params.length}`;
-    }
-    if (target_lang_code) {
-      params.push(target_lang_code);
-      sqlStr += ` and tw.language_code = $${params.length}`;
-    }
-    if (target_dialect_code) {
-      params.push(target_dialect_code);
-      sqlStr += ` and tw.dialect_code = $${params.length}`;
-    }
-    if (target_geo_code) {
-      params.push(target_geo_code);
-      sqlStr += ` and tw.geo_code = $${params.length}`;
     }
 
     const resQ = await this.pg.pool.query(sqlStr, params);
