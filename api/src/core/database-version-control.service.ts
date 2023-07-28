@@ -93,6 +93,18 @@ export class DatabaseVersionControlService {
     await this.runSqlFile('./src/core/sql/words/phrase_definition_upsert.sql');
     await this.runSqlFile('./src/core/sql/words/phrase_definition_update.sql');
     await this.runSqlFile('./src/core/sql/words/word_definition_update.sql');
+    await this.runSqlFile(
+      './src/core/sql/words/word-definition-vote-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/words/word-definition-vote-toggle.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/words/phrase-definition-vote-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/words/phrase-definition-vote-toggle.sql',
+    );
 
     // map
     await this.runSqlFile('./src/core/sql/map/original_map_create.sql');

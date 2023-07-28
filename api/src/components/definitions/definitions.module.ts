@@ -7,6 +7,8 @@ import { PhraseModule } from '../phrases/phrases.module';
 import { WordDefinitionsService } from './word-definitions.service';
 import { PhraseDefinitionsService } from './phrase-definitions.service';
 import { DefinitionsService } from './definitions.service';
+import { WordDefinitionVotesService } from './word-definition-votes.service';
+import { PhraseDefinitionVotesService } from './phrase-definition-votes.service';
 
 import { DefinitionsResolver } from './definitions.resolver';
 
@@ -17,11 +19,15 @@ import { DefinitionsResolver } from './definitions.resolver';
     PhraseDefinitionsService,
     DefinitionsService,
     WordDefinitionsService,
+    WordDefinitionVotesService,
+    PhraseDefinitionVotesService,
   ],
   exports: [
     WordDefinitionsService,
     PhraseDefinitionsService,
     DefinitionsService,
+    WordDefinitionVotesService,
+    PhraseDefinitionVotesService,
   ],
 })
 export class DefinitionsModule {}
