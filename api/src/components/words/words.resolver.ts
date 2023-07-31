@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context } from '@nestjs/graphql';
+import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
 
 import { WordsService } from './words.service';
+import { WordVotesService } from './word-votes.service';
 
 import {
   Word,
@@ -9,13 +10,19 @@ import {
   WordReadOutput,
   WordUpsertOutput,
   WordUpsertInput,
+  WordVoteOutput,
+  WordVoteUpsertInput,
+  WordVoteStatusOutputRow,
 } from './types';
 import { getBearer } from 'src/common/utility';
 
 @Injectable()
 @Resolver(Word)
 export class WordsResolver {
-  constructor(private wordService: WordsService) {}
+  constructor(
+    private wordService: WordsService,
+    private wordVoteService: WordVotesService,
+  ) {}
 
   @Query(() => WordReadOutput)
   async wordRead(@Args('input') input: WordReadInput): Promise<WordReadOutput> {
@@ -32,5 +39,48 @@ export class WordsResolver {
     console.log('word upsert resolver, string: ', input.wordlike_string);
 
     return this.wordService.upsert(input, getBearer(req));
+  }
+
+  @Query(() => WordVoteOutput)
+  async wordVoteRead(
+    @Args('id', { type: () => ID }) id: string,
+  ): Promise<WordVoteOutput> {
+    console.log('word vote read resolver, words_vote_id:', id);
+
+    return this.wordVoteService.read(+id);
+  }
+
+  @Mutation(() => WordVoteOutput)
+  async wordVoteUpsert(
+    @Args('input') input: WordVoteUpsertInput,
+    @Context() req: any,
+  ): Promise<WordVoteOutput> {
+    console.log('word vote upsert resolver: ', JSON.stringify(input, null, 2));
+
+    return this.wordVoteService.upsert(input, getBearer(req));
+  }
+
+  @Query(() => WordVoteStatusOutputRow)
+  async getWordVoteStatus(
+    @Args('word_id', { type: () => ID }) word_id: string,
+  ): Promise<WordVoteStatusOutputRow> {
+    console.log('get word vote status resolver, word_id:', word_id);
+
+    return this.wordVoteService.getVoteStatus(+word_id);
+  }
+
+  @Mutation(() => WordVoteStatusOutputRow)
+  async toggleWordVoteStatus(
+    @Args('word_id', { type: () => ID }) word_id: string,
+    @Args('vote', { type: () => Boolean }) vote: boolean,
+    @Context() req: any,
+  ): Promise<WordVoteStatusOutputRow> {
+    console.log(`toggle word vote resolver: word_id=${word_id} vote=${vote} `);
+
+    return this.wordVoteService.toggleVoteStatus(
+      +word_id,
+      vote,
+      getBearer(req),
+    );
   }
 }

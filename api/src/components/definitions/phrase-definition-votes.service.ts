@@ -31,7 +31,7 @@ export class PhraseDefinitionVotesService {
       );
 
       if (res1.rowCount !== 1) {
-        console.error(`no site-text-translation-vote for id: ${id}`);
+        console.error(`no phrase-definition-vote for id: ${id}`);
       } else {
         return {
           error: ErrorType.NoError,
