@@ -210,6 +210,7 @@ type Mutation {
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationUpsertOutput!
   phraseUpsert(input: PhraseUpsertInput!): PhraseUpsertOutput!
+  phraseVoteUpsert(input: PhraseVoteUpsertInput!): PhraseVoteOutput!
   postCreateResolver(input: PostCreateInput!): PostCreateOutput!
   register(input: RegisterInput!): RegisterOutput!
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
@@ -218,7 +219,9 @@ type Mutation {
   siteTextTranslationVoteUpsert(input: SiteTextTranslationVoteUpsertInput!): SiteTextTranslationVoteUpsertOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextUpsertOutput!
   siteTextWordDefinitionUpsert(input: SiteTextWordDefinitionUpsertInput!): SiteTextWordDefinitionUpsertOutput!
+  togglePhraseVoteStatus(phrase_id: ID!, vote: Boolean!): PhraseVoteStatusOutputRow!
   toggleVoteStatus(site_text_translation_id: String!, vote: Boolean!): VoteStatusOutputRow!
+  toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
   upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): SiteTextTranslationUpsertOutput!
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(input: FromPhraseAndDefintionlikeStringUpsertInput!): PhraseDefinitionUpsertOutput!
@@ -229,6 +232,7 @@ type Mutation {
   wordToPhraseTranslationUpsert(input: WordToPhraseTranslationUpsertInput!): WordToPhraseTranslationUpsertOutput!
   wordToWordTranslationUpsert(input: WordToWordTranslationUpsertInput!): WordToWordTranslationUpsertOutput!
   wordUpsert(input: WordUpsertInput!): WordUpsertOutput!
+  wordVoteUpsert(input: WordVoteUpsertInput!): WordVoteOutput!
 }
 
 input PasswordResetFormInput {
@@ -326,6 +330,35 @@ type PhraseUpsertOutput {
   phrase: Phrase
 }
 
+type PhraseVote {
+  last_updated_at: DateTime!
+  phrase_id: ID!
+  phrase_vote_id: ID!
+  user_id: ID!
+  vote: Boolean!
+}
+
+type PhraseVoteOutput {
+  error: ErrorType!
+  phrase_vote: PhraseVote
+}
+
+type PhraseVoteStatus {
+  downvotes: Int!
+  phrase_id: ID!
+  upvotes: Int!
+}
+
+type PhraseVoteStatusOutputRow {
+  error: ErrorType!
+  vote_status: PhraseVoteStatus
+}
+
+input PhraseVoteUpsertInput {
+  phrase_id: ID!
+  vote: Boolean!
+}
+
 type Post {
   created_at: String!
   created_by: Int!
@@ -361,13 +394,16 @@ type Query {
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getPhraseDefinitionsByLanguage(input: LanguageInput!): PhraseDefinitionWithVoteListOutput!
+  getPhraseVoteStatus(phrase_id: ID!): PhraseVoteStatusOutputRow!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
   getVoteStatus(site_text_translation_id: String!): SiteTextTranslationVoteReadOutput!
   getWordDefinitionVoteStatus(word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getWordDefinitionsByLanguage(input: LanguageInput!): WordDefinitionWithVoteListOutput!
+  getWordVoteStatus(word_id: ID!): WordVoteStatusOutputRow!
   phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!
   phraseRead(input: PhraseReadInput!): PhraseReadOutput!
   phraseToPhraseTranslationRead(id: ID!): PhraseToPhraseTranslationReadOutput!
+  phraseVoteRead(id: ID!): PhraseVoteOutput!
   postReadResolver(input: PostReadInput!): PostReadOutput!
   siteTextPhraseDefinitionRead(id: String!): SiteTextPhraseDefinitionReadOutput!
   siteTextTranslationRead(id: String!): SiteTextTranslationReadOutput!
@@ -378,6 +414,7 @@ type Query {
   wordRead(input: WordReadInput!): WordReadOutput!
   wordToPhraseTranslationRead(id: ID!): WordToPhraseTranslationReadOutput!
   wordToWordTranslationRead(id: ID!): WordToWordTranslationReadOutput!
+  wordVoteRead(id: ID!): WordVoteOutput!
 }
 
 input RegisterInput {
@@ -727,6 +764,35 @@ input WordUpsertInput {
 type WordUpsertOutput {
   error: ErrorType!
   word: Word
+}
+
+type WordVote {
+  last_updated_at: DateTime!
+  user_id: ID!
+  vote: Boolean!
+  word_id: ID!
+  words_vote_id: ID!
+}
+
+type WordVoteOutput {
+  error: ErrorType!
+  word_vote: WordVote
+}
+
+type WordVoteStatus {
+  downvotes: Int!
+  upvotes: Int!
+  word_id: ID!
+}
+
+type WordVoteStatusOutputRow {
+  error: ErrorType!
+  vote_status: WordVoteStatus
+}
+
+input WordVoteUpsertInput {
+  vote: Boolean!
+  word_id: ID!
 }
 
 type WordWithVotes {
