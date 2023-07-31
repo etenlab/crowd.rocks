@@ -214,6 +214,7 @@ type Mutation {
   postCreateResolver(input: PostCreateInput!): PostCreateOutput!
   register(input: RegisterInput!): RegisterOutput!
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
+  siteTextLanguageUpsert(input: SiteTextLanguageUpsertInput!): SiteTextLanguageOutput!
   siteTextPhraseDefinitionUpsert(input: SiteTextPhraseDefinitionUpsertInput!): SiteTextPhraseDefinitionUpsertOutput!
   siteTextTranslationUpsert(input: SiteTextTranslationInput!): SiteTextTranslationUpsertOutput!
   siteTextTranslationVoteUpsert(input: SiteTextTranslationVoteUpsertInput!): SiteTextTranslationVoteUpsertOutput!
@@ -396,6 +397,8 @@ type Query {
   getPhraseDefinitionsByLanguage(input: LanguageInput!): PhraseDefinitionWithVoteListOutput!
   getPhraseVoteStatus(phrase_id: ID!): PhraseVoteStatusOutputRow!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
+  getSiteTextLanguage(id: ID!): SiteTextLanguageOutput!
+  getSiteTextLanguageList: SiteTextLanguageListOutput!
   getVoteStatus(site_text_translation_id: String!): SiteTextTranslationVoteReadOutput!
   getWordDefinitionVoteStatus(word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getWordDefinitionsByLanguage(input: LanguageInput!): WordDefinitionWithVoteListOutput!
@@ -447,6 +450,29 @@ type SiteTextDefinitionListOutput {
   error: ErrorType!
   site_text_phrase_definition_list: [SiteTextPhraseDefinition]!
   site_text_word_definition_list: [SiteTextWordDefinition]!
+}
+
+type SiteTextLanguage {
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  site_text_language_id: ID!
+}
+
+type SiteTextLanguageListOutput {
+  error: ErrorType!
+  site_text_language_list: [SiteTextLanguage]!
+}
+
+type SiteTextLanguageOutput {
+  error: ErrorType!
+  site_text_language: SiteTextLanguage
+}
+
+input SiteTextLanguageUpsertInput {
+  dialect_code: String
+  geo_code: String
+  language_code: String!
 }
 
 type SiteTextPhraseDefinition {

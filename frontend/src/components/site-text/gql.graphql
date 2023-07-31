@@ -78,6 +78,13 @@ fragment VoteStatusFragment on VoteStatus {
   site_text_translation_id
 }
 
+fragment SiteTextLanguageFragment on SiteTextLanguage {
+  site_text_language_id
+  language_code
+  dialect_code
+  geo_code
+}
+
 query GetAllSiteTextDefinitions {
   getAllSiteTextDefinitions {
     error
@@ -164,6 +171,15 @@ mutation ToggleVoteStatus($site_text_translation_id: String!, $vote: Boolean!) {
     error
     vote_status {
       ...VoteStatusFragment
+    }
+  }
+}
+
+query GetSiteTextLanguageList {
+  getSiteTextLanguageList {
+    error
+    site_text_language_list {
+      ...SiteTextLanguageFragment
     }
   }
 }
