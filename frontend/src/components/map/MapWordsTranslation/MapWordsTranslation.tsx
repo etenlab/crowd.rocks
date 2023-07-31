@@ -14,15 +14,7 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   const [targetLang, setTargetLang] = useState<LanguageInfo>();
   const [selectedWordId, setSelectedWordId] = useState<string>();
 
-  const [
-    origMapWordsRead,
-    {
-      data: wordsData,
-      // error: wordsError,
-      // loading: wordsLoading,
-      // called: wordsCalled,
-    },
-  ] = useGetOrigMapWordsLazyQuery();
+  const [origMapWordsRead, { data: wordsData }] = useGetOrigMapWordsLazyQuery();
 
   const fetchMapWords = useCallback(() => {
     if (!targetLang?.lang.tag) {
