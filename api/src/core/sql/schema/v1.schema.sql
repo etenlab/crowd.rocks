@@ -568,6 +568,15 @@ create table site_text_translation_votes(
   unique (user_id, site_text_translation_id)
 );
 
+create table site_text_languages(
+  site_text_language_id bigserial primary key,
+  language_code varchar(32) not null,
+  dialect_code varchar(32),
+  geo_code varchar(32),
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  unique (language_code, dialect_code, geo_code)
+);
+
 -- MAPS -------------------------------------------------------------
 
 create table original_maps(
