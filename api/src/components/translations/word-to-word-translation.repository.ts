@@ -77,9 +77,9 @@ export class WordToWordTranslationRepository {
       );
       return {
         vote_status: {
-          upvotes: res[0].up_votes,
-          downvotes: res[0].down_votes,
-          word_to_word_translation_id: res[0].word_to_word_translation_id,
+          upvotes: res.rows[0].up_votes_count || '0',
+          downvotes: res.rows[0].down_votes_count || '0',
+          word_to_word_translation_id: res.rows[0].word_to_word_translation_id,
         },
         error: ErrorType.NoError,
       };

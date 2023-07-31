@@ -1138,6 +1138,7 @@ export type WordWithVotes = {
   down_votes: Scalars['String']['output'];
   geo_code?: Maybe<Scalars['String']['output']>;
   language_code: Scalars['String']['output'];
+  translation_id: Scalars['String']['output'];
   up_votes: Scalars['String']['output'];
   word: Scalars['String']['output'];
   word_id: Scalars['ID']['output'];
@@ -1200,7 +1201,7 @@ export type GetOrigMapWordsQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'WordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'WordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string }> | null }> } };
+export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'WordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'WordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
 
 export type VersionFieldsFragment = { __typename?: 'Version', version_id: string, post_id: number, created_at: string, license_title: string, content: string };
 
@@ -1686,6 +1687,7 @@ export const GetOrigMapWordsDocument = gql`
         definition_id
         up_votes
         down_votes
+        translation_id
       }
     }
   }

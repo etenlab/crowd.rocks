@@ -753,6 +753,7 @@ type WordWithVotes {
   down_votes: String!
   geo_code: String
   language_code: String!
+  translation_id: String!
   up_votes: String!
   word: String!
   word_id: ID!

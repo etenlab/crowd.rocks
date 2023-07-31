@@ -42,4 +42,7 @@ const StCards = styled.div`
 
 const StCard = styled.div`
   width: 50%;
+  & > * {
+    cursor: pointer;
+  }
 `;

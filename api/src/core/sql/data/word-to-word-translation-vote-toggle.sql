@@ -47,7 +47,7 @@ begin
   v_vote := null;
 
   select vote
-  from word_to_word_translation_votes
+  from word_to_word_translations_votes
   where word_to_word_translation_id = v_word_to_word_translation_id
     and user_id = v_user_id
   into v_vote;
@@ -56,16 +56,16 @@ begin
     p_vote := null;
   end if;
 
-  insert into word_to_word_translation_votes(word_to_word_translation_id, user_id, vote)
+  insert into word_to_word_translations_votes(word_to_word_translation_id, user_id, vote)
   values (p_word_to_word_translation_id, v_user_id, p_vote)
   on conflict (word_to_word_translation_id, user_id)
   do update set vote = EXCLUDED.vote
-  returning word_to_word_translation_vote_id
+  returning word_to_word_translations_vote_id
   into p_word_to_word_translation_vote_id;
 
   -- if p_word_to_word_translation_vote_id is null then
   --   select word_to_word_translation_vote_id
-  --   from word_to_word_translation_votes
+  --   from word_to_word_translations_votes
   --   where word_to_word_translation_id = p_word_to_word_translation_id
   --     and user_id = v_user_id
   --   into p_word_to_word_translation_vote_id;

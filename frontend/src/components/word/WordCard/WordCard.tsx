@@ -34,5 +34,4 @@ export const WordCard = ({
 const StCard = styled(IonCard)(() => ({
   width: '90%',
   height: '90px',
-  cursor: 'pointer',
 }));

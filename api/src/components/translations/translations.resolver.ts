@@ -144,10 +144,11 @@ export class TranslationsResolver {
     // const token = getBearer(req);
     const token = await this.authenticationService.getAdminToken();
 
-    return this.wordToWordTranslationService.toggleVoteStatus(
+    const res = await this.wordToWordTranslationService.toggleVoteStatus(
       input.word_to_word_translation_id,
       input.vote,
       token,
     );
+    return res;
   }
 }

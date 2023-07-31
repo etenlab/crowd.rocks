@@ -32,6 +32,7 @@ query GetOrigMapWords(
         definition_id
         up_votes
         down_votes
+        translation_id
       }
     }
   }
