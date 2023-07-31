@@ -1,4 +1,4 @@
-import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { Args, Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
 
@@ -91,4 +91,22 @@ export class AddWordAsTranslationForWordInput {
 @ObjectType()
 export class AddWordAsTranslationForWordOutput extends GenericOutput {
   @Field(() => String) wordTranslationId: string;
+}
+
+@ObjectType()
+export class WordTrVoteStatus {
+  @Field(() => String) word_to_word_translation_id: string;
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@InputType()
+export class WordTrVoteStatusInput extends GenericOutput {
+  @Field(() => ID) word_to_word_translation_id: string;
+  @Field(() => Boolean) vote: boolean;
+}
+@ObjectType()
+export class WordTrVoteStatusOutputRow extends GenericOutput {
+  @Field(() => WordTrVoteStatus, { nullable: true })
+  vote_status: WordTrVoteStatus;
 }

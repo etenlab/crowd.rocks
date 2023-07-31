@@ -4,10 +4,7 @@ import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { styled } from 'styled-components';
 import { TranslatedWordCards } from '../../word/TranslatedWordCards/TranslatedWordCards';
-import {
-  WordTranslations,
-  useGetOrigMapWordsLazyQuery,
-} from '../../../generated/graphql';
+import { useGetOrigMapWordsLazyQuery } from '../../../generated/graphql';
 import { WordTranslationsCom } from './WordTranslationsCom';
 
 interface MapWordsTranslationProps extends RouteComponentProps<{}> {}

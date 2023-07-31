@@ -140,6 +140,9 @@ export class DatabaseVersionControlService {
     await this.runSqlFile(
       './src/core/sql/data/site-text-translation-vote-toggle.sql',
     );
+    await this.runSqlFile(
+      './src/core/sql/data/word-to-word-translation-vote-toggle.sql',
+    );
 
     // update db version
     await this.setVersionNumber(1);

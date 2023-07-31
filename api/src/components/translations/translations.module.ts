@@ -10,6 +10,7 @@ import { WordToPhraseTranslationsService } from './word-to-phrase-translations.s
 import { PhraseToPhraseTranslationsService } from './phrase-to-phrase-translations.service';
 import { WordsModule } from '../words/words.module';
 import { AuthenticationModule } from '../authentication/authentication.module';
+import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AuthenticationModule } from '../authentication/authentication.module';
     WordToWordTranslationsService,
     WordToPhraseTranslationsService,
     PhraseToPhraseTranslationsService,
+    WordToWordTranslationRepository,
   ],
   exports: [
     WordToWordTranslationsService,

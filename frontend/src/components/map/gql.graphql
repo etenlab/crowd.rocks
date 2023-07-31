@@ -36,20 +36,3 @@ query GetOrigMapWords(
     }
   }
 }
-
-mutation AddWordAsTranslationForWord(
-  $originalDefinitionId: String!
-  $translationDefinition: String!
-  $translationWord: WordUpsertInput!
-) {
-  addWordAsTranslationForWord(
-    input: {
-      originalDefinitionId: $originalDefinitionId
-      translationDefinition: $translationDefinition
-      translationWord: $translationWord
-    }
-  ) {
-    wordTranslationId
-    error
-  }
-}

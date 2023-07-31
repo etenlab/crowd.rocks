@@ -57,10 +57,6 @@ export class MapsRepository {
         `,
       [mapFileName, fileBody, token],
     );
-    console.log(
-      'sql stored proc message: ',
-      JSON.stringify(res.rows[0].p_error_type),
-    );
 
     return {
       map_file_name: mapFileName,

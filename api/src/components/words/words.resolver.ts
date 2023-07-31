@@ -11,17 +11,18 @@ import {
   WordUpsertInput,
 } from './types';
 import { getBearer } from 'src/common/utility';
+import { VoteStatusOutputRow } from '../site-text/types';
 
 @Injectable()
 @Resolver(Word)
 export class WordsResolver {
-  constructor(private wordService: WordsService) {}
+  constructor(private wordsService: WordsService) {}
 
   @Query(() => WordReadOutput)
   async wordRead(@Args('input') input: WordReadInput): Promise<WordReadOutput> {
     console.log('word read resolver, word_id:', input.word_id);
 
-    return this.wordService.read(input);
+    return this.wordsService.read(input);
   }
 
   @Mutation(() => WordUpsertOutput)
@@ -31,6 +32,6 @@ export class WordsResolver {
   ): Promise<WordUpsertOutput> {
     console.log('word upsert resolver, string: ', input.wordlike_string);
 
-    return this.wordService.upsert(input, getBearer(req));
+    return this.wordsService.upsert(input, getBearer(req));
   }
 }
