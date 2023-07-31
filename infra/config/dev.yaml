@@ -40,13 +40,12 @@ dns:
     rootDomainCertSsmParam: '/dev/dev.crowd.rocks/root-domain-certificate'
 
 apiService:
-  albPort: 3003
-  dockerPort: 80
+  albPort: 3000
+  dockerPort: 3001
   priority: 10
   rootdomain: 'dev.crowd.rocks'
-  subdomain: 'api'
   serviceName: 'crowdrocksApiServer'
-  dockerImageUrl: 'etenlab/crowdrocks-api'
+  dockerImageUrl: 'etenlab/crowd-rocks'
   cpu: 2048
   memory: 4096
   healthCheckPath: '/'

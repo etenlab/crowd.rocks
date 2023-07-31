@@ -90,7 +90,17 @@ const apiServiceStack = new ApiServiceStack(
     memory: apiService.memory || 1024,
     serviceTasksCount: apiService.taskCount || 1,
     healthCheckPath: apiService.healthCheckPath || '/',
-    environmentVars: [],
+    environmentVars: [
+      {
+        AWS_REGION: config.awsRegion,
+      },
+      {
+        REACT_APP_SERVER_URL: `https://${apiService.rootdomain}`,
+      },
+      {
+        EMAIL_SERVER: `https://${apiService.rootdomain}`,
+      },
+    ],
     secrets: [
       {
         taskDefSecretName: 'CR_DB_USER',
@@ -117,26 +127,21 @@ const apiServiceStack = new ApiServiceStack(
         secretsManagerSecretName: config.dbCredentialSecret,
         secretsMangerSecretField: 'port',
       },
-      {
-        taskDefSecretName: 'AWS_ACCESS_KEY_ID',
-        secretsManagerSecretName: config.appSecrets,
-        secretsMangerSecretField: 'aws_access_key_id',
-      },
-      {
-        taskDefSecretName: 'AWS_SECRET_ACCESS_KEY',
-        secretsManagerSecretName: config.appSecrets,
-        secretsMangerSecretField: 'aws_secret_access_key',
-      },
-      {
-        taskDefSecretName: 'AWS_REGION',
-        secretsManagerSecretName: config.appSecrets,
-        secretsMangerSecretField: 'aws_region',
-      },
-      {
-        taskDefSecretName: 'EMAIL_SERVER',
-        secretsManagerSecretName: config.appSecrets,
-        secretsMangerSecretField: 'email_server',
-      },
+      // {
+      //   taskDefSecretName: 'AWS_ACCESS_KEY_ID',
+      //   secretsManagerSecretName: config.appSecrets,
+      //   secretsMangerSecretField: 'aws_access_key_id',
+      // },
+      // {
+      //   taskDefSecretName: 'AWS_SECRET_ACCESS_KEY',
+      //   secretsManagerSecretName: config.appSecrets,
+      //   secretsMangerSecretField: 'aws_secret_access_key',
+      // },
+      // {
+      //   taskDefSecretName: 'EMAIL_SERVER',
+      //   secretsManagerSecretName: config.appSecrets,
+      //   secretsMangerSecretField: 'email_server',
+      // },
     ],
   },
 );

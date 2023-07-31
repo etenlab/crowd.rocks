@@ -35,7 +35,7 @@ export interface ApiServiceStackProps extends cdk.StackProps {
   readonly rootDomainName: string;
 
   /** Subdomain of the root domain used to access the app */
-  readonly subdomain: string;
+  readonly subdomain?: string;
 
   /** SSM param name storing shared ALB ARN */
   readonly albArnSsmParam: string;
@@ -114,7 +114,7 @@ export class ApiServiceStack extends cdk.Stack {
       props.albSecurityGroupSsmParam,
       `${props.appPrefix}AlbSg`,
     );
-    const albListener = importAlbListener(this, props.albListenerSsmParam)
+    const albListener = importAlbListener(this, props.albListenerSsmParam);
 
     const dbSg = importSg(
       this,
@@ -223,17 +223,17 @@ export class ApiServiceStack extends cdk.Stack {
 
     albListener.addAction(`${props.serviceName}AlbAction`, {
       priority: props.routingPriority,
-      conditions: [elbv2.ListenerCondition.hostHeaders([`${props.subdomain}.${props.rootDomainName}`])],
+      conditions: [elbv2.ListenerCondition.hostHeaders([props.rootDomainName])],
       action: elbv2.ListenerAction.forward([targetGroup]),
-    })
+    });
 
-    /** Create Route53 record for service subdomain */
+    /** Create Route53 record for the service */
     const route53Record = new route53.ARecord(
       this,
       `${props.serviceName}ARecord`,
       {
         zone: rootHostedZone,
-        recordName: props.subdomain,
+        recordName: props.rootDomainName,
         target: route53.RecordTarget.fromAlias(
           new route53Targets.LoadBalancerTarget(alb),
         ),
@@ -242,7 +242,7 @@ export class ApiServiceStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, `${props.appPrefix}ApiUrl`, {
       exportName: `${props.serviceName}-api-url`,
-      value: `https://${props.subdomain}.${props.rootDomainName}`,
+      value: `https://${props.rootDomainName}`,
     });
   }
 }
