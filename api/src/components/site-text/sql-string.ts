@@ -510,3 +510,62 @@ export function getDefinitionIdBySiteTextId(
     [site_text_id],
   ];
 }
+
+export type GetSiteTextLanguageObjectById = {
+  site_text_language_id: number;
+  language_code: string;
+  dialect_code?: string;
+  geo_code?: string;
+};
+
+export function getSiteTextLanguageObjById(id: number): [string, [number]] {
+  return [
+    `
+      select 
+        site_text_language_id,
+        language_code,
+        dialect_code,
+        geo_code
+      from site_text_languages
+      where site_text_language_id = $1
+    `,
+    [id],
+  ];
+}
+
+export type SiteTextLanguageUpsertProcedureOutputRow = {
+  p_site_text_language_id: number;
+  p_error_type: ErrorType;
+};
+
+export function callSiteTextLanguageUpsertProcedure({
+  language_code,
+  dialect_code,
+  geo_code,
+}: {
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+}): [string, [string, string | null, string | null]] {
+  return [
+    `
+      call site_text_language_upsert($1, $2, $3, 0, '');
+    `,
+    [language_code, dialect_code, geo_code],
+  ];
+}
+
+export type GetAllSiteTextLanguageList = {
+  site_text_language_id: number;
+};
+
+export function getAllSiteTextLanguageList(): [string, []] {
+  return [
+    `
+      select 
+        site_text_language_id
+      from site_text_languages;
+    `,
+    [],
+  ];
+}

@@ -5,6 +5,7 @@ import { PostgresService } from './postgres.service';
 import { ErrorType } from 'src/common/types';
 import { SiteTextsService } from 'src/components/site-text/site-texts.service';
 import { SiteTextTranslationsService } from 'src/components/site-text/site-text-translations.service';
+import { SiteTextLanguagesService } from 'src/components/site-text/site-text-language.service';
 
 import { siteText } from './data/lang';
 
@@ -16,6 +17,7 @@ export class DataLoadService {
     private pg: PostgresService,
     private siteTextService: SiteTextsService,
     private siteTextTranslationService: SiteTextTranslationsService,
+    private siteTextLanguageService: SiteTextLanguagesService,
   ) {
     // this.loadSiteTextData(); // I use this to easily rerun the load function
   }
@@ -31,6 +33,16 @@ export class DataLoadService {
     }
 
     console.log(`Admin token ${token}`);
+
+    const languageCodes = ['en', 'ja', 'zh', 'hi', 'de'];
+
+    for (const code of languageCodes) {
+      await this.siteTextLanguageService.upsert({
+        language_code: code,
+        dialect_code: null,
+        geo_code: null,
+      });
+    }
 
     for (const [siteTextlike_string, translationObj] of Object.entries(
       siteText,

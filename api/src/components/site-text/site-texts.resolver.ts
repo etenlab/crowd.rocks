@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context } from '@nestjs/graphql';
+import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
 
 import { getBearer } from 'src/common/utility';
 
@@ -29,6 +29,9 @@ import {
   SiteTextTranslationWithVoteOutput,
   SiteTextDefinitionListOutput,
   SiteTextTranslationUpsertInput,
+  SiteTextLanguageOutput,
+  SiteTextLanguageUpsertInput,
+  SiteTextLanguageListOutput,
   VoteStatusOutputRow,
 } from './types';
 
@@ -38,6 +41,7 @@ import {
 } from 'src/components/definitions/types';
 
 import { SiteTextTranslationVotesService } from './site-text-translation-votes.service';
+import { SiteTextLanguagesService } from './site-text-language.service';
 
 @Injectable()
 @Resolver()
@@ -48,6 +52,7 @@ export class SiteTextsResolver {
     private siteTextTranslationVoteService: SiteTextTranslationVotesService,
     private siteTextWordDefinitionService: SiteTextWordDefinitionsService,
     private siteTextPhraseDefinitionService: SiteTextPhraseDefinitionsService,
+    private siteTextLanguageService: SiteTextLanguagesService,
   ) {}
 
   @Query(() => SiteTextWordDefinitionReadOutput)
@@ -289,5 +294,33 @@ export class SiteTextsResolver {
     console.log('site text getAllSiteTextDefinitions resolver');
 
     return this.siteTextService.getAllSiteTextDefinitions();
+  }
+
+  @Query(() => SiteTextLanguageOutput)
+  async getSiteTextLanguage(
+    @Args('id', { type: () => ID }) id: string,
+  ): Promise<SiteTextLanguageOutput> {
+    console.log('get site text language resolver', id);
+
+    return this.siteTextLanguageService.read(+id);
+  }
+
+  @Mutation(() => SiteTextLanguageOutput)
+  async siteTextLanguageUpsert(
+    @Args('input') input: SiteTextLanguageUpsertInput,
+  ): Promise<SiteTextLanguageOutput> {
+    console.log(
+      `siteTextLanguageUpsert resolver`,
+      JSON.stringify(input, null, 2),
+    );
+
+    return this.siteTextLanguageService.upsert(input);
+  }
+
+  @Query(() => SiteTextLanguageListOutput)
+  async getSiteTextLanguageList(): Promise<SiteTextLanguageListOutput> {
+    console.log('get site text language list resolver');
+
+    return this.siteTextLanguageService.getSiteTextLanguageList();
   }
 }
