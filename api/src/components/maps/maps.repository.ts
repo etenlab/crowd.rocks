@@ -152,8 +152,13 @@ export class MapsRepository {
       tLanguageRestrictionClause += ` and tw.geo_code =  $${params.length} `;
     }
 
+    // note that 'disctinct' because of same word can be at several original maps.
+    // For now, we don't care in which map the word is present, so don't select omw.original_map_id.
+    // But without 'distinct' clause this query will return row for each combination word-original map
+    // but we don't want it yet.
+
     let sqlStr = `
-      select
+      select distinct
         w.word_id,
         ws.wordlike_string as word,
         owd.definition as o_definition,
