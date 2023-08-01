@@ -1,16 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Redirect, Route } from 'react-router';
 import {
   IonContent,
   IonHeader,
   IonIcon,
+  IonModal,
+  IonToolbar,
   IonPage,
+  IonButtons,
+  IonTitle,
+  IonItem,
+  IonButton,
   IonRouterOutlet,
   useIonRouter,
   useIonViewWillEnter,
   useIonViewWillLeave,
 } from '@ionic/react';
-import { menu, moon, sunny } from 'ionicons/icons';
+import { menu, moon, sunny, languageOutline } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 
 import './Body.css';
@@ -21,6 +27,12 @@ import { globals } from './services/globals';
 import { login_change } from './services/subscriptions';
 
 import { apollo_client } from './main';
+
+import {
+  useGetAllSiteTextLanguageListQuery,
+  SiteTextLanguage,
+} from './generated/graphql';
+import { langInfo2String, subTags2LangInfo } from './common/langUtils';
 
 import Home from './components/home/Home';
 import Login from './components/authentication/Login';
@@ -39,11 +51,36 @@ const Body: React.FC = () => {
   const [show_menu, set_show_menu] = useState(false);
   const [is_logged_in, set_is_logged_in] = useState(false);
   const [show_dark_mode, set_show_dark_mode] = useState(false);
+  const [siteTextLanguageList, setSiteTextLanguageList] = useState<
+    SiteTextLanguage[]
+  >([]);
+
+  const modal = useRef<HTMLIonModalElement>(null);
+
+  const {
+    loading: languageLoading,
+    error: languageError,
+    data: languageData,
+  } = useGetAllSiteTextLanguageListQuery();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [logoutMutation, { data, loading, error }] = useLogoutMutation();
 
   let sub: Subscription;
+
+  useEffect(() => {
+    if (languageError || languageError) {
+      return;
+    }
+
+    if (languageData && languageData.getAllSiteTextLanguageList) {
+      setSiteTextLanguageList([
+        ...languageData.getAllSiteTextLanguageList.site_text_language_list.map(
+          (language) => language as SiteTextLanguage,
+        ),
+      ]);
+    }
+  }, [languageError, languageLoading, languageData]);
 
   useIonViewWillEnter(() => {
     const theme_storage = localStorage.getItem('theme');
@@ -143,6 +180,18 @@ const Body: React.FC = () => {
     router.push('/US/eng/1/home');
   };
 
+  const languages = useMemo(() => {
+    return siteTextLanguageList.map((language) => {
+      return langInfo2String(
+        subTags2LangInfo({
+          lang: language.language_code,
+          dialect: language.dialect_code as string | undefined,
+          region: language.geo_code as string | undefined,
+        }),
+      );
+    });
+  }, [siteTextLanguageList]);
+
   return (
     <IonPage>
       <IonHeader>
@@ -154,19 +203,24 @@ const Body: React.FC = () => {
                 <span className="rocks">rocks</span>
               </div>
               <div>
+                <IonIcon
+                  id="open-language-modal"
+                  icon={languageOutline}
+                  className="clickable"
+                />
                 {show_dark_mode && (
                   <IonIcon
                     icon={sunny}
                     onClick={toggle_theme}
                     className="clickable theme-icon"
-                  ></IonIcon>
+                  />
                 )}
                 {!show_dark_mode && (
                   <IonIcon
                     icon={moon}
                     onClick={toggle_theme}
                     className="clickable theme-icon"
-                  ></IonIcon>
+                  />
                 )}
                 <IonIcon
                   icon={menu}
@@ -220,6 +274,29 @@ const Body: React.FC = () => {
         </div>
       </IonHeader>
       <IonContent>
+        <IonModal ref={modal} trigger="open-language-modal">
+          <IonHeader>
+            <IonToolbar>
+              <IonButtons slot="start">
+                <IonButton onClick={() => modal.current?.dismiss()}>
+                  Cancel
+                </IonButton>
+              </IonButtons>
+              <IonTitle>Language Setting</IonTitle>
+              <IonButtons slot="end">
+                <IonButton strong={true} onClick={() => confirm()}>
+                  Confirm
+                </IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            {languages.length > 0 &&
+              languages.map((language) => (
+                <IonItem key={language}>{language}</IonItem>
+              ))}
+          </IonContent>
+        </IonModal>
         <IonRouterOutlet>
           <Route
             path="/:nation_id/:language_id/:cluster_id/profile"
