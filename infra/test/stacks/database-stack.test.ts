@@ -33,10 +33,10 @@ describe('DatabaseStack', () => {
         CopyTagsToSnapshot: true,
         DatabaseName: 'eildb1',
         DBClusterIdentifier: 'qa-aurora-cluster',
-        DBClusterParameterGroupName: 'default.aurora-postgresql14',
+        DBClusterParameterGroupName: 'default.aurora-postgresql15',
         DeletionProtection: true,
         Engine: 'aurora-postgresql',
-        EngineVersion: '14.5',
+        EngineVersion: '15.3',
         MasterUsername: 'postgres',
         MasterUserPassword: {
           'Fn::Join': [

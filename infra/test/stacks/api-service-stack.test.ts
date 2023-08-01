@@ -197,7 +197,7 @@ describe('ApiServiceStack', () => {
            Field: "host-header",
            HostHeaderConfig: {
             Values: [
-             "api.example.com"
+             "example.com"
             ]
            }
           }
@@ -212,7 +212,7 @@ describe('ApiServiceStack', () => {
     template.hasResourceProperties(
       'AWS::Route53::RecordSet',
       Match.objectLike({
-        Name: 'api.example.com.',
+        Name: 'example.com.',
         Type: 'A',
         AliasTarget: {
           DNSName: Match.anyValue(),
