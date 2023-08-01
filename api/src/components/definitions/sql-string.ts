@@ -161,7 +161,7 @@ export function getWordDefinitionListByLang({
       and words.geo_code = $2
     `;
     returnArr = [...returnArr, geo_code];
-  } else if (!!dialect_code && !geo_code) {
+  } else if (!dialect_code && !geo_code) {
     wherePlsStr = ``;
     returnArr = [...returnArr];
   }
@@ -181,6 +181,26 @@ export function getWordDefinitionListByLang({
       on ws.word_id = word_definitions.word_id
     `,
     returnArr,
+  ];
+}
+
+export type GetWordDefinitionListByWordId = {
+  word_definition_id: number;
+  created_at: string;
+};
+
+export function getWordDefinitionListByWordId(
+  word_id: number,
+): [string, [number]] {
+  return [
+    `
+      select 
+        word_definition_id,
+        created_at
+      from word_definitions
+      where word_id = $1
+    `,
+    [word_id],
   ];
 }
 
@@ -219,7 +239,7 @@ export function getPhraseDefinitionListByLang({
       and words.geo_code = $2
     `;
     returnArr = [...returnArr, geo_code];
-  } else if (!!dialect_code && !geo_code) {
+  } else if (!dialect_code && !geo_code) {
     wherePlsStr = ``;
     returnArr = [...returnArr];
   }
@@ -241,6 +261,26 @@ export function getPhraseDefinitionListByLang({
       on ps.phrase_id = phrase_definitions.phrase_id
     `,
     returnArr,
+  ];
+}
+
+export type GetPhraseDefinitionListByPhraseId = {
+  phrase_definition_id: number;
+  created_at: string;
+};
+
+export function getPhraseDefinitionListByPhraseId(
+  phrase_id: number,
+): [string, [number]] {
+  return [
+    `
+      select 
+        phrase_definition_id,
+        created_at
+      from phrase_definitions
+      where phrase_id = $1
+    `,
+    [phrase_id],
   ];
 }
 
@@ -445,5 +485,41 @@ export function togglePhraseDefinitionVoteStatus({
       call phrase_definition_vote_toggle($1, $2, $3, 0, '');
     `,
     [phrase_definition_id, vote, token],
+  ];
+}
+
+export type GetWordDefinitionlikeStringListByWordId = {
+  definition: string;
+};
+
+export function getWordDefinitionlikeStringListByWordId(
+  word_id: number,
+): [string, [number]] {
+  return [
+    `
+      select 
+        definition
+      from word_definitions
+      where word_id = $1
+    `,
+    [word_id],
+  ];
+}
+
+export type GetPhraseDefinitionlikeStringListByPhraseId = {
+  definition: string;
+};
+
+export function getPhraseDefinitionlikeStringListByPhraseId(
+  phrase_id: number,
+): [string, [number]] {
+  return [
+    `
+      select 
+        definition
+      from phrase_definitions
+      where phrase_id = $1
+    `,
+    [phrase_id],
   ];
 }

@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
 
+import { getBearer } from 'src/common/utility';
+
 import { WordDefinitionsService } from './word-definitions.service';
 import { PhraseDefinitionsService } from './phrase-definitions.service';
 import { DefinitionsService } from './definitions.service';
@@ -18,12 +20,11 @@ import {
   FromPhraseAndDefintionlikeStringUpsertInput,
   DefinitionUpdateaInput,
   DefinitionUpdateOutput,
-  LanguageInput,
   WordDefinitionWithVoteListOutput,
   PhraseDefinitionWithVoteListOutput,
   DefinitionVoteStatusOutputRow,
 } from './types';
-import { getBearer } from 'src/common/utility';
+import { LanguageInput } from 'src/components/common/types';
 
 @Injectable()
 @Resolver()
@@ -130,6 +131,15 @@ export class DefinitionsResolver {
     return this.wordDefinitionsService.getWordDefinitionsByLanguage(input);
   }
 
+  @Query(() => WordDefinitionWithVoteListOutput)
+  async getWordDefinitionsByWordId(
+    @Args('word_id', { type: () => ID }) word_id: string,
+  ): Promise<WordDefinitionWithVoteListOutput> {
+    console.log('getWordDefinitionsByLanguage resolver');
+
+    return this.wordDefinitionsService.getWordDefinitionsByWordId(+word_id);
+  }
+
   @Query(() => PhraseDefinitionWithVoteListOutput)
   async getPhraseDefinitionsByLanguage(
     @Args('input', { type: () => LanguageInput }) input: LanguageInput,
@@ -140,6 +150,17 @@ export class DefinitionsResolver {
     );
 
     return this.phraseDefinitionsService.getPhraseDefinitionsByLanguage(input);
+  }
+
+  @Query(() => PhraseDefinitionWithVoteListOutput)
+  async getPhraseDefinitionsByPhraseId(
+    @Args('phrase_id', { type: () => ID }) phrase_id: string,
+  ): Promise<PhraseDefinitionWithVoteListOutput> {
+    console.log('getPhraseDefinitionsByPhraseId resolver');
+
+    return this.phraseDefinitionsService.getPhraseDefinitionsByPhraseId(
+      +phrase_id,
+    );
   }
 
   @Query(() => DefinitionVoteStatusOutputRow)
@@ -164,7 +185,7 @@ export class DefinitionsResolver {
   }
 
   @Mutation(() => DefinitionVoteStatusOutputRow)
-  async getWordDefinitonToggleVoteStatus(
+  async toggleWordDefinitonVoteStatus(
     @Args('word_definition_id', { type: () => ID }) word_definition_id: string,
     @Args('vote', { type: () => Boolean }) vote: boolean,
     @Context() req: any,
@@ -179,7 +200,7 @@ export class DefinitionsResolver {
   }
 
   @Mutation(() => DefinitionVoteStatusOutputRow)
-  async getPhraseDefinitonToggleVoteStatus(
+  async togglePhraseDefinitonVoteStatus(
     @Args('phrase_definition_id', { type: () => ID })
     phrase_definition_id: string,
     @Args('vote', { type: () => Boolean }) vote: boolean,

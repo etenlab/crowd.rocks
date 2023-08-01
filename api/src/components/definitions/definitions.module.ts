@@ -13,7 +13,11 @@ import { PhraseDefinitionVotesService } from './phrase-definition-votes.service'
 import { DefinitionsResolver } from './definitions.resolver';
 
 @Module({
-  imports: [forwardRef(() => CoreModule), WordsModule, PhraseModule],
+  imports: [
+    forwardRef(() => CoreModule),
+    forwardRef(() => WordsModule),
+    forwardRef(() => PhraseModule),
+  ],
   providers: [
     DefinitionsResolver,
     PhraseDefinitionsService,

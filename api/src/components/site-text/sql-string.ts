@@ -263,7 +263,7 @@ export function getAllSiteTextWordTranslation({
       and words.geo_code = $3
     `;
     returnArr = [...returnArr, geo_code];
-  } else if (!!dialect_code && !geo_code) {
+  } else if (!dialect_code && !geo_code) {
     wherePlsStr = ``;
     returnArr = [...returnArr];
   }
@@ -368,7 +368,7 @@ export function getAllSiteTextPhraseTranslation({
       and words.geo_code = $3
     `;
     returnArr = [...returnArr, geo_code];
-  } else if (!!dialect_code && !geo_code) {
+  } else if (!dialect_code && !geo_code) {
     wherePlsStr = ``;
     returnArr = [...returnArr];
   }
