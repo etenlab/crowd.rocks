@@ -13,8 +13,11 @@ import {
   WordVoteOutput,
   WordVoteUpsertInput,
   WordVoteStatusOutputRow,
+  WordWithVoteListOutput,
+  WordWithVoteOutput,
 } from './types';
 import { getBearer } from 'src/common/utility';
+import { LanguageInput } from 'src/components/common/types';
 
 @Injectable()
 @Resolver(Word)
@@ -82,5 +85,26 @@ export class WordsResolver {
       vote,
       getBearer(req),
     );
+  }
+
+  @Query(() => WordWithVoteListOutput)
+  async getWordsByLanguage(
+    @Args('input', { type: () => LanguageInput }) input: LanguageInput,
+  ): Promise<WordWithVoteListOutput> {
+    console.log(
+      'get words by language resolver',
+      JSON.stringify(input, null, 2),
+    );
+
+    return this.wordService.getWordsByLanguage(input);
+  }
+
+  @Query(() => WordWithVoteOutput)
+  async getWordWithVoteById(
+    @Args('word_id', { type: () => ID }) word_id: string,
+  ): Promise<WordWithVoteOutput> {
+    console.log('getWordWithVoteById resolver', word_id);
+
+    return this.wordService.getWordWithVoteById(+word_id);
   }
 }

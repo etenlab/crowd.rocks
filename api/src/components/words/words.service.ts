@@ -1,21 +1,39 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { PoolClient } from 'pg';
 
 import { ErrorType, GenericOutput } from 'src/common/types';
-import { PostgresService } from 'src/core/postgres.service';
 
-import { WordReadInput, WordReadOutput, WordUpsertInput } from './types';
+import { PostgresService } from 'src/core/postgres.service';
+import { WordVotesService } from './word-votes.service';
+import { WordDefinitionsService } from 'src/components/definitions/word-definitions.service';
+
+import {
+  WordReadInput,
+  WordReadOutput,
+  WordUpsertInput,
+  WordWithDefinitionlikeStrings,
+  WordWithVoteListOutput,
+  WordWithVoteOutput,
+} from './types';
+import { LanguageInput } from 'src/components/common/types';
 
 import {
   getWordObjById,
   GetWordObjectById,
   callWordUpsertProcedure,
   WordUpsertProcedureOutputRow,
+  GetWordListByLang,
+  getWordListByLang,
 } from './sql-string';
-import { PoolClient } from 'pg';
 
 @Injectable()
 export class WordsService {
-  constructor(private pg: PostgresService) {}
+  constructor(
+    private pg: PostgresService,
+    private wordVoteService: WordVotesService,
+    @Inject(forwardRef(() => WordDefinitionsService))
+    private wordDefinitionService: WordDefinitionsService,
+  ) {}
 
   async read(input: WordReadInput): Promise<WordReadOutput> {
     try {
@@ -125,6 +143,118 @@ export class WordsService {
     return {
       error: ErrorType.UnknownError,
       word_id: null,
+    };
+  }
+
+  async getWordWithVoteById(word_id: number): Promise<WordWithVoteOutput> {
+    try {
+      const { error, vote_status } = await this.wordVoteService.getVoteStatus(
+        word_id,
+      );
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error,
+          word_with_vote: null,
+        };
+      }
+
+      const { error: readError, word } = await this.read({
+        word_id: word_id + '',
+      });
+
+      if (readError !== ErrorType.NoError) {
+        return {
+          error: readError,
+          word_with_vote: null,
+        };
+      }
+
+      return {
+        error,
+        word_with_vote: {
+          ...word,
+          upvotes: vote_status.upvotes,
+          downvotes: vote_status.downvotes,
+        },
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_with_vote: null,
+    };
+  }
+
+  async getWordsByLanguage(
+    input: LanguageInput,
+  ): Promise<WordWithVoteListOutput> {
+    try {
+      const res1 = await this.pg.pool.query<GetWordListByLang>(
+        ...getWordListByLang({
+          ...input,
+        }),
+      );
+
+      const wordWithVoteList: WordWithDefinitionlikeStrings[] = [];
+
+      for (let i = 0; i < res1.rowCount; i++) {
+        const { word_id } = res1.rows[i];
+        const { error, vote_status } = await this.wordVoteService.getVoteStatus(
+          +word_id,
+        );
+
+        if (error !== ErrorType.NoError) {
+          return {
+            error,
+            word_with_vote_list: [],
+          };
+        }
+
+        const { error: definitionError, definitionlike_strings } =
+          await this.wordDefinitionService.getDefinitionlikeStringsByWordId(
+            +word_id,
+          );
+
+        if (definitionError !== ErrorType.NoError) {
+          return {
+            error: definitionError,
+            word_with_vote_list: [],
+          };
+        }
+
+        const { error: readError, word } = await this.read({
+          word_id,
+        });
+
+        if (readError !== ErrorType.NoError) {
+          return {
+            error: readError,
+            word_with_vote_list: [],
+          };
+        }
+
+        wordWithVoteList.push({
+          ...word,
+          upvotes: vote_status.upvotes,
+          downvotes: vote_status.downvotes,
+          definitionlike_strings,
+        });
+      }
+
+      return {
+        error: ErrorType.NoError,
+        word_with_vote_list: wordWithVoteList,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_with_vote_list: [],
     };
   }
 }

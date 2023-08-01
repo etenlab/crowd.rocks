@@ -1,12 +1,14 @@
 import { Module, forwardRef } from '@nestjs/common';
+
 import { CoreModule } from 'src/core/core.module';
+import { DefinitionsModule } from 'src/components/definitions/definitions.module';
 
 import { WordsResolver } from './words.resolver';
 import { WordsService } from './words.service';
 import { WordVotesService } from './word-votes.service';
 
 @Module({
-  imports: [forwardRef(() => CoreModule)],
+  imports: [forwardRef(() => CoreModule), forwardRef(() => DefinitionsModule)],
   providers: [WordsService, WordVotesService, WordsResolver],
   exports: [WordsService, WordVotesService],
 })
