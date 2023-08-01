@@ -1,0 +1,1 @@
+export { WordListPage } from './WordListPage';
