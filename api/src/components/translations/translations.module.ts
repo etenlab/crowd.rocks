@@ -11,6 +11,7 @@ import { PhraseToPhraseTranslationsService } from './phrase-to-phrase-translatio
 import { WordsModule } from '../words/words.module';
 import { AuthenticationModule } from '../authentication/authentication.module';
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
+import { MapsModule } from '../maps/maps.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { WordToWordTranslationRepository } from './word-to-word-translation.repo
     DefinitionsModule,
     WordsModule,
     AuthenticationModule,
+    forwardRef(() => MapsModule),
   ],
   providers: [
     TranslationsResolver,

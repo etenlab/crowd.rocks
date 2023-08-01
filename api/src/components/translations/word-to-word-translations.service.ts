@@ -18,7 +18,11 @@ import {
   WordToWordTranslationUpsertProcedureOutputRow,
 } from './sql-string';
 import { WordsService } from '../words/words.service';
-import { WordUpsertInput } from '../words/types';
+import {
+  WordTranslations,
+  WordUpsertInput,
+  WordWithVotes,
+} from '../words/types';
 import { PoolClient } from 'pg';
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 
@@ -248,5 +252,22 @@ export class WordToWordTranslationsService {
       },
       error,
     };
+  }
+
+  chooseBestTranslation(wordTranslated: WordTranslations): WordWithVotes {
+    const res = wordTranslated?.translations?.reduce((bestTr, currTr) => {
+      if (bestTr?.up_votes === undefined) {
+        return currTr;
+      }
+      const bestTrTotal =
+        Number(bestTr?.up_votes || 0) - Number(bestTr?.down_votes || 0);
+      const currTrTotal =
+        Number(currTr?.up_votes || 0) - Number(currTr?.down_votes || 0);
+      if (currTrTotal > bestTrTotal) {
+        return currTr;
+      }
+      return bestTr;
+    }, {} as WordWithVotes);
+    return res;
   }
 }

@@ -16,10 +16,24 @@ interface ISaveMapParams {
   token: string;
   dbPoolClient?: PoolClient;
 }
+export interface ISaveTranslatedMapParams {
+  original_map_id: string;
+  fileBody: string;
+  token: string;
+  t_language_code: string;
+  t_dialect_code?: string;
+  t_geo_code?: string;
+  dbPoolClient?: PoolClient;
+}
 
 interface ISaveMapRes {
   map_file_name: string;
-  original_map_id: string;
+  map_id: string;
+  created_at: string;
+  created_by: string;
+}
+interface ISaveTranslatedMapRes {
+  map_id: string;
   created_at: string;
   created_by: string;
 }
@@ -60,9 +74,69 @@ export class MapsRepository {
 
     return {
       map_file_name: mapFileName,
-      original_map_id: res.rows[0].p_original_map_id,
+      map_id: res.rows[0].p_map_id,
       created_at: res.rows[0].p_created_at,
       created_by: res.rows[0].p_created_by,
+    };
+  }
+
+  /**
+   * dbPoolClient is optional. If providerd, then it will be used to run query (useful for SQL transactions)
+   * if not - then new client will be get from pg.pool
+   */
+  async saveTranslatedMap({
+    original_map_id,
+    fileBody,
+    dbPoolClient,
+    token,
+    t_language_code,
+    t_dialect_code,
+    t_geo_code,
+  }: ISaveTranslatedMapParams): Promise<ISaveTranslatedMapRes | null> {
+    const poolClient = dbPoolClient
+      ? dbPoolClient // use given pool client
+      : this.pg.pool; //some `random` client from pool will be used
+
+    const userQ = await poolClient.query(
+      `select user_id from tokens where token = $1`,
+      [token],
+    );
+    const userId = userQ.rows[0].user_id;
+    if (!userId) throw new Error('not Authorized');
+
+    const params = [original_map_id, fileBody, userId, t_language_code];
+    params.push(t_dialect_code ? t_dialect_code : null);
+    params.push(t_geo_code ? t_geo_code : null);
+    const sqlStr = `
+      insert into
+        translated_maps(
+          original_map_id,
+          content,
+          created_by,
+          language_code,
+          dialect_code,
+          geo_code
+        )
+        values
+        (
+          $1,
+          $2,
+          $3,
+          $4,
+          $5,
+          $6
+        )
+        on conflict(original_map_id, language_code, dialect_code, geo_code) do update
+          set content = EXCLUDED.content
+        returning 
+          translated_map_id, created_by, created_at
+      `;
+    const res = await poolClient.query(sqlStr, params);
+
+    return {
+      map_id: res.rows[0].translated_map_id,
+      created_at: res.rows[0].created_at,
+      created_by: res.rows[0].created_by,
     };
   }
 
@@ -261,5 +335,43 @@ export class MapsRepository {
     return {
       origMapWords: words,
     };
+  }
+
+  async getOrigMapIdsByWordDefinition(
+    wordDefinitionId: string,
+  ): Promise<string[]> {
+    const params = [wordDefinitionId];
+    const sqlStr = `
+      select distinct 
+        om.original_map_id
+      from
+        original_maps om
+      left join original_map_words omw on
+        om.original_map_id = omw.original_map_id
+      left join words w on
+        omw.word_id = w.word_id 
+      left join word_definitions wd on w.word_id = wd.word_id 
+      where wd.word_definition_id  = $1
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    return resQ.rows.map((row) => row.original_map_id);
+  }
+
+  async upsertTranslatedMapWord(
+    translated_map_id,
+    original_word_id,
+    translated_word_id,
+  ): Promise<string> {
+    const params = [translated_map_id, original_word_id, translated_word_id];
+    const sqlStr = `
+      insert into translated_map_words(translated_map_id, original_word_id, translated_word_id)
+      values($1, $2, $3)
+      on conflict (translated_map_id, original_word_id) do update set original_word_id = excluded.original_word_id
+      on conflict (translated_word_id, original_word_id) do update set original_word_id = excluded.original_word_id
+      returning translated_map_word_id
+    `;
+
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    return resQ.rows[0].translated_map_word_id;
   }
 }

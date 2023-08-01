@@ -135,9 +135,11 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
           ref={newTrRef}
         />
         <IonInput
-          label="Description"
+          label="Definition"
           labelPlacement="floating"
           ref={newDefinitionRef}
+          value="Geographical place"
+          disabled
         />
         <StButton onClick={() => handleNewTranslation()}>Submit</StButton>
       </StNewTranslationDiv>

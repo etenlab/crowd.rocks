@@ -10,20 +10,30 @@ import {
   OriginalMapWordInput,
 } from './types';
 import { type INode } from 'svgson';
-import { parseSync as readSvg } from 'svgson';
+import { parseSync as readSvg, stringify } from 'svgson';
 import { WordsService } from '../words/words.service';
 import { MapsRepository } from './maps.repository';
-import { Word, WordUpsertInput } from '../words/types';
-import { ErrorType, GenericOutput, LanguageInfo } from '../../common/types';
+import {
+  WordTranslations,
+  WordUpsertInput,
+  WordWithVotes,
+} from '../words/types';
+import { GenericOutput, LanguageInfo } from '../../common/types';
 import { DEFAULT_NEW_MAP_LANGUAGE } from '../../common/const';
 import { PostgresService } from '../../core/postgres.service';
-import { DefinitionsService } from '../definitions/definitions.service';
 import { WordDefinitionsService } from '../definitions/word-definitions.service';
 import { PoolClient } from 'pg';
+import { WordToWordTranslationsService } from '../translations/word-to-word-translations.service';
 
-const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
+// const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
+const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
 const DEFAULT_MAP_WORD_DEFINITION = 'Geographical place';
+
+export type MapTranslationResult = {
+  translatedMap: string;
+  translations: Array<{ source: string; translation: string }>;
+};
 
 interface parseAndSaveNewMapParams {
   readStream: ReadStream;
@@ -38,6 +48,7 @@ export class MapsService {
     private mapsRepository: MapsRepository,
     private wordsService: WordsService,
     private wordDefinitionsService: WordDefinitionsService,
+    private wordToWordTranslationsService: WordToWordTranslationsService,
   ) {}
 
   async parseAndSaveNewMap({
@@ -64,7 +75,7 @@ export class MapsService {
       const savedWordIds: string[] = [];
       const savedDefinitionIds: string[] = [];
 
-      const { map_file_name, original_map_id, created_at, created_by } =
+      const { map_file_name, map_id, created_at, created_by } =
         await this.mapsRepository.saveOriginalMap({
           mapFileName,
           fileBody,
@@ -107,7 +118,7 @@ export class MapsService {
         savedDefinitionIds.push(savedDefinition.word_definition_id);
 
         const savedOrginalMapWord = await this.saveOriginalMapWordInTrn(
-          { word_id: savedWord.word_id, original_map_id },
+          { word_id: savedWord.word_id, original_map_id: map_id },
           dbPoolClient,
         );
       }
@@ -118,7 +129,7 @@ export class MapsService {
 
       return {
         map_file_name,
-        original_map_id,
+        original_map_id: map_id,
         created_at,
         created_by,
       };
@@ -180,18 +191,6 @@ export class MapsService {
     };
   }
 
-  iterateOverINode(
-    node: INode,
-    skipNodeNames: string[],
-    cb: (node: INode) => void,
-  ) {
-    if (skipNodeNames.includes(node.name)) return;
-    cb(node);
-    for (const child of node.children || []) {
-      this.iterateOverINode(child, skipNodeNames, cb);
-    }
-  }
-
   async saveOriginalMapWordInTrn(
     input: OriginalMapWordInput,
     dbPoolClient: PoolClient,
@@ -208,4 +207,122 @@ export class MapsService {
       langRestrictions,
     );
   }
+
+  async translateMapsWithWordDefinitionId(
+    wordDefinitionId: string,
+    token: string,
+  ): Promise<void> {
+    const origMapIds = await this.mapsRepository.getOrigMapIdsByWordDefinition(
+      wordDefinitionId,
+    );
+
+    for (const origMapId of origMapIds) {
+      const translatedMapId = await this.translateMapAndSave(
+        origMapId,
+        // langParams[0].t_language_code,
+        // langParams[0].t_dialect_code,
+        // langParams[0].t_geo_code,
+        token,
+      );
+    }
+  }
+
+  async translateMapAndSave(
+    origMapId,
+    // t_language_code,
+    // t_dialect_code,
+    // t_geo_code,
+    token,
+  ): Promise<string> {
+    const { content: origMapContentStr } =
+      await this.mapsRepository.getOrigMapContent(origMapId);
+
+    const { origMapWords } = await this.getOrigMapWords({
+      original_map_id: origMapId,
+    });
+
+    todo: to generate translated maps we must know target languages
+    which we must gather from translated words.
+
+    const wordsByLangs = this.sortWordsByTargetlangs(origMapWords);
+
+    const translations: Array<{
+      source: string;
+      translation: string;
+    }> = [];
+    for (const origWordTranslations of origMapWords) {
+      const origWordTranslated =
+        this.wordToWordTranslationsService.chooseBestTranslation(
+          origWordTranslations,
+        );
+      translations.push({
+        source: origWordTranslations.word,
+        translation: origWordTranslated.word || origWordTranslations.word,
+      });
+    }
+
+    const { translatedMap } = await this.translateMapString(
+      origMapContentStr,
+      translations,
+    );
+
+    const { map_id: translatedMapId } =
+      await this.mapsRepository.saveTranslatedMap({
+        original_map_id: origMapId,
+        fileBody: translatedMap,
+        token,
+        t_language_code,
+        t_dialect_code,
+        t_geo_code,
+      });
+
+    console.log('translations', translations);
+    console.log('translated_map_id', translatedMapId);
+    return translatedMapId;
+  }
+
+  translateMapString(
+    sourceSvgString: string,
+    translations: Array<{
+      source: string;
+      translation: string;
+    }>,
+  ): MapTranslationResult | undefined {
+    const { transformedSvgINode } = this.parseSvgMapString(sourceSvgString);
+    this.replaceINodeTagValues(transformedSvgINode, translations);
+    const translatedMap = stringify(transformedSvgINode);
+    return { translatedMap, translations };
+  }
+
+  /**
+   * Mutetes INode sturcture - replaces subnodes' values using provided valuesToReplace
+   * @param iNodeStructure INode structure to replace values inside it.
+   * @param valuesToReplace
+   */
+  replaceINodeTagValues(
+    iNodeStructure: INode,
+    valuesToReplace: { source: string; translation: string }[],
+  ): void {
+    this.iterateOverINode(iNodeStructure, SKIP_INODE_NAMES, (node) => {
+      const idx = valuesToReplace.findIndex(
+        ({ source }) => source === node.value,
+      );
+      if (idx < 0) return;
+      node.value = valuesToReplace[idx].translation;
+    });
+  }
+
+  iterateOverINode(
+    node: INode,
+    skipNodeNames: string[],
+    cb: (node: INode) => void,
+  ) {
+    if (skipNodeNames.includes(node.name)) return;
+    cb(node);
+    for (const child of node.children || []) {
+      this.iterateOverINode(child, skipNodeNames, cb);
+    }
+  }
+
+  sortWordsByTargetlangs(words: WordTranslations[]): Array<{ langTag: Word }> {}
 }

@@ -23,6 +23,7 @@ import {
   WordTrVoteStatusInput,
 } from './types';
 import { AuthenticationService } from '../authentication/authentication.service';
+import { MapsService } from '../maps/maps.service';
 
 @Injectable()
 @Resolver()
@@ -32,6 +33,7 @@ export class TranslationsResolver {
     private wordToPhraseTranslationService: WordToPhraseTranslationsService,
     private phraseToPhraseTranslationService: PhraseToPhraseTranslationsService,
     private authenticationService: AuthenticationService,
+    private mapsService: MapsService,
   ) {}
 
   @Query(() => WordToWordTranslationReadOutput)
@@ -127,12 +129,20 @@ export class TranslationsResolver {
     // const token = getBearer(req);
     const token = await this.authenticationService.getAdminToken();
 
-    return this.wordToWordTranslationService.addWordAsTranslationForWord(
+    const newWordTr =
+      this.wordToWordTranslationService.addWordAsTranslationForWord(
+        input.originalDefinitionId,
+        input.translationWord,
+        input.translationDefinition,
+        token,
+      );
+
+    this.mapsService.translateMapsWithWordDefinitionId(
       input.originalDefinitionId,
-      input.translationWord,
-      input.translationDefinition,
       token,
-    );
+    ); // let it be synchronuos intentionally, lets see if any race conditions will appear...
+
+    return newWordTr;
   }
 
   @Mutation(() => WordTrVoteStatusOutputRow)
@@ -144,11 +154,15 @@ export class TranslationsResolver {
     // const token = getBearer(req);
     const token = await this.authenticationService.getAdminToken();
 
-    const res = await this.wordToWordTranslationService.toggleVoteStatus(
-      input.word_to_word_translation_id,
-      input.vote,
-      token,
-    );
-    return res;
+    const wordVoteStatus =
+      await this.wordToWordTranslationService.toggleVoteStatus(
+        input.word_to_word_translation_id,
+        input.vote,
+        token,
+      );
+
+    // mapsService.reCheckBestWordsTr(input.word_to_word_translation_id); // let it be synchronuos intentionally, lets see if any race conditions will appear...
+
+    return wordVoteStatus;
   }
 }
