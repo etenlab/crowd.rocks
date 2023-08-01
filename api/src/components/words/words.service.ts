@@ -12,7 +12,6 @@ import {
   WordUpsertProcedureOutputRow,
 } from './sql-string';
 import { PoolClient } from 'pg';
-
 @Injectable()
 export class WordsService {
   constructor(private pg: PostgresService) {}

@@ -8,6 +8,7 @@ import {
   AddWordAsTranslationForWordOutput,
   WordToWordTranslationReadOutput,
   WordToWordTranslationUpsertOutput,
+  WordTrVoteStatusOutputRow,
 } from './types';
 
 import {
@@ -19,6 +20,7 @@ import {
 import { WordsService } from '../words/words.service';
 import { WordUpsertInput } from '../words/types';
 import { PoolClient } from 'pg';
+import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 
 @Injectable()
 export class WordToWordTranslationsService {
@@ -26,6 +28,7 @@ export class WordToWordTranslationsService {
     private pg: PostgresService,
     private wordDefinitionService: WordDefinitionsService,
     private wordsService: WordsService,
+    private wordToWordTranslationRepository: WordToWordTranslationRepository,
   ) {}
 
   async read(id: number): Promise<WordToWordTranslationReadOutput> {
@@ -216,4 +219,34 @@ export class WordToWordTranslationsService {
       dbPoolClient.release();
     }
   };
+
+  async toggleVoteStatus(
+    word_to_word_translation_id: string,
+    vote: boolean,
+    token: string,
+  ): Promise<WordTrVoteStatusOutputRow> {
+    const { word_to_word_translation_vote_id, error: error } =
+      await this.wordToWordTranslationRepository.toggleVoteStatus({
+        word_to_word_translation_id,
+        vote,
+        token,
+      });
+    if (error !== ErrorType.NoError || !word_to_word_translation_vote_id) {
+      throw new Error('Error with voting');
+    }
+
+    const res = await this.wordToWordTranslationRepository.getVotesStatus(
+      word_to_word_translation_id,
+    );
+
+    return {
+      vote_status: {
+        upvotes: res.vote_status.upvotes,
+        downvotes: res.vote_status.downvotes,
+        word_to_word_translation_id:
+          res.vote_status.word_to_word_translation_id,
+      },
+      error,
+    };
+  }
 }

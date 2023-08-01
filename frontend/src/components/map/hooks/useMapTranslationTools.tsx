@@ -3,6 +3,8 @@ import { useCallback } from 'react';
 import {
   GetOrigMapContentOutput,
   GetOrigMapsListOutput,
+  WordTranslations,
+  WordWithVotes,
 } from '../../../generated/graphql';
 
 export const UPLOAD_FILE_MUTATION = gql`
@@ -121,9 +123,34 @@ export function useMapTranslationTools() {
     [apolloClient],
   );
 
+  const chooseBestTranslation = useCallback(
+    (wordTranslated: WordTranslations) => {
+      const res = wordTranslated?.translations?.reduce((bestTr, currTr) => {
+        if (bestTr?.up_votes === undefined) {
+          return currTr;
+        }
+
+        const bestTrTotal =
+          Number(bestTr?.up_votes || 0) - Number(bestTr?.down_votes || 0);
+
+        const currTrTotal =
+          Number(currTr?.up_votes || 0) - Number(currTr?.down_votes || 0);
+
+        if (currTrTotal > bestTrTotal) {
+          return currTr;
+        }
+
+        return bestTr;
+      }, {} as WordWithVotes);
+      return res;
+    },
+    [],
+  );
+
   return {
     sendMapFile,
     getOriginalMaps,
     getOrigMapContent,
+    chooseBestTranslation,
   };
 }

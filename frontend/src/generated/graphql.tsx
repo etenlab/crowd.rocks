@@ -249,6 +249,7 @@ export type Mutation = {
   siteTextWordDefinitionUpsert: SiteTextWordDefinitionUpsertOutput;
   togglePhraseVoteStatus: PhraseVoteStatusOutputRow;
   toggleVoteStatus: VoteStatusOutputRow;
+  toggleWordTrVoteStatus: WordTrVoteStatusOutputRow;
   toggleWordVoteStatus: WordVoteStatusOutputRow;
   updateDefinition: PhraseDefinitionUpsertOutput;
   upsertFromTranslationlikeString: SiteTextTranslationUpsertOutput;
@@ -383,11 +384,14 @@ export type MutationToggleVoteStatusArgs = {
 };
 
 
+export type MutationToggleWordTrVoteStatusArgs = {
+  input: WordTrVoteStatusInput;
+};
+
 export type MutationToggleWordVoteStatusArgs = {
   vote: Scalars['Boolean']['input'];
   word_id: Scalars['ID']['input'];
 };
-
 
 export type MutationUpdateDefinitionArgs = {
   input: DefinitionUpdateaInput;
@@ -1178,6 +1182,24 @@ export type WordToWordTranslationUpsertOutput = {
   word_to_word_translation?: Maybe<WordToWordTranslation>;
 };
 
+export type WordTrVoteStatus = {
+  __typename?: 'WordTrVoteStatus';
+  downvotes: Scalars['Int']['output'];
+  upvotes: Scalars['Int']['output'];
+  word_to_word_translation_id: Scalars['String']['output'];
+};
+
+export type WordTrVoteStatusInput = {
+  vote: Scalars['Boolean']['input'];
+  word_to_word_translation_id: Scalars['ID']['input'];
+};
+
+export type WordTrVoteStatusOutputRow = {
+  __typename?: 'WordTrVoteStatusOutputRow';
+  error: ErrorType;
+  vote_status?: Maybe<WordTrVoteStatus>;
+};
+
 export type WordTranslations = {
   __typename?: 'WordTranslations';
   definition?: Maybe<Scalars['String']['output']>;
@@ -1244,6 +1266,7 @@ export type WordWithVotes = {
   down_votes: Scalars['String']['output'];
   geo_code?: Maybe<Scalars['String']['output']>;
   language_code: Scalars['String']['output'];
+  translation_id: Scalars['String']['output'];
   up_votes: Scalars['String']['output'];
   word: Scalars['String']['output'];
   word_id: Scalars['ID']['output'];
@@ -1306,16 +1329,7 @@ export type GetOrigMapWordsQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'WordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'WordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string }> | null }> } };
-
-export type AddWordAsTranslationForWordMutationVariables = Exact<{
-  originalDefinitionId: Scalars['String']['input'];
-  translationDefinition: Scalars['String']['input'];
-  translationWord: WordUpsertInput;
-}>;
-
-
-export type AddWordAsTranslationForWordMutation = { __typename?: 'Mutation', addWordAsTranslationForWord: { __typename?: 'AddWordAsTranslationForWordOutput', wordTranslationId: string, error: ErrorType } };
+export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'WordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'WordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
 
 export type VersionFieldsFragment = { __typename?: 'Version', version_id: string, post_id: number, created_at: string, license_title: string, content: string };
 
@@ -1441,6 +1455,23 @@ export type GetFileUploadUrlQueryVariables = Exact<{
 
 
 export type GetFileUploadUrlQuery = { __typename?: 'Query', fileUploadUrlRequest: { __typename?: 'FileUploadUrlResponse', error: ErrorType, url: string, avatar_image_url: string } };
+
+export type ToggleWordTranslationVoteStatusMutationVariables = Exact<{
+  word_to_word_translation_id: Scalars['ID']['input'];
+  vote: Scalars['Boolean']['input'];
+}>;
+
+
+export type ToggleWordTranslationVoteStatusMutation = { __typename?: 'Mutation', toggleWordTrVoteStatus: { __typename?: 'WordTrVoteStatusOutputRow', error: ErrorType, vote_status?: { __typename?: 'WordTrVoteStatus', upvotes: number, downvotes: number, word_to_word_translation_id: string } | null } };
+
+export type AddWordAsTranslationForWordMutationVariables = Exact<{
+  originalDefinitionId: Scalars['String']['input'];
+  translationDefinition: Scalars['String']['input'];
+  translationWord: WordUpsertInput;
+}>;
+
+
+export type AddWordAsTranslationForWordMutation = { __typename?: 'Mutation', addWordAsTranslationForWord: { __typename?: 'AddWordAsTranslationForWordOutput', wordTranslationId: string, error: ErrorType } };
 
 export const SessionFieldsFragmentDoc = gql`
     fragment SessionFields on Session {
@@ -1798,6 +1829,7 @@ export const GetOrigMapWordsDocument = gql`
         definition_id
         up_votes
         down_votes
+        translation_id
       }
     }
   }
@@ -1835,44 +1867,6 @@ export function useGetOrigMapWordsLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type GetOrigMapWordsQueryHookResult = ReturnType<typeof useGetOrigMapWordsQuery>;
 export type GetOrigMapWordsLazyQueryHookResult = ReturnType<typeof useGetOrigMapWordsLazyQuery>;
 export type GetOrigMapWordsQueryResult = Apollo.QueryResult<GetOrigMapWordsQuery, GetOrigMapWordsQueryVariables>;
-export const AddWordAsTranslationForWordDocument = gql`
-    mutation AddWordAsTranslationForWord($originalDefinitionId: String!, $translationDefinition: String!, $translationWord: WordUpsertInput!) {
-  addWordAsTranslationForWord(
-    input: {originalDefinitionId: $originalDefinitionId, translationDefinition: $translationDefinition, translationWord: $translationWord}
-  ) {
-    wordTranslationId
-    error
-  }
-}
-    `;
-export type AddWordAsTranslationForWordMutationFn = Apollo.MutationFunction<AddWordAsTranslationForWordMutation, AddWordAsTranslationForWordMutationVariables>;
-
-/**
- * __useAddWordAsTranslationForWordMutation__
- *
- * To run a mutation, you first call `useAddWordAsTranslationForWordMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useAddWordAsTranslationForWordMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [addWordAsTranslationForWordMutation, { data, loading, error }] = useAddWordAsTranslationForWordMutation({
- *   variables: {
- *      originalDefinitionId: // value for 'originalDefinitionId'
- *      translationDefinition: // value for 'translationDefinition'
- *      translationWord: // value for 'translationWord'
- *   },
- * });
- */
-export function useAddWordAsTranslationForWordMutation(baseOptions?: Apollo.MutationHookOptions<AddWordAsTranslationForWordMutation, AddWordAsTranslationForWordMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<AddWordAsTranslationForWordMutation, AddWordAsTranslationForWordMutationVariables>(AddWordAsTranslationForWordDocument, options);
-      }
-export type AddWordAsTranslationForWordMutationHookResult = ReturnType<typeof useAddWordAsTranslationForWordMutation>;
-export type AddWordAsTranslationForWordMutationResult = Apollo.MutationResult<AddWordAsTranslationForWordMutation>;
-export type AddWordAsTranslationForWordMutationOptions = Apollo.BaseMutationOptions<AddWordAsTranslationForWordMutation, AddWordAsTranslationForWordMutationVariables>;
 export const PostCreateDocument = gql`
     mutation PostCreate($content: String!, $parentId: Int) {
   postCreateResolver(input: {content: $content, parent_id: $parentId}) {
@@ -2389,6 +2383,85 @@ export function useGetFileUploadUrlLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type GetFileUploadUrlQueryHookResult = ReturnType<typeof useGetFileUploadUrlQuery>;
 export type GetFileUploadUrlLazyQueryHookResult = ReturnType<typeof useGetFileUploadUrlLazyQuery>;
 export type GetFileUploadUrlQueryResult = Apollo.QueryResult<GetFileUploadUrlQuery, GetFileUploadUrlQueryVariables>;
+export const ToggleWordTranslationVoteStatusDocument = gql`
+    mutation ToggleWordTranslationVoteStatus($word_to_word_translation_id: ID!, $vote: Boolean!) {
+  toggleWordTrVoteStatus(
+    input: {word_to_word_translation_id: $word_to_word_translation_id, vote: $vote}
+  ) {
+    vote_status {
+      upvotes
+      downvotes
+      word_to_word_translation_id
+    }
+    error
+  }
+}
+    `;
+export type ToggleWordTranslationVoteStatusMutationFn = Apollo.MutationFunction<ToggleWordTranslationVoteStatusMutation, ToggleWordTranslationVoteStatusMutationVariables>;
+
+/**
+ * __useToggleWordTranslationVoteStatusMutation__
+ *
+ * To run a mutation, you first call `useToggleWordTranslationVoteStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useToggleWordTranslationVoteStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [toggleWordTranslationVoteStatusMutation, { data, loading, error }] = useToggleWordTranslationVoteStatusMutation({
+ *   variables: {
+ *      word_to_word_translation_id: // value for 'word_to_word_translation_id'
+ *      vote: // value for 'vote'
+ *   },
+ * });
+ */
+export function useToggleWordTranslationVoteStatusMutation(baseOptions?: Apollo.MutationHookOptions<ToggleWordTranslationVoteStatusMutation, ToggleWordTranslationVoteStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ToggleWordTranslationVoteStatusMutation, ToggleWordTranslationVoteStatusMutationVariables>(ToggleWordTranslationVoteStatusDocument, options);
+      }
+export type ToggleWordTranslationVoteStatusMutationHookResult = ReturnType<typeof useToggleWordTranslationVoteStatusMutation>;
+export type ToggleWordTranslationVoteStatusMutationResult = Apollo.MutationResult<ToggleWordTranslationVoteStatusMutation>;
+export type ToggleWordTranslationVoteStatusMutationOptions = Apollo.BaseMutationOptions<ToggleWordTranslationVoteStatusMutation, ToggleWordTranslationVoteStatusMutationVariables>;
+export const AddWordAsTranslationForWordDocument = gql`
+    mutation AddWordAsTranslationForWord($originalDefinitionId: String!, $translationDefinition: String!, $translationWord: WordUpsertInput!) {
+  addWordAsTranslationForWord(
+    input: {originalDefinitionId: $originalDefinitionId, translationDefinition: $translationDefinition, translationWord: $translationWord}
+  ) {
+    wordTranslationId
+    error
+  }
+}
+    `;
+export type AddWordAsTranslationForWordMutationFn = Apollo.MutationFunction<AddWordAsTranslationForWordMutation, AddWordAsTranslationForWordMutationVariables>;
+
+/**
+ * __useAddWordAsTranslationForWordMutation__
+ *
+ * To run a mutation, you first call `useAddWordAsTranslationForWordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddWordAsTranslationForWordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addWordAsTranslationForWordMutation, { data, loading, error }] = useAddWordAsTranslationForWordMutation({
+ *   variables: {
+ *      originalDefinitionId: // value for 'originalDefinitionId'
+ *      translationDefinition: // value for 'translationDefinition'
+ *      translationWord: // value for 'translationWord'
+ *   },
+ * });
+ */
+export function useAddWordAsTranslationForWordMutation(baseOptions?: Apollo.MutationHookOptions<AddWordAsTranslationForWordMutation, AddWordAsTranslationForWordMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddWordAsTranslationForWordMutation, AddWordAsTranslationForWordMutationVariables>(AddWordAsTranslationForWordDocument, options);
+      }
+export type AddWordAsTranslationForWordMutationHookResult = ReturnType<typeof useAddWordAsTranslationForWordMutation>;
+export type AddWordAsTranslationForWordMutationResult = Apollo.MutationResult<AddWordAsTranslationForWordMutation>;
+export type AddWordAsTranslationForWordMutationOptions = Apollo.BaseMutationOptions<AddWordAsTranslationForWordMutation, AddWordAsTranslationForWordMutationVariables>;
 
       export interface PossibleTypesResultData {
         possibleTypes: {
@@ -2424,12 +2497,13 @@ export const namedOperations = {
     ResetEmailRequest: 'ResetEmailRequest',
     PasswordResetFormRequest: 'PasswordResetFormRequest',
     EmailResponse: 'EmailResponse',
-    AddWordAsTranslationForWord: 'AddWordAsTranslationForWord',
     PostCreate: 'PostCreate',
     VersionCreate: 'VersionCreate',
     UpsertTranslation: 'UpsertTranslation',
     ToggleVoteStatus: 'ToggleVoteStatus',
-    AvatarUpdate: 'AvatarUpdate'
+    AvatarUpdate: 'AvatarUpdate',
+    ToggleWordTranslationVoteStatus: 'ToggleWordTranslationVoteStatus',
+    AddWordAsTranslationForWord: 'AddWordAsTranslationForWord'
   },
   Fragment: {
     SessionFields: 'SessionFields',

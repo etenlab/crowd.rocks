@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PoolClient } from 'pg';
 import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
-import { WordTranslations } from '../words/types';
+import { WordTranslations, WordWithVotes } from '../words/types';
 import {
   GetOrigMapContentOutput,
   GetOrigMapsListOutput,
@@ -56,10 +56,6 @@ export class MapsRepository {
           call original_map_create($1,$2,$3, null,null,null,null)
         `,
       [mapFileName, fileBody, token],
-    );
-    console.log(
-      'sql stored proc message: ',
-      JSON.stringify(res.rows[0].p_error_type),
     );
 
     return {
@@ -156,8 +152,13 @@ export class MapsRepository {
       tLanguageRestrictionClause += ` and tw.geo_code =  $${params.length} `;
     }
 
+    // note that 'disctinct' because of same word can be at several original maps.
+    // For now, we don't care in which map the word is present, so don't select omw.original_map_id.
+    // But without 'distinct' clause this query will return row for each combination word-original map
+    // but we don't want it yet.
+
     let sqlStr = `
-      select
+      select distinct
         w.word_id,
         ws.wordlike_string as word,
         owd.definition as o_definition,
@@ -166,6 +167,7 @@ export class MapsRepository {
         w.dialect_code as o_dialect_code,
         w.geo_code as o_geo_code,
         wtwt.to_word_definition_id,
+        wtwt.word_to_word_translation_id,
         twd.definition as t_definition,
         twd.word_definition_id as t_definition_id,
         tws.wordlike_string as t_wordlike_string,
@@ -217,7 +219,7 @@ export class MapsRepository {
 
     const words: WordTranslations[] = resQ.rows.reduce(
       (words: WordTranslations[], r) => {
-        const currTranslation = {
+        const currTranslation: WordWithVotes = {
           word_id: r.t_word_id,
           word: r.t_wordlike_string,
           definition: r.t_definition,
@@ -227,6 +229,7 @@ export class MapsRepository {
           geo_code: r.t_geo_code,
           up_votes: r.up_votes_count || 0,
           down_votes: r.down_votes_count || 0,
+          translation_id: r.word_to_word_translation_id,
         };
 
         const existingWordIdx = words.findIndex(

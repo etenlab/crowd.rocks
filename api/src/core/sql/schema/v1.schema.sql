@@ -239,7 +239,8 @@ create table word_definitions(
   word_id bigint not null references words(word_id),
   definition text not null,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (word_id, definition)
 );
 
 -- tags

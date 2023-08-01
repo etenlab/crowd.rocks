@@ -32,24 +32,8 @@ query GetOrigMapWords(
         definition_id
         up_votes
         down_votes
+        translation_id
       }
     }
-  }
-}
-
-mutation AddWordAsTranslationForWord(
-  $originalDefinitionId: String!
-  $translationDefinition: String!
-  $translationWord: WordUpsertInput!
-) {
-  addWordAsTranslationForWord(
-    input: {
-      originalDefinitionId: $originalDefinitionId
-      translationDefinition: $translationDefinition
-      translationWord: $translationWord
-    }
-  ) {
-    wordTranslationId
-    error
   }
 }

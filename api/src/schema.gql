@@ -221,6 +221,7 @@ type Mutation {
   siteTextWordDefinitionUpsert(input: SiteTextWordDefinitionUpsertInput!): SiteTextWordDefinitionUpsertOutput!
   togglePhraseVoteStatus(phrase_id: ID!, vote: Boolean!): PhraseVoteStatusOutputRow!
   toggleVoteStatus(site_text_translation_id: String!, vote: Boolean!): VoteStatusOutputRow!
+  toggleWordTrVoteStatus(input: WordTrVoteStatusInput!): WordTrVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
   upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): SiteTextTranslationUpsertOutput!
@@ -755,6 +756,22 @@ type WordToWordTranslationUpsertOutput {
   word_to_word_translation: WordToWordTranslation
 }
 
+type WordTrVoteStatus {
+  downvotes: Int!
+  upvotes: Int!
+  word_to_word_translation_id: String!
+}
+
+input WordTrVoteStatusInput {
+  vote: Boolean!
+  word_to_word_translation_id: ID!
+}
+
+type WordTrVoteStatusOutputRow {
+  error: ErrorType!
+  vote_status: WordTrVoteStatus
+}
+
 type WordTranslations {
   definition: String
   definition_id: String
@@ -814,6 +831,7 @@ type WordWithVotes {
   down_votes: String!
   geo_code: String
   language_code: String!
+  translation_id: String!
   up_votes: String!
   word: String!
   word_id: ID!

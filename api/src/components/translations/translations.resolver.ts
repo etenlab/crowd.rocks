@@ -19,6 +19,8 @@ import {
   PhraseToPhraseTranslationUpsertInput,
   AddWordAsTranslationForWordOutput,
   AddWordAsTranslationForWordInput,
+  WordTrVoteStatusOutputRow,
+  WordTrVoteStatusInput,
 } from './types';
 import { AuthenticationService } from '../authentication/authentication.service';
 
@@ -119,6 +121,7 @@ export class TranslationsResolver {
   @Mutation(() => AddWordAsTranslationForWordOutput)
   async addWordAsTranslationForWord(
     @Args('input') input: AddWordAsTranslationForWordInput,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Context() req: any,
   ): Promise<AddWordAsTranslationForWordOutput> {
     // const token = getBearer(req);
@@ -130,5 +133,22 @@ export class TranslationsResolver {
       input.translationDefinition,
       token,
     );
+  }
+
+  @Mutation(() => WordTrVoteStatusOutputRow)
+  async toggleWordTrVoteStatus(
+    @Args('input') input: WordTrVoteStatusInput,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Context() req: any,
+  ): Promise<WordTrVoteStatusOutputRow> {
+    // const token = getBearer(req);
+    const token = await this.authenticationService.getAdminToken();
+
+    const res = await this.wordToWordTranslationService.toggleVoteStatus(
+      input.word_to_word_translation_id,
+      input.vote,
+      token,
+    );
+    return res;
   }
 }
