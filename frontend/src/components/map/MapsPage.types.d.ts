@@ -1,13 +1,16 @@
-type TMap = TLangCodes & {
-  id: number;
+type TMap = {
+  id: string;
   name: string;
-  createdAt: Date;
-  createdByUserId?: number;
+  createdAt: string;
+  createdByUserId?: string;
+  languageCode: string;
+  dialectCode?: string;
+  geoCode?: string;
 };
 
 type TMapWithContent = TMap & {
   content: string;
 };
 
-type TMapList = TMap[];
+type TMapsList = TMap[];
 type TMapWithContentList = TMapWithContent[];

@@ -1,8 +1,8 @@
 import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { useEffect, useState } from 'react';
-import { mockMapWithContentList } from '../mocks/mapData.mock';
 import styled from 'styled-components';
+import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 
 interface MapDetailsProps
   extends RouteComponentProps<{
@@ -16,8 +16,10 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
     TMapWithContent | undefined
   >();
 
+  const { getOrigMapContent } = useMapTranslationTools();
+
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const mapId = Number(match.params.id);
+  const mapId = match.params.id;
 
   useEffect(() => {
     function handleWindowResize() {
@@ -30,14 +32,12 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   }, []);
 
   useEffect(() => {
-    const getMap = async (_mapId: number) => {
-      const map = mockMapWithContentList.find((m) => m.id === _mapId);
+    const getMap = async (_mapId: string) => {
+      const map = await getOrigMapContent(_mapId);
       setCurrentMapWithContent(map);
     };
     getMap(mapId);
-  }, [mapId]);
-
-  // if (isNaN(mapId)) return <div>Map not found</div>;
+  }, [getOrigMapContent, mapId]);
 
   return (
     <>

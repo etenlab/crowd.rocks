@@ -111,7 +111,13 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
               </IonItemDivider>
 
               <IonItem lines="none">
-                <IonCard>
+                <IonCard
+                  onClick={() => {
+                    router.push(
+                      `/${match.params.nation_id}/${match.params.language_id}/1/site-text-list`,
+                    );
+                  }}
+                >
                   <IonCardHeader>
                     <IonCardTitle>
                       <IonIcon icon={codeWorkingOutline}></IonIcon>

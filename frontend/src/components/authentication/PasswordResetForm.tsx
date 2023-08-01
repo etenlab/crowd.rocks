@@ -5,14 +5,14 @@ import {
   IonItem,
   IonLabel,
   IonPage,
-} from "@ionic/react";
-import { FormEvent, useState } from "react";
-import { RouteComponentProps, useHistory } from "react-router";
+} from '@ionic/react';
+import { FormEvent, useState } from 'react';
+import { RouteComponentProps, useHistory } from 'react-router';
 import {
   usePasswordResetFormRequestMutation,
   useResetEmailRequestMutation,
-} from "../../generated/graphql";
-import "./ResetEmailRequest.css";
+} from '../../generated/graphql';
+import './ResetEmailRequest.css';
 
 interface PasswordResetFormProps
   extends RouteComponentProps<{
@@ -23,7 +23,7 @@ interface PasswordResetFormProps
 
 const PasswordResetFormPage: React.FC<PasswordResetFormProps> = ({ match }) => {
   let history = useHistory();
-  const [password, set_password] = useState("");
+  const [password, set_password] = useState('');
   const [show_response, set_show_response] = useState(false);
 
   const [passwordResetFormMutation, { data, loading, error }] =
@@ -42,7 +42,7 @@ const PasswordResetFormPage: React.FC<PasswordResetFormProps> = ({ match }) => {
         },
       });
     } catch (e) {
-      console.error("error", e);
+      console.error('error', e);
     }
 
     const error = result?.data?.passwordResetFormResolver.error;

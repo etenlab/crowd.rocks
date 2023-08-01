@@ -2,18 +2,44 @@ import { IonList, useIonRouter } from '@ionic/react';
 import { MapItem } from './MapItem';
 import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
+import { useCallback, useEffect, useState } from 'react';
+import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 
-export type TMapListProps = {
-  mapList: TMapList | undefined;
-  onSelectMapId: (id: number) => void;
-};
-
-export const MapList = ({ mapList, onSelectMapId }: TMapListProps) => {
+export const MapList = () => {
   const router = useIonRouter();
+  const { sendMapFile } = useMapTranslationTools();
 
-  if (!mapList?.length || mapList?.length < 1) {
-    return <div> No maps found </div>;
-  }
+  const [mapList, setMapList] = useState<TMapsList>();
+  const { getOriginalMaps } = useMapTranslationTools();
+
+  const getMaps = useCallback(async () => {
+    const mapsList = await getOriginalMaps(
+      `some searchStr${Math.random() * 1000}`,
+    );
+    setMapList(mapsList);
+  }, [getOriginalMaps]);
+
+  useEffect(() => {
+    getMaps();
+  }, [getMaps]);
+
+  const handleAddMap = useCallback(
+    (file: File) => {
+      if (!file) return;
+
+      sendMapFile(
+        file,
+        async ({ id, fileName }) => {
+          console.log(`uploaded id ${id} filename ${fileName}`);
+          await getMaps();
+        },
+        (err) => {
+          console.log(`upload error  ${err}`);
+        },
+      );
+    },
+    [getMaps, sendMapFile],
+  );
 
   return (
     <>
@@ -25,19 +51,14 @@ export const MapList = ({ mapList, onSelectMapId }: TMapListProps) => {
         onTranslationsClick={() => {
           router.push(`/US/eng/1/maps/translation`);
         }}
-        onAddClick={() => {
-          alert('click on add mock');
-        }}
+        onAddClick={handleAddMap}
       />
       <IonList lines="none">
-        {mapList &&
-          mapList.map((m) => (
-            <MapItem
-              mapItem={m}
-              key={m.id}
-              onClick={() => onSelectMapId(m.id)}
-            ></MapItem>
-          ))}
+        {mapList?.length && mapList?.length > 0 ? (
+          mapList.map((m) => <MapItem mapItem={m} key={m.id}></MapItem>)
+        ) : (
+          <div> No maps found </div>
+        )}
       </IonList>
     </>
   );

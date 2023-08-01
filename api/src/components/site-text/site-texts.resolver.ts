@@ -22,7 +22,23 @@ import {
   SiteTextTranslationInput,
   SiteTextTranslationsFromInput,
   SiteTextTranslationsToInput,
+  SiteTextTranslationVoteReadOutput,
+  SiteTextTranslationVoteUpsertOutput,
+  SiteTextTranslationVoteUpsertInput,
+  SiteTextTranslationWithVoteListOutput,
+  SiteTextTranslationWithVoteOutput,
+  SiteTextDefinitionListOutput,
+  SiteTextTranslationUpsertInput,
+  VoteStatusOutputRow,
+  SiteTextLanguageListOutput,
 } from './types';
+
+import {
+  DefinitionUpdateaInput,
+  DefinitionUpdateOutput,
+} from 'src/components/definitions/types';
+
+import { SiteTextTranslationVotesService } from './site-text-translation-votes.service';
 
 @Injectable()
 @Resolver()
@@ -30,6 +46,7 @@ export class SiteTextsResolver {
   constructor(
     private siteTextService: SiteTextsService,
     private siteTextTranslationService: SiteTextTranslationsService,
+    private siteTextTranslationVoteService: SiteTextTranslationVotesService,
     private siteTextWordDefinitionService: SiteTextWordDefinitionsService,
     private siteTextPhraseDefinitionService: SiteTextPhraseDefinitionsService,
   ) {}
@@ -114,12 +131,12 @@ export class SiteTextsResolver {
 
   @Mutation(() => SiteTextTranslationUpsertOutput)
   async upsertFromTranslationlikeString(
-    fromInput: SiteTextTranslationsFromInput,
-    toInput: SiteTextTranslationsToInput,
+    @Args('fromInput') fromInput: SiteTextTranslationsFromInput,
+    @Args('toInput') toInput: SiteTextTranslationsToInput,
     @Context() req: any,
   ): Promise<SiteTextTranslationUpsertOutput> {
     console.log(
-      `site text word definition upsert resolver`,
+      `site text upsertFromTranslationlikeString resolver`,
       JSON.stringify(fromInput, null, 2),
       JSON.stringify(toInput, null, 2),
     );
@@ -129,5 +146,156 @@ export class SiteTextsResolver {
       toInput,
       getBearer(req),
     );
+  }
+
+  @Mutation(() => SiteTextTranslationUpsertOutput)
+  async upsertTranslation(
+    @Args('input') input: SiteTextTranslationUpsertInput,
+    @Context() req: any,
+  ): Promise<SiteTextTranslationUpsertOutput> {
+    console.log(
+      `site text upsertTranslation upsert resolver`,
+      JSON.stringify(input, null, 2),
+    );
+
+    return this.siteTextTranslationService.upsertTranslation(
+      input,
+      getBearer(req),
+    );
+  }
+
+  @Query(() => SiteTextTranslationVoteReadOutput)
+  async siteTextTranslationVoteRead(
+    @Args('id') id: string,
+  ): Promise<SiteTextTranslationVoteReadOutput> {
+    console.log('site text translation vote read resolver, id:', id);
+
+    return this.siteTextTranslationVoteService.read(+id);
+  }
+
+  @Query(() => SiteTextTranslationVoteReadOutput)
+  async getVoteStatus(
+    @Args('site_text_translation_id') site_text_translation_id: string,
+  ): Promise<SiteTextTranslationVoteReadOutput> {
+    console.log(
+      'site text translation getVoteStatus resolver, site_text_translation_id:',
+      site_text_translation_id,
+    );
+
+    return this.siteTextTranslationVoteService.read(+site_text_translation_id);
+  }
+
+  @Mutation(() => VoteStatusOutputRow)
+  async toggleVoteStatus(
+    @Args('site_text_translation_id') site_text_translation_id: string,
+    @Args('vote') vote: boolean,
+    @Context() req: any,
+  ): Promise<VoteStatusOutputRow> {
+    console.log('site text toggleVoteStatus resolver');
+
+    return this.siteTextTranslationVoteService.toggleVoteStatus(
+      +site_text_translation_id,
+      vote,
+      getBearer(req),
+    );
+  }
+
+  @Mutation(() => SiteTextTranslationVoteUpsertOutput)
+  async siteTextTranslationVoteUpsert(
+    @Args('input') input: SiteTextTranslationVoteUpsertInput,
+    @Context() req: any,
+  ): Promise<SiteTextTranslationVoteUpsertOutput> {
+    console.log(
+      `site text translation vote upsert resolver`,
+      JSON.stringify(input, null, 2),
+    );
+
+    return this.siteTextTranslationVoteService.upsert(input, getBearer(req));
+  }
+
+  @Query(() => SiteTextTranslationWithVoteListOutput)
+  async getAllTranslationFromSiteTextDefinitionID(
+    @Args('site_text_id') site_text_id: string,
+    @Args('site_text_type_is_word', { type: () => Boolean })
+    site_text_type_is_word,
+    @Args('language_code') language_code: string,
+    @Args('dialect_code', { nullable: true }) dialect_code: string,
+    @Args('geo_code', { nullable: true }) geo_code: string,
+  ): Promise<SiteTextTranslationWithVoteListOutput> {
+    console.log(
+      'site text translation getAllTranslationFromSiteTextDefinitionID resolver',
+    );
+
+    return this.siteTextTranslationService.getAllTranslationFromSiteTextDefinitionID(
+      +site_text_id,
+      site_text_type_is_word,
+      language_code,
+      dialect_code,
+      geo_code,
+    );
+  }
+
+  @Query(() => SiteTextTranslationWithVoteOutput)
+  async getRecommendedTranslationFromSiteTextDefinitionID(
+    @Args('site_text_id') site_text_id: string,
+    @Args('site_text_type_is_word', { type: () => Boolean })
+    site_text_type_is_word,
+    @Args('language_code') language_code: string,
+    @Args('dialect_code') dialect_code: string,
+    @Args('geo_code') geo_code: string,
+  ): Promise<SiteTextTranslationWithVoteOutput> {
+    console.log(
+      'site text translation getRecommendedTranslationFromSiteTextDefinitionID resolver',
+    );
+
+    return this.siteTextTranslationService.getRecommendedTranslationFromSiteTextDefinitionID(
+      +site_text_id,
+      site_text_type_is_word,
+      language_code,
+      dialect_code,
+      geo_code,
+    );
+  }
+
+  @Query(() => SiteTextTranslationWithVoteListOutput)
+  async getAllRecommendedTranslation(
+    @Args('language_code') language_code: string,
+    @Args('dialect_code') dialect_code: string,
+    @Args('geo_code') geo_code: string,
+  ): Promise<SiteTextTranslationWithVoteListOutput> {
+    console.log('site text translation getAllRecommendedTranslation resolver');
+
+    return this.siteTextTranslationService.getAllRecommendedTranslation(
+      language_code,
+      dialect_code,
+      geo_code,
+    );
+  }
+
+  @Mutation(() => DefinitionUpdateOutput)
+  async updateDefinition(
+    @Args('input') input: DefinitionUpdateaInput,
+    @Context() req: any,
+  ): Promise<DefinitionUpdateOutput> {
+    console.log(
+      `updateDefinition update resolver`,
+      JSON.stringify(input, null, 2),
+    );
+
+    return this.siteTextService.updateDefinition(input, getBearer(req));
+  }
+
+  @Query(() => SiteTextDefinitionListOutput)
+  async getAllSiteTextDefinitions(): Promise<SiteTextDefinitionListOutput> {
+    console.log('site text getAllSiteTextDefinitions resolver');
+
+    return this.siteTextService.getAllSiteTextDefinitions();
+  }
+
+  @Query(() => SiteTextLanguageListOutput)
+  async getAllSiteTextLanguageList(): Promise<SiteTextLanguageListOutput> {
+    console.log('site text getAllSiteTextLanguageList resolver');
+
+    return this.siteTextService.getAllSiteTextLanguageList();
   }
 }

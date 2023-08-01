@@ -91,6 +91,27 @@ export class DatabaseVersionControlService {
     await this.runSqlFile('./src/core/sql/words/phrase_upsert.sql');
     await this.runSqlFile('./src/core/sql/words/word_definition_upsert.sql');
     await this.runSqlFile('./src/core/sql/words/phrase_definition_upsert.sql');
+    await this.runSqlFile('./src/core/sql/words/phrase_definition_update.sql');
+    await this.runSqlFile('./src/core/sql/words/word_definition_update.sql');
+    await this.runSqlFile(
+      './src/core/sql/words/word-definition-vote-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/words/word-definition-vote-toggle.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/words/phrase-definition-vote-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/words/phrase-definition-vote-toggle.sql',
+    );
+    await this.runSqlFile('./src/core/sql/words/word-vote-upsert.sql');
+    await this.runSqlFile('./src/core/sql/words/word-vote-toggle.sql');
+    await this.runSqlFile('./src/core/sql/words/phrase-vote-upsert.sql');
+    await this.runSqlFile('./src/core/sql/words/phrase-vote-toggle.sql');
+
+    // map
+    await this.runSqlFile('./src/core/sql/map/original_map_create.sql');
 
     // translation
     await this.runSqlFile(
@@ -101,6 +122,14 @@ export class DatabaseVersionControlService {
     );
     await this.runSqlFile(
       './src/core/sql/translation/phrase_to_phrase_translation_upsert.sql',
+    );
+
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word_translation_votes_count.sql',
+    );
+
+    await this.runSqlFile(
+      './src/core/sql/translation/word-to-word-translation-vote-toggle.sql',
     );
 
     // data
@@ -115,6 +144,9 @@ export class DatabaseVersionControlService {
     );
     await this.runSqlFile(
       './src/core/sql/data/site-text-translation-vote-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/data/site-text-translation-vote-toggle.sql',
     );
 
     // update db version

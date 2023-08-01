@@ -17,7 +17,12 @@ import {
   PhraseToPhraseTranslationReadOutput,
   PhraseToPhraseTranslationUpsertOutput,
   PhraseToPhraseTranslationUpsertInput,
+  AddWordAsTranslationForWordOutput,
+  AddWordAsTranslationForWordInput,
+  WordTrVoteStatusOutputRow,
+  WordTrVoteStatusInput,
 } from './types';
+import { AuthenticationService } from '../authentication/authentication.service';
 
 @Injectable()
 @Resolver()
@@ -26,6 +31,7 @@ export class TranslationsResolver {
     private wordToWordTranslationService: WordToWordTranslationsService,
     private wordToPhraseTranslationService: WordToPhraseTranslationsService,
     private phraseToPhraseTranslationService: PhraseToPhraseTranslationsService,
+    private authenticationService: AuthenticationService,
   ) {}
 
   @Query(() => WordToWordTranslationReadOutput)
@@ -110,5 +116,39 @@ export class TranslationsResolver {
       +input.to_phrase_definition_id,
       getBearer(req),
     );
+  }
+
+  @Mutation(() => AddWordAsTranslationForWordOutput)
+  async addWordAsTranslationForWord(
+    @Args('input') input: AddWordAsTranslationForWordInput,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Context() req: any,
+  ): Promise<AddWordAsTranslationForWordOutput> {
+    // const token = getBearer(req);
+    const token = await this.authenticationService.getAdminToken();
+
+    return this.wordToWordTranslationService.addWordAsTranslationForWord(
+      input.originalDefinitionId,
+      input.translationWord,
+      input.translationDefinition,
+      token,
+    );
+  }
+
+  @Mutation(() => WordTrVoteStatusOutputRow)
+  async toggleWordTrVoteStatus(
+    @Args('input') input: WordTrVoteStatusInput,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Context() req: any,
+  ): Promise<WordTrVoteStatusOutputRow> {
+    // const token = getBearer(req);
+    const token = await this.authenticationService.getAdminToken();
+
+    const res = await this.wordToWordTranslationService.toggleVoteStatus(
+      input.word_to_word_translation_id,
+      input.vote,
+      token,
+    );
+    return res;
   }
 }

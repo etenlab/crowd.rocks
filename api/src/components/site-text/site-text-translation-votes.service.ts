@@ -7,6 +7,7 @@ import {
   SiteTextTranslationVoteUpsertInput,
   SiteTextTranslationVoteUpsertOutput,
   SiteTextTranslationVoteReadOutput,
+  VoteStatusOutputRow,
 } from './types';
 
 import {
@@ -14,6 +15,10 @@ import {
   callSiteTextTranslationVoteUpsertProcedure,
   GetSiteTextTranslationVoteObjectById,
   getSiteTextTranslationVoteObjById,
+  GetSiteTextTranslationVoteStatus,
+  getSiteTextTranslationVoteStatus,
+  ToggleSiteTextTranslationVoteStatus,
+  toggleSiteTextTranslationVoteStatus,
 } from './sql-string';
 
 @Injectable()
@@ -88,6 +93,84 @@ export class SiteTextTranslationVotesService {
     return {
       error: ErrorType.UnknownError,
       site_text_translation_vote: null,
+    };
+  }
+
+  async getVoteStatus(
+    site_text_translation_id: number,
+  ): Promise<VoteStatusOutputRow> {
+    try {
+      const res1 = await this.pg.pool.query<GetSiteTextTranslationVoteStatus>(
+        ...getSiteTextTranslationVoteStatus(site_text_translation_id),
+      );
+
+      if (res1.rowCount !== 1) {
+        return {
+          error: ErrorType.NoError,
+          vote_status: {
+            site_text_translation_id: site_text_translation_id + '',
+            upvotes: 0,
+            downvotes: 0,
+          },
+        };
+      } else {
+        return {
+          error: ErrorType.NoError,
+          vote_status: {
+            site_text_translation_id:
+              res1.rows[0].site_text_translation_id + '',
+            upvotes: res1.rows[0].upvotes,
+            downvotes: res1.rows[0].downvotes,
+          },
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      vote_status: null,
+    };
+  }
+
+  async toggleVoteStatus(
+    site_text_translation_id: number,
+    vote: boolean,
+    token: string,
+  ): Promise<VoteStatusOutputRow> {
+    try {
+      const res1 =
+        await this.pg.pool.query<ToggleSiteTextTranslationVoteStatus>(
+          ...toggleSiteTextTranslationVoteStatus({
+            site_text_translation_id,
+            vote,
+            token,
+          }),
+        );
+
+      const creatingError = res1.rows[0].p_error_type;
+      const site_text_translation_vote_id =
+        res1.rows[0].p_site_text_translation_vote_id;
+
+      if (
+        creatingError !== ErrorType.NoError ||
+        !site_text_translation_vote_id
+      ) {
+        return {
+          error: creatingError,
+          vote_status: null,
+        };
+      }
+
+      return this.getVoteStatus(site_text_translation_id);
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      vote_status: null,
     };
   }
 }

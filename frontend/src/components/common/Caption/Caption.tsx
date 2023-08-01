@@ -1,4 +1,4 @@
-import { IonIcon, IonText, IonTitle, useIonRouter } from '@ionic/react';
+import { IonIcon, IonText, useIonRouter } from '@ionic/react';
 import { arrowBack } from 'ionicons/icons';
 import { ReactElement } from 'react';
 import { styled } from 'styled-components';
@@ -10,33 +10,38 @@ export type TCaptionProps = {
 
 export const Caption = ({ handleBackClick, children }: TCaptionProps) => {
   const router = useIonRouter();
+
   let onClickAction: () => void;
+
   if (handleBackClick) {
     onClickAction = handleBackClick;
   } else {
     onClickAction = router.goBack;
   }
+
   return (
-    <StyledIonTitile>
+    <CaptainContainer>
       <StIonIcon
         color="black"
         icon={arrowBack}
         onClick={() => onClickAction()}
-      ></StIonIcon>
+      />
       <StIonText>{children}</StIonText>
-    </StyledIonTitile>
+    </CaptainContainer>
   );
 };
 
-const StyledIonTitile = styled(IonTitle)(() => ({
-  marginTop: '10px',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-}));
+const CaptainContainer = styled.div`
+  display: flex;
+  padding: 16px;
+  flexdirection: row;
+  justifycontent: flex-start;
+  alignitems: center;
+`;
 
 const StIonText = styled(IonText)(() => ({
   marginLeft: '10px',
+  fontWeight: '700',
 }));
 
 const StIonIcon = styled(IonIcon)(() => ({

@@ -239,7 +239,8 @@ create table word_definitions(
   word_id bigint not null references words(word_id),
   definition text not null,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (word_id, definition)
 );
 
 -- tags
@@ -572,6 +573,7 @@ create table site_text_translation_votes(
 
 create table original_maps(
   original_map_id bigserial primary key,
+  map_file_name varchar(256) unique not null,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
   content text not null
@@ -583,6 +585,7 @@ create table original_map_words(
   word_id bigint not null references words(word_id),
   updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE public.original_map_words ADD CONSTRAINT original_map_word_unq UNIQUE (word_id,original_map_id);
 
 create table translated_maps(
   translated_map_id bigserial primary key,

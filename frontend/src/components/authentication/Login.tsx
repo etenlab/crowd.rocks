@@ -6,24 +6,24 @@ import {
   IonLabel,
   IonPage,
   useIonViewWillEnter,
-} from "@ionic/react";
-import { FormEvent, useState } from "react";
-import { useHistory } from "react-router";
-import { apollo_client } from "../../main";
-import { ErrorType, useLoginMutation } from "../../generated/graphql";
-import { globals } from "../../services/globals";
-import { login_change } from "../../services/subscriptions";
-import "./Login.css";
+} from '@ionic/react';
+import { FormEvent, useState } from 'react';
+import { useHistory } from 'react-router';
+import { apollo_client } from '../../main';
+import { ErrorType, useLoginMutation } from '../../generated/graphql';
+import { globals } from '../../services/globals';
+import { login_change } from '../../services/subscriptions';
+import './Login.css';
 
 const Login: React.FC = () => {
-  let history = useHistory();
+  const history = useHistory();
 
   useIonViewWillEnter(() => {
-    document.title = "Login";
+    document.title = 'Login';
   });
 
-  const [email, set_email] = useState("");
-  const [password, set_password] = useState("");
+  const [email, set_email] = useState('');
+  const [password, set_password] = useState('');
 
   const [is_email_too_long, set_is_email_too_long] = useState(false);
   const [is_email_too_short, set_is_email_too_short] = useState(false);
@@ -32,8 +32,10 @@ const Login: React.FC = () => {
   const [is_password_too_short, set_is_password_too_short] = useState(false);
   const [is_invalid_email_or_password, set_is_invalid_email_or_password] =
     useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [is_unknown_error, set_is_unknown_error] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loginMutation, { data, loading, error }] = useLoginMutation();
 
   async function handle_submit(event: FormEvent) {
@@ -47,8 +49,9 @@ const Login: React.FC = () => {
           email,
           password,
         },
-        errorPolicy: "all",
+        errorPolicy: 'all',
       });
+      // eslint-disable-next-line no-empty
     } catch (e) {}
 
     const error = result?.data?.login.error;
@@ -61,28 +64,29 @@ const Login: React.FC = () => {
     set_is_invalid_email_or_password(false);
 
     if (error === ErrorType.NoError) {
-      set_email("");
-      set_password("");
+      set_email('');
+      set_password('');
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       const session = result?.data?.login.session!;
       globals.set_token(session.token);
       globals.set_user_id(+session.user_id);
       globals.set_avatar(session.avatar);
-      if (session.profile_url) {
-        globals.set_profile_url(session.profile_url);
+      if (session.avatar_url) {
+        globals.set_profile_url(session.avatar_url);
       }
 
       login_change.next(true);
 
-      const redirect = localStorage.getItem("login-redirect");
+      const redirect = localStorage.getItem('login-redirect');
 
       await apollo_client.clearStore();
       await apollo_client.resetStore();
 
-      if (redirect === "back") {
-        localStorage.removeItem("login-redirect");
+      if (redirect === 'back') {
+        localStorage.removeItem('login-redirect');
         history.goBack();
       } else {
-        history.push("/US/eng/1/home");
+        history.push('/US/eng/1/home');
       }
 
       return;
@@ -107,11 +111,11 @@ const Login: React.FC = () => {
   }
 
   const click_reset_password = () => {
-    history.push("/US/eng/1/reset-email-request");
+    history.push('/US/eng/1/reset-email-request');
   };
 
   const click_register = () => {
-    history.push("/US/eng/1/register");
+    history.push('/US/eng/1/register');
   };
 
   return (
@@ -170,7 +174,7 @@ const Login: React.FC = () => {
                 Reset Password
               </IonButton>
 
-              <br/>
+              <br />
 
               <IonButton
                 type="button"

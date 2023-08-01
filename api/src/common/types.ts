@@ -55,6 +55,11 @@ export enum ErrorType {
   PhraseNotFound = 'PhraseNotFound',
 
   SiteTextTranslationNotFound = 'SiteTextTranslationNotFound',
+  SiteTextWordDefinitionAlreadyExists = 'SiteTextWordDefinitionAlreadyExists',
+  SiteTextWordDefinitionNotFound = 'SiteTextWordDefinitionNotFound',
+
+  MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
+  MapInsertFailed = 'MapInsertFailed',
 
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
@@ -63,3 +68,18 @@ export enum ErrorType {
 registerEnumType(ErrorType, {
   name: 'ErrorType',
 });
+
+export interface ITagInfo {
+  tag: string | null;
+  descriptions?: Array<string>;
+}
+
+export type TLang = Omit<ITagInfo, 'tag'> & { tag: string }; // make tag mandatory for Lang tag
+export type TRegion = ITagInfo;
+export type TDialect = ITagInfo;
+
+export type LanguageInfo = {
+  lang: TLang;
+  dialect?: TDialect | undefined;
+  region?: TRegion | undefined;
+};

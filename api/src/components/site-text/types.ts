@@ -1,4 +1,4 @@
-import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, InputType, ObjectType } from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
 import {
@@ -131,12 +131,101 @@ export class SiteTextTranslationVoteUpsertInput {
 
 @ObjectType()
 export class SiteTextTranslationVoteUpsertOutput extends GenericOutput {
-  @Field(() => SiteTextTranslation, { nullable: true })
+  @Field(() => SiteTextTranslationVote, { nullable: true })
   site_text_translation_vote: SiteTextTranslationVote;
 }
 
 @ObjectType()
 export class SiteTextTranslationVoteReadOutput extends GenericOutput {
-  @Field(() => SiteTextTranslation, { nullable: true })
+  @Field(() => SiteTextTranslationVote, { nullable: true })
   site_text_translation_vote: SiteTextTranslationVote;
+}
+
+@ObjectType()
+export class VoteStatus {
+  @Field(() => String) site_text_translation_id: string;
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class VoteStatusOutputRow extends GenericOutput {
+  @Field(() => VoteStatus, { nullable: true })
+  vote_status: VoteStatus;
+}
+
+@ObjectType()
+export class SiteTextTranslationWithVote extends SiteTextTranslation {
+  @Field(() => String) created_at: string;
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class SiteTextTranslationWithVoteOutput extends GenericOutput {
+  @Field(() => SiteTextTranslationWithVote, { nullable: true })
+  site_text_translation_with_vote: SiteTextTranslationWithVote;
+}
+
+@ObjectType()
+export class SiteTextTranslationWithVoteListOutput extends GenericOutput {
+  @Field(() => [SiteTextTranslationWithVote], { nullable: 'items' })
+  site_text_translation_with_vote_list: SiteTextTranslationWithVote[];
+}
+
+@InputType()
+export class SiteTextPhraseDefinitionUpdateInput {
+  @Field(() => ID) phrase_definition_id: string;
+  @Field(() => String) definitionlike_string: string;
+}
+
+@InputType()
+export class SiteTextWordDefinitionUpdateInput {
+  @Field(() => ID) word_definition_id: string;
+  @Field(() => String) definitionlike_string: string;
+}
+
+@ObjectType()
+export class SiteTextPhraseDefinitionListOutput extends GenericOutput {
+  @Field(() => [SiteTextPhraseDefinition], { nullable: 'items' })
+  site_text_phrase_definition_list: SiteTextPhraseDefinition[];
+}
+
+@ObjectType()
+export class SiteTextWordDefinitionListOutput extends GenericOutput {
+  @Field(() => [SiteTextWordDefinition], { nullable: 'items' })
+  site_text_word_definition_list: SiteTextWordDefinition[];
+}
+
+@ObjectType()
+export class SiteTextDefinitionListOutput extends GenericOutput {
+  @Field(() => [SiteTextWordDefinition], { nullable: 'items' })
+  site_text_word_definition_list: SiteTextWordDefinition[];
+
+  @Field(() => [SiteTextPhraseDefinition], { nullable: 'items' })
+  site_text_phrase_definition_list: SiteTextPhraseDefinition[];
+}
+
+@InputType()
+export class SiteTextTranslationUpsertInput {
+  @Field(() => ID) site_text_id: string;
+  @Field(() => Boolean) is_word_definition: boolean;
+  @Field(() => String) translationlike_string: string;
+  @Field(() => String) definitionlike_string: string;
+  @Field(() => String) language_code: string;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
+}
+
+@ObjectType()
+export class SiteTextLanguage {
+  @Field(() => String) language_code: string;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
+}
+
+@ObjectType()
+export class SiteTextLanguageListOutput extends GenericOutput {
+  @Field(() => [SiteTextLanguage], { nullable: 'items' })
+  site_text_language_list: SiteTextLanguage[];
 }

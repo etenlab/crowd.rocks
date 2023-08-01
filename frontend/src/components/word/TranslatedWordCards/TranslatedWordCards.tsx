@@ -1,28 +1,38 @@
+import { WordTranslations, WordWithVotes } from '../../../generated/graphql';
+import { useMapTranslationTools } from '../../map/hooks/useMapTranslationTools';
 import { WordCard } from '../WordCard/WordCard';
-import { langInfo2tag } from '../../../common/langUtils';
 import { styled } from 'styled-components';
 
 export type TWordTranslationCardProps = {
-  wordTranslated: TWordTranslated;
-  targetLang?: LanguageInfo;
+  wordTranslated: WordTranslations;
+  routerLink?: string;
+  onClick?: () => void;
 };
 
 export const TranslatedWordCards = ({
   wordTranslated,
-  targetLang,
+  routerLink,
+  onClick,
 }: TWordTranslationCardProps) => {
-  const routerLink = `/US/eng/1/maps/word-translations/${
-    wordTranslated.word.id
-  }/${langInfo2tag(targetLang)}`;
+  const { chooseBestTranslation } = useMapTranslationTools();
+
+  const wordBestTranslation = chooseBestTranslation(wordTranslated);
 
   return (
     <StCards>
       <StCard>
-        <WordCard word={wordTranslated.word} routerLink={routerLink} />
+        <WordCard
+          word={wordTranslated.word}
+          definition={wordTranslated.definition}
+          onClick={onClick}
+          routerLink={routerLink}
+        />
       </StCard>
       <StCard>
         <WordCard
-          word={wordTranslated.translation?.word}
+          word={wordBestTranslation?.word || ''}
+          definition={wordBestTranslation?.definition || ''}
+          onClick={onClick}
           routerLink={routerLink}
         />
       </StCard>
@@ -37,4 +47,7 @@ const StCards = styled.div`
 
 const StCard = styled.div`
   width: 50%;
+  & > * {
+    cursor: pointer;
+  }
 `;

@@ -1,9 +1,10 @@
-import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { Args, Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
 
 import { WordDefinition } from 'src/components/definitions/types';
 import { PhraseDefinition } from 'src/components/definitions/types';
+import { WordUpsertInput } from '../words/types';
 
 @ObjectType()
 export class WordToWordTranslation {
@@ -78,4 +79,34 @@ export class WordToPhraseTranslationReadOutput extends GenericOutput {
 export class PhraseToPhraseTranslationReadOutput extends GenericOutput {
   @Field(() => PhraseToPhraseTranslation, { nullable: true })
   phrase_to_phrase_translation: PhraseToPhraseTranslation | null;
+}
+
+@InputType()
+export class AddWordAsTranslationForWordInput {
+  @Field(() => String) originalDefinitionId: string;
+  @Field(() => WordUpsertInput) translationWord: WordUpsertInput;
+  @Field(() => String) translationDefinition: string;
+}
+
+@ObjectType()
+export class AddWordAsTranslationForWordOutput extends GenericOutput {
+  @Field(() => String) wordTranslationId: string;
+}
+
+@ObjectType()
+export class WordTrVoteStatus {
+  @Field(() => String) word_to_word_translation_id: string;
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@InputType()
+export class WordTrVoteStatusInput extends GenericOutput {
+  @Field(() => ID) word_to_word_translation_id: string;
+  @Field(() => Boolean) vote: boolean;
+}
+@ObjectType()
+export class WordTrVoteStatusOutputRow extends GenericOutput {
+  @Field(() => WordTrVoteStatus, { nullable: true })
+  vote_status: WordTrVoteStatus;
 }

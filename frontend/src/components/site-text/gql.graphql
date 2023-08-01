@@ -1,0 +1,184 @@
+fragment PhraseFragment on Phrase {
+  phrase_id
+  phrase
+}
+
+fragment WordFragment on Word {
+  word_id
+  word
+  language_code
+  dialect_code
+  geo_code
+}
+
+fragment WordDefinitionFragment on WordDefinition {
+  word_definition_id
+  word {
+    ...WordFragment
+  }
+  definition
+}
+
+fragment PhraseDefinitionFragment on PhraseDefinition {
+  phrase_definition_id
+  definition
+  phrase {
+    ...PhraseFragment
+  }
+}
+
+fragment SiteTextPhraseDefinitionFragment on SiteTextPhraseDefinition {
+  site_text_id
+  phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+}
+
+fragment SiteTextWordDefinitionFragment on SiteTextWordDefinition {
+  site_text_id
+  word_definition {
+    ...WordDefinitionFragment
+  }
+}
+
+fragment SiteTextTranslationWithVoteFragment on SiteTextTranslationWithVote {
+  site_text_translation_id
+  from_definition {
+    ...WordDefinitionFragment
+    ...PhraseDefinitionFragment
+  }
+  to_definition {
+    ...WordDefinitionFragment
+    ...PhraseDefinitionFragment
+  }
+  from_type_is_word
+  to_type_is_word
+  upvotes
+  downvotes
+  created_at
+}
+
+fragment SiteTextTranslationFragment on SiteTextTranslation {
+  site_text_translation_id
+  from_definition {
+    ...WordDefinitionFragment
+    ...PhraseDefinitionFragment
+  }
+  to_definition {
+    ...WordDefinitionFragment
+    ...PhraseDefinitionFragment
+  }
+  from_type_is_word
+  to_type_is_word
+}
+
+fragment VoteStatusFragment on VoteStatus {
+  upvotes
+  downvotes
+  site_text_translation_id
+}
+
+fragment SiteTextLanguageFragment on SiteTextLanguage {
+  language_code
+  dialect_code
+  geo_code
+}
+
+query GetAllSiteTextDefinitions {
+  getAllSiteTextDefinitions {
+    error
+    site_text_phrase_definition_list {
+      ...SiteTextPhraseDefinitionFragment
+    }
+    site_text_word_definition_list {
+      ...SiteTextWordDefinitionFragment
+    }
+  }
+}
+
+query GetAllTranslationFromSiteTextDefinitionID(
+  $dialect_code: String
+  $geo_code: String
+  $language_code: String!
+  $site_text_id: String!
+  $site_text_type_is_word: Boolean!
+) {
+  getAllTranslationFromSiteTextDefinitionID(
+    dialect_code: $dialect_code
+    geo_code: $geo_code
+    language_code: $language_code
+    site_text_id: $site_text_id
+    site_text_type_is_word: $site_text_type_is_word
+  ) {
+    error
+    site_text_translation_with_vote_list {
+      ...SiteTextTranslationWithVoteFragment
+    }
+  }
+}
+
+query SiteTextWordDefinitionRead($id: String!) {
+  siteTextWordDefinitionRead(id: $id) {
+    error
+    site_text_word_definition {
+      ...SiteTextWordDefinitionFragment
+    }
+  }
+}
+
+query SiteTextPhraseDefinitionRead($id: String!) {
+  siteTextPhraseDefinitionRead(id: $id) {
+    error
+    site_text_phrase_definition {
+      ...SiteTextPhraseDefinitionFragment
+    }
+  }
+}
+
+mutation UpsertTranslation(
+  $site_text_id: ID!
+  $is_word_definition: Boolean!
+  $translationlike_string: String!
+  $definitionlike_string: String!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  upsertTranslation(
+    input: {
+      site_text_id: $site_text_id
+      is_word_definition: $is_word_definition
+      translationlike_string: $translationlike_string
+      definitionlike_string: $definitionlike_string
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
+    error
+    site_text_translation {
+      ...SiteTextTranslationFragment
+    }
+  }
+}
+
+mutation ToggleVoteStatus($site_text_translation_id: String!, $vote: Boolean!) {
+  toggleVoteStatus(
+    site_text_translation_id: $site_text_translation_id
+    vote: $vote
+  ) {
+    error
+    vote_status {
+      ...VoteStatusFragment
+    }
+  }
+}
+
+query GetAllSiteTextLanguageList {
+  getAllSiteTextLanguageList {
+    error
+    site_text_language_list {
+      ...SiteTextLanguageFragment
+    }
+  }
+}

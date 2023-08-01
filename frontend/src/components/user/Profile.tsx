@@ -1,49 +1,28 @@
 import {
   IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
   IonIcon,
   IonImg,
   IonInput,
   IonItem,
   IonLabel,
-  IonList,
-  IonMenu,
-  IonMenuButton,
-  IonMenuToggle,
   IonPage,
-  IonRouterOutlet,
-  IonTitle,
-  IonToolbar,
   useIonViewWillEnter,
-} from "@ionic/react";
+} from '@ionic/react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
+import { useHistory } from 'react-router';
 import {
-  ChangeEvent,
-  ChangeEventHandler,
-  FormEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { useHistory } from "react-router";
-import {
-  ErrorType,
   useAvatarUpdateMutation,
   useGetFileUploadUrlLazyQuery,
-  useGetFileUploadUrlQuery,
-} from "../../generated/graphql";
-import { globals } from "../../services/globals";
-import "./Profile.css";
-import Cropper from "cropperjs";
-import { imageOutline } from "ionicons/icons";
-import { CropperComp } from "../post/Cropper";
+} from '../../generated/graphql';
+import { globals } from '../../services/globals';
+import './Profile.css';
+import { imageOutline } from 'ionicons/icons';
+import { CropperComp } from '../post/Cropper';
 
 const Profile: React.FC = () => {
-  let history = useHistory();
-
-  const [avatarUpdateMutation, { data, loading, error }] =
-    useAvatarUpdateMutation();
+  const history = useHistory();
+  const [avatarUpdateMutation] = useAvatarUpdateMutation();
 
   const [show_update_avatar_form, set_show_update_avatar_form] =
     useState(false);
@@ -51,28 +30,31 @@ const Profile: React.FC = () => {
 
   const fileInput = useRef(null);
 
-  const [file_url, set_file_url] = useState("");
+  const [file_url, set_file_url] = useState('');
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [blob, set_blob] = useState<any>();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [avatar_url, set_avatar_url] = useState<string | null>(null);
 
   const [show_image_update_form, set_show_image_update_form] = useState(false);
 
   const [image_form_key, set_image_form_key] = useState(1);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [getData, { loading: loading2, error: error2, data: data2 }] =
     useGetFileUploadUrlLazyQuery();
 
   useIonViewWillEnter(() => {
-    document.title = "Profile";
+    document.title = 'Profile';
   });
 
   useEffect(() => {
     if (globals.get_token() === null) {
-      history.push("/US/eng/1/home");
+      history.push('/US/eng/1/home');
     }
-  }, []);
+  }, [history]);
 
   const show_avatar_form = () => {
     set_show_update_avatar_form(true);
@@ -82,6 +64,7 @@ const Profile: React.FC = () => {
     event.preventDefault();
     event.stopPropagation();
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const token = globals.get_token();
 
     if (new_avatar === null) return;
@@ -94,12 +77,13 @@ const Profile: React.FC = () => {
         },
       });
     } catch (e) {
-      console.error("error", e);
+      console.error('error', e);
     }
 
     const error = result?.data?.avatarUpdateResolver.error;
 
-    if (error == "NoError") {
+    if (error == 'NoError') {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       globals.set_avatar(result?.data?.avatarUpdateResolver.user?.avatar!);
       set_show_update_avatar_form(false);
     }
@@ -111,6 +95,7 @@ const Profile: React.FC = () => {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const update_avatar_image = async (blob: any) => {
     set_blob(blob);
   };
@@ -119,6 +104,7 @@ const Profile: React.FC = () => {
     if (globals.get_user_id() && blob) {
       const res = await getData({
         variables: {
+          // eslint-disable-next-line @typescript-eslint/no-extra-non-null-assertion
           userId: globals.get_user_id()!!.toString(),
         },
       });
@@ -128,13 +114,14 @@ const Profile: React.FC = () => {
         const avatar_image_url =
           res.data?.fileUploadUrlRequest.avatar_image_url;
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const put = await fetch(url, {
-          method: "PUT",
+          method: 'PUT',
           headers: {
-            "Content-Type": "image/png",
+            'Content-Type': 'image/png',
           },
           body: blob,
-          mode: "cors",
+          mode: 'cors',
         });
 
         globals.set_profile_url(avatar_image_url);
@@ -209,7 +196,7 @@ const Profile: React.FC = () => {
                   accept="image/*"
                   onChange={on_file_change}
                   onClick={(e) => {
-                    // console.log("form input onClick");
+                    console.log(e);
                   }}
                 />
               </form>
@@ -217,8 +204,10 @@ const Profile: React.FC = () => {
               {globals.get_profile_url() && (
                 <IonImg
                   className="avatar-image clickable"
+                  // eslint-disable-next-line @typescript-eslint/no-extra-non-null-assertion
                   src={globals.get_profile_url()!!}
                   onClick={() => {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
                     fileInput?.current?.click();
                     set_show_image_update_form(true);
@@ -230,6 +219,7 @@ const Profile: React.FC = () => {
                 <IonButton
                   color="primary"
                   onClick={() => {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
                     fileInput?.current?.click();
                     set_show_image_update_form(true);
@@ -265,7 +255,7 @@ const Profile: React.FC = () => {
                 </IonLabel>
 
                 <IonButton
-                  color={"danger"}
+                  color={'danger'}
                   onClick={() => {
                     set_show_image_update_form(false);
                   }}

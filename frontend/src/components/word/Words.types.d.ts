@@ -1,24 +1,22 @@
 type TVotes = {
-  up: number;
-  down: number;
+  upVotes: number;
+  downVotes: number;
 };
 
 type TWord = TLangCodes & {
-  id: number;
+  id: string;
   content: string;
-  description?: string;
+  definition?: string;
 };
+
+type TWordWithVotes = TWord & TVotes;
 
 type TWordTranslated = {
   word: TWord;
-  translation?: { word: TWord } | undefined;
+  translation?: TWordWithVotes | undefined;
 };
 
 type TWordWithTranslations = {
   word: TWord;
-  translationsVoted: Array<{
-    word: TWord;
-    votes: TVotes;
-    description?: string;
-  }>;
+  translations: Array<TWordWithVotes>;
 };

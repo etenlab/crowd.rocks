@@ -8,7 +8,19 @@ import { SiteTextPhraseDefinitionsService } from './site-text-phrase-definitions
 
 import { DefinitionsService } from 'src/components/definitions/definitions.service';
 
-import { SiteTextUpsertInput, SiteTextUpsertOutput } from './types';
+import {
+  SiteTextUpsertInput,
+  SiteTextUpsertOutput,
+  SiteTextDefinitionListOutput,
+  SiteTextLanguageListOutput,
+} from './types';
+
+import {
+  DefinitionUpdateaInput,
+  DefinitionUpdateOutput,
+} from 'src/components/definitions/types';
+
+import { GetSiteTextLanguageList, getSiteTextLanguageList } from './sql-string';
 
 @Injectable()
 export class SiteTextsService {
@@ -115,6 +127,82 @@ export class SiteTextsService {
       error: ErrorType.UnknownError,
       site_text_phrase_definition: null,
       site_text_word_definition: null,
+    };
+  }
+
+  async updateDefinition(
+    input: DefinitionUpdateaInput,
+    token: string,
+  ): Promise<DefinitionUpdateOutput> {
+    return this.definitionService.updateDefinition(input, token);
+  }
+
+  async getAllSiteTextDefinitions(): Promise<SiteTextDefinitionListOutput> {
+    try {
+      const { error: wordError, site_text_word_definition_list } =
+        await this.siteTextWordDefinitionService.getAllSiteTextWordDefinitions();
+
+      if (wordError !== ErrorType.NoError) {
+        return {
+          error: wordError,
+          site_text_phrase_definition_list: [],
+          site_text_word_definition_list: [],
+        };
+      }
+
+      const { error: phraseError, site_text_phrase_definition_list } =
+        await this.siteTextPhraseDefinitionService.getAllSiteTextPhraseDefinitions();
+
+      if (phraseError !== ErrorType.NoError) {
+        return {
+          error: phraseError,
+          site_text_phrase_definition_list: [],
+          site_text_word_definition_list: [],
+        };
+      }
+
+      return {
+        error: ErrorType.NoError,
+        site_text_word_definition_list,
+        site_text_phrase_definition_list,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      site_text_word_definition_list: [],
+      site_text_phrase_definition_list: [],
+    };
+  }
+
+  async getAllSiteTextLanguageList(): Promise<SiteTextLanguageListOutput> {
+    try {
+      const res1 = await this.pg.pool.query<GetSiteTextLanguageList>(
+        ...getSiteTextLanguageList(),
+      );
+      const siteTextLanguageList = [];
+
+      for (let i = 0; i < res1.rowCount; i++) {
+        siteTextLanguageList.push({
+          language_code: res1.rows[i].language_code,
+          dialect_code: res1.rows[i].dialect_code,
+          geo_code: res1.rows[i].geo_code,
+        });
+      }
+
+      return {
+        error: ErrorType.NoError,
+        site_text_language_list: siteTextLanguageList,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      site_text_language_list: [],
     };
   }
 }
