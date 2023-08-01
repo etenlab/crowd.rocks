@@ -617,6 +617,7 @@ export type Query = {
   fileUploadUrlRequest: FileUploadUrlResponse;
   getAllRecommendedTranslation: SiteTextTranslationWithVoteListOutput;
   getAllSiteTextDefinitions: SiteTextDefinitionListOutput;
+  getAllSiteTextLanguageList: SiteTextLanguageListOutput;
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
   getOrigMapContent: GetOrigMapContentOutput;
   getOrigMapWords: GetOrigMapWordsOutput;
@@ -835,6 +836,19 @@ export type SiteTextDefinitionListOutput = {
   error: ErrorType;
   site_text_phrase_definition_list: Array<Maybe<SiteTextPhraseDefinition>>;
   site_text_word_definition_list: Array<Maybe<SiteTextWordDefinition>>;
+};
+
+export type SiteTextLanguage = {
+  __typename?: 'SiteTextLanguage';
+  dialect_code?: Maybe<Scalars['String']['output']>;
+  geo_code?: Maybe<Scalars['String']['output']>;
+  language_code: Scalars['String']['output'];
+};
+
+export type SiteTextLanguageListOutput = {
+  __typename?: 'SiteTextLanguageListOutput';
+  error: ErrorType;
+  site_text_language_list: Array<Maybe<SiteTextLanguage>>;
 };
 
 export type SiteTextPhraseDefinition = {
@@ -1349,6 +1363,8 @@ export type SiteTextTranslationFragmentFragment = { __typename?: 'SiteTextTransl
 
 export type VoteStatusFragmentFragment = { __typename?: 'VoteStatus', upvotes: number, downvotes: number, site_text_translation_id: string };
 
+export type SiteTextLanguageFragmentFragment = { __typename?: 'SiteTextLanguage', language_code: string, dialect_code?: string | null, geo_code?: string | null };
+
 export type GetAllSiteTextDefinitionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1399,6 +1415,11 @@ export type ToggleVoteStatusMutationVariables = Exact<{
 
 
 export type ToggleVoteStatusMutation = { __typename?: 'Mutation', toggleVoteStatus: { __typename?: 'VoteStatusOutputRow', error: ErrorType, vote_status?: { __typename?: 'VoteStatus', upvotes: number, downvotes: number, site_text_translation_id: string } | null } };
+
+export type GetAllSiteTextLanguageListQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllSiteTextLanguageListQuery = { __typename?: 'Query', getAllSiteTextLanguageList: { __typename?: 'SiteTextLanguageListOutput', error: ErrorType, site_text_language_list: Array<{ __typename?: 'SiteTextLanguage', language_code: string, dialect_code?: string | null, geo_code?: string | null } | null> } };
 
 export type UserReadQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -1534,6 +1555,13 @@ export const VoteStatusFragmentFragmentDoc = gql`
   upvotes
   downvotes
   site_text_translation_id
+}
+    `;
+export const SiteTextLanguageFragmentFragmentDoc = gql`
+    fragment SiteTextLanguageFragment on SiteTextLanguage {
+  language_code
+  dialect_code
+  geo_code
 }
     `;
 export const RegisterDocument = gql`
@@ -2209,6 +2237,43 @@ export function useToggleVoteStatusMutation(baseOptions?: Apollo.MutationHookOpt
 export type ToggleVoteStatusMutationHookResult = ReturnType<typeof useToggleVoteStatusMutation>;
 export type ToggleVoteStatusMutationResult = Apollo.MutationResult<ToggleVoteStatusMutation>;
 export type ToggleVoteStatusMutationOptions = Apollo.BaseMutationOptions<ToggleVoteStatusMutation, ToggleVoteStatusMutationVariables>;
+export const GetAllSiteTextLanguageListDocument = gql`
+    query GetAllSiteTextLanguageList {
+  getAllSiteTextLanguageList {
+    error
+    site_text_language_list {
+      ...SiteTextLanguageFragment
+    }
+  }
+}
+    ${SiteTextLanguageFragmentFragmentDoc}`;
+
+/**
+ * __useGetAllSiteTextLanguageListQuery__
+ *
+ * To run a query within a React component, call `useGetAllSiteTextLanguageListQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllSiteTextLanguageListQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllSiteTextLanguageListQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAllSiteTextLanguageListQuery(baseOptions?: Apollo.QueryHookOptions<GetAllSiteTextLanguageListQuery, GetAllSiteTextLanguageListQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllSiteTextLanguageListQuery, GetAllSiteTextLanguageListQueryVariables>(GetAllSiteTextLanguageListDocument, options);
+      }
+export function useGetAllSiteTextLanguageListLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllSiteTextLanguageListQuery, GetAllSiteTextLanguageListQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllSiteTextLanguageListQuery, GetAllSiteTextLanguageListQueryVariables>(GetAllSiteTextLanguageListDocument, options);
+        }
+export type GetAllSiteTextLanguageListQueryHookResult = ReturnType<typeof useGetAllSiteTextLanguageListQuery>;
+export type GetAllSiteTextLanguageListLazyQueryHookResult = ReturnType<typeof useGetAllSiteTextLanguageListLazyQuery>;
+export type GetAllSiteTextLanguageListQueryResult = Apollo.QueryResult<GetAllSiteTextLanguageListQuery, GetAllSiteTextLanguageListQueryVariables>;
 export const UserReadDocument = gql`
     query UserRead($userId: ID!) {
   userReadResolver(input: {user_id: $userId}) {
@@ -2348,6 +2413,7 @@ export const namedOperations = {
     GetAllTranslationFromSiteTextDefinitionID: 'GetAllTranslationFromSiteTextDefinitionID',
     SiteTextWordDefinitionRead: 'SiteTextWordDefinitionRead',
     SiteTextPhraseDefinitionRead: 'SiteTextPhraseDefinitionRead',
+    GetAllSiteTextLanguageList: 'GetAllSiteTextLanguageList',
     UserRead: 'UserRead',
     GetFileUploadUrl: 'GetFileUploadUrl'
   },
@@ -2377,6 +2443,7 @@ export const namedOperations = {
     SiteTextWordDefinitionFragment: 'SiteTextWordDefinitionFragment',
     SiteTextTranslationWithVoteFragment: 'SiteTextTranslationWithVoteFragment',
     SiteTextTranslationFragment: 'SiteTextTranslationFragment',
-    VoteStatusFragment: 'VoteStatusFragment'
+    VoteStatusFragment: 'VoteStatusFragment',
+    SiteTextLanguageFragment: 'SiteTextLanguageFragment'
   }
 }
