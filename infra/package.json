@@ -5,8 +5,12 @@
     "app": "bin/app.js"
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
+    "deploy-common:dev": "cdk deploy -c env=dev devCommonStack",
+    "deploy-common:prod": "cdk deploy -c env=prod prodCommonStack",
+    "deploy-database:dev": "cdk deploy -c env=dev devDatabaseStack",
+    "deploy-database:prod": "cdk deploy -c env=prod prodDatabaseStack",
+    "deploy-api:dev": "cdk deploy -c env=dev devApiServiceStack",
+    "deploy-api:prod": "cdk deploy -c env=prod prodApiServiceStack",
     "lint": "./node_modules/.bin/eslint . --ext .ts",
     "lint-fix": "npm run lint -- --fix",
     "test": "jest",
