@@ -1,4 +1,4 @@
-import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, ID, InputType, ObjectType, Int } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
 
 @ObjectType()
@@ -28,4 +28,38 @@ export class PhraseReadInput {
 @ObjectType()
 export class PhraseReadOutput extends GenericOutput {
   @Field(() => Phrase, { nullable: true }) phrase: Phrase | null;
+}
+
+@ObjectType()
+export class PhraseVote {
+  @Field(() => ID) phrase_vote_id: string;
+  @Field(() => ID) phrase_id: string;
+  @Field(() => ID) user_id: string;
+  @Field(() => Boolean) vote: boolean;
+  @Field(() => Date) last_updated_at: Date;
+}
+
+@ObjectType()
+export class PhraseVoteOutput extends GenericOutput {
+  @Field(() => PhraseVote, { nullable: true })
+  phrase_vote: PhraseVote;
+}
+
+@InputType()
+export class PhraseVoteUpsertInput {
+  @Field(() => ID) phrase_id: string;
+  @Field(() => Boolean) vote: boolean;
+}
+
+@ObjectType()
+export class PhraseVoteStatus {
+  @Field(() => ID) phrase_id: string;
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class PhraseVoteStatusOutputRow extends GenericOutput {
+  @Field(() => PhraseVoteStatus, { nullable: true })
+  vote_status: PhraseVoteStatus;
 }
