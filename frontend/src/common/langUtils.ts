@@ -1,4 +1,7 @@
-import { DESCRIPTIONS_JOINER, NOT_DEFINED_PLACEHOLDER } from '../const/langConst';
+import {
+  DESCRIPTIONS_JOINER,
+  NOT_DEFINED_PLACEHOLDER,
+} from '../const/langConst';
 import Tags from 'language-tags';
 
 export const sortTagInfosFn = (t1: ITagInfo, t2: ITagInfo) => {

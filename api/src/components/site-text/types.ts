@@ -216,3 +216,16 @@ export class SiteTextTranslationUpsertInput {
   @Field(() => String, { nullable: true }) dialect_code: string | null;
   @Field(() => String, { nullable: true }) geo_code: string | null;
 }
+
+@ObjectType()
+export class SiteTextLanguage {
+  @Field(() => String) language_code: string;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
+}
+
+@ObjectType()
+export class SiteTextLanguageListOutput extends GenericOutput {
+  @Field(() => [SiteTextLanguage], { nullable: 'items' })
+  site_text_language_list: SiteTextLanguage[];
+}
