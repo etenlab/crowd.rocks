@@ -29,7 +29,6 @@ dbSecurityGroupSsmParam: '/dev/db-sg-id'
 
 # Secrets Manager params to create
 dbCredentialSecret: 'dev/db/credentials'
-appSecrets: 'dev/crowdrocks/secrets'
 
 # Whether database is accessible outside of VPC
 dbPublicAccess: true

@@ -1,175 +1,50 @@
-# # AWS env settings
-# awsAccountId: '605254017010'
-# awsRegion: 'us-east-2'
+# AWS env settings
+awsAccountId: '605254017010'
+awsRegion: 'us-east-2'
 
-# # Prefix used to identify app CloudFormation component
-# appPrefix: 'cb'
+# Prefix used to identify app CloudFormation component
+appPrefix: 'cb'
 
-# # VPC configuration
-# vpcCidr: '10.10.0.0/16'
-# natGatewaysCount: 0
+# VPC configuration
+vpcCidr: '10.10.0.0/16'
+natGatewaysCount: 0
 
-# # Env domain setup
-# envSubdomain: 'prod'
+# Env domain setup
+envSubdomain: 'prod'
 
-# # App ECS cluster name
-# ecsClusterName: 'prod-cluster'
+# App ECS cluster name
+ecsClusterName: 'prod-cluster'
 
-# # S3 bucket names
-# publicFilesBucketName: 'eil-public-files-prod'
+# S3 bucket names
+publicFilesBucketName: 'crowdrocks-public-files-prod'
 
-# # System Manager params to create
-# vpcSsmParam: '/prod/app-vpc-id'
-# defaultEcsExecRoleSsmParam: '/prod/ecs-default-execution-role'
-# defaultEcsTaskRoleSsmParam: '/prod/ecs-default-task-role'
-# albArnSsmParam: '/prod/alb-arn'
-# albSecurityGroupSsmParam: '/prod/alb-sg-id'
-# albListenerSsmParam: '/prod/alb-listener-arn'
-# dbSecurityGroupSsmParam: '/prod/db-sg-id'
+# System Manager params to create
+vpcSsmParam: '/prod/app-vpc-id'
+defaultEcsExecRoleSsmParam: '/prod/ecs-default-execution-role'
+defaultEcsTaskRoleSsmParam: '/prod/ecs-default-task-role'
+albArnSsmParam: '/prod/alb-arn'
+albSecurityGroupSsmParam: '/prod/alb-sg-id'
+albListenerSsmParam: '/prod/alb-listener-arn'
+dbSecurityGroupSsmParam: '/prod/db-sg-id'
 
-# # Secrets Manager params to create
-# dbCredentialSecret: 'prod/db/credentials'
+# Secrets Manager params to create
+dbCredentialSecret: 'prod/db/credentials'
 
-# # Whether database is accessible outside of VPC
-# dbPublicAccess: false
+# Whether database is accessible outside of VPC
+dbPublicAccess: false
 
-# # DNS setup
-# dns:
-#   - existingRootHostedZone: 'crowd.bible'
-#     rootDomainCertSsmParam: '/prod/crowd.bible/root-domain-certificate'
-#   - existingRootHostedZone: 'openlanguages.io'
-#     rootDomainCertSsmParam: '/prod/openlanguages.io/root-domain-certificate'
-#   - existingRootHostedZone: 'schema.bible'
-#     rootDomainCertSsmParam: '/prod/schema.bible/root-domain-certificate'
+# DNS setup
+dns:
+  - existingRootHostedZone: 'crowd.rocks'
+    rootDomainCertSsmParam: '/prod/crowd.rocks/root-domain-certificate'
 
-# fargateApiServices:
-#   DatabaseApiStack:
-#     projectTag: 'Common'
-#     albPort: 3001
-#     dockerPort: 8101
-#     priority: 10
-#     rootdomain: 'crowd.bible'
-#     subdomain: 'db-api'
-#     serviceName: 'databaseApi'
-#     dockerImageUrl: 'etenlab/database-api'
-#     healthCheckPath: '/'
-#     environment:
-#       PORT: 8101
-#       RUN_MIGRATIONS: false
-#     secrets:
-#       DB_HOST: host
-#       DB_PORT: port
-#       DB_USERNAME: username
-#       DB_PASSWORD: password
-#       DB_NAME: dbname
-#       KEYCLOAK_URL: keycloak-url
-#       KEYCLOAK_REALM: keycloak-realm
-#       KEYCLOAK_CLIENTS: keycloak-clients
-#       CORS_ALLOW_ORIGINS: database-api-cors-allow-origins
-
-#   OLDBApiStack:
-#     projectTag: 'Resources'
-#     albPort: 3002
-#     dockerPort: 80
-#     priority: 20
-#     rootdomain: 'openlanguages.io'
-#     subdomain: 'api'
-#     serviceName: 'oldbApi'
-#     dockerImageUrl: 'etenlab/oldb-api'
-#     healthCheckPath: '/'
-#     environment:
-#       PORT: 80
-#     secrets:
-#       DB_HOST: host
-#       DB_PORT: port
-#       DB_USERNAME: username
-#       DB_PASSWORD: password
-#       DB_NAME: dbname
-#       KEYCLOAK_URL: keycloak-url
-#       KEYCLOAK_CLIENT_ID: keycloak-client-id
-#       KEYCLOAK_REALM: keycloak-realm
-#       KEYCLOAK_CLIENT_SECRET: keyloak-client-secret
-#       KEYCLOAK_ADMIN_CLIENT_ID: keycloak-admin-client-id
-#       KEYCLOAK_ADMIN_CLIENT_SECRET: keycloak-admin-client-secret
-#       AIRTABLE_BASE_ID: airtable-base-id
-#       AIRTABLE_API_KEY: airtable-api-key
-#       AIRTABLE_TABLE_ID: airtable-table-id
-#       AIRTABLE_TABLE_NAME: airtable-table-name
-#       AIRTABLE_TOTAL_RECORDS: airtable-total-records
-
-#   CPGServerStack:
-#     projectTag: 'Crowd'
-#     albPort: 3003
-#     dockerPort: 80
-#     priority: 30
-#     rootdomain: 'crowd.bible'
-#     subdomain: 'api'
-#     serviceName: 'cpgServer'
-#     dockerImageUrl: 'etenlab/cpg-server'
-#     healthCheckPath: '/'
-#     environment:
-#       PORT: 80
-#       CORS_ALLOW_ORIGINS: ''
-#       MAX_FILE_SIZE: 1073741824 # 1024 * 1024 * 1024
-#       MAX_FILES: 10
-#     secrets:
-#       DB_HOST: host
-#       DB_PORT: port
-#       DB_USERNAME: username
-#       DB_PASSWORD: password
-#       DB_NAME: dbname
-#       AWS_S3_REGION: aws-s3-region
-#       AWS_S3_BUCKET_NAME: aws-s3-bucket-name
-#       AWS_S3_ACCESS_ID: aws-s3-access-id
-#       AWS_S3_SECRET_KEY: aws-s3-secret-key
-
-#   # Requires creating a database manually and putting necessary secrets in ASM.
-#   # CREATE USER keycloak WITH ENCRYPTED PASSWORD 'KJHU9VrcK38GDGQu3BZHVNYqDqYkt22jP5Vkrd8q';
-#   # CREATE DATABASE keycloak_db;
-#   # GRANT ALL PRIVILEGES ON DATABASE keycloak_db TO keycloak;
-#   KeyCloakStack:
-#     projectTag: 'Common'
-#     albPort: 3004
-#     dockerPort: 8080
-#     priority: 40
-#     rootdomain: 'crowd.bible'
-#     subdomain: 'keycloak'
-#     serviceName: 'keycloak'
-#     dockerImageUrl: 'quay.io/keycloak/keycloak:latest'
-#     healthCheckPath: '/'
-#     cpu: 2048
-#     memory: 4096
-#     secrets:
-#       KC_DB_USERNAME: keycloak-username
-#       KC_DB_PASSWORD: keycloak-password
-#       KC_DB_URL_DATABASE: keycloak-dbname
-#       KC_DB_URL_HOST: keycloak-host
-#       KC_DB_SCHEMA: keycloak-schema
-#       KEYCLOAK_ADMIN: keycloak-admin-username
-#       KEYCLOAK_ADMIN_PASSWORD: keycloak-admin-password
-#     environment:
-#       KC_PROXY: edge
-#     command:
-#       - start-dev
-#       - --features
-#       - admin-fine-grained-authz
-
-# frontendServices:
-#   OldbAppStack:
-#     projectTag: 'Resources'
-#     appId: oldb-app
-#     domainName: openlanguages.io
-#     enabled: true
-#     createCustomDomain: true
-#   CrowdBibleAppStack:
-#     projectTag: 'Crowd'
-#     appId: crowdbible
-#     domainName: crowd.bible
-#     enabled: false
-#     createCustomDomain: true
-#   SchemaStack:
-#     projectTag: 'Common'
-#     domainName: schema.bible
-#     appId: schema-app
-#     enabled: true
-#     createCustomDomain: true
+apiService:
+  albPort: 3000
+  dockerPort: 3000
+  priority: 10
+  rootdomain: 'crowd.rocks'
+  serviceName: 'crowdrocksApiServer'
+  dockerImageUrl: 'etenlab/crowd-rocks'
+  cpu: 2048
+  memory: 4096
+  healthCheckPath: '/'

@@ -16,7 +16,6 @@ export interface EnvConfig {
   albListenerSsmParam: string;
   dbSecurityGroupSsmParam: string;
   dbCredentialSecret: string;
-  appSecrets: string;
   dbPublicAccess: boolean;
   apiService: FargateServiceConfig;
   dns: DNSConfig[];
