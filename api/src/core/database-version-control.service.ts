@@ -128,6 +128,10 @@ export class DatabaseVersionControlService {
       './src/core/sql/translation/word_to_word_translation_votes_count.sql',
     );
 
+    await this.runSqlFile(
+      './src/core/sql/translation/word-to-word-translation-vote-toggle.sql',
+    );
+
     // data
     await this.runSqlFile(
       './src/core/sql/data/site-text-word-definition-upsert.sql',
@@ -143,9 +147,6 @@ export class DatabaseVersionControlService {
     );
     await this.runSqlFile(
       './src/core/sql/data/site-text-translation-vote-toggle.sql',
-    );
-    await this.runSqlFile(
-      './src/core/sql/data/word-to-word-translation-vote-toggle.sql',
     );
 
     // update db version
