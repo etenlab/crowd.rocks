@@ -41,7 +41,7 @@ dns:
 
 apiService:
   albPort: 3000
-  dockerPort: 3001
+  dockerPort: 3000
   priority: 10
   rootdomain: 'dev.crowd.rocks'
   serviceName: 'crowdrocksApiServer'

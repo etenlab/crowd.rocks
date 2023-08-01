@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as route53 from 'aws-cdk-lib/aws-route53';
@@ -136,6 +137,23 @@ export class ApiServiceStack extends cdk.Stack {
       props.ecsTaskRoleSsmParam,
       `${props.appPrefix}TaskRole`,
     );
+
+    const apiServiceExecutionPolicy = new iam.Policy(
+      this,
+      `${props.serviceName}ExecutionPolicy`,
+      {
+        policyName: `${props.serviceName}-service-execution-policy`,
+        statements: [
+          new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: ['ses:SendRawEmail', 'ses:SendEmail', 's3:*'],
+            resources: ['*'],
+          }),
+        ],
+      },
+    );
+
+    execRole.attachInlinePolicy(apiServiceExecutionPolicy);
 
     const cluster = ecs.Cluster.fromClusterAttributes(
       this,

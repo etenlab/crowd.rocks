@@ -100,6 +100,9 @@ const apiServiceStack = new ApiServiceStack(
       {
         EMAIL_SERVER: `https://${apiService.rootdomain}`,
       },
+      {
+        PORT: String(apiService.dockerPort),
+      },
     ],
     secrets: [
       {
@@ -126,22 +129,7 @@ const apiServiceStack = new ApiServiceStack(
         taskDefSecretName: 'CR_DB_PORT',
         secretsManagerSecretName: config.dbCredentialSecret,
         secretsMangerSecretField: 'port',
-      },
-      // {
-      //   taskDefSecretName: 'AWS_ACCESS_KEY_ID',
-      //   secretsManagerSecretName: config.appSecrets,
-      //   secretsMangerSecretField: 'aws_access_key_id',
-      // },
-      // {
-      //   taskDefSecretName: 'AWS_SECRET_ACCESS_KEY',
-      //   secretsManagerSecretName: config.appSecrets,
-      //   secretsMangerSecretField: 'aws_secret_access_key',
-      // },
-      // {
-      //   taskDefSecretName: 'EMAIL_SERVER',
-      //   secretsManagerSecretName: config.appSecrets,
-      //   secretsMangerSecretField: 'email_server',
-      // },
+      }
     ],
   },
 );
