@@ -77,7 +77,13 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
               </IonItemDivider>
 
               <IonItem lines="none">
-                <IonCard>
+                <IonCard
+                  onClick={() => {
+                    router.push(
+                      `/${match.params.nation_id}/${match.params.language_id}/1/dictionary-list`,
+                    );
+                  }}
+                >
                   <IonCardHeader>
                     <IonCardTitle>
                       <IonIcon icon={bookOutline}></IonIcon>

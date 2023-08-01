@@ -44,6 +44,8 @@ import PasswordResetFormPage from './components/authentication/PasswordResetForm
 import { MapsPage } from './components/map/MapsPage';
 import { SiteTextListPage } from './components/site-text/SiteTextListPage';
 import { SiteTextDetailPage } from './components/site-text/SiteTextDetailPage';
+import { WordListPage } from './components/dictionary/WordListPage';
+import { WordDetailPage } from './components/dictionary/WordDetailPage';
 
 const Body: React.FC = () => {
   const router = useIonRouter();
@@ -339,7 +341,16 @@ const Body: React.FC = () => {
             path="/:nation_id/:language_id/:cluster_id/site-text-detail/:definition_type/:site_text_id"
             component={SiteTextDetailPage}
           />
-
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/dictionary-list"
+            component={WordListPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/dictionary-detail/:word_id"
+            component={WordDetailPage}
+          />
           <Route exact path="/">
             <Redirect to="/US/eng/1/home" />
           </Route>
