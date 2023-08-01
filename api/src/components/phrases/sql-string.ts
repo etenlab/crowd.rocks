@@ -137,3 +137,54 @@ export function togglePhraseVoteStatus({
     [phrase_id, vote, token],
   ];
 }
+
+export type GetPhraseListByLang = {
+  phrase_id: string;
+};
+
+export function getPhraseListByLang({
+  language_code,
+  dialect_code,
+  geo_code,
+}: {
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+}): [string, [string, string, string] | [string, string] | [string]] {
+  let wherePlsStr = '';
+  let returnArr: [string, string, string] | [string, string] | [string] = [
+    language_code,
+  ];
+
+  if (dialect_code && geo_code) {
+    wherePlsStr = `
+      and dialect_code = $2
+      and geo_code = $3
+    `;
+    returnArr = [...returnArr, dialect_code, geo_code];
+  } else if (dialect_code && !geo_code) {
+    wherePlsStr = `
+      and dialect_code = $2
+    `;
+    returnArr = [...returnArr, dialect_code];
+  } else if (!dialect_code && geo_code) {
+    wherePlsStr = `
+      and geo_code = $2
+    `;
+    returnArr = [...returnArr, geo_code];
+  } else if (!dialect_code && !geo_code) {
+    wherePlsStr = ``;
+    returnArr = [...returnArr];
+  }
+
+  return [
+    `
+      select 
+        phrase_id
+      from phrases
+      where language_code = $1
+        ${wherePlsStr};
+    `,
+    [...returnArr],
+  ];
+}
