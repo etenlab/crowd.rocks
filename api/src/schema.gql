@@ -168,6 +168,7 @@ type GetOrigMapsListOutput {
 
 input LanguageInput {
   dialect_code: String
+  filter: String
   geo_code: String
   language_code: String!
 }

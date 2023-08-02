@@ -35,7 +35,8 @@
     "react-quill": "^2.0.0",
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4",
-    "styled-components": "^6.0.4"
+    "styled-components": "^6.0.4",
+    "use-debounce": "^9.0.4"
   },
   "devDependencies": {
     "@capacitor/cli": "5.1.1",

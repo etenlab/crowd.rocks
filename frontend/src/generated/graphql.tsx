@@ -192,6 +192,7 @@ export type GetOrigMapsListOutput = {
 
 export type LanguageInput = {
   dialect_code?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
   language_code: Scalars['String']['input'];
 };
@@ -1412,6 +1413,7 @@ export type GetWordsByLanguageQueryVariables = Exact<{
   language_code: Scalars['String']['input'];
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -1421,6 +1423,7 @@ export type GetPhrasesByLanguageQueryVariables = Exact<{
   language_code: Scalars['String']['input'];
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -2040,9 +2043,9 @@ export type PasswordResetFormRequestMutationHookResult = ReturnType<typeof usePa
 export type PasswordResetFormRequestMutationResult = Apollo.MutationResult<PasswordResetFormRequestMutation>;
 export type PasswordResetFormRequestMutationOptions = Apollo.BaseMutationOptions<PasswordResetFormRequestMutation, PasswordResetFormRequestMutationVariables>;
 export const GetWordsByLanguageDocument = gql`
-    query GetWordsByLanguage($language_code: String!, $dialect_code: String, $geo_code: String) {
+    query GetWordsByLanguage($language_code: String!, $dialect_code: String, $geo_code: String, $filter: String) {
   getWordsByLanguage(
-    input: {language_code: $language_code, dialect_code: $dialect_code, geo_code: $geo_code}
+    input: {language_code: $language_code, dialect_code: $dialect_code, geo_code: $geo_code, filter: $filter}
   ) {
     error
     word_with_vote_list {
@@ -2067,6 +2070,7 @@ export const GetWordsByLanguageDocument = gql`
  *      language_code: // value for 'language_code'
  *      dialect_code: // value for 'dialect_code'
  *      geo_code: // value for 'geo_code'
+ *      filter: // value for 'filter'
  *   },
  * });
  */
@@ -2082,9 +2086,9 @@ export type GetWordsByLanguageQueryHookResult = ReturnType<typeof useGetWordsByL
 export type GetWordsByLanguageLazyQueryHookResult = ReturnType<typeof useGetWordsByLanguageLazyQuery>;
 export type GetWordsByLanguageQueryResult = Apollo.QueryResult<GetWordsByLanguageQuery, GetWordsByLanguageQueryVariables>;
 export const GetPhrasesByLanguageDocument = gql`
-    query GetPhrasesByLanguage($language_code: String!, $dialect_code: String, $geo_code: String) {
+    query GetPhrasesByLanguage($language_code: String!, $dialect_code: String, $geo_code: String, $filter: String) {
   getPhrasesByLanguage(
-    input: {language_code: $language_code, dialect_code: $dialect_code, geo_code: $geo_code}
+    input: {language_code: $language_code, dialect_code: $dialect_code, geo_code: $geo_code, filter: $filter}
   ) {
     error
     phrase_with_vote_list {
@@ -2109,6 +2113,7 @@ export const GetPhrasesByLanguageDocument = gql`
  *      language_code: // value for 'language_code'
  *      dialect_code: // value for 'dialect_code'
  *      geo_code: // value for 'geo_code'
+ *      filter: // value for 'filter'
  *   },
  * });
  */
