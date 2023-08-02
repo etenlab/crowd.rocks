@@ -78,12 +78,14 @@ query GetWordsByLanguage(
   $language_code: String!
   $dialect_code: String
   $geo_code: String
+  $filter: String
 ) {
   getWordsByLanguage(
     input: {
       language_code: $language_code
       dialect_code: $dialect_code
       geo_code: $geo_code
+      filter: $filter
     }
   ) {
     error
@@ -97,12 +99,14 @@ query GetPhrasesByLanguage(
   $language_code: String!
   $dialect_code: String
   $geo_code: String
+  $filter: String
 ) {
   getPhrasesByLanguage(
     input: {
       language_code: $language_code
       dialect_code: $dialect_code
       geo_code: $geo_code
+      filter: $filter
     }
   ) {
     error
