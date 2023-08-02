@@ -10,6 +10,7 @@ import {
   useAddWordAsTranslationForWordMutation,
   useToggleWordTranslationVoteStatusMutation,
 } from '../../../generated/graphql';
+import { DEFAULT_MAP_WORD_DEFINITION } from '../../../const/mapsConst';
 
 interface WordTranslationsComProps {
   wordWithTranslations: WordTranslations;
@@ -138,7 +139,7 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
           label="Definition"
           labelPlacement="floating"
           ref={newDefinitionRef}
-          value="Geographical place"
+          value={DEFAULT_MAP_WORD_DEFINITION}
           disabled
         />
         <StButton onClick={() => handleNewTranslation()}>Submit</StButton>

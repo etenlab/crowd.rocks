@@ -10,7 +10,6 @@ import { WordTranslationsCom } from './WordTranslationsCom';
 interface MapWordsTranslationProps extends RouteComponentProps<{}> {}
 
 export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
-  // const [sourceLang, setSourceLang] = useState<LanguageInfo>();
   const [targetLang, setTargetLang] = useState<LanguageInfo>();
   const [selectedWordId, setSelectedWordId] = useState<string>();
 

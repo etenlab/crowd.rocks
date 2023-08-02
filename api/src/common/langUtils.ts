@@ -1,8 +1,7 @@
-import {
-  DESCRIPTIONS_JOINER,
-  NOT_DEFINED_PLACEHOLDER,
-} from '../const/langConst';
-import Tags from 'language-tags';
+import { DESCRIPTIONS_JOINER, NOT_DEFINED_PLACEHOLDER } from './const';
+import { ITagInfo, LanguageInfo } from './types';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Tags = require('language-tags');
 
 export const sortTagInfosFn = (t1: ITagInfo, t2: ITagInfo) => {
   if (t1.descriptions && t1.descriptions[0] === NOT_DEFINED_PLACEHOLDER) {
@@ -80,6 +79,21 @@ export const langInfo2String = (langInfo: LanguageInfo | undefined): string => {
       ', dialect:' + langInfo?.dialect?.descriptions.join(DESCRIPTIONS_JOINER);
   }
   return res;
+};
+
+export const subTags2Tag = ({
+  lang,
+  region,
+  dialect,
+}: {
+  lang: string;
+  region?: string;
+  dialect?: string;
+}): string => {
+  let langTag = lang;
+  region && (langTag += '-' + region);
+  dialect && (langTag += '-' + dialect);
+  return Tags(langTag).format();
 };
 
 export const subTags2LangInfo = ({

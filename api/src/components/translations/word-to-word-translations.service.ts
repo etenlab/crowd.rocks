@@ -25,6 +25,7 @@ import {
 } from '../words/types';
 import { PoolClient } from 'pg';
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
+import { LanguageInput } from '../definitions/types';
 
 @Injectable()
 export class WordToWordTranslationsService {
@@ -254,11 +255,36 @@ export class WordToWordTranslationsService {
     };
   }
 
-  chooseBestTranslation(wordTranslated: WordTranslations): WordWithVotes {
+  chooseBestTranslation(
+    wordTranslated: WordTranslations,
+    langRestrictions?: LanguageInput,
+  ): WordWithVotes {
     const res = wordTranslated?.translations?.reduce((bestTr, currTr) => {
-      if (bestTr?.up_votes === undefined) {
-        return currTr;
+      if (
+        langRestrictions?.language_code &&
+        currTr.language_code !== langRestrictions.language_code
+      ) {
+        return bestTr;
       }
+
+      if (
+        langRestrictions?.dialect_code &&
+        currTr.dialect_code !== langRestrictions.dialect_code
+      ) {
+        return bestTr;
+      }
+
+      if (
+        langRestrictions?.geo_code &&
+        currTr.geo_code !== langRestrictions.geo_code
+      ) {
+        return bestTr;
+      }
+
+      // if (bestTr?.up_votes === undefined) {
+      //   return currTr;
+      // }
+
       const bestTrTotal =
         Number(bestTr?.up_votes || 0) - Number(bestTr?.down_votes || 0);
       const currTrTotal =

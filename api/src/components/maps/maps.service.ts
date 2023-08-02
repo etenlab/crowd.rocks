@@ -13,22 +13,20 @@ import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
 import { WordsService } from '../words/words.service';
 import { MapsRepository } from './maps.repository';
-import {
-  WordTranslations,
-  WordUpsertInput,
-  WordWithVotes,
-} from '../words/types';
+import { WordTranslations, WordUpsertInput } from '../words/types';
 import { GenericOutput, LanguageInfo } from '../../common/types';
 import { DEFAULT_NEW_MAP_LANGUAGE } from '../../common/const';
 import { PostgresService } from '../../core/postgres.service';
 import { WordDefinitionsService } from '../definitions/word-definitions.service';
 import { PoolClient } from 'pg';
 import { WordToWordTranslationsService } from '../translations/word-to-word-translations.service';
+import { subTags2Tag, tag2langInfo } from '../../common/langUtils';
+import { LanguageInput } from '../definitions/types';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
-const DEFAULT_MAP_WORD_DEFINITION = 'Geographical place';
+const DEFAULT_MAP_WORD_DEFINITION = 'A geographical place';
 
 export type MapTranslationResult = {
   translatedMap: string;
@@ -217,23 +215,16 @@ export class MapsService {
     );
 
     for (const origMapId of origMapIds) {
-      const translatedMapId = await this.translateMapAndSave(
-        origMapId,
-        // langParams[0].t_language_code,
-        // langParams[0].t_dialect_code,
-        // langParams[0].t_geo_code,
-        token,
-      );
+      const translatedMapId = await this.translateMapAndSave(origMapId, token);
     }
   }
 
   async translateMapAndSave(
     origMapId,
-    // t_language_code,
-    // t_dialect_code,
-    // t_geo_code,
     token,
-  ): Promise<string> {
+    toLang?: LanguageInput,
+  ): Promise<Array<string>> {
+    const translatedMapIds: Array<string> = [];
     const { content: origMapContentStr } =
       await this.mapsRepository.getOrigMapContent(origMapId);
 
@@ -241,44 +232,62 @@ export class MapsService {
       original_map_id: origMapId,
     });
 
-    todo: to generate translated maps we must know target languages
-    which we must gather from translated words.
-
-    const wordsByLangs = this.sortWordsByTargetlangs(origMapWords);
-
-    const translations: Array<{
-      source: string;
-      translation: string;
-    }> = [];
-    for (const origWordTranslations of origMapWords) {
-      const origWordTranslated =
-        this.wordToWordTranslationsService.chooseBestTranslation(
-          origWordTranslations,
-        );
-      translations.push({
-        source: origWordTranslations.word,
-        translation: origWordTranslated.word || origWordTranslations.word,
-      });
+    let targetLanguagesFullTags: Array<string>;
+    if (toLang) {
+      targetLanguagesFullTags = [
+        subTags2Tag({
+          lang: toLang.language_code,
+          dialect: toLang.dialect_code,
+          region: toLang.geo_code,
+        }),
+      ];
+    } else {
+      targetLanguagesFullTags = this.getLangFullTags(origMapWords);
     }
 
-    const { translatedMap } = await this.translateMapString(
-      origMapContentStr,
-      translations,
-    );
+    for (const languageFullTag of targetLanguagesFullTags) {
+      const language_code: string = tag2langInfo(languageFullTag).lang.tag;
+      const dialect_code: string | undefined =
+        tag2langInfo(languageFullTag)?.dialect?.tag;
+      const geo_code: string | undefined =
+        tag2langInfo(languageFullTag)?.region?.tag;
 
-    const { map_id: translatedMapId } =
-      await this.mapsRepository.saveTranslatedMap({
+      const translations: Array<{
+        source: string;
+        translation: string;
+      }> = [];
+      for (const origWordTranslations of origMapWords) {
+        const origWordTranslated =
+          this.wordToWordTranslationsService.chooseBestTranslation(
+            origWordTranslations,
+            { language_code, dialect_code, geo_code },
+          );
+        translations.push({
+          source: origWordTranslations.word,
+          translation: origWordTranslated.word || origWordTranslations.word,
+        });
+      }
+
+      const { translatedMap } = await this.translateMapString(
+        origMapContentStr,
+        translations,
+      );
+
+      const { map_id } = await this.mapsRepository.saveTranslatedMap({
         original_map_id: origMapId,
         fileBody: translatedMap,
         token,
-        t_language_code,
-        t_dialect_code,
-        t_geo_code,
+        t_language_code: language_code,
+        t_dialect_code: dialect_code,
+        t_geo_code: geo_code,
       });
+      translatedMapIds.push(map_id);
 
-    console.log('translations', translations);
-    console.log('translated_map_id', translatedMapId);
-    return translatedMapId;
+      console.log('translations', translations);
+      console.log('translated_map_id', translatedMapIds);
+    }
+
+    return translatedMapIds;
   }
 
   translateMapString(
@@ -324,5 +333,20 @@ export class MapsService {
     }
   }
 
-  sortWordsByTargetlangs(words: WordTranslations[]): Array<{ langTag: Word }> {}
+  getLangFullTags(words: WordTranslations[]): Array<string> {
+    const foundLangs: Array<string> = [];
+    words.forEach((word) => {
+      word.translations.forEach((tr) => {
+        const currTag = subTags2Tag({
+          lang: tr.language_code,
+          region: tr.geo_code,
+          dialect: tr.dialect_code,
+        });
+        if (foundLangs.findIndex((fl) => fl === currTag) < 0) {
+          foundLangs.push(currTag);
+        }
+      });
+    });
+    return foundLangs;
+  }
 }
