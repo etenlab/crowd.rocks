@@ -2,11 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { PoolClient } from 'pg';
 import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
+import { LanguageInput } from '../definitions/types';
 import { WordTranslations, WordWithVotes } from '../words/types';
 import {
   GetOrigMapContentOutput,
   GetOrigMapsListOutput,
   GetOrigMapWordsOutput,
+  MapFileOutput,
   OriginalMapWordInput,
 } from './types';
 
@@ -146,20 +148,114 @@ export class MapsRepository {
     };
   }
 
-  async getOrigMaps(): Promise<GetOrigMapsListOutput> {
-    const resQ = await this.pg.pool.query(
-      `
-        select original_map_id, map_file_name, created_at, created_by from original_maps
-      `,
-      [],
-    );
+  async getOrigMaps(lang?: LanguageInput): Promise<GetOrigMapsListOutput> {
+    const params = [];
+    let languageClause = '';
+    if (lang?.language_code) {
+      params.push(lang?.language_code);
+      languageClause += ` and where language_code = $${params.length}`;
+    }
+    if (lang?.dialect_code) {
+      params.push(lang?.dialect_code);
+      languageClause += ` and where dialect_code = $${params.length}`;
+    }
+    if (lang?.geo_code) {
+      params.push(lang?.geo_code);
+      languageClause += ` and where geo_code = $${params.length}`;
+    }
+    const sqlStr = `
+        select
+          original_map_id,
+          map_file_name,
+          created_at,
+          created_by,
+          language_code ,
+          dialect_code ,
+          geo_code
+        from
+          original_maps
+        where true
+        ${languageClause}
+      `;
+    const resQ = await this.pg.pool.query(sqlStr, []);
 
-    const origMapList = resQ.rows.map(
-      ({ original_map_id, map_file_name, created_at, created_by }) => ({
+    const origMapList = resQ.rows.map<MapFileOutput>(
+      ({
         original_map_id,
         map_file_name,
         created_at,
         created_by,
+        language_code,
+        dialect_code,
+        geo_code,
+      }) => ({
+        original_map_id,
+        map_file_name,
+        created_at,
+        created_by,
+        is_original: true,
+        language: { language_code, dialect_code, geo_code },
+      }),
+    );
+
+    return { origMapList };
+  }
+
+  async getTranslatedMaps(
+    lang?: LanguageInput,
+  ): Promise<GetOrigMapsListOutput> {
+    const params = [];
+    let languageClause = '';
+    if (lang?.language_code) {
+      params.push(lang?.language_code);
+      languageClause += ` and where language_code = $${params.length}`;
+    }
+    if (lang?.dialect_code) {
+      params.push(lang?.dialect_code);
+      languageClause += ` and where dialect_code = $${params.length}`;
+    }
+    if (lang?.geo_code) {
+      params.push(lang?.geo_code);
+      languageClause += ` and where geo_code = $${params.length}`;
+    }
+    const sqlStr = `
+      select
+        tm.translated_map_id,
+        tm.original_map_id,
+        om.map_file_name,
+        tm.created_at,
+        tm.created_by,
+        tm.language_code ,
+        tm.dialect_code ,
+        tm.geo_code
+      from
+        translated_maps tm
+      left join original_maps om
+        on tm.original_map_id = om.original_map_id
+      where
+        true
+        ${languageClause}
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, []);
+
+    const origMapList = resQ.rows.map<MapFileOutput>(
+      ({
+        translated_map_id,
+        original_map_id,
+        map_file_name,
+        created_at,
+        created_by,
+        language_code,
+        dialect_code,
+        geo_code,
+      }) => ({
+        translated_map_id,
+        original_map_id,
+        map_file_name,
+        created_at,
+        created_by,
+        is_original: false,
+        language: { language_code, dialect_code, geo_code },
       }),
     );
 
@@ -169,7 +265,8 @@ export class MapsRepository {
   async getOrigMapContent(id: string): Promise<GetOrigMapContentOutput> {
     const resQ = await this.pg.pool.query(
       `
-        select content, map_file_name, created_at, created_by from original_maps where original_map_id = $1
+        select content, map_file_name, created_at, created_by, language_code,	dialect_code,	geo_code
+        from original_maps where original_map_id = $1
       `,
       [id],
     );
@@ -180,6 +277,12 @@ export class MapsRepository {
       created_at: resQ.rows[0].created_at,
       created_by: resQ.rows[0].created_by,
       content: resQ.rows[0].content,
+      is_original: true,
+      language: {
+        language_code: resQ.rows[0].language_code,
+        dialect_code: resQ.rows[0].dialect_code,
+        geo_code: resQ.rows[0].geo_code,
+      },
     };
   }
 

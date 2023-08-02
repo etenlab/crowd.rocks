@@ -2,26 +2,18 @@ import { IonList, useIonRouter } from '@ionic/react';
 import { MapItem } from './MapItem';
 import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
+import { useGetAllMapsListLazyQuery } from '../../../generated/graphql';
 
 export const MapList = () => {
   const router = useIonRouter();
   const { sendMapFile } = useMapTranslationTools();
-
-  const [mapList, setMapList] = useState<TMapsList>();
-  const { getOriginalMaps } = useMapTranslationTools();
-
-  const getMaps = useCallback(async () => {
-    const mapsList = await getOriginalMaps(
-      `some searchStr${Math.random() * 1000}`,
-    );
-    setMapList(mapsList);
-  }, [getOriginalMaps]);
+  const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery();
 
   useEffect(() => {
-    getMaps();
-  }, [getMaps]);
+    getAllMapsList();
+  }, [getAllMapsList]);
 
   const handleAddMap = useCallback(
     (file: File) => {
@@ -31,14 +23,14 @@ export const MapList = () => {
         file,
         async ({ id, fileName }) => {
           console.log(`uploaded id ${id} filename ${fileName}`);
-          await getMaps();
+          await getAllMapsList();
         },
         (err) => {
           console.log(`upload error  ${err}`);
         },
       );
     },
-    [getMaps, sendMapFile],
+    [getAllMapsList, sendMapFile],
   );
 
   return (
@@ -54,8 +46,10 @@ export const MapList = () => {
         onAddClick={handleAddMap}
       />
       <IonList lines="none">
-        {mapList?.length && mapList?.length > 0 ? (
-          mapList.map((m) => <MapItem mapItem={m} key={m.id}></MapItem>)
+        {allMapsQuery?.getAllMapsList.allMapsList?.length ? (
+          allMapsQuery?.getAllMapsList.allMapsList?.map((m, i) => (
+            <MapItem mapItem={m} key={i}></MapItem>
+          ))
         ) : (
           <div> No maps found </div>
         )}

@@ -61,13 +61,13 @@ export class MapsResolver {
     return maps;
   }
 
-  // @Query(() => GetAllMapsListOutput)
-  // async getAllMapsList(
-  //   @Args('input') input: GetAllMapsListInput,
-  // ): Promise<GetAllMapsListOutput> {
-  //   const maps = await this.mapService.getAllMaps(input.lang);
-  //   return maps;
-  // }
+  @Query(() => GetAllMapsListOutput)
+  async getAllMapsList(
+    @Args('input') input: GetAllMapsListInput,
+  ): Promise<GetAllMapsListOutput> {
+    const maps = await this.mapService.getAllMapsList(input.lang);
+    return maps;
+  }
 
   @Query(() => GetOrigMapContentOutput)
   async getOrigMapContent(

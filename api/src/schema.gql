@@ -132,6 +132,14 @@ input FromWordAndDefintionlikeStringUpsertInput {
   wordlike_string: String!
 }
 
+input GetAllMapsListInput {
+  lang: LanguageInput
+}
+
+type GetAllMapsListOutput {
+  allMapsList: [MapFileOutput!]!
+}
+
 input GetOrigMapContentInput {
   original_map_id: ID!
 }
@@ -140,8 +148,11 @@ type GetOrigMapContentOutput {
   content: String!
   created_at: String!
   created_by: ID!
+  is_original: Boolean!
+  language: LanguageOutput!
   map_file_name: String!
   original_map_id: ID!
+  translated_map_id: ID
 }
 
 input GetOrigMapListInput {
@@ -172,6 +183,12 @@ input LanguageInput {
   language_code: String!
 }
 
+type LanguageOutput {
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -193,8 +210,11 @@ type LogoutOutput {
 type MapFileOutput {
   created_at: String!
   created_by: ID!
+  is_original: Boolean!
+  language: LanguageOutput!
   map_file_name: String!
   original_map_id: ID!
+  translated_map_id: ID
 }
 
 type Mutation {
@@ -387,6 +407,7 @@ type PostReadOutput {
 
 type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
+  getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
   getAllRecommendedTranslation(dialect_code: String!, geo_code: String!, language_code: String!): SiteTextTranslationWithVoteListOutput!
   getAllSiteTextDefinitions: SiteTextDefinitionListOutput!
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!

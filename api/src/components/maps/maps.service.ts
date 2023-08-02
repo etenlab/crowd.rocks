@@ -64,6 +64,9 @@ export class MapsService {
         fileBody += chunk;
       }
     }
+    const language_code = mapLanguage.lang.tag;
+    const dialect_code = mapLanguage.dialect?.tag;
+    const geo_code = mapLanguage.region?.tag;
 
     const { transformedSvgINode, foundWords } =
       this.parseSvgMapString(fileBody);
@@ -80,15 +83,17 @@ export class MapsService {
           fileBody,
           token,
           dbPoolClient,
-          language_code: mapLanguage.lang.tag,
-          dialect_code: mapLanguage.dialect?.tag,
-          geo_code: mapLanguage.region?.tag,
+          language_code,
+          dialect_code,
+          geo_code,
         });
 
       for (const word of foundWords) {
         const wordInput: WordUpsertInput = {
           wordlike_string: word,
-          language_code: mapLanguage.lang.tag,
+          language_code,
+          dialect_code,
+          geo_code,
         };
         const savedWord = await this.wordsService.upsertInTrn(
           wordInput,
@@ -125,8 +130,6 @@ export class MapsService {
         );
       }
 
-      // todo bind words to map and sustain other relations
-
       await dbPoolClient.query('COMMIT');
 
       return {
@@ -134,6 +137,12 @@ export class MapsService {
         original_map_id: map_id,
         created_at,
         created_by,
+        is_original: true,
+        language: {
+          language_code,
+          dialect_code,
+          geo_code,
+        },
       };
     } catch (error) {
       await dbPoolClient.query('ROLLBACK');
@@ -146,12 +155,15 @@ export class MapsService {
     return this.mapsRepository.getOrigMaps();
   }
 
-  // async getAllMaps(lang?: LanguageInput): Promise<GetAllMapsListOutput> {
-  //   const origMaps = this.mapsRepository.getOrigMaps(lang);
-  //   const translatedMaps = this.mapsRepository.getTranslatedMaps(lang);
-  //   const allMaps = { ...origMaps, ...translatedMaps }
-  //   return allMaps
-  // }
+  async getAllMapsList(lang?: LanguageInput): Promise<GetAllMapsListOutput> {
+    const origMaps = await this.mapsRepository.getOrigMaps(lang);
+    const translatedMaps = await this.mapsRepository.getTranslatedMaps(lang);
+    const allMapsList = [
+      ...origMaps.origMapList,
+      ...translatedMaps.origMapList,
+    ];
+    return { allMapsList };
+  }
 
   async getOrigMapContent(id: string): Promise<GetOrigMapContentOutput> {
     return this.mapsRepository.getOrigMapContent(id);

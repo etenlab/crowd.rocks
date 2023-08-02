@@ -1,12 +1,15 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { WordTranslations } from '../words/types';
-import { LanguageInput } from '../definitions/types';
+import { LanguageInput, LanguageOutput } from '../definitions/types';
 
 @ObjectType()
 export class MapFileOutput {
+  @Field(() => Boolean) is_original: boolean;
   @Field(() => ID) original_map_id: string;
+  @Field(() => ID, { nullable: true }) translated_map_id?: string;
   @Field(() => String) map_file_name: string;
   @Field(() => String) created_at: string;
+  @Field(() => LanguageOutput) language: LanguageOutput;
   @Field(() => ID) created_by: string;
 }
 @InputType()

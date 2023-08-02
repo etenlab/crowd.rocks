@@ -20,7 +20,12 @@ export const MapsPage: React.FC<RouteComponentProps> = ({
             />
             <Route
               exact
-              path={`${match.url}/details/:id`}
+              path={`${match.url}/details-original/:id`}
+              component={MapDetails}
+            />
+            <Route
+              exact
+              path={`${match.url}/details-translated/:id`}
               component={MapDetails}
             />
           </div>
