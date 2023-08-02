@@ -410,6 +410,7 @@ type Query {
   getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
   getAllRecommendedTranslation(dialect_code: String!, geo_code: String!, language_code: String!): SiteTextTranslationWithVoteListOutput!
   getAllSiteTextDefinitions: SiteTextDefinitionListOutput!
+  getAllSiteTextLanguageList: SiteTextLanguageListOutput!
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
   getOrigMapContent(input: GetOrigMapContentInput!): GetOrigMapContentOutput!
   getOrigMapWords(input: GetOrigMapWordsInput): GetOrigMapWordsOutput!
@@ -469,6 +470,17 @@ type SiteTextDefinitionListOutput {
   error: ErrorType!
   site_text_phrase_definition_list: [SiteTextPhraseDefinition]!
   site_text_word_definition_list: [SiteTextWordDefinition]!
+}
+
+type SiteTextLanguage {
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+}
+
+type SiteTextLanguageListOutput {
+  error: ErrorType!
+  site_text_language_list: [SiteTextLanguage]!
 }
 
 type SiteTextPhraseDefinition {

@@ -1,0 +1,50 @@
+# AWS env settings
+awsAccountId: '605254017010'
+awsRegion: 'us-east-2'
+
+# Prefix used to identify app CloudFormation component
+appPrefix: 'cb'
+
+# VPC configuration
+vpcCidr: '10.10.0.0/16'
+natGatewaysCount: 0
+
+# Env domain setup
+envSubdomain: 'prod'
+
+# App ECS cluster name
+ecsClusterName: 'prod-cluster'
+
+# S3 bucket names
+publicFilesBucketName: 'crowdrocks-public-files-prod'
+
+# System Manager params to create
+vpcSsmParam: '/prod/app-vpc-id'
+defaultEcsExecRoleSsmParam: '/prod/ecs-default-execution-role'
+defaultEcsTaskRoleSsmParam: '/prod/ecs-default-task-role'
+albArnSsmParam: '/prod/alb-arn'
+albSecurityGroupSsmParam: '/prod/alb-sg-id'
+albListenerSsmParam: '/prod/alb-listener-arn'
+dbSecurityGroupSsmParam: '/prod/db-sg-id'
+
+# Secrets Manager params to create
+dbCredentialSecret: 'prod/db/credentials'
+
+# Whether database is accessible outside of VPC
+dbPublicAccess: false
+
+# DNS setup
+dns:
+  - existingRootHostedZone: 'crowd.rocks'
+    rootDomainCertSsmParam: '/prod/crowd.rocks/root-domain-certificate'
+
+apiService:
+  albPort: 3000
+  dockerPort: 3000
+  priority: 10
+  rootdomain: 'crowd.rocks'
+  serviceName: 'crowdrocksApiServer'
+  dockerImageUrl: 'etenlab/crowd-rocks'
+  cpu: 2048
+  memory: 4096
+  healthCheckPath: '/'

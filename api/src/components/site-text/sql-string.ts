@@ -510,3 +510,49 @@ export function getDefinitionIdBySiteTextId(
     [site_text_id],
   ];
 }
+
+export type GetSiteTextLanguageList = {
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+};
+
+export function getSiteTextLanguageList(): [string, []] {
+  return [
+    `
+      select
+        ws.language_code as language_code,
+        ws.dialect_code as dialect_code,
+        ws.geo_code as geo_code
+      from site_text_translations as stts
+      join word_definitions as wds_from
+      on stts.from_type_is_word is true and stts.from_definition_id = wds_from.word_definition_id
+      join word_definitions as wds_to
+      on stts.to_type_is_word is true and stts.to_definition_id = wds_to.word_definition_id
+      join words as ws
+      on wds_from.word_id = ws.word_id or wds_to.word_id = ws.word_id
+
+      union distinct
+
+      select
+        ws.language_code as language_code,
+        ws.dialect_code as dialect_code,
+        ws.geo_code as geo_code
+      from site_text_translations as stts
+      join phrase_definitions as pds_from
+      on stts.from_type_is_word is false and stts.from_definition_id = pds_from.phrase_definition_id
+      join phrase_definitions as pds_to
+      on stts.to_type_is_word is false and stts.to_definition_id = pds_to.phrase_definition_id
+      join (
+        select
+          phrase_id,
+          words[1] as word_id
+        from phrases
+      ) as ps
+      on pds_from.phrase_id = ps.phrase_id or pds_to.phrase_id = ps.phrase_id
+      join words as ws
+      on ws.word_id = ps.word_id;
+    `,
+    [],
+  ];
+}

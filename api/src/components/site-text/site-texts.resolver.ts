@@ -30,6 +30,7 @@ import {
   SiteTextDefinitionListOutput,
   SiteTextTranslationUpsertInput,
   VoteStatusOutputRow,
+  SiteTextLanguageListOutput,
 } from './types';
 
 import {
@@ -289,5 +290,12 @@ export class SiteTextsResolver {
     console.log('site text getAllSiteTextDefinitions resolver');
 
     return this.siteTextService.getAllSiteTextDefinitions();
+  }
+
+  @Query(() => SiteTextLanguageListOutput)
+  async getAllSiteTextLanguageList(): Promise<SiteTextLanguageListOutput> {
+    console.log('site text getAllSiteTextLanguageList resolver');
+
+    return this.siteTextService.getAllSiteTextLanguageList();
   }
 }
