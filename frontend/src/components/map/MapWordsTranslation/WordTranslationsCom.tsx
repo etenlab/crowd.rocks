@@ -10,6 +10,7 @@ import {
   useAddWordAsTranslationForWordMutation,
   useToggleWordTranslationVoteStatusMutation,
 } from '../../../generated/graphql';
+import { DEFAULT_MAP_WORD_DEFINITION } from '../../../const/mapsConst';
 
 interface WordTranslationsComProps {
   wordWithTranslations: WordTranslations;
@@ -113,19 +114,23 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
 
       <StTranslationsDiv>
         {wordWithTranslations.translations &&
-          wordWithTranslations.translations.map((wtr) => (
-            <StTranslationDiv key={wtr.word_id}>
-              <WordCard word={wtr.word} definition={wtr.definition} />
-              <VoteButtonsVertical
-                onVoteUpClick={() => handleVoteClick(wtr.translation_id, true)}
-                onVoteDownClick={() =>
-                  handleVoteClick(wtr.translation_id, false)
-                }
-                upVotes={Number(wtr.up_votes || 0)}
-                downVotes={Number(wtr.down_votes || 0)}
-              />
-            </StTranslationDiv>
-          ))}
+          wordWithTranslations.translations
+            .sort((wtr1, wtr2) => wtr1.word.localeCompare(wtr2.word))
+            .map((wtr) => (
+              <StTranslationDiv key={wtr.word_id}>
+                <WordCard word={wtr.word} definition={wtr.definition} />
+                <VoteButtonsVertical
+                  onVoteUpClick={() =>
+                    handleVoteClick(wtr.translation_id, true)
+                  }
+                  onVoteDownClick={() =>
+                    handleVoteClick(wtr.translation_id, false)
+                  }
+                  upVotes={Number(wtr.up_votes || 0)}
+                  downVotes={Number(wtr.down_votes || 0)}
+                />
+              </StTranslationDiv>
+            ))}
       </StTranslationsDiv>
 
       <StNewTranslationDiv>
@@ -135,9 +140,11 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
           ref={newTrRef}
         />
         <IonInput
-          label="Description"
+          label="Definition"
           labelPlacement="floating"
           ref={newDefinitionRef}
+          value={DEFAULT_MAP_WORD_DEFINITION}
+          disabled
         />
         <StButton onClick={() => handleNewTranslation()}>Submit</StButton>
       </StNewTranslationDiv>

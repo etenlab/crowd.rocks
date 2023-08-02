@@ -2,11 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { PoolClient } from 'pg';
 import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
+import { LanguageInput } from '../definitions/types';
 import { WordTranslations, WordWithVotes } from '../words/types';
 import {
   GetOrigMapContentOutput,
   GetOrigMapsListOutput,
   GetOrigMapWordsOutput,
+  GetTranslatedMapContentOutput,
+  MapFileOutput,
   OriginalMapWordInput,
 } from './types';
 
@@ -14,12 +17,29 @@ interface ISaveMapParams {
   mapFileName: string;
   fileBody: string;
   token: string;
+  language_code: string;
+  dialect_code?: string;
+  geo_code?: string;
+  dbPoolClient?: PoolClient;
+}
+export interface ISaveTranslatedMapParams {
+  original_map_id: string;
+  fileBody: string;
+  token: string;
+  t_language_code: string;
+  t_dialect_code?: string;
+  t_geo_code?: string;
   dbPoolClient?: PoolClient;
 }
 
 interface ISaveMapRes {
   map_file_name: string;
-  original_map_id: string;
+  map_id: string;
+  created_at: string;
+  created_by: string;
+}
+interface ISaveTranslatedMapRes {
+  map_id: string;
   created_at: string;
   created_by: string;
 }
@@ -46,6 +66,9 @@ export class MapsRepository {
     fileBody,
     token,
     dbPoolClient,
+    language_code,
+    dialect_code,
+    geo_code,
   }: ISaveMapParams): Promise<ISaveMapRes> {
     const poolClient = dbPoolClient
       ? dbPoolClient // use given pool client
@@ -53,33 +76,187 @@ export class MapsRepository {
 
     const res = await poolClient.query(
       `
-          call original_map_create($1,$2,$3, null,null,null,null)
+          call original_map_create($1,$2,$3,$4,$5,$6, null,null,null,null)
         `,
-      [mapFileName, fileBody, token],
+      [mapFileName, fileBody, token, language_code, dialect_code, geo_code],
     );
 
     return {
       map_file_name: mapFileName,
-      original_map_id: res.rows[0].p_original_map_id,
+      map_id: res.rows[0].p_map_id,
       created_at: res.rows[0].p_created_at,
       created_by: res.rows[0].p_created_by,
     };
   }
 
-  async getOrigMaps(): Promise<GetOrigMapsListOutput> {
-    const resQ = await this.pg.pool.query(
-      `
-        select original_map_id, map_file_name, created_at, created_by from original_maps
-      `,
-      [],
-    );
+  /**
+   * dbPoolClient is optional. If providerd, then it will be used to run query (useful for SQL transactions)
+   * if not - then new client will be get from pg.pool
+   */
+  async saveTranslatedMap({
+    original_map_id,
+    fileBody,
+    dbPoolClient,
+    token,
+    t_language_code,
+    t_dialect_code,
+    t_geo_code,
+  }: ISaveTranslatedMapParams): Promise<ISaveTranslatedMapRes | null> {
+    const poolClient = dbPoolClient
+      ? dbPoolClient // use given pool client
+      : this.pg.pool; //some `random` client from pool will be used
 
-    const origMapList = resQ.rows.map(
-      ({ original_map_id, map_file_name, created_at, created_by }) => ({
+    const userQ = await poolClient.query(
+      `select user_id from tokens where token = $1`,
+      [token],
+    );
+    const userId = userQ.rows[0].user_id;
+    if (!userId) throw new Error('not Authorized');
+
+    const params = [original_map_id, fileBody, userId, t_language_code];
+    params.push(t_dialect_code ? t_dialect_code : null);
+    params.push(t_geo_code ? t_geo_code : null);
+    const sqlStr = `
+      insert into
+        translated_maps(
+          original_map_id,
+          content,
+          created_by,
+          language_code,
+          dialect_code,
+          geo_code
+        )
+        values
+        (
+          $1,
+          $2,
+          $3,
+          $4,
+          $5,
+          $6
+        )
+        on conflict(original_map_id, language_code, dialect_code, geo_code) do update
+          set content = EXCLUDED.content
+        returning 
+          translated_map_id, created_by, created_at
+      `;
+    const res = await poolClient.query(sqlStr, params);
+
+    return {
+      map_id: res.rows[0].translated_map_id,
+      created_at: res.rows[0].created_at,
+      created_by: res.rows[0].created_by,
+    };
+  }
+
+  async getOrigMaps(lang?: LanguageInput): Promise<GetOrigMapsListOutput> {
+    const params = [];
+    let languageClause = '';
+    if (lang?.language_code) {
+      params.push(lang?.language_code);
+      languageClause += ` and where language_code = $${params.length}`;
+    }
+    if (lang?.dialect_code) {
+      params.push(lang?.dialect_code);
+      languageClause += ` and where dialect_code = $${params.length}`;
+    }
+    if (lang?.geo_code) {
+      params.push(lang?.geo_code);
+      languageClause += ` and where geo_code = $${params.length}`;
+    }
+    const sqlStr = `
+        select
+          original_map_id,
+          map_file_name,
+          created_at,
+          created_by,
+          language_code ,
+          dialect_code ,
+          geo_code
+        from
+          original_maps
+        where true
+        ${languageClause}
+      `;
+    const resQ = await this.pg.pool.query(sqlStr, []);
+
+    const origMapList = resQ.rows.map<MapFileOutput>(
+      ({
         original_map_id,
         map_file_name,
         created_at,
         created_by,
+        language_code,
+        dialect_code,
+        geo_code,
+      }) => ({
+        original_map_id,
+        map_file_name,
+        created_at,
+        created_by,
+        is_original: true,
+        language: { language_code, dialect_code, geo_code },
+      }),
+    );
+
+    return { origMapList };
+  }
+
+  async getTranslatedMaps(
+    lang?: LanguageInput,
+  ): Promise<GetOrigMapsListOutput> {
+    const params = [];
+    let languageClause = '';
+    if (lang?.language_code) {
+      params.push(lang?.language_code);
+      languageClause += ` and where language_code = $${params.length}`;
+    }
+    if (lang?.dialect_code) {
+      params.push(lang?.dialect_code);
+      languageClause += ` and where dialect_code = $${params.length}`;
+    }
+    if (lang?.geo_code) {
+      params.push(lang?.geo_code);
+      languageClause += ` and where geo_code = $${params.length}`;
+    }
+    const sqlStr = `
+      select
+        tm.translated_map_id,
+        tm.original_map_id,
+        om.map_file_name,
+        tm.created_at,
+        tm.created_by,
+        tm.language_code ,
+        tm.dialect_code ,
+        tm.geo_code
+      from
+        translated_maps tm
+      left join original_maps om
+        on tm.original_map_id = om.original_map_id
+      where
+        true
+        ${languageClause}
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, []);
+
+    const origMapList = resQ.rows.map<MapFileOutput>(
+      ({
+        translated_map_id,
+        original_map_id,
+        map_file_name,
+        created_at,
+        created_by,
+        language_code,
+        dialect_code,
+        geo_code,
+      }) => ({
+        translated_map_id,
+        original_map_id,
+        map_file_name,
+        created_at,
+        created_by,
+        is_original: false,
+        language: { language_code, dialect_code, geo_code },
       }),
     );
 
@@ -89,7 +266,8 @@ export class MapsRepository {
   async getOrigMapContent(id: string): Promise<GetOrigMapContentOutput> {
     const resQ = await this.pg.pool.query(
       `
-        select content, map_file_name, created_at, created_by from original_maps where original_map_id = $1
+        select content, map_file_name, created_at, created_by, language_code,	dialect_code,	geo_code
+        from original_maps where original_map_id = $1
       `,
       [id],
     );
@@ -100,6 +278,52 @@ export class MapsRepository {
       created_at: resQ.rows[0].created_at,
       created_by: resQ.rows[0].created_by,
       content: resQ.rows[0].content,
+      is_original: true,
+      language: {
+        language_code: resQ.rows[0].language_code,
+        dialect_code: resQ.rows[0].dialect_code,
+        geo_code: resQ.rows[0].geo_code,
+      },
+    };
+  }
+
+  async getTranslatedMapContent(
+    id: string,
+  ): Promise<GetTranslatedMapContentOutput> {
+    const resQ = await this.pg.pool.query(
+      `
+      select
+        tm.translated_map_id,
+        tm.original_map_id,
+        om.map_file_name,
+        tm.created_at,
+        tm.created_by,
+        tm.language_code ,
+        tm.dialect_code ,
+        tm.geo_code,
+        tm.content
+      from
+        translated_maps tm
+      left join original_maps om
+        on tm.original_map_id = om.original_map_id
+      where
+        translated_map_id = $1
+      `,
+      [id],
+    );
+
+    return {
+      original_map_id: String(id),
+      map_file_name: resQ.rows[0].map_file_name,
+      created_at: resQ.rows[0].created_at,
+      created_by: resQ.rows[0].created_by,
+      content: resQ.rows[0].content,
+      is_original: true,
+      language: {
+        language_code: resQ.rows[0].language_code,
+        dialect_code: resQ.rows[0].dialect_code,
+        geo_code: resQ.rows[0].geo_code,
+      },
     };
   }
 
@@ -261,5 +485,43 @@ export class MapsRepository {
     return {
       origMapWords: words,
     };
+  }
+
+  async getOrigMapIdsByWordDefinition(
+    wordDefinitionId: string,
+  ): Promise<string[]> {
+    const params = [wordDefinitionId];
+    const sqlStr = `
+      select distinct 
+        om.original_map_id
+      from
+        original_maps om
+      left join original_map_words omw on
+        om.original_map_id = omw.original_map_id
+      left join words w on
+        omw.word_id = w.word_id 
+      left join word_definitions wd on w.word_id = wd.word_id 
+      where wd.word_definition_id  = $1
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    return resQ.rows.map((row) => row.original_map_id);
+  }
+
+  async upsertTranslatedMapWord(
+    translated_map_id,
+    original_word_id,
+    translated_word_id,
+  ): Promise<string> {
+    const params = [translated_map_id, original_word_id, translated_word_id];
+    const sqlStr = `
+      insert into translated_map_words(translated_map_id, original_word_id, translated_word_id)
+      values($1, $2, $3)
+      on conflict (translated_map_id, original_word_id) do update set original_word_id = excluded.original_word_id
+      on conflict (translated_word_id, original_word_id) do update set original_word_id = excluded.original_word_id
+      returning translated_map_word_id
+    `;
+
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    return resQ.rows[0].translated_map_word_id;
   }
 }
