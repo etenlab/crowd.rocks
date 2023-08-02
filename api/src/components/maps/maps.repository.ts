@@ -8,6 +8,7 @@ import {
   GetOrigMapContentOutput,
   GetOrigMapsListOutput,
   GetOrigMapWordsOutput,
+  GetTranslatedMapContentOutput,
   MapFileOutput,
   OriginalMapWordInput,
 } from './types';
@@ -267,6 +268,46 @@ export class MapsRepository {
       `
         select content, map_file_name, created_at, created_by, language_code,	dialect_code,	geo_code
         from original_maps where original_map_id = $1
+      `,
+      [id],
+    );
+
+    return {
+      original_map_id: String(id),
+      map_file_name: resQ.rows[0].map_file_name,
+      created_at: resQ.rows[0].created_at,
+      created_by: resQ.rows[0].created_by,
+      content: resQ.rows[0].content,
+      is_original: true,
+      language: {
+        language_code: resQ.rows[0].language_code,
+        dialect_code: resQ.rows[0].dialect_code,
+        geo_code: resQ.rows[0].geo_code,
+      },
+    };
+  }
+
+  async getTranslatedMapContent(
+    id: string,
+  ): Promise<GetTranslatedMapContentOutput> {
+    const resQ = await this.pg.pool.query(
+      `
+      select
+        tm.translated_map_id,
+        tm.original_map_id,
+        om.map_file_name,
+        tm.created_at,
+        tm.created_by,
+        tm.language_code ,
+        tm.dialect_code ,
+        tm.geo_code,
+        tm.content
+      from
+        translated_maps tm
+      left join original_maps om
+        on tm.original_map_id = om.original_map_id
+      where
+        translated_map_id = $1
       `,
       [id],
     );

@@ -13,6 +13,8 @@ import {
   GetOrigMapsListOutput,
   GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
+  GetTranslatedMapContentInput,
+  GetTranslatedMapContentOutput,
   MapFileOutput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
@@ -78,6 +80,16 @@ export class MapsResolver {
 
     const mapContent = await this.mapService.getOrigMapContent(
       input.original_map_id,
+    );
+    return mapContent;
+  }
+
+  @Query(() => GetTranslatedMapContentOutput)
+  async getTranslatedMapContent(
+    @Args('input') input: GetTranslatedMapContentInput,
+  ): Promise<GetTranslatedMapContentOutput> {
+    const mapContent = await this.mapService.getTranslatedMapContent(
+      input.translated_map_id,
     );
     return mapContent;
   }

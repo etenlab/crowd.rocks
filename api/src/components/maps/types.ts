@@ -42,6 +42,13 @@ export class GetOrigMapContentOutput extends MapFileOutput {
 }
 
 @InputType()
+export class GetTranslatedMapContentInput {
+  @Field(() => ID) translated_map_id: string;
+}
+@ObjectType()
+export class GetTranslatedMapContentOutput extends GetOrigMapContentOutput {}
+
+@InputType()
 export class GetOrigMapWordsInput {
   @Field(() => ID, { nullable: true }) original_map_id?: string;
   @Field(() => String, { nullable: true }) o_language_code?: string;

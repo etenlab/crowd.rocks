@@ -202,6 +202,22 @@ export type GetOrigMapsListOutput = {
   origMapList: Array<MapFileOutput>;
 };
 
+export type GetTranslatedMapContentInput = {
+  translated_map_id: Scalars['ID']['input'];
+};
+
+export type GetTranslatedMapContentOutput = {
+  __typename?: 'GetTranslatedMapContentOutput';
+  content: Scalars['String']['output'];
+  created_at: Scalars['String']['output'];
+  created_by: Scalars['ID']['output'];
+  is_original: Scalars['Boolean']['output'];
+  language: LanguageOutput;
+  map_file_name: Scalars['String']['output'];
+  original_map_id: Scalars['ID']['output'];
+  translated_map_id?: Maybe<Scalars['ID']['output']>;
+};
+
 export type LanguageInput = {
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
@@ -655,6 +671,7 @@ export type Query = {
   getPhraseDefinitionsByLanguage: PhraseDefinitionWithVoteListOutput;
   getPhraseVoteStatus: PhraseVoteStatusOutputRow;
   getRecommendedTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteOutput;
+  getTranslatedMapContent: GetTranslatedMapContentOutput;
   getVoteStatus: SiteTextTranslationVoteReadOutput;
   getWordDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   getWordDefinitionsByLanguage: WordDefinitionWithVoteListOutput;
@@ -739,6 +756,11 @@ export type QueryGetRecommendedTranslationFromSiteTextDefinitionIdArgs = {
   language_code: Scalars['String']['input'];
   site_text_id: Scalars['String']['input'];
   site_text_type_is_word: Scalars['Boolean']['input'];
+};
+
+
+export type QueryGetTranslatedMapContentArgs = {
+  input: GetTranslatedMapContentInput;
 };
 
 
@@ -1368,6 +1390,13 @@ export type GetAllMapsListQueryVariables = Exact<{
 
 export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'GetAllMapsListOutput', allMapsList: Array<{ __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, created_at: string, created_by: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
+export type GetTranslatedMapContentQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'GetTranslatedMapContentOutput', translated_map_id?: string | null, map_file_name: string, created_at: string, created_by: string, content: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+
 export type VersionFieldsFragment = { __typename?: 'Version', version_id: string, post_id: number, created_at: string, license_title: string, content: string };
 
 export type PostFieldsFragment = { __typename?: 'Post', post_id: string, created_at: string, created_by: number };
@@ -1951,6 +1980,50 @@ export function useGetAllMapsListLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
 export type GetAllMapsListQueryHookResult = ReturnType<typeof useGetAllMapsListQuery>;
 export type GetAllMapsListLazyQueryHookResult = ReturnType<typeof useGetAllMapsListLazyQuery>;
 export type GetAllMapsListQueryResult = Apollo.QueryResult<GetAllMapsListQuery, GetAllMapsListQueryVariables>;
+export const GetTranslatedMapContentDocument = gql`
+    query GetTranslatedMapContent($id: ID!) {
+  getTranslatedMapContent(input: {translated_map_id: $id}) {
+    translated_map_id
+    map_file_name
+    language {
+      language_code
+      dialect_code
+      geo_code
+    }
+    created_at
+    created_by
+    content
+  }
+}
+    `;
+
+/**
+ * __useGetTranslatedMapContentQuery__
+ *
+ * To run a query within a React component, call `useGetTranslatedMapContentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetTranslatedMapContentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetTranslatedMapContentQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetTranslatedMapContentQuery(baseOptions: Apollo.QueryHookOptions<GetTranslatedMapContentQuery, GetTranslatedMapContentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetTranslatedMapContentQuery, GetTranslatedMapContentQueryVariables>(GetTranslatedMapContentDocument, options);
+      }
+export function useGetTranslatedMapContentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTranslatedMapContentQuery, GetTranslatedMapContentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetTranslatedMapContentQuery, GetTranslatedMapContentQueryVariables>(GetTranslatedMapContentDocument, options);
+        }
+export type GetTranslatedMapContentQueryHookResult = ReturnType<typeof useGetTranslatedMapContentQuery>;
+export type GetTranslatedMapContentLazyQueryHookResult = ReturnType<typeof useGetTranslatedMapContentLazyQuery>;
+export type GetTranslatedMapContentQueryResult = Apollo.QueryResult<GetTranslatedMapContentQuery, GetTranslatedMapContentQueryVariables>;
 export const PostCreateDocument = gql`
     mutation PostCreate($content: String!, $parentId: Int) {
   postCreateResolver(input: {content: $content, parent_id: $parentId}) {
@@ -2566,6 +2639,7 @@ export const namedOperations = {
   Query: {
     GetOrigMapWords: 'GetOrigMapWords',
     GetAllMapsList: 'GetAllMapsList',
+    GetTranslatedMapContent: 'GetTranslatedMapContent',
     PostRead: 'PostRead',
     GetAllSiteTextDefinitions: 'GetAllSiteTextDefinitions',
     GetAllTranslationFromSiteTextDefinitionID: 'GetAllTranslationFromSiteTextDefinitionID',

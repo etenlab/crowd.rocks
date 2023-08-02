@@ -169,6 +169,10 @@ export class MapsService {
     return this.mapsRepository.getOrigMapContent(id);
   }
 
+  async getTranslatedMapContent(id: string): Promise<GetOrigMapContentOutput> {
+    return this.mapsRepository.getTranslatedMapContent(id);
+  }
+
   /**
    * Since we must concatenate word if it is divided into several subtags inside some texty tag,
    * we also have transformed file with replaced (concatenated) each texty tag.

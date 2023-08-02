@@ -3,6 +3,7 @@ import { MapList } from './MapList/MapsList';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import { MapDetails } from './MapDetails/MapDetails';
 import { MapWordsTranslation } from './MapWordsTranslation/MapWordsTranslation';
+import { MapTranslatedDetails } from './MapDetails/MapTranslatedDetails';
 
 export const MapsPage: React.FC<RouteComponentProps> = ({
   match,
@@ -26,7 +27,7 @@ export const MapsPage: React.FC<RouteComponentProps> = ({
             <Route
               exact
               path={`${match.url}/details-translated/:id`}
-              component={MapDetails}
+              component={MapTranslatedDetails}
             />
           </div>
         </div>

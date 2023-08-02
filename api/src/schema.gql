@@ -177,6 +177,21 @@ type GetOrigMapsListOutput {
   origMapList: [MapFileOutput!]!
 }
 
+input GetTranslatedMapContentInput {
+  translated_map_id: ID!
+}
+
+type GetTranslatedMapContentOutput {
+  content: String!
+  created_at: String!
+  created_by: ID!
+  is_original: Boolean!
+  language: LanguageOutput!
+  map_file_name: String!
+  original_map_id: ID!
+  translated_map_id: ID
+}
+
 input LanguageInput {
   dialect_code: String
   geo_code: String
@@ -419,6 +434,7 @@ type Query {
   getPhraseDefinitionsByLanguage(input: LanguageInput!): PhraseDefinitionWithVoteListOutput!
   getPhraseVoteStatus(phrase_id: ID!): PhraseVoteStatusOutputRow!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
+  getTranslatedMapContent(input: GetTranslatedMapContentInput!): GetTranslatedMapContentOutput!
   getVoteStatus(site_text_translation_id: String!): SiteTextTranslationVoteReadOutput!
   getWordDefinitionVoteStatus(word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getWordDefinitionsByLanguage(input: LanguageInput!): WordDefinitionWithVoteListOutput!
