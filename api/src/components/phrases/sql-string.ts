@@ -146,30 +146,42 @@ export function getPhraseListByLang({
   language_code,
   dialect_code,
   geo_code,
+  filter,
 }: {
   language_code: string;
   dialect_code: string | null;
   geo_code: string | null;
-}): [string, [string, string, string] | [string, string] | [string]] {
+  filter: string | null;
+}): [
+  string,
+  (
+    | [string, string, string, string]
+    | [string, string, string]
+    | [string, string]
+    | [string]
+  ),
+] {
   let wherePlsStr = '';
-  let returnArr: [string, string, string] | [string, string] | [string] = [
-    language_code,
-  ];
+  let returnArr:
+    | [string, string, string, string]
+    | [string, string, string]
+    | [string, string]
+    | [string] = [language_code];
 
   if (dialect_code && geo_code) {
     wherePlsStr = `
-      and dialect_code = $2
-      and geo_code = $3
+      and w.dialect_code = $2
+      and w.geo_code = $3
     `;
     returnArr = [...returnArr, dialect_code, geo_code];
   } else if (dialect_code && !geo_code) {
     wherePlsStr = `
-      and dialect_code = $2
+      and w.dialect_code = $2
     `;
     returnArr = [...returnArr, dialect_code];
   } else if (!dialect_code && geo_code) {
     wherePlsStr = `
-      and geo_code = $2
+      and w.geo_code = $2
     `;
     returnArr = [...returnArr, geo_code];
   } else if (!dialect_code && !geo_code) {
@@ -177,12 +189,22 @@ export function getPhraseListByLang({
     returnArr = [...returnArr];
   }
 
+  if (filter && filter.trim().length > 0) {
+    wherePlsStr = `
+      ${wherePlsStr}
+      and p.phraselike_string like $${returnArr.length + 1}
+    `;
+    returnArr = [...returnArr, `%${filter.trim()}%`];
+  }
+
   return [
     `
       select 
-        phrase_id
-      from phrases
-      where language_code = $1
+        p.phrase_id
+      from phrases as p
+      join words as w
+      on w.word_id = any(p.words)
+      where w.language_code = $1
         ${wherePlsStr};
     `,
     [...returnArr],
