@@ -23,7 +23,7 @@ import { LanguageInput } from 'src/components/common/types';
 @Resolver(Word)
 export class WordsResolver {
   constructor(
-    private wordService: WordsService,
+    private wordsService: WordsService,
     private wordVoteService: WordVotesService,
   ) {}
 
@@ -31,7 +31,7 @@ export class WordsResolver {
   async wordRead(@Args('input') input: WordReadInput): Promise<WordReadOutput> {
     console.log('word read resolver, word_id:', input.word_id);
 
-    return this.wordService.read(input);
+    return this.wordsService.read(input);
   }
 
   @Mutation(() => WordUpsertOutput)
@@ -41,7 +41,7 @@ export class WordsResolver {
   ): Promise<WordUpsertOutput> {
     console.log('word upsert resolver, string: ', input.wordlike_string);
 
-    return this.wordService.upsert(input, getBearer(req));
+    return this.wordsService.upsert(input, getBearer(req));
   }
 
   @Query(() => WordVoteOutput)
@@ -96,7 +96,7 @@ export class WordsResolver {
       JSON.stringify(input, null, 2),
     );
 
-    return this.wordService.getWordsByLanguage(input);
+    return this.wordsService.getWordsByLanguage(input);
   }
 
   @Query(() => WordWithVoteOutput)
@@ -105,6 +105,6 @@ export class WordsResolver {
   ): Promise<WordWithVoteOutput> {
     console.log('getWordWithVoteById resolver', word_id);
 
-    return this.wordService.getWordWithVoteById(+word_id);
+    return this.wordsService.getWordWithVoteById(+word_id);
   }
 }

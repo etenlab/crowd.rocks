@@ -4,28 +4,16 @@ import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { styled } from 'styled-components';
 import { TranslatedWordCards } from '../../word/TranslatedWordCards/TranslatedWordCards';
-import {
-  WordTranslations,
-  useGetOrigMapWordsLazyQuery,
-} from '../../../generated/graphql';
+import { useGetOrigMapWordsLazyQuery } from '../../../generated/graphql';
 import { WordTranslationsCom } from './WordTranslationsCom';
 
 interface MapWordsTranslationProps extends RouteComponentProps<{}> {}
 
 export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
-  // const [sourceLang, setSourceLang] = useState<LanguageInfo>();
   const [targetLang, setTargetLang] = useState<LanguageInfo>();
   const [selectedWordId, setSelectedWordId] = useState<string>();
 
-  const [
-    origMapWordsRead,
-    {
-      data: wordsData,
-      // error: wordsError,
-      // loading: wordsLoading,
-      // called: wordsCalled,
-    },
-  ] = useGetOrigMapWordsLazyQuery();
+  const [origMapWordsRead, { data: wordsData }] = useGetOrigMapWordsLazyQuery();
 
   const fetchMapWords = useCallback(() => {
     if (!targetLang?.lang.tag) {
@@ -87,13 +75,15 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
           </LangSelectorBox>
           <WordsBox>
             {wordsData &&
-              wordsData.getOrigMapWords.origMapWords.map((omw) => (
-                <TranslatedWordCards
-                  key={omw.word_id}
-                  wordTranslated={omw}
-                  onClick={() => setSelectedWordId(omw.word_id)}
-                />
-              ))}
+              wordsData.getOrigMapWords.origMapWords
+                .sort((omw1, omw2) => omw1.word.localeCompare(omw2.word))
+                .map((omw) => (
+                  <TranslatedWordCards
+                    key={omw.word_id}
+                    wordTranslated={omw}
+                    onClick={() => setSelectedWordId(omw.word_id)}
+                  />
+                ))}
           </WordsBox>
         </>
       ) : (

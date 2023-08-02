@@ -239,7 +239,8 @@ create table word_definitions(
   word_id bigint not null references words(word_id),
   definition text not null,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (word_id, definition)
 );
 
 -- tags
@@ -573,6 +574,9 @@ create table site_text_translation_votes(
 create table original_maps(
   original_map_id bigserial primary key,
   map_file_name varchar(256) unique not null,
+  language_code varchar(32) not null,
+  dialect_code varchar(32),
+  geo_code varchar(32),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
   content text not null
@@ -586,6 +590,16 @@ create table original_map_words(
 );
 ALTER TABLE public.original_map_words ADD CONSTRAINT original_map_word_unq UNIQUE (word_id,original_map_id);
 
+create table translated_map_words(
+  translated_map_word_id bigserial primary key,
+  translated_map_id bigint not null references original_maps(original_map_id),
+  original_word_id bigint not null references words(word_id),
+  translated_word_id bigint not null references words(word_id),
+  updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE public.translated_map_words ADD CONSTRAINT translated_map_word_unq UNIQUE (original_word_id, translated_map_id);
+ALTER TABLE public.translated_map_words ADD CONSTRAINT map_original_word_translated_word_unq UNIQUE (original_word_id, translated_word_id);
+
 create table translated_maps(
   translated_map_id bigserial primary key,
   original_map_id bigint not null references original_maps(original_map_id),
@@ -596,3 +610,6 @@ create table translated_maps(
   created_by bigint not null references users(user_id),
   content text not null
 );
+CREATE UNIQUE INDEX original_map_id_lang_unq
+ON public.translated_maps (original_map_id, language_code, dialect_code, geo_code)
+nulls not distinct

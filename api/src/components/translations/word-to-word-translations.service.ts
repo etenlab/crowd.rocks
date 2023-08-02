@@ -8,6 +8,7 @@ import {
   AddWordAsTranslationForWordOutput,
   WordToWordTranslationReadOutput,
   WordToWordTranslationUpsertOutput,
+  WordTrVoteStatusOutputRow,
 } from './types';
 
 import {
@@ -17,8 +18,14 @@ import {
   WordToWordTranslationUpsertProcedureOutputRow,
 } from './sql-string';
 import { WordsService } from '../words/words.service';
-import { WordUpsertInput } from '../words/types';
+import {
+  WordTranslations,
+  WordUpsertInput,
+  WordWithVotes,
+} from '../words/types';
 import { PoolClient } from 'pg';
+import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
+import { LanguageInput } from 'src/components/common/types';
 
 @Injectable()
 export class WordToWordTranslationsService {
@@ -26,6 +33,7 @@ export class WordToWordTranslationsService {
     private pg: PostgresService,
     private wordDefinitionService: WordDefinitionsService,
     private wordsService: WordsService,
+    private wordToWordTranslationRepository: WordToWordTranslationRepository,
   ) {}
 
   async read(id: number): Promise<WordToWordTranslationReadOutput> {
@@ -216,4 +224,82 @@ export class WordToWordTranslationsService {
       dbPoolClient.release();
     }
   };
+
+  async toggleVoteStatus(
+    word_to_word_translation_id: string,
+    vote: boolean,
+    token: string,
+  ): Promise<WordTrVoteStatusOutputRow> {
+    const { word_to_word_translation_vote_id, error: error } =
+      await this.wordToWordTranslationRepository.toggleVoteStatus({
+        word_to_word_translation_id,
+        vote,
+        token,
+      });
+    if (error !== ErrorType.NoError || !word_to_word_translation_vote_id) {
+      throw new Error('Error with voting');
+    }
+
+    const res = await this.wordToWordTranslationRepository.getVotesStatus(
+      word_to_word_translation_id,
+    );
+
+    return {
+      vote_status: {
+        upvotes: res.vote_status.upvotes,
+        downvotes: res.vote_status.downvotes,
+        word_to_word_translation_id:
+          res.vote_status.word_to_word_translation_id,
+      },
+      error,
+    };
+  }
+
+  chooseBestTranslation(
+    wordTranslated: WordTranslations,
+    langRestrictions?: LanguageInput,
+  ): WordWithVotes {
+    const res = wordTranslated?.translations?.reduce((bestTr, currTr) => {
+      if (
+        langRestrictions?.language_code &&
+        currTr.language_code !== langRestrictions.language_code
+      ) {
+        return bestTr;
+      }
+
+      if (
+        langRestrictions?.dialect_code &&
+        currTr.dialect_code !== langRestrictions.dialect_code
+      ) {
+        return bestTr;
+      }
+
+      if (
+        langRestrictions?.geo_code &&
+        currTr.geo_code !== langRestrictions.geo_code
+      ) {
+        return bestTr;
+      }
+
+      if (bestTr?.up_votes === undefined) {
+        return currTr;
+      }
+
+      const bestTrTotal =
+        Number(bestTr?.up_votes || 0) - Number(bestTr?.down_votes || 0);
+      const currTrTotal =
+        Number(currTr?.up_votes || 0) - Number(currTr?.down_votes || 0);
+      if (currTrTotal > bestTrTotal) {
+        return currTr;
+      }
+      return bestTr;
+    }, {} as WordWithVotes);
+    return res;
+  }
+
+  async getDefinitionsIds(word_to_word_translation_id: string) {
+    return this.wordToWordTranslationRepository.getDefinitionsIds(
+      word_to_word_translation_id,
+    );
+  }
 }

@@ -10,6 +10,8 @@ import { WordToPhraseTranslationsService } from './word-to-phrase-translations.s
 import { PhraseToPhraseTranslationsService } from './phrase-to-phrase-translations.service';
 import { WordsModule } from '../words/words.module';
 import { AuthenticationModule } from '../authentication/authentication.module';
+import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
+import { MapsModule } from '../maps/maps.module';
 
 @Module({
   imports: [
@@ -17,12 +19,14 @@ import { AuthenticationModule } from '../authentication/authentication.module';
     DefinitionsModule,
     WordsModule,
     AuthenticationModule,
+    forwardRef(() => MapsModule),
   ],
   providers: [
     TranslationsResolver,
     WordToWordTranslationsService,
     WordToPhraseTranslationsService,
     PhraseToPhraseTranslationsService,
+    WordToWordTranslationRepository,
   ],
   exports: [
     WordToWordTranslationsService,

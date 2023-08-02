@@ -132,6 +132,14 @@ input FromWordAndDefintionlikeStringUpsertInput {
   wordlike_string: String!
 }
 
+input GetAllMapsListInput {
+  lang: LanguageInput
+}
+
+type GetAllMapsListOutput {
+  allMapsList: [MapFileOutput!]!
+}
+
 input GetOrigMapContentInput {
   original_map_id: ID!
 }
@@ -140,8 +148,11 @@ type GetOrigMapContentOutput {
   content: String!
   created_at: String!
   created_by: ID!
+  is_original: Boolean!
+  language: LanguageOutput!
   map_file_name: String!
   original_map_id: ID!
+  translated_map_id: ID
 }
 
 input GetOrigMapListInput {
@@ -166,9 +177,30 @@ type GetOrigMapsListOutput {
   origMapList: [MapFileOutput!]!
 }
 
+input GetTranslatedMapContentInput {
+  translated_map_id: ID!
+}
+
+type GetTranslatedMapContentOutput {
+  content: String!
+  created_at: String!
+  created_by: ID!
+  is_original: Boolean!
+  language: LanguageOutput!
+  map_file_name: String!
+  original_map_id: ID!
+  translated_map_id: ID
+}
+
 input LanguageInput {
   dialect_code: String
   filter: String
+  geo_code: String
+  language_code: String!
+}
+
+type LanguageOutput {
+  dialect_code: String
   geo_code: String
   language_code: String!
 }
@@ -194,8 +226,11 @@ type LogoutOutput {
 type MapFileOutput {
   created_at: String!
   created_by: ID!
+  is_original: Boolean!
+  language: LanguageOutput!
   map_file_name: String!
   original_map_id: ID!
+  translated_map_id: ID
 }
 
 type Mutation {
@@ -222,6 +257,7 @@ type Mutation {
   togglePhraseVoteStatus(phrase_id: ID!, vote: Boolean!): PhraseVoteStatusOutputRow!
   toggleVoteStatus(site_text_translation_id: String!, vote: Boolean!): VoteStatusOutputRow!
   toggleWordDefinitonVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
+  toggleWordTrVoteStatus(input: WordTrVoteStatusInput!): WordTrVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
   upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): SiteTextTranslationUpsertOutput!
@@ -412,6 +448,7 @@ type PostReadOutput {
 
 type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
+  getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
   getAllRecommendedTranslation(dialect_code: String!, geo_code: String!, language_code: String!): SiteTextTranslationWithVoteListOutput!
   getAllSiteTextDefinitions: SiteTextDefinitionListOutput!
   getAllSiteTextLanguageList: SiteTextLanguageListOutput!
@@ -426,6 +463,7 @@ type Query {
   getPhraseWithVoteById(phrase_id: ID!): PhraseWithVoteOutput!
   getPhrasesByLanguage(input: LanguageInput!): PhraseWithVoteListOutput!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
+  getTranslatedMapContent(input: GetTranslatedMapContentInput!): GetTranslatedMapContentOutput!
   getVoteStatus(site_text_translation_id: String!): SiteTextTranslationVoteReadOutput!
   getWordDefinitionVoteStatus(word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getWordDefinitionsByLanguage(input: LanguageInput!): WordDefinitionWithVoteListOutput!
@@ -787,6 +825,22 @@ type WordToWordTranslationUpsertOutput {
   word_to_word_translation: WordToWordTranslation
 }
 
+type WordTrVoteStatus {
+  downvotes: Int!
+  upvotes: Int!
+  word_to_word_translation_id: String!
+}
+
+input WordTrVoteStatusInput {
+  vote: Boolean!
+  word_to_word_translation_id: ID!
+}
+
+type WordTrVoteStatusOutputRow {
+  error: ErrorType!
+  vote_status: WordTrVoteStatus
+}
+
 type WordTranslations {
   definition: String
   definition_id: String
@@ -877,6 +931,7 @@ type WordWithVotes {
   down_votes: String!
   geo_code: String
   language_code: String!
+  translation_id: String!
   up_votes: String!
   word: String!
   word_id: ID!

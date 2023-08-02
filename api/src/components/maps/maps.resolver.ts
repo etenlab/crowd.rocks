@@ -5,12 +5,16 @@ import { MapsService } from './maps.service';
 
 import { getBearer } from '../../common/utility';
 import {
+  GetAllMapsListInput,
+  GetAllMapsListOutput,
   GetOrigMapContentInput,
   GetOrigMapContentOutput,
   GetOrigMapListInput,
   GetOrigMapsListOutput,
   GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
+  GetTranslatedMapContentInput,
+  GetTranslatedMapContentOutput,
   MapFileOutput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
@@ -52,11 +56,18 @@ export class MapsResolver {
   ): Promise<GetOrigMapsListOutput> {
     // TODO: refactor auth system. existing sysyem via passing token to sql proc is unconvinient
     // when no need in sql proc (request too small - just single-line select)
-
     // TODO: search by pattern
     // console.log(input.search);
 
     const maps = await this.mapService.getOrigMaps();
+    return maps;
+  }
+
+  @Query(() => GetAllMapsListOutput)
+  async getAllMapsList(
+    @Args('input') input: GetAllMapsListInput,
+  ): Promise<GetAllMapsListOutput> {
+    const maps = await this.mapService.getAllMapsList(input.lang);
     return maps;
   }
 
@@ -73,11 +84,22 @@ export class MapsResolver {
     return mapContent;
   }
 
+  @Query(() => GetTranslatedMapContentOutput)
+  async getTranslatedMapContent(
+    @Args('input') input: GetTranslatedMapContentInput,
+  ): Promise<GetTranslatedMapContentOutput> {
+    const mapContent = await this.mapService.getTranslatedMapContent(
+      input.translated_map_id,
+    );
+    return mapContent;
+  }
+
   @Query(() => GetOrigMapWordsOutput)
   async getOrigMapWords(
     @Args('input', { nullable: true }) input?: GetOrigMapWordsInput,
   ): Promise<GetOrigMapWordsOutput> {
     const words = await this.mapService.getOrigMapWords(input);
+
     return words;
   }
 }

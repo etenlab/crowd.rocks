@@ -1,4 +1,5 @@
-import { WordTranslations } from '../../../generated/graphql';
+import { WordTranslations, WordWithVotes } from '../../../generated/graphql';
+import { useMapTranslationTools } from '../../map/hooks/useMapTranslationTools';
 import { WordCard } from '../WordCard/WordCard';
 import { styled } from 'styled-components';
 
@@ -13,6 +14,10 @@ export const TranslatedWordCards = ({
   routerLink,
   onClick,
 }: TWordTranslationCardProps) => {
+  const { chooseBestTranslation } = useMapTranslationTools();
+
+  const wordBestTranslation = chooseBestTranslation(wordTranslated);
+
   return (
     <StCards>
       <StCard>
@@ -25,8 +30,8 @@ export const TranslatedWordCards = ({
       </StCard>
       <StCard>
         <WordCard
-          word={wordTranslated?.translations?.[0]?.word || ''}
-          definition={wordTranslated?.translations?.[0]?.definition || ''}
+          word={wordBestTranslation?.word || ''}
+          definition={wordBestTranslation?.definition || ''}
           onClick={onClick}
           routerLink={routerLink}
         />
@@ -42,4 +47,7 @@ const StCards = styled.div`
 
 const StCard = styled.div`
   width: 50%;
+  & > * {
+    cursor: pointer;
+  }
 `;

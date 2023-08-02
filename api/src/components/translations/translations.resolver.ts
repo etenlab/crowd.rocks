@@ -19,8 +19,11 @@ import {
   PhraseToPhraseTranslationUpsertInput,
   AddWordAsTranslationForWordOutput,
   AddWordAsTranslationForWordInput,
+  WordTrVoteStatusOutputRow,
+  WordTrVoteStatusInput,
 } from './types';
 import { AuthenticationService } from '../authentication/authentication.service';
+import { MapsService } from '../maps/maps.service';
 
 @Injectable()
 @Resolver()
@@ -30,6 +33,7 @@ export class TranslationsResolver {
     private wordToPhraseTranslationService: WordToPhraseTranslationsService,
     private phraseToPhraseTranslationService: PhraseToPhraseTranslationsService,
     private authenticationService: AuthenticationService,
+    private mapsService: MapsService,
   ) {}
 
   @Query(() => WordToWordTranslationReadOutput)
@@ -119,16 +123,54 @@ export class TranslationsResolver {
   @Mutation(() => AddWordAsTranslationForWordOutput)
   async addWordAsTranslationForWord(
     @Args('input') input: AddWordAsTranslationForWordInput,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Context() req: any,
   ): Promise<AddWordAsTranslationForWordOutput> {
     // const token = getBearer(req);
     const token = await this.authenticationService.getAdminToken();
 
-    return this.wordToWordTranslationService.addWordAsTranslationForWord(
+    const newWordTr =
+      this.wordToWordTranslationService.addWordAsTranslationForWord(
+        input.originalDefinitionId,
+        input.translationWord,
+        input.translationDefinition,
+        token,
+      );
+    // todo make here test if best translation changed and run maps tranlation conditionally
+    this.mapsService.translateMapsWithWordDefinitionId(
       input.originalDefinitionId,
-      input.translationWord,
-      input.translationDefinition,
+      token,
+    ); // let it be synchronuos intentionally, lets see if any race conditions will appear...
+
+    return newWordTr;
+  }
+
+  @Mutation(() => WordTrVoteStatusOutputRow)
+  async toggleWordTrVoteStatus(
+    @Args('input') input: WordTrVoteStatusInput,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Context() req: any,
+  ): Promise<WordTrVoteStatusOutputRow> {
+    // const token = getBearer(req);
+    const token = await this.authenticationService.getAdminToken();
+
+    const wordVoteStatus =
+      await this.wordToWordTranslationService.toggleVoteStatus(
+        input.word_to_word_translation_id,
+        input.vote,
+        token,
+      );
+    // todo make here test if best translation changed and run maps tranlation conditionally
+
+    const { from_word_definition_id } =
+      await this.wordToWordTranslationService.getDefinitionsIds(
+        input.word_to_word_translation_id,
+      );
+    this.mapsService.translateMapsWithWordDefinitionId(
+      from_word_definition_id,
       token,
     );
+
+    return wordVoteStatus;
   }
 }

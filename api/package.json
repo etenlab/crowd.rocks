@@ -48,6 +48,7 @@
     "graphql": "^16.7.1",
     "graphql-upload-ts": "^2.0.9",
     "jsonwebtoken": "^9.0.1",
+    "language-tags": "^1.0.8",
     "pg": "^8.11.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^5.0.1",

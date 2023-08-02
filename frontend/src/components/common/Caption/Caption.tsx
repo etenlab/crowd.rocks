@@ -34,9 +34,9 @@ export const Caption = ({ handleBackClick, children }: TCaptionProps) => {
 const CaptainContainer = styled.div`
   display: flex;
   padding: 16px;
-  flexdirection: row;
-  justifycontent: flex-start;
-  alignitems: center;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
 `;
 
 const StIonText = styled(IonText)(() => ({

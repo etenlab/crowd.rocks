@@ -8,6 +8,7 @@ import { WordVotesService } from './word-votes.service';
 import { WordDefinitionsService } from 'src/components/definitions/word-definitions.service';
 
 import {
+  Word,
   WordReadInput,
   WordReadOutput,
   WordUpsertInput,
@@ -256,5 +257,40 @@ export class WordsService {
       error: ErrorType.UnknownError,
       word_with_vote_list: [],
     };
+  }
+
+  /**
+   * @warning
+   * Sync style with other methods
+   */
+  async getWordByDefinitionId(definitionId: string): Promise<Word> {
+    const res = this.pg.pool.query(
+      `
+      select
+        w.word_id ,
+        ws.wordlike_string ,
+        w.language_code ,
+        w.dialect_code,
+        w.geo_code
+      from
+        words w
+      left join word_definitions wd on
+        w.word_id = wd.word_id
+      left join wordlike_strings ws on
+        w.wordlike_string_id = ws.wordlike_string_id
+      where
+        wd.word_definition_id = $1
+    `,
+      [definitionId],
+    );
+
+    const word: Word = {
+      word_id: res[0].word_id,
+      word: res[0].wordlike_string,
+      language_code: res[0].language_code,
+      dialect_code: res[0].dialect_code,
+      geo_code: res[0].geo_code,
+    };
+    return word;
   }
 }

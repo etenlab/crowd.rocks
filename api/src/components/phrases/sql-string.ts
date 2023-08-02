@@ -151,7 +151,7 @@ export function getPhraseListByLang({
   language_code: string;
   dialect_code: string | null;
   geo_code: string | null;
-  filter: string | null;
+  filter?: string | null;
 }): [
   string,
   (

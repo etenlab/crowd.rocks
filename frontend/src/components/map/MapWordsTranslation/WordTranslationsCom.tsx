@@ -8,7 +8,9 @@ import { VoteButtonsVertical } from '../../common/VoteButtonsVertical/VoteButton
 import {
   WordTranslations,
   useAddWordAsTranslationForWordMutation,
+  useToggleWordTranslationVoteStatusMutation,
 } from '../../../generated/graphql';
+import { DEFAULT_MAP_WORD_DEFINITION } from '../../../const/mapsConst';
 
 interface WordTranslationsComProps {
   wordWithTranslations: WordTranslations;
@@ -26,15 +28,30 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
   const newTrRef = useRef<HTMLIonInputElement | null>(null);
   const newDefinitionRef = useRef<HTMLIonInputElement | null>(null);
 
-  const [addWordAsTranslation, { data, loading, called, error, reset }] =
+  const [addWordAsTranslation, { data, reset }] =
     useAddWordAsTranslationForWordMutation();
+
+  const [
+    toggleWordTrVoteStatus,
+    { data: toggleVoteData, reset: resetToggleVote },
+  ] = useToggleWordTranslationVoteStatusMutation();
 
   useEffect(() => {
     if (data?.addWordAsTranslationForWord.wordTranslationId) {
       fetchMapWordsFn();
       reset();
     }
-  }, [data, reset, fetchMapWordsFn]);
+    if (toggleVoteData?.toggleWordTrVoteStatus) {
+      fetchMapWordsFn();
+      resetToggleVote();
+    }
+  }, [
+    data,
+    reset,
+    fetchMapWordsFn,
+    toggleVoteData?.toggleWordTrVoteStatus,
+    resetToggleVote,
+  ]);
 
   const handleNewTranslation = async () => {
     if (!newTrRef?.current?.value) {
@@ -71,6 +88,19 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
     }
   };
 
+  const handleVoteClick = (
+    word_to_word_translation_id: string,
+    vote: boolean,
+  ): void => {
+    toggleWordTrVoteStatus({
+      variables: {
+        word_to_word_translation_id,
+        vote: vote,
+      },
+    });
+    // fetchMapWordsFn();
+  };
+
   return (
     <>
       <Caption handleBackClick={() => onBackClick()}>Translations</Caption>
@@ -84,17 +114,23 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
 
       <StTranslationsDiv>
         {wordWithTranslations.translations &&
-          wordWithTranslations.translations.map((trv) => (
-            <StTranslationDiv key={trv.word_id}>
-              <WordCard word={trv.word} definition={trv.definition} />
-              <VoteButtonsVertical
-                onVoteUpClick={() => alert(`up ${trv.word_id}`)}
-                onVoteDownClick={() => alert(`down ${trv.word_id}`)}
-                upVotes={Number(trv.up_votes || 0)}
-                downVotes={Number(trv.down_votes || 0)}
-              />
-            </StTranslationDiv>
-          ))}
+          wordWithTranslations.translations
+            .sort((wtr1, wtr2) => wtr1.word.localeCompare(wtr2.word))
+            .map((wtr) => (
+              <StTranslationDiv key={wtr.word_id}>
+                <WordCard word={wtr.word} definition={wtr.definition} />
+                <VoteButtonsVertical
+                  onVoteUpClick={() =>
+                    handleVoteClick(wtr.translation_id, true)
+                  }
+                  onVoteDownClick={() =>
+                    handleVoteClick(wtr.translation_id, false)
+                  }
+                  upVotes={Number(wtr.up_votes || 0)}
+                  downVotes={Number(wtr.down_votes || 0)}
+                />
+              </StTranslationDiv>
+            ))}
       </StTranslationsDiv>
 
       <StNewTranslationDiv>
@@ -104,9 +140,11 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
           ref={newTrRef}
         />
         <IonInput
-          label="Description"
+          label="Definition"
           labelPlacement="floating"
           ref={newDefinitionRef}
+          value={DEFAULT_MAP_WORD_DEFINITION}
+          disabled
         />
         <StButton onClick={() => handleNewTranslation()}>Submit</StButton>
       </StNewTranslationDiv>

@@ -8,7 +8,7 @@ import { EmailModule } from './components/email/email.module';
 import { PostModule } from './components/post/post.module';
 import { UserModule } from './components/user/user.module';
 import { WordsModule } from './components/words/words.module';
-import { MapModule } from './components/maps/maps.module';
+import { MapsModule } from './components/maps/maps.module';
 import { TranslationsModule } from './components/translations/translations.module';
 
 @Module({
@@ -26,7 +26,7 @@ import { TranslationsModule } from './components/translations/translations.modul
     PostModule,
     EmailModule,
     WordsModule,
-    MapModule,
+    MapsModule,
     TranslationsModule,
   ],
   controllers: [],
