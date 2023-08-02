@@ -59,7 +59,9 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
       <Caption>
         <>
           Map - {currentMapWithContent?.map_file_name || ''}{' '}
-          <IonBadge>translated - {langInfo2String(langInfo)}</IonBadge>
+          <>
+            <IonBadge>translated to {langInfo2String(langInfo)}</IonBadge>
+          </>
         </>
       </Caption>
 

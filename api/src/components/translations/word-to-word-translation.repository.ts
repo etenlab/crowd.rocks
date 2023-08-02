@@ -94,4 +94,23 @@ export class WordToWordTranslationRepository {
       };
     }
   }
+
+  async getDefinitionsIds(word_to_word_translation_id: string) {
+    const resQ = await this.pg.pool.query(
+      `
+      select
+        from_word_definition_id ,
+        to_word_definition_id
+      from
+        word_to_word_translations wtwt
+      where
+        wtwt.word_to_word_translation_id = $1
+    `,
+      [word_to_word_translation_id],
+    );
+    return {
+      from_word_definition_id: resQ.rows[0].from_word_definition_id,
+      to_word_definition_id: resQ.rows[0].to_word_definition_id,
+    };
+  }
 }

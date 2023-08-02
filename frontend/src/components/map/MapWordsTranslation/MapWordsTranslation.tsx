@@ -75,13 +75,15 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
           </LangSelectorBox>
           <WordsBox>
             {wordsData &&
-              wordsData.getOrigMapWords.origMapWords.map((omw) => (
-                <TranslatedWordCards
-                  key={omw.word_id}
-                  wordTranslated={omw}
-                  onClick={() => setSelectedWordId(omw.word_id)}
-                />
-              ))}
+              wordsData.getOrigMapWords.origMapWords
+                .sort((omw1, omw2) => omw1.word.localeCompare(omw2.word))
+                .map((omw) => (
+                  <TranslatedWordCards
+                    key={omw.word_id}
+                    wordTranslated={omw}
+                    onClick={() => setSelectedWordId(omw.word_id)}
+                  />
+                ))}
           </WordsBox>
         </>
       ) : (

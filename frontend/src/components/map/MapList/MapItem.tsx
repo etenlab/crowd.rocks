@@ -26,12 +26,14 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
 
   return (
     <IonItem {...rest} routerLink={routerLink}>
+      {mapItem.map_file_name}
       {!mapItem.is_original ? (
-        <IonBadge>translated - {langInfo2String(langInfo)}</IonBadge>
+        <>
+          , <IonBadge> translated to {langInfo2String(langInfo)}</IonBadge>
+        </>
       ) : (
         <></>
       )}
-      {mapItem.map_file_name}
     </IonItem>
   );
 };

@@ -281,9 +281,9 @@ export class WordToWordTranslationsService {
         return bestTr;
       }
 
-      // if (bestTr?.up_votes === undefined) {
-      //   return currTr;
-      // }
+      if (bestTr?.up_votes === undefined) {
+        return currTr;
+      }
 
       const bestTrTotal =
         Number(bestTr?.up_votes || 0) - Number(bestTr?.down_votes || 0);
@@ -295,5 +295,11 @@ export class WordToWordTranslationsService {
       return bestTr;
     }, {} as WordWithVotes);
     return res;
+  }
+
+  async getDefinitionsIds(word_to_word_translation_id: string) {
+    return this.wordToWordTranslationRepository.getDefinitionsIds(
+      word_to_word_translation_id,
+    );
   }
 }

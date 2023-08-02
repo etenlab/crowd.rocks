@@ -136,7 +136,7 @@ export class TranslationsResolver {
         input.translationDefinition,
         token,
       );
-
+    // todo make here test if best translation changed and run maps tranlation conditionally
     this.mapsService.translateMapsWithWordDefinitionId(
       input.originalDefinitionId,
       token,
@@ -160,8 +160,16 @@ export class TranslationsResolver {
         input.vote,
         token,
       );
+    // todo make here test if best translation changed and run maps tranlation conditionally
 
-    // mapsService.reCheckBestWordsTr(input.word_to_word_translation_id); // let it be synchronuos intentionally, lets see if any race conditions will appear...
+    const { from_word_definition_id } =
+      await this.wordToWordTranslationService.getDefinitionsIds(
+        input.word_to_word_translation_id,
+      );
+    this.mapsService.translateMapsWithWordDefinitionId(
+      from_word_definition_id,
+      token,
+    );
 
     return wordVoteStatus;
   }
