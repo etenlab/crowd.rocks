@@ -14,6 +14,9 @@ interface ISaveMapParams {
   mapFileName: string;
   fileBody: string;
   token: string;
+  language_code: string;
+  dialect_code?: string;
+  geo_code?: string;
   dbPoolClient?: PoolClient;
 }
 export interface ISaveTranslatedMapParams {
@@ -60,6 +63,9 @@ export class MapsRepository {
     fileBody,
     token,
     dbPoolClient,
+    language_code,
+    dialect_code,
+    geo_code,
   }: ISaveMapParams): Promise<ISaveMapRes> {
     const poolClient = dbPoolClient
       ? dbPoolClient // use given pool client
@@ -67,9 +73,9 @@ export class MapsRepository {
 
     const res = await poolClient.query(
       `
-          call original_map_create($1,$2,$3, null,null,null,null)
+          call original_map_create($1,$2,$3,$4,$5,$6, null,null,null,null)
         `,
-      [mapFileName, fileBody, token],
+      [mapFileName, fileBody, token, language_code, dialect_code, geo_code],
     );
 
     return {

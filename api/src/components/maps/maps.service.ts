@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ReadStream } from 'fs';
 
 import {
+  GetAllMapsListOutput,
   GetOrigMapContentOutput,
   GetOrigMapsListOutput,
   GetOrigMapWordsInput,
@@ -79,6 +80,9 @@ export class MapsService {
           fileBody,
           token,
           dbPoolClient,
+          language_code: mapLanguage.lang.tag,
+          dialect_code: mapLanguage.dialect?.tag,
+          geo_code: mapLanguage.region?.tag,
         });
 
       for (const word of foundWords) {
@@ -141,6 +145,13 @@ export class MapsService {
   async getOrigMaps(): Promise<GetOrigMapsListOutput> {
     return this.mapsRepository.getOrigMaps();
   }
+
+  // async getAllMaps(lang?: LanguageInput): Promise<GetAllMapsListOutput> {
+  //   const origMaps = this.mapsRepository.getOrigMaps(lang);
+  //   const translatedMaps = this.mapsRepository.getTranslatedMaps(lang);
+  //   const allMaps = { ...origMaps, ...translatedMaps }
+  //   return allMaps
+  // }
 
   async getOrigMapContent(id: string): Promise<GetOrigMapContentOutput> {
     return this.mapsRepository.getOrigMapContent(id);
@@ -209,14 +220,19 @@ export class MapsService {
   async translateMapsWithWordDefinitionId(
     wordDefinitionId: string,
     token: string,
-  ): Promise<void> {
+  ): Promise<Array<string>> {
     const origMapIds = await this.mapsRepository.getOrigMapIdsByWordDefinition(
       wordDefinitionId,
     );
-
+    const translatedMapsIds: string[] = [];
     for (const origMapId of origMapIds) {
-      const translatedMapId = await this.translateMapAndSave(origMapId, token);
+      const translatedToSomeLanguages = await this.translateMapAndSave(
+        origMapId,
+        token,
+      );
+      translatedMapsIds.push(...translatedToSomeLanguages);
     }
+    return translatedMapsIds;
   }
 
   async translateMapAndSave(

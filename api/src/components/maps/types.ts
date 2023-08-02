@@ -1,5 +1,6 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { WordTranslations } from '../words/types';
+import { LanguageInput } from '../definitions/types';
 
 @ObjectType()
 export class MapFileOutput {
@@ -16,6 +17,16 @@ export class GetOrigMapListInput {
 @ObjectType()
 export class GetOrigMapsListOutput {
   @Field(() => [MapFileOutput]) origMapList: MapFileOutput[];
+}
+
+@InputType()
+export class GetAllMapsListInput {
+  @Field(() => LanguageInput, { nullable: true }) lang?: LanguageInput;
+}
+
+@ObjectType()
+export class GetAllMapsListOutput {
+  @Field(() => [MapFileOutput]) allMapsList: MapFileOutput[];
 }
 
 @InputType()

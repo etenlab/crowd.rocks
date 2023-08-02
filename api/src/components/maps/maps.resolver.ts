@@ -5,6 +5,8 @@ import { MapsService } from './maps.service';
 
 import { getBearer } from '../../common/utility';
 import {
+  GetAllMapsListInput,
+  GetAllMapsListOutput,
   GetOrigMapContentInput,
   GetOrigMapContentOutput,
   GetOrigMapListInput,
@@ -52,13 +54,20 @@ export class MapsResolver {
   ): Promise<GetOrigMapsListOutput> {
     // TODO: refactor auth system. existing sysyem via passing token to sql proc is unconvinient
     // when no need in sql proc (request too small - just single-line select)
-
     // TODO: search by pattern
     // console.log(input.search);
 
     const maps = await this.mapService.getOrigMaps();
     return maps;
   }
+
+  // @Query(() => GetAllMapsListOutput)
+  // async getAllMapsList(
+  //   @Args('input') input: GetAllMapsListInput,
+  // ): Promise<GetAllMapsListOutput> {
+  //   const maps = await this.mapService.getAllMaps(input.lang);
+  //   return maps;
+  // }
 
   @Query(() => GetOrigMapContentOutput)
   async getOrigMapContent(

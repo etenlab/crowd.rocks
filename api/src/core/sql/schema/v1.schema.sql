@@ -574,6 +574,9 @@ create table site_text_translation_votes(
 create table original_maps(
   original_map_id bigserial primary key,
   map_file_name varchar(256) unique not null,
+  language_code varchar(32) not null,
+  dialect_code varchar(32),
+  geo_code varchar(32),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
   content text not null

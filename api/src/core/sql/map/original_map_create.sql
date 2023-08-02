@@ -3,6 +3,9 @@ or replace procedure original_map_create(
   in p_map_file_name varchar(64),
   in p_map_content text,
   in p_token varchar(512),
+  in p_language_code varchar(32),
+  in p_dialect_code varchar(32),
+  in p_geo_code varchar(32),
   inout p_map_id bigint,
   inout p_created_at varchar(32),
   inout p_created_by varchar(32),
@@ -47,13 +50,19 @@ insert into
   original_maps(
     map_file_name,
     content,
-    created_by
+    created_by,
+    language_code,
+    dialect_code,
+    geo_code
   )
 values
   (
     p_map_file_name,
     p_map_content,
-    v_user_id
+    v_user_id,
+    p_language_code,
+    p_dialect_code,
+    p_geo_code
   ) on conflict do nothing 
 returning 
   original_map_id, created_by, created_at 
