@@ -1,7 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router';
-import { useIonRouter } from '@ionic/react';
-import { IonContent, IonPage } from '@ionic/react';
+import {
+  useIonRouter,
+  InputCustomEvent,
+  InputChangeEventDetail,
+} from '@ionic/react';
+import { IonContent, IonPage, useIonToast } from '@ionic/react';
 
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -10,9 +14,19 @@ import { Input } from '../../common/styled';
 
 import {
   useGetWordsByLanguageLazyQuery,
-  WordWithVoteListOutput,
   useToggleWordVoteStatusMutation,
+} from '../../../generated/graphql';
+
+import {
+  WordWithVoteListOutput,
+  WordWithDefinitionlikeStrings,
+  WordWithVote,
   ErrorType,
+} from '../../../generated/graphql';
+
+import {
+  WordWithDefinitionlikeStringsFragmentFragmentDoc,
+  WordWithVoteFragmentFragmentDoc,
 } from '../../../generated/graphql';
 
 import {
@@ -30,21 +44,86 @@ interface WordListPageProps
 
 export function WordListPage({ match }: WordListPageProps) {
   const router = useIonRouter();
-  const [getWordsByLanguage, { data, error, loading, called }] =
-    useGetWordsByLanguageLazyQuery();
-  const [
-    toggleWordVoteStatus,
-    {
-      data: voteData,
-      error: voteError,
-      loading: voteLoading,
-      called: voteCalled,
-    },
-  ] = useToggleWordVoteStatusMutation();
+  const [present] = useIonToast();
 
   const [langInfo, setLangInfo] = useState<LanguageInfo>();
+  const [filter, setFilter] = useState<string>('');
+
   const [wordWithVoteList, setWordWithVoteList] =
     useState<WordWithVoteListOutput>();
+
+  const [getWordsByLanguage, { data: wordsData, error, loading, called }] =
+    useGetWordsByLanguageLazyQuery();
+  const [toggleWordVoteStatus] = useToggleWordVoteStatusMutation({
+    update(cache, { data, errors }) {
+      if (errors) {
+        console.log('useToggleWordVoteStatusMutation: ', errors);
+
+        present({
+          message: 'Failed at voting!',
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+
+        return;
+      }
+
+      if (!wordsData || !data || !data.toggleWordVoteStatus.vote_status) {
+        return;
+      }
+
+      if (!langInfo) {
+        return;
+      }
+
+      const newVoteStatus = data.toggleWordVoteStatus.vote_status;
+
+      cache.updateFragment<WordWithDefinitionlikeStrings>(
+        {
+          id: cache.identify({
+            __typename: 'WordWithDefinitionlikeStrings',
+            word_id: newVoteStatus.word_id,
+          }),
+          fragment: WordWithDefinitionlikeStringsFragmentFragmentDoc,
+          fragmentName: 'WordWithDefinitionlikeStringsFragment',
+        },
+        (data) => {
+          if (data) {
+            return {
+              ...data,
+              upvotes: newVoteStatus.upvotes,
+              downvotes: newVoteStatus.downvotes,
+            };
+          } else {
+            return data;
+          }
+        },
+      );
+
+      cache.updateFragment<WordWithVote>(
+        {
+          id: cache.identify({
+            __typename: 'WordWithVote',
+            word_id: newVoteStatus.word_id,
+          }),
+          fragment: WordWithVoteFragmentFragmentDoc,
+          fragmentName: 'WordWithVoteFragment',
+        },
+        (data) => {
+          if (data) {
+            return {
+              ...data,
+              upvotes: newVoteStatus.upvotes,
+              downvotes: newVoteStatus.downvotes,
+            };
+          } else {
+            return data;
+          }
+        },
+      );
+    },
+  });
 
   useEffect(() => {
     if (!langInfo) {
@@ -56,15 +135,13 @@ export function WordListPage({ match }: WordListPageProps) {
         language_code: langInfo.lang.tag,
         dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
         geo_code: langInfo.region ? langInfo.region.tag : null,
+        filter: filter,
       },
     });
-  }, [langInfo, getWordsByLanguage]);
+  }, [langInfo, getWordsByLanguage, filter]);
 
   useEffect(() => {
     if (error) {
-      console.log(error);
-      alert('Error');
-
       return;
     }
 
@@ -72,67 +149,13 @@ export function WordListPage({ match }: WordListPageProps) {
       return;
     }
 
-    if (data) {
-      if (data.getWordsByLanguage.error !== ErrorType.NoError) {
-        console.log(data.getWordsByLanguage.error);
-        alert(data.getWordsByLanguage.error);
+    if (wordsData) {
+      if (wordsData.getWordsByLanguage.error !== ErrorType.NoError) {
         return;
       }
-      setWordWithVoteList(data.getWordsByLanguage);
+      setWordWithVoteList(wordsData.getWordsByLanguage);
     }
-  }, [data, error, loading, called]);
-
-  useEffect(() => {
-    if (voteError) {
-      console.log(voteError);
-      alert('Error');
-
-      return;
-    }
-
-    if (voteLoading || !voteCalled) {
-      return;
-    }
-
-    if (voteData) {
-      if (voteData.toggleWordVoteStatus.error !== ErrorType.NoError) {
-        console.log(voteData.toggleWordVoteStatus.error);
-        alert(voteData.toggleWordVoteStatus.error);
-        return;
-      }
-
-      const vote_status = voteData.toggleWordVoteStatus.vote_status;
-
-      if (vote_status) {
-        setWordWithVoteList((_wordWithVoteList) => {
-          if (!_wordWithVoteList) {
-            return _wordWithVoteList;
-          }
-
-          return {
-            ..._wordWithVoteList,
-            word_with_vote_list: _wordWithVoteList?.word_with_vote_list.map(
-              (wordWithVote) => {
-                if (!wordWithVote) {
-                  return wordWithVote;
-                }
-
-                if (wordWithVote.word_id === vote_status.word_id) {
-                  return {
-                    ...wordWithVote,
-                    upvotes: vote_status.upvotes,
-                    downvotes: vote_status.downvotes,
-                  };
-                } else {
-                  return wordWithVote;
-                }
-              },
-            ),
-          };
-        });
-      }
-    }
-  }, [voteError, voteLoading, voteCalled, voteData]);
+  }, [wordsData, error, loading, called]);
 
   const handleGoToDefinitionDetail = useCallback(
     (wordId: string) => {
@@ -142,6 +165,12 @@ export function WordListPage({ match }: WordListPageProps) {
     },
     [match, router],
   );
+
+  const handleFilterChange = (
+    event: InputCustomEvent<InputChangeEventDetail>,
+  ) => {
+    setFilter(event.detail.value!);
+  };
 
   const words = useMemo(() => {
     const tempWords: {
@@ -236,6 +265,9 @@ export function WordListPage({ match }: WordListPageProps) {
                 labelPlacement="floating"
                 label="Search"
                 fill="outline"
+                debounce={300}
+                value={filter}
+                onIonInput={handleFilterChange}
               />
             </FilterContainer>
 
