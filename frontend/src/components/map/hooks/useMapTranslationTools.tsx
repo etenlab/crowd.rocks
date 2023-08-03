@@ -16,19 +16,6 @@ export const UPLOAD_FILE_MUTATION = gql`
   }
 `;
 
-// export const GET_ORIGINAL_MAPS_QUERY = gql`
-//   query GetOrigMapsList($search: String!) {
-//     getOrigMapsList(input: { search: $search }) {
-//       origMapList {
-//         original_map_id
-//         map_file_name
-//         created_at
-//         created_by
-//       }
-//     }
-//   }
-// `;
-
 export const GET_ORIGINAL_MAP_CONTENT_QUERY = gql`
   query GetOrigMapsContent($id: ID!) {
     getOrigMapContent(input: { original_map_id: $id }) {
@@ -73,26 +60,6 @@ export function useMapTranslationTools() {
     [apolloClient],
   );
 
-  // const getOriginalMaps = useCallback(
-  //   async (search: string): Promise<TMapsList> => {
-  //     const res = await apolloClient.query<{
-  //       getOrigMapsList: GetOrigMapsListOutput;
-  //     }>({
-  //       query: GET_ORIGINAL_MAPS_QUERY,
-  //       variables: { search },
-  //     });
-
-  //     return res.data.getOrigMapsList.origMapList.map((r) => ({
-  //       id: r.original_map_id,
-  //       name: r.map_file_name,
-  //       createdAt: r.created_at,
-  //       createdByUserId: r.created_by,
-  //       languageCode: 'en',
-  //     }));
-  //   },
-  //   [apolloClient],
-  // );
-
   const sendMapFile = useCallback(
     async (
       file: File,
@@ -108,7 +75,7 @@ export function useMapTranslationTools() {
           variables: {
             file,
           },
-          // refetchQueries: [{ query: GET_ORIGINAL_MAPS_QUERY }],
+          refetchQueries: ['GetAllMapsList'],
         })
         .then((res) => {
           console.log(`Map file (name:${file.name}) is uploaded.`);
@@ -149,7 +116,6 @@ export function useMapTranslationTools() {
 
   return {
     sendMapFile,
-    // getOriginalMaps,
     getOrigMapContent,
     chooseBestTranslation,
   };

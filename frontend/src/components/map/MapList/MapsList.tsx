@@ -17,7 +17,9 @@ interface MapListProps
 export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const router = useIonRouter();
   const { sendMapFile } = useMapTranslationTools();
-  const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery();
+  const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
+    fetchPolicy: 'no-cache',
+  });
   const [mapListLang, setMapListLang] = useState<LanguageInfo>();
 
   useEffect(() => {

@@ -2,7 +2,6 @@ import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-// import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 import { useGetTranslatedMapContentLazyQuery } from '../../../generated/graphql';
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 import { IonBadge } from '@ionic/react';
@@ -15,13 +14,8 @@ interface MapDetailsProps
 export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
   match,
 }: MapDetailsProps) => {
-  // const [currentMapWithContent, setCurrentMapWithContent] = useState<
-  //   TMapWithContent | undefined
-  // >();
-
-  // const { getOrigMapContent } = useMapTranslationTools();
   const [getTranslatedMapContent, { data }] =
-    useGetTranslatedMapContentLazyQuery();
+    useGetTranslatedMapContentLazyQuery({ fetchPolicy: 'no-cache' });
   const currentMapWithContent = data?.getTranslatedMapContent;
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);

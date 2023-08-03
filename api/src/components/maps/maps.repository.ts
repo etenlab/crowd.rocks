@@ -154,15 +154,15 @@ export class MapsRepository {
     let languageClause = '';
     if (lang?.language_code) {
       params.push(lang?.language_code);
-      languageClause += ` and where language_code = $${params.length}`;
+      languageClause += ` and language_code = $${params.length}`;
     }
     if (lang?.dialect_code) {
       params.push(lang?.dialect_code);
-      languageClause += ` and where dialect_code = $${params.length}`;
+      languageClause += ` and dialect_code = $${params.length}`;
     }
     if (lang?.geo_code) {
       params.push(lang?.geo_code);
-      languageClause += ` and where geo_code = $${params.length}`;
+      languageClause += ` and geo_code = $${params.length}`;
     }
     const sqlStr = `
         select
@@ -170,15 +170,15 @@ export class MapsRepository {
           map_file_name,
           created_at,
           created_by,
-          language_code ,
-          dialect_code ,
+          language_code,
+          dialect_code,
           geo_code
         from
           original_maps
         where true
         ${languageClause}
       `;
-    const resQ = await this.pg.pool.query(sqlStr, []);
+    const resQ = await this.pg.pool.query(sqlStr, params);
 
     const origMapList = resQ.rows.map<MapFileOutput>(
       ({
@@ -209,15 +209,15 @@ export class MapsRepository {
     let languageClause = '';
     if (lang?.language_code) {
       params.push(lang?.language_code);
-      languageClause += ` and where language_code = $${params.length}`;
+      languageClause += ` and tm.language_code = $${params.length}`;
     }
     if (lang?.dialect_code) {
       params.push(lang?.dialect_code);
-      languageClause += ` and where dialect_code = $${params.length}`;
+      languageClause += ` and tm.dialect_code = $${params.length}`;
     }
     if (lang?.geo_code) {
       params.push(lang?.geo_code);
-      languageClause += ` and where geo_code = $${params.length}`;
+      languageClause += ` and tm.geo_code = $${params.length}`;
     }
     const sqlStr = `
       select
@@ -237,7 +237,7 @@ export class MapsRepository {
         true
         ${languageClause}
     `;
-    const resQ = await this.pg.pool.query(sqlStr, []);
+    const resQ = await this.pg.pool.query(sqlStr, params);
 
     const origMapList = resQ.rows.map<MapFileOutput>(
       ({

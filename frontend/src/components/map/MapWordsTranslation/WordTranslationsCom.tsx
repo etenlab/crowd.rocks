@@ -29,12 +29,20 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
   const newDefinitionRef = useRef<HTMLIonInputElement | null>(null);
 
   const [addWordAsTranslation, { data, reset }] =
-    useAddWordAsTranslationForWordMutation();
+    useAddWordAsTranslationForWordMutation({
+      refetchQueries: [
+        'GetTranslatedMapContent',
+        'GetOrigMapWords',
+        'GetAllMapsList',
+      ],
+    });
 
   const [
     toggleWordTrVoteStatus,
     { data: toggleVoteData, reset: resetToggleVote },
-  ] = useToggleWordTranslationVoteStatusMutation();
+  ] = useToggleWordTranslationVoteStatusMutation({
+    refetchQueries: ['GetTranslatedMapContent', 'GetOrigMapWords'],
+  });
 
   useEffect(() => {
     if (data?.addWordAsTranslationForWord.wordTranslationId) {
