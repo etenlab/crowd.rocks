@@ -2,7 +2,7 @@ import { IonIcon } from '@ionic/react';
 import { funnelOutline, logoAlipay, logoAmplify } from 'ionicons/icons';
 import React from 'react';
 import { styled } from 'styled-components';
-import { FileUploadBtn } from '../../common/LangSelector/FileUploadBtn';
+import { FileUploadBtn } from '../../common/FileUploadBtn/FileUploadBtn';
 
 type TMapToolsParams = {
   onFilterClick?: () => void;

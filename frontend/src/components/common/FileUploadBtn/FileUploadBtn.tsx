@@ -11,10 +11,6 @@ export type FileUploadProps = {
 export const FileUploadBtn = ({ accept, onSelect }: FileUploadProps) => {
   const fileInput = useRef<HTMLInputElement | null>(null);
 
-  // const onSelectFile: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-  //   console.log('file: ', e.target.value);
-  // };
-
   return (
     <>
       <input
