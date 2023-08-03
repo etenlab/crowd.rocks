@@ -5,6 +5,12 @@ import { MapTools } from './MapsTools';
 import { useCallback, useEffect } from 'react';
 import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 import { useGetAllMapsListLazyQuery } from '../../../generated/graphql';
+import { RouteComponentProps } from 'react-router';
+interface MapListProps
+  extends RouteComponentProps<{
+    nation_id: string;
+    language_id: string;
+  }> {}
 
 export const MapList = () => {
   const router = useIonRouter();

@@ -1,34 +1,49 @@
 import { IonContent, IonPage } from '@ionic/react';
 import { MapList } from './MapList/MapsList';
-import { Route, RouteComponentProps } from 'react-router-dom';
+import { Redirect, Route, RouteComponentProps } from 'react-router-dom';
 import { MapDetails } from './MapDetails/MapDetails';
 import { MapWordsTranslation } from './MapWordsTranslation/MapWordsTranslation';
 import { MapTranslatedDetails } from './MapDetails/MapTranslatedDetails';
+interface MapsPageProps
+  extends RouteComponentProps<{
+    nation_id: string;
+    language_id: string;
+  }> {}
 
-export const MapsPage: React.FC<RouteComponentProps> = ({
-  match,
-}: RouteComponentProps) => {
+export const MapsPage: React.FC<MapsPageProps> = ({ match }: MapsPageProps) => {
   return (
     <IonPage>
       <IonContent>
         <div className="page">
           <div className="section">
-            <Route exact path={`${match.url}`} render={() => <MapList />} />
             <Route
               exact
-              path={`${match.url}/translation`}
+              path={`/${match.params.nation_id}/${match.params.language_id}/1/maps/list`}
+              render={() => <MapList />}
+            />
+            <Route
+              exact
+              path={`/${match.params.nation_id}/${match.params.language_id}/1/maps/translation`}
               component={MapWordsTranslation}
             />
             <Route
               exact
-              path={`${match.url}/details-original/:id`}
+              path={`/${match.params.nation_id}/${match.params.language_id}/1/maps/details-original/:id`}
               component={MapDetails}
             />
             <Route
               exact
-              path={`${match.url}/details-translated/:id`}
+              path={`/${match.params.nation_id}/${match.params.language_id}/1/maps/details-translated/:id`}
               component={MapTranslatedDetails}
             />
+            <Route
+              exact
+              path={`/${match.params.nation_id}/${match.params.language_id}/1/maps`}
+            >
+              <Redirect
+                to={`/${match.params.nation_id}/${match.params.language_id}/1/maps/list`}
+              />
+            </Route>
           </div>
         </div>
       </IonContent>

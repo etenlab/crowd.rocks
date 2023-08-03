@@ -2,7 +2,7 @@ import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
+// import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 import { useGetTranslatedMapContentLazyQuery } from '../../../generated/graphql';
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 import { IonBadge } from '@ionic/react';
