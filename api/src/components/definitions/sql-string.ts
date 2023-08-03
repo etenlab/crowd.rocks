@@ -9,7 +9,7 @@ export type GetWordDefinitionObjectById = {
 export function getWordDefinitionObjById(id: number): [string, [number]] {
   return [
     `
-      select 
+      select distinct
         word_definition_id,
         word_id,
         definition
@@ -51,7 +51,7 @@ export type GetPhraseDefinitionObjectById = {
 export function getPhraseDefinitionObjById(id: number): [string, [number]] {
   return [
     `
-      select 
+      select distinct 
         phrase_definition_id,
         phrase_id,
         definition
@@ -168,7 +168,7 @@ export function getWordDefinitionListByLang({
 
   return [
     `
-      select 
+      select distinct
         word_definitions.word_definition_id,
         word_definitions.created_at
       from word_definitions
@@ -194,7 +194,7 @@ export function getWordDefinitionListByWordId(
 ): [string, [number]] {
   return [
     `
-      select 
+      select distinct 
         word_definition_id,
         created_at
       from word_definitions
@@ -246,7 +246,7 @@ export function getPhraseDefinitionListByLang({
 
   return [
     `
-      select 
+      select distinct 
         phrase_definitions.phrase_definition_id,
         phrase_definitions.created_at
       from phrase_definitions
@@ -274,7 +274,7 @@ export function getPhraseDefinitionListByPhraseId(
 ): [string, [number]] {
   return [
     `
-      select 
+      select distinct 
         phrase_definition_id,
         created_at
       from phrase_definitions
@@ -295,7 +295,7 @@ export type GetWordDefinitionVoteObjectById = {
 export function getWordDefinitionVoteObjById(id: number): [string, [number]] {
   return [
     `
-      select 
+      select distinct 
         word_definitions_vote_id,
         word_definition_id,
         user_id,
@@ -397,7 +397,7 @@ export type GetPhraseDefinitionVoteObjectById = {
 export function getPhraseDefinitionVoteObjById(id: number): [string, [number]] {
   return [
     `
-      select 
+      select distinct 
         phrase_definitions_vote_id,
         phrase_definition_id,
         user_id,

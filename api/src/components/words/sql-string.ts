@@ -211,7 +211,7 @@ export function getWordListByLang({
 
   return [
     `
-      select 
+      select distinct
         w.word_id
       from words as w
       join wordlike_strings as ws

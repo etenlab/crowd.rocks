@@ -200,7 +200,7 @@ export class DefinitionsResolver {
   }
 
   @Mutation(() => DefinitionVoteStatusOutputRow)
-  async togglePhraseDefinitonVoteStatus(
+  async togglePhraseDefinitionVoteStatus(
     @Args('phrase_definition_id', { type: () => ID })
     phrase_definition_id: string,
     @Args('vote', { type: () => Boolean }) vote: boolean,

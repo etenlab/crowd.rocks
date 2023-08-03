@@ -270,7 +270,7 @@ export function getAllSiteTextWordTranslation({
 
   return [
     `
-      select
+      select distinct
         stts.site_text_translation_id,
         stts.created_at
       from site_text_translations as stts
@@ -295,9 +295,9 @@ export function getAllSiteTextWordTranslation({
       where from_type_is_word = true
         and to_type_is_word = true
 
-      union
+      union distinct
 
-      select
+      select distinct
         stts.site_text_translation_id,
         stts.created_at
       from site_text_translations as stts
@@ -375,7 +375,7 @@ export function getAllSiteTextPhraseTranslation({
 
   return [
     `
-      select 
+      select distinct 
         stts.site_text_translation_id,
         stts.created_at
       from site_text_translations as stts
@@ -400,9 +400,9 @@ export function getAllSiteTextPhraseTranslation({
       where from_type_is_word = false
         and to_type_is_word = true
 
-      union
+      union distinct
 
-      select 
+      select distinct 
         stts.site_text_translation_id,
         stts.created_at
       from site_text_translations as stts
@@ -520,7 +520,7 @@ export type GetSiteTextLanguageList = {
 export function getSiteTextLanguageList(): [string, []] {
   return [
     `
-      select
+      select distinct
         ws.language_code as language_code,
         ws.dialect_code as dialect_code,
         ws.geo_code as geo_code
@@ -534,7 +534,7 @@ export function getSiteTextLanguageList(): [string, []] {
 
       union distinct
 
-      select
+      select distinct
         ws.language_code as language_code,
         ws.dialect_code as dialect_code,
         ws.geo_code as geo_code

@@ -199,7 +199,7 @@ export function getPhraseListByLang({
 
   return [
     `
-      select 
+      select distinct 
         p.phrase_id
       from phrases as p
       join words as w
