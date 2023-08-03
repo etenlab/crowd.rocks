@@ -2,7 +2,7 @@ name: Build, Dockerize, Upload
 on:
   push:
     branches:
-      - workflow
+      - dev
 
 jobs:
   package:
