@@ -21,9 +21,6 @@ export const FileUploadBtn = ({ accept, onSelect }: FileUploadProps) => {
         onChange={(e) => {
           e.target?.files && onSelect(e.target.files[0]);
         }}
-        onClick={() => {
-          console.log('onClick');
-        }}
       />
       <StIonIcon
         icon={add}

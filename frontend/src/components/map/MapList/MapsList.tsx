@@ -14,7 +14,7 @@ interface MapListProps
     language_id: string;
   }> {}
 
-export const MapList = ({ match }: MapListProps) => {
+export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const router = useIonRouter();
   const { sendMapFile } = useMapTranslationTools();
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery();
@@ -72,9 +72,7 @@ export const MapList = ({ match }: MapListProps) => {
           alert('click on filter mock');
         }}
         onTranslationsClick={() => {
-          router.push(
-            `/${match.params.nation_id}/${match.params.language_id}/1/maps/translation`,
-          );
+          router.push(`/US/eng/1/maps/translation`);
         }}
         onAddClick={handleAddMap}
       />

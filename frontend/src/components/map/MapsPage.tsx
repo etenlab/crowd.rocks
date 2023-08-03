@@ -19,7 +19,7 @@ export const MapsPage: React.FC<MapsPageProps> = ({ match }: MapsPageProps) => {
             <Route
               exact
               path={`/${match.params.nation_id}/${match.params.language_id}/1/maps/list`}
-              render={() => <MapList />}
+              component={MapList}
             />
             <Route
               exact
