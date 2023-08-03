@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { IonItem, IonLabel, IonModal } from '@ionic/react';
+import { IonIcon, IonItem, IonLabel, IonModal } from '@ionic/react';
 
 import tags from 'language-tags';
 
@@ -12,6 +12,8 @@ import {
   LOADING_TAG_PLACEHOLDER,
   NOT_DEFINED_PLACEHOLDER,
 } from '../../../const/langConst';
+import { styled } from 'styled-components';
+import { removeCircleOutline } from 'ionicons/icons';
 
 export type LangSelectorProps = {
   title?: string;
@@ -20,6 +22,7 @@ export type LangSelectorProps = {
   onChange(langTag: string | null, selected: LanguageInfo): void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setLoadingState?(isLoading: boolean): any;
+  onClearClick?: () => void;
 };
 
 type LangsRegistry = {
@@ -49,6 +52,7 @@ export function LangSelector({
   selected,
   onChange,
   setLoadingState,
+  onClearClick,
 }: LangSelectorProps) {
   const [langsRegistry, setLangsRegistry] =
     useState<LangsRegistry>(emptyLangsRegistry);
@@ -172,9 +176,22 @@ export function LangSelector({
 
   return (
     <>
-      <IonItem button={true} detail={false} id={langSelectorId}>
-        <IonLabel>{selectedLangValue}</IonLabel>
-      </IonItem>
+      <StSelectorDiv>
+        <StIonItem button={true} detail={false} id={langSelectorId}>
+          <IonLabel>{selectedLangValue}</IonLabel>
+        </StIonItem>
+        {onClearClick && (
+          <StIonIcon
+            icon={removeCircleOutline}
+            onClick={() => {
+              setSelectedLang(null);
+              setSelectedDialect(null);
+              setSelectedRegion(null);
+              onClearClick();
+            }}
+          ></StIonIcon>
+        )}
+      </StSelectorDiv>
       <IonModal trigger={langSelectorId} ref={modal}>
         <AppTypeahead
           title={title}
@@ -192,3 +209,17 @@ export function LangSelector({
     </>
   );
 }
+
+const StIonIcon = styled(IonIcon)(() => ({
+  cursor: 'pointer',
+  fontSize: '30px',
+}));
+
+const StSelectorDiv = styled('div')(() => ({
+  display: 'flex',
+  alignItems: 'center',
+}));
+
+const StIonItem = styled(IonItem)(() => ({
+  width: '100%',
+}));
