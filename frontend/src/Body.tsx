@@ -42,10 +42,15 @@ import EmailResponsePage from './components/email/EmailResponse';
 import ResetEmailRequestPage from './components/authentication/ResetEmailRequest';
 import PasswordResetFormPage from './components/authentication/PasswordResetForm';
 import { MapsPage } from './components/map/MapsPage';
+
 import { SiteTextListPage } from './components/site-text/SiteTextListPage';
 import { SiteTextDetailPage } from './components/site-text/SiteTextDetailPage';
+
 import { WordListPage } from './components/dictionary/WordListPage';
 import { WordDetailPage } from './components/dictionary/WordDetailPage';
+
+import { PhraseListPage } from './components/phrase-book/PhraseListPage';
+import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
 
 const Body: React.FC = () => {
   const router = useIonRouter();
@@ -350,6 +355,16 @@ const Body: React.FC = () => {
             exact
             path="/:nation_id/:language_id/:cluster_id/dictionary-detail/:word_id"
             component={WordDetailPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/phrase-book-list"
+            component={PhraseListPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/phrase-book-detail/:phrase_id"
+            component={PhraseDetailPage}
           />
           <Route exact path="/">
             <Redirect to="/US/eng/1/home" />
