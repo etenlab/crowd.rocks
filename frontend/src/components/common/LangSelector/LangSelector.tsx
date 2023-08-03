@@ -22,7 +22,7 @@ export type LangSelectorProps = {
   onChange(langTag: string | null, selected: LanguageInfo): void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setLoadingState?(isLoading: boolean): any;
-  showClearButton?: boolean;
+  onClearClick?: () => void;
 };
 
 type LangsRegistry = {
@@ -52,7 +52,7 @@ export function LangSelector({
   selected,
   onChange,
   setLoadingState,
-  showClearButton = false,
+  onClearClick,
 }: LangSelectorProps) {
   const [langsRegistry, setLangsRegistry] =
     useState<LangsRegistry>(emptyLangsRegistry);
@@ -171,16 +171,6 @@ export function LangSelector({
     [langsRegistry.langs],
   );
 
-  const handleClearClick: React.MouseEventHandler<HTMLIonIconElement> =
-    useCallback(
-      (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setSelectedLang(null);
-      },
-      [setSelectedLang],
-    );
-
   const selectedLangValue =
     selectedLang?.descriptions?.join(DESCRIPTIONS_JOINER) || title;
 
@@ -190,10 +180,15 @@ export function LangSelector({
         <StIonItem button={true} detail={false} id={langSelectorId}>
           <IonLabel>{selectedLangValue}</IonLabel>
         </StIonItem>
-        {showClearButton && (
+        {onClearClick && (
           <StIonIcon
             icon={removeCircleOutline}
-            onClick={handleClearClick}
+            onClick={() => {
+              setSelectedLang(null);
+              setSelectedDialect(null);
+              setSelectedRegion(null);
+              onClearClick();
+            }}
           ></StIonIcon>
         )}
       </StSelectorDiv>

@@ -64,6 +64,7 @@ export const MapList = ({ match }: MapListProps) => {
           onChange={(mapListLangTag, mapListLangInfo) => {
             setMapListLang(mapListLangInfo);
           }}
+          onClearClick={() => setMapListLang(undefined)}
         ></LangSelector>
       </LangSelectorBox>
       <MapTools
