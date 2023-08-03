@@ -314,9 +314,6 @@ export class MapsService {
         t_geo_code: geo_code,
       });
       translatedMapIds.push(map_id);
-
-      console.log('translations', translations);
-      console.log('translated_map_id', translatedMapIds);
     }
 
     return translatedMapIds;
