@@ -253,7 +253,7 @@ type Mutation {
   siteTextTranslationVoteUpsert(input: SiteTextTranslationVoteUpsertInput!): SiteTextTranslationVoteUpsertOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextUpsertOutput!
   siteTextWordDefinitionUpsert(input: SiteTextWordDefinitionUpsertInput!): SiteTextWordDefinitionUpsertOutput!
-  togglePhraseDefinitonVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
+  togglePhraseDefinitionVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
   togglePhraseVoteStatus(phrase_id: ID!, vote: Boolean!): PhraseVoteStatusOutputRow!
   toggleVoteStatus(site_text_translation_id: String!, vote: Boolean!): VoteStatusOutputRow!
   toggleWordDefinitonVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
