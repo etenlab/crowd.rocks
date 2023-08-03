@@ -1,11 +1,6 @@
 import { gql, useApolloClient } from '@apollo/client';
 import { useCallback } from 'react';
-import {
-  GetOrigMapContentOutput,
-  // GetOrigMapsListOutput,
-  WordTranslations,
-  WordWithVotes,
-} from '../../../generated/graphql';
+import { WordTranslations, WordWithVotes } from '../../../generated/graphql';
 
 export const UPLOAD_FILE_MUTATION = gql`
   mutation MapUpload($file: Upload!) {
@@ -16,49 +11,8 @@ export const UPLOAD_FILE_MUTATION = gql`
   }
 `;
 
-export const GET_ORIGINAL_MAP_CONTENT_QUERY = gql`
-  query GetOrigMapsContent($id: ID!) {
-    getOrigMapContent(input: { original_map_id: $id }) {
-      original_map_id
-      map_file_name
-      created_at
-      created_by
-      content
-    }
-  }
-`;
-
 export function useMapTranslationTools() {
   const apolloClient = useApolloClient();
-
-  const getOrigMapContent = useCallback(
-    async (id: string): Promise<TMapWithContent> => {
-      const res = await apolloClient.query<{
-        getOrigMapContent: GetOrigMapContentOutput;
-      }>({
-        query: GET_ORIGINAL_MAP_CONTENT_QUERY,
-        variables: { id },
-      });
-
-      const {
-        original_map_id,
-        map_file_name,
-        created_at,
-        created_by,
-        content,
-      } = res.data.getOrigMapContent;
-
-      return {
-        id: original_map_id,
-        name: map_file_name,
-        createdAt: created_at,
-        createdByUserId: created_by,
-        content: content,
-        languageCode: 'en',
-      };
-    },
-    [apolloClient],
-  );
 
   const sendMapFile = useCallback(
     async (
@@ -116,7 +70,6 @@ export function useMapTranslationTools() {
 
   return {
     sendMapFile,
-    getOrigMapContent,
     chooseBestTranslation,
   };
 }
