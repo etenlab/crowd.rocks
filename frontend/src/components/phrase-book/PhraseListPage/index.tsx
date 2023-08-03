@@ -1,0 +1,1 @@
+export { PhraseListPage } from './PhraseListPage';
