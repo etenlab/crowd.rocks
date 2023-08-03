@@ -1,6 +1,12 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
+  IonButton,
+  IonModal,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonButtons,
   useIonRouter,
   InputCustomEvent,
   InputChangeEventDetail,
@@ -10,11 +16,12 @@ import { IonContent, IonPage, useIonToast } from '@ionic/react';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { Card } from '../../common/Card';
-import { Input } from '../../common/styled';
+import { Input, Textarea } from '../../common/styled';
 
 import {
   useGetWordsByLanguageLazyQuery,
   useToggleWordVoteStatusMutation,
+  useWordUpsertMutation,
 } from '../../../generated/graphql';
 
 import {
@@ -27,6 +34,7 @@ import {
 import {
   WordWithDefinitionlikeStringsFragmentFragmentDoc,
   WordWithVoteFragmentFragmentDoc,
+  GetWordsByLanguageDocument,
 } from '../../../generated/graphql';
 
 import {
@@ -46,6 +54,9 @@ export function WordListPage({ match }: WordListPageProps) {
   const router = useIonRouter();
   const [present] = useIonToast();
 
+  const modal = useRef<HTMLIonModalElement>(null);
+  const textarea = useRef<HTMLIonTextareaElement>(null);
+
   const [langInfo, setLangInfo] = useState<LanguageInfo>();
   const [filter, setFilter] = useState<string>('');
 
@@ -56,8 +67,61 @@ export function WordListPage({ match }: WordListPageProps) {
     useGetWordsByLanguageLazyQuery();
   const [toggleWordVoteStatus] = useToggleWordVoteStatusMutation({
     update(cache, { data, errors }) {
-      if (errors) {
+      if (
+        data &&
+        !errors &&
+        wordsData &&
+        data.toggleWordVoteStatus.vote_status &&
+        langInfo
+      ) {
+        const newVoteStatus = data.toggleWordVoteStatus.vote_status;
+
+        cache.updateFragment<WordWithDefinitionlikeStrings>(
+          {
+            id: cache.identify({
+              __typename: 'WordWithDefinitionlikeStrings',
+              word_id: newVoteStatus.word_id,
+            }),
+            fragment: WordWithDefinitionlikeStringsFragmentFragmentDoc,
+            fragmentName: 'WordWithDefinitionlikeStringsFragment',
+          },
+          (data) => {
+            if (data) {
+              return {
+                ...data,
+                upvotes: newVoteStatus.upvotes,
+                downvotes: newVoteStatus.downvotes,
+              };
+            } else {
+              return data;
+            }
+          },
+        );
+
+        cache.updateFragment<WordWithVote>(
+          {
+            id: cache.identify({
+              __typename: 'WordWithVote',
+              word_id: newVoteStatus.word_id,
+            }),
+            fragment: WordWithVoteFragmentFragmentDoc,
+            fragmentName: 'WordWithVoteFragment',
+          },
+          (data) => {
+            if (data) {
+              return {
+                ...data,
+                upvotes: newVoteStatus.upvotes,
+                downvotes: newVoteStatus.downvotes,
+              };
+            } else {
+              return data;
+            }
+          },
+        );
+      } else {
         console.log('useToggleWordVoteStatusMutation: ', errors);
+        console.log(data?.toggleWordVoteStatus.error);
 
         present({
           message: 'Failed at voting!',
@@ -65,63 +129,59 @@ export function WordListPage({ match }: WordListPageProps) {
           position: 'top',
           color: 'danger',
         });
-
-        return;
       }
+    },
+  });
+  const [upsertWord] = useWordUpsertMutation({
+    update(cache, { data, errors }) {
+      if (data && !errors && wordsData && data.wordUpsert.word && langInfo) {
+        const newWord = data.wordUpsert.word;
 
-      if (!wordsData || !data || !data.toggleWordVoteStatus.vote_status) {
-        return;
+        cache.writeQuery({
+          query: GetWordsByLanguageDocument,
+          data: {
+            ...wordsData,
+            getWordsByLanguage: {
+              ...wordsData.getWordsByLanguage,
+              word_with_vote_list: [
+                ...wordsData.getWordsByLanguage.word_with_vote_list,
+                {
+                  ...newWord,
+                  __typename: 'WordWithDefinitionlikeStrings',
+                  definitionlike_strings: [],
+                  upvotes: 0,
+                  downvotes: 0,
+                  created_at: new Date().toISOString(),
+                },
+              ],
+            },
+          },
+          variables: {
+            language_code: langInfo.lang.tag,
+            dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
+            geo_code: langInfo.region ? langInfo.region.tag : null,
+          },
+        });
+
+        present({
+          message: 'Success at creating new word!',
+          duration: 1500,
+          position: 'top',
+          color: 'success',
+        });
+
+        modal.current?.dismiss();
+      } else {
+        console.log('useWordUpsertMutation: ', errors);
+        console.log(data?.wordUpsert.error);
+
+        present({
+          message: 'Failed at voting!',
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
       }
-
-      if (!langInfo) {
-        return;
-      }
-
-      const newVoteStatus = data.toggleWordVoteStatus.vote_status;
-
-      cache.updateFragment<WordWithDefinitionlikeStrings>(
-        {
-          id: cache.identify({
-            __typename: 'WordWithDefinitionlikeStrings',
-            word_id: newVoteStatus.word_id,
-          }),
-          fragment: WordWithDefinitionlikeStringsFragmentFragmentDoc,
-          fragmentName: 'WordWithDefinitionlikeStringsFragment',
-        },
-        (data) => {
-          if (data) {
-            return {
-              ...data,
-              upvotes: newVoteStatus.upvotes,
-              downvotes: newVoteStatus.downvotes,
-            };
-          } else {
-            return data;
-          }
-        },
-      );
-
-      cache.updateFragment<WordWithVote>(
-        {
-          id: cache.identify({
-            __typename: 'WordWithVote',
-            word_id: newVoteStatus.word_id,
-          }),
-          fragment: WordWithVoteFragmentFragmentDoc,
-          fragmentName: 'WordWithVoteFragment',
-        },
-        (data) => {
-          if (data) {
-            return {
-              ...data,
-              upvotes: newVoteStatus.upvotes,
-              downvotes: newVoteStatus.downvotes,
-            };
-          } else {
-            return data;
-          }
-        },
-      );
     },
   });
 
@@ -135,7 +195,7 @@ export function WordListPage({ match }: WordListPageProps) {
         language_code: langInfo.lang.tag,
         dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
         geo_code: langInfo.region ? langInfo.region.tag : null,
-        filter: filter,
+        filter: filter.trim(),
       },
     });
   }, [langInfo, getWordsByLanguage, filter]);
@@ -165,6 +225,44 @@ export function WordListPage({ match }: WordListPageProps) {
     },
     [match, router],
   );
+
+  const handleSaveNewDefinition = () => {
+    if (!langInfo) {
+      return;
+    }
+
+    const textareaEl = textarea.current;
+    if (!textareaEl) {
+      present({
+        message: 'Input or Textarea not exists!',
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+
+    const textareaVal = (textareaEl.value + '').trim();
+
+    if (textareaVal.length === 0) {
+      present({
+        message: 'Word cannot be empty string!',
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+
+    upsertWord({
+      variables: {
+        language_code: langInfo.lang.tag,
+        dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
+        geo_code: langInfo.region ? langInfo.region.tag : null,
+        wordlike_string: textareaVal.trim(),
+      },
+    });
+  };
 
   const handleFilterChange = (
     event: InputCustomEvent<InputChangeEventDetail>,
@@ -259,6 +357,7 @@ export function WordListPage({ match }: WordListPageProps) {
                   setLangInfo(sourceLangInfo);
                 }}
               />
+              <br />
               <Input
                 type="text"
                 placeholder="Search..."
@@ -271,9 +370,46 @@ export function WordListPage({ match }: WordListPageProps) {
               />
             </FilterContainer>
 
+            <hr />
+
+            <IonButton id="open-modal" expand="block">
+              + Add More Definitions
+            </IonButton>
+
             <br />
 
             <CardListContainer>{cardListComs}</CardListContainer>
+
+            <IonModal ref={modal} trigger="open-modal">
+              <IonHeader>
+                <IonToolbar>
+                  <IonButtons slot="start">
+                    <IonButton onClick={() => modal.current?.dismiss()}>
+                      Cancel
+                    </IonButton>
+                  </IonButtons>
+                  <IonTitle>Dictionary</IonTitle>
+                </IonToolbar>
+              </IonHeader>
+              <IonContent className="ion-padding">
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '10px',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <Textarea
+                    ref={textarea}
+                    label="Input New Definition"
+                    labelPlacement="floating"
+                    fill="solid"
+                    placeholder="Input New Definition..."
+                  />
+                  <IonButton onClick={handleSaveNewDefinition}>Save</IonButton>
+                </div>
+              </IonContent>
+            </IonModal>
           </div>
         </div>
       </IonContent>
