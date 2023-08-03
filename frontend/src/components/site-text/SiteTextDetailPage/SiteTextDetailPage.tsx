@@ -32,13 +32,8 @@ import {
   useToggleVoteStatusMutation,
 } from '../../../generated/graphql';
 
-import {
-  CaptainContainer,
-  CardListContainer,
-  CardContainer,
-  Textarea,
-  Input,
-} from './styled';
+import { CaptainContainer, CardListContainer, CardContainer } from './styled';
+import { Input, Textarea } from '../../common/styled';
 
 interface SiteTextDetailPageProps
   extends RouteComponentProps<{
@@ -467,6 +462,7 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
               });
             },
           }}
+          voteFor="description"
         />
       ))
     : null;

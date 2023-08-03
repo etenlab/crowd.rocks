@@ -25,7 +25,7 @@ import {
 } from '../words/types';
 import { PoolClient } from 'pg';
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
-import { LanguageInput } from '../definitions/types';
+import { LanguageInput } from 'src/components/common/types';
 
 @Injectable()
 export class WordToWordTranslationsService {

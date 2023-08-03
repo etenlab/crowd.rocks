@@ -1,0 +1,136 @@
+fragment WordWithDefinitionlikeStringsFragment on WordWithDefinitionlikeStrings {
+  word_id
+  word
+  definitionlike_strings
+  downvotes
+  upvotes
+  language_code
+  dialect_code
+  geo_code
+}
+
+fragment WordDefinitionWithVoteFragment on WordDefinitionWithVote {
+  word_definition_id
+  word {
+    ...WordFragment
+  }
+  definition
+  downvotes
+  upvotes
+  created_at
+}
+
+fragment WordWithVoteFragment on WordWithVote {
+  dialect_code
+  downvotes
+  geo_code
+  language_code
+  upvotes
+  word
+  word_id
+}
+
+fragment DefinitionVoteStatusFragment on DefinitionVoteStatus {
+  definition_id
+  downvotes
+  upvotes
+}
+
+fragment WordVoteStatusFragment on WordVoteStatus {
+  word_id
+  downvotes
+  upvotes
+}
+
+query GetWordsByLanguage(
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+  $filter: String
+) {
+  getWordsByLanguage(
+    input: {
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+      filter: $filter
+    }
+  ) {
+    error
+    word_with_vote_list {
+      ...WordWithDefinitionlikeStringsFragment
+    }
+  }
+}
+
+query GetWordDefinitionsByWordId($word_id: ID!) {
+  getWordDefinitionsByWordId(word_id: $word_id) {
+    error
+    word_definition_list {
+      ...WordDefinitionWithVoteFragment
+    }
+  }
+}
+
+query GetWordWithVoteById($word_id: ID!) {
+  getWordWithVoteById(word_id: $word_id) {
+    error
+    word_with_vote {
+      ...WordWithVoteFragment
+    }
+  }
+}
+
+mutation WordDefinitionUpsert($word_id: ID!, $definition: String!) {
+  wordDefinitionUpsert(input: { word_id: $word_id, definition: $definition }) {
+    error
+    word_definition {
+      ...WordDefinitionFragment
+    }
+  }
+}
+
+mutation ToggleWordDefinitonVoteStatus(
+  $word_definition_id: ID!
+  $vote: Boolean!
+) {
+  toggleWordDefinitonVoteStatus(
+    word_definition_id: $word_definition_id
+    vote: $vote
+  ) {
+    error
+    vote_status {
+      ...DefinitionVoteStatusFragment
+    }
+  }
+}
+
+mutation ToggleWordVoteStatus($word_id: ID!, $vote: Boolean!) {
+  toggleWordVoteStatus(word_id: $word_id, vote: $vote) {
+    error
+    vote_status {
+      ...WordVoteStatusFragment
+    }
+  }
+}
+
+mutation WordUpsert(
+  $wordlike_string: String!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  wordUpsert(
+    input: {
+      wordlike_string: $wordlike_string
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
+    error
+    word {
+      ...WordFragment
+    }
+  }
+}

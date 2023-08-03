@@ -21,7 +21,10 @@ export function VoteButtonsHerizontal({
         <StIonIcon
           color="success"
           icon={thumbsUp}
-          onClick={() => onVoteUpClick()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onVoteUpClick();
+          }}
         />
         {upVotes}
       </StThumbDiv>
@@ -29,7 +32,10 @@ export function VoteButtonsHerizontal({
         <StIonIcon
           color="danger"
           icon={thumbsDown}
-          onClick={() => onVoteDownClick()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onVoteDownClick();
+          }}
         />
         {downVotes}
       </StThumbDiv>

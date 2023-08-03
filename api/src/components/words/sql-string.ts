@@ -149,3 +149,76 @@ export function toggleWordVoteStatus({
     [word_id, vote, token],
   ];
 }
+
+export type GetWordListByLang = {
+  word_id: string;
+};
+
+export function getWordListByLang({
+  language_code,
+  dialect_code,
+  geo_code,
+  filter,
+}: {
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+  filter?: string | null;
+}): [
+  string,
+  (
+    | [string, string, string, string]
+    | [string, string, string]
+    | [string, string]
+    | [string]
+  ),
+] {
+  let wherePlsStr = '';
+  let returnArr:
+    | [string, string, string, string]
+    | [string, string, string]
+    | [string, string]
+    | [string] = [language_code];
+
+  if (dialect_code && geo_code) {
+    wherePlsStr = `
+      and w.dialect_code = $2
+      and w.geo_code = $3
+    `;
+    returnArr = [...returnArr, dialect_code, geo_code];
+  } else if (dialect_code && !geo_code) {
+    wherePlsStr = `
+      and w.dialect_code = $2
+    `;
+    returnArr = [...returnArr, dialect_code];
+  } else if (!dialect_code && geo_code) {
+    wherePlsStr = `
+      and w.geo_code = $2
+    `;
+    returnArr = [...returnArr, geo_code];
+  } else if (!dialect_code && !geo_code) {
+    wherePlsStr = ``;
+    returnArr = [...returnArr];
+  }
+
+  if (filter && filter.trim().length > 0) {
+    wherePlsStr = `
+      ${wherePlsStr}
+      and ws.wordlike_string like $${returnArr.length + 1}
+    `;
+    returnArr = [...returnArr, `%${filter.trim()}%`];
+  }
+
+  return [
+    `
+      select distinct
+        w.word_id
+      from words as w
+      join wordlike_strings as ws
+      on ws.wordlike_string_id = w.wordlike_string_id
+      where w.language_code = $1
+        ${wherePlsStr};
+    `,
+    [...returnArr],
+  ];
+}

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
@@ -10,10 +10,12 @@ import {
   PhraseDefinitionReadOutput,
   PhraseDefinitionUpsertOutput,
   PhraseDefinitionUpdateInput,
-  LanguageInput,
   PhraseDefinitionWithVoteListOutput,
   PhraseDefinitionWithVote,
+  DefinitionlikeStringListOutput,
 } from './types';
+
+import { LanguageInput } from 'src/components/common/types';
 
 import {
   getPhraseDefinitionObjById,
@@ -24,12 +26,17 @@ import {
   callPhraseDefinitionUpdateProcedure,
   GetPhraseDefinitionListByLang,
   getPhraseDefinitionListByLang,
+  GetPhraseDefinitionListByPhraseId,
+  getPhraseDefinitionListByPhraseId,
+  GetPhraseDefinitionlikeStringListByPhraseId,
+  getPhraseDefinitionlikeStringListByPhraseId,
 } from './sql-string';
 
 @Injectable()
 export class PhraseDefinitionsService {
   constructor(
     private pg: PostgresService,
+    @Inject(forwardRef(() => PhrasesService))
     private phraseService: PhrasesService,
     private phraseDefinitionVoteService: PhraseDefinitionVotesService,
   ) {}
@@ -202,6 +209,91 @@ export class PhraseDefinitionsService {
     return {
       error: ErrorType.UnknownError,
       phrase_definition_list: [],
+    };
+  }
+
+  async getPhraseDefinitionsByPhraseId(
+    phrase_id: number,
+  ): Promise<PhraseDefinitionWithVoteListOutput> {
+    try {
+      const res1 = await this.pg.pool.query<GetPhraseDefinitionListByPhraseId>(
+        ...getPhraseDefinitionListByPhraseId(phrase_id),
+      );
+
+      const definitionsWithVoteList: PhraseDefinitionWithVote[] = [];
+
+      for (let i = 0; i < res1.rowCount; i++) {
+        const { phrase_definition_id, created_at } = res1.rows[i];
+        const { error, vote_status } =
+          await this.phraseDefinitionVoteService.getVoteStatus(
+            phrase_definition_id,
+          );
+
+        if (error !== ErrorType.NoError) {
+          return {
+            error,
+            phrase_definition_list: [],
+          };
+        }
+
+        const { error: readError, phrase_definition } = await this.read(
+          phrase_definition_id,
+        );
+
+        if (readError !== ErrorType.NoError) {
+          continue;
+        }
+
+        definitionsWithVoteList.push({
+          ...phrase_definition,
+          upvotes: vote_status.upvotes,
+          downvotes: vote_status.downvotes,
+          created_at: created_at,
+        });
+      }
+
+      return {
+        error: ErrorType.NoError,
+        phrase_definition_list: definitionsWithVoteList,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      phrase_definition_list: [],
+    };
+  }
+
+  async getDefinitionlikeStringsByPhraseId(
+    phrase_id: number,
+  ): Promise<DefinitionlikeStringListOutput> {
+    try {
+      const res1 =
+        await this.pg.pool.query<GetPhraseDefinitionlikeStringListByPhraseId>(
+          ...getPhraseDefinitionlikeStringListByPhraseId(phrase_id),
+        );
+
+      const definitionlikeStringList: string[] = [];
+
+      for (let i = 0; i < res1.rowCount; i++) {
+        const { definition } = res1.rows[i];
+
+        definitionlikeStringList.push(definition);
+      }
+
+      return {
+        error: ErrorType.NoError,
+        definitionlike_strings: definitionlikeStringList,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      definitionlike_strings: [],
     };
   }
 }
