@@ -1573,6 +1573,13 @@ export type GetOrigMapContentQueryVariables = Exact<{
 
 export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: { __typename?: 'GetOrigMapContentOutput', original_map_id: string, map_file_name: string, created_at: string, created_by: string, content: string } };
 
+export type MapUploadMutationVariables = Exact<{
+  file: Scalars['Upload']['input'];
+}>;
+
+
+export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typename?: 'MapFileOutput', original_map_id: string, map_file_name: string } };
+
 export type PhraseWithDefinitionlikeStringsFragmentFragment = { __typename?: 'PhraseWithDefinitionlikeStrings', phrase_id: string, phrase: string, definitionlike_strings: Array<string | null>, downvotes: number, upvotes: number };
 
 export type PhraseDefinitionWithVoteFragmentFragment = { __typename?: 'PhraseDefinitionWithVote', phrase_definition_id: string, definition: string, downvotes: number, upvotes: number, created_at: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } };
@@ -2664,6 +2671,40 @@ export function useGetOrigMapContentLazyQuery(baseOptions?: Apollo.LazyQueryHook
 export type GetOrigMapContentQueryHookResult = ReturnType<typeof useGetOrigMapContentQuery>;
 export type GetOrigMapContentLazyQueryHookResult = ReturnType<typeof useGetOrigMapContentLazyQuery>;
 export type GetOrigMapContentQueryResult = Apollo.QueryResult<GetOrigMapContentQuery, GetOrigMapContentQueryVariables>;
+export const MapUploadDocument = gql`
+    mutation MapUpload($file: Upload!) {
+  mapUpload(file: $file) {
+    original_map_id
+    map_file_name
+  }
+}
+    `;
+export type MapUploadMutationFn = Apollo.MutationFunction<MapUploadMutation, MapUploadMutationVariables>;
+
+/**
+ * __useMapUploadMutation__
+ *
+ * To run a mutation, you first call `useMapUploadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMapUploadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mapUploadMutation, { data, loading, error }] = useMapUploadMutation({
+ *   variables: {
+ *      file: // value for 'file'
+ *   },
+ * });
+ */
+export function useMapUploadMutation(baseOptions?: Apollo.MutationHookOptions<MapUploadMutation, MapUploadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MapUploadMutation, MapUploadMutationVariables>(MapUploadDocument, options);
+      }
+export type MapUploadMutationHookResult = ReturnType<typeof useMapUploadMutation>;
+export type MapUploadMutationResult = Apollo.MutationResult<MapUploadMutation>;
+export type MapUploadMutationOptions = Apollo.BaseMutationOptions<MapUploadMutation, MapUploadMutationVariables>;
 export const GetPhrasesByLanguageDocument = gql`
     query GetPhrasesByLanguage($language_code: String!, $dialect_code: String, $geo_code: String, $filter: String) {
   getPhrasesByLanguage(
@@ -3581,6 +3622,7 @@ export const namedOperations = {
     ToggleWordVoteStatus: 'ToggleWordVoteStatus',
     WordUpsert: 'WordUpsert',
     EmailResponse: 'EmailResponse',
+    MapUpload: 'MapUpload',
     PhraseDefinitionUpsert: 'PhraseDefinitionUpsert',
     TogglePhraseDefinitionVoteStatus: 'TogglePhraseDefinitionVoteStatus',
     TogglePhraseVoteStatus: 'TogglePhraseVoteStatus',

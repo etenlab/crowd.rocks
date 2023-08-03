@@ -81,3 +81,10 @@ query GetOrigMapContent($id: ID!) {
     content
   }
 }
+
+mutation MapUpload($file: Upload!) {
+  mapUpload(file: $file) {
+    original_map_id
+    map_file_name
+  }
+}
