@@ -10,6 +10,8 @@ import {
 import { createUploadLink } from 'apollo-upload-client';
 import { setContext } from '@apollo/client/link/context';
 
+import { typePolicies } from './cacheTypePolicies';
+
 let server_url = 'http://localhost:3000/graphql';
 
 if (process.env.NODE_ENV == 'production') {
@@ -40,7 +42,9 @@ const authLink = setContext((_, { headers }) => {
 
 export const apollo_client = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies,
+  }),
 });
 
 // const client = new ApolloClient({

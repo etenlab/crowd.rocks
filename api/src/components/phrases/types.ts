@@ -63,3 +63,27 @@ export class PhraseVoteStatusOutputRow extends GenericOutput {
   @Field(() => PhraseVoteStatus, { nullable: true })
   vote_status: PhraseVoteStatus;
 }
+
+@ObjectType()
+export class PhraseWithVote extends Phrase {
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class PhraseWithDefinitionlikeStrings extends PhraseWithVote {
+  @Field(() => [String], { nullable: 'items' })
+  definitionlike_strings: string[];
+}
+
+@ObjectType()
+export class PhraseWithVoteListOutput extends GenericOutput {
+  @Field(() => [PhraseWithDefinitionlikeStrings], { nullable: 'items' })
+  phrase_with_vote_list: PhraseWithDefinitionlikeStrings[];
+}
+
+@ObjectType()
+export class PhraseWithVoteOutput extends GenericOutput {
+  @Field(() => PhraseWithVote, { nullable: true })
+  phrase_with_vote: PhraseWithVote | null;
+}

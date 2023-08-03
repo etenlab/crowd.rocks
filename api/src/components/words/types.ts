@@ -82,3 +82,27 @@ export class WordVoteStatusOutputRow extends GenericOutput {
   @Field(() => WordVoteStatus, { nullable: true })
   vote_status: WordVoteStatus;
 }
+
+@ObjectType()
+export class WordWithVote extends Word {
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class WordWithDefinitionlikeStrings extends WordWithVote {
+  @Field(() => [String], { nullable: 'items' })
+  definitionlike_strings: string[];
+}
+
+@ObjectType()
+export class WordWithVoteListOutput extends GenericOutput {
+  @Field(() => [WordWithDefinitionlikeStrings], { nullable: 'items' })
+  word_with_vote_list: WordWithDefinitionlikeStrings[];
+}
+
+@ObjectType()
+export class WordWithVoteOutput extends GenericOutput {
+  @Field(() => WordWithVote, { nullable: true })
+  word_with_vote: WordWithVote | null;
+}

@@ -9,7 +9,7 @@ export type GetWordDefinitionObjectById = {
 export function getWordDefinitionObjById(id: number): [string, [number]] {
   return [
     `
-      select 
+      select distinct
         word_definition_id,
         word_id,
         definition
@@ -51,7 +51,7 @@ export type GetPhraseDefinitionObjectById = {
 export function getPhraseDefinitionObjById(id: number): [string, [number]] {
   return [
     `
-      select 
+      select distinct 
         phrase_definition_id,
         phrase_id,
         definition
@@ -161,14 +161,14 @@ export function getWordDefinitionListByLang({
       and words.geo_code = $2
     `;
     returnArr = [...returnArr, geo_code];
-  } else if (!!dialect_code && !geo_code) {
+  } else if (!dialect_code && !geo_code) {
     wherePlsStr = ``;
     returnArr = [...returnArr];
   }
 
   return [
     `
-      select 
+      select distinct
         word_definitions.word_definition_id,
         word_definitions.created_at
       from word_definitions
@@ -181,6 +181,26 @@ export function getWordDefinitionListByLang({
       on ws.word_id = word_definitions.word_id
     `,
     returnArr,
+  ];
+}
+
+export type GetWordDefinitionListByWordId = {
+  word_definition_id: number;
+  created_at: string;
+};
+
+export function getWordDefinitionListByWordId(
+  word_id: number,
+): [string, [number]] {
+  return [
+    `
+      select distinct 
+        word_definition_id,
+        created_at
+      from word_definitions
+      where word_id = $1
+    `,
+    [word_id],
   ];
 }
 
@@ -219,14 +239,14 @@ export function getPhraseDefinitionListByLang({
       and words.geo_code = $2
     `;
     returnArr = [...returnArr, geo_code];
-  } else if (!!dialect_code && !geo_code) {
+  } else if (!dialect_code && !geo_code) {
     wherePlsStr = ``;
     returnArr = [...returnArr];
   }
 
   return [
     `
-      select 
+      select distinct 
         phrase_definitions.phrase_definition_id,
         phrase_definitions.created_at
       from phrase_definitions
@@ -244,6 +264,26 @@ export function getPhraseDefinitionListByLang({
   ];
 }
 
+export type GetPhraseDefinitionListByPhraseId = {
+  phrase_definition_id: number;
+  created_at: string;
+};
+
+export function getPhraseDefinitionListByPhraseId(
+  phrase_id: number,
+): [string, [number]] {
+  return [
+    `
+      select distinct 
+        phrase_definition_id,
+        created_at
+      from phrase_definitions
+      where phrase_id = $1
+    `,
+    [phrase_id],
+  ];
+}
+
 export type GetWordDefinitionVoteObjectById = {
   word_definitions_vote_id: number;
   word_definition_id: number;
@@ -255,7 +295,7 @@ export type GetWordDefinitionVoteObjectById = {
 export function getWordDefinitionVoteObjById(id: number): [string, [number]] {
   return [
     `
-      select 
+      select distinct 
         word_definitions_vote_id,
         word_definition_id,
         user_id,
@@ -357,7 +397,7 @@ export type GetPhraseDefinitionVoteObjectById = {
 export function getPhraseDefinitionVoteObjById(id: number): [string, [number]] {
   return [
     `
-      select 
+      select distinct 
         phrase_definitions_vote_id,
         phrase_definition_id,
         user_id,
@@ -445,5 +485,41 @@ export function togglePhraseDefinitionVoteStatus({
       call phrase_definition_vote_toggle($1, $2, $3, 0, '');
     `,
     [phrase_definition_id, vote, token],
+  ];
+}
+
+export type GetWordDefinitionlikeStringListByWordId = {
+  definition: string;
+};
+
+export function getWordDefinitionlikeStringListByWordId(
+  word_id: number,
+): [string, [number]] {
+  return [
+    `
+      select 
+        definition
+      from word_definitions
+      where word_id = $1
+    `,
+    [word_id],
+  ];
+}
+
+export type GetPhraseDefinitionlikeStringListByPhraseId = {
+  definition: string;
+};
+
+export function getPhraseDefinitionlikeStringListByPhraseId(
+  phrase_id: number,
+): [string, [number]] {
+  return [
+    `
+      select 
+        definition
+      from phrase_definitions
+      where phrase_id = $1
+    `,
+    [phrase_id],
   ];
 }

@@ -121,19 +121,6 @@ export class DefinitionUpdateOutput extends GenericOutput {
   phrase_definition: PhraseDefinition | null;
 }
 
-@InputType()
-export class LanguageInput {
-  @Field(() => String) language_code: string;
-  @Field(() => String, { nullable: true }) dialect_code: string | null;
-  @Field(() => String, { nullable: true }) geo_code: string | null;
-}
-@ObjectType()
-export class LanguageOutput {
-  @Field(() => String) language_code: string;
-  @Field(() => String, { nullable: true }) dialect_code: string | null;
-  @Field(() => String, { nullable: true }) geo_code: string | null;
-}
-
 @ObjectType()
 export class WordDefinitionWithVote extends WordDefinition {
   @Field(() => String) created_at: string;
@@ -207,4 +194,10 @@ export class DefinitionVoteStatus {
 export class DefinitionVoteStatusOutputRow extends GenericOutput {
   @Field(() => DefinitionVoteStatus, { nullable: true })
   vote_status: DefinitionVoteStatus;
+}
+
+@ObjectType()
+export class DefinitionlikeStringListOutput extends GenericOutput {
+  @Field(() => [String], { nullable: 'items' })
+  definitionlike_strings: string[];
 }

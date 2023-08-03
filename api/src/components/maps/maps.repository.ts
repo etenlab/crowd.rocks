@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PoolClient } from 'pg';
 import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
-import { LanguageInput } from '../definitions/types';
+import { LanguageInput } from 'src/components/common/types';
 import { WordTranslations, WordWithVotes } from '../words/types';
 import {
   GetOrigMapContentOutput,

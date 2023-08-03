@@ -1,6 +1,6 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { WordTranslations } from '../words/types';
-import { LanguageInput, LanguageOutput } from '../definitions/types';
+import { LanguageInput, LanguageOutput } from 'src/components/common/types';
 
 @ObjectType()
 export class MapFileOutput {

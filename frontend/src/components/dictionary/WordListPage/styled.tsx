@@ -4,6 +4,14 @@ export const CaptainContainer = styled.div`
   height: 50px;
 `;
 
+export const FilterContainer = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+`;
+
 export const CardListContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -15,5 +23,4 @@ export const CardListContainer = styled.div`
 
 export const CardContainer = styled.div`
   width: 100%;
-  padding: 8px 0;
 `;

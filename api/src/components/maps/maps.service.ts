@@ -22,7 +22,7 @@ import { WordDefinitionsService } from '../definitions/word-definitions.service'
 import { PoolClient } from 'pg';
 import { WordToWordTranslationsService } from '../translations/word-to-word-translations.service';
 import { subTags2Tag, tag2langInfo } from '../../common/langUtils';
-import { LanguageInput } from '../definitions/types';
+import { LanguageInput } from 'src/components/common/types';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value

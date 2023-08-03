@@ -77,7 +77,13 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
               </IonItemDivider>
 
               <IonItem lines="none">
-                <IonCard>
+                <IonCard
+                  onClick={() => {
+                    router.push(
+                      `/${match.params.nation_id}/${match.params.language_id}/1/dictionary-list`,
+                    );
+                  }}
+                >
                   <IonCardHeader>
                     <IonCardTitle>
                       <IonIcon icon={bookOutline}></IonIcon>
@@ -91,7 +97,13 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
               </IonItem>
 
               <IonItem lines="none">
-                <IonCard onClick={() => console.log('asdf')}>
+                <IonCard
+                  onClick={() => {
+                    router.push(
+                      `/${match.params.nation_id}/${match.params.language_id}/1/phrase-book-list`,
+                    );
+                  }}
+                >
                   <IonCardHeader>
                     <IonCardTitle>
                       <IonIcon icon={chatbubbleEllipsesOutline}></IonIcon>
