@@ -82,104 +82,22 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
 
   const [toggleWordVoteStatus] = useToggleWordVoteStatusMutation({
     update(cache, { data, errors }) {
-      if (errors) {
-        console.log('useToggleWordVoteStatusMutation: ', errors);
+      if (
+        !errors &&
+        data &&
+        data.toggleWordVoteStatus.vote_status &&
+        wordData
+      ) {
+        const newVoteStatus = data.toggleWordVoteStatus.vote_status;
 
-        present({
-          message: 'Failed at voting!',
-          duration: 1500,
-          position: 'top',
-          color: 'danger',
-        });
-
-        return;
-      }
-
-      if (!wordData || !data || !data.toggleWordVoteStatus.vote_status) {
-        return;
-      }
-
-      const newVoteStatus = data.toggleWordVoteStatus.vote_status;
-
-      cache.updateFragment<WordWithDefinitionlikeStrings>(
-        {
-          id: cache.identify({
-            __typename: 'WordWithDefinitionlikeStrings',
-            word_id: newVoteStatus.word_id,
-          }),
-          fragment: WordWithDefinitionlikeStringsFragmentFragmentDoc,
-          fragmentName: 'WordWithDefinitionlikeStringsFragment',
-        },
-        (data) => {
-          if (data) {
-            return {
-              ...data,
-              upvotes: newVoteStatus.upvotes,
-              downvotes: newVoteStatus.downvotes,
-            };
-          } else {
-            return data;
-          }
-        },
-      );
-
-      cache.updateFragment<WordWithVote>(
-        {
-          id: cache.identify({
-            __typename: 'WordWithVote',
-            word_id: newVoteStatus.word_id,
-          }),
-          fragment: WordWithVoteFragmentFragmentDoc,
-          fragmentName: 'WordWithVoteFragment',
-        },
-        (data) => {
-          if (data) {
-            return {
-              ...data,
-              upvotes: newVoteStatus.upvotes,
-              downvotes: newVoteStatus.downvotes,
-            };
-          } else {
-            return data;
-          }
-        },
-      );
-    },
-  });
-  const [toggleWordDefinitionVoteStatus] =
-    useToggleWordDefinitonVoteStatusMutation({
-      update(cache, { data, errors }) {
-        if (errors) {
-          console.log('useToggleWordDefinitonVoteStatusMutation: ', errors);
-
-          present({
-            message: 'Failed at voting!',
-            duration: 1500,
-            position: 'top',
-            color: 'danger',
-          });
-
-          return;
-        }
-
-        if (
-          !definitionData ||
-          !data ||
-          !data.toggleWordDefinitonVoteStatus.vote_status
-        ) {
-          return;
-        }
-
-        const newVoteStatus = data.toggleWordDefinitonVoteStatus.vote_status;
-
-        cache.updateFragment<WordDefinitionWithVote>(
+        cache.updateFragment<WordWithDefinitionlikeStrings>(
           {
             id: cache.identify({
-              __typename: 'WordDefinitionWithVote',
-              word_definition_id: newVoteStatus.definition_id,
+              __typename: 'WordWithDefinitionlikeStrings',
+              word_id: newVoteStatus.word_id,
             }),
-            fragment: WordDefinitionWithVoteFragmentFragmentDoc,
-            fragmentName: 'WordDefinitionWithVoteFragment',
+            fragment: WordWithDefinitionlikeStringsFragmentFragmentDoc,
+            fragmentName: 'WordWithDefinitionlikeStringsFragment',
           },
           (data) => {
             if (data) {
@@ -193,60 +111,134 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
             }
           },
         );
-      },
-    });
-  const [upsertWordDefinition] = useWordDefinitionUpsertMutation({
-    update(cache, { data, errors }) {
-      if (errors) {
-        console.log('useWordDefinitionUpsertMutation: ', errors);
+
+        cache.updateFragment<WordWithVote>(
+          {
+            id: cache.identify({
+              __typename: 'WordWithVote',
+              word_id: newVoteStatus.word_id,
+            }),
+            fragment: WordWithVoteFragmentFragmentDoc,
+            fragmentName: 'WordWithVoteFragment',
+          },
+          (data) => {
+            if (data) {
+              return {
+                ...data,
+                upvotes: newVoteStatus.upvotes,
+                downvotes: newVoteStatus.downvotes,
+              };
+            } else {
+              return data;
+            }
+          },
+        );
+      } else {
+        console.log('useToggleWordVoteStatusMutation: ', errors);
+        console.log(data?.toggleWordVoteStatus.error);
 
         present({
-          message: 'Failed at creating new definition!',
+          message: 'Failed at voting!',
           duration: 1500,
           position: 'top',
           color: 'danger',
         });
-
-        return;
       }
+    },
+  });
+  const [toggleWordDefinitionVoteStatus] =
+    useToggleWordDefinitonVoteStatusMutation({
+      update(cache, { data, errors }) {
+        if (!errors && data && data.toggleWordDefinitonVoteStatus.vote_status) {
+          const newVoteStatus = data.toggleWordDefinitonVoteStatus.vote_status;
 
-      if (!definitionData || !data) {
-        return;
-      }
-
-      const newDefinition = data.wordDefinitionUpsert.word_definition;
-
-      cache.writeQuery({
-        query: GetWordDefinitionsByWordIdDocument,
-        data: {
-          ...definitionData,
-          getWordDefinitionsByWordId: {
-            ...definitionData.getWordDefinitionsByWordId,
-            word_definition_list: [
-              ...definitionData.getWordDefinitionsByWordId.word_definition_list,
-              {
-                ...newDefinition,
+          cache.updateFragment<WordDefinitionWithVote>(
+            {
+              id: cache.identify({
                 __typename: 'WordDefinitionWithVote',
-                upvotes: 0,
-                downvotes: 0,
-                created_at: new Date().toISOString(),
-              },
-            ],
+                word_definition_id: newVoteStatus.definition_id,
+              }),
+              fragment: WordDefinitionWithVoteFragmentFragmentDoc,
+              fragmentName: 'WordDefinitionWithVoteFragment',
+            },
+            (data) => {
+              if (data) {
+                return {
+                  ...data,
+                  upvotes: newVoteStatus.upvotes,
+                  downvotes: newVoteStatus.downvotes,
+                };
+              } else {
+                return data;
+              }
+            },
+          );
+        } else {
+          console.log('useToggleWordDefinitonVoteStatusMutation: ', errors);
+          console.log(data?.toggleWordDefinitonVoteStatus.error);
+
+          present({
+            message: 'Failed at voting!',
+            duration: 1500,
+            position: 'top',
+            color: 'danger',
+          });
+        }
+      },
+    });
+  const [upsertWordDefinition] = useWordDefinitionUpsertMutation({
+    update(cache, { data, errors }) {
+      if (
+        !errors &&
+        data &&
+        data.wordDefinitionUpsert.word_definition &&
+        definitionData
+      ) {
+        const newDefinition = data.wordDefinitionUpsert.word_definition;
+
+        cache.writeQuery({
+          query: GetWordDefinitionsByWordIdDocument,
+          data: {
+            ...definitionData,
+            getWordDefinitionsByWordId: {
+              ...definitionData.getWordDefinitionsByWordId,
+              word_definition_list: [
+                ...definitionData.getWordDefinitionsByWordId
+                  .word_definition_list,
+                {
+                  ...newDefinition,
+                  __typename: 'WordDefinitionWithVote',
+                  upvotes: 0,
+                  downvotes: 0,
+                  created_at: new Date().toISOString(),
+                },
+              ],
+            },
           },
-        },
-        variables: {
-          word_id: match.params.word_id,
-        },
-      });
+          variables: {
+            word_id: match.params.word_id,
+          },
+        });
 
-      present({
-        message: 'Success at creating new definition!',
-        duration: 1500,
-        position: 'top',
-        color: 'success',
-      });
+        present({
+          message: 'Success at creating new definition!',
+          duration: 1500,
+          position: 'top',
+          color: 'success',
+        });
 
-      modal.current?.dismiss();
+        modal.current?.dismiss();
+      } else {
+        console.log('useWordDefinitionUpsertMutation: ', errors);
+        console.log(data?.wordDefinitionUpsert.error);
+
+        present({
+          message: 'Failed at voting!',
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+      }
     },
   });
 
@@ -423,13 +415,13 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
 
             <p style={{ padding: '0 16px', fontSize: 16 }}>Definitions</p>
 
-            <IonButton id="open-modal" expand="block">
+            <IonButton id="open-dictionary-definition-modal" expand="block">
               + Add More Definitions
             </IonButton>
 
             <CardListContainer>{definitionsCom}</CardListContainer>
 
-            <IonModal ref={modal} trigger="open-modal">
+            <IonModal ref={modal} trigger="open-dictionary-definition-modal">
               <IonHeader>
                 <IonToolbar>
                   <IonButtons slot="start">
