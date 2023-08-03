@@ -9,14 +9,6 @@ fragment WordWithDefinitionlikeStringsFragment on WordWithDefinitionlikeStrings 
   geo_code
 }
 
-fragment PhraseWithDefinitionlikeStringsFragment on PhraseWithDefinitionlikeStrings {
-  phrase_id
-  phrase
-  definitionlike_strings
-  downvotes
-  upvotes
-}
-
 fragment WordDefinitionWithVoteFragment on WordDefinitionWithVote {
   word_definition_id
   word {
@@ -26,24 +18,6 @@ fragment WordDefinitionWithVoteFragment on WordDefinitionWithVote {
   downvotes
   upvotes
   created_at
-}
-
-fragment PhraseDefinitionWithVoteFragment on PhraseDefinitionWithVote {
-  phrase_definition_id
-  phrase {
-    ...PhraseFragment
-  }
-  definition
-  downvotes
-  upvotes
-  created_at
-}
-
-fragment PhraseWithVoteFragment on PhraseWithVote {
-  phrase_id
-  phrase
-  downvotes
-  upvotes
 }
 
 fragment WordWithVoteFragment on WordWithVote {
@@ -68,12 +42,6 @@ fragment WordVoteStatusFragment on WordVoteStatus {
   upvotes
 }
 
-fragment PhraseVoteStatusFragment on PhraseVoteStatus {
-  downvotes
-  phrase_id
-  upvotes
-}
-
 query GetWordsByLanguage(
   $language_code: String!
   $dialect_code: String
@@ -95,41 +63,11 @@ query GetWordsByLanguage(
   }
 }
 
-query GetPhrasesByLanguage(
-  $language_code: String!
-  $dialect_code: String
-  $geo_code: String
-  $filter: String
-) {
-  getPhrasesByLanguage(
-    input: {
-      language_code: $language_code
-      dialect_code: $dialect_code
-      geo_code: $geo_code
-      filter: $filter
-    }
-  ) {
-    error
-    phrase_with_vote_list {
-      ...PhraseWithDefinitionlikeStringsFragment
-    }
-  }
-}
-
 query GetWordDefinitionsByWordId($word_id: ID!) {
   getWordDefinitionsByWordId(word_id: $word_id) {
     error
     word_definition_list {
       ...WordDefinitionWithVoteFragment
-    }
-  }
-}
-
-query GetPhraseDefinitionsByPhraseId($phrase_id: ID!) {
-  getPhraseDefinitionsByPhraseId(phrase_id: $phrase_id) {
-    error
-    phrase_definition_list {
-      ...PhraseDefinitionWithVoteFragment
     }
   }
 }
@@ -143,31 +81,11 @@ query GetWordWithVoteById($word_id: ID!) {
   }
 }
 
-query GetPhraseWithVoteById($phrase_id: ID!) {
-  getPhraseWithVoteById(phrase_id: $phrase_id) {
-    error
-    phrase_with_vote {
-      ...PhraseWithVoteFragment
-    }
-  }
-}
-
 mutation WordDefinitionUpsert($word_id: ID!, $definition: String!) {
   wordDefinitionUpsert(input: { word_id: $word_id, definition: $definition }) {
     error
     word_definition {
       ...WordDefinitionFragment
-    }
-  }
-}
-
-mutation PhraseDefinitionUpsert($phrase_id: ID!, $definition: String!) {
-  phraseDefinitionUpsert(
-    input: { phrase_id: $phrase_id, definition: $definition }
-  ) {
-    error
-    phrase_definition {
-      ...PhraseDefinitionFragment
     }
   }
 }
@@ -187,21 +105,6 @@ mutation ToggleWordDefinitonVoteStatus(
   }
 }
 
-mutation TogglePhraseDefinitonVoteStatus(
-  $phrase_definition_id: ID!
-  $vote: Boolean!
-) {
-  togglePhraseDefinitonVoteStatus(
-    phrase_definition_id: $phrase_definition_id
-    vote: $vote
-  ) {
-    error
-    vote_status {
-      ...DefinitionVoteStatusFragment
-    }
-  }
-}
-
 mutation ToggleWordVoteStatus($word_id: ID!, $vote: Boolean!) {
   toggleWordVoteStatus(word_id: $word_id, vote: $vote) {
     error
@@ -211,11 +114,23 @@ mutation ToggleWordVoteStatus($word_id: ID!, $vote: Boolean!) {
   }
 }
 
-mutation TogglePhraseVoteStatus($phrase_id: ID!, $vote: Boolean!) {
-  togglePhraseVoteStatus(phrase_id: $phrase_id, vote: $vote) {
+mutation WordUpsert(
+  $wordlike_string: String!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  wordUpsert(
+    input: {
+      wordlike_string: $wordlike_string
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
     error
-    vote_status {
-      ...PhraseVoteStatusFragment
+    word {
+      ...WordFragment
     }
   }
 }

@@ -1,0 +1,126 @@
+fragment PhraseWithDefinitionlikeStringsFragment on PhraseWithDefinitionlikeStrings {
+  phrase_id
+  phrase
+  definitionlike_strings
+  downvotes
+  upvotes
+}
+
+fragment PhraseDefinitionWithVoteFragment on PhraseDefinitionWithVote {
+  phrase_definition_id
+  phrase {
+    ...PhraseFragment
+  }
+  definition
+  downvotes
+  upvotes
+  created_at
+}
+
+fragment PhraseWithVoteFragment on PhraseWithVote {
+  phrase_id
+  phrase
+  downvotes
+  upvotes
+}
+
+fragment PhraseVoteStatusFragment on PhraseVoteStatus {
+  downvotes
+  phrase_id
+  upvotes
+}
+
+query GetPhrasesByLanguage(
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+  $filter: String
+) {
+  getPhrasesByLanguage(
+    input: {
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+      filter: $filter
+    }
+  ) {
+    error
+    phrase_with_vote_list {
+      ...PhraseWithDefinitionlikeStringsFragment
+    }
+  }
+}
+
+query GetPhraseDefinitionsByPhraseId($phrase_id: ID!) {
+  getPhraseDefinitionsByPhraseId(phrase_id: $phrase_id) {
+    error
+    phrase_definition_list {
+      ...PhraseDefinitionWithVoteFragment
+    }
+  }
+}
+
+query GetPhraseWithVoteById($phrase_id: ID!) {
+  getPhraseWithVoteById(phrase_id: $phrase_id) {
+    error
+    phrase_with_vote {
+      ...PhraseWithVoteFragment
+    }
+  }
+}
+
+mutation PhraseDefinitionUpsert($phrase_id: ID!, $definition: String!) {
+  phraseDefinitionUpsert(
+    input: { phrase_id: $phrase_id, definition: $definition }
+  ) {
+    error
+    phrase_definition {
+      ...PhraseDefinitionFragment
+    }
+  }
+}
+
+mutation TogglePhraseDefinitionVoteStatus(
+  $phrase_definition_id: ID!
+  $vote: Boolean!
+) {
+  togglePhraseDefinitionVoteStatus(
+    phrase_definition_id: $phrase_definition_id
+    vote: $vote
+  ) {
+    error
+    vote_status {
+      ...DefinitionVoteStatusFragment
+    }
+  }
+}
+
+mutation TogglePhraseVoteStatus($phrase_id: ID!, $vote: Boolean!) {
+  togglePhraseVoteStatus(phrase_id: $phrase_id, vote: $vote) {
+    error
+    vote_status {
+      ...PhraseVoteStatusFragment
+    }
+  }
+}
+
+mutation PhraseUpsert(
+  $phraselike_string: String!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  phraseUpsert(
+    input: {
+      phraselike_string: $phraselike_string
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
+    error
+    phrase {
+      ...PhraseFragment
+    }
+  }
+}
