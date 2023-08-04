@@ -15,7 +15,7 @@ import { typePolicies } from './cacheTypePolicies';
 let server_url = 'http://localhost:3000/graphql';
 
 if (process.env.NODE_ENV == 'production') {
-  server_url = 'https://api.crowd.rocks/graphql';
+  server_url = 'https://dev.crowd.rocks/graphql';
 }
 
 // const httpLink = createHttpLink({
