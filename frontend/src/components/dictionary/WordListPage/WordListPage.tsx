@@ -44,6 +44,8 @@ import {
   CardContainer,
 } from './styled';
 
+import { useTr } from '../../../hooks/useTr';
+
 interface WordListPageProps
   extends RouteComponentProps<{
     nation_id: string;
@@ -52,6 +54,8 @@ interface WordListPageProps
 
 export function WordListPage({ match }: WordListPageProps) {
   const router = useIonRouter();
+  const { tr } = useTr();
+
   const [present] = useIonToast();
 
   const modal = useRef<HTMLIonModalElement>(null);
@@ -124,7 +128,7 @@ export function WordListPage({ match }: WordListPageProps) {
         console.log(data?.toggleWordVoteStatus.error);
 
         present({
-          message: 'Failed at voting!',
+          message: tr('Failed at voting!'),
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -164,7 +168,7 @@ export function WordListPage({ match }: WordListPageProps) {
         });
 
         present({
-          message: 'Success at creating new word!',
+          message: tr('Success at creating new word!'),
           duration: 1500,
           position: 'top',
           color: 'success',
@@ -176,7 +180,7 @@ export function WordListPage({ match }: WordListPageProps) {
         console.log(data?.wordUpsert.error);
 
         present({
-          message: 'Failed at voting!',
+          message: tr('Failed at creating new word!'),
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -234,7 +238,7 @@ export function WordListPage({ match }: WordListPageProps) {
     const textareaEl = textarea.current;
     if (!textareaEl) {
       present({
-        message: 'Input or Textarea not exists!',
+        message: tr('Input or Textarea not exists!'),
         duration: 1500,
         position: 'top',
         color: 'danger',
@@ -246,7 +250,7 @@ export function WordListPage({ match }: WordListPageProps) {
 
     if (textareaVal.length === 0) {
       present({
-        message: 'Word cannot be empty string!',
+        message: tr('Word cannot be empty string!'),
         duration: 1500,
         position: 'top',
         color: 'danger',
@@ -345,13 +349,13 @@ export function WordListPage({ match }: WordListPageProps) {
         <div className="page">
           <div className="section">
             <CaptainContainer>
-              <Caption>Dictionary</Caption>
+              <Caption>{tr('Dictionary')}</Caption>
             </CaptainContainer>
 
             <FilterContainer>
               <LangSelector
-                title="Select language"
-                langSelectorId="langSelector"
+                title={tr('Select language')}
+                langSelectorId="dictionary-langSelector"
                 selected={langInfo}
                 onChange={(_sourceLangTag, sourceLangInfo) => {
                   setLangInfo(sourceLangInfo);
@@ -360,9 +364,8 @@ export function WordListPage({ match }: WordListPageProps) {
               <br />
               <Input
                 type="text"
-                placeholder="Search..."
+                label={tr('Search')}
                 labelPlacement="floating"
-                label="Search"
                 fill="outline"
                 debounce={300}
                 value={filter}
@@ -372,23 +375,23 @@ export function WordListPage({ match }: WordListPageProps) {
 
             <hr />
 
-            <IonButton id="open-modal" expand="block">
-              + Add More Definitions
+            <IonButton id="open-word-modal" expand="block">
+              + {tr('Add More Word')}
             </IonButton>
 
             <br />
 
             <CardListContainer>{cardListComs}</CardListContainer>
 
-            <IonModal ref={modal} trigger="open-modal">
+            <IonModal ref={modal} trigger="open-word-modal">
               <IonHeader>
                 <IonToolbar>
                   <IonButtons slot="start">
                     <IonButton onClick={() => modal.current?.dismiss()}>
-                      Cancel
+                      {tr('Cancel')}
                     </IonButton>
                   </IonButtons>
-                  <IonTitle>Dictionary</IonTitle>
+                  <IonTitle>{tr('Dictionary')}</IonTitle>
                 </IonToolbar>
               </IonHeader>
               <IonContent className="ion-padding">
@@ -401,12 +404,13 @@ export function WordListPage({ match }: WordListPageProps) {
                 >
                   <Textarea
                     ref={textarea}
-                    label="Input New Definition"
                     labelPlacement="floating"
                     fill="solid"
-                    placeholder="Input New Definition..."
+                    label={tr('Input New Word')}
                   />
-                  <IonButton onClick={handleSaveNewDefinition}>Save</IonButton>
+                  <IonButton onClick={handleSaveNewDefinition}>
+                    {tr('Save')}
+                  </IonButton>
                 </div>
               </IonContent>
             </IonModal>

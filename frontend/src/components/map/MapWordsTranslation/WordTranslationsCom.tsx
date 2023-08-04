@@ -11,6 +11,7 @@ import {
   useToggleWordTranslationVoteStatusMutation,
 } from '../../../generated/graphql';
 import { DEFAULT_MAP_WORD_DEFINITION } from '../../../const/mapsConst';
+import { useTr } from '../../../hooks/useTr';
 
 interface WordTranslationsComProps {
   wordWithTranslations: WordTranslations;
@@ -25,6 +26,8 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
   onBackClick,
   fetchMapWordsFn,
 }: WordTranslationsComProps) => {
+  const { tr } = useTr();
+
   const newTrRef = useRef<HTMLIonInputElement | null>(null);
   const newDefinitionRef = useRef<HTMLIonInputElement | null>(null);
 
@@ -143,18 +146,20 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
 
       <StNewTranslationDiv>
         <IonInput
-          label="New Translation"
+          label={tr('New Translation')}
           labelPlacement="floating"
           ref={newTrRef}
         />
         <IonInput
-          label="Definition"
+          label={tr('Definition')}
           labelPlacement="floating"
           ref={newDefinitionRef}
           value={DEFAULT_MAP_WORD_DEFINITION}
           disabled
         />
-        <StButton onClick={() => handleNewTranslation()}>Submit</StButton>
+        <StButton onClick={() => handleNewTranslation()}>
+          {tr('Submit')}
+        </StButton>
       </StNewTranslationDiv>
     </>
   );

@@ -7,12 +7,11 @@ import {
   IonPage,
 } from '@ionic/react';
 import { FormEvent, useState } from 'react';
-import { RouteComponentProps, useHistory } from 'react-router';
-import {
-  usePasswordResetFormRequestMutation,
-  useResetEmailRequestMutation,
-} from '../../generated/graphql';
+import { RouteComponentProps } from 'react-router';
+import { usePasswordResetFormRequestMutation } from '../../generated/graphql';
 import './ResetEmailRequest.css';
+
+import { useTr } from '../../hooks/useTr';
 
 interface PasswordResetFormProps
   extends RouteComponentProps<{
@@ -21,13 +20,14 @@ interface PasswordResetFormProps
     token: string;
   }> {}
 
+// eslint-disable-next-line react/prop-types
 const PasswordResetFormPage: React.FC<PasswordResetFormProps> = ({ match }) => {
-  let history = useHistory();
+  const { tr } = useTr();
+
   const [password, set_password] = useState('');
   const [show_response, set_show_response] = useState(false);
 
-  const [passwordResetFormMutation, { data, loading, error }] =
-    usePasswordResetFormRequestMutation();
+  const [passwordResetFormMutation] = usePasswordResetFormRequestMutation();
 
   async function handle_submit(event: FormEvent) {
     event.preventDefault();
@@ -37,6 +37,7 @@ const PasswordResetFormPage: React.FC<PasswordResetFormProps> = ({ match }) => {
     try {
       result = await passwordResetFormMutation({
         variables: {
+          // eslint-disable-next-line react/prop-types
           token: match.params.token,
           password,
         },
@@ -45,6 +46,7 @@ const PasswordResetFormPage: React.FC<PasswordResetFormProps> = ({ match }) => {
       console.error('error', e);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const error = result?.data?.passwordResetFormResolver.error;
 
     set_show_response(true);
@@ -55,11 +57,11 @@ const PasswordResetFormPage: React.FC<PasswordResetFormProps> = ({ match }) => {
       <IonContent>
         <div className="page">
           <div className="section">
-            <h1>Reset Password</h1>
+            <h1>{tr('Reset Password')}</h1>
 
             <form onSubmit={(event) => handle_submit(event)}>
               <IonItem counter={true}>
-                <IonLabel position="floating">Password</IonLabel>
+                <IonLabel position="floating">{tr('Password')}</IonLabel>
                 <IonInput
                   value={password}
                   type="password"
@@ -68,14 +70,14 @@ const PasswordResetFormPage: React.FC<PasswordResetFormProps> = ({ match }) => {
                   maxlength={512}
                   onIonChange={(e) => set_password(e.detail.value!)}
                   required
-                ></IonInput>
+                />
               </IonItem>
 
-              {show_response && <div>Your password has been reset</div>}
+              {show_response && <div>{tr('Your password has been reset')}</div>}
 
               {!show_response && (
                 <IonButton type="submit" color="primary">
-                  Reset Password
+                  {tr('Reset Password')}
                 </IonButton>
               )}
             </form>

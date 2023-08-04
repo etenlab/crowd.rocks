@@ -19,22 +19,16 @@ export const MapTools: React.FC<TMapToolsParams> = ({
     <StyledMapsToolsBox>
       {onFilterClick ? (
         <StIonIcon icon={funnelOutline} onClick={() => onFilterClick()} />
-      ) : (
-        <div></div>
-      )}
+      ) : null}
       {onTranslationsClick ? (
         <div onClick={() => onTranslationsClick()}>
           <StIonIcon icon={logoAmplify} />
           <StIonIcon icon={logoAlipay} size="50px" />
         </div>
-      ) : (
-        <div></div>
-      )}
+      ) : null}
       {onAddClick ? (
         <FileUploadBtn accept=".svg" onSelect={onAddClick} />
-      ) : (
-        <div></div>
-      )}
+      ) : null}
     </StyledMapsToolsBox>
   );
 };

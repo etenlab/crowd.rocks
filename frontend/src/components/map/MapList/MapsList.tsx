@@ -8,14 +8,19 @@ import { useGetAllMapsListLazyQuery } from '../../../generated/graphql';
 import { RouteComponentProps } from 'react-router';
 import { styled } from 'styled-components';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
+import { useTr } from '../../../hooks/useTr';
+
 interface MapListProps
   extends RouteComponentProps<{
     nation_id: string;
     language_id: string;
   }> {}
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const router = useIonRouter();
+  const { tr } = useTr();
+
   const { sendMapFile } = useMapTranslationTools();
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
@@ -56,18 +61,18 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
 
   return (
     <>
-      <Caption>Maps</Caption>
+      <Caption>{tr('Maps')}</Caption>
 
       <LangSelectorBox>
         <LangSelector
-          title="Select language"
+          title={tr('Select language')}
           langSelectorId="mapsListLangSelector"
           selected={mapListLang}
-          onChange={(mapListLangTag, mapListLangInfo) => {
+          onChange={(_mapListLangTag, mapListLangInfo) => {
             setMapListLang(mapListLangInfo);
           }}
           onClearClick={() => setMapListLang(undefined)}
-        ></LangSelector>
+        />
       </LangSelectorBox>
       <MapTools
         onFilterClick={() => {
@@ -84,7 +89,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
             <MapItem mapItem={m} key={i}></MapItem>
           ))
         ) : (
-          <div> No maps found </div>
+          <div> {tr('No maps found')} </div>
         )}
       </IonList>
     </>

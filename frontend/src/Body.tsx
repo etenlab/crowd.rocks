@@ -1,16 +1,11 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Redirect, Route } from 'react-router';
 import {
   IonContent,
   IonHeader,
   IonIcon,
   IonModal,
-  IonToolbar,
   IonPage,
-  IonButtons,
-  IonTitle,
-  IonItem,
-  IonButton,
   IonRouterOutlet,
   useIonRouter,
   useIonViewWillEnter,
@@ -32,7 +27,12 @@ import {
   useGetAllSiteTextLanguageListQuery,
   SiteTextLanguage,
 } from './generated/graphql';
-import { langInfo2String, subTags2LangInfo } from './common/langUtils';
+import {
+  langInfo2String,
+  subTags2LangInfo,
+  langInfo2tag,
+  tag2langInfo,
+} from './common/langUtils';
 
 import Home from './components/home/Home';
 import Login from './components/authentication/Login';
@@ -51,9 +51,21 @@ import { WordDetailPage } from './components/dictionary/WordDetailPage';
 
 import { PhraseListPage } from './components/phrase-book/PhraseListPage';
 import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
+import { useAppContext } from './hooks/useAppContext';
+import { useTr } from './hooks/useTr';
+
+import AppTypeahead from './components/common/LangSelector/TypeAhead';
 
 const Body: React.FC = () => {
+  const {
+    states: {
+      global: { appLanguage },
+    },
+    actions: { changeAppLanguage },
+  } = useAppContext();
+
   const router = useIonRouter();
+  const { tr, outputAllTrWords } = useTr();
 
   const [show_menu, set_show_menu] = useState(false);
   const [is_logged_in, set_is_logged_in] = useState(false);
@@ -187,15 +199,26 @@ const Body: React.FC = () => {
     router.push('/US/eng/1/home');
   };
 
+  const handleChangeAppLanguage = useCallback(
+    (value: string | undefined) => {
+      if (value) {
+        changeAppLanguage(tag2langInfo(value));
+      }
+
+      outputAllTrWords();
+
+      modal.current?.dismiss();
+    },
+    [changeAppLanguage, outputAllTrWords],
+  );
+
   const languages = useMemo(() => {
     return siteTextLanguageList.map((language) => {
-      return langInfo2String(
-        subTags2LangInfo({
-          lang: language.language_code,
-          dialect: language.dialect_code as string | undefined,
-          region: language.geo_code as string | undefined,
-        }),
-      );
+      return subTags2LangInfo({
+        lang: language.language_code,
+        dialect: language.dialect_code as string | undefined,
+        region: language.geo_code as string | undefined,
+      });
     });
   }, [siteTextLanguageList]);
 
@@ -206,10 +229,10 @@ const Body: React.FC = () => {
           <div className="section">
             <div className="header-content">
               <div className="clickable brand" onClick={goHome}>
-                <span className="crowd">crowd</span>
-                <span className="rocks">rocks</span>
+                <span className="crowd">{tr('crowd')}</span>
+                <span className="rocks">{tr('rocks')}</span>
               </div>
-              <div>
+              <div style={{ display: 'flex', gap: '20px' }}>
                 <IonIcon
                   id="open-language-modal"
                   icon={languageOutline}
@@ -233,7 +256,7 @@ const Body: React.FC = () => {
                   icon={menu}
                   onClick={toggleMenu}
                   className="clickable"
-                ></IonIcon>
+                />
               </div>
             </div>
             <div className="header-menu">
@@ -252,7 +275,7 @@ const Body: React.FC = () => {
                         className="clickable ion-text-end"
                         onClick={click_logout}
                       >
-                        Logout
+                        {tr('Logout')}
                       </div>
                     </div>
                   )}
@@ -263,14 +286,14 @@ const Body: React.FC = () => {
                         className="clickable ion-text-end"
                         onClick={click_register}
                       >
-                        Register
+                        {tr('Register')}
                       </div>
 
                       <div
                         className="clickable ion-text-end"
                         onClick={click_login}
                       >
-                        Login
+                        {tr('Login')}
                       </div>
                     </div>
                   )}
@@ -282,27 +305,16 @@ const Body: React.FC = () => {
       </IonHeader>
       <IonContent>
         <IonModal ref={modal} trigger="open-language-modal">
-          <IonHeader>
-            <IonToolbar>
-              <IonButtons slot="start">
-                <IonButton onClick={() => modal.current?.dismiss()}>
-                  Cancel
-                </IonButton>
-              </IonButtons>
-              <IonTitle>Language Setting</IonTitle>
-              <IonButtons slot="end">
-                <IonButton strong={true} onClick={() => confirm()}>
-                  Confirm
-                </IonButton>
-              </IonButtons>
-            </IonToolbar>
-          </IonHeader>
-          <IonContent className="ion-padding">
-            {languages.length > 0 &&
-              languages.map((language) => (
-                <IonItem key={language}>{language}</IonItem>
-              ))}
-          </IonContent>
+          <AppTypeahead
+            title={tr('App Language')}
+            items={languages.map((language) => ({
+              text: langInfo2String(language),
+              value: langInfo2tag(language) || '',
+            }))}
+            selectedItem={langInfo2String(appLanguage)}
+            onSelectionCancel={() => modal.current?.dismiss()}
+            onSelectionChange={handleChangeAppLanguage}
+          />
         </IonModal>
         <IonRouterOutlet>
           <Route

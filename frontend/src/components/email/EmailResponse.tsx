@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import { RouteComponentProps, useHistory } from 'react-router';
 import { useEmailResponseMutation } from '../../generated/graphql';
 
+import { useTr } from '../../hooks/useTr';
+
 import './EmailResponse.css';
 
 interface EmailResponsePageProps
@@ -13,8 +15,9 @@ interface EmailResponsePageProps
     token: string;
   }> {}
 
+// eslint-disable-next-line react/prop-types
 const EmailResponsePage: React.FC<EmailResponsePageProps> = ({ match }) => {
-  let history = useHistory();
+  const { tr } = useTr();
   const [present] = useIonToast();
 
   const [emailResponseMutation, { data, loading, error }] =
@@ -26,7 +29,7 @@ const EmailResponsePage: React.FC<EmailResponsePageProps> = ({ match }) => {
 
   const presentToast = (position: 'top' | 'middle' | 'bottom') => {
     present({
-      message: 'Thank you!',
+      message: tr('Thank you!'),
       duration: 4000,
       position: position,
     });
@@ -60,9 +63,9 @@ const EmailResponsePage: React.FC<EmailResponsePageProps> = ({ match }) => {
       <IonContent>
         <div className="page">
           <div className="section">
-            <div>Your response has been processed.</div>
+            <div>{tr('Your response has been processed.')}</div>
             <div>
-              <IonButton onClick={click_go_home}>Home</IonButton>
+              <IonButton onClick={click_go_home}>{tr('Home')}</IonButton>
             </div>
           </div>
         </div>
