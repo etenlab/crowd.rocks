@@ -22,18 +22,28 @@ import {
   useSiteTextPhraseDefinitionReadLazyQuery,
   useSiteTextWordDefinitionReadLazyQuery,
   useUpsertTranslationMutation,
+  useToggleVoteStatusMutation,
+} from '../../../generated/graphql';
+
+import {
   SiteTextTranslationWithVoteListOutput,
-  SiteTextTranslationWithVote,
-  ErrorType,
   SiteTextPhraseDefinitionReadOutput,
   SiteTextWordDefinitionReadOutput,
-  WordDefinition,
+  SiteTextTranslationWithVote,
   PhraseDefinition,
-  useToggleVoteStatusMutation,
+  WordDefinition,
+  ErrorType,
+} from '../../../generated/graphql';
+
+import {
+  SiteTextTranslationWithVoteFragmentFragmentDoc,
+  GetAllTranslationFromSiteTextDefinitionIdDocument,
 } from '../../../generated/graphql';
 
 import { CaptainContainer, CardListContainer, CardContainer } from './styled';
 import { Input, Textarea } from '../../common/styled';
+
+import { useTr } from '../../../hooks/useTr';
 
 interface SiteTextDetailPageProps
   extends RouteComponentProps<{
@@ -45,6 +55,20 @@ interface SiteTextDetailPageProps
 
 export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
   const query = useQuery();
+  const { tr } = useTr();
+  const [present] = useIonToast();
+
+  const [allTranslations, setAllTranslations] =
+    useState<SiteTextTranslationWithVoteListOutput>();
+  const [siteTextWordDefinition, setSiteTextWordDefinition] =
+    useState<SiteTextWordDefinitionReadOutput>();
+  const [siteTextPhraseDefinition, setSiteTextPhraseDefinition] =
+    useState<SiteTextPhraseDefinitionReadOutput>();
+
+  const modal = useRef<HTMLIonModalElement>(null);
+  const input = useRef<HTMLIonInputElement>(null);
+  const textarea = useRef<HTMLIonTextareaElement>(null);
+
   const [
     getAllTranslationFromSiteTextDefinitionID,
     {
@@ -72,27 +96,104 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
       called: phraseCalled,
     },
   ] = useSiteTextPhraseDefinitionReadLazyQuery();
-  const [
-    upsertTranslation,
-    { data: upsertData, error: upsertError, loading: upsertLoading },
-  ] = useUpsertTranslationMutation();
-  const [
-    toggleVoteStatus,
-    { data: voteData, error: voteError, loading: voteLoading },
-  ] = useToggleVoteStatusMutation();
+  const [upsertTranslation] = useUpsertTranslationMutation({
+    update(cache, { data, errors }) {
+      if (data && !errors && translationsData) {
+        const newSiteTextTranslation =
+          data.upsertTranslation.site_text_translation;
 
-  const [present] = useIonToast();
+        cache.writeQuery({
+          query: GetAllTranslationFromSiteTextDefinitionIdDocument,
+          data: {
+            ...translationsData,
+            getAllTranslationFromSiteTextDefinitionID: {
+              ...translationsData.getAllTranslationFromSiteTextDefinitionID,
+              site_text_translation_with_vote_list: [
+                ...translationsData.getAllTranslationFromSiteTextDefinitionID.site_text_translation_with_vote_list.filter(
+                  (translation) =>
+                    translation?.site_text_translation_id !==
+                    newSiteTextTranslation?.site_text_translation_id,
+                ),
+                {
+                  ...newSiteTextTranslation,
+                  __typename: 'SiteTextTranslationWithVote',
+                  upvotes: 0,
+                  downvotes: 0,
+                  created_at: new Date().toISOString(),
+                },
+              ],
+            },
+          },
+          variables: {
+            site_text_id: match.params.site_text_id,
+            site_text_type_is_word:
+              match.params.definition_type === 'word' ? true : false,
+            language_code: query.get('language_code')!,
+            dialect_code: query.get('dialect_code'),
+            geo_code: query.get('geo_code'),
+          },
+        });
 
-  const [allTranslations, setAllTranslations] =
-    useState<SiteTextTranslationWithVoteListOutput>();
-  const [siteTextWordDefinition, setSiteTextWordDefinition] =
-    useState<SiteTextWordDefinitionReadOutput>();
-  const [siteTextPhraseDefinition, setSiteTextPhraseDefinition] =
-    useState<SiteTextPhraseDefinitionReadOutput>();
+        present({
+          message: tr('Success at creating new site text translation!'),
+          duration: 1500,
+          position: 'top',
+          color: 'success',
+        });
 
-  const modal = useRef<HTMLIonModalElement>(null);
-  const input = useRef<HTMLIonInputElement>(null);
-  const textarea = useRef<HTMLIonTextareaElement>(null);
+        modal.current?.dismiss();
+      } else {
+        console.log('useUpsertTranslationMutation: ', errors);
+        console.log(data?.upsertTranslation.error);
+
+        present({
+          message: tr('Failed at creating new site text translation!'),
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+      }
+    },
+  });
+  const [toggleVoteStatus] = useToggleVoteStatusMutation({
+    update(cache, { data, errors }) {
+      if (!errors && data && data.toggleVoteStatus.vote_status) {
+        const newVoteStatus = data.toggleVoteStatus.vote_status;
+
+        cache.updateFragment<SiteTextTranslationWithVote>(
+          {
+            id: cache.identify({
+              __typename: 'SiteTextTranslationWithVote',
+              site_text_translation_id: newVoteStatus.site_text_translation_id,
+            }),
+            fragment: SiteTextTranslationWithVoteFragmentFragmentDoc,
+            fragmentName: 'SiteTextTranslationWithVoteFragment',
+          },
+          (data) => {
+            if (data) {
+              return {
+                ...data,
+                upvotes: newVoteStatus.upvotes,
+                downvotes: newVoteStatus.downvotes,
+              };
+            } else {
+              return data;
+            }
+          },
+        );
+      } else {
+        console.log('useToggleVoteStatusMutation: ', errors);
+        console.log(data?.toggleVoteStatus.error);
+
+        present({
+          message: tr('Failed at voting!'),
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+      }
+    },
+  });
 
   useEffect(() => {
     if (!query.get('language_code')) {
@@ -206,125 +307,6 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
       setSiteTextPhraseDefinition(phraseData.siteTextPhraseDefinitionRead);
     }
   }, [phraseData, phraseError, phraseLoading, phraseCalled]);
-
-  useEffect(() => {
-    if (upsertError) {
-      console.log(upsertError);
-      alert('Error');
-
-      return;
-    }
-
-    if (upsertLoading) {
-      return;
-    }
-
-    if (upsertData) {
-      if (upsertData.upsertTranslation.error !== ErrorType.NoError) {
-        console.log(upsertData.upsertTranslation.error);
-        present({
-          message: 'Failed at creating new translation!',
-          duration: 1500,
-          position: 'top',
-          color: 'danger',
-        });
-        return;
-      }
-
-      present({
-        message: 'Success at creating new translation!',
-        duration: 1500,
-        position: 'top',
-        color: 'success',
-      });
-
-      setAllTranslations((_translations) => {
-        const site_text_translation =
-          upsertData.upsertTranslation.site_text_translation;
-
-        if (!_translations || !site_text_translation) {
-          return _translations;
-        }
-
-        return {
-          ..._translations,
-          site_text_translation_with_vote_list: [
-            ..._translations.site_text_translation_with_vote_list,
-            {
-              ...site_text_translation,
-              upvotes: 0,
-              downvotes: 0,
-              created_at: new Date().toISOString(),
-            } as SiteTextTranslationWithVote,
-          ],
-        };
-      });
-
-      modal.current?.dismiss();
-    }
-  }, [upsertData, upsertError, upsertLoading, present]);
-
-  useEffect(() => {
-    if (voteError) {
-      console.log(voteError);
-      alert('Error');
-
-      return;
-    }
-
-    if (voteLoading) {
-      return;
-    }
-
-    if (voteData) {
-      if (voteData.toggleVoteStatus.error !== ErrorType.NoError) {
-        console.log(voteData.toggleVoteStatus.error);
-        present({
-          message: 'Failed at voting!',
-          duration: 1500,
-          position: 'top',
-          color: 'danger',
-        });
-        return;
-      }
-
-      setAllTranslations((_translations) => {
-        const vote_status = voteData.toggleVoteStatus.vote_status;
-
-        if (!_translations || !vote_status) {
-          return _translations;
-        }
-
-        return {
-          ..._translations,
-          site_text_translation_with_vote_list: [
-            ..._translations.site_text_translation_with_vote_list.map(
-              (translation) => {
-                if (!translation) {
-                  return translation;
-                }
-
-                if (
-                  translation.site_text_translation_id ===
-                  vote_status.site_text_translation_id
-                ) {
-                  return {
-                    ...translation,
-                    downvotes: vote_status.downvotes,
-                    upvotes: vote_status.upvotes,
-                  } as SiteTextTranslationWithVote;
-                }
-
-                return translation;
-              },
-            ),
-          ],
-        };
-      });
-
-      modal.current?.dismiss();
-    }
-  }, [voteData, voteError, voteLoading, present]);
 
   const handleSaveNewTranslation = () => {
     const inputEl = input.current;
@@ -487,7 +469,9 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
         <div className="page">
           <div className="section">
             <CaptainContainer>
-              <Caption>Site Text - {title}</Caption>
+              <Caption>
+                {tr('Site Text')} - {title}
+              </Caption>
             </CaptainContainer>
 
             <CardContainer>
@@ -498,24 +482,26 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
             <hr />
 
             <p style={{ padding: '0 16px', fontSize: 16 }}>
-              Site Text Translations
+              {tr('Site Text Translations')}
             </p>
 
-            <IonButton id="open-modal" expand="block">
-              + Add More Translation
+            <IonButton id="open-site-text-translation-modal" expand="block">
+              + {tr('Add More Translation')}
             </IonButton>
 
             <CardListContainer>{translationsCom}</CardListContainer>
 
-            <IonModal ref={modal} trigger="open-modal">
+            <IonModal ref={modal} trigger="open-site-text-translation-modal">
               <IonHeader>
                 <IonToolbar>
                   <IonButtons slot="start">
                     <IonButton onClick={() => modal.current?.dismiss()}>
-                      Cancel
+                      {tr('Cancel')}
                     </IonButton>
                   </IonButtons>
-                  <IonTitle>Site Text - {title}</IonTitle>
+                  <IonTitle>
+                    {tr('Site Text')} - {title}
+                  </IonTitle>
                 </IonToolbar>
               </IonHeader>
               <IonContent className="ion-padding">
@@ -529,19 +515,19 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
                   <Input
                     ref={input}
                     type="text"
-                    placeholder="Site Text..."
+                    label={tr('Site Text')}
                     labelPlacement="floating"
-                    label="Input Site Text"
                     fill="outline"
                   />
                   <Textarea
                     ref={textarea}
-                    label="Input Site Text Description"
                     labelPlacement="floating"
                     fill="solid"
-                    placeholder="Site Text Description..."
+                    label={tr('Site Text Definition')}
                   />
-                  <IonButton onClick={handleSaveNewTranslation}>Save</IonButton>
+                  <IonButton onClick={handleSaveNewTranslation}>
+                    {tr('Save')}
+                  </IonButton>
                 </div>
               </IonContent>
             </IonModal>
