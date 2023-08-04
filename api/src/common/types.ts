@@ -51,12 +51,15 @@ export enum ErrorType {
 
   WordNotFound = 'WordNotFound',
   WordDefinitionNotFound = 'WordDefinitionNotFound',
+  WordDefinitionAlreadyExists = 'WordDefinitionAlreadyExists',
   PhraseDefinitionNotFound = 'PhraseDefinitionNotFound',
+  PhraseDefinitionAlreadyExists = 'PhraseDefinitionAlreadyExists',
   PhraseNotFound = 'PhraseNotFound',
 
   SiteTextTranslationNotFound = 'SiteTextTranslationNotFound',
   SiteTextWordDefinitionAlreadyExists = 'SiteTextWordDefinitionAlreadyExists',
   SiteTextWordDefinitionNotFound = 'SiteTextWordDefinitionNotFound',
+  SiteTextPhraseDefinitionAlreadyExists = 'SiteTextPhraseDefinitionAlreadyExists',
 
   MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
   MapInsertFailed = 'MapInsertFailed',
