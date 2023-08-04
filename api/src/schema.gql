@@ -85,6 +85,7 @@ enum ErrorType {
   PasswordInvalid
   PasswordTooLong
   PasswordTooShort
+  PhraseDefinitionAlreadyExists
   PhraseDefinitionNotFound
   PhraseNotFound
   PositionInvalid
@@ -94,12 +95,14 @@ enum ErrorType {
   PrefixTooShort
   RankInvalid
   RankUnchanged
+  SiteTextPhraseDefinitionAlreadyExists
   SiteTextTranslationNotFound
   SiteTextWordDefinitionAlreadyExists
   SiteTextWordDefinitionNotFound
   TokenInvalid
   Unauthorized
   UnknownError
+  WordDefinitionAlreadyExists
   WordDefinitionNotFound
   WordInsertFailed
   WordLikeStringInsertFailed
@@ -449,8 +452,8 @@ type PostReadOutput {
 type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
   getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
-  getAllRecommendedTranslation(dialect_code: String!, geo_code: String!, language_code: String!): SiteTextTranslationWithVoteListOutput!
-  getAllSiteTextDefinitions: SiteTextDefinitionListOutput!
+  getAllRecommendedTranslation(dialect_code: String, geo_code: String, language_code: String!): SiteTextTranslationWithVoteListOutput!
+  getAllSiteTextDefinitions(filter: String): SiteTextDefinitionListOutput!
   getAllSiteTextLanguageList: SiteTextLanguageListOutput!
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
   getOrigMapContent(input: GetOrigMapContentInput!): GetOrigMapContentOutput!
@@ -462,7 +465,7 @@ type Query {
   getPhraseVoteStatus(phrase_id: ID!): PhraseVoteStatusOutputRow!
   getPhraseWithVoteById(phrase_id: ID!): PhraseWithVoteOutput!
   getPhrasesByLanguage(input: LanguageInput!): PhraseWithVoteListOutput!
-  getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String!, geo_code: String!, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
+  getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
   getTranslatedMapContent(input: GetTranslatedMapContentInput!): GetTranslatedMapContentOutput!
   getVoteStatus(site_text_translation_id: String!): SiteTextTranslationVoteReadOutput!
   getWordDefinitionVoteStatus(word_definition_id: ID!): DefinitionVoteStatusOutputRow!
