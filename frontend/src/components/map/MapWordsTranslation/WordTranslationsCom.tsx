@@ -30,18 +30,14 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
 
   const [addWordAsTranslation, { data, reset }] =
     useAddWordAsTranslationForWordMutation({
-      refetchQueries: [
-        'GetTranslatedMapContent',
-        'GetOrigMapWords',
-        'GetAllMapsList',
-      ],
+      refetchQueries: ['GetOrigMapWords'],
     });
 
   const [
     toggleWordTrVoteStatus,
     { data: toggleVoteData, reset: resetToggleVote },
   ] = useToggleWordTranslationVoteStatusMutation({
-    refetchQueries: ['GetTranslatedMapContent', 'GetOrigMapWords'],
+    refetchQueries: ['GetOrigMapWords'],
   });
 
   useEffect(() => {

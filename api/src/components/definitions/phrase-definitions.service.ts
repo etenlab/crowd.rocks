@@ -1,6 +1,6 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 
-import { ErrorType } from 'src/common/types';
+import { ErrorType, GenericOutput } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 import { PhrasesService } from 'src/components/phrases/phrases.service';
 import { PhraseDefinitionVotesService } from './phrase-definition-votes.service';
@@ -31,6 +31,7 @@ import {
   GetPhraseDefinitionlikeStringListByPhraseId,
   getPhraseDefinitionlikeStringListByPhraseId,
 } from './sql-string';
+import { PoolClient } from 'pg';
 
 @Injectable()
 export class PhraseDefinitionsService {
@@ -112,6 +113,45 @@ export class PhraseDefinitionsService {
     return {
       error: ErrorType.UnknownError,
       phrase_definition: null,
+    };
+  }
+
+  async upsertInTrn(
+    input: PhraseDefinitionUpsertInput,
+    token: string,
+    dbPoolClient: PoolClient,
+  ): Promise<{ phrase_definition_id: number } & GenericOutput> {
+    try {
+      const res =
+        await dbPoolClient.query<PhraseDefinitionUpsertProcedureOutputRow>(
+          ...callPhraseDefinitionUpsertProcedure({
+            phrase_id: +input.phrase_id,
+            definition: input.definition,
+            token: token,
+          }),
+        );
+
+      const creatingError = res.rows[0].p_error_type;
+      const phrase_definition_id = res.rows[0].p_phrase_definition_id;
+
+      if (creatingError !== ErrorType.NoError || !phrase_definition_id) {
+        return {
+          error: creatingError,
+          phrase_definition_id: null,
+        };
+      }
+
+      return {
+        error: ErrorType.NoError,
+        phrase_definition_id,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      phrase_definition_id: null,
     };
   }
 
