@@ -26,7 +26,8 @@ begin
   -- insert phrase
   insert into phrases(phraselike_string, words, created_by)
   values (p_phraselike_string, p_words, v_user_id)
-  on conflict do nothing
+  on conflict (phraselike_string, words)
+  do nothing
   returning phrase_id
   into p_phrase_id;
 

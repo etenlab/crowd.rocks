@@ -8,6 +8,7 @@ language plpgsql
 as $$
 declare
   v_user_id bigint;
+  v_word_id bigint;
   v_word_definition_id bigint;
 begin
   p_error_type := 'UnknownError';
@@ -30,13 +31,25 @@ begin
   end if;
 
   -- check for word_definition_id existence
-  select word_definition_id
+  select word_id
   from word_definitions
   where word_definition_id = p_word_definition_id
+  into v_word_id;
+
+  if v_word_id is null then
+    p_error_type := 'WordDefinitionNotFound';
+    return;
+  end if;
+
+  -- check for same phrase_definition existence
+  select word_definition_id
+  from word_definitions
+  where word_id = v_word_id
+    and definition = p_definition
   into v_word_definition_id;
 
-  if v_word_definition_id is null then
-    p_error_type := 'WordDefinitionNotFound';
+  if v_word_definition_id is not null then 
+    p_error_type := 'WordDefinitionAlreadyExists';
     return;
   end if;
 
