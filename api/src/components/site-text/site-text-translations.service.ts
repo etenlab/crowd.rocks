@@ -309,8 +309,8 @@ export class SiteTextTranslationsService {
     site_text_id: number,
     site_text_type_is_word: boolean,
     language_code: string,
-    dialect_code: string,
-    geo_code: string,
+    dialect_code: string | null,
+    geo_code: string | null,
   ): Promise<SiteTextTranslationWithVoteListOutput> {
     try {
       let res1: QueryResult<GetAllSiteTextTranslation>;
@@ -385,8 +385,8 @@ export class SiteTextTranslationsService {
     site_text_id: number,
     site_text_type_is_word: boolean,
     language_code: string,
-    dialect_code: string,
-    geo_code: string,
+    dialect_code: string | null,
+    geo_code: string | null,
   ): Promise<SiteTextTranslationWithVoteOutput> {
     try {
       const { error, site_text_translation_with_vote_list } =
@@ -454,8 +454,8 @@ export class SiteTextTranslationsService {
 
   async getAllRecommendedTranslation(
     language_code: string,
-    dialect_code: string,
-    geo_code: string,
+    dialect_code: string | null,
+    geo_code: string | null,
   ): Promise<SiteTextTranslationWithVoteListOutput> {
     try {
       const res1 = await this.pg.pool.query<GetAllSiteTextWordDefinition>(

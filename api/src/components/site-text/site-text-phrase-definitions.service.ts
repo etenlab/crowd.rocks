@@ -19,6 +19,8 @@ import {
   SiteTextPhraseDefinitionUpsertProcedureOutputRow,
   GetAllSiteTextPhraseDefinition,
   getAllSiteTextPhraseDefinition,
+  GetDefinitionIdFromPhraseId,
+  getDefinitionIdFromPhraseId,
 } from './sql-string';
 
 @Injectable()
@@ -58,6 +60,24 @@ export class SiteTextPhraseDefinitionsService {
       error: ErrorType.UnknownError,
       site_text_phrase_definition: null,
     };
+  }
+
+  async getDefinitionIdFromWordId(phrase_id: number): Promise<number | null> {
+    try {
+      const res = await this.pg.pool.query<GetDefinitionIdFromPhraseId>(
+        ...getDefinitionIdFromPhraseId(phrase_id),
+      );
+
+      if (res.rowCount === 0) {
+        return null;
+      } else {
+        return res.rows[0].phrase_definition_id;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return null;
   }
 
   async upsert(
@@ -100,10 +120,12 @@ export class SiteTextPhraseDefinitionsService {
     };
   }
 
-  async getAllSiteTextPhraseDefinitions(): Promise<SiteTextPhraseDefinitionListOutput> {
+  async getAllSiteTextPhraseDefinitions(
+    filter?: string,
+  ): Promise<SiteTextPhraseDefinitionListOutput> {
     try {
       const res1 = await this.pg.pool.query<GetAllSiteTextPhraseDefinition>(
-        ...getAllSiteTextPhraseDefinition(),
+        ...getAllSiteTextPhraseDefinition(filter),
       );
 
       const siteTextPhraseDefinitionList = [];
