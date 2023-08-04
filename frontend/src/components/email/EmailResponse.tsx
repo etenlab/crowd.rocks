@@ -17,6 +17,7 @@ interface EmailResponsePageProps
 
 // eslint-disable-next-line react/prop-types
 const EmailResponsePage: React.FC<EmailResponsePageProps> = ({ match }) => {
+  const history = useHistory();
   const { tr } = useTr();
   const [present] = useIonToast();
 
