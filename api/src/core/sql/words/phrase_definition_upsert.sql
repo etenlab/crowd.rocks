@@ -43,7 +43,8 @@ begin
 
   insert into phrase_definitions(phrase_id, definition, created_by)
   values (p_phrase_id, p_definition, v_user_id)
-  on conflict do nothing
+  on conflict (phrase_id, definition) 
+  do nothing
   returning phrase_definition_id
   into p_phrase_definition_id;
 

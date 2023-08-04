@@ -7,9 +7,11 @@ import {
   IonPage,
 } from '@ionic/react';
 import { FormEvent, useState } from 'react';
-import { RouteComponentProps, useHistory } from 'react-router';
+import { RouteComponentProps } from 'react-router';
 import { useResetEmailRequestMutation } from '../../generated/graphql';
 import './ResetEmailRequest.css';
+
+import { useTr } from '../../hooks/useTr';
 
 interface ResetEmailRequestProps
   extends RouteComponentProps<{
@@ -17,13 +19,13 @@ interface ResetEmailRequestProps
     language_id: string;
   }> {}
 
-const ResetEmailRequestPage: React.FC<ResetEmailRequestProps> = ({ match }) => {
-  let history = useHistory();
+const ResetEmailRequestPage: React.FC<ResetEmailRequestProps> = () => {
+  const { tr } = useTr();
+
   const [email, set_email] = useState('');
   const [show_response, set_show_response] = useState(false);
 
-  const [resetEmailRequestMutation, { data, loading, error }] =
-    useResetEmailRequestMutation();
+  const [resetEmailRequestMutation] = useResetEmailRequestMutation();
 
   async function handle_submit(event: FormEvent) {
     event.preventDefault();
@@ -40,6 +42,7 @@ const ResetEmailRequestPage: React.FC<ResetEmailRequestProps> = ({ match }) => {
       console.error('error', e);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const error = result?.data?.resetEmailRequest.error;
 
     set_show_response(true);
@@ -50,11 +53,11 @@ const ResetEmailRequestPage: React.FC<ResetEmailRequestProps> = ({ match }) => {
       <IonContent>
         <div className="page">
           <div className="section">
-            <h1>Request a Password Reset</h1>
+            <h1>{tr('Request a Password Reset')}</h1>
 
             <form onSubmit={(event) => handle_submit(event)}>
               <IonItem counter={true}>
-                <IonLabel position="floating">Email</IonLabel>
+                <IonLabel position="floating">{tr('Email')}</IonLabel>
                 <IonInput
                   value={email}
                   inputmode="email"
@@ -62,19 +65,20 @@ const ResetEmailRequestPage: React.FC<ResetEmailRequestProps> = ({ match }) => {
                   maxlength={512}
                   onIonChange={(e) => set_email(e.detail.value!)}
                   required
-                ></IonInput>
+                />
               </IonItem>
 
               {show_response && (
                 <div>
-                  If your email exists in our database a reset link has been
-                  sent.
+                  {tr(
+                    'If your email exists in our database a reset link has been sent.',
+                  )}
                 </div>
               )}
 
               {!show_response && (
                 <IonButton type="submit" color="primary">
-                  Send Password Reset Email
+                  {tr('Send Password Reset Email')}
                 </IonButton>
               )}
             </form>

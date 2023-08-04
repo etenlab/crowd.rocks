@@ -12,6 +12,7 @@ import {
   IonToolbar,
 } from '@ionic/react';
 import type { CheckboxCustomEvent } from '@ionic/react';
+import { useTr } from '../../../hooks/useTr';
 
 interface TypeaheadProps<T> {
   items: T[];
@@ -24,6 +25,8 @@ interface TypeaheadProps<T> {
 function AppTypeahead<Item extends { text: string; value: string }>(
   props: TypeaheadProps<Item>,
 ) {
+  const { tr } = useTr();
+
   const [filteredItems, setFilteredItems] = useState<Item[]>([...props.items]);
   const [workingSelectedValue, setWorkingSelectedValue] = useState<
     string | undefined
@@ -90,15 +93,15 @@ function AppTypeahead<Item extends { text: string; value: string }>(
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
-            <IonButton onClick={cancelChanges}>Cancel</IonButton>
+            <IonButton onClick={cancelChanges}>{tr('Cancel')}</IonButton>
           </IonButtons>
           <IonTitle>{props.title}</IonTitle>
           <IonButtons slot="end">
-            <IonButton onClick={confirmChanges}>Done</IonButton>
+            <IonButton onClick={confirmChanges}>{tr('Done')}</IonButton>
           </IonButtons>
         </IonToolbar>
         <IonToolbar>
-          <IonSearchbar onIonInput={searchbarInput}></IonSearchbar>
+          <IonSearchbar onIonInput={searchbarInput} />
         </IonToolbar>
       </IonHeader>
 

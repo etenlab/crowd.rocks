@@ -20,8 +20,12 @@ import './Profile.css';
 import { imageOutline } from 'ionicons/icons';
 import { CropperComp } from '../post/Cropper';
 
+import { useTr } from '../../hooks/useTr';
+
 const Profile: React.FC = () => {
   const history = useHistory();
+  const { tr } = useTr();
+
   const [avatarUpdateMutation] = useAvatarUpdateMutation();
 
   const [show_update_avatar_form, set_show_update_avatar_form] =
@@ -47,7 +51,7 @@ const Profile: React.FC = () => {
     useGetFileUploadUrlLazyQuery();
 
   useIonViewWillEnter(() => {
-    document.title = 'Profile';
+    document.title = tr('Profile');
   });
 
   useEffect(() => {
@@ -138,16 +142,16 @@ const Profile: React.FC = () => {
       <IonContent>
         <div className="page">
           <div className="section">
-            <h1>Profile</h1>
+            <h1>{tr('Profile')}</h1>
 
             <IonItem>
-              <IonLabel>User ID</IonLabel>
+              <IonLabel>{tr('User ID')}</IonLabel>
               {globals.get_user_id()}
             </IonItem>
 
             {!show_update_avatar_form && (
               <IonItem>
-                <IonLabel>Avatar</IonLabel>
+                <IonLabel>{tr('Avatar')}</IonLabel>
                 <div className="clickable" onClick={show_avatar_form}>
                   {globals.get_avatar()}
                 </div>
@@ -157,14 +161,14 @@ const Profile: React.FC = () => {
             {show_update_avatar_form && (
               <div>
                 <IonItem>
-                  <IonLabel position="floating">Avatar</IonLabel>
+                  <IonLabel position="floating">{tr('Avatar')}</IonLabel>
                   <IonInput
                     value={new_avatar}
                     type="text"
                     inputMode="text"
                     onIonChange={(e) => set_new_avatar(e.detail.value!)}
                     required
-                  ></IonInput>
+                  />
                 </IonItem>
                 <div className="avatar-update-form-buttons">
                   <IonButton
@@ -172,21 +176,21 @@ const Profile: React.FC = () => {
                     color="primary"
                     onClick={update_avatar}
                   >
-                    Submit
+                    {tr('Submit')}
                   </IonButton>
                   <IonButton
                     type="button"
                     color="secondary"
                     onClick={() => set_show_update_avatar_form(false)}
                   >
-                    Cancel
+                    {tr('Cancel')}
                   </IonButton>
                 </div>
               </div>
             )}
 
             <IonItem>
-              <IonLabel>Avatar Image</IonLabel>
+              <IonLabel>{tr('Avatar Image')}</IonLabel>
 
               <form key={image_form_key}>
                 <input
@@ -226,7 +230,7 @@ const Profile: React.FC = () => {
                     // setBackgroundOption(BackgroundOptionType.Gradient);
                   }}
                 >
-                  Add
+                  {tr('Add')}
                   <IonIcon slot="end" icon={imageOutline} />
                 </IonButton>
               )}
@@ -234,13 +238,13 @@ const Profile: React.FC = () => {
 
             {show_image_update_form && (
               <IonItem>
-                <IonLabel>New Avatar Image</IonLabel>
+                <IonLabel>{tr('New Avatar Image')}</IonLabel>
                 <div className="new-avatar-image-cropper">
                   {file_url && (
                     <CropperComp
                       url={file_url}
                       update_blob={update_avatar_image}
-                    ></CropperComp>
+                    />
                   )}
                 </div>
               </IonItem>
@@ -250,7 +254,7 @@ const Profile: React.FC = () => {
               <IonItem>
                 <IonLabel>
                   <IonButton onClick={submit_new_avatar_image}>
-                    Update Avatar Image
+                    {tr('Update Avatar Image')}
                   </IonButton>
                 </IonLabel>
 
@@ -260,7 +264,7 @@ const Profile: React.FC = () => {
                     set_show_image_update_form(false);
                   }}
                 >
-                  Cancel
+                  {tr('Cancel')}
                 </IonButton>
               </IonItem>
             )}

@@ -105,6 +105,7 @@ export enum ErrorType {
   PasswordInvalid = 'PasswordInvalid',
   PasswordTooLong = 'PasswordTooLong',
   PasswordTooShort = 'PasswordTooShort',
+  PhraseDefinitionAlreadyExists = 'PhraseDefinitionAlreadyExists',
   PhraseDefinitionNotFound = 'PhraseDefinitionNotFound',
   PhraseNotFound = 'PhraseNotFound',
   PositionInvalid = 'PositionInvalid',
@@ -114,12 +115,14 @@ export enum ErrorType {
   PrefixTooShort = 'PrefixTooShort',
   RankInvalid = 'RankInvalid',
   RankUnchanged = 'RankUnchanged',
+  SiteTextPhraseDefinitionAlreadyExists = 'SiteTextPhraseDefinitionAlreadyExists',
   SiteTextTranslationNotFound = 'SiteTextTranslationNotFound',
   SiteTextWordDefinitionAlreadyExists = 'SiteTextWordDefinitionAlreadyExists',
   SiteTextWordDefinitionNotFound = 'SiteTextWordDefinitionNotFound',
   TokenInvalid = 'TokenInvalid',
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
+  WordDefinitionAlreadyExists = 'WordDefinitionAlreadyExists',
   WordDefinitionNotFound = 'WordDefinitionNotFound',
   WordInsertFailed = 'WordInsertFailed',
   WordLikeStringInsertFailed = 'WordLikeStringInsertFailed',
@@ -741,9 +744,14 @@ export type QueryGetAllMapsListArgs = {
 
 
 export type QueryGetAllRecommendedTranslationArgs = {
-  dialect_code: Scalars['String']['input'];
-  geo_code: Scalars['String']['input'];
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  geo_code?: InputMaybe<Scalars['String']['input']>;
   language_code: Scalars['String']['input'];
+};
+
+
+export type QueryGetAllSiteTextDefinitionsArgs = {
+  filter?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -802,8 +810,8 @@ export type QueryGetPhrasesByLanguageArgs = {
 
 
 export type QueryGetRecommendedTranslationFromSiteTextDefinitionIdArgs = {
-  dialect_code: Scalars['String']['input'];
-  geo_code: Scalars['String']['input'];
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  geo_code?: InputMaybe<Scalars['String']['input']>;
   language_code: Scalars['String']['input'];
   site_text_id: Scalars['String']['input'];
   site_text_type_is_word: Scalars['Boolean']['input'];
@@ -1694,7 +1702,9 @@ export type VoteStatusFragmentFragment = { __typename?: 'VoteStatus', upvotes: n
 
 export type SiteTextLanguageFragmentFragment = { __typename?: 'SiteTextLanguage', language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
-export type GetAllSiteTextDefinitionsQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetAllSiteTextDefinitionsQueryVariables = Exact<{
+  filter?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 
 export type GetAllSiteTextDefinitionsQuery = { __typename?: 'Query', getAllSiteTextDefinitions: { __typename?: 'SiteTextDefinitionListOutput', error: ErrorType, site_text_phrase_definition_list: Array<{ __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | null>, site_text_word_definition_list: Array<{ __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null> } };
@@ -1749,6 +1759,26 @@ export type GetAllSiteTextLanguageListQueryVariables = Exact<{ [key: string]: ne
 
 
 export type GetAllSiteTextLanguageListQuery = { __typename?: 'Query', getAllSiteTextLanguageList: { __typename?: 'SiteTextLanguageListOutput', error: ErrorType, site_text_language_list: Array<{ __typename?: 'SiteTextLanguage', language_code: string, dialect_code?: string | null, geo_code?: string | null } | null> } };
+
+export type GetAllRecommendedTranslationQueryVariables = Exact<{
+  language_code: Scalars['String']['input'];
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  geo_code?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetAllRecommendedTranslationQuery = { __typename?: 'Query', getAllRecommendedTranslation: { __typename?: 'SiteTextTranslationWithVoteListOutput', error: ErrorType, site_text_translation_with_vote_list: Array<{ __typename?: 'SiteTextTranslationWithVote', site_text_translation_id: string, from_type_is_word: boolean, to_type_is_word: boolean, upvotes: number, downvotes: number, created_at: string, from_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } | { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null> } };
+
+export type SiteTextUpsertMutationVariables = Exact<{
+  siteTextlike_string: Scalars['String']['input'];
+  definitionlike_string: Scalars['String']['input'];
+  language_code: Scalars['String']['input'];
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  geo_code?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type SiteTextUpsertMutation = { __typename?: 'Mutation', siteTextUpsert: { __typename?: 'SiteTextUpsertOutput', error: ErrorType, site_text_phrase_definition?: { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | null, site_text_word_definition?: { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null } };
 
 export type UserReadQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -3095,8 +3125,8 @@ export type PostReadQueryHookResult = ReturnType<typeof usePostReadQuery>;
 export type PostReadLazyQueryHookResult = ReturnType<typeof usePostReadLazyQuery>;
 export type PostReadQueryResult = Apollo.QueryResult<PostReadQuery, PostReadQueryVariables>;
 export const GetAllSiteTextDefinitionsDocument = gql`
-    query GetAllSiteTextDefinitions {
-  getAllSiteTextDefinitions {
+    query GetAllSiteTextDefinitions($filter: String) {
+  getAllSiteTextDefinitions(filter: $filter) {
     error
     site_text_phrase_definition_list {
       ...SiteTextPhraseDefinitionFragment
@@ -3121,6 +3151,7 @@ ${SiteTextWordDefinitionFragmentFragmentDoc}`;
  * @example
  * const { data, loading, error } = useGetAllSiteTextDefinitionsQuery({
  *   variables: {
+ *      filter: // value for 'filter'
  *   },
  * });
  */
@@ -3380,6 +3411,96 @@ export function useGetAllSiteTextLanguageListLazyQuery(baseOptions?: Apollo.Lazy
 export type GetAllSiteTextLanguageListQueryHookResult = ReturnType<typeof useGetAllSiteTextLanguageListQuery>;
 export type GetAllSiteTextLanguageListLazyQueryHookResult = ReturnType<typeof useGetAllSiteTextLanguageListLazyQuery>;
 export type GetAllSiteTextLanguageListQueryResult = Apollo.QueryResult<GetAllSiteTextLanguageListQuery, GetAllSiteTextLanguageListQueryVariables>;
+export const GetAllRecommendedTranslationDocument = gql`
+    query GetAllRecommendedTranslation($language_code: String!, $dialect_code: String, $geo_code: String) {
+  getAllRecommendedTranslation(
+    language_code: $language_code
+    dialect_code: $dialect_code
+    geo_code: $geo_code
+  ) {
+    error
+    site_text_translation_with_vote_list {
+      ...SiteTextTranslationWithVoteFragment
+    }
+  }
+}
+    ${SiteTextTranslationWithVoteFragmentFragmentDoc}`;
+
+/**
+ * __useGetAllRecommendedTranslationQuery__
+ *
+ * To run a query within a React component, call `useGetAllRecommendedTranslationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllRecommendedTranslationQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllRecommendedTranslationQuery({
+ *   variables: {
+ *      language_code: // value for 'language_code'
+ *      dialect_code: // value for 'dialect_code'
+ *      geo_code: // value for 'geo_code'
+ *   },
+ * });
+ */
+export function useGetAllRecommendedTranslationQuery(baseOptions: Apollo.QueryHookOptions<GetAllRecommendedTranslationQuery, GetAllRecommendedTranslationQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllRecommendedTranslationQuery, GetAllRecommendedTranslationQueryVariables>(GetAllRecommendedTranslationDocument, options);
+      }
+export function useGetAllRecommendedTranslationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllRecommendedTranslationQuery, GetAllRecommendedTranslationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllRecommendedTranslationQuery, GetAllRecommendedTranslationQueryVariables>(GetAllRecommendedTranslationDocument, options);
+        }
+export type GetAllRecommendedTranslationQueryHookResult = ReturnType<typeof useGetAllRecommendedTranslationQuery>;
+export type GetAllRecommendedTranslationLazyQueryHookResult = ReturnType<typeof useGetAllRecommendedTranslationLazyQuery>;
+export type GetAllRecommendedTranslationQueryResult = Apollo.QueryResult<GetAllRecommendedTranslationQuery, GetAllRecommendedTranslationQueryVariables>;
+export const SiteTextUpsertDocument = gql`
+    mutation SiteTextUpsert($siteTextlike_string: String!, $definitionlike_string: String!, $language_code: String!, $dialect_code: String, $geo_code: String) {
+  siteTextUpsert(
+    input: {siteTextlike_string: $siteTextlike_string, definitionlike_string: $definitionlike_string, language_code: $language_code, dialect_code: $dialect_code, geo_code: $geo_code}
+  ) {
+    error
+    site_text_phrase_definition {
+      ...SiteTextPhraseDefinitionFragment
+    }
+    site_text_word_definition {
+      ...SiteTextWordDefinitionFragment
+    }
+  }
+}
+    ${SiteTextPhraseDefinitionFragmentFragmentDoc}
+${SiteTextWordDefinitionFragmentFragmentDoc}`;
+export type SiteTextUpsertMutationFn = Apollo.MutationFunction<SiteTextUpsertMutation, SiteTextUpsertMutationVariables>;
+
+/**
+ * __useSiteTextUpsertMutation__
+ *
+ * To run a mutation, you first call `useSiteTextUpsertMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSiteTextUpsertMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [siteTextUpsertMutation, { data, loading, error }] = useSiteTextUpsertMutation({
+ *   variables: {
+ *      siteTextlike_string: // value for 'siteTextlike_string'
+ *      definitionlike_string: // value for 'definitionlike_string'
+ *      language_code: // value for 'language_code'
+ *      dialect_code: // value for 'dialect_code'
+ *      geo_code: // value for 'geo_code'
+ *   },
+ * });
+ */
+export function useSiteTextUpsertMutation(baseOptions?: Apollo.MutationHookOptions<SiteTextUpsertMutation, SiteTextUpsertMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SiteTextUpsertMutation, SiteTextUpsertMutationVariables>(SiteTextUpsertDocument, options);
+      }
+export type SiteTextUpsertMutationHookResult = ReturnType<typeof useSiteTextUpsertMutation>;
+export type SiteTextUpsertMutationResult = Apollo.MutationResult<SiteTextUpsertMutation>;
+export type SiteTextUpsertMutationOptions = Apollo.BaseMutationOptions<SiteTextUpsertMutation, SiteTextUpsertMutationVariables>;
 export const UserReadDocument = gql`
     query UserRead($userId: ID!) {
   userReadResolver(input: {user_id: $userId}) {
@@ -3608,6 +3729,7 @@ export const namedOperations = {
     SiteTextWordDefinitionRead: 'SiteTextWordDefinitionRead',
     SiteTextPhraseDefinitionRead: 'SiteTextPhraseDefinitionRead',
     GetAllSiteTextLanguageList: 'GetAllSiteTextLanguageList',
+    GetAllRecommendedTranslation: 'GetAllRecommendedTranslation',
     UserRead: 'UserRead',
     GetFileUploadUrl: 'GetFileUploadUrl'
   },
@@ -3631,6 +3753,7 @@ export const namedOperations = {
     VersionCreate: 'VersionCreate',
     UpsertTranslation: 'UpsertTranslation',
     ToggleVoteStatus: 'ToggleVoteStatus',
+    SiteTextUpsert: 'SiteTextUpsert',
     AvatarUpdate: 'AvatarUpdate',
     ToggleWordTranslationVoteStatus: 'ToggleWordTranslationVoteStatus',
     AddWordAsTranslationForWord: 'AddWordAsTranslationForWord'

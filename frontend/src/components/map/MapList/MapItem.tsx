@@ -1,13 +1,18 @@
 import { IonBadge, IonItem } from '@ionic/react';
 import { styled } from 'styled-components';
 import { MapFileOutput } from '../../../generated/graphql';
+
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
+
+import { useTr } from '../../../hooks/useTr';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
   mapItem: MapFileOutput;
 };
 
 const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
+  const { tr } = useTr();
+
   const routerLink =
     mapItem.is_original || !mapItem.translated_map_id
       ? `/US/eng/1/maps/details-original/${mapItem.original_map_id}`
@@ -24,7 +29,10 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
       {mapItem.map_file_name}
       {!mapItem.is_original ? (
         <>
-          , <IonBadge> translated to {langInfo2String(langInfo)}</IonBadge>
+          ,{' '}
+          <IonBadge>
+            {tr('translated to')} {langInfo2String(langInfo)}
+          </IonBadge>
         </>
       ) : (
         <></>

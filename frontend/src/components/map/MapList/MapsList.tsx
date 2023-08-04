@@ -9,10 +9,14 @@ import {
 } from '../../../generated/graphql';
 import { styled } from 'styled-components';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
+import { useTr } from '../../../hooks/useTr';
+
 
 export const MapList: React.FC = () => {
   const router = useIonRouter();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { tr } = useTr();
+
   const [sendMapFile, { data: uploadResult }] = useMapUploadMutation();
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
@@ -43,18 +47,18 @@ export const MapList: React.FC = () => {
 
   return (
     <>
-      <Caption>Maps</Caption>
+      <Caption>{tr('Maps')}</Caption>
 
       <LangSelectorBox>
         <LangSelector
-          title="Select language"
+          title={tr('Select language')}
           langSelectorId="mapsListLangSelector"
           selected={mapListLang}
-          onChange={(mapListLangTag, mapListLangInfo) => {
+          onChange={(_mapListLangTag, mapListLangInfo) => {
             setMapListLang(mapListLangInfo);
           }}
           onClearClick={() => setMapListLang(undefined)}
-        ></LangSelector>
+        />
       </LangSelectorBox>
       <MapTools
         onFilterClick={() => {
@@ -71,7 +75,7 @@ export const MapList: React.FC = () => {
             <MapItem mapItem={m} key={i}></MapItem>
           ))
         ) : (
-          <div> No maps found </div>
+          <div> {tr('No maps found')} </div>
         )}
       </IonList>
     </>

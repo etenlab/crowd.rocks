@@ -304,7 +304,8 @@ create table phrases(
   words bigint[] not null, -- references words(word_id)
   phraselike_string text not null,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (phraselike_string, words)
 );
 
 create table phrase_definitions(
@@ -312,7 +313,8 @@ create table phrase_definitions(
   phrase_id bigint not null references phrases(phrase_id),
   definition text not null,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)  
+  created_by bigint not null references users(user_id),
+  unique (phrase_id, definition)
 );
 
 -- tags

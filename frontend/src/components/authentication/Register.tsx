@@ -14,11 +14,14 @@ import { globals } from '../../services/globals';
 import { login_change } from '../../services/subscriptions';
 import './Register.css';
 
+import { useTr } from '../../hooks/useTr';
+
 const Register: React.FC = () => {
   const history = useHistory();
+  const { tr } = useTr();
 
   useIonViewWillEnter(() => {
-    document.title = 'Register';
+    document.title = tr('Register');
   });
 
   const [email, set_email] = useState('');
@@ -117,10 +120,10 @@ const Register: React.FC = () => {
       <IonContent>
         <div className="page">
           <div className="section">
-            <h1>Register</h1>
+            <h1>{tr('Register')}</h1>
             <form onSubmit={(event) => handle_submit(event)}>
               <IonItem>
-                <IonLabel position="floating">Email</IonLabel>
+                <IonLabel position="floating">{tr('Email')}</IonLabel>
                 <IonInput
                   value={email}
                   inputmode="email"
@@ -128,15 +131,15 @@ const Register: React.FC = () => {
                   maxlength={255}
                   onIonChange={(e) => set_email(e.detail.value!)}
                   required
-                ></IonInput>
+                />
               </IonItem>
 
-              {is_email_too_long && <div>Email too long</div>}
-              {is_email_too_short && <div>Email too short</div>}
-              {is_email_invalid && <div>Email Invalid</div>}
+              {is_email_too_long && <div>{tr('Email too long')}</div>}
+              {is_email_too_short && <div>{tr('Email too short')}</div>}
+              {is_email_invalid && <div>{tr('Email Invalid')}</div>}
 
               <IonItem counter={true}>
-                <IonLabel position="floating">Avatar</IonLabel>
+                <IonLabel position="floating">{tr('Avatar')}</IonLabel>
                 <IonInput
                   value={avatar}
                   inputmode="text"
@@ -144,14 +147,14 @@ const Register: React.FC = () => {
                   maxlength={64}
                   onIonChange={(e) => set_avatar(e.detail.value!)}
                   required
-                ></IonInput>
+                />
               </IonItem>
 
-              {is_avatar_too_long && <div>Avatar too long</div>}
-              {is_avatar_too_short && <div>Avatar too short</div>}
-              {is_avatar_unavailable && <div>Avatar Unavailable</div>}
+              {is_avatar_too_long && <div>{tr('Avatar too long')}</div>}
+              {is_avatar_too_short && <div>{tr('Avatar too short')}</div>}
+              {is_avatar_unavailable && <div>{tr('Avatar Unavailable')}</div>}
               <IonItem counter={true}>
-                <IonLabel position="floating">Password</IonLabel>
+                <IonLabel position="floating">{tr('Password')}</IonLabel>
                 <IonInput
                   value={password}
                   type="password"
@@ -159,14 +162,14 @@ const Register: React.FC = () => {
                   maxlength={128}
                   onIonChange={(e) => set_password(e.detail.value!)}
                   required
-                ></IonInput>
+                />
               </IonItem>
 
-              {is_password_too_long && <div>Password too long</div>}
-              {is_password_too_short && <div>Password too short</div>}
+              {is_password_too_long && <div>{tr('Password too long')}</div>}
+              {is_password_too_short && <div>{tr('Password too short')}</div>}
 
               <IonButton type="submit" color="primary">
-                Register
+                {tr('Register')}
               </IonButton>
             </form>
 
@@ -178,7 +181,7 @@ const Register: React.FC = () => {
               fill="clear"
               onClick={click_login}
             >
-              Login
+              {tr('Login')}
             </IonButton>
           </div>
         </div>

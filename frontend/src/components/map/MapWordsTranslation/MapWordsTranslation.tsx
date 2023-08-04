@@ -6,10 +6,13 @@ import { styled } from 'styled-components';
 import { TranslatedWordCards } from '../../word/TranslatedWordCards/TranslatedWordCards';
 import { useGetOrigMapWordsLazyQuery } from '../../../generated/graphql';
 import { WordTranslationsCom } from './WordTranslationsCom';
+import { useTr } from '../../../hooks/useTr';
 
 interface MapWordsTranslationProps extends RouteComponentProps {}
 
 export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
+  const { tr } = useTr();
+
   const [targetLang, setTargetLang] = useState<LanguageInfo>();
   const [selectedWordId, setSelectedWordId] = useState<string>();
 
@@ -52,7 +55,7 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
     <>
       {!selectedWord || !targetLang ? (
         <>
-          <Caption>Map Translation</Caption>
+          <Caption>{tr('Map Translation')}</Caption>
           {/* <LangSelectorBox>  // source language is always 'English' for now, so we don't need this selector yet
             <LangSelector
               title="Select source language"
@@ -65,13 +68,13 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
           </LangSelectorBox> */}
           <LangSelectorBox>
             <LangSelector
-              title="Select target language"
+              title={tr('Select target language')}
               langSelectorId="targetLangSelector"
               selected={targetLang}
-              onChange={(targetLangTag, targetLangInfo) => {
+              onChange={(_targetLangTag, targetLangInfo) => {
                 setTargetLang(targetLangInfo);
               }}
-            ></LangSelector>
+            />
           </LangSelectorBox>
           <WordsBox>
             {wordsData &&

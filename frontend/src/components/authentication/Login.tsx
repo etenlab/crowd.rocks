@@ -15,11 +15,14 @@ import { globals } from '../../services/globals';
 import { login_change } from '../../services/subscriptions';
 import './Login.css';
 
+import { useTr } from '../../hooks/useTr';
+
 const Login: React.FC = () => {
   const history = useHistory();
+  const { tr } = useTr();
 
   useIonViewWillEnter(() => {
-    document.title = 'Login';
+    document.title = tr('Login');
   });
 
   const [email, set_email] = useState('');
@@ -123,11 +126,11 @@ const Login: React.FC = () => {
       <IonContent>
         <div className="page">
           <div className="section">
-            <h1>Login</h1>
+            <h1>{tr('Login')}</h1>
 
             <form onSubmit={(event) => handle_submit(event)}>
               <IonItem>
-                <IonLabel position="floating">Email</IonLabel>
+                <IonLabel position="floating">{tr('Email')}</IonLabel>
                 <IonInput
                   value={email}
                   inputmode="email"
@@ -135,31 +138,31 @@ const Login: React.FC = () => {
                   maxlength={255}
                   onIonChange={(e) => set_email(e.detail.value!)}
                   required
-                ></IonInput>
+                />
               </IonItem>
 
-              {is_email_too_long && <div>Email too long</div>}
-              {is_email_too_short && <div>Email too short</div>}
-              {is_email_invalid && <div>Email Invalid</div>}
+              {is_email_too_long && <div>{tr('Email too long')}</div>}
+              {is_email_too_short && <div>{tr('Email too short')}</div>}
+              {is_email_invalid && <div>{tr('Email Invalid')}</div>}
 
               <IonItem>
-                <IonLabel position="floating">Password</IonLabel>
+                <IonLabel position="floating">{tr('Password')}</IonLabel>
                 <IonInput
                   value={password}
                   type="password"
                   inputmode="text"
                   onIonChange={(e) => set_password(e.detail.value!)}
                   required
-                ></IonInput>
+                />
               </IonItem>
 
-              {is_password_too_long && <div>Password too long</div>}
-              {is_password_too_short && <div>Password too short</div>}
+              {is_password_too_long && <div>{tr('Password too long')}</div>}
+              {is_password_too_short && <div>{tr('Password too short')}</div>}
 
               <br />
 
               <IonButton type="submit" color="primary">
-                Login
+                {tr('Login')}
               </IonButton>
 
               <br />
@@ -171,7 +174,7 @@ const Login: React.FC = () => {
                 fill="clear"
                 onClick={click_reset_password}
               >
-                Reset Password
+                {tr('Reset Password')}
               </IonButton>
 
               <br />
@@ -182,11 +185,11 @@ const Login: React.FC = () => {
                 fill="clear"
                 onClick={click_register}
               >
-                Register
+                {tr('Register')}
               </IonButton>
 
               {is_invalid_email_or_password && (
-                <div>Invalid email or password</div>
+                <div>{tr('Invalid email or password')}</div>
               )}
             </form>
           </div>

@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useGetOrigMapContentQuery } from '../../../generated/graphql';
 
+import { useTr } from '../../../hooks/useTr';
+
 interface MapDetailsProps
   extends RouteComponentProps<{
     id: string;
@@ -12,6 +14,8 @@ interface MapDetailsProps
 export const MapDetails: React.FC<MapDetailsProps> = ({
   match,
 }: MapDetailsProps) => {
+  const { tr } = useTr();
+
   const origMapContent = useGetOrigMapContentQuery({
     variables: { id: match.params.id },
   });
@@ -31,7 +35,7 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   return (
     <>
       <Caption>
-        Map - {origMapContent.data?.getOrigMapContent.map_file_name || ''}
+        {tr('Map')} - {origMapContent.data?.getOrigMapContent.map_file_name || ''}
       </Caption>
 
       <StyledMapImg>

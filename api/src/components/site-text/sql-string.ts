@@ -437,30 +437,68 @@ export type GetAllSiteTextWordDefinition = {
   site_text_id: number;
 };
 
-export function getAllSiteTextWordDefinition(): [string, []] {
-  return [
-    `
-      select 
-        site_text_id
-      from site_text_word_definitions;
-    `,
-    [],
-  ];
+export function getAllSiteTextWordDefinition(
+  filter?: string,
+): [string, [string] | []] {
+  if (filter) {
+    return [
+      `
+        select distinct
+          site_text_id
+        from site_text_word_definitions as stwds
+        join word_definitions as wds
+        on stwds.word_definition_id = wds.word_definition_id
+        join words as ws
+        on ws.word_id = wds.word_id
+        join wordlike_strings as wlss
+        on wlss.wordlike_string_id = ws.wordlike_string_id
+        where wlss.wordlike_string like $1;
+      `,
+      [`%${filter.trim()}%`],
+    ];
+  } else {
+    return [
+      `
+        select distinct
+          site_text_id
+        from site_text_word_definitions;
+      `,
+      [],
+    ];
+  }
 }
 
 export type GetAllSiteTextPhraseDefinition = {
   site_text_id: number;
 };
 
-export function getAllSiteTextPhraseDefinition(): [string, []] {
-  return [
-    `
-      select 
-        site_text_id
-      from site_text_word_definitions;
-    `,
-    [],
-  ];
+export function getAllSiteTextPhraseDefinition(
+  filter?: string,
+): [string, [string] | []] {
+  if (filter) {
+    return [
+      `
+        select distinct
+          site_text_id
+        from site_text_phrase_definitions as stpds
+        join phrase_definitions as pds
+        on pds.phrase_definition_id = stpds.phrase_definition_id
+        join phrases as ps
+        on ps.phrase_id = pds.phrase_id
+        where ps.phraselike_string like $1;
+      `,
+      [`%${filter.trim()}%`],
+    ];
+  } else {
+    return [
+      `
+        select distinct
+          site_text_id
+        from site_text_phrase_definitions;      
+      `,
+      [],
+    ];
+  }
 }
 
 export type ToggleSiteTextTranslationVoteStatus = {
@@ -554,5 +592,43 @@ export function getSiteTextLanguageList(): [string, []] {
       on ws.word_id = ps.word_id;
     `,
     [],
+  ];
+}
+
+export type GetDefinitionIdFromWordId = {
+  word_definition_id: number;
+};
+
+export function getDefinitionIdFromWordId(word_id: number): [string, [number]] {
+  return [
+    `
+      select
+        stwds.word_definition_id
+      from site_text_word_definitions as stwds
+      join word_definitions as wds
+      on stwds.word_definition_id = wds.word_definition_id
+      where wds.word_id = $1;
+    `,
+    [word_id],
+  ];
+}
+
+export type GetDefinitionIdFromPhraseId = {
+  phrase_definition_id: number;
+};
+
+export function getDefinitionIdFromPhraseId(
+  phrase_id: number,
+): [string, [number]] {
+  return [
+    `
+      select
+        stpds.phrase_definition_id
+      from site_text_phrase_definitions as stpds
+      join phrase_definitions as pds
+      on stpds.phrase_definition_id = pds.phrase_definition_id
+      where pds.phrase_id = $1;
+    `,
+    [phrase_id],
   ];
 }
