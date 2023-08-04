@@ -7,7 +7,7 @@ import { TranslatedWordCards } from '../../word/TranslatedWordCards/TranslatedWo
 import { useGetOrigMapWordsLazyQuery } from '../../../generated/graphql';
 import { WordTranslationsCom } from './WordTranslationsCom';
 
-interface MapWordsTranslationProps extends RouteComponentProps<{}> {}
+interface MapWordsTranslationProps extends RouteComponentProps {}
 
 export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   const [targetLang, setTargetLang] = useState<LanguageInfo>();

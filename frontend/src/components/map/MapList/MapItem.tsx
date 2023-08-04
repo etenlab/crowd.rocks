@@ -1,12 +1,7 @@
 import { IonBadge, IonItem } from '@ionic/react';
 import { styled } from 'styled-components';
 import { MapFileOutput } from '../../../generated/graphql';
-import Tag from 'language-tags/Tag';
-import {
-  langInfo2String,
-  langInfo2tag,
-  subTags2LangInfo,
-} from '../../../common/langUtils';
+import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
   mapItem: MapFileOutput;
