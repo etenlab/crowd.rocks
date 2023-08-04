@@ -1,5 +1,5 @@
+import { useState } from 'react';
 import {
-  IonCard,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
@@ -20,9 +20,10 @@ import {
   codeWorkingOutline,
   mapOutline,
 } from 'ionicons/icons';
-import { useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import './Home.css';
+import { CustomIonCard } from './styled';
+import { useTr } from '../../hooks/useTr';
 
 interface HomePageProps
   extends RouteComponentProps<{
@@ -32,11 +33,12 @@ interface HomePageProps
 
 const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
   const router = useIonRouter();
+  const { tr } = useTr();
 
   const [show_legal_menu, set_show_legal_menu] = useState(false);
 
   useIonViewWillEnter(() => {
-    document.title = 'Home';
+    document.title = tr('Home');
   });
 
   return (
@@ -46,11 +48,11 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           <div className="section">
             <IonItemGroup>
               <IonItemDivider>
-                <IonLabel>Media</IonLabel>
+                <IonLabel>{tr('Media')}</IonLabel>
               </IonItemDivider>
 
               <IonItem lines="none">
-                <IonCard
+                <CustomIonCard
                   onClick={() => {
                     router.push(
                       `/${match.params.nation_id}/${match.params.language_id}/1/maps`,
@@ -60,24 +62,25 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
                   <IonCardHeader>
                     <IonCardTitle>
                       <IonIcon icon={mapOutline}></IonIcon>
-                      <IonText>Maps</IonText>
+                      <IonText>{tr('Maps')}</IonText>
                     </IonCardTitle>
                     <IonCardSubtitle>
-                      Upload .svg files and translate all their text into
-                      another language
+                      {tr(
+                        'Upload .svg files and translate all their text into another language',
+                      )}
                     </IonCardSubtitle>
                   </IonCardHeader>
-                </IonCard>
+                </CustomIonCard>
               </IonItem>
             </IonItemGroup>
 
             <IonItemGroup>
               <IonItemDivider>
-                <IonLabel>Language</IonLabel>
+                <IonLabel>{tr('Language')}</IonLabel>
               </IonItemDivider>
 
               <IonItem lines="none">
-                <IonCard
+                <CustomIonCard
                   onClick={() => {
                     router.push(
                       `/${match.params.nation_id}/${match.params.language_id}/1/dictionary-list`,
@@ -87,43 +90,44 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
                   <IonCardHeader>
                     <IonCardTitle>
                       <IonIcon icon={bookOutline}></IonIcon>
-                      <IonText>Dictionary</IonText>
+                      <IonText>{tr('Dictionary')}</IonText>
                     </IonCardTitle>
                     <IonCardSubtitle>
-                      Manage the words and definitions in a language
+                      {tr('Manage the words and definitions in a language')}
                     </IonCardSubtitle>
                   </IonCardHeader>
-                </IonCard>
+                </CustomIonCard>
               </IonItem>
 
               <IonItem lines="none">
-                <IonCard
+                <CustomIonCard
                   onClick={() => {
                     router.push(
                       `/${match.params.nation_id}/${match.params.language_id}/1/phrase-book-list`,
                     );
                   }}
+                  style={{ width: '100%' }}
                 >
                   <IonCardHeader>
                     <IonCardTitle>
                       <IonIcon icon={chatbubbleEllipsesOutline}></IonIcon>
-                      <IonText>Phrase Book</IonText>
+                      <IonText>{tr('Phrase Book')}</IonText>
                     </IonCardTitle>
                     <IonCardSubtitle>
-                      Helpful phrases in a lanuage
+                      {tr('Helpful phrases in a lanuage')}
                     </IonCardSubtitle>
                   </IonCardHeader>
-                </IonCard>
+                </CustomIonCard>
               </IonItem>
             </IonItemGroup>
 
             <IonItemGroup>
               <IonItemDivider>
-                <IonLabel>User Interface</IonLabel>
+                <IonLabel>{tr('User Interface')}</IonLabel>
               </IonItemDivider>
 
               <IonItem lines="none">
-                <IonCard
+                <CustomIonCard
                   onClick={() => {
                     router.push(
                       `/${match.params.nation_id}/${match.params.language_id}/1/site-text-list`,
@@ -133,13 +137,13 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
                   <IonCardHeader>
                     <IonCardTitle>
                       <IonIcon icon={codeWorkingOutline}></IonIcon>
-                      <IonText>Site Text Strings</IonText>
+                      <IonText>{tr('Site Text Strings')}</IonText>
                     </IonCardTitle>
                     <IonCardSubtitle>
-                      Help us translate this app into more languages
+                      {tr('Help us translate this app into more languages')}
                     </IonCardSubtitle>
                   </IonCardHeader>
-                </IonCard>
+                </CustomIonCard>
               </IonItem>
             </IonItemGroup>
 
@@ -166,42 +170,42 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
                 <div>
                   <div>
                     <a href="https://app.termly.io/document/terms-of-use-for-website/[todo]">
-                      Terms of Service
+                      {tr('Terms of Service')}
                     </a>
                   </div>
 
                   <div>
                     <a href="https://app.termly.io/document/cookie-policy/[todo]">
-                      Cookie Policy
+                      {tr('Cookie Policy')}
                     </a>
                   </div>
 
                   <div>
                     <a href="https://app.termly.io/document/acceptable-use-policy/[todo]">
-                      Acceptable Use Policy
+                      {tr('Acceptable Use Policy')}
                     </a>
                   </div>
 
                   <div>
                     <a href="https://app.termly.io/document/disclaimer/[todo]">
-                      Disclaimer
+                      {tr('Disclaimer')}
                     </a>
                   </div>
 
                   <div>
                     <a href="https://app.termly.io/document/eula/[todo]">
-                      EULA
+                      {tr('EULA')}
                     </a>
                   </div>
 
                   <div>
                     <a href="https://app.termly.io/document/privacy-policy/[todo]">
-                      Privacy Policy
+                      {tr('Privacy Policy')}
                     </a>
                   </div>
                   <div>
                     <a href="https://app.termly.io/notify/[todo]">
-                      Do Not Sell or Share My Personal information
+                      {tr('Do Not Sell or Share My Personal information')}
                     </a>
                   </div>
                 </div>
@@ -213,7 +217,7 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
                   set_show_legal_menu(!show_legal_menu);
                 }}
               >
-                Legal
+                {tr('Legal')}
               </div>
             </div>
           </div>

@@ -43,6 +43,8 @@ import {
 import { CaptainContainer, CardListContainer, CardContainer } from './styled';
 import { Textarea } from '../../common/styled';
 
+import { useTr } from '../../../hooks/useTr';
+
 interface PhraseDetailPageProps
   extends RouteComponentProps<{
     nation_id: string;
@@ -52,6 +54,7 @@ interface PhraseDetailPageProps
 
 export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
   const [present] = useIonToast();
+  const { tr } = useTr();
 
   const [allDefinitions, setAllDefinitions] =
     useState<PhraseDefinitionWithVoteListOutput>();
@@ -139,7 +142,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
         console.log(data?.togglePhraseVoteStatus.error);
 
         present({
-          message: 'Failed at voting!',
+          message: tr('Failed at voting!'),
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -184,7 +187,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
           console.log(data?.togglePhraseDefinitionVoteStatus.error);
 
           present({
-            message: 'Failed at voting!',
+            message: tr('Failed at voting!'),
             duration: 1500,
             position: 'top',
             color: 'danger',
@@ -227,7 +230,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
         });
 
         present({
-          message: 'Success at creating new definition!',
+          message: tr('Success at creating new definition!'),
           duration: 1500,
           position: 'top',
           color: 'success',
@@ -239,7 +242,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
         console.log(data?.phraseDefinitionUpsert.error);
 
         present({
-          message: 'Failed at voting!',
+          message: tr('Failed at creating new definition!'),
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -291,7 +294,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
     const textareaEl = textarea.current;
     if (!textareaEl) {
       present({
-        message: 'Input or Textarea not exists!',
+        message: tr('Input or Textarea not exists!'),
         duration: 1500,
         position: 'top',
         color: 'danger',
@@ -303,7 +306,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
 
     if (textareaVal.length === 0) {
       present({
-        message: 'Definition cannot be empty string!',
+        message: tr('Definition cannot be empty string!'),
         duration: 1500,
         position: 'top',
         color: 'danger',
@@ -413,30 +416,32 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
         <div className="page">
           <div className="section">
             <CaptainContainer>
-              <Caption>Phrase Book</Caption>
+              <Caption>{tr('Phrase Book')}</Caption>
             </CaptainContainer>
 
             <CardContainer>{phraseCom}</CardContainer>
 
             <hr />
 
-            <p style={{ padding: '0 16px', fontSize: 16 }}>Definitions</p>
+            <p style={{ padding: '0 16px', fontSize: 16 }}>
+              {tr('Definitions')}
+            </p>
 
-            <IonButton id="open-modal" expand="block">
-              + Add More Definitions
+            <IonButton id="open-phrase-definition-modal" expand="block">
+              + {tr('Add More Definitions')}
             </IonButton>
 
             <CardListContainer>{definitionsCom}</CardListContainer>
 
-            <IonModal ref={modal} trigger="open-modal">
+            <IonModal ref={modal} trigger="open-phrase-definition-modal">
               <IonHeader>
                 <IonToolbar>
                   <IonButtons slot="start">
                     <IonButton onClick={() => modal.current?.dismiss()}>
-                      Cancel
+                      {tr('Cancel')}
                     </IonButton>
                   </IonButtons>
-                  <IonTitle>Phrase Book</IonTitle>
+                  <IonTitle>{tr('Phrase Book')}</IonTitle>
                 </IonToolbar>
               </IonHeader>
               <IonContent className="ion-padding">
@@ -449,12 +454,13 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
                 >
                   <Textarea
                     ref={textarea}
-                    label="Input New Definition"
                     labelPlacement="floating"
                     fill="solid"
-                    placeholder="Input New Definition..."
+                    label={tr('Input New Definition')}
                   />
-                  <IonButton onClick={handleSaveNewDefinition}>Save</IonButton>
+                  <IonButton onClick={handleSaveNewDefinition}>
+                    {tr('Save')}
+                  </IonButton>
                 </div>
               </IonContent>
             </IonModal>

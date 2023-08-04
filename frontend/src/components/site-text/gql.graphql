@@ -84,8 +84,8 @@ fragment SiteTextLanguageFragment on SiteTextLanguage {
   geo_code
 }
 
-query GetAllSiteTextDefinitions {
-  getAllSiteTextDefinitions {
+query GetAllSiteTextDefinitions($filter: String) {
+  getAllSiteTextDefinitions(filter: $filter) {
     error
     site_text_phrase_definition_list {
       ...SiteTextPhraseDefinitionFragment
@@ -179,6 +179,49 @@ query GetAllSiteTextLanguageList {
     error
     site_text_language_list {
       ...SiteTextLanguageFragment
+    }
+  }
+}
+
+query GetAllRecommendedTranslation(
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  getAllRecommendedTranslation(
+    language_code: $language_code
+    dialect_code: $dialect_code
+    geo_code: $geo_code
+  ) {
+    error
+    site_text_translation_with_vote_list {
+      ...SiteTextTranslationWithVoteFragment
+    }
+  }
+}
+
+mutation SiteTextUpsert(
+  $siteTextlike_string: String!
+  $definitionlike_string: String!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  siteTextUpsert(
+    input: {
+      siteTextlike_string: $siteTextlike_string
+      definitionlike_string: $definitionlike_string
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
+    error
+    site_text_phrase_definition {
+      ...SiteTextPhraseDefinitionFragment
+    }
+    site_text_word_definition {
+      ...SiteTextWordDefinitionFragment
     }
   }
 }

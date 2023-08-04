@@ -1,6 +1,19 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { RouteComponentProps } from 'react-router';
-import { IonContent, IonPage, useIonRouter } from '@ionic/react';
+import {
+  IonContent,
+  IonPage,
+  useIonRouter,
+  IonButton,
+  IonModal,
+  IonHeader,
+  IonToolbar,
+  IonButtons,
+  IonTitle,
+  useIonToast,
+  InputCustomEvent,
+  InputChangeEventDetail,
+} from '@ionic/react';
 
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -8,7 +21,9 @@ import { Card } from '../../common/Card';
 
 import {
   useGetAllSiteTextDefinitionsLazyQuery,
+  useSiteTextUpsertMutation,
   SiteTextDefinitionListOutput,
+  GetAllSiteTextDefinitionsDocument,
   ErrorType,
 } from '../../../generated/graphql';
 
@@ -19,6 +34,10 @@ import {
   CardContainer,
 } from './styled';
 
+import { useTr } from '../../../hooks/useTr';
+
+import { Input } from '../../common/styled';
+
 interface SiteTextListPageProps
   extends RouteComponentProps<{
     nation_id: string;
@@ -27,21 +46,118 @@ interface SiteTextListPageProps
 
 export function SiteTextListPage({ match }: SiteTextListPageProps) {
   const router = useIonRouter();
-  const [getAllSiteTextDefinitions, { data, error, loading, called }] =
-    useGetAllSiteTextDefinitionsLazyQuery();
+  const [present] = useIonToast();
+  const { tr } = useTr();
 
+  const [filter, setFilter] = useState<string>('');
   const [targetLang, setTargetLang] = useState<LanguageInfo>();
   const [allSiteTextDefinitions, setAllSiteTextDefinitions] =
     useState<SiteTextDefinitionListOutput>();
 
+  const modal = useRef<HTMLIonModalElement>(null);
+  const input = useRef<HTMLIonInputElement>(null);
+
+  const [getAllSiteTextDefinitions, { data, error, loading, called }] =
+    useGetAllSiteTextDefinitionsLazyQuery();
+  const [siteTextUpsert] = useSiteTextUpsertMutation({
+    update(cache, { data: upsertData, errors }) {
+      if (
+        upsertData &&
+        !errors &&
+        data &&
+        upsertData.siteTextUpsert.error === ErrorType.NoError
+      ) {
+        console.log(upsertData);
+        let wordDefinitionList =
+          data.getAllSiteTextDefinitions.site_text_word_definition_list;
+        let phraseDefinitionList =
+          data.getAllSiteTextDefinitions.site_text_phrase_definition_list;
+
+        if (upsertData.siteTextUpsert.site_text_word_definition) {
+          const newSiteTextWordDefinition =
+            upsertData.siteTextUpsert.site_text_word_definition;
+
+          wordDefinitionList = [
+            ...wordDefinitionList.filter(
+              (wordDefinition) =>
+                wordDefinition?.site_text_id !==
+                newSiteTextWordDefinition.site_text_id,
+            ),
+            newSiteTextWordDefinition,
+          ];
+        }
+
+        if (upsertData.siteTextUpsert.site_text_phrase_definition) {
+          const newSiteTextPhraseDefinition =
+            upsertData.siteTextUpsert.site_text_phrase_definition;
+
+          phraseDefinitionList = [
+            ...phraseDefinitionList.filter(
+              (phraseDefinition) =>
+                phraseDefinition?.site_text_id !==
+                newSiteTextPhraseDefinition.site_text_id,
+            ),
+            newSiteTextPhraseDefinition,
+          ];
+        }
+
+        cache.writeQuery({
+          query: GetAllSiteTextDefinitionsDocument,
+          data: {
+            ...data,
+            getAllSiteTextDefinitions: {
+              ...data.getAllSiteTextDefinitions,
+              site_text_phrase_definition_list: phraseDefinitionList,
+              site_text_word_definition_list: wordDefinitionList,
+            },
+          },
+          variables: {
+            filter,
+          },
+        });
+
+        present({
+          message: tr('Success at creating new site text!'),
+          duration: 1500,
+          position: 'top',
+          color: 'success',
+        });
+
+        modal.current?.dismiss();
+      } else {
+        console.log('useSiteTextUpsertMutation: ', errors);
+        console.log(upsertData?.siteTextUpsert.error);
+
+        present({
+          message:
+            upsertData?.siteTextUpsert.error !== ErrorType.NoError
+              ? upsertData?.siteTextUpsert.error
+              : tr('Failed at creating new site text!'),
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+      }
+    },
+  });
+
   useEffect(() => {
-    getAllSiteTextDefinitions();
-  }, [getAllSiteTextDefinitions]);
+    getAllSiteTextDefinitions({
+      variables: {
+        filter,
+      },
+    });
+  }, [getAllSiteTextDefinitions, filter]);
 
   useEffect(() => {
     if (error) {
       console.log(error);
-      alert('Error');
+      present({
+        message: tr('Error!'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
 
       return;
     }
@@ -53,17 +169,29 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
     if (data) {
       if (data.getAllSiteTextDefinitions.error !== ErrorType.NoError) {
         console.log(data.getAllSiteTextDefinitions.error);
-        alert(data.getAllSiteTextDefinitions.error);
+
+        present({
+          message: data.getAllSiteTextDefinitions.error,
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
         return;
       }
       setAllSiteTextDefinitions(data.getAllSiteTextDefinitions);
     }
-  }, [data, error, loading, called]);
+  }, [data, error, loading, called, present, tr]);
 
   const handleGoToDefinitionDetail = useCallback(
     (siteTextId: string, isWord: boolean) => {
       if (!targetLang) {
-        alert('Should select target language!');
+        present({
+          message: tr('Should select target language!'),
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+
         return;
       }
 
@@ -89,8 +217,57 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
         }/${siteTextId}?${queryStr}`,
       );
     },
-    [targetLang, match, router],
+    [
+      targetLang,
+      router,
+      match.params.nation_id,
+      match.params.language_id,
+      present,
+      tr,
+    ],
   );
+
+  const handleSaveNewSiteText = () => {
+    const inputEl = input.current;
+
+    if (!inputEl) {
+      present({
+        message: tr('Input element not exists!'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+
+    const inputVal = (inputEl.value + '').trim();
+
+    if (inputVal.length === 0) {
+      present({
+        message: tr('Invalid input'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+
+    siteTextUpsert({
+      variables: {
+        siteTextlike_string: inputVal,
+        definitionlike_string: 'Site User Interface Text',
+        language_code: 'en',
+        dialect_code: null,
+        geo_code: null,
+      },
+    });
+  };
+
+  const handleFilterChange = (
+    event: InputCustomEvent<InputChangeEventDetail>,
+  ) => {
+    setFilter(event.detail.value!);
+  };
 
   const definitions = useMemo(() => {
     const tempDefinitions: {
@@ -159,14 +336,15 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
         <div className="page">
           <div className="section">
             <CaptainContainer>
-              <Caption>Site Text</Caption>
+              <Caption>{tr('Site Text')}</Caption>
             </CaptainContainer>
 
             <LangSelectorContainer>
+              <label>{tr('App Language')}: </label>
               <h4>English</h4>
               <LangSelector
-                title="Select target language"
-                langSelectorId="targetLangSelector"
+                title={tr('Select target language')}
+                langSelectorId="site-text-targetLangSelector"
                 selected={targetLang}
                 onChange={(_sourceLangTag, sourceLangInfo) => {
                   setTargetLang(sourceLangInfo);
@@ -174,7 +352,61 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
               />
             </LangSelectorContainer>
 
+            <hr />
+
+            <Input
+              type="text"
+              label={tr('Search')}
+              labelPlacement="floating"
+              fill="outline"
+              debounce={300}
+              value={filter}
+              onIonInput={handleFilterChange}
+            />
+
+            <br />
+
+            <IonButton id="open-site-text-modal" expand="block">
+              + {tr('Add More Site Text')}
+            </IonButton>
+
+            <br />
+
             <CardListContainer>{cardListComs}</CardListContainer>
+
+            <IonModal ref={modal} trigger="open-site-text-modal">
+              <IonHeader>
+                <IonToolbar>
+                  <IonButtons slot="start">
+                    <IonButton onClick={() => modal.current?.dismiss()}>
+                      {tr('Cancel')}
+                    </IonButton>
+                  </IonButtons>
+                  <IonTitle>{tr('Add Site Text')}</IonTitle>
+                </IonToolbar>
+              </IonHeader>
+              <IonContent className="ion-padding">
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '10px',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <Input
+                    ref={input}
+                    type="text"
+                    label={tr('Site Text')}
+                    labelPlacement="floating"
+                    fill="outline"
+                  />
+
+                  <IonButton onClick={handleSaveNewSiteText}>
+                    {tr('Save')}
+                  </IonButton>
+                </div>
+              </IonContent>
+            </IonModal>
           </div>
         </div>
       </IonContent>

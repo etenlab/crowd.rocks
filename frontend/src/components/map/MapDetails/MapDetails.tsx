@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 
+import { useTr } from '../../../hooks/useTr';
+
 interface MapDetailsProps
   extends RouteComponentProps<{
     id: string;
@@ -12,6 +14,8 @@ interface MapDetailsProps
 export const MapDetails: React.FC<MapDetailsProps> = ({
   match,
 }: MapDetailsProps) => {
+  const { tr } = useTr();
+
   const [currentMapWithContent, setCurrentMapWithContent] = useState<
     TMapWithContent | undefined
   >();
@@ -41,7 +45,9 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
 
   return (
     <>
-      <Caption>Map - {currentMapWithContent?.name || ''}</Caption>
+      <Caption>
+        {tr('Map')} - {currentMapWithContent?.name || ''}
+      </Caption>
 
       <StyledMapImg>
         {currentMapWithContent && (

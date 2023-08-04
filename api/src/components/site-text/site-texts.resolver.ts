@@ -219,8 +219,8 @@ export class SiteTextsResolver {
     @Args('site_text_type_is_word', { type: () => Boolean })
     site_text_type_is_word,
     @Args('language_code') language_code: string,
-    @Args('dialect_code', { nullable: true }) dialect_code: string,
-    @Args('geo_code', { nullable: true }) geo_code: string,
+    @Args('dialect_code', { nullable: true }) dialect_code: string | null,
+    @Args('geo_code', { nullable: true }) geo_code: string | null,
   ): Promise<SiteTextTranslationWithVoteListOutput> {
     console.log(
       'site text translation getAllTranslationFromSiteTextDefinitionID resolver',
@@ -241,8 +241,8 @@ export class SiteTextsResolver {
     @Args('site_text_type_is_word', { type: () => Boolean })
     site_text_type_is_word,
     @Args('language_code') language_code: string,
-    @Args('dialect_code') dialect_code: string,
-    @Args('geo_code') geo_code: string,
+    @Args('dialect_code', { nullable: true }) dialect_code: string | null,
+    @Args('geo_code', { nullable: true }) geo_code: string | null,
   ): Promise<SiteTextTranslationWithVoteOutput> {
     console.log(
       'site text translation getRecommendedTranslationFromSiteTextDefinitionID resolver',
@@ -260,8 +260,8 @@ export class SiteTextsResolver {
   @Query(() => SiteTextTranslationWithVoteListOutput)
   async getAllRecommendedTranslation(
     @Args('language_code') language_code: string,
-    @Args('dialect_code') dialect_code: string,
-    @Args('geo_code') geo_code: string,
+    @Args('dialect_code', { nullable: true }) dialect_code: string | null,
+    @Args('geo_code', { nullable: true }) geo_code: string | null,
   ): Promise<SiteTextTranslationWithVoteListOutput> {
     console.log('site text translation getAllRecommendedTranslation resolver');
 
@@ -286,10 +286,12 @@ export class SiteTextsResolver {
   }
 
   @Query(() => SiteTextDefinitionListOutput)
-  async getAllSiteTextDefinitions(): Promise<SiteTextDefinitionListOutput> {
+  async getAllSiteTextDefinitions(
+    @Args('filter', { nullable: true }) filter?: string,
+  ): Promise<SiteTextDefinitionListOutput> {
     console.log('site text getAllSiteTextDefinitions resolver');
 
-    return this.siteTextService.getAllSiteTextDefinitions();
+    return this.siteTextService.getAllSiteTextDefinitions(filter);
   }
 
   @Query(() => SiteTextLanguageListOutput)

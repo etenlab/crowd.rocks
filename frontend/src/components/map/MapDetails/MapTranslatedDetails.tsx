@@ -6,6 +6,8 @@ import { useGetTranslatedMapContentLazyQuery } from '../../../generated/graphql'
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 import { IonBadge } from '@ionic/react';
 
+import { useTr } from '../../../hooks/useTr';
+
 interface MapDetailsProps
   extends RouteComponentProps<{
     id: string;
@@ -14,6 +16,8 @@ interface MapDetailsProps
 export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
   match,
 }: MapDetailsProps) => {
+  const { tr } = useTr();
+
   const [getTranslatedMapContent, { data }] =
     useGetTranslatedMapContentLazyQuery({ fetchPolicy: 'no-cache' });
   const currentMapWithContent = data?.getTranslatedMapContent;
@@ -52,9 +56,11 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
     <>
       <Caption>
         <>
-          Map - {currentMapWithContent?.map_file_name || ''}{' '}
+          {tr('Map')} - {currentMapWithContent?.map_file_name || ''}{' '}
           <>
-            <IonBadge>translated to {langInfo2String(langInfo)}</IonBadge>
+            <IonBadge>
+              {tr('translated to')} {langInfo2String(langInfo)}
+            </IonBadge>
           </>
         </>
       </Caption>

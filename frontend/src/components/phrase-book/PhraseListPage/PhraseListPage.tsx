@@ -44,6 +44,8 @@ import {
   CardContainer,
 } from './styled';
 
+import { useTr } from '../../../hooks/useTr';
+
 interface PhraseListPageProps
   extends RouteComponentProps<{
     nation_id: string;
@@ -52,6 +54,7 @@ interface PhraseListPageProps
 
 export function PhraseListPage({ match }: PhraseListPageProps) {
   const router = useIonRouter();
+  const { tr } = useTr();
   const [present] = useIonToast();
 
   const modal = useRef<HTMLIonModalElement>(null);
@@ -124,7 +127,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
         console.log(data?.togglePhraseVoteStatus.error);
 
         present({
-          message: 'Failed at voting!',
+          message: tr('Failed at voting!'),
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -169,7 +172,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
         });
 
         present({
-          message: 'Success at creating new phrase!',
+          message: tr('Success at creating new phrase!'),
           duration: 1500,
           position: 'top',
           color: 'success',
@@ -181,7 +184,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
         console.log(data?.phraseUpsert.error);
 
         present({
-          message: 'Failed at voting!',
+          message: tr('Failed at creating new phrase!'),
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -239,7 +242,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
     const textareaEl = textarea.current;
     if (!textareaEl) {
       present({
-        message: 'Input or Textarea not exists!',
+        message: tr('Input or Textarea not exists!'),
         duration: 1500,
         position: 'top',
         color: 'danger',
@@ -251,7 +254,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
     if (textareaVal.length === 0) {
       present({
-        message: 'Phrase cannot be empty string!',
+        message: tr('Phrase cannot be empty string!'),
         duration: 1500,
         position: 'top',
         color: 'danger',
@@ -349,13 +352,13 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
         <div className="page">
           <div className="section">
             <CaptainContainer>
-              <Caption>Phrase Book</Caption>
+              <Caption>{tr('Phrase Book')}</Caption>
             </CaptainContainer>
 
             <FilterContainer>
               <LangSelector
-                title="Select language"
-                langSelectorId="langSelector"
+                title={tr('Select language')}
+                langSelectorId="phrase-book-langSelector"
                 selected={langInfo}
                 onChange={(_sourceLangTag, sourceLangInfo) => {
                   setLangInfo(sourceLangInfo);
@@ -364,9 +367,8 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
               <br />
               <Input
                 type="text"
-                placeholder="Search..."
+                label={tr('Search')}
                 labelPlacement="floating"
-                label="Search"
                 fill="outline"
                 debounce={300}
                 value={filter}
@@ -376,23 +378,23 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
             <hr />
 
-            <IonButton id="open-modal" expand="block">
-              + Add More Definitions
+            <IonButton id="open-phrase-modal" expand="block">
+              + {tr('Add More Phrase')}
             </IonButton>
 
             <br />
 
             <CardListContainer>{cardListComs}</CardListContainer>
 
-            <IonModal ref={modal} trigger="open-modal">
+            <IonModal ref={modal} trigger="open-phrase-modal">
               <IonHeader>
                 <IonToolbar>
                   <IonButtons slot="start">
                     <IonButton onClick={() => modal.current?.dismiss()}>
-                      Cancel
+                      {tr('Cancel')}
                     </IonButton>
                   </IonButtons>
-                  <IonTitle>Dictionary</IonTitle>
+                  <IonTitle>{tr('Dictionary')}</IonTitle>
                 </IonToolbar>
               </IonHeader>
               <IonContent className="ion-padding">
@@ -405,12 +407,13 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
                 >
                   <Textarea
                     ref={textarea}
-                    label="Input New Definition"
                     labelPlacement="floating"
                     fill="solid"
-                    placeholder="Input New Definition..."
+                    label={tr('Input New Phrase')}
                   />
-                  <IonButton onClick={handleSaveNewDefinition}>Save</IonButton>
+                  <IonButton onClick={handleSaveNewDefinition}>
+                    {tr('Save')}
+                  </IonButton>
                 </div>
               </IonContent>
             </IonModal>

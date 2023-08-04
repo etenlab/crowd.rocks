@@ -9,6 +9,7 @@ export const LangSelectorContainer = styled.div`
   width: 100%;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
 `;
 
 export const CardListContainer = styled.div`

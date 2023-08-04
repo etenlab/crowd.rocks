@@ -7,6 +7,10 @@ import { SiteTextWordDefinitionsService } from './site-text-word-definitions.ser
 import { SiteTextPhraseDefinitionsService } from './site-text-phrase-definitions.service';
 
 import { DefinitionsService } from 'src/components/definitions/definitions.service';
+import { WordDefinitionsService } from 'src/components/definitions/word-definitions.service';
+import { PhraseDefinitionsService } from 'src/components/definitions/phrase-definitions.service';
+import { WordsService } from 'src/components/words/words.service';
+import { PhrasesService } from 'src/components/phrases/phrases.service';
 
 import {
   SiteTextUpsertInput,
@@ -29,6 +33,10 @@ export class SiteTextsService {
     private siteTextWordDefinitionService: SiteTextWordDefinitionsService,
     private siteTextPhraseDefinitionService: SiteTextPhraseDefinitionsService,
     private definitionService: DefinitionsService,
+    private wordDefinitionService: WordDefinitionsService,
+    private phraseDefinitionService: PhraseDefinitionsService,
+    private phraseService: PhrasesService,
+    private wordService: WordsService,
   ) {}
 
   async upsert(
@@ -44,63 +52,118 @@ export class SiteTextsService {
     }
 
     try {
-      const words = input.siteTextlike_string.split(' ');
+      const words = input.siteTextlike_string.trim().split(' ');
 
       if (words.length > 1) {
-        const { error, phrase_definition } =
-          await this.definitionService.upsertFromPhraseAndDefinitionlikeString(
-            {
-              phraselike_string: input.siteTextlike_string.trim(),
-              definitionlike_string: input.definitionlike_string,
-              language_code: input.language_code,
-              dialect_code: input.dialect_code,
-              geo_code: input.geo_code,
-            },
-            token,
-          );
+        const phraseOuptut = await this.phraseService.upsert(
+          {
+            phraselike_string: input.siteTextlike_string.trim(),
+            language_code: input.language_code,
+            dialect_code: input.dialect_code,
+            geo_code: input.geo_code,
+          },
+          token,
+        );
 
-        if (error !== ErrorType.NoError || phrase_definition === null) {
+        if (phraseOuptut.error !== ErrorType.NoError || !phraseOuptut.phrase) {
           return {
-            error: error,
+            error: phraseOuptut.error,
             site_text_phrase_definition: null,
             site_text_word_definition: null,
           };
         }
 
+        let phrase_definition_id =
+          await this.siteTextPhraseDefinitionService.getDefinitionIdFromWordId(
+            +phraseOuptut.phrase.phrase_id,
+          );
+
+        if (!phrase_definition_id) {
+          const phraseDefinitionOutput =
+            await this.phraseDefinitionService.upsert(
+              {
+                phrase_id: phraseOuptut.phrase.phrase_id,
+                definition: input.definitionlike_string,
+              },
+              token,
+            );
+
+          if (
+            phraseDefinitionOutput.error !== ErrorType.NoError ||
+            phraseDefinitionOutput.phrase_definition === null
+          ) {
+            return {
+              error: phraseDefinitionOutput.error,
+              site_text_phrase_definition: null,
+              site_text_word_definition: null,
+            };
+          }
+
+          phrase_definition_id =
+            +phraseDefinitionOutput.phrase_definition.phrase_definition_id;
+        }
+
         const {
-          error: siteTextPhraseDefinitionError,
+          error: siteTextWordDefinitionError,
           site_text_phrase_definition,
         } = await this.siteTextPhraseDefinitionService.upsert(
           {
-            phrase_definition_id: phrase_definition.phrase_definition_id + '',
+            phrase_definition_id: phrase_definition_id + '',
           },
           token,
         );
 
         return {
-          error: siteTextPhraseDefinitionError,
-          site_text_phrase_definition,
+          error: siteTextWordDefinitionError,
           site_text_word_definition: null,
+          site_text_phrase_definition,
         };
       } else {
-        const { error, word_definition } =
-          await this.definitionService.upsertFromWordAndDefinitionlikeString(
+        const wordOutput = await this.wordService.upsert(
+          {
+            wordlike_string: input.siteTextlike_string.trim(),
+            language_code: input.language_code,
+            dialect_code: input.dialect_code,
+            geo_code: input.geo_code,
+          },
+          token,
+        );
+
+        if (wordOutput.error !== ErrorType.NoError || !wordOutput.word) {
+          return {
+            error: wordOutput.error,
+            site_text_phrase_definition: null,
+            site_text_word_definition: null,
+          };
+        }
+
+        let word_definition_id =
+          await this.siteTextWordDefinitionService.getDefinitionIdFromWordId(
+            +wordOutput.word.word_id,
+          );
+
+        if (!word_definition_id) {
+          const wordDefinitionOutput = await this.wordDefinitionService.upsert(
             {
-              wordlike_string: input.siteTextlike_string.trim(),
-              definitionlike_string: input.definitionlike_string,
-              language_code: input.language_code,
-              dialect_code: input.dialect_code,
-              geo_code: input.geo_code,
+              word_id: wordOutput.word.word_id,
+              definition: input.definitionlike_string,
             },
             token,
           );
 
-        if (error !== ErrorType.NoError || word_definition === null) {
-          return {
-            error: error,
-            site_text_phrase_definition: null,
-            site_text_word_definition: null,
-          };
+          if (
+            wordDefinitionOutput.error !== ErrorType.NoError ||
+            wordDefinitionOutput.word_definition === null
+          ) {
+            return {
+              error: wordDefinitionOutput.error,
+              site_text_phrase_definition: null,
+              site_text_word_definition: null,
+            };
+          }
+
+          word_definition_id =
+            +wordDefinitionOutput.word_definition.word_definition_id;
         }
 
         const {
@@ -108,7 +171,7 @@ export class SiteTextsService {
           site_text_word_definition,
         } = await this.siteTextWordDefinitionService.upsert(
           {
-            word_definition_id: word_definition.word_definition_id + '',
+            word_definition_id: word_definition_id + '',
           },
           token,
         );
@@ -137,10 +200,14 @@ export class SiteTextsService {
     return this.definitionService.updateDefinition(input, token);
   }
 
-  async getAllSiteTextDefinitions(): Promise<SiteTextDefinitionListOutput> {
+  async getAllSiteTextDefinitions(
+    filter?: string,
+  ): Promise<SiteTextDefinitionListOutput> {
     try {
       const { error: wordError, site_text_word_definition_list } =
-        await this.siteTextWordDefinitionService.getAllSiteTextWordDefinitions();
+        await this.siteTextWordDefinitionService.getAllSiteTextWordDefinitions(
+          filter,
+        );
 
       if (wordError !== ErrorType.NoError) {
         return {
@@ -151,7 +218,9 @@ export class SiteTextsService {
       }
 
       const { error: phraseError, site_text_phrase_definition_list } =
-        await this.siteTextPhraseDefinitionService.getAllSiteTextPhraseDefinitions();
+        await this.siteTextPhraseDefinitionService.getAllSiteTextPhraseDefinitions(
+          filter,
+        );
 
       if (phraseError !== ErrorType.NoError) {
         return {

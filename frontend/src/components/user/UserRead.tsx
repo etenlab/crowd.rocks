@@ -25,7 +25,7 @@ const UserRead: React.FC<PropsWithChildren<UserReadProps>> = (props) => {
           <IonImg
             className="user-read-image"
             src={data.userReadResolver.user.avatar_url}
-          ></IonImg>
+          />
         </span>
       )}
       <span>{data?.userReadResolver.user?.avatar}</span>

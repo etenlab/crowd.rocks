@@ -6,7 +6,7 @@ import { ErrorType } from 'src/common/types';
 import { SiteTextsService } from 'src/components/site-text/site-texts.service';
 import { SiteTextTranslationsService } from 'src/components/site-text/site-text-translations.service';
 
-import { siteText } from './data/lang';
+import { siteText } from './data/lang_sample_1';
 
 import { getAdminTokenSQL } from './sql-string';
 
@@ -70,7 +70,7 @@ export class DataLoadService {
               from_definition_id,
             },
             {
-              translationlike_string: translationlike_string,
+              translationlike_string: translationlike_string.trim(),
               definitionlike_string: 'Site User Interface Text Translation',
               language_code: langTag,
               dialect_code: null,

@@ -21,19 +21,23 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
+import { AppContextProvider } from './AppContext';
+
 import Body from './Body';
 
 setupIonicReact();
 
 const App: React.FC = () => (
   <IonApp>
-    <IonReactRouter>
-      <IonRouterOutlet>
-        <Route path="/">
-          <Body />
-        </Route>
-      </IonRouterOutlet>
-    </IonReactRouter>
+    <AppContextProvider>
+      <IonReactRouter>
+        <IonRouterOutlet>
+          <Route path="/">
+            <Body />
+          </Route>
+        </IonRouterOutlet>
+      </IonReactRouter>
+    </AppContextProvider>
   </IonApp>
 );
 

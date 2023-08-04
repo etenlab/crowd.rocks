@@ -25,4 +25,31 @@ export const typePolicies: TypePolicies = {
   PhraseVoteStatus: {
     keyFields: ['phrase_id'],
   },
+  Phrase: {
+    keyFields: ['phrase_id'],
+  },
+  Word: {
+    keyFields: ['word_id'],
+  },
+  WordDefinition: {
+    keyFields: ['word_definition_id'],
+  },
+  PhraseDefinition: {
+    keyFields: ['phrase_definition_id'],
+  },
+  SiteTextPhraseDefinition: {
+    keyFields: ['site_text_id'],
+  },
+  SiteTextWordDefinition: {
+    keyFields: ['site_text_id'],
+  },
+  SiteTextTranslationWithVote: {
+    keyFields: ['site_text_translation_id'],
+  },
+  SiteTextTranslation: {
+    keyFields: ['site_text_translation_id'],
+  },
+  VoteStatus: {
+    keyFields: ['site_text_translation_id'],
+  },
 };

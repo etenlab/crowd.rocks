@@ -42,6 +42,8 @@ import {
 import { CaptainContainer, CardListContainer, CardContainer } from './styled';
 import { Textarea } from '../../common/styled';
 
+import { useTr } from '../../../hooks/useTr';
+
 interface WordDetailPageProps
   extends RouteComponentProps<{
     nation_id: string;
@@ -50,6 +52,8 @@ interface WordDetailPageProps
   }> {}
 
 export function WordDetailPage({ match }: WordDetailPageProps) {
+  const { tr } = useTr();
+
   const [present] = useIonToast();
 
   const [allDefinitions, setAllDefinitions] =
@@ -138,7 +142,7 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
         console.log(data?.toggleWordVoteStatus.error);
 
         present({
-          message: 'Failed at voting!',
+          message: tr('Failed at voting!'),
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -178,7 +182,7 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
           console.log(data?.toggleWordDefinitonVoteStatus.error);
 
           present({
-            message: 'Failed at voting!',
+            message: tr('Failed at voting!'),
             duration: 1500,
             position: 'top',
             color: 'danger',
@@ -221,7 +225,7 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
         });
 
         present({
-          message: 'Success at creating new definition!',
+          message: tr('Success at creating new definition!'),
           duration: 1500,
           position: 'top',
           color: 'success',
@@ -233,7 +237,7 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
         console.log(data?.wordDefinitionUpsert.error);
 
         present({
-          message: 'Failed at voting!',
+          message: tr('Failed at creating new definition!'),
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -284,7 +288,7 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
     const textareaEl = textarea.current;
     if (!textareaEl) {
       present({
-        message: 'Input or Textarea not exists!',
+        message: tr('Input or Textarea not exists!'),
         duration: 1500,
         position: 'top',
         color: 'danger',
@@ -296,7 +300,7 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
 
     if (textareaVal.length === 0) {
       present({
-        message: 'Definition cannot be empty string!',
+        message: tr('Definition cannot be empty string!'),
         duration: 1500,
         position: 'top',
         color: 'danger',
@@ -406,17 +410,19 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
         <div className="page">
           <div className="section">
             <CaptainContainer>
-              <Caption>Dictionary</Caption>
+              <Caption>{tr('Dictionary')}</Caption>
             </CaptainContainer>
 
             <CardContainer>{wordCom}</CardContainer>
 
             <hr />
 
-            <p style={{ padding: '0 16px', fontSize: 16 }}>Definitions</p>
+            <p style={{ padding: '0 16px', fontSize: 16 }}>
+              {tr('Definitions')}
+            </p>
 
             <IonButton id="open-dictionary-definition-modal" expand="block">
-              + Add More Definitions
+              + {tr('Add More Definitions')}
             </IonButton>
 
             <CardListContainer>{definitionsCom}</CardListContainer>
@@ -426,10 +432,10 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
                 <IonToolbar>
                   <IonButtons slot="start">
                     <IonButton onClick={() => modal.current?.dismiss()}>
-                      Cancel
+                      {tr('Cancel')}
                     </IonButton>
                   </IonButtons>
-                  <IonTitle>Dictionary</IonTitle>
+                  <IonTitle>{tr('Dictionary')}</IonTitle>
                 </IonToolbar>
               </IonHeader>
               <IonContent className="ion-padding">
@@ -442,12 +448,13 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
                 >
                   <Textarea
                     ref={textarea}
-                    label="Input New Definition"
                     labelPlacement="floating"
                     fill="solid"
-                    placeholder="Input New Definition..."
+                    label={tr('Input New Definition')}
                   />
-                  <IonButton onClick={handleSaveNewDefinition}>Save</IonButton>
+                  <IonButton onClick={handleSaveNewDefinition}>
+                    {tr('Save')}
+                  </IonButton>
                 </div>
               </IonContent>
             </IonModal>

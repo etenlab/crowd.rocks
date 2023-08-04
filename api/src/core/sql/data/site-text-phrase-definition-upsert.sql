@@ -8,6 +8,7 @@ language plpgsql
 as $$
 declare
   v_user_id bigint;
+  v_phrase_id bigint;
   v_phrase_definition_id bigint;
 begin
   p_error_type := 'UnknownError';
@@ -30,13 +31,27 @@ begin
   end if;
 
   -- check for phrase existence
-  select phrase_definition_id
+  select phrase_id
   from phrase_definitions
   where phrase_definition_id = p_phrase_definition_id
+  into v_phrase_id;
+
+  if v_phrase_id is null then
+    p_error_type := 'PhraseDefinitionNotFound';
+    return;
+  end if;
+
+  -- check for phrase_id duplication
+  select pds.phrase_definition_id
+  from site_text_phrase_definitions as stpds
+  join phrase_definitions as pds
+  on pds.phrase_definition_id = stpds.phrase_definition_id
+  where pds.phrase_id = v_phrase_id
+    and stpds.phrase_definition_id <> p_phrase_definition_id
   into v_phrase_definition_id;
 
-  if v_phrase_definition_id is null then
-    p_error_type := 'PhraseDefinitionNotFound';
+  if v_phrase_definition_id is not null then
+    p_error_type := 'SiteTextPhraseDefinitionAlreadyExists';
     return;
   end if;
 
