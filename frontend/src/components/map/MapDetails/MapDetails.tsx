@@ -2,7 +2,7 @@ import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
+import { useGetOrigMapContentQuery } from '../../../generated/graphql';
 
 import { useTr } from '../../../hooks/useTr';
 
@@ -16,14 +16,11 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
 }: MapDetailsProps) => {
   const { tr } = useTr();
 
-  const [currentMapWithContent, setCurrentMapWithContent] = useState<
-    TMapWithContent | undefined
-  >();
-
-  const { getOrigMapContent } = useMapTranslationTools();
+  const origMapContent = useGetOrigMapContentQuery({
+    variables: { id: match.params.id },
+  });
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const mapId = match.params.id;
 
   useEffect(() => {
     function handleWindowResize() {
@@ -35,27 +32,19 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    const getMap = async (_mapId: string) => {
-      const map = await getOrigMapContent(_mapId);
-      setCurrentMapWithContent(map);
-    };
-    getMap(mapId);
-  }, [getOrigMapContent, mapId]);
-
   return (
     <>
       <Caption>
-        {tr('Map')} - {currentMapWithContent?.name || ''}
+        {tr('Map')} - {origMapContent.data?.getOrigMapContent.map_file_name || ''}
       </Caption>
 
       <StyledMapImg>
-        {currentMapWithContent && (
+        {origMapContent.data?.getOrigMapContent.content && (
           <img
             width={`${windowWidth - 10}px`}
             height={'auto'}
             src={`data:image/svg+xml;utf8,${encodeURIComponent(
-              currentMapWithContent.content,
+              origMapContent.data?.getOrigMapContent.content,
             )}`} // without `encodeURIComponent(image)` everal .svg images won't work
             alt="Original map"
           />

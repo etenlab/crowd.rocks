@@ -8,11 +8,13 @@ import { WordsModule } from '../words/words.module';
 import { MapsRepository } from './maps.repository';
 import { DefinitionsModule } from '../definitions/definitions.module';
 import { TranslationsModule } from '../translations/translations.module';
+import { PhraseModule } from '../phrases/phrases.module';
 @Module({
   imports: [
     forwardRef(() => CoreModule),
     AuthenticationModule,
     WordsModule,
+    PhraseModule,
     DefinitionsModule,
     forwardRef(() => TranslationsModule),
   ],

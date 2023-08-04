@@ -70,3 +70,21 @@ query GetTranslatedMapContent($id: ID!) {
     content
   }
 }
+
+
+query GetOrigMapContent($id: ID!) {
+  getOrigMapContent(input: { original_map_id: $id }) {
+    original_map_id
+    map_file_name
+    created_at
+    created_by
+    content
+  }
+}
+
+mutation MapUpload($file: Upload!) {
+  mapUpload(file: $file) {
+    original_map_id
+    map_file_name
+  }
+}
