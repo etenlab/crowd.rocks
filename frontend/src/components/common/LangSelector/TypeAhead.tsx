@@ -107,7 +107,7 @@ function AppTypeahead<Item extends { text: string; value: string }>(
 
       <IonContent color="light" class="ion-padding">
         <IonList id="modal-list" inset={true}>
-          {filteredItems.map((item) => (
+          {filteredItems.slice(0, 20).map((item) => (
             <IonItem key={item.value}>
               <IonCheckbox
                 value={item.value}
