@@ -81,18 +81,18 @@ export function LangSelector({
         for (const currTag of allTags) {
           // TODO temporary limitation - need to optimize to allow full list
           //----------
-          const enabledTags = [
-            'en',
-            'uk',
-            'apq',
-            'aas',
-            'jp',
-            'zh',
-            'hi',
-            'de',
-          ];
-          if (!enabledTags.includes(currTag.format())) continue;
-          //----------
+          // const enabledTags = [
+          //   'en',
+          //   'uk',
+          //   'apq',
+          //   'aas',
+          //   'jp',
+          //   'zh',
+          //   'hi',
+          //   'de',
+          // ];
+          // if (!enabledTags.includes(currTag.format())) continue;
+          //---------
 
           if (
             currTag.deprecated() ||
