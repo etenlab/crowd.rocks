@@ -8,7 +8,7 @@ import { useGetOrigMapWordsLazyQuery } from '../../../generated/graphql';
 import { WordTranslationsCom } from './WordTranslationsCom';
 import { useTr } from '../../../hooks/useTr';
 
-interface MapWordsTranslationProps extends RouteComponentProps<object> {}
+interface MapWordsTranslationProps extends RouteComponentProps {}
 
 export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   const { tr } = useTr();

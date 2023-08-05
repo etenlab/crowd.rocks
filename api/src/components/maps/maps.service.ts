@@ -23,11 +23,16 @@ import { PoolClient } from 'pg';
 import { WordToWordTranslationsService } from '../translations/word-to-word-translations.service';
 import { subTags2Tag, tag2langInfo } from '../../common/langUtils';
 import { LanguageInput } from 'src/components/common/types';
+import { PhraseUpsertInput } from '../phrases/types';
+import { PhrasesService } from '../phrases/phrases.service';
+import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
 const DEFAULT_MAP_WORD_DEFINITION = 'A geographical place';
+const DEFAULT_MAP_PHRASE_DEFINITION = 'A geographical place phrase';
+const WORDS_SEPARATOR = ' ';
 
 export type MapTranslationResult = {
   translatedMap: string;
@@ -46,6 +51,8 @@ export class MapsService {
     private pg: PostgresService,
     private mapsRepository: MapsRepository,
     private wordsService: WordsService,
+    private phrasesService: PhrasesService,
+    private phraseDefinitionsService: PhraseDefinitionsService,
     private wordDefinitionsService: WordDefinitionsService,
     private wordToWordTranslationsService: WordToWordTranslationsService,
   ) {}
@@ -68,14 +75,14 @@ export class MapsService {
     const dialect_code = mapLanguage.dialect?.tag;
     const geo_code = mapLanguage.region?.tag;
 
-    const { transformedSvgINode, foundWords } =
+    const { transformedSvgINode, foundWords, foundPhrases } =
       this.parseSvgMapString(fileBody);
 
     const dbPoolClient = await this.pg.pool.connect();
     try {
       dbPoolClient.query('BEGIN');
-      const savedWordIds: string[] = [];
-      const savedDefinitionIds: string[] = [];
+
+      //-- Save map
 
       const { map_file_name, map_id, created_at, created_by } =
         await this.mapsRepository.saveOriginalMap({
@@ -88,6 +95,8 @@ export class MapsService {
           geo_code,
         });
 
+      //--save found words with definitions and original map boundng
+
       for (const word of foundWords) {
         const wordInput: WordUpsertInput = {
           wordlike_string: word,
@@ -95,39 +104,68 @@ export class MapsService {
           dialect_code,
           geo_code,
         };
-        const savedWord = await this.wordsService.upsertInTrn(
-          wordInput,
+        await this.saveOriginalMapWord(wordInput, map_id, token, dbPoolClient);
+      }
+
+      //--save found phrases, split into words and save words with definitions and original map boundng
+
+      for (const phrase of foundPhrases) {
+        const phraseInput: PhraseUpsertInput = {
+          phraselike_string: phrase,
+          language_code,
+          dialect_code,
+          geo_code,
+        };
+        const savedPhrase = await this.phrasesService.upsertInTrn(
+          phraseInput,
           token,
           dbPoolClient,
         );
-        if (!savedWord.word_id) {
-          console.error(
-            `MapsService#parseAndSaveNewMap: Error ${savedWord.error} with saving word ${wordInput}`,
-          );
-          continue;
-        }
-        savedWordIds.push(savedWord.word_id);
 
-        const savedDefinition = await this.wordDefinitionsService.upsertInTrn(
+        await this.phraseDefinitionsService.upsertInTrn(
           {
-            definition: DEFAULT_MAP_WORD_DEFINITION,
-            word_id: savedWord.word_id,
+            definition: DEFAULT_MAP_PHRASE_DEFINITION,
+            phrase_id: String(savedPhrase.phrase_id),
           },
           token,
           dbPoolClient,
         );
-        if (!savedDefinition.word_definition_id) {
-          console.error(
-            `MapsService#parseAndSaveNewMap: Error ${savedDefinition.error} with saving definition for word ${wordInput}`,
-          );
-          continue;
-        }
-        savedDefinitionIds.push(savedDefinition.word_definition_id);
 
-        const savedOrginalMapWord = await this.saveOriginalMapWordInTrn(
-          { word_id: savedWord.word_id, original_map_id: map_id },
-          dbPoolClient,
-        );
+        if (!savedPhrase.phrase_id) {
+          throw Error(
+            `MapsService#parseAndSaveNewMap: 
+              Error ${savedPhrase.error} with saving phrase ${JSON.stringify(
+              phraseInput,
+            )}`,
+          );
+        }
+
+        if (savedPhrase.word_ids) {
+          for (const phraseWordId of savedPhrase.word_ids) {
+            const savedDefinition =
+              await this.wordDefinitionsService.upsertInTrn(
+                {
+                  definition: DEFAULT_MAP_WORD_DEFINITION,
+                  word_id: String(phraseWordId),
+                },
+                token,
+                dbPoolClient,
+              );
+            if (!savedDefinition.word_definition_id) {
+              throw new Error(
+                `MapsService#parseAndSaveNewMap: Error ${savedDefinition.error} with saving definition for wordId ${phraseWordId}`,
+              );
+            }
+
+            await this.saveOriginalMapWordInTrn(
+              {
+                word_id: String(phraseWordId),
+                original_map_id: map_id,
+              },
+              dbPoolClient,
+            );
+          }
+        }
       }
 
       await dbPoolClient.query('COMMIT');
@@ -149,6 +187,46 @@ export class MapsService {
     } finally {
       dbPoolClient.release();
     }
+  }
+
+  async saveOriginalMapWord(
+    wordInput: WordUpsertInput,
+    map_id: string,
+    token: string,
+    dbPoolClient: PoolClient,
+  ): Promise<string> {
+    const savedWord = await this.wordsService.upsertInTrn(
+      wordInput,
+      token,
+      dbPoolClient,
+    );
+    if (!savedWord.word_id) {
+      throw new Error(
+        `MapsService#parseAndSaveNewMap: 
+        Error ${savedWord.error} with saving word ${JSON.stringify(wordInput)}`,
+      );
+    }
+
+    const savedDefinition = await this.wordDefinitionsService.upsertInTrn(
+      {
+        definition: DEFAULT_MAP_WORD_DEFINITION,
+        word_id: savedWord.word_id,
+      },
+      token,
+      dbPoolClient,
+    );
+    if (!savedDefinition.word_definition_id) {
+      throw new Error(
+        `MapsService#parseAndSaveNewMap: Error ${savedDefinition.error} with saving definition for word ${wordInput}`,
+      );
+    }
+
+    await this.saveOriginalMapWordInTrn(
+      { word_id: savedWord.word_id, original_map_id: map_id },
+      dbPoolClient,
+    );
+
+    return savedWord.word_id;
   }
 
   async getOrigMaps(): Promise<GetOrigMapsListOutput> {
@@ -180,9 +258,10 @@ export class MapsService {
   parseSvgMapString(originalSvgString: string): {
     transformedSvgINode: INode;
     foundWords: string[];
+    foundPhrases: string[];
   } {
     const svgAsINode = readSvg(originalSvgString);
-    const foundWords: string[] = [];
+    const foundTexts: string[] = [];
     this.iterateOverINode(svgAsINode, SKIP_INODE_NAMES, (node) => {
       if (TEXTY_INODE_NAMES.includes(node.name)) {
         let currNodeAllText = node.value || '';
@@ -202,17 +281,34 @@ export class MapsService {
         }
 
         if (!currNodeAllText) return;
-        if (currNodeAllText.trim().length <= 1) return;
+        currNodeAllText = currNodeAllText.trim();
+        if (currNodeAllText.length <= 1) return;
         if (!isNaN(Number(currNodeAllText))) return;
-        const isExist = foundWords.findIndex((w) => w === currNodeAllText);
+        const isExist = foundTexts.findIndex((w) => w === currNodeAllText);
+
         if (isExist < 0) {
-          foundWords.push(currNodeAllText);
+          foundTexts.push(currNodeAllText);
         }
+      }
+    });
+    const foundWords: string[] = [];
+    const foundPhrases: string[] = [];
+    foundTexts.forEach((text) => {
+      const words = text
+        .split(' ')
+        .map((w) => w.trim())
+        .filter((w) => w.length > 1);
+      if (words.length === 0) return;
+      if (words.length > 1) {
+        foundPhrases.push(text);
+      } else {
+        foundWords.push(text);
       }
     });
     return {
       transformedSvgINode: svgAsINode,
       foundWords,
+      foundPhrases,
     };
   }
 
@@ -327,7 +423,7 @@ export class MapsService {
     }>,
   ): MapTranslationResult | undefined {
     const { transformedSvgINode } = this.parseSvgMapString(sourceSvgString);
-    this.replaceINodeTagValues(transformedSvgINode, translations);
+    this.replaceINodeTagValuesWordByWord(transformedSvgINode, translations);
     const translatedMap = stringify(transformedSvgINode);
     return { translatedMap, translations };
   }
@@ -347,6 +443,33 @@ export class MapsService {
       );
       if (idx < 0) return;
       node.value = valuesToReplace[idx].translation;
+    });
+  }
+
+  /**
+   * Mutetes INode sturcture - replaces subnodes' values using provided valuesToReplace
+   * @param iNodeStructure INode structure to replace values inside it.
+   * @param valuesToReplace
+   */
+  replaceINodeTagValuesWordByWord(
+    iNodeStructure: INode,
+    valuesToReplace: { source: string; translation: string }[],
+  ): void {
+    this.iterateOverINode(iNodeStructure, SKIP_INODE_NAMES, (node) => {
+      const nodeWords = node.value
+        .split(WORDS_SEPARATOR)
+        .map((w) => w.trim())
+        .filter((w) => w.length > 1);
+      nodeWords.forEach((nodeWord, i) => {
+        const translationIdx = valuesToReplace.findIndex(
+          ({ source }) => source === nodeWord,
+        );
+        if (translationIdx >= 0) {
+          nodeWords[i] = valuesToReplace[translationIdx].translation;
+        }
+      });
+      const newNodeText = nodeWords.join(WORDS_SEPARATOR);
+      node.value = newNodeText;
     });
   }
 

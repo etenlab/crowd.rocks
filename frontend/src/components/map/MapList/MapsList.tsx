@@ -3,25 +3,21 @@ import { MapItem } from './MapItem';
 import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
 import { useCallback, useEffect, useState } from 'react';
-import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
-import { useGetAllMapsListLazyQuery } from '../../../generated/graphql';
-import { RouteComponentProps } from 'react-router';
+import {
+  useGetAllMapsListLazyQuery,
+  useMapUploadMutation,
+} from '../../../generated/graphql';
 import { styled } from 'styled-components';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { useTr } from '../../../hooks/useTr';
 
-interface MapListProps
-  extends RouteComponentProps<{
-    nation_id: string;
-    language_id: string;
-  }> {}
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
+export const MapList: React.FC = () => {
   const router = useIonRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { tr } = useTr();
 
-  const { sendMapFile } = useMapTranslationTools();
+  const [sendMapFile, { data: uploadResult }] = useMapUploadMutation();
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
   });
@@ -44,19 +40,9 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const handleAddMap = useCallback(
     (file: File) => {
       if (!file) return;
-
-      sendMapFile(
-        file,
-        async ({ id, fileName }) => {
-          console.log(`uploaded id ${id} filename ${fileName}`);
-          await getAllMapsList();
-        },
-        (err) => {
-          console.log(`upload error  ${err}`);
-        },
-      );
+      sendMapFile({ variables: { file }, refetchQueries: ['GetAllMapsList'] });
     },
-    [getAllMapsList, sendMapFile],
+    [sendMapFile],
   );
 
   return (
