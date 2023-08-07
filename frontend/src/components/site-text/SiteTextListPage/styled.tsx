@@ -2,14 +2,15 @@ import { styled } from 'styled-components';
 
 export const CaptainContainer = styled.div`
   height: 50px;
+  margin: -16px;
 `;
 
 export const LangSelectorContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   width: 100%;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
 `;
 
 export const CardListContainer = styled.div`
@@ -23,4 +24,10 @@ export const CardListContainer = styled.div`
 
 export const CardContainer = styled.div`
   width: 47%;
+`;
+
+export const AppLanguageShowerContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;

@@ -35,6 +35,7 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
   const router = useIonRouter();
   const { tr } = useTr();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [show_legal_menu, set_show_legal_menu] = useState(false);
 
   useIonViewWillEnter(() => {
@@ -147,6 +148,9 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
               </IonItem>
             </IonItemGroup>
 
+            <br />
+            <br />
+
             <div className="home-footer">
               <div className="ion-text-end">
                 {/* <IonFab className="home-footer-create-button-wrap">
@@ -211,14 +215,14 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
                 </div>
               )}
 
-              <div
+              {/* <div
                 className="home-footer-legal-button clickable"
                 onClick={() => {
-                  set_show_legal_menu(!show_legal_menu);
+                  set_show_legal_menu((_show_legal_menu) => !_show_legal_menu);
                 }}
               >
                 {tr('Legal')}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

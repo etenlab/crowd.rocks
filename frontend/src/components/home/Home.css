@@ -27,15 +27,16 @@
 
 .home-footer {
   position: fixed;
-  bottom: 0px;
-  width: 100%;
+  bottom: 0;
+  left: 0;
   max-width: 777px;
-  /* display: flex;
-  justify-content: space-between;
-  align-items: flex-end; */
+  width: 100%;
+  z-index: 1001;
+  padding: 16px;
 }
 
 .home-footer a {
+  line-height: 25px;
   color: gray;
   text-decoration: none;
   font-size: smaller;
@@ -46,7 +47,7 @@
   font-size: smaller;
 }
 
-.home-footer-create-button-wrap{
+.home-footer-create-button-wrap {
   bottom: 40px;
   right: 10px;
 }

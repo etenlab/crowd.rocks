@@ -352,6 +352,8 @@ export function WordListPage({ match }: WordListPageProps) {
               <Caption>{tr('Dictionary')}</Caption>
             </CaptainContainer>
 
+            <br />
+
             <FilterContainer>
               <LangSelector
                 title={tr('Select language')}
@@ -360,8 +362,8 @@ export function WordListPage({ match }: WordListPageProps) {
                 onChange={(_sourceLangTag, sourceLangInfo) => {
                   setLangInfo(sourceLangInfo);
                 }}
+                onClearClick={() => setLangInfo(undefined)}
               />
-              <br />
               <Input
                 type="text"
                 label={tr('Search')}

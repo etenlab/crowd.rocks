@@ -355,6 +355,8 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
               <Caption>{tr('Phrase Book')}</Caption>
             </CaptainContainer>
 
+            <br />
+
             <FilterContainer>
               <LangSelector
                 title={tr('Select language')}
@@ -363,8 +365,8 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
                 onChange={(_sourceLangTag, sourceLangInfo) => {
                   setLangInfo(sourceLangInfo);
                 }}
+                onClearClick={() => setLangInfo(undefined)}
               />
-              <br />
               <Input
                 type="text"
                 label={tr('Search')}

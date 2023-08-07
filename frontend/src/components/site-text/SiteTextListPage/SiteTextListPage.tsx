@@ -3,6 +3,7 @@ import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
   IonPage,
+  IonBadge,
   useIonRouter,
   IonButton,
   IonModal,
@@ -30,6 +31,7 @@ import {
 import {
   CaptainContainer,
   LangSelectorContainer,
+  AppLanguageShowerContainer,
   CardListContainer,
   CardContainer,
 } from './styled';
@@ -340,19 +342,28 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
             </CaptainContainer>
 
             <LangSelectorContainer>
-              <label>{tr('App Language')}: </label>
-              <h4>English</h4>
-              <LangSelector
-                title={tr('Select target language')}
-                langSelectorId="site-text-targetLangSelector"
-                selected={targetLang}
-                onChange={(_sourceLangTag, sourceLangInfo) => {
-                  setTargetLang(sourceLangInfo);
-                }}
-              />
-            </LangSelectorContainer>
+              <AppLanguageShowerContainer>
+                <label style={{ fontSize: '14px', display: 'flex' }}>
+                  {tr('App Language')}:
+                </label>
+                <IonBadge color="primary">English</IonBadge>
+              </AppLanguageShowerContainer>
 
-            <hr />
+              <AppLanguageShowerContainer>
+                <label style={{ fontSize: '14px', display: 'flex' }}>
+                  {tr('Translation')}:
+                </label>
+                <LangSelector
+                  title={tr('Select')}
+                  langSelectorId="site-text-targetLangSelector"
+                  selected={targetLang}
+                  onChange={(_sourceLangTag, sourceLangInfo) => {
+                    setTargetLang(sourceLangInfo);
+                  }}
+                  onClearClick={() => setTargetLang(undefined)}
+                />
+              </AppLanguageShowerContainer>
+            </LangSelectorContainer>
 
             <Input
               type="text"
