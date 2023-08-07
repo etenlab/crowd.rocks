@@ -1,10 +1,15 @@
-import { RouteComponentProps } from 'react-router';
-import { Caption } from '../../common/Caption/Caption';
 import { useEffect, useState } from 'react';
+import { RouteComponentProps } from 'react-router';
+import { IonBadge, IonIcon } from '@ionic/react';
+import { downloadOutline } from 'ionicons/icons';
 import styled from 'styled-components';
+
+import { Caption } from '../../common/Caption/Caption';
+
 import { useGetTranslatedMapContentLazyQuery } from '../../../generated/graphql';
+
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
-import { IonBadge } from '@ionic/react';
+import { downloadFromSrc } from '../../../common/utility';
 
 import { useTr } from '../../../hooks/useTr';
 
@@ -44,6 +49,17 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
     getMap();
   }, [getTranslatedMapContent, mapId]);
 
+  const handleDownloadSvg = () => {
+    if (currentMapWithContent) {
+      downloadFromSrc(
+        currentMapWithContent.map_file_name,
+        `data:image/svg+xml;utf8,${encodeURIComponent(
+          currentMapWithContent.content,
+        )}`,
+      );
+    }
+  };
+
   const langInfo = currentMapWithContent
     ? subTags2LangInfo({
         lang: currentMapWithContent.language.language_code,
@@ -56,12 +72,17 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
     <>
       <Caption>
         <>
-          {tr('Map')} - {currentMapWithContent?.map_file_name || ''}{' '}
-          <>
-            <IonBadge>
-              {tr('translated to')} {langInfo2String(langInfo)}
-            </IonBadge>
-          </>
+          {tr('Map')} - {currentMapWithContent?.map_file_name || ''}
+          <IonBadge>
+            {tr('translated to')} {langInfo2String(langInfo)}
+          </IonBadge>
+          <IonIcon
+            icon={downloadOutline}
+            onClick={handleDownloadSvg}
+            size="large"
+            color="primary"
+            className="clickable theme-icon"
+          />
         </>
       </Caption>
 

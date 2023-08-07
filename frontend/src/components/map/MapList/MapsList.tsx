@@ -11,12 +11,11 @@ import { styled } from 'styled-components';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { useTr } from '../../../hooks/useTr';
 
-
 export const MapList: React.FC = () => {
   const router = useIonRouter();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { tr } = useTr();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sendMapFile, { data: uploadResult }] = useMapUploadMutation();
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
@@ -72,7 +71,7 @@ export const MapList: React.FC = () => {
       <IonList lines="none">
         {allMapsQuery?.getAllMapsList.allMapsList?.length ? (
           allMapsQuery?.getAllMapsList.allMapsList?.map((m, i) => (
-            <MapItem mapItem={m} key={i}></MapItem>
+            <MapItem mapItem={m} key={i} />
           ))
         ) : (
           <div> {tr('No maps found')} </div>
