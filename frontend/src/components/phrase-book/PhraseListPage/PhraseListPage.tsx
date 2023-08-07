@@ -71,10 +71,12 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
   const [togglePhraseVoteStatus] = useTogglePhraseVoteStatusMutation({
     update(cache, { data, errors }) {
       if (
-        data &&
         !errors &&
-        phrasesData &&
+        data &&
         data.togglePhraseVoteStatus.vote_status &&
+        data.togglePhraseVoteStatus.error === ErrorType.NoError &&
+        phrasesData &&
+        phrasesData.getPhrasesByLanguage.error === ErrorType.NoError &&
         langInfo
       ) {
         const newVoteStatus = data.togglePhraseVoteStatus.vote_status;
@@ -127,7 +129,8 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
         console.log(data?.togglePhraseVoteStatus.error);
 
         present({
-          message: tr('Failed at voting!'),
+          message: `${tr('Failed at voting!')} [${data?.togglePhraseVoteStatus
+            .error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -138,10 +141,12 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
   const [upsertPhrase] = usePhraseUpsertMutation({
     update(cache, { data, errors }) {
       if (
-        data &&
         !errors &&
-        phrasesData &&
+        data &&
         data.phraseUpsert.phrase &&
+        data.phraseUpsert.error === ErrorType.NoError &&
+        phrasesData &&
+        phrasesData.getPhrasesByLanguage.error === ErrorType.NoError &&
         langInfo
       ) {
         const newPhrase = data.phraseUpsert.phrase;
@@ -184,7 +189,8 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
         console.log(data?.phraseUpsert.error);
 
         present({
-          message: tr('Failed at creating new phrase!'),
+          message: `${tr('Failed at creating new phrase!')} [${data
+            ?.phraseUpsert.error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',

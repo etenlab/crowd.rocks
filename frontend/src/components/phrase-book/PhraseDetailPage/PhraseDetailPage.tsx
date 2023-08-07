@@ -89,8 +89,10 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
       if (
         !errors &&
         data &&
+        data.togglePhraseVoteStatus.error === ErrorType.NoError &&
         data.togglePhraseVoteStatus.vote_status &&
-        phraseData
+        phraseData &&
+        phraseData.getPhraseWithVoteById.error === ErrorType.NoError
       ) {
         const newVoteStatus = data.togglePhraseVoteStatus.vote_status;
 
@@ -142,7 +144,8 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
         console.log(data?.togglePhraseVoteStatus.error);
 
         present({
-          message: tr('Failed at voting!'),
+          message: `${tr('Failed at voting!')} [${data?.togglePhraseVoteStatus
+            .error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -156,6 +159,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
         if (
           !errors &&
           data &&
+          data.togglePhraseDefinitionVoteStatus.error === ErrorType.NoError &&
           data.togglePhraseDefinitionVoteStatus.vote_status
         ) {
           const newVoteStatus =
@@ -187,7 +191,8 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
           console.log(data?.togglePhraseDefinitionVoteStatus.error);
 
           present({
-            message: tr('Failed at voting!'),
+            message: `${tr('Failed at voting!')} [${data
+              ?.togglePhraseDefinitionVoteStatus.error}]`,
             duration: 1500,
             position: 'top',
             color: 'danger',
@@ -201,7 +206,10 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
         !errors &&
         data &&
         data.phraseDefinitionUpsert.phrase_definition &&
-        definitionData
+        data.phraseDefinitionUpsert.error === ErrorType.NoError &&
+        definitionData &&
+        definitionData.getPhraseDefinitionsByPhraseId.error ===
+          ErrorType.NoError
       ) {
         const newDefinition = data.phraseDefinitionUpsert.phrase_definition;
 
@@ -242,7 +250,8 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
         console.log(data?.phraseDefinitionUpsert.error);
 
         present({
-          message: tr('Failed at creating new definition!'),
+          message: `${tr('Failed at creating new definition!')} [${data
+            ?.phraseDefinitionUpsert.error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',

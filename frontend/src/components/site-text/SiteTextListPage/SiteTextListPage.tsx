@@ -64,12 +64,12 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
   const [siteTextUpsert] = useSiteTextUpsertMutation({
     update(cache, { data: upsertData, errors }) {
       if (
-        upsertData &&
         !errors &&
+        upsertData &&
+        upsertData.siteTextUpsert.error === ErrorType.NoError &&
         data &&
-        upsertData.siteTextUpsert.error === ErrorType.NoError
+        data.getAllSiteTextDefinitions.error === ErrorType.NoError
       ) {
-        console.log(upsertData);
         let wordDefinitionList =
           data.getAllSiteTextDefinitions.site_text_word_definition_list;
         let phraseDefinitionList =
@@ -131,10 +131,8 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
         console.log(upsertData?.siteTextUpsert.error);
 
         present({
-          message:
-            upsertData?.siteTextUpsert.error !== ErrorType.NoError
-              ? upsertData?.siteTextUpsert.error
-              : tr('Failed at creating new site text!'),
+          message: `${tr('Failed at creating new site text!')} [${upsertData
+            ?.siteTextUpsert.error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',
