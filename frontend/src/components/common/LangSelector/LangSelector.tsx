@@ -189,7 +189,7 @@ export function LangSelector({
               setSelectedRegion(null);
               onClearClick();
             }}
-          ></StIonIcon>
+          />
         )}
       </StSelectorDiv>
       <IonModal trigger={langSelectorId} ref={modal}>
@@ -217,9 +217,11 @@ const StIonIcon = styled(IonIcon)(() => ({
 
 const StSelectorDiv = styled('div')(() => ({
   display: 'flex',
+  width: '100%',
   alignItems: 'center',
 }));
 
 const StIonItem = styled(IonItem)(() => ({
+  '--padding-start': '0px',
   width: '100%',
 }));

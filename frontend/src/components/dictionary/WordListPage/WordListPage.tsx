@@ -72,10 +72,12 @@ export function WordListPage({ match }: WordListPageProps) {
   const [toggleWordVoteStatus] = useToggleWordVoteStatusMutation({
     update(cache, { data, errors }) {
       if (
-        data &&
         !errors &&
-        wordsData &&
+        data &&
         data.toggleWordVoteStatus.vote_status &&
+        data.toggleWordVoteStatus.error === ErrorType.NoError &&
+        wordsData &&
+        wordsData.getWordsByLanguage.error === ErrorType.NoError &&
         langInfo
       ) {
         const newVoteStatus = data.toggleWordVoteStatus.vote_status;
@@ -128,7 +130,8 @@ export function WordListPage({ match }: WordListPageProps) {
         console.log(data?.toggleWordVoteStatus.error);
 
         present({
-          message: tr('Failed at voting!'),
+          message: `${tr('Failed at voting!')} [${data?.toggleWordVoteStatus
+            .error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -138,7 +141,15 @@ export function WordListPage({ match }: WordListPageProps) {
   });
   const [upsertWord] = useWordUpsertMutation({
     update(cache, { data, errors }) {
-      if (data && !errors && wordsData && data.wordUpsert.word && langInfo) {
+      if (
+        !errors &&
+        data &&
+        data.wordUpsert.word &&
+        data.wordUpsert.error === ErrorType.NoError &&
+        wordsData &&
+        wordsData.getWordsByLanguage.error === ErrorType.NoError &&
+        langInfo
+      ) {
         const newWord = data.wordUpsert.word;
 
         cache.writeQuery({
@@ -180,7 +191,8 @@ export function WordListPage({ match }: WordListPageProps) {
         console.log(data?.wordUpsert.error);
 
         present({
-          message: tr('Failed at creating new word!'),
+          message: `${tr('Failed at creating new word!')} [${data?.wordUpsert
+            .error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -352,6 +364,8 @@ export function WordListPage({ match }: WordListPageProps) {
               <Caption>{tr('Dictionary')}</Caption>
             </CaptainContainer>
 
+            <br />
+
             <FilterContainer>
               <LangSelector
                 title={tr('Select language')}
@@ -360,8 +374,8 @@ export function WordListPage({ match }: WordListPageProps) {
                 onChange={(_sourceLangTag, sourceLangInfo) => {
                   setLangInfo(sourceLangInfo);
                 }}
+                onClearClick={() => setLangInfo(undefined)}
               />
-              <br />
               <Input
                 type="text"
                 label={tr('Search')}

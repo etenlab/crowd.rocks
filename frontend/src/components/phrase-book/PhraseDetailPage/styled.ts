@@ -2,6 +2,7 @@ import { styled } from 'styled-components';
 
 export const CaptainContainer = styled.div`
   height: 50px;
+  margin: -16px;
 `;
 
 export const CardListContainer = styled.div`

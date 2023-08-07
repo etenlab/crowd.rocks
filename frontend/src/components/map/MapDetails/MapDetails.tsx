@@ -1,8 +1,12 @@
-import { RouteComponentProps } from 'react-router';
-import { Caption } from '../../common/Caption/Caption';
 import { useEffect, useState } from 'react';
+import { RouteComponentProps } from 'react-router';
+import { IonIcon } from '@ionic/react';
+import { downloadOutline } from 'ionicons/icons';
 import styled from 'styled-components';
+
+import { Caption } from '../../common/Caption/Caption';
 import { useGetOrigMapContentQuery } from '../../../generated/graphql';
+import { downloadFromSrc } from '../../../common/utility';
 
 import { useTr } from '../../../hooks/useTr';
 
@@ -32,10 +36,33 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
     };
   }, []);
 
+  const handleDownloadSvg = () => {
+    if (origMapContent.data?.getOrigMapContent.content) {
+      downloadFromSrc(
+        origMapContent.data?.getOrigMapContent.map_file_name,
+        `data:image/svg+xml;utf8,${encodeURIComponent(
+          origMapContent.data?.getOrigMapContent.content,
+        )}`,
+      );
+    }
+  };
+
   return (
     <>
       <Caption>
-        {tr('Map')} - {origMapContent.data?.getOrigMapContent.map_file_name || ''}
+        <>
+          {tr('Map')} -{' '}
+          {origMapContent.data?.getOrigMapContent.map_file_name || ''}
+          {origMapContent.data?.getOrigMapContent.content && (
+            <IonIcon
+              icon={downloadOutline}
+              onClick={handleDownloadSvg}
+              size="large"
+              color="primary"
+              className="clickable theme-icon"
+            />
+          )}
+        </>
       </Caption>
 
       <StyledMapImg>

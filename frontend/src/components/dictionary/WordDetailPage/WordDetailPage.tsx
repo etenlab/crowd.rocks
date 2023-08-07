@@ -90,7 +90,9 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
         !errors &&
         data &&
         data.toggleWordVoteStatus.vote_status &&
-        wordData
+        data.toggleWordVoteStatus.error === ErrorType.NoError &&
+        wordData &&
+        wordData.getWordWithVoteById.error === ErrorType.NoError
       ) {
         const newVoteStatus = data.toggleWordVoteStatus.vote_status;
 
@@ -142,7 +144,8 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
         console.log(data?.toggleWordVoteStatus.error);
 
         present({
-          message: tr('Failed at voting!'),
+          message: `${tr('Failed at voting!')} [${data?.toggleWordVoteStatus
+            .error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -153,7 +156,12 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
   const [toggleWordDefinitionVoteStatus] =
     useToggleWordDefinitonVoteStatusMutation({
       update(cache, { data, errors }) {
-        if (!errors && data && data.toggleWordDefinitonVoteStatus.vote_status) {
+        if (
+          !errors &&
+          data &&
+          data.toggleWordDefinitonVoteStatus.vote_status &&
+          data.toggleWordDefinitonVoteStatus.error === ErrorType.NoError
+        ) {
           const newVoteStatus = data.toggleWordDefinitonVoteStatus.vote_status;
 
           cache.updateFragment<WordDefinitionWithVote>(
@@ -182,7 +190,8 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
           console.log(data?.toggleWordDefinitonVoteStatus.error);
 
           present({
-            message: tr('Failed at voting!'),
+            message: `${tr('Failed at voting!')} [${data
+              ?.toggleWordDefinitonVoteStatus.error}]`,
             duration: 1500,
             position: 'top',
             color: 'danger',
@@ -196,7 +205,9 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
         !errors &&
         data &&
         data.wordDefinitionUpsert.word_definition &&
-        definitionData
+        data.wordDefinitionUpsert.error === ErrorType.NoError &&
+        definitionData &&
+        definitionData.getWordDefinitionsByWordId.error === ErrorType.NoError
       ) {
         const newDefinition = data.wordDefinitionUpsert.word_definition;
 
@@ -237,7 +248,8 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
         console.log(data?.wordDefinitionUpsert.error);
 
         present({
-          message: tr('Failed at creating new definition!'),
+          message: `${tr('Failed at creating new definition!')} [${data
+            ?.wordDefinitionUpsert.error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',

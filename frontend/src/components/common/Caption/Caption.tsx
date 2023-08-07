@@ -36,10 +36,13 @@ const CaptainContainer = styled.div`
   padding: 16px;
   flex-direction: row;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
 `;
 
 const StIonText = styled(IonText)(() => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
   marginLeft: '10px',
   fontWeight: '700',
 }));

@@ -2,6 +2,7 @@ import { styled } from 'styled-components';
 
 export const CaptainContainer = styled.div`
   height: 50px;
+  margin: -16px;
 `;
 
 export const FilterContainer = styled.div`
@@ -10,6 +11,7 @@ export const FilterContainer = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
 `;
 
 export const CardListContainer = styled.div`

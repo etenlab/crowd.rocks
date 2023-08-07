@@ -98,7 +98,14 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
   ] = useSiteTextPhraseDefinitionReadLazyQuery();
   const [upsertTranslation] = useUpsertTranslationMutation({
     update(cache, { data, errors }) {
-      if (data && !errors && translationsData) {
+      if (
+        !errors &&
+        data &&
+        data.upsertTranslation.error === ErrorType.NoError &&
+        translationsData &&
+        translationsData.getAllTranslationFromSiteTextDefinitionID.error ===
+          ErrorType.NoError
+      ) {
         const newSiteTextTranslation =
           data.upsertTranslation.site_text_translation;
 
@@ -147,7 +154,9 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
         console.log(data?.upsertTranslation.error);
 
         present({
-          message: tr('Failed at creating new site text translation!'),
+          message: `${tr(
+            'Failed at creating new site text translation!',
+          )} [${data?.upsertTranslation.error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -157,7 +166,12 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
   });
   const [toggleVoteStatus] = useToggleVoteStatusMutation({
     update(cache, { data, errors }) {
-      if (!errors && data && data.toggleVoteStatus.vote_status) {
+      if (
+        !errors &&
+        data &&
+        data.toggleVoteStatus.vote_status &&
+        data.toggleVoteStatus.error === ErrorType.NoError
+      ) {
         const newVoteStatus = data.toggleVoteStatus.vote_status;
 
         cache.updateFragment<SiteTextTranslationWithVote>(
@@ -186,7 +200,8 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
         console.log(data?.toggleVoteStatus.error);
 
         present({
-          message: tr('Failed at voting!'),
+          message: `${tr('Failed at voting!')} [${data?.toggleVoteStatus
+            .error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',

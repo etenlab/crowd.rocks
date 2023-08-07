@@ -1,8 +1,16 @@
-import { IonBadge, IonItem } from '@ionic/react';
+import { MouseEventHandler, useRef } from 'react';
+import { IonBadge, IonItem, IonIcon } from '@ionic/react';
+import { downloadOutline } from 'ionicons/icons';
 import { styled } from 'styled-components';
-import { MapFileOutput } from '../../../generated/graphql';
+
+import {
+  MapFileOutput,
+  useGetOrigMapContentLazyQuery,
+  useGetTranslatedMapContentLazyQuery,
+} from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
+import { downloadFromSrc } from '../../../common/utility';
 
 import { useTr } from '../../../hooks/useTr';
 
@@ -12,6 +20,14 @@ export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
 
 const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
   const { tr } = useTr();
+
+  const downloadFlagRef = useRef<'original' | 'translated' | null>(null);
+
+  const [getOrigMapContent, origMapContent] = useGetOrigMapContentLazyQuery({
+    fetchPolicy: 'no-cache',
+  });
+  const [getTranslatedMapContent, translatedMapContent] =
+    useGetTranslatedMapContentLazyQuery({ fetchPolicy: 'no-cache' });
 
   const routerLink =
     mapItem.is_original || !mapItem.translated_map_id
@@ -24,19 +40,74 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
     region: mapItem.language.geo_code || undefined,
   });
 
+  const handleDownloadSvg: MouseEventHandler<HTMLIonIconElement> = (e) => {
+    if (mapItem.is_original || !mapItem.translated_map_id) {
+      downloadFlagRef.current = 'original';
+      getOrigMapContent({
+        variables: {
+          id: mapItem.original_map_id,
+        },
+      });
+    } else {
+      downloadFlagRef.current = 'translated';
+      getTranslatedMapContent({
+        variables: {
+          id: mapItem.translated_map_id,
+        },
+      });
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  if (
+    origMapContent.data &&
+    !origMapContent.error &&
+    !origMapContent.loading &&
+    downloadFlagRef.current === 'original'
+  ) {
+    downloadFromSrc(
+      origMapContent.data.getOrigMapContent.map_file_name,
+      `data:image/svg+xml;utf8,${encodeURIComponent(
+        origMapContent.data.getOrigMapContent.content,
+      )}`,
+    );
+    downloadFlagRef.current = null;
+  }
+
+  if (
+    translatedMapContent.data &&
+    !translatedMapContent.error &&
+    !translatedMapContent.loading &&
+    downloadFlagRef.current === 'translated'
+  ) {
+    downloadFromSrc(
+      translatedMapContent.data.getTranslatedMapContent.map_file_name,
+      `data:image/svg+xml;utf8,${encodeURIComponent(
+        translatedMapContent.data.getTranslatedMapContent.content,
+      )}`,
+    );
+    downloadFlagRef.current = null;
+  }
+
   return (
     <IonItem {...rest} routerLink={routerLink}>
-      {mapItem.map_file_name}
-      {!mapItem.is_original ? (
-        <>
-          ,{' '}
+      <div>
+        {mapItem.map_file_name}
+        {!mapItem.is_original ? (
           <IonBadge>
             {tr('translated to')} {langInfo2String(langInfo)}
           </IonBadge>
-        </>
-      ) : (
-        <></>
-      )}
+        ) : null}
+      </div>
+      <IonIcon
+        icon={downloadOutline}
+        onClick={handleDownloadSvg}
+        size="large"
+        color="primary"
+        className="clickable theme-icon"
+      />
     </IonItem>
   );
 };
