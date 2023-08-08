@@ -63,13 +63,13 @@ begin
   returning word_to_word_translations_vote_id
   into p_word_to_word_translation_vote_id;
 
-  -- if p_word_to_word_translation_vote_id is null then
-  --   select word_to_word_translation_vote_id
-  --   from word_to_word_translations_votes
-  --   where word_to_word_translation_id = p_word_to_word_translation_id
-  --     and user_id = v_user_id
-  --   into p_word_to_word_translation_vote_id;
-  -- end if;
+  if p_word_to_word_translation_vote_id is null then
+    select word_to_word_translations_vote_id
+    from word_to_word_translations_votes
+    where word_to_word_translation_id = p_word_to_word_translation_id
+      and user_id = v_user_id
+    into p_word_to_word_translation_vote_id;
+  end if;
 
   if p_word_to_word_translation_vote_id is null then
     return;
