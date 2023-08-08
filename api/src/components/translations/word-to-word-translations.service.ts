@@ -16,6 +16,8 @@ import {
   getWordToWordTranslationObjById,
   callWordToWordTranslationUpsertProcedure,
   WordToWordTranslationUpsertProcedureOutputRow,
+  GetWordToWordTranslationVoteStatus,
+  getWordToWordTranslationVoteStatus,
 } from './sql-string';
 import { WordsService } from '../words/words.service';
 import {
@@ -173,12 +175,12 @@ export class WordToWordTranslationsService {
     };
   }
 
-  addWordAsTranslationForWord = async (
+  async addWordAsTranslationForWord(
     originalDefinitionId: string,
     tWord: WordUpsertInput,
     tDefinitionText: string,
     token: string,
-  ): Promise<AddWordAsTranslationForWordOutput> => {
+  ): Promise<AddWordAsTranslationForWordOutput> {
     const dbPoolClient = await this.pg.pool.connect();
     try {
       dbPoolClient.query('BEGIN');
@@ -223,7 +225,45 @@ export class WordToWordTranslationsService {
     } finally {
       dbPoolClient.release();
     }
-  };
+  }
+
+  async getVoteStatus(
+    word_to_word_translation_id: number,
+  ): Promise<WordTrVoteStatusOutputRow> {
+    try {
+      const res1 = await this.pg.pool.query<GetWordToWordTranslationVoteStatus>(
+        ...getWordToWordTranslationVoteStatus(word_to_word_translation_id),
+      );
+
+      if (res1.rowCount !== 1) {
+        return {
+          error: ErrorType.NoError,
+          vote_status: {
+            word_to_word_translation_id: word_to_word_translation_id + '',
+            upvotes: 0,
+            downvotes: 0,
+          },
+        };
+      } else {
+        return {
+          error: ErrorType.NoError,
+          vote_status: {
+            word_to_word_translation_id:
+              res1.rows[0].word_to_word_translation_id + '',
+            upvotes: res1.rows[0].upvotes,
+            downvotes: res1.rows[0].downvotes,
+          },
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      vote_status: null,
+    };
+  }
 
   async toggleVoteStatus(
     word_to_word_translation_id: string,

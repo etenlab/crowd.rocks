@@ -7,6 +7,7 @@ import { PhraseDefinitionsService } from 'src/components/definitions/phrase-defi
 import {
   PhraseToPhraseTranslationReadOutput,
   PhraseToPhraseTranslationUpsertOutput,
+  PhraseToPhraseVoteStatusOutputRow,
 } from './types';
 
 import {
@@ -14,6 +15,10 @@ import {
   getPhraseToPhraseTranslationObjById,
   callPhraseToPhraseTranslationUpsertProcedure,
   PhraseToPhraseTranslationUpsertProcedureOutputRow,
+  GetPhraseToPhraseTranslationVoteStatus,
+  getPhraseToPhraseTranslationVoteStatus,
+  TogglePhraseToPhraseTranslationVoteStatus,
+  togglePhraseToPhraseTranslationVoteStatus,
 } from './sql-string';
 
 @Injectable()
@@ -118,6 +123,87 @@ export class PhraseToPhraseTranslationsService {
     return {
       error: ErrorType.UnknownError,
       phrase_to_phrase_translation: null,
+    };
+  }
+  async getVoteStatus(
+    phrase_to_phrase_translation_id: number,
+  ): Promise<PhraseToPhraseVoteStatusOutputRow> {
+    try {
+      const res1 =
+        await this.pg.pool.query<GetPhraseToPhraseTranslationVoteStatus>(
+          ...getPhraseToPhraseTranslationVoteStatus(
+            phrase_to_phrase_translation_id,
+          ),
+        );
+
+      if (res1.rowCount !== 1) {
+        return {
+          error: ErrorType.NoError,
+          vote_status: {
+            phrase_to_phrase_translation_id:
+              phrase_to_phrase_translation_id + '',
+            upvotes: 0,
+            downvotes: 0,
+          },
+        };
+      } else {
+        return {
+          error: ErrorType.NoError,
+          vote_status: {
+            phrase_to_phrase_translation_id:
+              res1.rows[0].phrase_to_phrase_translation_id + '',
+            upvotes: res1.rows[0].upvotes,
+            downvotes: res1.rows[0].downvotes,
+          },
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      vote_status: null,
+    };
+  }
+
+  async toggleVoteStatus(
+    phrase_to_phrase_translation_id: number,
+    vote: boolean,
+    token: string,
+  ): Promise<PhraseToPhraseVoteStatusOutputRow> {
+    try {
+      const res1 =
+        await this.pg.pool.query<TogglePhraseToPhraseTranslationVoteStatus>(
+          ...togglePhraseToPhraseTranslationVoteStatus({
+            phrase_to_phrase_translation_id,
+            vote,
+            token,
+          }),
+        );
+
+      const creatingError = res1.rows[0].p_error_type;
+      const phrase_to_phrase_translations_vote_id =
+        res1.rows[0].p_phrase_to_phrase_translations_vote_id;
+
+      if (
+        creatingError !== ErrorType.NoError ||
+        !phrase_to_phrase_translations_vote_id
+      ) {
+        return {
+          error: creatingError,
+          vote_status: null,
+        };
+      }
+
+      return this.getVoteStatus(phrase_to_phrase_translation_id);
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      vote_status: null,
     };
   }
 }

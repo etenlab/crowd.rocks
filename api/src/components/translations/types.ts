@@ -1,6 +1,7 @@
-import { Args, Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
+import { PartialVoteStatus } from 'src/components/common/types';
 
 import { WordDefinition } from 'src/components/definitions/types';
 import { PhraseDefinition } from 'src/components/definitions/types';
@@ -18,6 +19,13 @@ export class WordToPhraseTranslation {
   @Field(() => ID) word_to_phrase_translation_id: string;
   @Field(() => WordDefinition) from_word_definition: WordDefinition;
   @Field(() => PhraseDefinition) to_phrase_definition: PhraseDefinition;
+}
+
+@ObjectType()
+export class PhraseToWordTranslation {
+  @Field(() => ID) phrase_to_word_translation_id: string;
+  @Field(() => PhraseDefinition) from_phrase_definition: PhraseDefinition;
+  @Field(() => WordDefinition) to_word_definition: WordDefinition;
 }
 
 @ObjectType()
@@ -40,6 +48,12 @@ export class WordToPhraseTranslationUpsertInput {
 }
 
 @InputType()
+export class PhraseToWordTranslationUpsertInput {
+  @Field(() => ID) from_phrase_definition_id: string;
+  @Field(() => ID) to_word_definition_id: string;
+}
+
+@InputType()
 export class PhraseToPhraseTranslationUpsertInput {
   @Field(() => ID) from_phrase_definition_id: string;
   @Field(() => ID) to_phrase_definition_id: string;
@@ -55,6 +69,12 @@ export class WordToWordTranslationUpsertOutput extends GenericOutput {
 export class WordToPhraseTranslationUpsertOutput extends GenericOutput {
   @Field(() => WordToPhraseTranslation, { nullable: true })
   word_to_phrase_translation: WordToPhraseTranslation | null;
+}
+
+@ObjectType()
+export class PhraseToWordTranslationUpsertOutput extends GenericOutput {
+  @Field(() => PhraseToWordTranslation, { nullable: true })
+  phrase_to_word_translation: PhraseToWordTranslation | null;
 }
 
 @ObjectType()
@@ -76,6 +96,12 @@ export class WordToPhraseTranslationReadOutput extends GenericOutput {
 }
 
 @ObjectType()
+export class PhraseToWordTranslationReadOutput extends GenericOutput {
+  @Field(() => PhraseToWordTranslation, { nullable: true })
+  phrase_to_word_translation: PhraseToWordTranslation | null;
+}
+
+@ObjectType()
 export class PhraseToPhraseTranslationReadOutput extends GenericOutput {
   @Field(() => PhraseToPhraseTranslation, { nullable: true })
   phrase_to_phrase_translation: PhraseToPhraseTranslation | null;
@@ -94,10 +120,23 @@ export class AddWordAsTranslationForWordOutput extends GenericOutput {
 }
 
 @ObjectType()
-export class WordTrVoteStatus {
+export class WordTrVoteStatus extends PartialVoteStatus {
   @Field(() => String) word_to_word_translation_id: string;
-  @Field(() => Int) upvotes: number;
-  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class WordToPhraseVoteStatus extends PartialVoteStatus {
+  @Field(() => ID) word_to_phrase_translation_id: string;
+}
+
+@ObjectType()
+export class PhraseToWordVoteStatus extends PartialVoteStatus {
+  @Field(() => ID) phrase_to_word_translation_id: string;
+}
+
+@ObjectType()
+export class PhraseToPhraseVoteStatus extends PartialVoteStatus {
+  @Field(() => ID) phrase_to_phrase_translation_id: string;
 }
 
 @InputType()
@@ -105,8 +144,45 @@ export class WordTrVoteStatusInput extends GenericOutput {
   @Field(() => ID) word_to_word_translation_id: string;
   @Field(() => Boolean) vote: boolean;
 }
+
 @ObjectType()
 export class WordTrVoteStatusOutputRow extends GenericOutput {
   @Field(() => WordTrVoteStatus, { nullable: true })
   vote_status: WordTrVoteStatus;
+}
+
+@InputType()
+export class WordToPhraseVoteStatusInput extends GenericOutput {
+  @Field(() => ID) word_to_phrase_translation_id: string;
+  @Field(() => Boolean) vote: boolean;
+}
+
+@ObjectType()
+export class WordToPhraseVoteStatusOutputRow extends GenericOutput {
+  @Field(() => WordToPhraseVoteStatus, { nullable: true })
+  vote_status: WordToPhraseVoteStatus;
+}
+
+@InputType()
+export class PhraseToWordVoteStatusInput extends GenericOutput {
+  @Field(() => ID) phrase_to_word_translation_id: string;
+  @Field(() => Boolean) vote: boolean;
+}
+
+@ObjectType()
+export class PhraseToWordVoteStatusOutputRow extends GenericOutput {
+  @Field(() => PhraseToWordVoteStatus, { nullable: true })
+  vote_status: PhraseToWordVoteStatus;
+}
+
+@InputType()
+export class PhraseToPhraseVoteStatusInput extends GenericOutput {
+  @Field(() => ID) phrase_to_phrase_translation_id: string;
+  @Field(() => Boolean) vote: boolean;
+}
+
+@ObjectType()
+export class PhraseToPhraseVoteStatusOutputRow extends GenericOutput {
+  @Field(() => PhraseToPhraseVoteStatus, { nullable: true })
+  vote_status: PhraseToPhraseVoteStatus;
 }
