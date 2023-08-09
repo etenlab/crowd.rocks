@@ -1,4 +1,4 @@
-import { WordTranslations, WordWithVotes } from '../../../generated/graphql';
+import { WordTranslations } from '../../../generated/graphql';
 import { useMapTranslationTools } from '../../map/hooks/useMapTranslationTools';
 import { WordCard } from '../WordCard/WordCard';
 import { styled } from 'styled-components';
