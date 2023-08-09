@@ -92,7 +92,7 @@ export class WordWithVote extends Word {
 
 @ObjectType()
 export class WordWithDefinitions extends WordWithVote {
-  @Field(() => [String], { nullable: 'items' })
+  @Field(() => [WordDefinition], { nullable: 'items' })
   definitions: WordDefinition[];
 }
 
