@@ -487,39 +487,3 @@ export function togglePhraseDefinitionVoteStatus({
     [phrase_definition_id, vote, token],
   ];
 }
-
-export type GetWordDefinitionlikeStringListByWordId = {
-  definition: string;
-};
-
-export function getWordDefinitionlikeStringListByWordId(
-  word_id: number,
-): [string, [number]] {
-  return [
-    `
-      select 
-        definition
-      from word_definitions
-      where word_id = $1
-    `,
-    [word_id],
-  ];
-}
-
-export type GetPhraseDefinitionlikeStringListByPhraseId = {
-  definition: string;
-};
-
-export function getPhraseDefinitionlikeStringListByPhraseId(
-  phrase_id: number,
-): [string, [number]] {
-  return [
-    `
-      select 
-        definition
-      from phrase_definitions
-      where phrase_id = $1
-    `,
-    [phrase_id],
-  ];
-}

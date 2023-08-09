@@ -56,6 +56,11 @@ export enum ErrorType {
   PhraseDefinitionAlreadyExists = 'PhraseDefinitionAlreadyExists',
   PhraseNotFound = 'PhraseNotFound',
 
+  PhraseToPhraseTranslationNotFound = 'PhraseToPhraseTranslationNotFound',
+  WordToWordTranslationNotFound = 'WordToWordTranslationNotFound',
+  WordToPhraseTranslationNotFound = 'WordToPhraseTranslationNotFound',
+  PhraseToWordTranslationNotFound = 'PhraseToWordTranslationNotFound',
+
   SiteTextTranslationNotFound = 'SiteTextTranslationNotFound',
   SiteTextWordDefinitionAlreadyExists = 'SiteTextWordDefinitionAlreadyExists',
   SiteTextWordDefinitionNotFound = 'SiteTextWordDefinitionNotFound',

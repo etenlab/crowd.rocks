@@ -1,5 +1,5 @@
+import { useEffect, useCallback } from 'react';
 import { IonButton, IonContent, IonPage, useIonToast } from '@ionic/react';
-import { useEffect } from 'react';
 import { RouteComponentProps, useHistory } from 'react-router';
 import { useEmailResponseMutation } from '../../generated/graphql';
 
@@ -21,40 +21,47 @@ const EmailResponsePage: React.FC<EmailResponsePageProps> = ({ match }) => {
   const { tr } = useTr();
   const [present] = useIonToast();
 
-  const [emailResponseMutation, { data, loading, error }] =
-    useEmailResponseMutation();
+  const [emailResponseMutation] = useEmailResponseMutation();
 
-  useEffect(() => {
-    send_token();
-  }, []);
+  const presentToast = useCallback(
+    (position: 'top' | 'middle' | 'bottom') => {
+      present({
+        message: tr('Thank you!'),
+        duration: 4000,
+        position: position,
+      });
+    },
+    [present, tr],
+  );
 
-  const presentToast = (position: 'top' | 'middle' | 'bottom') => {
-    present({
-      message: tr('Thank you!'),
-      duration: 4000,
-      position: position,
-    });
-  };
-
-  const send_token = async () => {
+  const send_token = useCallback(async () => {
+    // eslint-disable-next-line react/prop-types
     if (match.params.token === null) return;
 
     let result;
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       result = await emailResponseMutation({
         variables: {
+          // eslint-disable-next-line react/prop-types
           token: match.params.token,
         },
       });
 
-      // presentToast("bottom");
+      presentToast('bottom');
     } catch (e) {
       console.error('error', e);
     }
-  };
+    // eslint-disable-next-line react/prop-types
+  }, [match.params.token, emailResponseMutation, presentToast]);
+
+  useEffect(() => {
+    send_token();
+  }, [send_token]);
 
   const click_go_home = () => {
     history.push(
+      // eslint-disable-next-line react/prop-types
       `/${match.params.nation_id}/${match.params.language_id}/1/home`,
     );
   };

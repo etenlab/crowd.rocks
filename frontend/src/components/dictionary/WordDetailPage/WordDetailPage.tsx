@@ -25,7 +25,7 @@ import {
 
 import {
   WordDefinitionWithVoteListOutput,
-  WordWithDefinitionlikeStrings,
+  WordWithDefinitions,
   WordDefinitionWithVote,
   WordWithVoteOutput,
   WordWithVote,
@@ -36,7 +36,7 @@ import {
   WordWithVoteFragmentFragmentDoc,
   GetWordDefinitionsByWordIdDocument,
   WordDefinitionWithVoteFragmentFragmentDoc,
-  WordWithDefinitionlikeStringsFragmentFragmentDoc,
+  WordWithDefinitionsFragmentFragmentDoc,
 } from '../../../generated/graphql';
 
 import { CaptainContainer, CardListContainer, CardContainer } from './styled';
@@ -96,14 +96,14 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
       ) {
         const newVoteStatus = data.toggleWordVoteStatus.vote_status;
 
-        cache.updateFragment<WordWithDefinitionlikeStrings>(
+        cache.updateFragment<WordWithDefinitions>(
           {
             id: cache.identify({
-              __typename: 'WordWithDefinitionlikeStrings',
+              __typename: 'WordWithDefinitions',
               word_id: newVoteStatus.word_id,
             }),
-            fragment: WordWithDefinitionlikeStringsFragmentFragmentDoc,
-            fragmentName: 'WordWithDefinitionlikeStringsFragment',
+            fragment: WordWithDefinitionsFragmentFragmentDoc,
+            fragmentName: 'WordWithDefinitionsFragment',
           },
           (data) => {
             if (data) {

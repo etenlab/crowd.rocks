@@ -197,7 +197,13 @@ export class DefinitionVoteStatusOutputRow extends GenericOutput {
 }
 
 @ObjectType()
-export class DefinitionlikeStringListOutput extends GenericOutput {
-  @Field(() => [String], { nullable: 'items' })
-  definitionlike_strings: string[];
+export class WordDefinitionListOutput extends GenericOutput {
+  @Field(() => [WordDefinition], { nullable: 'items' })
+  definitions: WordDefinition[];
+}
+
+@ObjectType()
+export class PhraseDefinitionListOutput extends GenericOutput {
+  @Field(() => [PhraseDefinition], { nullable: 'items' })
+  definitions: PhraseDefinition[];
 }

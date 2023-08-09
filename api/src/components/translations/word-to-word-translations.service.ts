@@ -9,6 +9,8 @@ import {
   WordToWordTranslationReadOutput,
   WordToWordTranslationUpsertOutput,
   WordTrVoteStatusOutputRow,
+  WordToWordTranslationWithVote,
+  WordToWordTranslationWithVoteListOutput,
 } from './types';
 
 import {
@@ -16,6 +18,10 @@ import {
   getWordToWordTranslationObjById,
   callWordToWordTranslationUpsertProcedure,
   WordToWordTranslationUpsertProcedureOutputRow,
+  GetWordToWordTranslationVoteStatus,
+  getWordToWordTranslationVoteStatus,
+  GetWordToWordTranslationListByFromWordDefinitionId,
+  getWordToWordTranslationListByFromWordDefinitionId,
 } from './sql-string';
 import { WordsService } from '../words/words.service';
 import {
@@ -173,12 +179,12 @@ export class WordToWordTranslationsService {
     };
   }
 
-  addWordAsTranslationForWord = async (
+  async addWordAsTranslationForWord(
     originalDefinitionId: string,
     tWord: WordUpsertInput,
     tDefinitionText: string,
     token: string,
-  ): Promise<AddWordAsTranslationForWordOutput> => {
+  ): Promise<AddWordAsTranslationForWordOutput> {
     const dbPoolClient = await this.pg.pool.connect();
     try {
       dbPoolClient.query('BEGIN');
@@ -223,7 +229,45 @@ export class WordToWordTranslationsService {
     } finally {
       dbPoolClient.release();
     }
-  };
+  }
+
+  async getVoteStatus(
+    word_to_word_translation_id: number,
+  ): Promise<WordTrVoteStatusOutputRow> {
+    try {
+      const res1 = await this.pg.pool.query<GetWordToWordTranslationVoteStatus>(
+        ...getWordToWordTranslationVoteStatus(word_to_word_translation_id),
+      );
+
+      if (res1.rowCount !== 1) {
+        return {
+          error: ErrorType.NoError,
+          vote_status: {
+            word_to_word_translation_id: word_to_word_translation_id + '',
+            upvotes: 0,
+            downvotes: 0,
+          },
+        };
+      } else {
+        return {
+          error: ErrorType.NoError,
+          vote_status: {
+            word_to_word_translation_id:
+              res1.rows[0].word_to_word_translation_id + '',
+            upvotes: res1.rows[0].upvotes,
+            downvotes: res1.rows[0].downvotes,
+          },
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      vote_status: null,
+    };
+  }
 
   async toggleVoteStatus(
     word_to_word_translation_id: string,
@@ -301,5 +345,67 @@ export class WordToWordTranslationsService {
     return this.wordToWordTranslationRepository.getDefinitionsIds(
       word_to_word_translation_id,
     );
+  }
+
+  async getTranslationsByFromWordDefinitionId(
+    from_word_definition_id: number,
+    langInfo: LanguageInput,
+  ): Promise<WordToWordTranslationWithVoteListOutput> {
+    try {
+      const res =
+        await this.pg.pool.query<GetWordToWordTranslationListByFromWordDefinitionId>(
+          ...getWordToWordTranslationListByFromWordDefinitionId({
+            from_word_definition_id,
+            language_code: langInfo.language_code,
+            dialect_code: langInfo.dialect_code,
+            geo_code: langInfo.geo_code,
+          }),
+        );
+
+      const wordToWordTrWithVoteList: WordToWordTranslationWithVote[] = [];
+
+      for (let i = 0; i < res.rowCount; i++) {
+        const { word_to_word_translation_id } = res.rows[i];
+        const { error, word_to_word_translation } = await this.read(
+          word_to_word_translation_id,
+        );
+
+        if (error !== ErrorType.NoError) {
+          return {
+            error,
+            word_to_word_tr_with_vote_list: [],
+          };
+        }
+
+        const { error: voteError, vote_status } = await this.getVoteStatus(
+          word_to_word_translation_id,
+        );
+
+        if (voteError !== ErrorType.NoError) {
+          return {
+            error: voteError,
+            word_to_word_tr_with_vote_list: [],
+          };
+        }
+
+        wordToWordTrWithVoteList.push({
+          ...word_to_word_translation,
+          upvotes: vote_status.upvotes,
+          downvotes: vote_status.downvotes,
+        });
+      }
+
+      return {
+        error: ErrorType.NoError,
+        word_to_word_tr_with_vote_list: wordToWordTrWithVoteList,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_to_word_tr_with_vote_list: [],
+    };
   }
 }

@@ -121,6 +121,9 @@ export class DatabaseVersionControlService {
       './src/core/sql/translation/word_to_phrase_translation_upsert.sql',
     );
     await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word_translation_upsert.sql',
+    );
+    await this.runSqlFile(
       './src/core/sql/translation/phrase_to_phrase_translation_upsert.sql',
     );
 
@@ -129,7 +132,16 @@ export class DatabaseVersionControlService {
     );
 
     await this.runSqlFile(
-      './src/core/sql/translation/word-to-word-translation-vote-toggle.sql',
+      './src/core/sql/translation/word_to_word_translation_vote_toggle.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase_translation_vote_toggle.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word_translation_vote_toggle.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase_translation_vote_toggle.sql',
     );
 
     // data

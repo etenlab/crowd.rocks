@@ -1,7 +1,9 @@
-fragment WordWithDefinitionlikeStringsFragment on WordWithDefinitionlikeStrings {
+fragment WordWithDefinitionsFragment on WordWithDefinitions {
   word_id
   word
-  definitionlike_strings
+  definitions {
+    ...WordDefinitionFragment
+  }
   downvotes
   upvotes
   language_code
@@ -58,7 +60,7 @@ query GetWordsByLanguage(
   ) {
     error
     word_with_vote_list {
-      ...WordWithDefinitionlikeStringsFragment
+      ...WordWithDefinitionsFragment
     }
   }
 }

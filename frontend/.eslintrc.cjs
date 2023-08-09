@@ -10,6 +10,8 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
   ],
+  plugins: ['react', 'react-hooks'],
+  ignorePatterns: ['src/generated/graphql.tsx'],
   parserOptions: {
     ecmaVersion: 2020,
   },

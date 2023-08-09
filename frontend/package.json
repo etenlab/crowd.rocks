@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "test.e2e": "cypress run",
     "test.unit": "vitest",
-    "lint": "eslint",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.{ts,tsx,md,mdx,js,jsx}\" --fix",
     "codegen": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
@@ -68,6 +68,7 @@
     "jsdom": "^22.1.0",
     "typescript": "^5.1.6",
     "vite": "^4.3.9",
+    "vite-plugin-eslint": "^1.8.1",
     "vitest": "^0.32.2"
   },
   "description": "An Ionic project"

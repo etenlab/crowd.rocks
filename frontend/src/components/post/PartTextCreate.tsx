@@ -14,16 +14,16 @@ import {
   useIonToast,
   useIonViewDidEnter,
   useIonViewWillLeave,
-} from "@ionic/react";
+} from '@ionic/react';
 import {
   FormEvent,
   PropsWithChildren,
   useEffect,
   useRef,
   useState,
-} from "react";
-import "./PostCreate2.css";
-import { Lexitor } from "./Lexitor";
+} from 'react';
+import './PostCreate2.css';
+import { Lexitor } from './Lexitor';
 
 export type Content_type = 'html' | 'lexical_text' | 'image_url' | 'video_url';
 
@@ -33,7 +33,7 @@ type PartTextCreateProps = {
 };
 
 const PartTextCreate2: React.FC<PropsWithChildren<PartTextCreateProps>> = (
-  props
+  props,
 ) => {
   const lexitor_update = (lex_state: string) => {
     props.update_content(lex_state);

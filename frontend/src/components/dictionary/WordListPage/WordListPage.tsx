@@ -26,13 +26,13 @@ import {
 
 import {
   WordWithVoteListOutput,
-  WordWithDefinitionlikeStrings,
+  WordWithDefinitions,
   WordWithVote,
   ErrorType,
 } from '../../../generated/graphql';
 
 import {
-  WordWithDefinitionlikeStringsFragmentFragmentDoc,
+  WordWithDefinitionsFragmentFragmentDoc,
   WordWithVoteFragmentFragmentDoc,
   GetWordsByLanguageDocument,
 } from '../../../generated/graphql';
@@ -82,14 +82,14 @@ export function WordListPage({ match }: WordListPageProps) {
       ) {
         const newVoteStatus = data.toggleWordVoteStatus.vote_status;
 
-        cache.updateFragment<WordWithDefinitionlikeStrings>(
+        cache.updateFragment<WordWithDefinitions>(
           {
             id: cache.identify({
-              __typename: 'WordWithDefinitionlikeStrings',
+              __typename: 'WordWithDefinitions',
               word_id: newVoteStatus.word_id,
             }),
-            fragment: WordWithDefinitionlikeStringsFragmentFragmentDoc,
-            fragmentName: 'WordWithDefinitionlikeStringsFragment',
+            fragment: WordWithDefinitionsFragmentFragmentDoc,
+            fragmentName: 'WordWithDefinitionsFragment',
           },
           (data) => {
             if (data) {
@@ -162,7 +162,7 @@ export function WordListPage({ match }: WordListPageProps) {
                 ...wordsData.getWordsByLanguage.word_with_vote_list,
                 {
                   ...newWord,
-                  __typename: 'WordWithDefinitionlikeStrings',
+                  __typename: 'WordWithDefinitions',
                   definitionlike_strings: [],
                   upvotes: 0,
                   downvotes: 0,
@@ -304,8 +304,9 @@ export function WordListPage({ match }: WordListPageProps) {
         tempWords.push({
           word_id: wordWithVote.word_id,
           word: wordWithVote.word,
-          definitionlike_strings:
-            wordWithVote.definitionlike_strings as string[],
+          definitionlike_strings: wordWithVote.definitions.map(
+            (definition) => definition?.definition,
+          ) as string[],
           upvotes: wordWithVote.upvotes,
           downvotes: wordWithVote.downvotes,
         });

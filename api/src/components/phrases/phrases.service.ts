@@ -12,7 +12,7 @@ import {
   PhraseReadOutput,
   PhraseUpsertInput,
   PhraseWithVoteListOutput,
-  PhraseWithDefinitionlikeStrings,
+  PhraseWithDefinitions,
   PhraseWithVoteOutput,
 } from './types';
 import { WordUpsertInput } from 'src/components/words/types';
@@ -257,7 +257,7 @@ export class PhrasesService {
         }),
       );
 
-      const phraseWithVoteList: PhraseWithDefinitionlikeStrings[] = [];
+      const phraseWithVoteList: PhraseWithDefinitions[] = [];
 
       for (let i = 0; i < res1.rowCount; i++) {
         const { phrase_id } = res1.rows[i];
@@ -271,8 +271,8 @@ export class PhrasesService {
           };
         }
 
-        const { error: definitionError, definitionlike_strings } =
-          await this.phraseDefinitionService.getDefinitionlikeStringsByPhraseId(
+        const { error: definitionError, definitions } =
+          await this.phraseDefinitionService.getDefinitionsByPhraseId(
             +phrase_id,
           );
 
@@ -298,7 +298,7 @@ export class PhrasesService {
           ...phrase,
           upvotes: vote_status.upvotes,
           downvotes: vote_status.downvotes,
-          definitionlike_strings,
+          definitions,
         });
       }
 
