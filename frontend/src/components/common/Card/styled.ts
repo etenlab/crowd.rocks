@@ -3,6 +3,7 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
+  IonIcon,
 } from '@ionic/react';
 import { styled } from 'styled-components';
 
@@ -21,6 +22,13 @@ export const CustomCardTitle = styled(IonCardTitle)(() => ({
 export const CustomCardContent = styled(IonCardContent)(() => ({}));
 
 export const CustomCardHeader = styled(IonCardHeader)(() => ({}));
+
+// TODO: would be nice to get this to float to the right of the container...
+export const CustomChatIcon = styled(IonIcon)(() => ({
+  cursor: 'pointer',
+  fontSize: '20px',
+  padding: '5px',
+}));
 
 export const Layout = styled.div`
   display: flex;
