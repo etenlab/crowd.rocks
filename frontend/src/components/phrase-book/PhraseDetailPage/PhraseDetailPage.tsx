@@ -25,7 +25,7 @@ import {
 
 import {
   PhraseDefinitionWithVoteListOutput,
-  PhraseWithDefinitionlikeStrings,
+  PhraseWithDefinitions,
   PhraseDefinitionWithVote,
   PhraseWithVoteOutput,
   PhraseWithVote,
@@ -37,7 +37,7 @@ import {
   PhraseWithVoteFragmentFragmentDoc,
   GetPhraseDefinitionsByPhraseIdDocument,
   PhraseDefinitionWithVoteFragmentFragmentDoc,
-  PhraseWithDefinitionlikeStringsFragmentFragmentDoc,
+  PhraseWithDefinitionsFragmentFragmentDoc,
 } from '../../../generated/graphql';
 
 import { CaptainContainer, CardListContainer, CardContainer } from './styled';
@@ -96,14 +96,14 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
       ) {
         const newVoteStatus = data.togglePhraseVoteStatus.vote_status;
 
-        cache.updateFragment<PhraseWithDefinitionlikeStrings>(
+        cache.updateFragment<PhraseWithDefinitions>(
           {
             id: cache.identify({
-              __typename: 'PhraseWithDefinitionlikeStrings',
+              __typename: 'PhraseWithDefinitions',
               phrase_id: newVoteStatus.phrase_id,
             }),
-            fragment: PhraseWithDefinitionlikeStringsFragmentFragmentDoc,
-            fragmentName: 'PhraseWithDefinitionlikeStringsFragment',
+            fragment: PhraseWithDefinitionsFragmentFragmentDoc,
+            fragmentName: 'PhraseWithDefinitionsFragmentFragmentDoc',
           },
           (data) => {
             if (data) {

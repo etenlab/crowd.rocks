@@ -1,7 +1,9 @@
-fragment PhraseWithDefinitionlikeStringsFragment on PhraseWithDefinitionlikeStrings {
+fragment PhraseWithDefinitionsFragment on PhraseWithDefinitions {
   phrase_id
   phrase
-  definitionlike_strings
+  definitions {
+    ...PhraseDefinitionFragment
+  }
   downvotes
   upvotes
 }
@@ -46,7 +48,7 @@ query GetPhrasesByLanguage(
   ) {
     error
     phrase_with_vote_list {
-      ...PhraseWithDefinitionlikeStringsFragment
+      ...PhraseWithDefinitionsFragment
     }
   }
 }

@@ -26,13 +26,13 @@ import {
 
 import {
   PhraseWithVoteListOutput,
-  PhraseWithDefinitionlikeStrings,
+  PhraseWithDefinitions,
   PhraseWithVote,
   ErrorType,
 } from '../../../generated/graphql';
 
 import {
-  PhraseWithDefinitionlikeStringsFragmentFragmentDoc,
+  PhraseWithDefinitionsFragmentFragmentDoc,
   PhraseWithVoteFragmentFragmentDoc,
   GetPhrasesByLanguageDocument,
 } from '../../../generated/graphql';
@@ -81,14 +81,14 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
       ) {
         const newVoteStatus = data.togglePhraseVoteStatus.vote_status;
 
-        cache.updateFragment<PhraseWithDefinitionlikeStrings>(
+        cache.updateFragment<PhraseWithDefinitions>(
           {
             id: cache.identify({
-              __typename: 'PhraseWithDefinitionlikeStrings',
+              __typename: 'PhraseWithDefinitions',
               phrase_id: newVoteStatus.phrase_id,
             }),
-            fragment: PhraseWithDefinitionlikeStringsFragmentFragmentDoc,
-            fragmentName: 'PhraseWithDefinitionlikeStringsFragment',
+            fragment: PhraseWithDefinitionsFragmentFragmentDoc,
+            fragmentName: 'PhraseWithDefinitionsFragment',
           },
           (data) => {
             if (data) {
@@ -161,7 +161,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
                 ...phrasesData.getPhrasesByLanguage.phrase_with_vote_list,
                 {
                   ...newPhrase,
-                  __typename: 'PhraseWithDefinitionlikeStrings',
+                  __typename: 'PhraseWithDefinitions',
                   definitionlike_strings: [],
                   upvotes: 0,
                   downvotes: 0,
@@ -302,8 +302,9 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
         tempPhrases.push({
           phrase_id: phraseWithVote.phrase_id,
           phrase: phraseWithVote.phrase,
-          definitionlike_strings:
-            phraseWithVote.definitionlike_strings as string[],
+          definitionlike_strings: phraseWithVote.definitions.map(
+            (definition) => definition?.definition,
+          ) as string[],
           upvotes: phraseWithVote.upvotes,
           downvotes: phraseWithVote.downvotes,
         });
