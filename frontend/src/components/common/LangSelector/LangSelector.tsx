@@ -201,7 +201,6 @@ export function LangSelector({
               : l.tag,
             value: l.tag,
           }))}
-          checkboxEnabled={false}
           selectedItem={selectedLang?.tag ? selectedLang.tag : undefined}
           onSelectionCancel={() => modal.current?.dismiss()}
           onSelectionChange={(tag) => handleSetLanguage(tag)}

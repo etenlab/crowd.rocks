@@ -1,8 +1,7 @@
-import React, { useState, MouseEvent } from 'react';
+import { useState, MouseEvent } from 'react';
 import {
   IonButton,
   IonButtons,
-  IonCheckbox,
   IonContent,
   IonHeader,
   IonItem,
@@ -12,7 +11,6 @@ import {
   IonToolbar,
   IonIcon,
 } from '@ionic/react';
-import type { CheckboxCustomEvent } from '@ionic/react';
 import { useTr } from '../../../hooks/useTr';
 import { checkmark } from 'ionicons/icons';
 
@@ -20,38 +18,26 @@ interface TypeaheadProps<T> {
   items: T[];
   selectedItem?: string | undefined;
   title?: string;
-  checkboxEnabled?: boolean;
   onSelectionCancel?: () => void;
   onSelectionChange?: (item: string | undefined) => void;
 }
 
 function AppTypeahead<Item extends { text: string; value: string }>({
-  checkboxEnabled = true,
   ...props
 }: TypeaheadProps<Item>) {
   const { tr } = useTr();
 
-  console.log(`selectedItem: ${props.selectedItem}`);
   const [filteredItems, setFilteredItems] = useState<Item[]>([...props.items]);
-  const [workingSelectedValue, setWorkingSelectedValue] = useState<
-    string | undefined
-  >(props.selectedItem);
+  console.log(props.selectedItem);
 
-  const isChecked = (value: string) => {
-    return workingSelectedValue === value;
+  const isValueOrTextChecked = (value: string, text: string) => {
+    return props.selectedItem === value || props.selectedItem === text;
   };
 
   const cancelChanges = () => {
     const { onSelectionCancel } = props;
     if (onSelectionCancel !== undefined) {
       onSelectionCancel();
-    }
-  };
-
-  const confirmChanges = () => {
-    const { onSelectionChange } = props;
-    if (onSelectionChange !== undefined) {
-      onSelectionChange(workingSelectedValue);
     }
   };
 
@@ -88,17 +74,15 @@ function AppTypeahead<Item extends { text: string; value: string }>({
     }
   };
 
-  const checkboxChange = (ev: CheckboxCustomEvent) => {
-    const { value } = ev.detail;
-    setWorkingSelectedValue(value);
-  };
-
   const itemClickHandler = (
     id: string,
     e: MouseEvent<HTMLIonItemElement>,
   ): void => {
     e.preventDefault();
-    setWorkingSelectedValue(id);
+    const { onSelectionChange } = props;
+    if (onSelectionChange !== undefined) {
+      onSelectionChange(id);
+    }
   };
 
   return (
@@ -109,9 +93,6 @@ function AppTypeahead<Item extends { text: string; value: string }>({
             <IonButton onClick={cancelChanges}>{tr('Cancel')}</IonButton>
           </IonButtons>
           <IonTitle>{props.title}</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={confirmChanges}>{tr('Done')}</IonButton>
-          </IonButtons>
         </IonToolbar>
         <IonToolbar>
           <IonSearchbar onIonInput={searchbarInput} />
@@ -122,28 +103,14 @@ function AppTypeahead<Item extends { text: string; value: string }>({
         <IonList id="modal-list" inset={true}>
           {filteredItems.slice(0, 20).map((item) => (
             <IonItem
-              button={!checkboxEnabled}
-              onClick={
-                !checkboxEnabled
-                  ? (e) => itemClickHandler(item.value, e)
-                  : undefined
-              }
+              button
+              onClick={(e) => itemClickHandler(item.value, e)}
               key={item.value}
             >
-              {checkboxEnabled ? (
-                <IonCheckbox
-                  value={item.value}
-                  checked={isChecked(item.value)}
-                  onIonChange={checkboxChange}
-                >
-                  {item.text}
-                </IonCheckbox>
-              ) : (
-                item.text
-              )}
-              {!checkboxEnabled && isChecked(item.value) && (
+              {isValueOrTextChecked(item.value, item.text) && (
                 <IonIcon slot="end" icon={checkmark} />
               )}
+              {item.text}
             </IonItem>
           ))}
         </IonList>
