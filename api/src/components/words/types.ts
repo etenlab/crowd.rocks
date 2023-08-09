@@ -1,5 +1,6 @@
 import { Field, ID, InputType, ObjectType, Int } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
+import { WordDefinition } from 'src/components/definitions/types';
 
 @ObjectType()
 export class Word {
@@ -90,15 +91,15 @@ export class WordWithVote extends Word {
 }
 
 @ObjectType()
-export class WordWithDefinitionlikeStrings extends WordWithVote {
+export class WordWithDefinitions extends WordWithVote {
   @Field(() => [String], { nullable: 'items' })
-  definitionlike_strings: string[];
+  definitions: WordDefinition[];
 }
 
 @ObjectType()
 export class WordWithVoteListOutput extends GenericOutput {
-  @Field(() => [WordWithDefinitionlikeStrings], { nullable: 'items' })
-  word_with_vote_list: WordWithDefinitionlikeStrings[];
+  @Field(() => [WordWithDefinitions], { nullable: 'items' })
+  word_with_vote_list: WordWithDefinitions[];
 }
 
 @ObjectType()

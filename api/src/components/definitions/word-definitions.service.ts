@@ -13,7 +13,8 @@ import {
   WordDefinitionUpdateInput,
   WordDefinitionWithVoteListOutput,
   WordDefinitionWithVote,
-  DefinitionlikeStringListOutput,
+  WordDefinitionListOutput,
+  WordDefinition,
 } from './types';
 
 import { LanguageInput } from 'src/components/common/types';
@@ -29,8 +30,6 @@ import {
   getWordDefinitionListByLang,
   GetWordDefinitionListByWordId,
   getWordDefinitionListByWordId,
-  GetWordDefinitionlikeStringListByWordId,
-  getWordDefinitionlikeStringListByWordId,
 } from './sql-string';
 
 @Injectable()
@@ -307,26 +306,33 @@ export class WordDefinitionsService {
     };
   }
 
-  async getDefinitionlikeStringsByWordId(
+  async getDefinitionsByWordId(
     word_id: number,
-  ): Promise<DefinitionlikeStringListOutput> {
+  ): Promise<WordDefinitionListOutput> {
     try {
-      const res1 =
-        await this.pg.pool.query<GetWordDefinitionlikeStringListByWordId>(
-          ...getWordDefinitionlikeStringListByWordId(word_id),
-        );
+      const res1 = await this.pg.pool.query<GetWordDefinitionListByWordId>(
+        ...getWordDefinitionListByWordId(word_id),
+      );
 
-      const definitionlikeStringList: string[] = [];
+      const definitionList: WordDefinition[] = [];
 
       for (let i = 0; i < res1.rowCount; i++) {
-        const { definition } = res1.rows[i];
+        const { word_definition_id } = res1.rows[i];
+        const { error, word_definition } = await this.read(word_definition_id);
 
-        definitionlikeStringList.push(definition);
+        if (error !== ErrorType.NoError) {
+          return {
+            error,
+            definitions: [],
+          };
+        }
+
+        definitionList.push(word_definition);
       }
 
       return {
         error: ErrorType.NoError,
-        definitionlike_strings: definitionlikeStringList,
+        definitions: definitionList,
       };
     } catch (e) {
       console.error(e);
@@ -334,7 +340,7 @@ export class WordDefinitionsService {
 
     return {
       error: ErrorType.UnknownError,
-      definitionlike_strings: [],
+      definitions: [],
     };
   }
 }

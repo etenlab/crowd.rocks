@@ -12,7 +12,7 @@ import {
   WordReadInput,
   WordReadOutput,
   WordUpsertInput,
-  WordWithDefinitionlikeStrings,
+  WordWithDefinitions,
   WordWithVoteListOutput,
   WordWithVoteOutput,
 } from './types';
@@ -199,7 +199,7 @@ export class WordsService {
         }),
       );
 
-      const wordWithVoteList: WordWithDefinitionlikeStrings[] = [];
+      const wordWithVoteList: WordWithDefinitions[] = [];
 
       for (let i = 0; i < res1.rowCount; i++) {
         const { word_id } = res1.rows[i];
@@ -214,10 +214,8 @@ export class WordsService {
           };
         }
 
-        const { error: definitionError, definitionlike_strings } =
-          await this.wordDefinitionService.getDefinitionlikeStringsByWordId(
-            +word_id,
-          );
+        const { error: definitionError, definitions } =
+          await this.wordDefinitionService.getDefinitionsByWordId(+word_id);
 
         if (definitionError !== ErrorType.NoError) {
           return {
@@ -241,7 +239,7 @@ export class WordsService {
           ...word,
           upvotes: vote_status.upvotes,
           downvotes: vote_status.downvotes,
-          definitionlike_strings,
+          definitions,
         });
       }
 

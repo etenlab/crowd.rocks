@@ -231,8 +231,8 @@ export function getAllSiteTextWordTranslation({
 }: {
   site_text_id: number;
   language_code: string;
-  dialect_code?: string;
-  geo_code?: string;
+  dialect_code: string | null;
+  geo_code: string | null;
 }): [
   string,
   (
@@ -336,8 +336,8 @@ export function getAllSiteTextPhraseTranslation({
 }: {
   site_text_id: number;
   language_code: string;
-  dialect_code: string;
-  geo_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
 }): [
   string,
   (
