@@ -1,4 +1,4 @@
-import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, InputType, ObjectType } from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
 import { PartialVoteStatus } from 'src/components/common/types';
@@ -185,4 +185,67 @@ export class PhraseToPhraseVoteStatusInput extends GenericOutput {
 export class PhraseToPhraseVoteStatusOutputRow extends GenericOutput {
   @Field(() => PhraseToPhraseVoteStatus, { nullable: true })
   vote_status: PhraseToPhraseVoteStatus;
+}
+
+@ObjectType()
+export class WordToWordTranslationWithVote extends WordToWordTranslation {
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class WordToPhraseTranslationWithVote extends WordToPhraseTranslation {
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class PhraseToWordTranslationWithVote extends PhraseToWordTranslation {
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class PhraseToPhraseTranslationWithVote extends PhraseToPhraseTranslation {
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class WordToWordTranslationWithVoteListOutput extends GenericOutput {
+  @Field(() => [WordToWordTranslationWithVote], { nullable: 'items' })
+  word_to_word_tr_with_vote_list: WordToWordTranslationWithVote[];
+}
+
+@ObjectType()
+export class WordToPhraseTranslationWithVoteListOutput extends GenericOutput {
+  @Field(() => [WordToPhraseTranslationWithVote], { nullable: 'items' })
+  word_to_phrase_tr_with_vote_list: WordToPhraseTranslationWithVote[];
+}
+
+@ObjectType()
+export class PhraseToWordTranslationWithVoteListOutput extends GenericOutput {
+  @Field(() => [PhraseToWordTranslationWithVote], { nullable: 'items' })
+  phrase_to_word_tr_with_vote_list: PhraseToWordTranslationWithVote[];
+}
+
+@ObjectType()
+export class PhraseToPhraseTranslationWithVoteListOutput extends GenericOutput {
+  @Field(() => [PhraseToPhraseTranslationWithVote], { nullable: 'items' })
+  phrase_to_phrase_tr_with_vote_list: PhraseToPhraseTranslationWithVote[];
+}
+
+@ObjectType()
+export class TranslationWithVoteListOutput extends GenericOutput {
+  @Field(() => [WordToWordTranslationWithVote], { nullable: 'items' })
+  word_to_word_tr_with_vote_list: WordToWordTranslationWithVote[];
+
+  @Field(() => [WordToPhraseTranslationWithVote], { nullable: 'items' })
+  word_to_phrase_tr_with_vote_list: WordToPhraseTranslationWithVote[];
+
+  @Field(() => [PhraseToWordTranslationWithVote], { nullable: 'items' })
+  phrase_to_word_tr_with_vote_list: PhraseToWordTranslationWithVote[];
+
+  @Field(() => [PhraseToPhraseTranslationWithVote], { nullable: 'items' })
+  phrase_to_phrase_tr_with_vote_list: PhraseToPhraseTranslationWithVote[];
 }

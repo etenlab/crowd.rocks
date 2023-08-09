@@ -3,6 +3,8 @@ import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
 
 import { getBearer } from 'src/common/utility';
 
+import { LanguageInput } from 'src/components/common/types';
+
 import { AuthenticationService } from 'src/components/authentication/authentication.service';
 import { MapsService } from 'src/components/maps/maps.service';
 
@@ -10,6 +12,7 @@ import { WordToWordTranslationsService } from './word-to-word-translations.servi
 import { WordToPhraseTranslationsService } from './word-to-phrase-translations.service';
 import { PhraseToWordTranslationsService } from './phrase-to-word-translations.service';
 import { PhraseToPhraseTranslationsService } from './phrase-to-phrase-translations.service';
+import { TranslationsService } from './translations.service';
 
 import {
   WordToWordTranslationReadOutput,
@@ -28,12 +31,18 @@ import {
   WordToPhraseVoteStatusOutputRow,
   PhraseToWordVoteStatusOutputRow,
   PhraseToPhraseVoteStatusOutputRow,
+  WordToWordTranslationWithVoteListOutput,
+  WordToPhraseTranslationWithVoteListOutput,
+  PhraseToWordTranslationWithVoteListOutput,
+  PhraseToPhraseTranslationWithVoteListOutput,
+  TranslationWithVoteListOutput,
 } from './types';
 
 @Injectable()
 @Resolver()
 export class TranslationsResolver {
   constructor(
+    private translationService: TranslationsService,
     private wordToWordTranslationService: WordToWordTranslationsService,
     private wordToPhraseTranslationService: WordToPhraseTranslationsService,
     private phraseToWordTranslationService: PhraseToWordTranslationsService,
@@ -285,6 +294,100 @@ export class TranslationsResolver {
       +phrase_to_phrase_translation_id,
       vote,
       getBearer(req),
+    );
+  }
+
+  @Query(() => WordToWordTranslationWithVoteListOutput)
+  async getWordToWordTranslationsByFromWordDefinitionId(
+    @Args('from_word_definition_id', { type: () => ID })
+    from_word_definition_id: string,
+    @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
+  ): Promise<WordToWordTranslationWithVoteListOutput> {
+    console.log(
+      'getWordToWordTranslationsByFromWordDefinitionId resolver',
+      from_word_definition_id,
+      JSON.stringify(langInfo, null, 2),
+    );
+
+    return this.wordToWordTranslationService.getTranslationsByFromWordDefinitionId(
+      +from_word_definition_id,
+      langInfo,
+    );
+  }
+
+  @Query(() => WordToPhraseTranslationWithVoteListOutput)
+  async getWordToPhraseTranslationsByFromWordDefinitionId(
+    @Args('from_word_definition_id', { type: () => ID })
+    from_word_definition_id: string,
+    @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
+  ): Promise<WordToPhraseTranslationWithVoteListOutput> {
+    console.log(
+      'getWordToPhraseTranslationsByFromWordDefinitionId resolver',
+      from_word_definition_id,
+      JSON.stringify(langInfo, null, 2),
+    );
+
+    return this.wordToPhraseTranslationService.getTranslationsByFromWordDefinitionId(
+      +from_word_definition_id,
+      langInfo,
+    );
+  }
+
+  @Query(() => PhraseToWordTranslationWithVoteListOutput)
+  async getPhraseToWordTranslationsByFromPhraseDefinitionId(
+    @Args('from_phrase_definition_id', { type: () => ID })
+    from_phrase_definition_id: string,
+    @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
+  ): Promise<PhraseToWordTranslationWithVoteListOutput> {
+    console.log(
+      'getPhraseToWordTranslationsByFromPhraseDefinitionId resolver',
+      from_phrase_definition_id,
+      JSON.stringify(langInfo, null, 2),
+    );
+
+    return this.phraseToWordTranslationService.getTranslationsByFromPhraseDefinitionId(
+      +from_phrase_definition_id,
+      langInfo,
+    );
+  }
+
+  @Query(() => PhraseToPhraseTranslationWithVoteListOutput)
+  async getPhraseToPhraseTranslationsByFromPhraseDefinitionId(
+    @Args('from_phrase_definition_id', { type: () => ID })
+    from_phrase_definition_id: string,
+    @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
+  ): Promise<PhraseToPhraseTranslationWithVoteListOutput> {
+    console.log(
+      'getPhraseToPhraseTranslationsByFromPhraseDefinitionId resolver',
+      from_phrase_definition_id,
+      JSON.stringify(langInfo, null, 2),
+    );
+
+    return this.phraseToPhraseTranslationService.getTranslationsByFromPhraseDefinitionId(
+      +from_phrase_definition_id,
+      langInfo,
+    );
+  }
+
+  @Query(() => TranslationWithVoteListOutput)
+  async getTranslationsByFromDefinitionId(
+    @Args('definition_id', { type: () => ID })
+    definition_id: string,
+    @Args('from_definition_type_is_word', { type: () => Boolean })
+    from_definition_type_is_word: boolean,
+    @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
+  ): Promise<TranslationWithVoteListOutput> {
+    console.log(
+      'getTranslationsByFromDefinitionId resolver',
+      definition_id,
+      from_definition_type_is_word,
+      JSON.stringify(langInfo, null, 2),
+    );
+
+    return this.translationService.getTranslationsByFromDefinitionId(
+      +definition_id,
+      from_definition_type_is_word,
+      langInfo,
     );
   }
 }

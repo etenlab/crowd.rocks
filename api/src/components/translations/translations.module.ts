@@ -13,6 +13,7 @@ import { WordToWordTranslationsService } from './word-to-word-translations.servi
 import { WordToPhraseTranslationsService } from './word-to-phrase-translations.service';
 import { PhraseToPhraseTranslationsService } from './phrase-to-phrase-translations.service';
 import { PhraseToWordTranslationsService } from './phrase-to-word-translations.service';
+import { TranslationsService } from './translations.service';
 
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 
@@ -32,12 +33,14 @@ import { WordToWordTranslationRepository } from './word-to-word-translation.repo
     WordToPhraseTranslationsService,
     PhraseToWordTranslationsService,
     PhraseToPhraseTranslationsService,
+    TranslationsService,
   ],
   exports: [
     WordToWordTranslationsService,
     WordToPhraseTranslationsService,
     PhraseToWordTranslationsService,
     PhraseToPhraseTranslationsService,
+    TranslationsService,
   ],
 })
 export class TranslationsModule {}

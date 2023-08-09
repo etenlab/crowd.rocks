@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
 import { ErrorType } from 'src/common/types';
+import { LanguageInput } from 'src/components/common/types';
+
 import { PostgresService } from 'src/core/postgres.service';
 import { PhraseDefinitionsService } from 'src/components/definitions/phrase-definitions.service';
 
@@ -8,6 +10,8 @@ import {
   PhraseToPhraseTranslationReadOutput,
   PhraseToPhraseTranslationUpsertOutput,
   PhraseToPhraseVoteStatusOutputRow,
+  PhraseToPhraseTranslationWithVote,
+  PhraseToPhraseTranslationWithVoteListOutput,
 } from './types';
 
 import {
@@ -19,6 +23,8 @@ import {
   getPhraseToPhraseTranslationVoteStatus,
   TogglePhraseToPhraseTranslationVoteStatus,
   togglePhraseToPhraseTranslationVoteStatus,
+  GetPhraseToPhraseTranslationListByFromPhraseDefinitionId,
+  getPhraseToPhraseTranslationListByFromPhraseDefinitionId,
 } from './sql-string';
 
 @Injectable()
@@ -204,6 +210,69 @@ export class PhraseToPhraseTranslationsService {
     return {
       error: ErrorType.UnknownError,
       vote_status: null,
+    };
+  }
+
+  async getTranslationsByFromPhraseDefinitionId(
+    from_phrase_definition_id: number,
+    langInfo: LanguageInput,
+  ): Promise<PhraseToPhraseTranslationWithVoteListOutput> {
+    try {
+      const res =
+        await this.pg.pool.query<GetPhraseToPhraseTranslationListByFromPhraseDefinitionId>(
+          ...getPhraseToPhraseTranslationListByFromPhraseDefinitionId({
+            from_phrase_definition_id,
+            language_code: langInfo.language_code,
+            dialect_code: langInfo.dialect_code,
+            geo_code: langInfo.geo_code,
+          }),
+        );
+
+      const phraseToPhraseTrWithVoteList: PhraseToPhraseTranslationWithVote[] =
+        [];
+
+      for (let i = 0; i < res.rowCount; i++) {
+        const { phrase_to_phrase_translation_id } = res.rows[i];
+        const { error, phrase_to_phrase_translation } = await this.read(
+          phrase_to_phrase_translation_id,
+        );
+
+        if (error !== ErrorType.NoError) {
+          return {
+            error,
+            phrase_to_phrase_tr_with_vote_list: [],
+          };
+        }
+
+        const { error: voteError, vote_status } = await this.getVoteStatus(
+          phrase_to_phrase_translation_id,
+        );
+
+        if (voteError !== ErrorType.NoError) {
+          return {
+            error: voteError,
+            phrase_to_phrase_tr_with_vote_list: [],
+          };
+        }
+
+        phraseToPhraseTrWithVoteList.push({
+          ...phrase_to_phrase_translation,
+          upvotes: vote_status.upvotes,
+          downvotes: vote_status.downvotes,
+        });
+      }
+
+      return {
+        error: ErrorType.NoError,
+        phrase_to_phrase_tr_with_vote_list: phraseToPhraseTrWithVoteList,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      phrase_to_phrase_tr_with_vote_list: [],
     };
   }
 }

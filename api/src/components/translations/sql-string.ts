@@ -377,3 +377,303 @@ export function togglePhraseToPhraseTranslationVoteStatus({
     [phrase_to_phrase_translation_id, vote, token],
   ];
 }
+
+export type GetWordToWordTranslationListByFromWordDefinitionId = {
+  word_to_word_translation_id: number;
+  created_at: string;
+};
+
+export function getWordToWordTranslationListByFromWordDefinitionId({
+  from_word_definition_id,
+  language_code,
+  dialect_code,
+  geo_code,
+}: {
+  from_word_definition_id: number;
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+}): [
+  string,
+  (
+    | [number, string, string, string]
+    | [number, string, string]
+    | [number, string]
+  ),
+] {
+  let wherePlsStr = '';
+  let returnArr:
+    | [number, string, string, string]
+    | [number, string, string]
+    | [number, string] = [from_word_definition_id, language_code];
+
+  if (dialect_code && geo_code) {
+    wherePlsStr = `
+      and words.dialect_code = $3
+      and words.geo_code = $4
+    `;
+    returnArr = [...returnArr, dialect_code, geo_code];
+  } else if (dialect_code && !geo_code) {
+    wherePlsStr = `
+      and words.dialect_code = $3
+    `;
+    returnArr = [...returnArr, dialect_code];
+  } else if (!dialect_code && geo_code) {
+    wherePlsStr = `
+      and words.geo_code = $3
+    `;
+    returnArr = [...returnArr, geo_code];
+  } else if (!dialect_code && !geo_code) {
+    wherePlsStr = ``;
+    returnArr = [...returnArr];
+  }
+
+  return [
+    `
+      select distinct 
+        wtwts.word_to_word_translation_id,
+        wtwts.created_at
+      from word_to_word_translations as wtwts
+      join (
+        select word_definitions.word_definition_id
+        from word_definitions
+        join (
+          select words.word_id
+          from words
+          where words.language_code = $2
+            ${wherePlsStr}
+        ) as ws
+        on ws.word_id = word_definitions.word_id
+      ) as wds
+      on wds.word_definition_id = wtwts.to_word_definition_id
+      where wtwts.from_word_definition_id = $1;
+    `,
+    returnArr,
+  ];
+}
+
+export type GetWordToPhraseTranslationListByFromWordDefinitionId = {
+  word_to_phrase_translation_id: number;
+  created_at: string;
+};
+
+export function getWordToPhraseTranslationListByFromWordDefinitionId({
+  from_word_definition_id,
+  language_code,
+  dialect_code,
+  geo_code,
+}: {
+  from_word_definition_id: number;
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+}): [
+  string,
+  (
+    | [number, string, string, string]
+    | [number, string, string]
+    | [number, string]
+  ),
+] {
+  let wherePlsStr = '';
+  let returnArr:
+    | [number, string, string, string]
+    | [number, string, string]
+    | [number, string] = [from_word_definition_id, language_code];
+
+  if (dialect_code && geo_code) {
+    wherePlsStr = `
+      and words.dialect_code = $3
+      and words.geo_code = $4
+    `;
+    returnArr = [...returnArr, dialect_code, geo_code];
+  } else if (dialect_code && !geo_code) {
+    wherePlsStr = `
+      and words.dialect_code = $3
+    `;
+    returnArr = [...returnArr, dialect_code];
+  } else if (!dialect_code && geo_code) {
+    wherePlsStr = `
+      and words.geo_code = $3
+    `;
+    returnArr = [...returnArr, geo_code];
+  } else if (!dialect_code && !geo_code) {
+    wherePlsStr = ``;
+    returnArr = [...returnArr];
+  }
+
+  return [
+    `
+      select distinct 
+        wtpts.word_to_phrase_translation_id,
+        wtpts.created_at
+      from word_to_phrase_translations as wtpts
+      join (
+        select phrase_definitions.phrase_definition_id
+        from phrase_definitions
+        join (
+          select phrases.phrase_id
+          from phrases
+          join words
+          on words.word_id = any(phrases.words)
+          where words.language_code = $2
+            ${wherePlsStr}
+        ) as ps
+        on ps.phrase_id = phrase_definitions.phrase_id
+      ) as pds
+      on pds.phrase_definition_id = wtpts.to_phrase_definition_id
+      where wtpts.from_word_definition_id = $1
+    `,
+    returnArr,
+  ];
+}
+
+export type GetPhraseToWordTranslationListByFromPhraseDefinitionId = {
+  phrase_to_word_translation_id: number;
+  created_at: string;
+};
+
+export function getPhraseToWordTranslationListByFromPhraseDefinitionId({
+  from_phrase_definition_id,
+  language_code,
+  dialect_code,
+  geo_code,
+}: {
+  from_phrase_definition_id: number;
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+}): [
+  string,
+  (
+    | [number, string, string, string]
+    | [number, string, string]
+    | [number, string]
+  ),
+] {
+  let wherePlsStr = '';
+  let returnArr:
+    | [number, string, string, string]
+    | [number, string, string]
+    | [number, string] = [from_phrase_definition_id, language_code];
+
+  if (dialect_code && geo_code) {
+    wherePlsStr = `
+      and words.dialect_code = $3
+      and words.geo_code = $4
+    `;
+    returnArr = [...returnArr, dialect_code, geo_code];
+  } else if (dialect_code && !geo_code) {
+    wherePlsStr = `
+      and words.dialect_code = $3
+    `;
+    returnArr = [...returnArr, dialect_code];
+  } else if (!dialect_code && geo_code) {
+    wherePlsStr = `
+      and words.geo_code = $3
+    `;
+    returnArr = [...returnArr, geo_code];
+  } else if (!dialect_code && !geo_code) {
+    wherePlsStr = ``;
+    returnArr = [...returnArr];
+  }
+
+  return [
+    `
+      select distinct 
+        ptwts.phrase_to_phrase_translation_id,
+        ptwts.created_at
+      from phrase_to_word_translations as ptwts
+      join (
+        select word_definitions.word_definition_id
+        from word_definitions
+        join (
+          select words.word_id
+          from words
+          where words.language_code = $2
+            ${wherePlsStr}
+        ) as ws
+        on ws.word_id = word_definitions.word_id
+      ) as wds
+      on wds.word_definition_id = ptwts.to_word_definition_id
+      where ptwts.from_phrase_definition_id = $1
+    `,
+    returnArr,
+  ];
+}
+
+export type GetPhraseToPhraseTranslationListByFromPhraseDefinitionId = {
+  phrase_to_phrase_translation_id: number;
+  created_at: string;
+};
+
+export function getPhraseToPhraseTranslationListByFromPhraseDefinitionId({
+  from_phrase_definition_id,
+  language_code,
+  dialect_code,
+  geo_code,
+}: {
+  from_phrase_definition_id: number;
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+}): [
+  string,
+  (
+    | [number, string, string, string]
+    | [number, string, string]
+    | [number, string]
+  ),
+] {
+  let wherePlsStr = '';
+  let returnArr:
+    | [number, string, string, string]
+    | [number, string, string]
+    | [number, string] = [from_phrase_definition_id, language_code];
+
+  if (dialect_code && geo_code) {
+    wherePlsStr = `
+      and words.dialect_code = $3
+      and words.geo_code = $4
+    `;
+    returnArr = [...returnArr, dialect_code, geo_code];
+  } else if (dialect_code && !geo_code) {
+    wherePlsStr = `
+      and words.dialect_code = $3
+    `;
+    returnArr = [...returnArr, dialect_code];
+  } else if (!dialect_code && geo_code) {
+    wherePlsStr = `
+      and words.geo_code = $3
+    `;
+    returnArr = [...returnArr, geo_code];
+  } else if (!dialect_code && !geo_code) {
+    wherePlsStr = ``;
+    returnArr = [...returnArr];
+  }
+
+  return [
+    `
+      select distinct 
+        ptpts.phrase_to_phrase_translation_id,
+        ptpts.created_at
+      from phrase_to_phrase_translations as ptpts
+      join (
+        select phrase_definitions.phrase_definition_id
+        from phrase_definitions
+        join (
+          select phrases.phrase_id
+          from phrases
+          join words
+          on words.word_id = any(phrases.words)
+          where words.language_code = $2
+            ${wherePlsStr}
+        ) as ps
+        on ps.phrase_id = phrase_definitions.phrase_id
+      ) as pds
+      on pds.phrase_definition_id = ptpts.to_phrase_definition_id
+      where ptpts.from_phrase_definition_id = $1
+    `,
+    returnArr,
+  ];
+}
