@@ -21,6 +21,7 @@ export interface ContextType {
   actions: {
     setSiteTextMap: (siteTextMap: Record<string, string>) => void;
     changeAppLanguage: (langInfo: LanguageInfo) => void;
+    setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
   };
 }
 
@@ -39,7 +40,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
   const [getAllRecommendedTranslation, { data, loading, error, called }] =
     useGetAllRecommendedTranslationLazyQuery();
 
-  const { setSiteTextMap, changeAppLanguage } = useGlobal({
+  const { setSiteTextMap, changeAppLanguage, setTargetLanguage } = useGlobal({
     dispatch,
   });
 
@@ -120,6 +121,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
     actions: {
       setSiteTextMap,
       changeAppLanguage,
+      setTargetLanguage,
     },
   };
 
