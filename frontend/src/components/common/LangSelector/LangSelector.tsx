@@ -153,6 +153,7 @@ export function LangSelector({
     const langTagFormatted = tags(langTag).format();
 
     if (langInfo2tag(selected) === langTagFormatted) return;
+
     onChange(langTagFormatted, {
       lang: selectedLang,
       dialect: selectedDialect?.tag ? selectedDialect : undefined,

@@ -28,7 +28,6 @@ function AppTypeahead<Item extends { text: string; value: string }>({
   const { tr } = useTr();
 
   const [filteredItems, setFilteredItems] = useState<Item[]>([...props.items]);
-  console.log(props.selectedItem);
 
   const isValueOrTextChecked = (value: string, text: string) => {
     return props.selectedItem === value || props.selectedItem === text;

@@ -45,6 +45,7 @@ import {
 } from './styled';
 
 import { useTr } from '../../../hooks/useTr';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 interface PhraseListPageProps
   extends RouteComponentProps<{
@@ -56,11 +57,17 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
   const router = useIonRouter();
   const { tr } = useTr();
   const [present] = useIonToast();
+  const {
+    states: {
+      global: { targetLang },
+    },
+    actions: { setTargetLanguage },
+  } = useAppContext();
 
   const modal = useRef<HTMLIonModalElement>(null);
   const textarea = useRef<HTMLIonTextareaElement>(null);
 
-  const [langInfo, setLangInfo] = useState<LanguageInfo>();
+  //const [langInfo, setLangInfo] = useState<LanguageInfo>();
   const [filter, setFilter] = useState<string>('');
 
   const [phraseWithVoteList, setPhraseWithVoteList] =
@@ -77,7 +84,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
         data.togglePhraseVoteStatus.error === ErrorType.NoError &&
         phrasesData &&
         phrasesData.getPhrasesByLanguage.error === ErrorType.NoError &&
-        langInfo
+        targetLang
       ) {
         const newVoteStatus = data.togglePhraseVoteStatus.vote_status;
 
@@ -147,7 +154,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
         data.phraseUpsert.error === ErrorType.NoError &&
         phrasesData &&
         phrasesData.getPhrasesByLanguage.error === ErrorType.NoError &&
-        langInfo
+        targetLang
       ) {
         const newPhrase = data.phraseUpsert.phrase;
 
@@ -170,9 +177,9 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
             },
           },
           variables: {
-            language_code: langInfo.lang.tag,
-            dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
-            geo_code: langInfo.region ? langInfo.region.tag : null,
+            language_code: targetLang.lang.tag,
+            dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
+            geo_code: targetLang.region ? targetLang.region.tag : null,
           },
         });
 
@@ -200,19 +207,19 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
   });
 
   useEffect(() => {
-    if (!langInfo) {
+    if (!targetLang) {
       return;
     }
 
     getPhrasesByLanguage({
       variables: {
-        language_code: langInfo.lang.tag,
-        dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
-        geo_code: langInfo.region ? langInfo.region.tag : null,
+        language_code: targetLang.lang.tag,
+        dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
+        geo_code: targetLang.region ? targetLang.region.tag : null,
         filter: filter.trim(),
       },
     });
-  }, [langInfo, getPhrasesByLanguage, filter]);
+  }, [targetLang, getPhrasesByLanguage, filter]);
 
   useEffect(() => {
     if (error) {
@@ -241,7 +248,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
   );
 
   const handleSaveNewDefinition = () => {
-    if (!langInfo) {
+    if (!targetLang) {
       return;
     }
 
@@ -270,9 +277,9 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
     upsertPhrase({
       variables: {
-        language_code: langInfo.lang.tag,
-        dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
-        geo_code: langInfo.region ? langInfo.region.tag : null,
+        language_code: targetLang.lang.tag,
+        dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
+        geo_code: targetLang.region ? targetLang.region.tag : null,
         phraselike_string: textareaVal.trim(),
       },
     });
@@ -368,11 +375,11 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
               <LangSelector
                 title={tr('Select language')}
                 langSelectorId="phrase-book-langSelector"
-                selected={langInfo}
+                selected={targetLang ?? undefined}
                 onChange={(_sourceLangTag, sourceLangInfo) => {
-                  setLangInfo(sourceLangInfo);
+                  setTargetLanguage(sourceLangInfo);
                 }}
-                onClearClick={() => setLangInfo(undefined)}
+                onClearClick={() => setTargetLanguage(null)}
               />
               <Input
                 type="text"
