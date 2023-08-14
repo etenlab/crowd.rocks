@@ -7,13 +7,23 @@ import { TranslatedWordCards } from '../../word/TranslatedWordCards/TranslatedWo
 import { useGetOrigMapWordsLazyQuery } from '../../../generated/graphql';
 import { WordTranslationsCom } from './WordTranslationsCom';
 import { useTr } from '../../../hooks/useTr';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 interface MapWordsTranslationProps extends RouteComponentProps {}
 
 export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   const { tr } = useTr();
 
-  const [targetLang, setTargetLang] = useState<LanguageInfo>();
+  const {
+    states: {
+      global: {
+        langauges: { targetLang },
+      },
+    },
+    actions: { setTargetLanguage },
+  } = useAppContext();
+
+  //const [targetLang, setTargetLang] = useState<LanguageInfo>();
   const [selectedWordId, setSelectedWordId] = useState<string>();
 
   const [origMapWordsRead, { data: wordsData }] = useGetOrigMapWordsLazyQuery();
@@ -70,9 +80,9 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
             <LangSelector
               title={tr('Select target language')}
               langSelectorId="targetLangSelector"
-              selected={targetLang}
+              selected={targetLang ?? undefined}
               onChange={(_targetLangTag, targetLangInfo) => {
-                setTargetLang(targetLangInfo);
+                setTargetLanguage(targetLangInfo);
               }}
             />
           </LangSelectorBox>

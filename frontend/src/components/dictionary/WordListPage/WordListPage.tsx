@@ -45,6 +45,7 @@ import {
 } from './styled';
 
 import { useTr } from '../../../hooks/useTr';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 interface WordListPageProps
   extends RouteComponentProps<{
@@ -56,12 +57,21 @@ export function WordListPage({ match }: WordListPageProps) {
   const router = useIonRouter();
   const { tr } = useTr();
 
+  const {
+    states: {
+      global: {
+        langauges: { targetLang },
+      },
+    },
+    actions: { setTargetLanguage },
+  } = useAppContext();
+
   const [present] = useIonToast();
 
   const modal = useRef<HTMLIonModalElement>(null);
   const textarea = useRef<HTMLIonTextareaElement>(null);
 
-  const [langInfo, setLangInfo] = useState<LanguageInfo>();
+  //const [langInfo, setLangInfo] = useState<LanguageInfo>();
   const [filter, setFilter] = useState<string>('');
 
   const [wordWithVoteList, setWordWithVoteList] =
@@ -78,7 +88,7 @@ export function WordListPage({ match }: WordListPageProps) {
         data.toggleWordVoteStatus.error === ErrorType.NoError &&
         wordsData &&
         wordsData.getWordsByLanguage.error === ErrorType.NoError &&
-        langInfo
+        targetLang
       ) {
         const newVoteStatus = data.toggleWordVoteStatus.vote_status;
 
@@ -148,7 +158,7 @@ export function WordListPage({ match }: WordListPageProps) {
         data.wordUpsert.error === ErrorType.NoError &&
         wordsData &&
         wordsData.getWordsByLanguage.error === ErrorType.NoError &&
-        langInfo
+        targetLang
       ) {
         const newWord = data.wordUpsert.word;
 
@@ -172,9 +182,9 @@ export function WordListPage({ match }: WordListPageProps) {
             },
           },
           variables: {
-            language_code: langInfo.lang.tag,
-            dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
-            geo_code: langInfo.region ? langInfo.region.tag : null,
+            language_code: targetLang.lang.tag,
+            dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
+            geo_code: targetLang.region ? targetLang.region.tag : null,
           },
         });
 
@@ -202,19 +212,19 @@ export function WordListPage({ match }: WordListPageProps) {
   });
 
   useEffect(() => {
-    if (!langInfo) {
+    if (!targetLang) {
       return;
     }
 
     getWordsByLanguage({
       variables: {
-        language_code: langInfo.lang.tag,
-        dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
-        geo_code: langInfo.region ? langInfo.region.tag : null,
+        language_code: targetLang.lang.tag,
+        dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
+        geo_code: targetLang.region ? targetLang.region.tag : null,
         filter: filter.trim(),
       },
     });
-  }, [langInfo, getWordsByLanguage, filter]);
+  }, [targetLang, getWordsByLanguage, filter]);
 
   useEffect(() => {
     if (error) {
@@ -243,7 +253,7 @@ export function WordListPage({ match }: WordListPageProps) {
   );
 
   const handleSaveNewDefinition = () => {
-    if (!langInfo) {
+    if (!targetLang) {
       return;
     }
 
@@ -272,9 +282,9 @@ export function WordListPage({ match }: WordListPageProps) {
 
     upsertWord({
       variables: {
-        language_code: langInfo.lang.tag,
-        dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
-        geo_code: langInfo.region ? langInfo.region.tag : null,
+        language_code: targetLang.lang.tag,
+        dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
+        geo_code: targetLang.region ? targetLang.region.tag : null,
         wordlike_string: textareaVal.trim(),
       },
     });
@@ -371,11 +381,11 @@ export function WordListPage({ match }: WordListPageProps) {
               <LangSelector
                 title={tr('Select language')}
                 langSelectorId="dictionary-langSelector"
-                selected={langInfo}
+                selected={targetLang ?? undefined}
                 onChange={(_sourceLangTag, sourceLangInfo) => {
-                  setLangInfo(sourceLangInfo);
+                  setTargetLanguage(sourceLangInfo);
                 }}
-                onClearClick={() => setLangInfo(undefined)}
+                onClearClick={() => setTargetLanguage(null)}
               />
               <Input
                 type="text"

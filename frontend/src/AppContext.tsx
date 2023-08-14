@@ -23,6 +23,7 @@ export interface ContextType {
     changeAppLanguage: (langInfo: LanguageInfo) => void;
     changeTranslationSourceLanguage: (langInfo: LanguageInfo | null) => void;
     changeTranslationTargetLanguage: (langInfo: LanguageInfo | null) => void;
+    setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
   };
 }
 
@@ -44,6 +45,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
   const {
     setSiteTextMap,
     changeAppLanguage,
+    setTargetLanguage,
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
   } = useGlobal({
@@ -129,6 +131,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
       changeAppLanguage,
       changeTranslationSourceLanguage,
       changeTranslationTargetLanguage,
+      setTargetLanguage,
     },
   };
 

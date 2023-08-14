@@ -39,6 +39,7 @@ import {
 import { useTr } from '../../../hooks/useTr';
 
 import { Input } from '../../common/styled';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 interface SiteTextListPageProps
   extends RouteComponentProps<{
@@ -51,8 +52,17 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
   const [present] = useIonToast();
   const { tr } = useTr();
 
+  const {
+    states: {
+      global: {
+        langauges: { targetLang },
+      },
+    },
+    actions: { setTargetLanguage },
+  } = useAppContext();
+
   const [filter, setFilter] = useState<string>('');
-  const [targetLang, setTargetLang] = useState<LanguageInfo>();
+  //const [targetLang, setTargetLang] = useState<LanguageInfo>();
   const [allSiteTextDefinitions, setAllSiteTextDefinitions] =
     useState<SiteTextDefinitionListOutput>();
 
@@ -354,11 +364,11 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
                 <LangSelector
                   title={tr('Select')}
                   langSelectorId="site-text-targetLangSelector"
-                  selected={targetLang}
+                  selected={targetLang ?? undefined}
                   onChange={(_sourceLangTag, sourceLangInfo) => {
-                    setTargetLang(sourceLangInfo);
+                    setTargetLanguage(sourceLangInfo);
                   }}
-                  onClearClick={() => setTargetLang(undefined)}
+                  onClearClick={() => setTargetLanguage(null)}
                 />
               </AppLanguageShowerContainer>
             </LangSelectorContainer>

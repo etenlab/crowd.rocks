@@ -2,7 +2,7 @@ import { IonList, useIonRouter } from '@ionic/react';
 import { MapItem } from './MapItem';
 import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   useGetAllMapsListLazyQuery,
   useMapUploadMutation,
@@ -10,31 +10,42 @@ import {
 import { styled } from 'styled-components';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { useTr } from '../../../hooks/useTr';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 export const MapList: React.FC = () => {
   const router = useIonRouter();
   const { tr } = useTr();
+
+  const {
+    states: {
+      global: {
+        langauges: { targetLang },
+      },
+    },
+    actions: { setTargetLanguage },
+  } = useAppContext();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sendMapFile, { data: uploadResult }] = useMapUploadMutation();
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
   });
-  const [mapListLang, setMapListLang] = useState<LanguageInfo>();
+  //const [mapListLang, setMapListLang] = useState<LanguageInfo>();
+  //console.log(mapListLang);
 
   useEffect(() => {
-    const variables = mapListLang?.lang
+    const variables = targetLang?.lang
       ? {
           lang: {
-            language_code: mapListLang.lang.tag,
-            dialect_code: mapListLang?.dialect?.tag,
-            geo_code: mapListLang?.region?.tag,
+            language_code: targetLang.lang.tag,
+            dialect_code: targetLang?.dialect?.tag,
+            geo_code: targetLang?.region?.tag,
           },
         }
       : undefined;
 
     getAllMapsList({ variables });
-  }, [getAllMapsList, mapListLang]);
+  }, [getAllMapsList, targetLang]);
 
   const handleAddMap = useCallback(
     (file: File) => {
@@ -52,11 +63,11 @@ export const MapList: React.FC = () => {
         <LangSelector
           title={tr('Select language')}
           langSelectorId="mapsListLangSelector"
-          selected={mapListLang}
+          selected={targetLang ?? undefined}
           onChange={(_mapListLangTag, mapListLangInfo) => {
-            setMapListLang(mapListLangInfo);
+            setTargetLanguage(mapListLangInfo);
           }}
-          onClearClick={() => setMapListLang(undefined)}
+          onClearClick={() => setTargetLanguage(null)}
         />
       </LangSelectorBox>
       <MapTools
