@@ -1,0 +1,237 @@
+fragment WordToWordTranslationWithVoteFragment on WordToWordTranslationWithVote {
+  word_to_word_translation_id
+  from_word_definition {
+    ...WordDefinitionFragment
+  }
+  to_word_definition {
+    ...WordDefinitionFragment
+  }
+  downvotes
+  upvotes
+}
+
+fragment WordToPhraseTranslationWithVoteFragment on WordToPhraseTranslationWithVote {
+  word_to_phrase_translation_id
+  from_word_definition {
+    ...WordDefinitionFragment
+  }
+  to_phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+  downvotes
+  upvotes
+}
+
+fragment PhraseToWordTranslationWithVoteFragment on PhraseToWordTranslationWithVote {
+  phrase_to_word_translation_id
+  from_phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+  to_word_definition {
+    ...WordDefinitionFragment
+  }
+  downvotes
+  upvotes
+}
+
+fragment PhraseToPhraseTranslationWithVoteFragment on PhraseToPhraseTranslationWithVote {
+  phrase_to_phrase_translation_id
+  from_phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+  to_phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+  downvotes
+  upvotes
+}
+
+fragment WordToWordTranslationFragment on WordToWordTranslation {
+  word_to_word_translation_id
+  from_word_definition {
+    ...WordDefinitionFragment
+  }
+  to_word_definition {
+    ...WordDefinitionFragment
+  }
+}
+
+fragment WordToPhraseTranslationFragment on WordToPhraseTranslation {
+  word_to_phrase_translation_id
+  from_word_definition {
+    ...WordDefinitionFragment
+  }
+  to_phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+}
+
+fragment PhraseToWordTranslationFragment on PhraseToWordTranslation {
+  phrase_to_word_translation_id
+  from_phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+  to_word_definition {
+    ...WordDefinitionFragment
+  }
+}
+
+fragment PhraseToPhraseTranslationFragment on PhraseToPhraseTranslation {
+  phrase_to_phrase_translation_id
+  from_phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+  to_phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+}
+
+fragment WordTrVoteStatusFragment on WordTrVoteStatus {
+  word_to_word_translation_id
+  upvotes
+  downvotes
+}
+
+fragment WordToPhraseVoteStatusFragment on WordToPhraseVoteStatus {
+  word_to_phrase_translation_id
+  upvotes
+  downvotes
+}
+
+fragment PhraseToWordVoteStatusFragment on PhraseToWordVoteStatus {
+  phrase_to_word_translation_id
+  upvotes
+  downvotes
+}
+
+fragment PhraseToPhraseVoteStatusFragment on PhraseToPhraseVoteStatus {
+  phrase_to_phrase_translation_id
+  upvotes
+  downvotes
+}
+
+query GetTranslationsByFromDefinitionId(
+  $definition_id: ID!
+  $from_definition_type_is_word: Boolean!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  getTranslationsByFromDefinitionId(
+    definition_id: $definition_id
+    from_definition_type_is_word: $from_definition_type_is_word
+    langInfo: {
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
+    error
+    word_to_word_tr_with_vote_list {
+      ...WordToWordTranslationWithVoteFragment
+    }
+    word_to_phrase_tr_with_vote_list {
+      ...WordToPhraseTranslationWithVoteFragment
+    }
+    phrase_to_word_tr_with_vote_list {
+      ...PhraseToWordTranslationWithVoteFragment
+    }
+    phrase_to_phrase_tr_with_vote_list {
+      ...PhraseToPhraseTranslationWithVoteFragment
+    }
+  }
+}
+
+mutation ToggleTranslationVoteStatus(
+  $translation_id: ID!
+  $vote: Boolean!
+  $from_definition_type_is_word: Boolean!
+  $to_definition_type_is_word: Boolean!
+) {
+  toggleTranslationVoteStatus(
+    translation_id: $translation_id
+    vote: $vote
+    from_definition_type_is_word: $from_definition_type_is_word
+    to_definition_type_is_word: $to_definition_type_is_word
+  ) {
+    error
+    phrase_to_phrase_vote_status {
+      ...PhraseToPhraseVoteStatusFragment
+    }
+    phrase_to_word_vote_status {
+      ...PhraseToWordVoteStatusFragment
+    }
+    word_to_phrase_vote_status {
+      ...WordToPhraseVoteStatusFragment
+    }
+    word_to_word_vote_status {
+      ...WordTrVoteStatusFragment
+    }
+  }
+}
+
+mutation UpsertTranslation(
+  $from_definition_id: ID!
+  $from_definition_type_is_word: Boolean!
+  $to_definition_id: ID!
+  $to_definition_type_is_word: Boolean!
+) {
+  upsertTranslation(
+    from_definition_id: $from_definition_id
+    from_definition_type_is_word: $from_definition_type_is_word
+    to_definition_id: $to_definition_id
+    to_definition_type_is_word: $to_definition_type_is_word
+  ) {
+    error
+    word_to_word_translation {
+      ...WordToWordTranslationFragment
+    }
+    word_to_phrase_translation {
+      ...WordToPhraseTranslationFragment
+    }
+    phrase_to_word_translation {
+      ...PhraseToWordTranslationFragment
+    }
+    phrase_to_phrase_translation {
+      ...PhraseToPhraseTranslationFragment
+    }
+  }
+}
+
+mutation UpsertTranslationFromWordAndDefinitionlikeString(
+  $from_definition_id: ID!
+  $from_definition_type_is_word: Boolean!
+  $word_or_phrase: String!
+  $definition: String!
+  $is_type_word: Boolean!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  upsertTranslationFromWordAndDefinitionlikeString(
+    from_definition_id: $from_definition_id
+    from_definition_type_is_word: $from_definition_type_is_word
+    to_definition_input: {
+      word_or_phrase: $word_or_phrase
+      definition: $definition
+      is_type_word: $is_type_word
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
+    error
+    word_to_word_translation {
+      ...WordToWordTranslationFragment
+    }
+    word_to_phrase_translation {
+      ...WordToPhraseTranslationFragment
+    }
+    phrase_to_word_translation {
+      ...PhraseToWordTranslationFragment
+    }
+    phrase_to_phrase_translation {
+      ...PhraseToPhraseTranslationFragment
+    }
+  }
+}

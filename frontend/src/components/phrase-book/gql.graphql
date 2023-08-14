@@ -32,6 +32,15 @@ fragment PhraseVoteStatusFragment on PhraseVoteStatus {
   upvotes
 }
 
+query PhraseDefinitionRead($id: ID!) {
+  phraseDefinitionRead(id: $id) {
+    error
+    phrase_definition {
+      ...PhraseDefinitionFragment
+    }
+  }
+}
+
 query GetPhrasesByLanguage(
   $language_code: String!
   $dialect_code: String

@@ -44,6 +44,15 @@ fragment WordVoteStatusFragment on WordVoteStatus {
   upvotes
 }
 
+query WordDefinitionRead($id: ID!) {
+  wordDefinitionRead(id: $id) {
+    error
+    word_definition {
+      ...WordDefinitionFragment
+    }
+  }
+}
+
 query GetWordsByLanguage(
   $language_code: String!
   $dialect_code: String

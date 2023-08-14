@@ -1,7 +1,7 @@
 import { TypePolicies } from '@apollo/client';
 
 export const typePolicies: TypePolicies = {
-  WordWithDefinitionlikeStrings: {
+  WordWithDefinitions: {
     keyFields: ['word_id'],
   },
   WordDefinitionWithVote: {
@@ -13,7 +13,7 @@ export const typePolicies: TypePolicies = {
   WordVoteStatus: {
     keyFields: ['word_id'],
   },
-  PhraseWithDefinitionlikeStrings: {
+  PhraseWithDefinitions: {
     keyFields: ['phrase_id'],
   },
   PhraseDefinitionWithVote: {
@@ -51,5 +51,17 @@ export const typePolicies: TypePolicies = {
   },
   VoteStatus: {
     keyFields: ['site_text_translation_id'],
+  },
+  WordToWordTranslationWithVote: {
+    keyFields: ['word_to_word_translation_id'],
+  },
+  WordToPhraseTranslationWithVote: {
+    keyFields: ['word_to_phrase_translation_id'],
+  },
+  PhraseToWordTranslationWithVote: {
+    keyFields: ['phrase_to_word_translation_id'],
+  },
+  PhraseToPhraseTranslationWithVote: {
+    keyFields: ['phrase_to_phrase_translation_id'],
   },
 };
