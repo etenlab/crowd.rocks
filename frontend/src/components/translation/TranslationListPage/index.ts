@@ -1,0 +1,1 @@
+export { TranslationListPage } from './TranslationListPage';
