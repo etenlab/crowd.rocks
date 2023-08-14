@@ -21,7 +21,7 @@ import {
   useGetAllTranslationFromSiteTextDefinitionIdLazyQuery,
   useSiteTextPhraseDefinitionReadLazyQuery,
   useSiteTextWordDefinitionReadLazyQuery,
-  useUpsertTranslationMutation,
+  useUpsertSiteTextTranslationMutation,
   useToggleVoteStatusMutation,
 } from '../../../generated/graphql';
 
@@ -96,18 +96,18 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
       called: phraseCalled,
     },
   ] = useSiteTextPhraseDefinitionReadLazyQuery();
-  const [upsertTranslation] = useUpsertTranslationMutation({
+  const [upsertTranslation] = useUpsertSiteTextTranslationMutation({
     update(cache, { data, errors }) {
       if (
         !errors &&
         data &&
-        data.upsertTranslation.error === ErrorType.NoError &&
+        data.upsertSiteTextTranslation.error === ErrorType.NoError &&
         translationsData &&
         translationsData.getAllTranslationFromSiteTextDefinitionID.error ===
           ErrorType.NoError
       ) {
         const newSiteTextTranslation =
-          data.upsertTranslation.site_text_translation;
+          data.upsertSiteTextTranslation.site_text_translation;
 
         cache.writeQuery({
           query: GetAllTranslationFromSiteTextDefinitionIdDocument,
@@ -151,12 +151,12 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
         modal.current?.dismiss();
       } else {
         console.log('useUpsertTranslationMutation: ', errors);
-        console.log(data?.upsertTranslation.error);
+        console.log(data?.upsertSiteTextTranslation.error);
 
         present({
           message: `${tr(
             'Failed at creating new site text translation!',
-          )} [${data?.upsertTranslation.error}]`,
+          )} [${data?.upsertSiteTextTranslation.error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',
