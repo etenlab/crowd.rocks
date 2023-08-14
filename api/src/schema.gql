@@ -264,6 +264,7 @@ type Mutation {
   togglePhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!, vote: Boolean!): PhraseToPhraseVoteStatusOutputRow!
   togglePhraseToWordTrVoteStatus(phrase_to_word_translation_id: ID!, vote: Boolean!): PhraseToWordVoteStatusOutputRow!
   togglePhraseVoteStatus(phrase_id: ID!, vote: Boolean!): PhraseVoteStatusOutputRow!
+  toggleTranslationVoteStatus(from_definition_type_is_word: Boolean!, to_definition_type_is_word: Boolean!, translation_id: ID!, vote: Boolean!): TranslationVoteStatusOutputRow!
   toggleVoteStatus(site_text_translation_id: String!, vote: Boolean!): VoteStatusOutputRow!
   toggleWordDefinitonVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseVoteStatusOutputRow!
@@ -272,7 +273,9 @@ type Mutation {
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
   upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): SiteTextTranslationUpsertOutput!
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(input: FromPhraseAndDefintionlikeStringUpsertInput!): PhraseDefinitionUpsertOutput!
-  upsertTranslation(input: SiteTextTranslationUpsertInput!): SiteTextTranslationUpsertOutput!
+  upsertSiteTextTranslation(input: SiteTextTranslationUpsertInput!): SiteTextTranslationUpsertOutput!
+  upsertTranslation(from_definition_id: ID!, from_definition_type_is_word: Boolean!, to_definition_id: ID!, to_definition_type_is_word: Boolean!): TranslationUpsertOutput!
+  upsertTranslationFromWordAndDefinitionlikeString(from_definition_id: ID!, from_definition_type_is_word: Boolean!, to_definition_input: ToDefinitionInput!): TranslationUpsertOutput!
   upsertWordDefinitionFromWordAndDefinitionlikeString(input: FromWordAndDefintionlikeStringUpsertInput!): WordDefinitionUpsertOutput!
   versionCreateResolver(input: VersionCreateInput!): VersionCreateOutput!
   wordDefinitionUpsert(input: WordDefinitionUpsertInput!): WordDefinitionUpsertOutput!
@@ -746,6 +749,31 @@ input SiteTextWordDefinitionUpsertInput {
 type SiteTextWordDefinitionUpsertOutput {
   error: ErrorType!
   site_text_word_definition: SiteTextWordDefinition
+}
+
+input ToDefinitionInput {
+  definition: String!
+  dialect_code: String
+  geo_code: String
+  is_type_word: Boolean!
+  language_code: String!
+  word_or_phrase: String!
+}
+
+type TranslationUpsertOutput {
+  error: ErrorType!
+  phrase_to_phrase_translation: PhraseToPhraseTranslation
+  phrase_to_word_translation: PhraseToWordTranslation
+  word_to_phrase_translation: WordToPhraseTranslation
+  word_to_word_translation: WordToWordTranslation
+}
+
+type TranslationVoteStatusOutputRow {
+  error: ErrorType!
+  phrase_to_phrase_vote_status: PhraseToPhraseVoteStatus
+  phrase_to_word_vote_status: PhraseToWordVoteStatus
+  word_to_phrase_vote_status: WordToPhraseVoteStatus
+  word_to_word_vote_status: WordTrVoteStatus
 }
 
 type TranslationWithVoteListOutput {
