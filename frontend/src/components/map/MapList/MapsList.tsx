@@ -18,7 +18,9 @@ export const MapList: React.FC = () => {
 
   const {
     states: {
-      global: { targetLang },
+      global: {
+        langauges: { targetLang },
+      },
     },
     actions: { setTargetLanguage },
   } = useAppContext();

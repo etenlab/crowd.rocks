@@ -21,6 +21,8 @@ export interface ContextType {
   actions: {
     setSiteTextMap: (siteTextMap: Record<string, string>) => void;
     changeAppLanguage: (langInfo: LanguageInfo) => void;
+    changeTranslationSourceLanguage: (langInfo: LanguageInfo | null) => void;
+    changeTranslationTargetLanguage: (langInfo: LanguageInfo | null) => void;
     setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
   };
 }
@@ -40,19 +42,25 @@ export function AppContextProvider({ children }: AppProviderProps) {
   const [getAllRecommendedTranslation, { data, loading, error, called }] =
     useGetAllRecommendedTranslationLazyQuery();
 
-  const { setSiteTextMap, changeAppLanguage, setTargetLanguage } = useGlobal({
+  const {
+    setSiteTextMap,
+    changeAppLanguage,
+    setTargetLanguage,
+    changeTranslationSourceLanguage,
+    changeTranslationTargetLanguage,
+  } = useGlobal({
     dispatch,
   });
 
   useEffect(() => {
     getAllRecommendedTranslation({
       variables: {
-        language_code: state.global.appLanguage.lang.tag,
-        dialect_code: state.global.appLanguage.dialect?.tag,
-        geo_code: state.global.appLanguage.region?.tag,
+        language_code: state.global.langauges.appLanguage.lang.tag,
+        dialect_code: state.global.langauges.appLanguage.dialect?.tag,
+        geo_code: state.global.langauges.appLanguage.region?.tag,
       },
     });
-  }, [getAllRecommendedTranslation, state.global.appLanguage]);
+  }, [getAllRecommendedTranslation, state.global.langauges.appLanguage]);
 
   useEffect(() => {
     if (loading || !called) {
@@ -121,6 +129,8 @@ export function AppContextProvider({ children }: AppProviderProps) {
     actions: {
       setSiteTextMap,
       changeAppLanguage,
+      changeTranslationSourceLanguage,
+      changeTranslationTargetLanguage,
       setTargetLanguage,
     },
   };

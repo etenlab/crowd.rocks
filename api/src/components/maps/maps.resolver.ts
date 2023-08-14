@@ -34,7 +34,6 @@ export class MapsResolver {
     { createReadStream, filename: map_file_name }: FileUpload,
     @Context() req: any,
   ): Promise<MapFileOutput> {
-    // const userToken = getBearer(req);
     console.log(
       `request bearer token: `,
       getBearer(req),

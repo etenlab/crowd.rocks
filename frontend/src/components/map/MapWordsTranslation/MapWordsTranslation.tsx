@@ -16,7 +16,9 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
 
   const {
     states: {
-      global: { targetLang },
+      global: {
+        langauges: { targetLang },
+      },
     },
     actions: { setTargetLanguage },
   } = useAppContext();

@@ -36,6 +36,9 @@ import {
   PhraseToWordTranslationWithVoteListOutput,
   PhraseToPhraseTranslationWithVoteListOutput,
   TranslationWithVoteListOutput,
+  TranslationVoteStatusOutputRow,
+  TranslationUpsertOutput,
+  ToDefinitionInput,
 } from './types';
 
 @Injectable()
@@ -388,6 +391,70 @@ export class TranslationsResolver {
       +definition_id,
       from_definition_type_is_word,
       langInfo,
+    );
+  }
+
+  @Mutation(() => TranslationVoteStatusOutputRow)
+  async toggleTranslationVoteStatus(
+    @Args('translation_id', { type: () => ID }) translation_id: number,
+    @Args('from_definition_type_is_word', { type: () => Boolean })
+    from_definition_type_is_word: boolean,
+    @Args('to_definition_type_is_word', { type: () => Boolean })
+    to_definition_type_is_word: boolean,
+    @Args('vote', { type: () => Boolean })
+    vote: boolean,
+    @Context()
+    req: any,
+  ): Promise<TranslationVoteStatusOutputRow> {
+    console.log('toggleTranslationVoteStatus');
+
+    return this.translationService.toggleTranslationVoteStatus(
+      +translation_id,
+      from_definition_type_is_word,
+      to_definition_type_is_word,
+      vote,
+      getBearer(req),
+    );
+  }
+
+  @Mutation(() => TranslationUpsertOutput)
+  async upsertTranslation(
+    @Args('from_definition_id', { type: () => ID }) from_definition_id: string,
+    @Args('from_definition_type_is_word', { type: () => Boolean })
+    from_definition_type_is_word: boolean,
+    @Args('to_definition_id', { type: () => ID })
+    to_definition_id: string,
+    @Args('to_definition_type_is_word', { type: () => Boolean })
+    to_definition_type_is_word: boolean,
+    @Context() req: any,
+  ): Promise<TranslationUpsertOutput> {
+    console.log('upsertTranslation');
+
+    return this.translationService.upsertTranslation(
+      +from_definition_id,
+      from_definition_type_is_word,
+      +to_definition_id,
+      to_definition_type_is_word,
+      getBearer(req),
+    );
+  }
+
+  @Mutation(() => TranslationUpsertOutput)
+  async upsertTranslationFromWordAndDefinitionlikeString(
+    @Args('from_definition_id', { type: () => ID }) from_definition_id: string,
+    @Args('from_definition_type_is_word', { type: () => Boolean })
+    from_definition_type_is_word: boolean,
+    @Args('to_definition_input', { type: () => ToDefinitionInput })
+    to_definition_input: ToDefinitionInput,
+    @Context() req: any,
+  ): Promise<TranslationUpsertOutput> {
+    console.log('upsertTranslationFromWordAndDefinitionlikeString');
+
+    return this.translationService.upsertTranslationFromWordAndDefinitionlikeString(
+      +from_definition_id,
+      from_definition_type_is_word,
+      to_definition_input,
+      getBearer(req),
     );
   }
 }

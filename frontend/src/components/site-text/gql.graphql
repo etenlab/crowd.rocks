@@ -135,7 +135,7 @@ query SiteTextPhraseDefinitionRead($id: String!) {
   }
 }
 
-mutation UpsertTranslation(
+mutation UpsertSiteTextTranslation(
   $site_text_id: ID!
   $is_word_definition: Boolean!
   $translationlike_string: String!
@@ -144,7 +144,7 @@ mutation UpsertTranslation(
   $dialect_code: String
   $geo_code: String
 ) {
-  upsertTranslation(
+  upsertSiteTextTranslation(
     input: {
       site_text_id: $site_text_id
       is_word_definition: $is_word_definition

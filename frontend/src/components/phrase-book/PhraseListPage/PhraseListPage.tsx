@@ -59,7 +59,9 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
   const [present] = useIonToast();
   const {
     states: {
-      global: { targetLang },
+      global: {
+        langauges: { targetLang },
+      },
     },
     actions: { setTargetLanguage },
   } = useAppContext();

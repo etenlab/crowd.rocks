@@ -17,12 +17,12 @@ export const initialState = {
   global: globalInitialState,
 };
 
-const CROWD_BIBLE_STATE = 'CROWD_BIBLE_STATE';
+const CROWD_ROCKS_STATE = 'CROWD_ROCKS_STATE';
 
 export function persistStore(state: StateType) {
   try {
     window.localStorage.setItem(
-      CROWD_BIBLE_STATE,
+      CROWD_ROCKS_STATE,
       JSON.stringify({
         ...state,
         global: {
@@ -38,7 +38,7 @@ export function persistStore(state: StateType) {
 
 export function loadPersistedStore(): StateType {
   try {
-    const state = window.localStorage.getItem(CROWD_BIBLE_STATE);
+    const state = window.localStorage.getItem(CROWD_ROCKS_STATE);
 
     if (state === null) {
       return initialState;

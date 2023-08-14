@@ -17,6 +17,7 @@ import {
 import {
   bookOutline,
   chatbubbleEllipsesOutline,
+  languageOutline,
   codeWorkingOutline,
   mapOutline,
 } from 'ionicons/icons';
@@ -42,111 +43,86 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
     document.title = tr('Home');
   });
 
+  const menu = [
+    {
+      group: tr('Media'),
+      subMenu: [
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/maps`,
+          icon: mapOutline,
+          title: tr('Maps'),
+          description: tr(
+            'Upload .svg files and translate all their text into another language',
+          ),
+        },
+      ],
+    },
+    {
+      group: tr('Language'),
+      subMenu: [
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/dictionary-list`,
+          icon: bookOutline,
+          title: tr('Dictionary'),
+          description: tr('Manage the words and definitions in a language'),
+        },
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/phrase-book-list`,
+          icon: chatbubbleEllipsesOutline,
+          title: tr('Phrase Book'),
+          description: tr('Helpful phrases in a lanuage'),
+        },
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/translation-list`,
+          icon: languageOutline,
+          title: tr('Translation'),
+          description: tr('Translate the words and phrases'),
+        },
+      ],
+    },
+    {
+      group: tr('User Interface'),
+      subMenu: [
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/site-text-list`,
+          icon: codeWorkingOutline,
+          title: tr('Site Text Strings'),
+          description: tr('Help us translate this app into more languages'),
+        },
+      ],
+    },
+  ];
+
   return (
     <IonPage>
       <IonContent>
         <div className="page">
           <div className="section">
-            <IonItemGroup>
-              <IonItemDivider>
-                <IonLabel>{tr('Media')}</IonLabel>
-              </IonItemDivider>
+            {menu.map((group) => (
+              <IonItemGroup key={group.group}>
+                <IonItemDivider>
+                  <IonLabel>{group.group}</IonLabel>
+                </IonItemDivider>
 
-              <IonItem lines="none">
-                <CustomIonCard
-                  onClick={() => {
-                    router.push(
-                      `/${match.params.nation_id}/${match.params.language_id}/1/maps`,
-                    );
-                  }}
-                >
-                  <IonCardHeader>
-                    <IonCardTitle>
-                      <IonIcon icon={mapOutline}></IonIcon>
-                      <IonText>{tr('Maps')}</IonText>
-                    </IonCardTitle>
-                    <IonCardSubtitle>
-                      {tr(
-                        'Upload .svg files and translate all their text into another language',
-                      )}
-                    </IonCardSubtitle>
-                  </IonCardHeader>
-                </CustomIonCard>
-              </IonItem>
-            </IonItemGroup>
-
-            <IonItemGroup>
-              <IonItemDivider>
-                <IonLabel>{tr('Language')}</IonLabel>
-              </IonItemDivider>
-
-              <IonItem lines="none">
-                <CustomIonCard
-                  onClick={() => {
-                    router.push(
-                      `/${match.params.nation_id}/${match.params.language_id}/1/dictionary-list`,
-                    );
-                  }}
-                >
-                  <IonCardHeader>
-                    <IonCardTitle>
-                      <IonIcon icon={bookOutline}></IonIcon>
-                      <IonText>{tr('Dictionary')}</IonText>
-                    </IonCardTitle>
-                    <IonCardSubtitle>
-                      {tr('Manage the words and definitions in a language')}
-                    </IonCardSubtitle>
-                  </IonCardHeader>
-                </CustomIonCard>
-              </IonItem>
-
-              <IonItem lines="none">
-                <CustomIonCard
-                  onClick={() => {
-                    router.push(
-                      `/${match.params.nation_id}/${match.params.language_id}/1/phrase-book-list`,
-                    );
-                  }}
-                  style={{ width: '100%' }}
-                >
-                  <IonCardHeader>
-                    <IonCardTitle>
-                      <IonIcon icon={chatbubbleEllipsesOutline}></IonIcon>
-                      <IonText>{tr('Phrase Book')}</IonText>
-                    </IonCardTitle>
-                    <IonCardSubtitle>
-                      {tr('Helpful phrases in a lanuage')}
-                    </IonCardSubtitle>
-                  </IonCardHeader>
-                </CustomIonCard>
-              </IonItem>
-            </IonItemGroup>
-
-            <IonItemGroup>
-              <IonItemDivider>
-                <IonLabel>{tr('User Interface')}</IonLabel>
-              </IonItemDivider>
-
-              <IonItem lines="none">
-                <CustomIonCard
-                  onClick={() => {
-                    router.push(
-                      `/${match.params.nation_id}/${match.params.language_id}/1/site-text-list`,
-                    );
-                  }}
-                >
-                  <IonCardHeader>
-                    <IonCardTitle>
-                      <IonIcon icon={codeWorkingOutline}></IonIcon>
-                      <IonText>{tr('Site Text Strings')}</IonText>
-                    </IonCardTitle>
-                    <IonCardSubtitle>
-                      {tr('Help us translate this app into more languages')}
-                    </IonCardSubtitle>
-                  </IonCardHeader>
-                </CustomIonCard>
-              </IonItem>
-            </IonItemGroup>
+                {group.subMenu.map((item) => (
+                  <IonItem lines="none" key={item.title}>
+                    <CustomIonCard
+                      onClick={() => {
+                        router.push(item.link);
+                      }}
+                    >
+                      <IonCardHeader>
+                        <IonCardTitle>
+                          <IonIcon icon={item.icon}></IonIcon>
+                          <IonText>{item.title}</IonText>
+                        </IonCardTitle>
+                        <IonCardSubtitle>{item.description}</IonCardSubtitle>
+                      </IonCardHeader>
+                    </CustomIonCard>
+                  </IonItem>
+                ))}
+              </IonItemGroup>
+            ))}
 
             <br />
             <br />

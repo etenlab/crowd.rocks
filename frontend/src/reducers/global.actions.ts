@@ -1,8 +1,19 @@
 export const actions = {
   CHANGE_APP_LANGUAGE: 'CHANGE_APP_LANGUAGE',
+  CHANGE_TRANSLATION_PAGE_SOURCE_LANGAUGE:
+    'CHANGE_TRANSLATION_PAGE_SOURCE_LANGAUGE',
+  CHANGE_TRANSLATION_PAGE_TARGET_LANGAUGE:
+    'CHANGE_TRANSLATION_PAGE_TARGET_LANGAUGE',
   SET_SITE_TEXT_MAP: 'SET_SITE_TEXT_MAP',
   SET_CURRENT_TARGET_LANG: 'SET_CURRENT_TARGET_LANGUAGE',
 };
+
+export function setSiteTextMap(siteTextMap: Record<string, string>) {
+  return {
+    type: actions.SET_SITE_TEXT_MAP,
+    payload: siteTextMap,
+  };
+}
 
 export function changeAppLanguage(langInfo: LanguageInfo) {
   return {
@@ -18,9 +29,16 @@ export function setTargetLanguage(language: LanguageInfo | null) {
   };
 }
 
-export function setSiteTextMap(siteTextMap: Record<string, string>) {
+export function changeTranslationSourceLanguage(langInfo: LanguageInfo | null) {
   return {
-    type: actions.SET_SITE_TEXT_MAP,
-    payload: siteTextMap,
+    type: actions.CHANGE_TRANSLATION_PAGE_SOURCE_LANGAUGE,
+    payload: langInfo,
+  };
+}
+
+export function changeTranslationTargetLanguage(langInfo: LanguageInfo | null) {
+  return {
+    type: actions.CHANGE_TRANSLATION_PAGE_TARGET_LANGAUGE,
+    payload: langInfo,
   };
 }

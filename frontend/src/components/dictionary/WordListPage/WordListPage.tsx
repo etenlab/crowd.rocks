@@ -59,7 +59,9 @@ export function WordListPage({ match }: WordListPageProps) {
 
   const {
     states: {
-      global: { targetLang },
+      global: {
+        langauges: { targetLang },
+      },
     },
     actions: { setTargetLanguage },
   } = useAppContext();

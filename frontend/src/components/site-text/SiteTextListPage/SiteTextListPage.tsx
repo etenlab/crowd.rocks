@@ -54,7 +54,9 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
 
   const {
     states: {
-      global: { targetLang },
+      global: {
+        langauges: { targetLang },
+      },
     },
     actions: { setTargetLanguage },
   } = useAppContext();

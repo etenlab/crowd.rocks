@@ -1,4 +1,4 @@
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { PostgresService } from 'src/core/postgres.service';
 import { ErrorType } from 'src/common/types';
 import { SesService } from 'src/core/ses.service';
@@ -16,7 +16,6 @@ export class EmailResponseResolver {
   @Mutation(() => EmailResponseOutput)
   async emailResponseResolver(
     @Args('input') input: EmailResponseInput,
-    @Context() req: any,
   ): Promise<EmailResponseOutput> {
     console.log('email response resolver');
     try {

@@ -3,6 +3,8 @@ import { useRef, type Dispatch, useCallback } from 'react';
 import {
   setSiteTextMap as setSiteTextMapAction,
   changeAppLanguage as changeAppLanguageAction,
+  changeTranslationSourceLanguage as changeTranslationSourceLanguageAction,
+  changeTranslationTargetLanguage as changeTranslationTargetLanguageAction,
   setTargetLanguage as setTargetLangAction,
 } from '../reducers/global.actions';
 
@@ -25,6 +27,24 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     dispatchRef.current.dispatch(changeAppLanguageAction(langInfo));
   }, []);
 
+  const changeTranslationSourceLanguage = useCallback(
+    (langInfo: LanguageInfo | null) => {
+      dispatchRef.current.dispatch(
+        changeTranslationSourceLanguageAction(langInfo),
+      );
+    },
+    [],
+  );
+
+  const changeTranslationTargetLanguage = useCallback(
+    (langInfo: LanguageInfo | null) => {
+      dispatchRef.current.dispatch(
+        changeTranslationTargetLanguageAction(langInfo),
+      );
+    },
+    [],
+  );
+
   const setTargetLanguage = useCallback((language: LanguageInfo | null) => {
     dispatchRef.current.dispatch(setTargetLangAction(language));
   }, []);
@@ -32,6 +52,8 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
   return {
     setSiteTextMap,
     changeAppLanguage,
+    changeTranslationSourceLanguage,
+    changeTranslationTargetLanguage,
     setTargetLanguage,
   };
 }

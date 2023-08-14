@@ -97,13 +97,13 @@ export class SiteTextTranslation {
 @ObjectType()
 export class SiteTextTranslationUpsertOutput extends GenericOutput {
   @Field(() => SiteTextTranslation, { nullable: true })
-  site_text_translation: SiteTextTranslation;
+  site_text_translation: SiteTextTranslation | null;
 }
 
 @ObjectType()
 export class SiteTextTranslationReadOutput extends GenericOutput {
   @Field(() => SiteTextTranslation, { nullable: true })
-  site_text_translation: SiteTextTranslation;
+  site_text_translation: SiteTextTranslation | null;
 }
 
 @InputType()
@@ -132,13 +132,13 @@ export class SiteTextTranslationVoteUpsertInput {
 @ObjectType()
 export class SiteTextTranslationVoteUpsertOutput extends GenericOutput {
   @Field(() => SiteTextTranslationVote, { nullable: true })
-  site_text_translation_vote: SiteTextTranslationVote;
+  site_text_translation_vote: SiteTextTranslationVote | null;
 }
 
 @ObjectType()
 export class SiteTextTranslationVoteReadOutput extends GenericOutput {
   @Field(() => SiteTextTranslationVote, { nullable: true })
-  site_text_translation_vote: SiteTextTranslationVote;
+  site_text_translation_vote: SiteTextTranslationVote | null;
 }
 
 @ObjectType()
@@ -151,7 +151,7 @@ export class VoteStatus {
 @ObjectType()
 export class VoteStatusOutputRow extends GenericOutput {
   @Field(() => VoteStatus, { nullable: true })
-  vote_status: VoteStatus;
+  vote_status: VoteStatus | null;
 }
 
 @ObjectType()
@@ -164,7 +164,7 @@ export class SiteTextTranslationWithVote extends SiteTextTranslation {
 @ObjectType()
 export class SiteTextTranslationWithVoteOutput extends GenericOutput {
   @Field(() => SiteTextTranslationWithVote, { nullable: true })
-  site_text_translation_with_vote: SiteTextTranslationWithVote;
+  site_text_translation_with_vote: SiteTextTranslationWithVote | null;
 }
 
 @ObjectType()

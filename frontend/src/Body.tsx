@@ -51,15 +51,22 @@ import { WordDetailPage } from './components/dictionary/WordDetailPage';
 
 import { PhraseListPage } from './components/phrase-book/PhraseListPage';
 import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
+
+import { OriginalListPage } from './components/translation/OriginalListPage';
+import { TranslationListPage } from './components/translation/TranslationListPage';
+
 import { useAppContext } from './hooks/useAppContext';
 import { useTr } from './hooks/useTr';
 
 import AppTypeahead from './components/common/LangSelector/TypeAhead';
+import { AddNewTranslationPage } from './components/translation/AddNewTranslationPage';
 
 const Body: React.FC = () => {
   const {
     states: {
-      global: { appLanguage },
+      global: {
+        langauges: { appLanguage },
+      },
     },
     actions: { changeAppLanguage },
   } = useAppContext();
@@ -377,6 +384,21 @@ const Body: React.FC = () => {
             exact
             path="/:nation_id/:language_id/:cluster_id/phrase-book-detail/:phrase_id"
             component={PhraseDetailPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/translation-list"
+            component={OriginalListPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/translation-list/:definition_kind/:definition_id"
+            component={TranslationListPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/add-new-translation/:definition_kind/:definition_id"
+            component={AddNewTranslationPage}
           />
           <Route exact path="/">
             <Redirect to="/US/eng/1/home" />

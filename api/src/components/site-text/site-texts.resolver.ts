@@ -149,7 +149,7 @@ export class SiteTextsResolver {
   }
 
   @Mutation(() => SiteTextTranslationUpsertOutput)
-  async upsertTranslation(
+  async upsertSiteTextTranslation(
     @Args('input') input: SiteTextTranslationUpsertInput,
     @Context() req: any,
   ): Promise<SiteTextTranslationUpsertOutput> {
@@ -287,7 +287,7 @@ export class SiteTextsResolver {
 
   @Query(() => SiteTextDefinitionListOutput)
   async getAllSiteTextDefinitions(
-    @Args('filter', { nullable: true }) filter?: string,
+    @Args('filter', { nullable: true }) filter: string | null,
   ): Promise<SiteTextDefinitionListOutput> {
     console.log('site text getAllSiteTextDefinitions resolver');
 
