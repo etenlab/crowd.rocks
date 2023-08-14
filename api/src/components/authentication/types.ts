@@ -1,14 +1,12 @@
-import { Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
-import { ErrorType, GenericOutput } from 'src/common/types';
+import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { GenericOutput } from 'src/common/types';
 
 @ObjectType()
 export class Session {
-  @Field((type) => ID) user_id: number;
+  @Field(() => ID) user_id: number;
   @Field() token: string;
   @Field() readonly avatar: string;
-  @Field((type) => String, { nullable: true }) readonly avatar_url:
-    | string
-    | null;
+  @Field(() => String, { nullable: true }) readonly avatar_url: string | null;
 }
 
 @InputType()
@@ -20,7 +18,7 @@ export class RegisterInput {
 
 @ObjectType()
 export class RegisterOutput extends GenericOutput {
-  @Field((type) => Session, { nullable: true })
+  @Field(() => Session, { nullable: true })
   readonly session: Session | null;
 }
 
@@ -32,7 +30,7 @@ export class LoginInput {
 
 @ObjectType()
 export class LoginOutput extends GenericOutput {
-  @Field((type) => Session, { nullable: true })
+  @Field(() => Session, { nullable: true })
   readonly session: Session | null;
 }
 

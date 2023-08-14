@@ -43,7 +43,7 @@ export class PhraseVote {
 @ObjectType()
 export class PhraseVoteOutput extends GenericOutput {
   @Field(() => PhraseVote, { nullable: true })
-  phrase_vote: PhraseVote;
+  phrase_vote: PhraseVote | null;
 }
 
 @InputType()
@@ -62,7 +62,7 @@ export class PhraseVoteStatus {
 @ObjectType()
 export class PhraseVoteStatusOutputRow extends GenericOutput {
   @Field(() => PhraseVoteStatus, { nullable: true })
-  vote_status: PhraseVoteStatus;
+  vote_status: PhraseVoteStatus | null;
 }
 
 @ObjectType()

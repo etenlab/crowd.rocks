@@ -62,7 +62,7 @@ export class WordVote {
 @ObjectType()
 export class WordVoteOutput extends GenericOutput {
   @Field(() => WordVote, { nullable: true })
-  word_vote: WordVote;
+  word_vote: WordVote | null;
 }
 
 @InputType()
@@ -81,7 +81,7 @@ export class WordVoteStatus {
 @ObjectType()
 export class WordVoteStatusOutputRow extends GenericOutput {
   @Field(() => WordVoteStatus, { nullable: true })
-  vote_status: WordVoteStatus;
+  vote_status: WordVoteStatus | null;
 }
 
 @ObjectType()

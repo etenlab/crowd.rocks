@@ -33,8 +33,6 @@ export class TranslationsService {
     langInfo: LanguageInput,
   ): Promise<TranslationWithVoteListOutput> {
     try {
-      console.log(definition_id, from_definition_type_is_word);
-
       if (from_definition_type_is_word) {
         const { error: wordToWordError, word_to_word_tr_with_vote_list } =
           await this.wordToWordTrService.getTranslationsByFromWordDefinitionId(
@@ -239,7 +237,6 @@ export class TranslationsService {
           );
 
         if (wordError !== ErrorType.NoError) {
-          console.log('wordError ==>', wordError);
           return {
             error: wordError,
             word_to_word_translation: null,

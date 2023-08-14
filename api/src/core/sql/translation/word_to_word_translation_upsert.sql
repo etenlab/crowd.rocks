@@ -64,7 +64,7 @@ begin
     select word_to_word_translation_id
     from word_to_word_translations
     where 
-      from_word_definition_id = p_word_definition_id
+      from_word_definition_id = p_from_word_definition_id
       and to_word_definition_id = p_to_word_definition_id
     into p_word_to_word_translation_id;
   end if;

@@ -174,13 +174,13 @@ export class DefinitionVoteUpsertInput {
 @ObjectType()
 export class WordDefinitionVoteOutput extends GenericOutput {
   @Field(() => WordDefinitionVote, { nullable: true })
-  word_definition_vote: WordDefinitionVote;
+  word_definition_vote: WordDefinitionVote | null;
 }
 
 @ObjectType()
 export class PhraseDefinitionVoteOutput extends GenericOutput {
   @Field(() => PhraseDefinitionVote, { nullable: true })
-  phrase_definition_vote: PhraseDefinitionVote;
+  phrase_definition_vote: PhraseDefinitionVote | null;
 }
 
 @ObjectType()
@@ -193,7 +193,7 @@ export class DefinitionVoteStatus {
 @ObjectType()
 export class DefinitionVoteStatusOutputRow extends GenericOutput {
   @Field(() => DefinitionVoteStatus, { nullable: true })
-  vote_status: DefinitionVoteStatus;
+  vote_status: DefinitionVoteStatus | null;
 }
 
 @ObjectType()
