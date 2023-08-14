@@ -13,7 +13,7 @@ interface IToggleVoteStatusParams {
 
 export interface IToggleVoteStatusRes {
   word_to_word_translation_vote_id: number | null;
-  error: string;
+  error: ErrorType;
 }
 
 @Injectable()

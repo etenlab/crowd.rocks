@@ -281,7 +281,10 @@ export class WordToWordTranslationsService {
         token,
       });
     if (error !== ErrorType.NoError || !word_to_word_translation_vote_id) {
-      throw new Error('Error with voting');
+      return {
+        error,
+        vote_status: null,
+      };
     }
 
     const res = await this.wordToWordTranslationRepository.getVotesStatus(
@@ -295,7 +298,7 @@ export class WordToWordTranslationsService {
         word_to_word_translation_id:
           res.vote_status.word_to_word_translation_id,
       },
-      error,
+      error: ErrorType.NoError,
     };
   }
 
