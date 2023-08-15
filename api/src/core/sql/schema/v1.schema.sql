@@ -551,24 +551,15 @@ create table site_text_phrase_definitions (
   unique (phrase_definition_id)
 );
 
-create table site_text_translations(
-  site_text_translation_id bigserial primary key,
-  from_definition_id bigint not null,
-  to_definition_id bigint not null,
-  from_type_is_word bool not null, -- true = word, false = phrase
-  to_type_is_word bool not null, -- true = word, false = phrase
-  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id),
-  unique (from_definition_id, to_definition_id, from_type_is_word, to_type_is_word)
-);
-
 create table site_text_translation_votes(
   site_text_translation_vote_id bigserial primary key,
-  site_text_translation_id bigint not null references site_text_translations(site_text_translation_id),
+  translation_id bigint not null,
+  from_type_is_word bool not null, -- true = word, false = phrase
+  to_type_is_word bool not null, -- true = word, false = phrase
   user_id bigint not null references users(user_id),
   vote bool,
   last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  unique (user_id, site_text_translation_id)
+  unique (user_id, translation_id, from_type_is_word, to_type_is_word)
 );
 
 -- MAPS -------------------------------------------------------------

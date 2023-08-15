@@ -152,9 +152,6 @@ export class DatabaseVersionControlService {
       './src/core/sql/data/site-text-phrase-definition-upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/data/site-text-translation-upsert.sql',
-    );
-    await this.runSqlFile(
       './src/core/sql/data/site-text-translation-vote-upsert.sql',
     );
     await this.runSqlFile(
