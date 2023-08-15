@@ -18,6 +18,7 @@ interface TranslatedCardProps {
   siteTextId: string;
   isWord: boolean;
   languageInfo: LanguageInfo | null;
+  onClick: () => void;
 }
 
 interface Translation {
@@ -170,7 +171,7 @@ export function TranslatedCard(props: TranslatedCardProps) {
   const bestTr = chooseBestTranslation(translations);
 
   return (
-    <StCard>
+    <StCard onClick={() => props.onClick()}>
       <CustomCardHeader>
         <CustomCardTitle>{bestTr?.siteTextlikeString || ''}</CustomCardTitle>
       </CustomCardHeader>
