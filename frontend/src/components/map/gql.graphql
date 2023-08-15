@@ -71,6 +71,11 @@ query GetTranslatedMapContent($id: ID!) {
   }
 }
 
+query IsAdminLoggedIn($input: IsAdminIdInput!) {
+  loggedInIsAdmin(input: $input) {
+    isAdmin
+  }
+}
 
 query GetOrigMapContent($id: ID!) {
   getOrigMapContent(input: { original_map_id: $id }) {

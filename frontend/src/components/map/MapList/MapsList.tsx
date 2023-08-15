@@ -5,12 +5,14 @@ import { MapTools } from './MapsTools';
 import { useCallback, useEffect } from 'react';
 import {
   useGetAllMapsListLazyQuery,
+  useIsAdminLoggedInLazyQuery,
   useMapUploadMutation,
 } from '../../../generated/graphql';
 import { styled } from 'styled-components';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { globals } from '../../../services/globals';
 
 export const MapList: React.FC = () => {
   const router = useIonRouter();
@@ -25,6 +27,8 @@ export const MapList: React.FC = () => {
     actions: { setTargetLanguage },
   } = useAppContext();
 
+  const [isAdmin, { data: isAdminRes }] = useIsAdminLoggedInLazyQuery();
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sendMapFile, { data: uploadResult }] = useMapUploadMutation();
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
@@ -32,6 +36,15 @@ export const MapList: React.FC = () => {
   });
   //const [mapListLang, setMapListLang] = useState<LanguageInfo>();
   //console.log(mapListLang);
+
+  useEffect(() => {
+    const user_id = globals.get_user_id();
+
+    if (!user_id) return;
+
+    const variables = { input: { user_id: String(user_id) } };
+    isAdmin({ variables });
+  }, [isAdmin]);
 
   useEffect(() => {
     const variables = targetLang?.lang
@@ -74,7 +87,9 @@ export const MapList: React.FC = () => {
         onTranslationsClick={() => {
           router.push(`/US/eng/1/maps/translation`);
         }}
-        onAddClick={handleAddMap}
+        onAddClick={
+          isAdminRes?.loggedInIsAdmin.isAdmin ? handleAddMap : undefined
+        }
       />
       <IonList lines="none">
         {allMapsQuery?.getAllMapsList.allMapsList?.length ? (
