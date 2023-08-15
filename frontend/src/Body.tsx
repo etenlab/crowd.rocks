@@ -236,8 +236,7 @@ const Body: React.FC = () => {
           <div className="section">
             <div className="header-content">
               <div className="clickable brand" onClick={goHome}>
-                <span className="crowd">{tr('crowd')}</span>
-                <span className="rocks">{tr('rocks')}</span>
+                <span className="rocks">{tr('crowdrocks')}</span>
               </div>
               <div style={{ display: 'flex', gap: '20px' }}>
                 <IonIcon
