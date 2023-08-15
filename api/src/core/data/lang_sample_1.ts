@@ -332,7 +332,7 @@ export const siteText: {
     hi: 'नया अनुवाद मान अनिवार्य है',
     de: 'Der neue Übersetzungswert ist obligatorisch',
   },
-  '': {
+  'Translated value of definition is mandatory': {
     en: 'Translated value of definition is mandatory',
     ja: '定義の翻訳値は必須です',
     zh: '定义的翻译值是强制性的',
