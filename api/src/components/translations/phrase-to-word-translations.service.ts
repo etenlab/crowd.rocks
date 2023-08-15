@@ -10,7 +10,7 @@ import { WordDefinitionsService } from 'src/components/definitions/word-definiti
 import {
   PhraseToWordTranslationReadOutput,
   PhraseToWordTranslationUpsertOutput,
-  PhraseToWordVoteStatusOutputRow,
+  PhraseToWordTranslationVoteStatusOutputRow,
   PhraseToWordTranslationWithVote,
   PhraseToWordTranslationWithVoteListOutput,
 } from './types';
@@ -136,7 +136,7 @@ export class PhraseToWordTranslationsService {
 
   async getVoteStatus(
     phrase_to_word_translation_id: number,
-  ): Promise<PhraseToWordVoteStatusOutputRow> {
+  ): Promise<PhraseToWordTranslationVoteStatusOutputRow> {
     try {
       const res1 =
         await this.pg.pool.query<GetPhraseToWordTranslationVoteStatus>(
@@ -179,7 +179,7 @@ export class PhraseToWordTranslationsService {
     phrase_to_word_translation_id: number,
     vote: boolean,
     token: string,
-  ): Promise<PhraseToWordVoteStatusOutputRow> {
+  ): Promise<PhraseToWordTranslationVoteStatusOutputRow> {
     try {
       const res1 =
         await this.pg.pool.query<TogglePhraseToWordTranslationVoteStatus>(
