@@ -108,12 +108,12 @@ export const siteText: {
     hi: 'एमएपीएस',
     de: 'Karten',
   },
-  'Upload .svg files and translate all their text into another language': {
-    en: 'Upload .svg files and translate all their text into another language',
-    ja: '.svg ファイルをアップロードし、そのすべてのテキストを別の言語に翻訳します',
-    zh: '上传 .svg 文件并将其所有文本翻译成另一种语言',
-    hi: '.svg फ़ाइलें अपलोड करें और उनके सभी टेक्स्ट का दूसरी भाषा में अनुवाद करें',
-    de: 'Laden Sie .svg-Dateien hoch und übersetzen Sie den gesamten Text in eine andere Sprache',
+  'Translate maps into any language': {
+    en: 'Translate maps into any language',
+    ja: '地図を任意の言語に翻訳',
+    zh: '将地图翻译成任何语言',
+    hi: 'मानचित्रों का किसी भी भाषा में अनुवाद करें',
+    de: 'Übersetzen Sie Karten in jede beliebige Sprache',
   },
   Language: {
     en: 'Language',
@@ -143,12 +143,19 @@ export const siteText: {
     hi: 'वाक्यांश पुस्तक',
     de: 'Sprachführer',
   },
-  'Helpful phrases in a lanuage': {
-    en: 'Helpful phrases in a lanuage',
-    ja: 'ある言語で役立つフレーズ',
-    zh: '语言中有用的短语',
-    hi: 'भाषा में उपयोगी वाक्यांश',
-    de: 'Hilfreiche Sätze in einer Sprache',
+  'Manage the phrases and phrase definitions in a language': {
+    en: 'Manage the phrases and phrase definitions in a language',
+    ja: '言語内のフレーズとフレーズ定義を管理する',
+    zh: '管理语言中的短语和短语定义',
+    hi: 'किसी भाषा में वाक्यांश और वाक्यांश परिभाषाएँ प्रबंधित करें',
+    de: 'Verwalten Sie die Phrasen und Phrasendefinitionen in einer Sprache',
+  },
+  'Translate words and phrases into any language': {
+    en: 'Translate words and phrases into any language',
+    ja: '単語やフレーズをあらゆる言語に翻訳',
+    zh: '将单词和短语翻译成任何语言',
+    hi: 'किसी भी भाषा में शब्दों और वाक्यांशों का अनुवाद करें',
+    de: 'Übersetzen Sie Wörter und Sätze in jede beliebige Sprache',
   },
   'User Interface': {
     en: 'User Interface',
