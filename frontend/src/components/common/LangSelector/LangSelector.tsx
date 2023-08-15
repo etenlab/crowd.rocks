@@ -181,7 +181,7 @@ export function LangSelector({
         <StIonItem button={true} detail={false} id={langSelectorId}>
           <IonLabel>{selectedLangValue}</IonLabel>
         </StIonItem>
-        {onClearClick && (
+        {onClearClick && selectedLangValue !== title && (
           <StIonIcon
             icon={removeCircleOutline}
             onClick={() => {

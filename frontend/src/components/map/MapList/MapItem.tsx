@@ -12,15 +12,11 @@ import {
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 import { downloadFromSrc } from '../../../common/utility';
 
-import { useTr } from '../../../hooks/useTr';
-
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
   mapItem: MapFileOutput;
 };
 
 const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
-  const { tr } = useTr();
-
   const downloadFlagRef = useRef<'original' | 'translated' | null>(null);
 
   const [getOrigMapContent, origMapContent] = useGetOrigMapContentLazyQuery({
@@ -93,21 +89,21 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
 
   return (
     <IonItem {...rest} routerLink={routerLink}>
-      <div>
-        {mapItem.map_file_name}
-        {!mapItem.is_original ? (
-          <IonBadge>
-            {tr('translated to')} {langInfo2String(langInfo)}
-          </IonBadge>
-        ) : null}
-      </div>
-      <IonIcon
-        icon={downloadOutline}
-        onClick={handleDownloadSvg}
-        size="large"
-        color="primary"
-        className="clickable theme-icon"
-      />
+      <StItem>
+        <FileName>{mapItem.map_file_name}</FileName>
+        <div>
+          {!mapItem.is_original ? (
+            <IonBadge>{langInfo2String(langInfo)}</IonBadge>
+          ) : null}
+          <IonIcon
+            icon={downloadOutline}
+            onClick={handleDownloadSvg}
+            size="large"
+            color="primary"
+            className="clickable theme-icon"
+          />
+        </div>
+      </StItem>
     </IonItem>
   );
 };
@@ -116,3 +112,13 @@ export const MapItem = styled(NotStyledMapItem)(() => ({
   border: 'solid 1px #cfcfcf',
   marginTop: '20px',
 }));
+
+const FileName = styled.div`
+  margin-top: 7px;
+`;
+
+const StItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+`;
