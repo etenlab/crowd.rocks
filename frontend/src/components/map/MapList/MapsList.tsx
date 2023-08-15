@@ -71,9 +71,6 @@ export const MapList: React.FC = () => {
         />
       </LangSelectorBox>
       <MapTools
-        onFilterClick={() => {
-          alert('click on filter mock');
-        }}
         onTranslationsClick={() => {
           router.push(`/US/eng/1/maps/translation`);
         }}
