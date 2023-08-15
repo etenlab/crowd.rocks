@@ -325,4 +325,18 @@ export const siteText: {
     hi: 'साइट टेक्स्ट परिभाषा',
     de: 'Site-Textdefinition',
   },
+  'New translation value is mandatory': {
+    en: 'New translation value is mandatory',
+    ja: '新しい翻訳値は必須です',
+    zh: '新的翻译值是强制性的',
+    hi: 'नया अनुवाद मान अनिवार्य है',
+    de: 'Der neue Übersetzungswert ist obligatorisch',
+  },
+  'Translated value of definition is mandatory': {
+    en: 'Translated value of definition is mandatory',
+    ja: '定義の翻訳値は必須です',
+    zh: '定义的翻译值是强制性的',
+    hi: 'परिभाषा का अनुवादित मूल्य अनिवार्य है',
+    de: 'Der übersetzte Definitionswert ist obligatorisch',
+  },
 };
