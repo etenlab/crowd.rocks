@@ -51,9 +51,7 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/maps`,
           icon: mapOutline,
           title: tr('Maps'),
-          description: tr(
-            'Upload .svg files and translate all their text into another language',
-          ),
+          description: tr('Translate maps into any language'),
         },
       ],
     },
@@ -70,13 +68,15 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/phrase-book-list`,
           icon: chatbubbleEllipsesOutline,
           title: tr('Phrase Book'),
-          description: tr('Helpful phrases in a lanuage'),
+          description: tr(
+            'Manage the phrases and phrase definitions in a language',
+          ),
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/translation-list`,
           icon: languageOutline,
           title: tr('Translation'),
-          description: tr('Translate the words and phrases'),
+          description: tr('Translate words and phrases into any language'),
         },
       ],
     },
@@ -113,8 +113,12 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
                     >
                       <IonCardHeader>
                         <IonCardTitle>
-                          <IonIcon icon={item.icon}></IonIcon>
-                          <IonText>{item.title}</IonText>
+                          <div className="home-card-title">
+                            <IonIcon icon={item.icon}></IonIcon>
+                            <div className="home-card-title-text">
+                              <IonText>{item.title}</IonText>
+                            </div>
+                          </div>
                         </IonCardTitle>
                         <IonCardSubtitle>{item.description}</IonCardSubtitle>
                       </IonCardHeader>
