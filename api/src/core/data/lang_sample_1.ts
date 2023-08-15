@@ -3,18 +3,18 @@ export const siteText: {
     [lang: string]: string;
   };
 } = {
-  crowd: {
-    en: 'crowd',
-    ja: '群衆',
-    zh: '人群',
+  crowdrocks: {
+    en: 'crowdrocks',
+    ja: 'クラウドロック',
+    zh: '人群摇滚',
     hi: 'भीड़',
-    de: 'Menge',
+    de: 'crowdrocks',
   },
   rocks: {
     en: 'rocks',
     ja: '岩',
     zh: '岩石',
-    hi: 'चट्टानों',
+    hi: 'क्राउडरॉक',
     de: 'Felsen',
   },
   'App Language': {
