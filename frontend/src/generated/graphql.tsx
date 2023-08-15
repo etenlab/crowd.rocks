@@ -225,6 +225,15 @@ export type GetTranslatedMapContentOutput = {
   translated_map_id?: Maybe<Scalars['ID']['output']>;
 };
 
+export type IsAdminIdInput = {
+  user_id: Scalars['ID']['input'];
+};
+
+export type IsAdminIdOutput = {
+  __typename?: 'IsAdminIdOutput';
+  isAdmin: Scalars['Boolean']['output'];
+};
+
 export type LanguageInput = {
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   filter?: InputMaybe<Scalars['String']['input']>;
@@ -838,6 +847,7 @@ export type Query = {
   getWordVoteStatus: WordVoteStatusOutputRow;
   getWordWithVoteById: WordWithVoteOutput;
   getWordsByLanguage: WordWithVoteListOutput;
+  loggedInIsAdmin: IsAdminIdOutput;
   phraseDefinitionRead: PhraseDefinitionReadOutput;
   phraseRead: PhraseReadOutput;
   phraseToPhraseTranslationRead: PhraseToPhraseTranslationReadOutput;
@@ -1029,6 +1039,11 @@ export type QueryGetWordWithVoteByIdArgs = {
 
 export type QueryGetWordsByLanguageArgs = {
   input: LanguageInput;
+};
+
+
+export type QueryLoggedInIsAdminArgs = {
+  input: IsAdminIdInput;
 };
 
 
@@ -1833,6 +1848,13 @@ export type GetTranslatedMapContentQueryVariables = Exact<{
 
 
 export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'GetTranslatedMapContentOutput', translated_map_id?: string | null, map_file_name: string, created_at: string, created_by: string, content: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+
+export type IsAdminLoggedInQueryVariables = Exact<{
+  input: IsAdminIdInput;
+}>;
+
+
+export type IsAdminLoggedInQuery = { __typename?: 'Query', loggedInIsAdmin: { __typename?: 'IsAdminIdOutput', isAdmin: boolean } };
 
 export type GetOrigMapContentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3168,6 +3190,41 @@ export function useGetTranslatedMapContentLazyQuery(baseOptions?: Apollo.LazyQue
 export type GetTranslatedMapContentQueryHookResult = ReturnType<typeof useGetTranslatedMapContentQuery>;
 export type GetTranslatedMapContentLazyQueryHookResult = ReturnType<typeof useGetTranslatedMapContentLazyQuery>;
 export type GetTranslatedMapContentQueryResult = Apollo.QueryResult<GetTranslatedMapContentQuery, GetTranslatedMapContentQueryVariables>;
+export const IsAdminLoggedInDocument = gql`
+    query IsAdminLoggedIn($input: IsAdminIdInput!) {
+  loggedInIsAdmin(input: $input) {
+    isAdmin
+  }
+}
+    `;
+
+/**
+ * __useIsAdminLoggedInQuery__
+ *
+ * To run a query within a React component, call `useIsAdminLoggedInQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIsAdminLoggedInQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIsAdminLoggedInQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useIsAdminLoggedInQuery(baseOptions: Apollo.QueryHookOptions<IsAdminLoggedInQuery, IsAdminLoggedInQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IsAdminLoggedInQuery, IsAdminLoggedInQueryVariables>(IsAdminLoggedInDocument, options);
+      }
+export function useIsAdminLoggedInLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IsAdminLoggedInQuery, IsAdminLoggedInQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IsAdminLoggedInQuery, IsAdminLoggedInQueryVariables>(IsAdminLoggedInDocument, options);
+        }
+export type IsAdminLoggedInQueryHookResult = ReturnType<typeof useIsAdminLoggedInQuery>;
+export type IsAdminLoggedInLazyQueryHookResult = ReturnType<typeof useIsAdminLoggedInLazyQuery>;
+export type IsAdminLoggedInQueryResult = Apollo.QueryResult<IsAdminLoggedInQuery, IsAdminLoggedInQueryVariables>;
 export const GetOrigMapContentDocument = gql`
     query GetOrigMapContent($id: ID!) {
   getOrigMapContent(input: {original_map_id: $id}) {
@@ -4493,6 +4550,7 @@ export const namedOperations = {
     GetOrigMapWords: 'GetOrigMapWords',
     GetAllMapsList: 'GetAllMapsList',
     GetTranslatedMapContent: 'GetTranslatedMapContent',
+    IsAdminLoggedIn: 'IsAdminLoggedIn',
     GetOrigMapContent: 'GetOrigMapContent',
     PhraseDefinitionRead: 'PhraseDefinitionRead',
     GetPhrasesByLanguage: 'GetPhrasesByLanguage',
