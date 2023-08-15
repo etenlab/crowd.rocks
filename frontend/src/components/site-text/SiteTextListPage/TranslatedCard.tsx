@@ -6,7 +6,13 @@ import {
   PhraseDefinition,
   WordDefinition,
 } from '../../../generated/graphql';
-import { Card } from '../../common/Card';
+import {
+  IonCardHeader,
+  IonCardTitle,
+  IonCard,
+  IonCardContent,
+} from '@ionic/react';
+import styled from 'styled-components';
 
 interface TranslatedCardProps {
   siteTextId: string;
@@ -164,9 +170,28 @@ export function TranslatedCard(props: TranslatedCardProps) {
   const bestTr = chooseBestTranslation(translations);
 
   return (
-    <Card
-      content={bestTr?.siteTextlikeString || ''}
-      description={bestTr?.definitionlikeString || ''}
-    />
+    <StCard>
+      <CustomCardHeader>
+        <CustomCardTitle>{bestTr?.siteTextlikeString || ''}</CustomCardTitle>
+      </CustomCardHeader>
+      <CustomCardContent>
+        <div>{bestTr?.definitionlikeString || ''}</div>
+      </CustomCardContent>
+    </StCard>
   );
 }
+const StCard = styled(IonCard)(() => ({
+  width: '90%',
+  height: '90px',
+}));
+
+export const CustomCardTitle = styled(IonCardTitle)(() => ({
+  fontSize: '17px',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+}));
+
+export const CustomCardContent = styled(IonCardContent)(() => ({}));
+
+export const CustomCardHeader = styled(IonCardHeader)(() => ({}));
