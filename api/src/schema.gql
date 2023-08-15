@@ -199,6 +199,14 @@ type GetTranslatedMapContentOutput {
   translated_map_id: ID
 }
 
+input IsAdminIdInput {
+  user_id: ID!
+}
+
+type IsAdminIdOutput {
+  isAdmin: Boolean!
+}
+
 input LanguageInput {
   dialect_code: String
   filter: String
@@ -547,6 +555,7 @@ type Query {
   getWordVoteStatus(word_id: ID!): WordVoteStatusOutputRow!
   getWordWithVoteById(word_id: ID!): WordWithVoteOutput!
   getWordsByLanguage(input: LanguageInput!): WordWithVoteListOutput!
+  loggedInIsAdmin(input: IsAdminIdInput!): IsAdminIdOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!
   phraseRead(input: PhraseReadInput!): PhraseReadOutput!
   phraseToPhraseTranslationRead(id: ID!): PhraseToPhraseTranslationReadOutput!
