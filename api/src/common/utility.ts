@@ -1,5 +1,3 @@
-import { sign } from 'jsonwebtoken';
-
 export function createToken(length = 64): string {
   let result = '';
   const characters =
@@ -48,4 +46,8 @@ export function get_avatar_image_url(object_key: string | null): string | null {
     return `https://[TODO]-public.s3.us-east-2.amazonaws.com/${object_key}`;
   }
   return null;
+}
+
+export function calc_vote_weight(upvotes: number, downvotes: number): number {
+  return upvotes * 2 - downvotes;
 }
