@@ -6,9 +6,7 @@ import { PostgresService } from 'src/core/postgres.service';
 import { PhraseDefinitionsService } from 'src/components/definitions/phrase-definitions.service';
 
 import {
-  SiteTextPhraseDefinitionReadOutput,
-  SiteTextPhraseDefinitionUpsertInput,
-  SiteTextPhraseDefinitionUpsertOutput,
+  SiteTextPhraseDefinitionOutput,
   SiteTextPhraseDefinitionListOutput,
 } from './types';
 
@@ -30,7 +28,7 @@ export class SiteTextPhraseDefinitionsService {
     private phraseDefinitionService: PhraseDefinitionsService,
   ) {}
 
-  async read(id: number): Promise<SiteTextPhraseDefinitionReadOutput> {
+  async read(id: number): Promise<SiteTextPhraseDefinitionOutput> {
     try {
       const res1 =
         await this.pg.pool.query<GetSiteTextPhraseDefinitionObjectById>(
@@ -81,14 +79,14 @@ export class SiteTextPhraseDefinitionsService {
   }
 
   async upsert(
-    input: SiteTextPhraseDefinitionUpsertInput,
+    phrase_definition_id: number,
     token: string,
-  ): Promise<SiteTextPhraseDefinitionUpsertOutput> {
+  ): Promise<SiteTextPhraseDefinitionOutput> {
     try {
       const res =
         await this.pg.pool.query<SiteTextPhraseDefinitionUpsertProcedureOutputRow>(
           ...callSiteTextPhraseDefinitionUpsertProcedure({
-            phrase_definition_id: +input.phrase_definition_id,
+            phrase_definition_id: phrase_definition_id,
             token: token,
           }),
         );
