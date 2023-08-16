@@ -1,13 +1,11 @@
 import { HttpRequest } from '@aws-sdk/protocol-http';
 import { S3RequestPresigner } from '@aws-sdk/s3-request-presigner';
 import { parseUrl } from '@aws-sdk/url-parser';
-import { Sha256 } from '@aws-crypto/sha256-browser';
 import { Hash } from '@aws-sdk/hash-node';
 import { formatUrl } from '@aws-sdk/util-format-url';
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from './config.service';
-import { createToken } from '../common/utility';
 
 @Injectable()
 export class S3Service {
