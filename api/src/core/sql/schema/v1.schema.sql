@@ -596,6 +596,7 @@ create table original_maps(
   language_code varchar(32) not null,
   dialect_code varchar(32),
   geo_code varchar(32),
+  preview_file_id bigint references files(file_id),
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
   content text not null
@@ -620,6 +621,7 @@ create table original_map_phrases(
 create table translated_maps(
   translated_map_id bigserial primary key,
   original_map_id bigint not null references original_maps(original_map_id),
+  preview_file_id bigint references files(file_id),
   language_code varchar(32) not null,
   dialect_code varchar(32),
   geo_code varchar(32),
