@@ -9,6 +9,13 @@ interface ITagInfo {
   descriptions?: Array<string>;
 }
 
+interface IDefinition {
+  siteTextId: string;
+  isWord: boolean;
+  siteTextlikeString: string;
+  definitionlikeString: string;
+}
+
 type TLang = Omit<ITagInfo, 'tag'> & { tag: string }; // make tag mandatory for Lang tag
 type TRegion = ITagInfo;
 type TDialect = ITagInfo;
