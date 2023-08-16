@@ -588,9 +588,17 @@ create table original_map_words(
   original_map_word_id bigserial primary key,
   original_map_id bigint not null references original_maps(original_map_id),
   word_id bigint not null references words(word_id),
-  updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  unique (word_id, original_map_id)
 );
-ALTER TABLE public.original_map_words ADD CONSTRAINT original_map_word_unq UNIQUE (word_id,original_map_id);
+
+create table original_map_phrases(
+  original_map_phrase_id bigserial primary key,
+  original_map_id bigint not null references original_maps(original_map_id),
+  phrase_id bigint not null references phrases(phrase_id),
+  updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  unique (phrase_id, original_map_id)
+);
 
 create table translated_maps(
   translated_map_id bigserial primary key,
@@ -600,8 +608,6 @@ create table translated_maps(
   geo_code varchar(32),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  content text not null
+  content text not null,
+  unique nulls not distinct (original_map_id, language_code, dialect_code, geo_code)
 );
-CREATE UNIQUE INDEX original_map_id_lang_unq
-ON public.translated_maps (original_map_id, language_code, dialect_code, geo_code)
-nulls not distinct
