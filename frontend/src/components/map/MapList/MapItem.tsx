@@ -100,9 +100,11 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
       <StItem>
         <FileName>{mapItem.map_file_name}</FileName>
         <div>
-          {!mapItem.is_original ? (
+          {mapItem.is_original ? (
+            <OrigBadge>Original</OrigBadge>
+          ) : (
             <IonBadge>{langInfo2String(langInfo)}</IonBadge>
-          ) : null}
+          )}
           <IonIcon
             icon={downloadOutline}
             onClick={handleDownloadSvg}
@@ -130,3 +132,7 @@ const StItem = styled.div`
   justify-content: space-between;
   width: 100%;
 `;
+
+const OrigBadge = styled(IonBadge)(() => ({
+  background: 'purple',
+}));
