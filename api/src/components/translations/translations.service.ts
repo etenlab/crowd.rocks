@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
 import { ErrorType } from 'src/common/types';
+import { calc_vote_weight } from 'src/common/utility';
+
 import { LanguageInput } from 'src/components/common/types';
 
 import { DefinitionsService } from 'src/components/definitions/definitions.service';
@@ -14,7 +16,12 @@ import {
   TranslationWithVoteListOutput,
   TranslationVoteStatusOutputRow,
   ToDefinitionInput,
+  TranslationWithVoteOutput,
   TranslationUpsertOutput,
+  WordToWordTranslationWithVote,
+  WordToPhraseTranslationWithVote,
+  PhraseToWordTranslationWithVote,
+  PhraseToPhraseTranslationWithVote,
 } from './types';
 
 @Injectable()
@@ -112,6 +119,76 @@ export class TranslationsService {
     return {
       error: ErrorType.UnknownError,
       translation_with_vote_list: null,
+    };
+  }
+
+  async getRecommendedTranslationFromDefinitionID(
+    from_definition_id: number,
+    from_type_is_word: boolean,
+    language_code: string,
+    dialect_code: string | null,
+    geo_code: string | null,
+  ): Promise<TranslationWithVoteOutput> {
+    try {
+      const { error, translation_with_vote_list } =
+        await this.getTranslationsByFromDefinitionId(
+          from_definition_id,
+          from_type_is_word,
+          {
+            language_code,
+            dialect_code,
+            geo_code,
+          },
+        );
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error: error,
+          translation_with_vote: null,
+        };
+      }
+
+      let mostVoted:
+        | WordToWordTranslationWithVote
+        | WordToPhraseTranslationWithVote
+        | PhraseToWordTranslationWithVote
+        | PhraseToPhraseTranslationWithVote
+        | null = null;
+
+      for (const translation_with_vote of translation_with_vote_list) {
+        if (mostVoted !== null) {
+          const a = calc_vote_weight(mostVoted.upvotes, mostVoted.downvotes);
+          const b = calc_vote_weight(
+            translation_with_vote.upvotes,
+            translation_with_vote.downvotes,
+          );
+
+          if (a > b) {
+            continue;
+          }
+        }
+
+        mostVoted = translation_with_vote;
+      }
+
+      if (mostVoted === null) {
+        return {
+          error: ErrorType.NoError,
+          translation_with_vote: null,
+        };
+      }
+
+      return {
+        error: ErrorType.NoError,
+        translation_with_vote: mostVoted,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      translation_with_vote: null,
     };
   }
 

@@ -39,6 +39,7 @@ import {
   TranslationVoteStatusOutputRow,
   TranslationUpsertOutput,
   ToDefinitionInput,
+  TranslationWithVoteOutput,
 } from './types';
 
 @Injectable()
@@ -391,6 +392,30 @@ export class TranslationsResolver {
       +definition_id,
       from_definition_type_is_word,
       langInfo,
+    );
+  }
+
+  @Query(() => TranslationWithVoteOutput)
+  async getRecommendedTranslationFromDefinitionID(
+    @Args('from_definition_id', { type: () => ID })
+    from_definition_id: string,
+    @Args('from_type_is_word', { type: () => Boolean })
+    from_type_is_word: boolean,
+    @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
+  ): Promise<TranslationWithVoteOutput> {
+    console.log(
+      'getTranslationsByFromDefinitionId resolver',
+      from_definition_id,
+      from_type_is_word,
+      JSON.stringify(langInfo, null, 2),
+    );
+
+    return this.translationService.getRecommendedTranslationFromDefinitionID(
+      +from_definition_id,
+      from_type_is_word,
+      langInfo.language_code,
+      langInfo.dialect_code,
+      langInfo.geo_code,
     );
   }
 

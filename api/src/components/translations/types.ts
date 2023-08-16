@@ -308,6 +308,17 @@ export const TranslationWithVote = createUnionType({
 });
 
 @ObjectType()
+export class TranslationWithVoteOutput extends GenericOutput {
+  @Field(() => TranslationWithVote, { nullable: true })
+  translation_with_vote:
+    | WordToWordTranslationWithVote
+    | WordToPhraseTranslationWithVote
+    | PhraseToWordTranslationWithVote
+    | PhraseToPhraseTranslationWithVote
+    | null;
+}
+
+@ObjectType()
 export class WordToWordTranslationWithVoteListOutput extends GenericOutput {
   @Field(() => [WordToWordTranslationWithVote], { nullable: true })
   word_to_word_tr_with_vote_list: WordToWordTranslationWithVote[] | null;
