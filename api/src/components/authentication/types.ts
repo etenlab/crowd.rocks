@@ -10,6 +10,15 @@ export class Session {
 }
 
 @InputType()
+export class IsAdminIdInput {
+  @Field(() => ID) readonly user_id: number;
+}
+@ObjectType()
+export class IsAdminIdOutput {
+  @Field() readonly isAdmin: boolean;
+}
+
+@InputType()
 export class RegisterInput {
   @Field() readonly email: string;
   @Field() readonly password: string;

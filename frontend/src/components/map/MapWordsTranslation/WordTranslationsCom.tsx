@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Caption } from '../../common/Caption/Caption';
 import { WordCard } from '../../word/WordCard/WordCard';
-import { IonButton, IonIcon, IonInput } from '@ionic/react';
+import { IonButton, IonIcon, IonInput, useIonToast } from '@ionic/react';
 import { chatbubbleEllipses } from 'ionicons/icons';
 import { VoteButtonsVertical } from '../../common/VoteButtonsVertical/VoteButtonsVertical';
 import {
@@ -10,7 +10,6 @@ import {
   useAddWordAsTranslationForWordMutation,
   useToggleWordTranslationVoteStatusMutation,
 } from '../../../generated/graphql';
-import { DEFAULT_MAP_WORD_DEFINITION } from '../../../const/mapsConst';
 import { useTr } from '../../../hooks/useTr';
 
 interface WordTranslationsComProps {
@@ -27,6 +26,7 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
   fetchMapWordsFn,
 }: WordTranslationsComProps) => {
   const { tr } = useTr();
+  const [present] = useIonToast();
 
   const newTrRef = useRef<HTMLIonInputElement | null>(null);
   const newDefinitionRef = useRef<HTMLIonInputElement | null>(null);
@@ -62,7 +62,12 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
 
   const handleNewTranslation = async () => {
     if (!newTrRef?.current?.value) {
-      alert(`New translation value is mandatory`);
+      present({
+        message: `${tr('New translation value is mandatory')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'warning',
+      });
       return;
     }
     if (!wordWithTranslations.definition_id) {
@@ -70,7 +75,12 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
       return;
     }
     if (!newDefinitionRef.current?.value) {
-      alert(`Not found newDefinitionRef.current?.value`);
+      present({
+        message: `${tr('Translated value of definition is mandatory')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'warning',
+      });
       return;
     }
 
@@ -112,7 +122,10 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
     <>
       <Caption handleBackClick={() => onBackClick()}>Translations</Caption>
       <StSourceWordDiv>
-        <WordCard word={wordWithTranslations?.word} />
+        <WordCard
+          word={wordWithTranslations?.word}
+          definition={wordWithTranslations?.definition}
+        />
         <StIonIcon
           icon={chatbubbleEllipses}
           onClick={() => alert('mock discussion')}
@@ -150,8 +163,6 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
           label={tr('Definition')}
           labelPlacement="floating"
           ref={newDefinitionRef}
-          value={DEFAULT_MAP_WORD_DEFINITION}
-          disabled
         />
         <StButton onClick={() => handleNewTranslation()}>
           {tr('Submit')}

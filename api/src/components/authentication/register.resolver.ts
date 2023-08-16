@@ -1,11 +1,17 @@
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { createToken, getBearer, validateEmail } from 'src/common/utility';
 import { PostgresService } from 'src/core/postgres.service';
-import { RegisterOutput, RegisterInput } from './types';
+import {
+  RegisterOutput,
+  RegisterInput,
+  IsAdminIdInput,
+  IsAdminIdOutput,
+} from './types';
 import { hash } from 'argon2';
 import { ErrorType } from 'src/common/types';
 import { SesService } from 'src/core/ses.service';
 import { ConfigService } from 'src/core/config.service';
+import { AuthenticationService } from './authentication.service';
 
 @Resolver(RegisterOutput)
 export class RegisterResolver {
@@ -13,7 +19,21 @@ export class RegisterResolver {
     private pg: PostgresService,
     private ses: SesService,
     private config: ConfigService,
+    private authenticationService?: AuthenticationService,
   ) {}
+
+  @Query(() => IsAdminIdOutput)
+  async loggedInIsAdmin(
+    @Args('input') input: IsAdminIdInput,
+  ): Promise<IsAdminIdOutput> {
+    const adminId = await this.authenticationService.get_admin_id();
+    console.log(`userId: ${input.user_id}`);
+    console.log(`adminId: ${adminId}`);
+    if (adminId == input.user_id) {
+      return { isAdmin: true };
+    }
+    return { isAdmin: false };
+  }
 
   @Mutation(() => RegisterOutput)
   async register(

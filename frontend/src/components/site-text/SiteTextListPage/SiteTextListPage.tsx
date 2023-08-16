@@ -40,6 +40,8 @@ import { useTr } from '../../../hooks/useTr';
 
 import { Input } from '../../common/styled';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { TranslatedCard } from './TranslatedCard';
+import React from 'react';
 
 interface SiteTextListPageProps
   extends RouteComponentProps<{
@@ -321,22 +323,37 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
 
   const cardListComs = definitions
     ? definitions.map((definition) => (
-        <CardContainer
+        <React.Fragment
           key={`${definition.isWord ? 'word' : 'phrase'}-${
             definition.siteTextId
           }`}
         >
-          <Card
-            content={definition.siteTextlikeString}
-            description={definition.definitionlikeString}
-            onClick={() =>
-              handleGoToDefinitionDetail(
-                definition.siteTextId,
-                definition.isWord,
-              )
-            }
-          />
-        </CardContainer>
+          <CardContainer>
+            <Card
+              content={definition.siteTextlikeString}
+              description={definition.definitionlikeString}
+              onClick={() =>
+                handleGoToDefinitionDetail(
+                  definition.siteTextId,
+                  definition.isWord,
+                )
+              }
+            />
+          </CardContainer>
+          <CardContainer>
+            <TranslatedCard
+              siteTextId={definition.siteTextId}
+              isWord={definition.isWord}
+              languageInfo={targetLang}
+              onClick={() =>
+                handleGoToDefinitionDetail(
+                  definition.siteTextId,
+                  definition.isWord,
+                )
+              }
+            />
+          </CardContainer>
+        </React.Fragment>
       ))
     : null;
 

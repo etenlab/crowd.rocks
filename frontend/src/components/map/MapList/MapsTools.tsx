@@ -1,5 +1,5 @@
-import { IonIcon } from '@ionic/react';
-import { funnelOutline, logoAlipay, logoAmplify } from 'ionicons/icons';
+import { IonButton, IonIcon } from '@ionic/react';
+import { funnelOutline } from 'ionicons/icons';
 import React from 'react';
 import { styled } from 'styled-components';
 import { FileUploadBtn } from '../../common/FileUploadBtn/FileUploadBtn';
@@ -21,10 +21,9 @@ export const MapTools: React.FC<TMapToolsParams> = ({
         <StIonIcon icon={funnelOutline} onClick={() => onFilterClick()} />
       ) : null}
       {onTranslationsClick ? (
-        <div onClick={() => onTranslationsClick()}>
-          <StIonIcon icon={logoAmplify} />
-          <StIonIcon icon={logoAlipay} size="50px" />
-        </div>
+        <StIonButton onClick={() => onTranslationsClick()}>
+          Translate
+        </StIonButton>
       ) : null}
       {onAddClick ? (
         <FileUploadBtn accept=".svg" onSelect={onAddClick} />
@@ -37,10 +36,14 @@ const StyledMapsToolsBox = styled.div`
   font-size: 30px;
   justify-content: space-between;
   margin-top: 20px;
-  padding-left: 10px;
+  padding-left: 37%;
   width: 100%;
   display: flex;
 `;
+
+const StIonButton = styled(IonButton)(() => ({
+  width: '200px',
+}));
 
 const StIonIcon = styled(IonIcon)(() => ({
   cursor: 'pointer',

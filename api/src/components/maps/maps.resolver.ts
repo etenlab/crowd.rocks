@@ -19,6 +19,7 @@ import {
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
+import { ErrorType } from 'src/common/types';
 
 @Injectable()
 @Resolver(Map)
@@ -34,11 +35,21 @@ export class MapsResolver {
     { createReadStream, filename: map_file_name }: FileUpload,
     @Context() req: any,
   ): Promise<MapFileOutput> {
-    console.log(
-      `request bearer token: `,
-      getBearer(req),
-      ` but temporary using mocked admin token`,
+    const bearer = getBearer(req);
+    console.log(`bearer: ${bearer}`);
+
+    const user_id = await this.authenticationService.get_user_id_from_bearer(
+      bearer,
     );
+
+    const admin_id = await this.authenticationService.get_admin_id();
+    console.log(`user_id ${user_id}`);
+    console.log(`admin_id ${admin_id}`);
+
+    if (admin_id !== user_id) {
+      throw new Error(`${ErrorType.Unauthorized}`);
+    }
+
     const userToken = await this.authenticationService.getAdminToken();
 
     const map = await this.mapService.parseAndSaveNewMap({
