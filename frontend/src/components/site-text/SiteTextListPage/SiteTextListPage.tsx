@@ -14,6 +14,9 @@ import {
   useIonToast,
   InputCustomEvent,
   InputChangeEventDetail,
+  IonFab,
+  IonFabButton,
+  IonIcon,
 } from '@ionic/react';
 
 import { Caption } from '../../common/Caption/Caption';
@@ -26,6 +29,7 @@ import {
   SiteTextDefinitionListOutput,
   GetAllSiteTextDefinitionsDocument,
   ErrorType,
+  useIsAdminLoggedInQuery,
 } from '../../../generated/graphql';
 
 import {
@@ -34,6 +38,7 @@ import {
   AppLanguageShowerContainer,
   CardListContainer,
   CardContainer,
+  FabContainer,
 } from './styled';
 
 import { useTr } from '../../../hooks/useTr';
@@ -42,6 +47,9 @@ import { Input } from '../../common/styled';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { TranslatedCard } from './TranslatedCard';
 import React from 'react';
+import { sortSiteTextFn } from '../../../common/langUtils';
+import { add } from 'ionicons/icons';
+import { globals } from '../../../services/globals';
 
 interface SiteTextListPageProps
   extends RouteComponentProps<{
@@ -70,6 +78,14 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
 
   const modal = useRef<HTMLIonModalElement>(null);
   const input = useRef<HTMLIonInputElement>(null);
+
+  const [showModal, setShowModal] = useState(false);
+
+  const user_id = globals.get_user_id();
+  const variables = { input: { user_id: String(user_id) } };
+  const { data: isAdminRes } = useIsAdminLoggedInQuery({
+    variables: variables,
+  });
 
   const [getAllSiteTextDefinitions, { data, error, loading, called }] =
     useGetAllSiteTextDefinitionsLazyQuery();
@@ -273,6 +289,7 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
         geo_code: null,
       },
     });
+    setShowModal(false);
   };
 
   const handleFilterChange = (
@@ -317,6 +334,7 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
         });
       }
     }
+    tempDefinitions.sort(sortSiteTextFn);
 
     return tempDefinitions;
   }, [allSiteTextDefinitions]);
@@ -400,21 +418,24 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
               onIonInput={handleFilterChange}
             />
 
-            <br />
-
-            <IonButton id="open-site-text-modal" expand="block">
-              + {tr('Add More Site Text')}
-            </IonButton>
-
+            {isAdminRes?.loggedInIsAdmin.isAdmin && (
+              <FabContainer className="section">
+                <IonFab>
+                  <IonFabButton onClick={() => setShowModal(true)}>
+                    <IonIcon icon={add} />
+                  </IonFabButton>
+                </IonFab>
+              </FabContainer>
+            )}
             <br />
 
             <CardListContainer>{cardListComs}</CardListContainer>
 
-            <IonModal ref={modal} trigger="open-site-text-modal">
+            <IonModal ref={modal} isOpen={showModal}>
               <IonHeader>
                 <IonToolbar>
                   <IonButtons slot="start">
-                    <IonButton onClick={() => modal.current?.dismiss()}>
+                    <IonButton onClick={() => setShowModal(false)}>
                       {tr('Cancel')}
                     </IonButton>
                   </IonButtons>
