@@ -165,6 +165,7 @@ export class DatabaseVersionControlService {
     await this.setVersionNumber(1);
 
     await this.registerUser('admin@crowd.rocks', 'Admin', 'asdfasdf');
+    await this.registerUser('anonymous@crowd.rocks', 'Anonymous', 'asdfasdf');
 
     // load data
     await this.dataloader.loadSiteTextData();
