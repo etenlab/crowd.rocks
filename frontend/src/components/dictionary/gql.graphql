@@ -1,3 +1,19 @@
+fragment WordFragment on Word {
+  word_id
+  word
+  language_code
+  dialect_code
+  geo_code
+}
+
+fragment WordDefinitionFragment on WordDefinition {
+  word_definition_id
+  word {
+    ...WordFragment
+  }
+  definition
+}
+
 fragment WordWithDefinitionsFragment on WordWithDefinitions {
   word_id
   word
