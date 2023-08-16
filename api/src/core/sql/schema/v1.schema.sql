@@ -446,10 +446,24 @@ create table phrase_to_phrase_translations_votes(
   unique (user_id, phrase_to_phrase_translation_id)
 );
 
+-- FILES -------------------------------------------------------------
+
+create table files (
+  file_id bigserial primary key, 
+  file_name varchar(64) not null, 
+  file_size bigint not null, 
+  file_type varchar(16) not null, 
+  file_url varchar(128) not null,
+  file_hash varchar(255) not null,
+  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id)
+);
+
 -- DOCUMENTS -------------------------------------------------------------
 
 create table documents(
   document_id bigserial primary key,
+  file_id bigint not null references files(file_id),
   language_code varchar(32) not null,
   dialect_code varchar(32),
   geo_code varchar(32),
