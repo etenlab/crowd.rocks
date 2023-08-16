@@ -1,4 +1,11 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+  Fragment,
+} from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
@@ -23,8 +30,13 @@ import { Card } from '../../common/Card';
 import {
   useGetAllSiteTextDefinitionsLazyQuery,
   useSiteTextUpsertMutation,
+} from '../../../generated/graphql';
+
+import { GetAllSiteTextDefinitionsDocument } from '../../../generated/graphql';
+
+import {
   SiteTextDefinitionListOutput,
-  GetAllSiteTextDefinitionsDocument,
+  GetAllSiteTextDefinitionsQuery,
   ErrorType,
 } from '../../../generated/graphql';
 
@@ -41,7 +53,6 @@ import { useTr } from '../../../hooks/useTr';
 import { Input } from '../../common/styled';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { TranslatedCard } from './TranslatedCard';
-import React from 'react';
 
 interface SiteTextListPageProps
   extends RouteComponentProps<{
@@ -78,57 +89,55 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
       if (
         !errors &&
         upsertData &&
-        upsertData.siteTextUpsert.error === ErrorType.NoError &&
-        data &&
-        data.getAllSiteTextDefinitions.error === ErrorType.NoError
+        upsertData.siteTextUpsert.error === ErrorType.NoError
       ) {
-        let wordDefinitionList =
-          data.getAllSiteTextDefinitions.site_text_word_definition_list;
-        let phraseDefinitionList =
-          data.getAllSiteTextDefinitions.site_text_phrase_definition_list;
+        const newSiteTextDefinition =
+          upsertData.siteTextUpsert.site_text_definition;
 
-        if (upsertData.siteTextUpsert.site_text_word_definition) {
-          const newSiteTextWordDefinition =
-            upsertData.siteTextUpsert.site_text_word_definition;
-
-          wordDefinitionList = [
-            ...wordDefinitionList.filter(
-              (wordDefinition) =>
-                wordDefinition?.site_text_id !==
-                newSiteTextWordDefinition.site_text_id,
-            ),
-            newSiteTextWordDefinition,
-          ];
+        if (!newSiteTextDefinition) {
+          return;
         }
 
-        if (upsertData.siteTextUpsert.site_text_phrase_definition) {
-          const newSiteTextPhraseDefinition =
-            upsertData.siteTextUpsert.site_text_phrase_definition;
-
-          phraseDefinitionList = [
-            ...phraseDefinitionList.filter(
-              (phraseDefinition) =>
-                phraseDefinition?.site_text_id !==
-                newSiteTextPhraseDefinition.site_text_id,
-            ),
-            newSiteTextPhraseDefinition,
-          ];
-        }
-
-        cache.writeQuery({
-          query: GetAllSiteTextDefinitionsDocument,
-          data: {
-            ...data,
-            getAllSiteTextDefinitions: {
-              ...data.getAllSiteTextDefinitions,
-              site_text_phrase_definition_list: phraseDefinitionList,
-              site_text_word_definition_list: wordDefinitionList,
+        cache.updateQuery<GetAllSiteTextDefinitionsQuery>(
+          {
+            query: GetAllSiteTextDefinitionsDocument,
+            variables: {
+              filter,
             },
           },
-          variables: {
-            filter,
+          (data) => {
+            if (
+              data &&
+              data.getAllSiteTextDefinitions.site_text_definition_list
+            ) {
+              const alreadyExists =
+                data.getAllSiteTextDefinitions.site_text_definition_list.filter(
+                  (site_text_definition) =>
+                    site_text_definition.__typename ===
+                      newSiteTextDefinition.__typename &&
+                    site_text_definition.site_text_id ===
+                      newSiteTextDefinition.site_text_id,
+                );
+
+              if (alreadyExists.length > 0) {
+                return data;
+              }
+
+              return {
+                ...data,
+                getAllSiteTextDefinitions: {
+                  ...data.getAllSiteTextDefinitions,
+                  site_text_definition_list: [
+                    ...data.getAllSiteTextDefinitions.site_text_definition_list,
+                    newSiteTextDefinition,
+                  ],
+                },
+              };
+            } else {
+              return data;
+            }
           },
-        });
+        );
 
         present({
           message: tr('Success at creating new site text!'),
@@ -281,7 +290,7 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
     setFilter(event.detail.value!);
   };
 
-  const definitions = useMemo(() => {
+  const cardListComs = useMemo(() => {
     const tempDefinitions: {
       siteTextId: string;
       isWord: boolean;
@@ -289,73 +298,72 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
       definitionlikeString: string;
     }[] = [];
 
-    if (!allSiteTextDefinitions) {
-      return tempDefinitions;
+    if (
+      !allSiteTextDefinitions ||
+      !allSiteTextDefinitions.site_text_definition_list
+    ) {
+      return null;
     }
 
-    for (const siteTextWordDefinition of allSiteTextDefinitions.site_text_word_definition_list) {
-      if (siteTextWordDefinition) {
-        tempDefinitions.push({
-          siteTextId: siteTextWordDefinition.site_text_id,
-          isWord: true,
-          siteTextlikeString: siteTextWordDefinition.word_definition.word.word,
-          definitionlikeString:
-            siteTextWordDefinition.word_definition.definition,
-        });
+    for (const siteTextDefinition of allSiteTextDefinitions.site_text_definition_list) {
+      switch (siteTextDefinition.__typename) {
+        case 'SiteTextWordDefinition': {
+          tempDefinitions.push({
+            siteTextId: siteTextDefinition.site_text_id,
+            isWord: true,
+            siteTextlikeString: siteTextDefinition.word_definition.word.word,
+            definitionlikeString: siteTextDefinition.word_definition.definition,
+          });
+          break;
+        }
+        case 'SiteTextPhraseDefinition': {
+          tempDefinitions.push({
+            siteTextId: siteTextDefinition.site_text_id,
+            isWord: false,
+            siteTextlikeString:
+              siteTextDefinition.phrase_definition.phrase.phrase,
+            definitionlikeString:
+              siteTextDefinition.phrase_definition.definition,
+          });
+          break;
+        }
       }
     }
 
-    for (const siteTextPhraseDefinition of allSiteTextDefinitions.site_text_phrase_definition_list) {
-      if (siteTextPhraseDefinition) {
-        tempDefinitions.push({
-          siteTextId: siteTextPhraseDefinition.site_text_id,
-          isWord: false,
-          siteTextlikeString:
-            siteTextPhraseDefinition.phrase_definition.phrase.phrase,
-          definitionlikeString:
-            siteTextPhraseDefinition.phrase_definition.definition,
-        });
-      }
-    }
-
-    return tempDefinitions;
-  }, [allSiteTextDefinitions]);
-
-  const cardListComs = definitions
-    ? definitions.map((definition) => (
-        <React.Fragment
-          key={`${definition.isWord ? 'word' : 'phrase'}-${
-            definition.siteTextId
-          }`}
-        >
-          <CardContainer>
-            <Card
-              content={definition.siteTextlikeString}
-              description={definition.definitionlikeString}
-              onClick={() =>
-                handleGoToDefinitionDetail(
-                  definition.siteTextId,
-                  definition.isWord,
-                )
-              }
-            />
-          </CardContainer>
-          <CardContainer>
-            <TranslatedCard
-              siteTextId={definition.siteTextId}
-              isWord={definition.isWord}
-              languageInfo={targetLang}
-              onClick={() =>
-                handleGoToDefinitionDetail(
-                  definition.siteTextId,
-                  definition.isWord,
-                )
-              }
-            />
-          </CardContainer>
-        </React.Fragment>
-      ))
-    : null;
+    return tempDefinitions.map((definition) => (
+      <Fragment
+        key={`${definition.isWord ? 'word' : 'phrase'}-${
+          definition.siteTextId
+        }`}
+      >
+        <CardContainer>
+          <Card
+            content={definition.siteTextlikeString}
+            description={definition.definitionlikeString}
+            onClick={() =>
+              handleGoToDefinitionDetail(
+                definition.siteTextId,
+                definition.isWord,
+              )
+            }
+          />
+        </CardContainer>
+        <CardContainer>
+          <TranslatedCard
+            siteTextId={definition.siteTextId}
+            isWord={definition.isWord}
+            languageInfo={targetLang}
+            onClick={() =>
+              handleGoToDefinitionDetail(
+                definition.siteTextId,
+                definition.isWord,
+              )
+            }
+          />
+        </CardContainer>
+      </Fragment>
+    ));
+  }, [allSiteTextDefinitions, handleGoToDefinitionDetail, targetLang]);
 
   return (
     <IonPage>
