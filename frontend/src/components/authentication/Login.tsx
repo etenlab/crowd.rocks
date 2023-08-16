@@ -16,10 +16,19 @@ import { login_change } from '../../services/subscriptions';
 import './Login.css';
 
 import { useTr } from '../../hooks/useTr';
+import { useAppContext } from '../../hooks/useAppContext';
 
 const Login: React.FC = () => {
   const history = useHistory();
   const { tr } = useTr();
+
+  const {
+    states: {
+      global: {
+        langauges: { appLanguage },
+      },
+    },
+  } = useAppContext();
 
   useIonViewWillEnter(() => {
     document.title = tr('Login');
@@ -89,7 +98,7 @@ const Login: React.FC = () => {
         localStorage.removeItem('login-redirect');
         history.goBack();
       } else {
-        history.push('/US/eng/1/home');
+        history.push(`/US/${appLanguage.lang.tag}/1/home`);
       }
 
       return;
@@ -114,11 +123,11 @@ const Login: React.FC = () => {
   }
 
   const click_reset_password = () => {
-    history.push('/US/eng/1/reset-email-request');
+    history.push(`/US/${appLanguage.lang.tag}/1/reset-email-request`);
   };
 
   const click_register = () => {
-    history.push('/US/eng/1/register');
+    history.push(`/US/${appLanguage.lang.tag}/1/register`);
   };
 
   return (

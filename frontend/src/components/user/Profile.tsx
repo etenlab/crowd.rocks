@@ -21,10 +21,19 @@ import { imageOutline } from 'ionicons/icons';
 import { CropperComp } from '../post/Cropper';
 
 import { useTr } from '../../hooks/useTr';
+import { useAppContext } from '../../hooks/useAppContext';
 
 const Profile: React.FC = () => {
   const history = useHistory();
   const { tr } = useTr();
+
+  const {
+    states: {
+      global: {
+        langauges: { appLanguage },
+      },
+    },
+  } = useAppContext();
 
   const [avatarUpdateMutation] = useAvatarUpdateMutation();
 
@@ -56,9 +65,9 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     if (globals.get_token() === null) {
-      history.push('/US/eng/1/home');
+      history.push(`/US/${appLanguage.lang.tag}/1/home`);
     }
-  }, [history]);
+  }, [appLanguage, history]);
 
   const show_avatar_form = () => {
     set_show_update_avatar_form(true);
