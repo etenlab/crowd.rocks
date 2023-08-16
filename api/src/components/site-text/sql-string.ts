@@ -168,8 +168,8 @@ export function getSiteTextTranslationVoteStatus(
         and v.to_type_is_word = $3
       group BY 
         v.translation_id,
-        v.from_type_word_id,
-        v.to_type_word_id,
+        v.from_type_is_word,
+        v.to_type_is_word
       order by 
         count(
           case when v.vote = true then 1 when v.vote = false then 0 else null end
@@ -372,7 +372,7 @@ export function getSiteTextLanguageList(): [string, []] {
       join phrase_definitions as pds_from
       on ptpts.from_phrase_definition_id = pds_from.phrase_definition_id
       join phrase_definitions as pds_to
-      on wtpts.to_phrase_definition_id = pds_to.phrase_definition_id
+      on ptpts.to_phrase_definition_id = pds_to.phrase_definition_id
       join (
         select
           phrase_id,

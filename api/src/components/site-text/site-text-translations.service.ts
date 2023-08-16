@@ -12,8 +12,6 @@ import { SiteTextTranslationVotesService } from './site-text-translation-votes.s
 
 import {
   TranslationUpsertOutput,
-  TranslationWithVoteListOutput,
-  TranslationWithVoteOutput,
   WordToWordTranslationWithVote,
   WordToPhraseTranslationWithVote,
   PhraseToWordTranslationWithVote,
@@ -21,6 +19,12 @@ import {
 } from 'src/components/translations/types';
 
 import {
+  SiteTextWordToWordTranslationWithVote,
+  SiteTextWordToPhraseTranslationWithVote,
+  SiteTextPhraseToWordTranslationWithVote,
+  SiteTextPhraseToPhraseTranslationWithVote,
+  SiteTextTranslationWithVoteOutput,
+  SiteTextTranslationWithVoteListOutput,
   SiteTextTranslationsFromInput,
   SiteTextTranslationsToInput,
   SiteTextTranslationUpsertInput,
@@ -178,7 +182,7 @@ export class SiteTextTranslationsService {
     language_code: string,
     dialect_code: string | null,
     geo_code: string | null,
-  ): Promise<TranslationWithVoteListOutput> {
+  ): Promise<SiteTextTranslationWithVoteListOutput> {
     try {
       let from_definition_id: number;
 
@@ -191,10 +195,10 @@ export class SiteTextTranslationsService {
         if (res.rowCount !== 1) {
           return {
             error: ErrorType.SiteTextWordDefinitionNotFound,
-            translation_with_vote_list: null,
+            site_text_translation_with_vote_list: null,
           };
         } else {
-          from_definition_id = +res.rows[0].site_text_id;
+          from_definition_id = +res.rows[0].word_definition_id;
         }
       } else {
         const res =
@@ -205,10 +209,10 @@ export class SiteTextTranslationsService {
         if (res.rowCount !== 1) {
           return {
             error: ErrorType.SiteTextPhraseDefinitionNotFound,
-            translation_with_vote_list: null,
+            site_text_translation_with_vote_list: null,
           };
         } else {
-          from_definition_id = +res.rows[0].site_text_id;
+          from_definition_id = +res.rows[0].phrase_definition_id;
         }
       }
 
@@ -226,15 +230,15 @@ export class SiteTextTranslationsService {
       if (error !== ErrorType.NoError || translation_with_vote_list === null) {
         return {
           error,
-          translation_with_vote_list: null,
+          site_text_translation_with_vote_list: null,
         };
       }
 
       const new_translation_with_vote_list: (
-        | WordToWordTranslationWithVote
-        | WordToPhraseTranslationWithVote
-        | PhraseToWordTranslationWithVote
-        | PhraseToPhraseTranslationWithVote
+        | SiteTextWordToWordTranslationWithVote
+        | SiteTextWordToPhraseTranslationWithVote
+        | SiteTextPhraseToWordTranslationWithVote
+        | SiteTextPhraseToPhraseTranslationWithVote
       )[] = [];
 
       for (const translation_with_vote of translation_with_vote_list) {
@@ -283,7 +287,7 @@ export class SiteTextTranslationsService {
         if (vote_status_output.error !== ErrorType.NoError) {
           return {
             error,
-            translation_with_vote_list: null,
+            site_text_translation_with_vote_list: null,
           };
         }
 
@@ -296,7 +300,7 @@ export class SiteTextTranslationsService {
 
       return {
         error: ErrorType.NoError,
-        translation_with_vote_list: new_translation_with_vote_list,
+        site_text_translation_with_vote_list: new_translation_with_vote_list,
       };
     } catch (e) {
       console.error(e);
@@ -304,7 +308,7 @@ export class SiteTextTranslationsService {
 
     return {
       error: ErrorType.UnknownError,
-      translation_with_vote_list: null,
+      site_text_translation_with_vote_list: null,
     };
   }
 
@@ -314,9 +318,9 @@ export class SiteTextTranslationsService {
     language_code: string,
     dialect_code: string | null,
     geo_code: string | null,
-  ): Promise<TranslationWithVoteOutput> {
+  ): Promise<SiteTextTranslationWithVoteOutput> {
     try {
-      const { error, translation_with_vote_list } =
+      const { error, site_text_translation_with_vote_list } =
         await this.getAllTranslationFromSiteTextDefinitionID(
           site_text_id,
           site_text_type_is_word,
@@ -328,18 +332,18 @@ export class SiteTextTranslationsService {
       if (error !== ErrorType.NoError) {
         return {
           error: error,
-          translation_with_vote: null,
+          site_text_translation_with_vote: null,
         };
       }
 
       let mostVoted:
-        | WordToWordTranslationWithVote
-        | WordToPhraseTranslationWithVote
-        | PhraseToWordTranslationWithVote
-        | PhraseToPhraseTranslationWithVote
+        | SiteTextWordToWordTranslationWithVote
+        | SiteTextWordToPhraseTranslationWithVote
+        | SiteTextPhraseToWordTranslationWithVote
+        | SiteTextPhraseToPhraseTranslationWithVote
         | null = null;
 
-      for (const translation_with_vote of translation_with_vote_list) {
+      for (const translation_with_vote of site_text_translation_with_vote_list) {
         if (mostVoted !== null) {
           const a = calc_vote_weight(mostVoted.upvotes, mostVoted.downvotes);
           const b = calc_vote_weight(
@@ -358,13 +362,13 @@ export class SiteTextTranslationsService {
       if (mostVoted === null) {
         return {
           error: ErrorType.NoError,
-          translation_with_vote: null,
+          site_text_translation_with_vote: null,
         };
       }
 
       return {
         error: ErrorType.NoError,
-        translation_with_vote: mostVoted,
+        site_text_translation_with_vote: mostVoted,
       };
     } catch (e) {
       console.error(e);
@@ -372,7 +376,7 @@ export class SiteTextTranslationsService {
 
     return {
       error: ErrorType.UnknownError,
-      translation_with_vote: null,
+      site_text_translation_with_vote: null,
     };
   }
 
@@ -380,21 +384,21 @@ export class SiteTextTranslationsService {
     language_code: string,
     dialect_code: string | null,
     geo_code: string | null,
-  ): Promise<TranslationWithVoteListOutput> {
+  ): Promise<SiteTextTranslationWithVoteListOutput> {
     try {
       const res1 = await this.pg.pool.query<GetAllSiteTextWordDefinition>(
         ...getAllSiteTextWordDefinition(),
       );
 
       const translationWithVoteList: (
-        | WordToWordTranslationWithVote
-        | WordToPhraseTranslationWithVote
-        | PhraseToWordTranslationWithVote
-        | PhraseToPhraseTranslationWithVote
+        | SiteTextWordToWordTranslationWithVote
+        | SiteTextWordToPhraseTranslationWithVote
+        | SiteTextPhraseToWordTranslationWithVote
+        | SiteTextPhraseToPhraseTranslationWithVote
       )[] = [];
 
       for (let i = 0; i < res1.rowCount; i++) {
-        const { error, translation_with_vote } =
+        const { error, site_text_translation_with_vote } =
           await this.getRecommendedTranslationFromSiteTextDefinitionID(
             res1.rows[i].site_text_id,
             true,
@@ -406,11 +410,13 @@ export class SiteTextTranslationsService {
         if (error !== ErrorType.NoError) {
           return {
             error,
-            translation_with_vote_list: null,
+            site_text_translation_with_vote_list: null,
           };
         }
 
-        translationWithVoteList.push(translation_with_vote);
+        if (site_text_translation_with_vote) {
+          translationWithVoteList.push(site_text_translation_with_vote);
+        }
       }
 
       const res2 = await this.pg.pool.query<GetAllSiteTextPhraseDefinition>(
@@ -418,7 +424,7 @@ export class SiteTextTranslationsService {
       );
 
       for (let i = 0; i < res2.rowCount; i++) {
-        const { error, translation_with_vote } =
+        const { error, site_text_translation_with_vote } =
           await this.getRecommendedTranslationFromSiteTextDefinitionID(
             res2.rows[i].site_text_id,
             false,
@@ -430,16 +436,18 @@ export class SiteTextTranslationsService {
         if (error !== ErrorType.NoError) {
           return {
             error,
-            translation_with_vote_list: null,
+            site_text_translation_with_vote_list: null,
           };
         }
 
-        translationWithVoteList.push(translation_with_vote);
+        if (site_text_translation_with_vote) {
+          translationWithVoteList.push(site_text_translation_with_vote);
+        }
       }
 
       return {
         error: ErrorType.NoError,
-        translation_with_vote_list: translationWithVoteList,
+        site_text_translation_with_vote_list: translationWithVoteList,
       };
     } catch (e) {
       console.error(e);
@@ -447,7 +455,7 @@ export class SiteTextTranslationsService {
 
     return {
       error: ErrorType.UnknownError,
-      translation_with_vote_list: null,
+      site_text_translation_with_vote_list: null,
     };
   }
 }

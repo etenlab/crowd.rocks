@@ -12,6 +12,12 @@ import {
   WordDefinition,
   PhraseDefinition,
 } from 'src/components/definitions/types';
+import {
+  WordToWordTranslation,
+  WordToPhraseTranslation,
+  PhraseToWordTranslation,
+  PhraseToPhraseTranslation,
+} from 'src/components/translations/types';
 
 @ObjectType()
 export class SiteTextWordDefinition {
@@ -170,4 +176,78 @@ export class SiteTextLanguage {
 export class SiteTextLanguageListOutput extends GenericOutput {
   @Field(() => [SiteTextLanguage], { nullable: true })
   site_text_language_list: SiteTextLanguage[] | null;
+}
+
+@ObjectType()
+export class SiteTextWordToWordTranslationWithVote extends WordToWordTranslation {
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class SiteTextWordToPhraseTranslationWithVote extends WordToPhraseTranslation {
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class SiteTextPhraseToWordTranslationWithVote extends PhraseToWordTranslation {
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class SiteTextPhraseToPhraseTranslationWithVote extends PhraseToPhraseTranslation {
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+export const SiteTextTranslationWithVote = createUnionType({
+  name: 'SiteTextTranslationWithVote',
+  types: () =>
+    [
+      SiteTextWordToWordTranslationWithVote,
+      SiteTextWordToPhraseTranslationWithVote,
+      SiteTextPhraseToWordTranslationWithVote,
+      SiteTextPhraseToPhraseTranslationWithVote,
+    ] as const,
+  resolveType(value) {
+    if (value.word_to_word_translation_id) {
+      return SiteTextWordToWordTranslationWithVote;
+    }
+    if (value.word_to_phrase_translation_id) {
+      return SiteTextWordToPhraseTranslationWithVote;
+    }
+    if (value.phrase_to_word_translation_id) {
+      return SiteTextPhraseToWordTranslationWithVote;
+    }
+    if (value.phrase_to_phrase_translation_id) {
+      return SiteTextPhraseToPhraseTranslationWithVote;
+    }
+    return null;
+  },
+});
+
+@ObjectType()
+export class SiteTextTranslationWithVoteOutput extends GenericOutput {
+  @Field(() => SiteTextTranslationWithVote, { nullable: true })
+  site_text_translation_with_vote:
+    | SiteTextWordToWordTranslationWithVote
+    | SiteTextWordToPhraseTranslationWithVote
+    | SiteTextPhraseToWordTranslationWithVote
+    | SiteTextPhraseToPhraseTranslationWithVote
+    | null;
+}
+
+@ObjectType()
+export class SiteTextTranslationWithVoteListOutput extends GenericOutput {
+  @Field(() => [SiteTextTranslationWithVote], { nullable: true })
+  site_text_translation_with_vote_list:
+    | (
+        | SiteTextWordToWordTranslationWithVote
+        | SiteTextWordToPhraseTranslationWithVote
+        | SiteTextPhraseToWordTranslationWithVote
+        | SiteTextPhraseToPhraseTranslationWithVote
+      )[]
+    | null;
 }

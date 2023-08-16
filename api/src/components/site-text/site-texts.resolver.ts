@@ -8,11 +8,7 @@ import { SiteTextTranslationsService } from './site-text-translations.service';
 import { SiteTextWordDefinitionsService } from './site-text-word-definitions.service';
 import { SiteTextPhraseDefinitionsService } from './site-text-phrase-definitions.service';
 
-import {
-  TranslationUpsertOutput,
-  TranslationWithVoteOutput,
-  TranslationWithVoteListOutput,
-} from 'src/components/translations/types';
+import { TranslationUpsertOutput } from 'src/components/translations/types';
 
 import {
   SiteTextUpsertInput,
@@ -26,6 +22,8 @@ import {
   SiteTextTranslationVoteOutput,
   SiteTextTranslationVoteStatusOutputRow,
   SiteTextLanguageListOutput,
+  SiteTextTranslationWithVoteListOutput,
+  SiteTextTranslationWithVoteOutput,
 } from './types';
 
 import { SiteTextTranslationVotesService } from './site-text-translation-votes.service';
@@ -150,7 +148,7 @@ export class SiteTextsResolver {
   }
 
   @Query(() => SiteTextTranslationVoteStatusOutputRow)
-  async getVoteStatus(
+  async getSiteTextTranslationVoteStatus(
     @Args('translation_id', { type: () => ID })
     translation_id: string,
     @Args('from_type_is_word', { type: () => Boolean })
@@ -171,7 +169,7 @@ export class SiteTextsResolver {
   }
 
   @Mutation(() => SiteTextTranslationVoteStatusOutputRow)
-  async toggleVoteStatus(
+  async toggleSiteTextTranslationVoteStatus(
     @Args('translation_id', { type: () => ID })
     translation_id: string,
     @Args('from_type_is_word', { type: () => Boolean })
@@ -182,7 +180,7 @@ export class SiteTextsResolver {
     vote: boolean,
     @Context() req: any,
   ): Promise<SiteTextTranslationVoteStatusOutputRow> {
-    console.log('site text toggleVoteStatus resolver');
+    console.log('toggleSiteTextTranslationVoteStatus resolver');
 
     return this.siteTextTranslationVoteService.toggleVoteStatus(
       +translation_id,
@@ -228,15 +226,15 @@ export class SiteTextsResolver {
     );
   }
 
-  @Query(() => TranslationWithVoteListOutput)
+  @Query(() => SiteTextTranslationWithVoteListOutput)
   async getAllTranslationFromSiteTextDefinitionID(
-    @Args('site_text_id') site_text_id: string,
+    @Args('site_text_id', { type: () => ID }) site_text_id: string,
     @Args('site_text_type_is_word', { type: () => Boolean })
     site_text_type_is_word,
     @Args('language_code') language_code: string,
     @Args('dialect_code', { nullable: true }) dialect_code: string | null,
     @Args('geo_code', { nullable: true }) geo_code: string | null,
-  ): Promise<TranslationWithVoteListOutput> {
+  ): Promise<SiteTextTranslationWithVoteListOutput> {
     console.log(
       'site text translation getAllTranslationFromSiteTextDefinitionID resolver',
     );
@@ -250,15 +248,15 @@ export class SiteTextsResolver {
     );
   }
 
-  @Query(() => TranslationWithVoteOutput)
+  @Query(() => SiteTextTranslationWithVoteOutput)
   async getRecommendedTranslationFromSiteTextDefinitionID(
-    @Args('site_text_id') site_text_id: string,
+    @Args('site_text_id', { type: () => ID }) site_text_id: string,
     @Args('site_text_type_is_word', { type: () => Boolean })
     site_text_type_is_word,
     @Args('language_code') language_code: string,
     @Args('dialect_code', { nullable: true }) dialect_code: string | null,
     @Args('geo_code', { nullable: true }) geo_code: string | null,
-  ): Promise<TranslationWithVoteOutput> {
+  ): Promise<SiteTextTranslationWithVoteOutput> {
     console.log(
       'site text translation getRecommendedTranslationFromSiteTextDefinitionID resolver',
     );
@@ -272,13 +270,15 @@ export class SiteTextsResolver {
     );
   }
 
-  @Query(() => TranslationWithVoteListOutput)
-  async getAllRecommendedTranslation(
+  @Query(() => SiteTextTranslationWithVoteListOutput)
+  async getAllRecommendedSiteTextTranslation(
     @Args('language_code') language_code: string,
     @Args('dialect_code', { nullable: true }) dialect_code: string | null,
     @Args('geo_code', { nullable: true }) geo_code: string | null,
-  ): Promise<TranslationWithVoteListOutput> {
-    console.log('site text translation getAllRecommendedTranslation resolver');
+  ): Promise<SiteTextTranslationWithVoteListOutput> {
+    console.log(
+      'site text translation getAllRecommendedSiteTextTranslation resolver',
+    );
 
     return this.siteTextTranslationService.getAllRecommendedTranslation(
       language_code,
