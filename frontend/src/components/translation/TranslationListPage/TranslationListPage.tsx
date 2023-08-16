@@ -16,6 +16,7 @@ import {
 import {
   WordDefinition,
   PhraseDefinition,
+  TranslationWithVote,
   WordToWordTranslationWithVote,
   WordToPhraseTranslationWithVote,
   PhraseToWordTranslationWithVote,
@@ -68,15 +69,9 @@ export function TranslationListPage({ match }: TranslationListPageProps) {
   );
   const [phraseDefinition, setPhraseDefinition] =
     useState<PhraseDefinition | null>(null);
-  const [wordToWordTranslationList, setWordToWordTranslationList] = useState<
-    WordToWordTranslationWithVote[]
+  const [translationWithVoteList, setTranslationWithVoteList] = useState<
+    TranslationWithVote[]
   >([]);
-  const [wordToPhraseTranslationList, setWordToPhraseTranslationList] =
-    useState<WordToPhraseTranslationWithVote[]>([]);
-  const [phraseToWordTranslationList, setPhraseToWordTranslationList] =
-    useState<PhraseToWordTranslationWithVote[]>([]);
-  const [phraseToPhraseTranslationList, setPhraseToPhraseTranslationList] =
-    useState<PhraseToPhraseTranslationWithVote[]>([]);
 
   const [
     phraseDefinitionRead,
@@ -129,116 +124,114 @@ export function TranslationListPage({ match }: TranslationListPageProps) {
         return;
       }
 
-      if (data.toggleTranslationVoteStatus.word_to_word_vote_status) {
-        const newVoteStatus =
-          data.toggleTranslationVoteStatus.word_to_word_vote_status;
-
-        cache.updateFragment<WordToWordTranslationWithVote>(
-          {
-            id: cache.identify({
-              __typename: 'WordToWordTranslationWithVote',
-              word_to_word_translation_id:
-                newVoteStatus.word_to_word_translation_id,
-            }),
-            fragment: WordToWordTranslationWithVoteFragmentFragmentDoc,
-            fragmentName: 'WordToWordTranslationWithVoteFragment',
-          },
-          (data) => {
-            if (data) {
-              return {
-                ...data,
-                upvotes: newVoteStatus.upvotes,
-                downvotes: newVoteStatus.downvotes,
-              };
-            } else {
-              return data;
-            }
-          },
-        );
+      if (!data.toggleTranslationVoteStatus.translation_vote_status) {
+        return;
       }
 
-      if (data.toggleTranslationVoteStatus.word_to_phrase_vote_status) {
-        const newVoteStatus =
-          data.toggleTranslationVoteStatus.word_to_phrase_vote_status;
+      const newVoteStatus =
+        data.toggleTranslationVoteStatus.translation_vote_status;
 
-        cache.updateFragment<WordToPhraseTranslationWithVote>(
-          {
-            id: cache.identify({
-              __typename: 'WordToPhraseTranslationWithVote',
-              word_to_phrase_translation_id:
-                newVoteStatus.word_to_phrase_translation_id,
-            }),
-            fragment: WordToPhraseTranslationWithVoteFragmentFragmentDoc,
-            fragmentName: 'WordToPhraseTranslationWithVoteFragment',
-          },
-          (data) => {
-            if (data) {
-              return {
-                ...data,
-                upvotes: newVoteStatus.upvotes,
-                downvotes: newVoteStatus.downvotes,
-              };
-            } else {
-              return data;
-            }
-          },
-        );
-      }
-
-      if (data.toggleTranslationVoteStatus.phrase_to_word_vote_status) {
-        const newVoteStatus =
-          data.toggleTranslationVoteStatus.phrase_to_word_vote_status;
-
-        cache.updateFragment<PhraseToWordTranslationWithVote>(
-          {
-            id: cache.identify({
-              __typename: 'PhraseToWordTranslationWithVote',
-              phrase_to_word_translation_id:
-                newVoteStatus.phrase_to_word_translation_id,
-            }),
-            fragment: PhraseToWordTranslationWithVoteFragmentFragmentDoc,
-            fragmentName: 'PhraseToWordTranslationWithVoteFragment',
-          },
-          (data) => {
-            if (data) {
-              return {
-                ...data,
-                upvotes: newVoteStatus.upvotes,
-                downvotes: newVoteStatus.downvotes,
-              };
-            } else {
-              return data;
-            }
-          },
-        );
-      }
-
-      if (data.toggleTranslationVoteStatus.phrase_to_phrase_vote_status) {
-        const newVoteStatus =
-          data.toggleTranslationVoteStatus.phrase_to_phrase_vote_status;
-
-        cache.updateFragment<PhraseToPhraseTranslationWithVote>(
-          {
-            id: cache.identify({
-              __typename: 'PhraseToPhraseTranslationWithVote',
-              phrase_to_phrase_translation_id:
-                newVoteStatus.phrase_to_phrase_translation_id,
-            }),
-            fragment: PhraseToPhraseTranslationWithVoteFragmentFragmentDoc,
-            fragmentName: 'PhraseToPhraseTranslationWithVoteFragment',
-          },
-          (data) => {
-            if (data) {
-              return {
-                ...data,
-                upvotes: newVoteStatus.upvotes,
-                downvotes: newVoteStatus.downvotes,
-              };
-            } else {
-              return data;
-            }
-          },
-        );
+      switch (newVoteStatus.__typename) {
+        case 'WordTrVoteStatus': {
+          cache.updateFragment<WordToWordTranslationWithVote>(
+            {
+              id: cache.identify({
+                __typename: 'WordToWordTranslationWithVote',
+                word_to_word_translation_id:
+                  newVoteStatus.word_to_word_translation_id,
+              }),
+              fragment: WordToWordTranslationWithVoteFragmentFragmentDoc,
+              fragmentName: 'WordToWordTranslationWithVoteFragment',
+            },
+            (data) => {
+              if (data) {
+                return {
+                  ...data,
+                  upvotes: newVoteStatus.upvotes,
+                  downvotes: newVoteStatus.downvotes,
+                };
+              } else {
+                return data;
+              }
+            },
+          );
+          break;
+        }
+        case 'WordToPhraseTranslationVoteStatus': {
+          cache.updateFragment<WordToPhraseTranslationWithVote>(
+            {
+              id: cache.identify({
+                __typename: 'WordToPhraseTranslationWithVote',
+                word_to_phrase_translation_id:
+                  newVoteStatus.word_to_phrase_translation_id,
+              }),
+              fragment: WordToPhraseTranslationWithVoteFragmentFragmentDoc,
+              fragmentName: 'WordToPhraseTranslationWithVoteFragment',
+            },
+            (data) => {
+              if (data) {
+                return {
+                  ...data,
+                  upvotes: newVoteStatus.upvotes,
+                  downvotes: newVoteStatus.downvotes,
+                };
+              } else {
+                return data;
+              }
+            },
+          );
+          break;
+        }
+        case 'PhraseToWordTranslationVoteStatus': {
+          cache.updateFragment<PhraseToWordTranslationWithVote>(
+            {
+              id: cache.identify({
+                __typename: 'PhraseToWordTranslationWithVote',
+                phrase_to_word_translation_id:
+                  newVoteStatus.phrase_to_word_translation_id,
+              }),
+              fragment: PhraseToWordTranslationWithVoteFragmentFragmentDoc,
+              fragmentName: 'PhraseToWordTranslationWithVoteFragment',
+            },
+            (data) => {
+              if (data) {
+                return {
+                  ...data,
+                  upvotes: newVoteStatus.upvotes,
+                  downvotes: newVoteStatus.downvotes,
+                };
+              } else {
+                return data;
+              }
+            },
+          );
+          break;
+        }
+        case 'PhraseToPhraseTranslationVoteStatus': {
+          cache.updateFragment<PhraseToPhraseTranslationWithVote>(
+            {
+              id: cache.identify({
+                __typename: 'PhraseToPhraseTranslationWithVote',
+                phrase_to_phrase_translation_id:
+                  newVoteStatus.phrase_to_phrase_translation_id,
+              }),
+              fragment: PhraseToPhraseTranslationWithVoteFragmentFragmentDoc,
+              fragmentName: 'PhraseToPhraseTranslationWithVoteFragment',
+            },
+            (data) => {
+              if (data) {
+                return {
+                  ...data,
+                  upvotes: newVoteStatus.upvotes,
+                  downvotes: newVoteStatus.downvotes,
+                };
+              } else {
+                return data;
+              }
+            },
+          );
+          break;
+        }
       }
     },
   });
@@ -418,45 +411,11 @@ export function TranslationListPage({ match }: TranslationListPageProps) {
 
       if (
         translationData.getTranslationsByFromDefinitionId
-          .word_to_word_tr_with_vote_list
+          .translation_with_vote_list
       ) {
-        setWordToWordTranslationList(
-          translationData?.getTranslationsByFromDefinitionId.word_to_word_tr_with_vote_list.filter(
-            (w2w) => w2w !== null,
-          ) as WordToWordTranslationWithVote[],
-        );
-      }
-
-      if (
-        translationData.getTranslationsByFromDefinitionId
-          .word_to_phrase_tr_with_vote_list
-      ) {
-        setWordToPhraseTranslationList(
-          translationData?.getTranslationsByFromDefinitionId.word_to_phrase_tr_with_vote_list.filter(
-            (w2p) => w2p !== null,
-          ) as WordToPhraseTranslationWithVote[],
-        );
-      }
-
-      if (
-        translationData.getTranslationsByFromDefinitionId
-          .phrase_to_word_tr_with_vote_list
-      ) {
-        setPhraseToWordTranslationList(
-          translationData?.getTranslationsByFromDefinitionId.phrase_to_word_tr_with_vote_list.filter(
-            (p2w) => p2w !== null,
-          ) as PhraseToWordTranslationWithVote[],
-        );
-      }
-
-      if (
-        translationData.getTranslationsByFromDefinitionId
-          .phrase_to_phrase_tr_with_vote_list
-      ) {
-        setPhraseToPhraseTranslationList(
-          translationData?.getTranslationsByFromDefinitionId.phrase_to_phrase_tr_with_vote_list.filter(
-            (p2p) => p2p !== null,
-          ) as PhraseToPhraseTranslationWithVote[],
+        setTranslationWithVoteList(
+          translationData.getTranslationsByFromDefinitionId
+            .translation_with_vote_list as TranslationWithVote[],
         );
       }
     }
@@ -495,52 +454,59 @@ export function TranslationListPage({ match }: TranslationListPageProps) {
       downvotes: number;
     }[] = [];
 
-    for (const wordToWordTr of wordToWordTranslationList) {
-      temp.push({
-        key: `word_to_word_${wordToWordTr.word_to_word_translation_id}`,
-        translation_id: wordToWordTr.word_to_word_translation_id,
-        wordOrPhrase: wordToWordTr.to_word_definition.word.word,
-        definition: wordToWordTr.to_word_definition.definition,
-        to_definition_type_is_word: true,
-        upvotes: wordToWordTr.upvotes,
-        downvotes: wordToWordTr.downvotes,
-      });
-    }
-
-    for (const wordToPhraseTr of wordToPhraseTranslationList) {
-      temp.push({
-        key: `word_to_phrase_${wordToPhraseTr.word_to_phrase_translation_id}`,
-        translation_id: wordToPhraseTr.word_to_phrase_translation_id,
-        wordOrPhrase: wordToPhraseTr.to_phrase_definition.phrase.phrase,
-        definition: wordToPhraseTr.to_phrase_definition.definition,
-        to_definition_type_is_word: false,
-        upvotes: wordToPhraseTr.upvotes,
-        downvotes: wordToPhraseTr.downvotes,
-      });
-    }
-
-    for (const phraseToWordTr of phraseToWordTranslationList) {
-      temp.push({
-        key: `phrase_to_word_${phraseToWordTr.phrase_to_word_translation_id}`,
-        translation_id: phraseToWordTr.phrase_to_word_translation_id,
-        wordOrPhrase: phraseToWordTr.to_word_definition.word.word,
-        definition: phraseToWordTr.to_word_definition.definition,
-        to_definition_type_is_word: true,
-        upvotes: phraseToWordTr.upvotes,
-        downvotes: phraseToWordTr.downvotes,
-      });
-    }
-
-    for (const phraseToPhraseTr of phraseToPhraseTranslationList) {
-      temp.push({
-        key: `phrase_to_phrase_${phraseToPhraseTr.phrase_to_phrase_translation_id}`,
-        translation_id: phraseToPhraseTr.phrase_to_phrase_translation_id,
-        wordOrPhrase: phraseToPhraseTr.to_phrase_definition.phrase.phrase,
-        definition: phraseToPhraseTr.to_phrase_definition.definition,
-        to_definition_type_is_word: false,
-        upvotes: phraseToPhraseTr.upvotes,
-        downvotes: phraseToPhraseTr.downvotes,
-      });
+    for (const translationWithVote of translationWithVoteList) {
+      switch (translationWithVote.__typename) {
+        case 'WordToWordTranslationWithVote': {
+          temp.push({
+            key: `word_to_word_${translationWithVote.word_to_word_translation_id}`,
+            translation_id: translationWithVote.word_to_word_translation_id,
+            wordOrPhrase: translationWithVote.to_word_definition.word.word,
+            definition: translationWithVote.to_word_definition.definition,
+            to_definition_type_is_word: true,
+            upvotes: translationWithVote.upvotes,
+            downvotes: translationWithVote.downvotes,
+          });
+          break;
+        }
+        case 'WordToPhraseTranslationWithVote': {
+          temp.push({
+            key: `word_to_phrase_${translationWithVote.word_to_phrase_translation_id}`,
+            translation_id: translationWithVote.word_to_phrase_translation_id,
+            wordOrPhrase:
+              translationWithVote.to_phrase_definition.phrase.phrase,
+            definition: translationWithVote.to_phrase_definition.definition,
+            to_definition_type_is_word: false,
+            upvotes: translationWithVote.upvotes,
+            downvotes: translationWithVote.downvotes,
+          });
+          break;
+        }
+        case 'PhraseToWordTranslationWithVote': {
+          temp.push({
+            key: `phrase_to_word_${translationWithVote.phrase_to_word_translation_id}`,
+            translation_id: translationWithVote.phrase_to_word_translation_id,
+            wordOrPhrase: translationWithVote.to_word_definition.word.word,
+            definition: translationWithVote.to_word_definition.definition,
+            to_definition_type_is_word: true,
+            upvotes: translationWithVote.upvotes,
+            downvotes: translationWithVote.downvotes,
+          });
+          break;
+        }
+        case 'PhraseToPhraseTranslationWithVote': {
+          temp.push({
+            key: `phrase_to_phrase_${translationWithVote.phrase_to_phrase_translation_id}`,
+            translation_id: translationWithVote.phrase_to_phrase_translation_id,
+            wordOrPhrase:
+              translationWithVote.to_phrase_definition.phrase.phrase,
+            definition: translationWithVote.to_phrase_definition.definition,
+            to_definition_type_is_word: false,
+            upvotes: translationWithVote.upvotes,
+            downvotes: translationWithVote.downvotes,
+          });
+          break;
+        }
+      }
     }
 
     return temp.map((item) => (
@@ -580,11 +546,8 @@ export function TranslationListPage({ match }: TranslationListPageProps) {
     ));
   }, [
     match.params.definition_kind,
-    phraseToPhraseTranslationList,
-    phraseToWordTranslationList,
     toggleTranslationVoteStatus,
-    wordToPhraseTranslationList,
-    wordToWordTranslationList,
+    translationWithVoteList,
   ]);
 
   return (
