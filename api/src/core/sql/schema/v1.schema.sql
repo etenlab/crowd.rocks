@@ -450,6 +450,9 @@ create table phrase_to_phrase_translations_votes(
 
 create table documents(
   document_id bigserial primary key,
+  language_code varchar(32) not null,
+  dialect_code varchar(32),
+  geo_code varchar(32),
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
