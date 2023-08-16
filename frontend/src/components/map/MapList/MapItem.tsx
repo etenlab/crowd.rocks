@@ -11,12 +11,20 @@ import {
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 import { downloadFromSrc } from '../../../common/utility';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
   mapItem: MapFileOutput;
 };
 
 const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
+  const {
+    states: {
+      global: {
+        langauges: { appLanguage },
+      },
+    },
+  } = useAppContext();
   const downloadFlagRef = useRef<'original' | 'translated' | null>(null);
 
   const [getOrigMapContent, origMapContent] = useGetOrigMapContentLazyQuery({
@@ -27,8 +35,8 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
 
   const routerLink =
     mapItem.is_original || !mapItem.translated_map_id
-      ? `/US/eng/1/maps/details-original/${mapItem.original_map_id}`
-      : `/US/eng/1/maps/details-translated/${mapItem.translated_map_id}`;
+      ? `/US/${appLanguage.lang.tag}/1/maps/details-original/${mapItem.original_map_id}`
+      : `/US/${appLanguage.lang.tag}/1/maps/details-translated/${mapItem.translated_map_id}`;
 
   const langInfo = subTags2LangInfo({
     lang: mapItem.language.language_code,

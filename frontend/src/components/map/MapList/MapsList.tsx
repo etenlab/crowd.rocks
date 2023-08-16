@@ -21,7 +21,7 @@ export const MapList: React.FC = () => {
   const {
     states: {
       global: {
-        langauges: { targetLang },
+        langauges: { targetLang, appLanguage },
       },
     },
     actions: { setTargetLanguage },
@@ -85,7 +85,7 @@ export const MapList: React.FC = () => {
       </LangSelectorBox>
       <MapTools
         onTranslationsClick={() => {
-          router.push(`/US/eng/1/maps/translation`);
+          router.push(`/US/${appLanguage.lang.tag}/1/maps/translation`);
         }}
         onAddClick={
           isAdminRes?.loggedInIsAdmin.isAdmin ? handleAddMap : undefined
