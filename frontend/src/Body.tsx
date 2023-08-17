@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import { Redirect, Route } from 'react-router';
 import {
   IonContent,
@@ -23,10 +23,6 @@ import { login_change } from './services/subscriptions';
 
 import { apollo_client } from './main';
 
-import {
-  useGetAllSiteTextLanguageListQuery,
-  SiteTextLanguage,
-} from './generated/graphql';
 import {
   langInfo2String,
   subTags2LangInfo,
@@ -66,50 +62,25 @@ const Body: React.FC = () => {
     states: {
       global: {
         langauges: { appLanguage },
+        siteTexts: { languages, originalMap, translationMap },
       },
     },
     actions: { changeAppLanguage },
   } = useAppContext();
 
   const router = useIonRouter();
-  const { tr, outputAllTrWords } = useTr();
+  const { tr } = useTr();
 
   const [show_menu, set_show_menu] = useState(false);
   const [is_logged_in, set_is_logged_in] = useState(false);
   const [show_dark_mode, set_show_dark_mode] = useState(false);
-  const [siteTextLanguageList, setSiteTextLanguageList] = useState<
-    SiteTextLanguage[]
-  >([]);
 
   const modal = useRef<HTMLIonModalElement>(null);
-
-  const {
-    loading: languageLoading,
-    error: languageError,
-    data: languageData,
-  } = useGetAllSiteTextLanguageListQuery();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [logoutMutation, { data, loading, error }] = useLogoutMutation();
 
   let sub: Subscription;
-
-  useEffect(() => {
-    if (languageError || languageError) {
-      return;
-    }
-
-    if (
-      languageData &&
-      languageData.getAllSiteTextLanguageList.site_text_language_list
-    ) {
-      setSiteTextLanguageList([
-        ...languageData.getAllSiteTextLanguageList.site_text_language_list.map(
-          (language) => language as SiteTextLanguage,
-        ),
-      ]);
-    }
-  }, [languageError, languageLoading, languageData]);
 
   useIonViewWillEnter(() => {
     const theme_storage = localStorage.getItem('theme');
@@ -216,22 +187,35 @@ const Body: React.FC = () => {
         router.push(`/US/${value}/1/home`);
       }
 
-      outputAllTrWords();
-
       modal.current?.dismiss();
     },
-    [changeAppLanguage, outputAllTrWords, router],
+    [changeAppLanguage, router],
   );
 
-  const languages = useMemo(() => {
-    return siteTextLanguageList.map((language) => {
-      return subTags2LangInfo({
+  const languageList = useMemo(() => {
+    return languages.map((language) => {
+      const langInfo = subTags2LangInfo({
         lang: language.language_code,
         dialect: language.dialect_code as string | undefined,
         region: language.geo_code as string | undefined,
       });
+
+      const langInfoStr = langInfo2String(langInfo);
+
+      const originalCnt = Object.keys(originalMap).length;
+      const translationCnt = Object.keys(translationMap[langInfoStr]).length;
+
+      const percent =
+        originalCnt > 0 ? (translationCnt / originalCnt) * 100 : 100;
+
+      return {
+        text: `${langInfo2String(langInfo)} (${tr(
+          'translated',
+        )} : ${percent}%)`,
+        value: langInfo2tag(langInfo) || '',
+      };
     });
-  }, [siteTextLanguageList]);
+  }, [languages, originalMap, tr, translationMap]);
 
   return (
     <IonPage>
@@ -317,10 +301,7 @@ const Body: React.FC = () => {
         <IonModal ref={modal} trigger="open-language-modal">
           <AppTypeahead
             title={tr('App Language')}
-            items={languages.map((language) => ({
-              text: langInfo2String(language),
-              value: langInfo2tag(language) || '',
-            }))}
+            items={languageList}
             selectedItem={langInfo2String(appLanguage)}
             onSelectionCancel={() => modal.current?.dismiss()}
             onSelectionChange={handleChangeAppLanguage}

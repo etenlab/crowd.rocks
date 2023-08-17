@@ -1,7 +1,9 @@
 import { useRef, type Dispatch, useCallback } from 'react';
 
 import {
-  setSiteTextMap as setSiteTextMapAction,
+  setSiteTextLanguageList as setSiteTextLanguageListAction,
+  setOriginalSiteTextMap as setOriginalSiteTextMapAction,
+  setTranslationSiteTextMap as setTranslationSiteTextMapAction,
   changeAppLanguage as changeAppLanguageAction,
   changeTranslationSourceLanguage as changeTranslationSourceLanguageAction,
   changeTranslationTargetLanguage as changeTranslationTargetLanguageAction,
@@ -9,6 +11,10 @@ import {
 } from '../reducers/global.actions';
 
 import { type ActionType } from '../reducers/index';
+
+import { langInfo2String } from '../common/langUtils';
+
+import { SiteTextLanguage } from '../generated/graphql';
 
 interface UseGlobalProps {
   dispatch: Dispatch<ActionType<unknown>>;
@@ -19,9 +25,31 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     dispatch,
   });
 
-  const setSiteTextMap = useCallback((siteTextMap: Record<string, string>) => {
-    dispatchRef.current.dispatch(setSiteTextMapAction(siteTextMap));
-  }, []);
+  const setSiteTextLanguageList = useCallback(
+    (languages: SiteTextLanguage[]) => {
+      dispatchRef.current.dispatch(setSiteTextLanguageListAction(languages));
+    },
+    [],
+  );
+
+  const setOriginalSiteTextMap = useCallback(
+    (originalMap: Record<string, string>) => {
+      dispatchRef.current.dispatch(setOriginalSiteTextMapAction(originalMap));
+    },
+    [],
+  );
+
+  const setTranslationSiteTextMap = useCallback(
+    (langInfo: LanguageInfo, translationMapMap: Record<string, string>) => {
+      dispatchRef.current.dispatch(
+        setTranslationSiteTextMapAction(
+          langInfo2String(langInfo),
+          translationMapMap,
+        ),
+      );
+    },
+    [],
+  );
 
   const changeAppLanguage = useCallback((langInfo: LanguageInfo) => {
     dispatchRef.current.dispatch(changeAppLanguageAction(langInfo));
@@ -50,7 +78,9 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
   }, []);
 
   return {
-    setSiteTextMap,
+    setOriginalSiteTextMap,
+    setTranslationSiteTextMap,
+    setSiteTextLanguageList,
     changeAppLanguage,
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,

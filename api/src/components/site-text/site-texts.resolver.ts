@@ -24,6 +24,8 @@ import {
   SiteTextLanguageListOutput,
   SiteTextTranslationWithVoteListOutput,
   SiteTextTranslationWithVoteOutput,
+  SiteTextTranslationWithVoteListByLanguageOutput,
+  SiteTextTranslationWithVoteListByLanguageListOutput,
 } from './types';
 
 import { SiteTextTranslationVotesService } from './site-text-translation-votes.service';
@@ -270,21 +272,30 @@ export class SiteTextsResolver {
     );
   }
 
-  @Query(() => SiteTextTranslationWithVoteListOutput)
-  async getAllRecommendedSiteTextTranslation(
+  @Query(() => SiteTextTranslationWithVoteListByLanguageOutput)
+  async getAllRecommendedSiteTextTranslationListByLanguage(
     @Args('language_code') language_code: string,
     @Args('dialect_code', { nullable: true }) dialect_code: string | null,
     @Args('geo_code', { nullable: true }) geo_code: string | null,
-  ): Promise<SiteTextTranslationWithVoteListOutput> {
+  ): Promise<SiteTextTranslationWithVoteListByLanguageOutput> {
     console.log(
-      'site text translation getAllRecommendedSiteTextTranslation resolver',
+      'site text translation getAllRecommendedTranslationByLanguage resolver',
     );
 
-    return this.siteTextTranslationService.getAllRecommendedTranslation(
+    return this.siteTextTranslationService.getAllRecommendedTranslationListByLanguage(
       language_code,
       dialect_code,
       geo_code,
     );
+  }
+
+  @Query(() => SiteTextTranslationWithVoteListByLanguageListOutput)
+  async getAllRecommendedSiteTextTranslationList(): Promise<SiteTextTranslationWithVoteListByLanguageListOutput> {
+    console.log(
+      'site text translation getAllRecommendedSiteTextTranslationList resolver',
+    );
+
+    return this.siteTextTranslationService.getAllRecommendedTranslationList();
   }
 
   @Query(() => SiteTextDefinitionListOutput)
