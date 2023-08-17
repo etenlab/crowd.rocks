@@ -8,6 +8,7 @@ import { PostgresService } from 'src/core/postgres.service';
 import { DefinitionsService } from 'src/components/definitions/definitions.service';
 import { TranslationsService } from 'src/components/translations/translations.service';
 
+import { SiteTextsService } from './site-texts.service';
 import { SiteTextTranslationVotesService } from './site-text-translation-votes.service';
 
 import {
@@ -29,6 +30,9 @@ import {
   SiteTextTranslationsToInput,
   SiteTextTranslationUpsertInput,
   SiteTextTranslationVoteStatusOutputRow,
+  SiteTextTranslationWithVoteListByLanguage,
+  SiteTextTranslationWithVoteListByLanguageOutput,
+  SiteTextTranslationWithVoteListByLanguageListOutput,
 } from './types';
 
 import {
@@ -50,6 +54,7 @@ export class SiteTextTranslationsService {
     private pg: PostgresService,
     private definitionService: DefinitionsService,
     private translationService: TranslationsService,
+    private siteTextService: SiteTextsService,
     private siteTextTranslationVoteService: SiteTextTranslationVotesService,
   ) {}
 
@@ -380,11 +385,11 @@ export class SiteTextTranslationsService {
     };
   }
 
-  async getAllRecommendedTranslation(
+  async getAllRecommendedTranslationListByLanguage(
     language_code: string,
     dialect_code: string | null,
     geo_code: string | null,
-  ): Promise<SiteTextTranslationWithVoteListOutput> {
+  ): Promise<SiteTextTranslationWithVoteListByLanguageOutput> {
     try {
       const res1 = await this.pg.pool.query<GetAllSiteTextWordDefinition>(
         ...getAllSiteTextWordDefinition(),
@@ -410,7 +415,12 @@ export class SiteTextTranslationsService {
         if (error !== ErrorType.NoError) {
           return {
             error,
-            site_text_translation_with_vote_list: null,
+            site_text_translation_with_vote_list_by_language: {
+              site_text_translation_with_vote_list: null,
+              language_code,
+              dialect_code,
+              geo_code,
+            },
           };
         }
 
@@ -436,7 +446,12 @@ export class SiteTextTranslationsService {
         if (error !== ErrorType.NoError) {
           return {
             error,
-            site_text_translation_with_vote_list: null,
+            site_text_translation_with_vote_list_by_language: {
+              site_text_translation_with_vote_list: null,
+              language_code,
+              dialect_code,
+              geo_code,
+            },
           };
         }
 
@@ -447,7 +462,12 @@ export class SiteTextTranslationsService {
 
       return {
         error: ErrorType.NoError,
-        site_text_translation_with_vote_list: translationWithVoteList,
+        site_text_translation_with_vote_list_by_language: {
+          site_text_translation_with_vote_list: translationWithVoteList,
+          language_code,
+          dialect_code,
+          geo_code,
+        },
       };
     } catch (e) {
       console.error(e);
@@ -455,7 +475,62 @@ export class SiteTextTranslationsService {
 
     return {
       error: ErrorType.UnknownError,
-      site_text_translation_with_vote_list: null,
+      site_text_translation_with_vote_list_by_language: {
+        site_text_translation_with_vote_list: null,
+        language_code,
+        dialect_code,
+        geo_code,
+      },
+    };
+  }
+
+  async getAllRecommendedTranslationList(): Promise<SiteTextTranslationWithVoteListByLanguageListOutput> {
+    try {
+      const { error: languageError, site_text_language_list } =
+        await this.siteTextService.getAllSiteTextLanguageList();
+
+      if (languageError !== ErrorType.NoError) {
+        return {
+          error: languageError,
+          site_text_translation_with_vote_list_by_language_list: null,
+        };
+      }
+
+      const siteTextTranslationWithVoteListByLanguageList: SiteTextTranslationWithVoteListByLanguage[] =
+        [];
+
+      for (const language of site_text_language_list) {
+        const { error, site_text_translation_with_vote_list_by_language } =
+          await this.getAllRecommendedTranslationListByLanguage(
+            language.language_code,
+            language.dialect_code,
+            language.geo_code,
+          );
+
+        if (error !== ErrorType.NoError) {
+          return {
+            error,
+            site_text_translation_with_vote_list_by_language_list: null,
+          };
+        }
+
+        siteTextTranslationWithVoteListByLanguageList.push(
+          site_text_translation_with_vote_list_by_language,
+        );
+      }
+
+      return {
+        error: ErrorType.NoError,
+        site_text_translation_with_vote_list_by_language_list:
+          siteTextTranslationWithVoteListByLanguageList,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      site_text_translation_with_vote_list_by_language_list: null,
     };
   }
 }

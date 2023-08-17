@@ -251,3 +251,33 @@ export class SiteTextTranslationWithVoteListOutput extends GenericOutput {
       )[]
     | null;
 }
+
+@ObjectType()
+export class SiteTextTranslationWithVoteListByLanguage {
+  @Field(() => [SiteTextTranslationWithVote], { nullable: true })
+  site_text_translation_with_vote_list:
+    | (
+        | SiteTextWordToWordTranslationWithVote
+        | SiteTextWordToPhraseTranslationWithVote
+        | SiteTextPhraseToWordTranslationWithVote
+        | SiteTextPhraseToPhraseTranslationWithVote
+      )[]
+    | null;
+  @Field(() => String) language_code: string;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
+}
+
+@ObjectType()
+export class SiteTextTranslationWithVoteListByLanguageOutput extends GenericOutput {
+  @Field(() => SiteTextTranslationWithVoteListByLanguage)
+  site_text_translation_with_vote_list_by_language: SiteTextTranslationWithVoteListByLanguage;
+}
+
+@ObjectType()
+export class SiteTextTranslationWithVoteListByLanguageListOutput extends GenericOutput {
+  @Field(() => [SiteTextTranslationWithVoteListByLanguage], { nullable: true })
+  site_text_translation_with_vote_list_by_language_list:
+    | SiteTextTranslationWithVoteListByLanguage[]
+    | null;
+}
