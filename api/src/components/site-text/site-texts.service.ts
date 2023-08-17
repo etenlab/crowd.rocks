@@ -6,7 +6,6 @@ import { PostgresService } from 'src/core/postgres.service';
 import { SiteTextWordDefinitionsService } from './site-text-word-definitions.service';
 import { SiteTextPhraseDefinitionsService } from './site-text-phrase-definitions.service';
 
-import { DefinitionsService } from 'src/components/definitions/definitions.service';
 import { WordDefinitionsService } from 'src/components/definitions/word-definitions.service';
 import { PhraseDefinitionsService } from 'src/components/definitions/phrase-definitions.service';
 import { WordsService } from 'src/components/words/words.service';
@@ -27,7 +26,6 @@ export class SiteTextsService {
     private pg: PostgresService,
     private siteTextWordDefinitionService: SiteTextWordDefinitionsService,
     private siteTextPhraseDefinitionService: SiteTextPhraseDefinitionsService,
-    private definitionService: DefinitionsService,
     private wordDefinitionService: WordDefinitionsService,
     private phraseDefinitionService: PhraseDefinitionsService,
     private phraseService: PhrasesService,

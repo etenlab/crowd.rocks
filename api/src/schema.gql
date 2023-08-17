@@ -515,7 +515,8 @@ type PostReadOutput {
 type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
   getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
-  getAllRecommendedSiteTextTranslation(dialect_code: String, geo_code: String, language_code: String!): SiteTextTranslationWithVoteListOutput!
+  getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput!
+  getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): SiteTextTranslationWithVoteListByLanguageOutput!
   getAllSiteTextDefinitions(filter: String): SiteTextDefinitionListOutput!
   getAllSiteTextLanguageList: SiteTextLanguageListOutput!
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
@@ -678,6 +679,23 @@ type SiteTextTranslationVoteStatusOutputRow {
 }
 
 union SiteTextTranslationWithVote = SiteTextPhraseToPhraseTranslationWithVote | SiteTextPhraseToWordTranslationWithVote | SiteTextWordToPhraseTranslationWithVote | SiteTextWordToWordTranslationWithVote
+
+type SiteTextTranslationWithVoteListByLanguage {
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  site_text_translation_with_vote_list: [SiteTextTranslationWithVote!]
+}
+
+type SiteTextTranslationWithVoteListByLanguageListOutput {
+  error: ErrorType!
+  site_text_translation_with_vote_list_by_language_list: [SiteTextTranslationWithVoteListByLanguage!]
+}
+
+type SiteTextTranslationWithVoteListByLanguageOutput {
+  error: ErrorType!
+  site_text_translation_with_vote_list_by_language: SiteTextTranslationWithVoteListByLanguage!
+}
 
 type SiteTextTranslationWithVoteListOutput {
   error: ErrorType!

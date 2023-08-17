@@ -74,6 +74,18 @@ fragment SiteTextLanguageFragment on SiteTextLanguage {
   geo_code
 }
 
+fragment SiteTextTranslationWithVoteListByLanguageFragment on SiteTextTranslationWithVoteListByLanguage {
+  dialect_code
+  geo_code
+  language_code
+  site_text_translation_with_vote_list {
+    ...SiteTextWordToWordTranslationWithVoteFragment
+    ...SiteTextWordToPhraseTranslationWithVoteFragment
+    ...SiteTextPhraseToWordTranslationWithVoteFragment
+    ...SiteTextPhraseToPhraseTranslationWithVoteFragment
+  }
+}
+
 query GetAllSiteTextDefinitions($filter: String) {
   getAllSiteTextDefinitions(filter: $filter) {
     error
@@ -208,22 +220,28 @@ query GetRecommendedTranslationFromSiteTextDefinitionID(
   }
 }
 
-query GetAllRecommendedSiteTextTranslation(
+query GetAllRecommendedSiteTextTranslationListByLanguage(
   $language_code: String!
   $dialect_code: String
   $geo_code: String
 ) {
-  getAllRecommendedSiteTextTranslation(
+  getAllRecommendedSiteTextTranslationListByLanguage(
     language_code: $language_code
     dialect_code: $dialect_code
     geo_code: $geo_code
   ) {
     error
-    site_text_translation_with_vote_list {
-      ...SiteTextWordToWordTranslationWithVoteFragment
-      ...SiteTextWordToPhraseTranslationWithVoteFragment
-      ...SiteTextPhraseToWordTranslationWithVoteFragment
-      ...SiteTextPhraseToPhraseTranslationWithVoteFragment
+    site_text_translation_with_vote_list_by_language {
+      ...SiteTextTranslationWithVoteListByLanguageFragment
+    }
+  }
+}
+
+query GetAllRecommendedSiteTextTranslationList {
+  getAllRecommendedSiteTextTranslationList {
+    error
+    site_text_translation_with_vote_list_by_language_list {
+      ...SiteTextTranslationWithVoteListByLanguageFragment
     }
   }
 }

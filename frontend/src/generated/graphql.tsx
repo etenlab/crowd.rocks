@@ -806,7 +806,8 @@ export type Query = {
   __typename?: 'Query';
   fileUploadUrlRequest: FileUploadUrlResponse;
   getAllMapsList: GetAllMapsListOutput;
-  getAllRecommendedSiteTextTranslation: SiteTextTranslationWithVoteListOutput;
+  getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput;
+  getAllRecommendedSiteTextTranslationListByLanguage: SiteTextTranslationWithVoteListByLanguageOutput;
   getAllSiteTextDefinitions: SiteTextDefinitionListOutput;
   getAllSiteTextLanguageList: SiteTextLanguageListOutput;
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
@@ -866,7 +867,7 @@ export type QueryGetAllMapsListArgs = {
 };
 
 
-export type QueryGetAllRecommendedSiteTextTranslationArgs = {
+export type QueryGetAllRecommendedSiteTextTranslationListByLanguageArgs = {
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
   language_code: Scalars['String']['input'];
@@ -1244,6 +1245,26 @@ export type SiteTextTranslationVoteStatusOutputRow = {
 };
 
 export type SiteTextTranslationWithVote = SiteTextPhraseToPhraseTranslationWithVote | SiteTextPhraseToWordTranslationWithVote | SiteTextWordToPhraseTranslationWithVote | SiteTextWordToWordTranslationWithVote;
+
+export type SiteTextTranslationWithVoteListByLanguage = {
+  __typename?: 'SiteTextTranslationWithVoteListByLanguage';
+  dialect_code?: Maybe<Scalars['String']['output']>;
+  geo_code?: Maybe<Scalars['String']['output']>;
+  language_code: Scalars['String']['output'];
+  site_text_translation_with_vote_list?: Maybe<Array<SiteTextTranslationWithVote>>;
+};
+
+export type SiteTextTranslationWithVoteListByLanguageListOutput = {
+  __typename?: 'SiteTextTranslationWithVoteListByLanguageListOutput';
+  error: ErrorType;
+  site_text_translation_with_vote_list_by_language_list?: Maybe<Array<SiteTextTranslationWithVoteListByLanguage>>;
+};
+
+export type SiteTextTranslationWithVoteListByLanguageOutput = {
+  __typename?: 'SiteTextTranslationWithVoteListByLanguageOutput';
+  error: ErrorType;
+  site_text_translation_with_vote_list_by_language: SiteTextTranslationWithVoteListByLanguage;
+};
 
 export type SiteTextTranslationWithVoteListOutput = {
   __typename?: 'SiteTextTranslationWithVoteListOutput';
@@ -1963,6 +1984,8 @@ export type SiteTextTranslationVoteStatusFragmentFragment = { __typename?: 'Site
 
 export type SiteTextLanguageFragmentFragment = { __typename?: 'SiteTextLanguage', language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
+export type SiteTextTranslationWithVoteListByLanguageFragmentFragment = { __typename?: 'SiteTextTranslationWithVoteListByLanguage', dialect_code?: string | null, geo_code?: string | null, language_code: string, site_text_translation_with_vote_list?: Array<{ __typename?: 'SiteTextPhraseToPhraseTranslationWithVote', phrase_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | { __typename?: 'SiteTextPhraseToWordTranslationWithVote', phrase_to_word_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | { __typename?: 'SiteTextWordToPhraseTranslationWithVote', word_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | { __typename?: 'SiteTextWordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } }> | null };
+
 export type GetAllSiteTextDefinitionsQueryVariables = Exact<{
   filter?: InputMaybe<Scalars['String']['input']>;
 }>;
@@ -2034,14 +2057,19 @@ export type GetRecommendedTranslationFromSiteTextDefinitionIdQueryVariables = Ex
 
 export type GetRecommendedTranslationFromSiteTextDefinitionIdQuery = { __typename?: 'Query', getRecommendedTranslationFromSiteTextDefinitionID: { __typename?: 'SiteTextTranslationWithVoteOutput', error: ErrorType, site_text_translation_with_vote?: { __typename?: 'SiteTextPhraseToPhraseTranslationWithVote', phrase_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | { __typename?: 'SiteTextPhraseToWordTranslationWithVote', phrase_to_word_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | { __typename?: 'SiteTextWordToPhraseTranslationWithVote', word_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | { __typename?: 'SiteTextWordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null } };
 
-export type GetAllRecommendedSiteTextTranslationQueryVariables = Exact<{
+export type GetAllRecommendedSiteTextTranslationListByLanguageQueryVariables = Exact<{
   language_code: Scalars['String']['input'];
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetAllRecommendedSiteTextTranslationQuery = { __typename?: 'Query', getAllRecommendedSiteTextTranslation: { __typename?: 'SiteTextTranslationWithVoteListOutput', error: ErrorType, site_text_translation_with_vote_list?: Array<{ __typename?: 'SiteTextPhraseToPhraseTranslationWithVote', phrase_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | { __typename?: 'SiteTextPhraseToWordTranslationWithVote', phrase_to_word_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | { __typename?: 'SiteTextWordToPhraseTranslationWithVote', word_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | { __typename?: 'SiteTextWordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } }> | null } };
+export type GetAllRecommendedSiteTextTranslationListByLanguageQuery = { __typename?: 'Query', getAllRecommendedSiteTextTranslationListByLanguage: { __typename?: 'SiteTextTranslationWithVoteListByLanguageOutput', error: ErrorType, site_text_translation_with_vote_list_by_language: { __typename?: 'SiteTextTranslationWithVoteListByLanguage', dialect_code?: string | null, geo_code?: string | null, language_code: string, site_text_translation_with_vote_list?: Array<{ __typename?: 'SiteTextPhraseToPhraseTranslationWithVote', phrase_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | { __typename?: 'SiteTextPhraseToWordTranslationWithVote', phrase_to_word_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | { __typename?: 'SiteTextWordToPhraseTranslationWithVote', word_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | { __typename?: 'SiteTextWordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } }> | null } } };
+
+export type GetAllRecommendedSiteTextTranslationListQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllRecommendedSiteTextTranslationListQuery = { __typename?: 'Query', getAllRecommendedSiteTextTranslationList: { __typename?: 'SiteTextTranslationWithVoteListByLanguageListOutput', error: ErrorType, site_text_translation_with_vote_list_by_language_list?: Array<{ __typename?: 'SiteTextTranslationWithVoteListByLanguage', dialect_code?: string | null, geo_code?: string | null, language_code: string, site_text_translation_with_vote_list?: Array<{ __typename?: 'SiteTextPhraseToPhraseTranslationWithVote', phrase_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | { __typename?: 'SiteTextPhraseToWordTranslationWithVote', phrase_to_word_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | { __typename?: 'SiteTextWordToPhraseTranslationWithVote', word_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string } } } | { __typename?: 'SiteTextWordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } }> | null }> | null } };
 
 export type SiteTextUpsertMutationVariables = Exact<{
   siteTextlike_string: Scalars['String']['input'];
@@ -2318,6 +2346,38 @@ export const PostFieldsFragmentDoc = gql`
   created_by
 }
     `;
+export const SiteTextPhraseDefinitionFragmentFragmentDoc = gql`
+    fragment SiteTextPhraseDefinitionFragment on SiteTextPhraseDefinition {
+  site_text_id
+  phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+}
+    ${PhraseDefinitionFragmentFragmentDoc}`;
+export const SiteTextWordDefinitionFragmentFragmentDoc = gql`
+    fragment SiteTextWordDefinitionFragment on SiteTextWordDefinition {
+  site_text_id
+  word_definition {
+    ...WordDefinitionFragment
+  }
+}
+    ${WordDefinitionFragmentFragmentDoc}`;
+export const SiteTextTranslationVoteStatusFragmentFragmentDoc = gql`
+    fragment SiteTextTranslationVoteStatusFragment on SiteTextTranslationVoteStatus {
+  translation_id
+  from_type_is_word
+  to_type_is_word
+  downvotes
+  upvotes
+}
+    `;
+export const SiteTextLanguageFragmentFragmentDoc = gql`
+    fragment SiteTextLanguageFragment on SiteTextLanguage {
+  language_code
+  dialect_code
+  geo_code
+}
+    `;
 export const SiteTextWordToWordTranslationWithVoteFragmentFragmentDoc = gql`
     fragment SiteTextWordToWordTranslationWithVoteFragment on SiteTextWordToWordTranslationWithVote {
   word_to_word_translation_id
@@ -2372,38 +2432,22 @@ export const SiteTextPhraseToPhraseTranslationWithVoteFragmentFragmentDoc = gql`
   upvotes
 }
     ${PhraseDefinitionFragmentFragmentDoc}`;
-export const SiteTextPhraseDefinitionFragmentFragmentDoc = gql`
-    fragment SiteTextPhraseDefinitionFragment on SiteTextPhraseDefinition {
-  site_text_id
-  phrase_definition {
-    ...PhraseDefinitionFragment
-  }
-}
-    ${PhraseDefinitionFragmentFragmentDoc}`;
-export const SiteTextWordDefinitionFragmentFragmentDoc = gql`
-    fragment SiteTextWordDefinitionFragment on SiteTextWordDefinition {
-  site_text_id
-  word_definition {
-    ...WordDefinitionFragment
-  }
-}
-    ${WordDefinitionFragmentFragmentDoc}`;
-export const SiteTextTranslationVoteStatusFragmentFragmentDoc = gql`
-    fragment SiteTextTranslationVoteStatusFragment on SiteTextTranslationVoteStatus {
-  translation_id
-  from_type_is_word
-  to_type_is_word
-  downvotes
-  upvotes
-}
-    `;
-export const SiteTextLanguageFragmentFragmentDoc = gql`
-    fragment SiteTextLanguageFragment on SiteTextLanguage {
-  language_code
+export const SiteTextTranslationWithVoteListByLanguageFragmentFragmentDoc = gql`
+    fragment SiteTextTranslationWithVoteListByLanguageFragment on SiteTextTranslationWithVoteListByLanguage {
   dialect_code
   geo_code
+  language_code
+  site_text_translation_with_vote_list {
+    ...SiteTextWordToWordTranslationWithVoteFragment
+    ...SiteTextWordToPhraseTranslationWithVoteFragment
+    ...SiteTextPhraseToWordTranslationWithVoteFragment
+    ...SiteTextPhraseToPhraseTranslationWithVoteFragment
+  }
 }
-    `;
+    ${SiteTextWordToWordTranslationWithVoteFragmentFragmentDoc}
+${SiteTextWordToPhraseTranslationWithVoteFragmentFragmentDoc}
+${SiteTextPhraseToWordTranslationWithVoteFragmentFragmentDoc}
+${SiteTextPhraseToPhraseTranslationWithVoteFragmentFragmentDoc}`;
 export const WordToWordTranslationWithVoteFragmentFragmentDoc = gql`
     fragment WordToWordTranslationWithVoteFragment on WordToWordTranslationWithVote {
   word_to_word_translation_id
@@ -4097,38 +4141,32 @@ export function useGetRecommendedTranslationFromSiteTextDefinitionIdLazyQuery(ba
 export type GetRecommendedTranslationFromSiteTextDefinitionIdQueryHookResult = ReturnType<typeof useGetRecommendedTranslationFromSiteTextDefinitionIdQuery>;
 export type GetRecommendedTranslationFromSiteTextDefinitionIdLazyQueryHookResult = ReturnType<typeof useGetRecommendedTranslationFromSiteTextDefinitionIdLazyQuery>;
 export type GetRecommendedTranslationFromSiteTextDefinitionIdQueryResult = Apollo.QueryResult<GetRecommendedTranslationFromSiteTextDefinitionIdQuery, GetRecommendedTranslationFromSiteTextDefinitionIdQueryVariables>;
-export const GetAllRecommendedSiteTextTranslationDocument = gql`
-    query GetAllRecommendedSiteTextTranslation($language_code: String!, $dialect_code: String, $geo_code: String) {
-  getAllRecommendedSiteTextTranslation(
+export const GetAllRecommendedSiteTextTranslationListByLanguageDocument = gql`
+    query GetAllRecommendedSiteTextTranslationListByLanguage($language_code: String!, $dialect_code: String, $geo_code: String) {
+  getAllRecommendedSiteTextTranslationListByLanguage(
     language_code: $language_code
     dialect_code: $dialect_code
     geo_code: $geo_code
   ) {
     error
-    site_text_translation_with_vote_list {
-      ...SiteTextWordToWordTranslationWithVoteFragment
-      ...SiteTextWordToPhraseTranslationWithVoteFragment
-      ...SiteTextPhraseToWordTranslationWithVoteFragment
-      ...SiteTextPhraseToPhraseTranslationWithVoteFragment
+    site_text_translation_with_vote_list_by_language {
+      ...SiteTextTranslationWithVoteListByLanguageFragment
     }
   }
 }
-    ${SiteTextWordToWordTranslationWithVoteFragmentFragmentDoc}
-${SiteTextWordToPhraseTranslationWithVoteFragmentFragmentDoc}
-${SiteTextPhraseToWordTranslationWithVoteFragmentFragmentDoc}
-${SiteTextPhraseToPhraseTranslationWithVoteFragmentFragmentDoc}`;
+    ${SiteTextTranslationWithVoteListByLanguageFragmentFragmentDoc}`;
 
 /**
- * __useGetAllRecommendedSiteTextTranslationQuery__
+ * __useGetAllRecommendedSiteTextTranslationListByLanguageQuery__
  *
- * To run a query within a React component, call `useGetAllRecommendedSiteTextTranslationQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetAllRecommendedSiteTextTranslationQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetAllRecommendedSiteTextTranslationListByLanguageQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllRecommendedSiteTextTranslationListByLanguageQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetAllRecommendedSiteTextTranslationQuery({
+ * const { data, loading, error } = useGetAllRecommendedSiteTextTranslationListByLanguageQuery({
  *   variables: {
  *      language_code: // value for 'language_code'
  *      dialect_code: // value for 'dialect_code'
@@ -4136,17 +4174,54 @@ ${SiteTextPhraseToPhraseTranslationWithVoteFragmentFragmentDoc}`;
  *   },
  * });
  */
-export function useGetAllRecommendedSiteTextTranslationQuery(baseOptions: Apollo.QueryHookOptions<GetAllRecommendedSiteTextTranslationQuery, GetAllRecommendedSiteTextTranslationQueryVariables>) {
+export function useGetAllRecommendedSiteTextTranslationListByLanguageQuery(baseOptions: Apollo.QueryHookOptions<GetAllRecommendedSiteTextTranslationListByLanguageQuery, GetAllRecommendedSiteTextTranslationListByLanguageQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetAllRecommendedSiteTextTranslationQuery, GetAllRecommendedSiteTextTranslationQueryVariables>(GetAllRecommendedSiteTextTranslationDocument, options);
+        return Apollo.useQuery<GetAllRecommendedSiteTextTranslationListByLanguageQuery, GetAllRecommendedSiteTextTranslationListByLanguageQueryVariables>(GetAllRecommendedSiteTextTranslationListByLanguageDocument, options);
       }
-export function useGetAllRecommendedSiteTextTranslationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllRecommendedSiteTextTranslationQuery, GetAllRecommendedSiteTextTranslationQueryVariables>) {
+export function useGetAllRecommendedSiteTextTranslationListByLanguageLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllRecommendedSiteTextTranslationListByLanguageQuery, GetAllRecommendedSiteTextTranslationListByLanguageQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetAllRecommendedSiteTextTranslationQuery, GetAllRecommendedSiteTextTranslationQueryVariables>(GetAllRecommendedSiteTextTranslationDocument, options);
+          return Apollo.useLazyQuery<GetAllRecommendedSiteTextTranslationListByLanguageQuery, GetAllRecommendedSiteTextTranslationListByLanguageQueryVariables>(GetAllRecommendedSiteTextTranslationListByLanguageDocument, options);
         }
-export type GetAllRecommendedSiteTextTranslationQueryHookResult = ReturnType<typeof useGetAllRecommendedSiteTextTranslationQuery>;
-export type GetAllRecommendedSiteTextTranslationLazyQueryHookResult = ReturnType<typeof useGetAllRecommendedSiteTextTranslationLazyQuery>;
-export type GetAllRecommendedSiteTextTranslationQueryResult = Apollo.QueryResult<GetAllRecommendedSiteTextTranslationQuery, GetAllRecommendedSiteTextTranslationQueryVariables>;
+export type GetAllRecommendedSiteTextTranslationListByLanguageQueryHookResult = ReturnType<typeof useGetAllRecommendedSiteTextTranslationListByLanguageQuery>;
+export type GetAllRecommendedSiteTextTranslationListByLanguageLazyQueryHookResult = ReturnType<typeof useGetAllRecommendedSiteTextTranslationListByLanguageLazyQuery>;
+export type GetAllRecommendedSiteTextTranslationListByLanguageQueryResult = Apollo.QueryResult<GetAllRecommendedSiteTextTranslationListByLanguageQuery, GetAllRecommendedSiteTextTranslationListByLanguageQueryVariables>;
+export const GetAllRecommendedSiteTextTranslationListDocument = gql`
+    query GetAllRecommendedSiteTextTranslationList {
+  getAllRecommendedSiteTextTranslationList {
+    error
+    site_text_translation_with_vote_list_by_language_list {
+      ...SiteTextTranslationWithVoteListByLanguageFragment
+    }
+  }
+}
+    ${SiteTextTranslationWithVoteListByLanguageFragmentFragmentDoc}`;
+
+/**
+ * __useGetAllRecommendedSiteTextTranslationListQuery__
+ *
+ * To run a query within a React component, call `useGetAllRecommendedSiteTextTranslationListQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllRecommendedSiteTextTranslationListQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllRecommendedSiteTextTranslationListQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAllRecommendedSiteTextTranslationListQuery(baseOptions?: Apollo.QueryHookOptions<GetAllRecommendedSiteTextTranslationListQuery, GetAllRecommendedSiteTextTranslationListQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllRecommendedSiteTextTranslationListQuery, GetAllRecommendedSiteTextTranslationListQueryVariables>(GetAllRecommendedSiteTextTranslationListDocument, options);
+      }
+export function useGetAllRecommendedSiteTextTranslationListLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllRecommendedSiteTextTranslationListQuery, GetAllRecommendedSiteTextTranslationListQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllRecommendedSiteTextTranslationListQuery, GetAllRecommendedSiteTextTranslationListQueryVariables>(GetAllRecommendedSiteTextTranslationListDocument, options);
+        }
+export type GetAllRecommendedSiteTextTranslationListQueryHookResult = ReturnType<typeof useGetAllRecommendedSiteTextTranslationListQuery>;
+export type GetAllRecommendedSiteTextTranslationListLazyQueryHookResult = ReturnType<typeof useGetAllRecommendedSiteTextTranslationListLazyQuery>;
+export type GetAllRecommendedSiteTextTranslationListQueryResult = Apollo.QueryResult<GetAllRecommendedSiteTextTranslationListQuery, GetAllRecommendedSiteTextTranslationListQueryVariables>;
 export const SiteTextUpsertDocument = gql`
     mutation SiteTextUpsert($siteTextlike_string: String!, $definitionlike_string: String!, $language_code: String!, $dialect_code: String, $geo_code: String) {
   siteTextUpsert(
@@ -4704,7 +4779,8 @@ export const namedOperations = {
     SiteTextPhraseDefinitionRead: 'SiteTextPhraseDefinitionRead',
     GetAllSiteTextLanguageList: 'GetAllSiteTextLanguageList',
     GetRecommendedTranslationFromSiteTextDefinitionID: 'GetRecommendedTranslationFromSiteTextDefinitionID',
-    GetAllRecommendedSiteTextTranslation: 'GetAllRecommendedSiteTextTranslation',
+    GetAllRecommendedSiteTextTranslationListByLanguage: 'GetAllRecommendedSiteTextTranslationListByLanguage',
+    GetAllRecommendedSiteTextTranslationList: 'GetAllRecommendedSiteTextTranslationList',
     GetTranslationsByFromDefinitionId: 'GetTranslationsByFromDefinitionId',
     GetRecommendedTranslationFromDefinitionID: 'GetRecommendedTranslationFromDefinitionID',
     UserRead: 'UserRead',
@@ -4763,6 +4839,7 @@ export const namedOperations = {
     SiteTextWordDefinitionFragment: 'SiteTextWordDefinitionFragment',
     SiteTextTranslationVoteStatusFragment: 'SiteTextTranslationVoteStatusFragment',
     SiteTextLanguageFragment: 'SiteTextLanguageFragment',
+    SiteTextTranslationWithVoteListByLanguageFragment: 'SiteTextTranslationWithVoteListByLanguageFragment',
     WordToWordTranslationWithVoteFragment: 'WordToWordTranslationWithVoteFragment',
     WordToPhraseTranslationWithVoteFragment: 'WordToPhraseTranslationWithVoteFragment',
     PhraseToWordTranslationWithVoteFragment: 'PhraseToWordTranslationWithVoteFragment',
