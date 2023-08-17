@@ -99,7 +99,10 @@ const Body: React.FC = () => {
       return;
     }
 
-    if (languageData && languageData.getAllSiteTextLanguageList) {
+    if (
+      languageData &&
+      languageData.getAllSiteTextLanguageList.site_text_language_list
+    ) {
       setSiteTextLanguageList([
         ...languageData.getAllSiteTextLanguageList.site_text_language_list.map(
           (language) => language as SiteTextLanguage,
@@ -147,17 +150,17 @@ const Body: React.FC = () => {
 
   const click_profile = () => {
     toggleMenu();
-    router.push('/US/eng/1/profile');
+    router.push(`/US/${appLanguage.lang.tag}/1/profile`);
   };
 
   const click_register = () => {
     toggleMenu();
-    router.push('/US/eng/1/register');
+    router.push(`/US/${appLanguage.lang.tag}/1/register`);
   };
 
   const click_login = () => {
     toggleMenu();
-    router.push('/US/eng/1/login');
+    router.push(`/US/${appLanguage.lang.tag}/1/login`);
   };
 
   const click_logout = async () => {
@@ -184,7 +187,7 @@ const Body: React.FC = () => {
     await apollo_client.clearStore();
     await apollo_client.resetStore();
 
-    router.push('/US/eng/1/home');
+    router.push(`/US/${appLanguage.lang.tag}/1/home`);
   };
 
   const toggle_theme = () => {
@@ -203,20 +206,21 @@ const Body: React.FC = () => {
   };
 
   const goHome = () => {
-    router.push('/US/eng/1/home');
+    router.push(`/US/${appLanguage.lang.tag}/1/home`);
   };
 
   const handleChangeAppLanguage = useCallback(
     (value: string | undefined) => {
       if (value) {
         changeAppLanguage(tag2langInfo(value));
+        router.push(`/US/${value}/1/home`);
       }
 
       outputAllTrWords();
 
       modal.current?.dismiss();
     },
-    [changeAppLanguage, outputAllTrWords],
+    [changeAppLanguage, outputAllTrWords, router],
   );
 
   const languages = useMemo(() => {
@@ -400,7 +404,7 @@ const Body: React.FC = () => {
             component={AddNewTranslationPage}
           />
           <Route exact path="/">
-            <Redirect to="/US/eng/1/home" />
+            <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />
           </Route>
         </IonRouterOutlet>
       </IonContent>

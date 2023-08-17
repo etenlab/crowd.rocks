@@ -21,7 +21,7 @@ export const MapList: React.FC = () => {
   const {
     states: {
       global: {
-        langauges: { targetLang },
+        langauges: { targetLang, appLanguage },
       },
     },
     actions: { setTargetLanguage },
@@ -34,8 +34,6 @@ export const MapList: React.FC = () => {
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
   });
-  //const [mapListLang, setMapListLang] = useState<LanguageInfo>();
-  //console.log(mapListLang);
 
   useEffect(() => {
     const user_id = globals.get_user_id();
@@ -85,7 +83,7 @@ export const MapList: React.FC = () => {
       </LangSelectorBox>
       <MapTools
         onTranslationsClick={() => {
-          router.push(`/US/eng/1/maps/translation`);
+          router.push(`/US/${appLanguage.lang.tag}/1/maps/translation`);
         }}
         onAddClick={
           isAdminRes?.loggedInIsAdmin.isAdmin ? handleAddMap : undefined

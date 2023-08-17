@@ -21,7 +21,11 @@ import {
   useIonToast,
   InputCustomEvent,
   InputChangeEventDetail,
+  IonFab,
+  IonFabButton,
+  IonIcon,
 } from '@ionic/react';
+import { add } from 'ionicons/icons';
 
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -38,6 +42,7 @@ import {
   SiteTextDefinitionListOutput,
   GetAllSiteTextDefinitionsQuery,
   ErrorType,
+  useIsAdminLoggedInQuery,
 } from '../../../generated/graphql';
 
 import {
@@ -46,6 +51,7 @@ import {
   AppLanguageShowerContainer,
   CardListContainer,
   CardContainer,
+  FabContainer,
 } from './styled';
 
 import { useTr } from '../../../hooks/useTr';
@@ -53,6 +59,9 @@ import { useTr } from '../../../hooks/useTr';
 import { Input } from '../../common/styled';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { TranslatedCard } from './TranslatedCard';
+
+import { sortSiteTextFn } from '../../../common/langUtils';
+import { globals } from '../../../services/globals';
 
 interface SiteTextListPageProps
   extends RouteComponentProps<{
@@ -75,12 +84,20 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
   } = useAppContext();
 
   const [filter, setFilter] = useState<string>('');
-  //const [targetLang, setTargetLang] = useState<LanguageInfo>();
+
   const [allSiteTextDefinitions, setAllSiteTextDefinitions] =
     useState<SiteTextDefinitionListOutput>();
 
   const modal = useRef<HTMLIonModalElement>(null);
   const input = useRef<HTMLIonInputElement>(null);
+
+  const [showModal, setShowModal] = useState(false);
+
+  const user_id = globals.get_user_id();
+  const variables = { input: { user_id: String(user_id) } };
+  const { data: isAdminRes } = useIsAdminLoggedInQuery({
+    variables: variables,
+  });
 
   const [getAllSiteTextDefinitions, { data, error, loading, called }] =
     useGetAllSiteTextDefinitionsLazyQuery();
@@ -152,8 +169,9 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
         console.log(upsertData?.siteTextUpsert.error);
 
         present({
-          message: `${tr('Failed at creating new site text!')} [${upsertData
-            ?.siteTextUpsert.error}]`,
+          message: `${tr('Failed at creating new site text!')} [${
+            upsertData?.siteTextUpsert.error || ''
+          }]`,
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -282,6 +300,7 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
         geo_code: null,
       },
     });
+    setShowModal(false);
   };
 
   const handleFilterChange = (
@@ -329,6 +348,8 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
         }
       }
     }
+
+    tempDefinitions.sort(sortSiteTextFn);
 
     return tempDefinitions.map((definition) => (
       <Fragment
@@ -390,8 +411,8 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
                   title={tr('Select')}
                   langSelectorId="site-text-targetLangSelector"
                   selected={targetLang ?? undefined}
-                  onChange={(_sourceLangTag, sourceLangInfo) => {
-                    setTargetLanguage(sourceLangInfo);
+                  onChange={(_targetLangTag, targetLangInfo) => {
+                    setTargetLanguage(targetLangInfo);
                   }}
                   onClearClick={() => setTargetLanguage(null)}
                 />
@@ -408,21 +429,24 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
               onIonInput={handleFilterChange}
             />
 
-            <br />
-
-            <IonButton id="open-site-text-modal" expand="block">
-              + {tr('Add More Site Text')}
-            </IonButton>
-
+            {isAdminRes?.loggedInIsAdmin.isAdmin && (
+              <FabContainer className="section">
+                <IonFab>
+                  <IonFabButton onClick={() => setShowModal(true)}>
+                    <IonIcon icon={add} />
+                  </IonFabButton>
+                </IonFab>
+              </FabContainer>
+            )}
             <br />
 
             <CardListContainer>{cardListComs}</CardListContainer>
 
-            <IonModal ref={modal} trigger="open-site-text-modal">
+            <IonModal ref={modal} isOpen={showModal}>
               <IonHeader>
                 <IonToolbar>
                   <IonButtons slot="start">
-                    <IonButton onClick={() => modal.current?.dismiss()}>
+                    <IonButton onClick={() => setShowModal(false)}>
                       {tr('Cancel')}
                     </IonButton>
                   </IonButtons>

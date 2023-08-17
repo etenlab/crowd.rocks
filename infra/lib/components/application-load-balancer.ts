@@ -32,7 +32,7 @@ export class ApplicationLoadBalancer extends Construct {
   constructor(scope: Construct, id: string, props: AppLoadBalancerProps) {
     super(scope, id);
 
-    const certificates = props.certificateArns.map(importAlbCertificate)
+    const certificates = props.certificateArns.map(importAlbCertificate);
 
     this.albSecurityGroup = new ec2.SecurityGroup(
       this,
@@ -54,6 +54,11 @@ export class ApplicationLoadBalancer extends Construct {
         subnetType: ec2.SubnetType.PUBLIC,
       },
       idleTimeout: cdk.Duration.seconds(300),
+    });
+
+    this.alb.addRedirect({
+      sourceProtocol: elbv2.ApplicationProtocol.HTTP,
+      targetProtocol: elbv2.ApplicationProtocol.HTTPS,
     });
 
     this.albListener = this.alb.addListener('HTTPSAlbListener', {

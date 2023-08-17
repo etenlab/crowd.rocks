@@ -25,6 +25,11 @@
   --ion-background-color: var(--ca-menu-background-color);
 }
 
+.dark {
+  color: var(--ca-menu-header-text);
+  background-color: var(--ca-menu-background-color);
+}
+
 .theme-icon {
   margin: 0px 7px;
 }

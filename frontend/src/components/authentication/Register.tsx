@@ -15,10 +15,18 @@ import { login_change } from '../../services/subscriptions';
 import './Register.css';
 
 import { useTr } from '../../hooks/useTr';
+import { useAppContext } from '../../hooks/useAppContext';
 
 const Register: React.FC = () => {
   const history = useHistory();
   const { tr } = useTr();
+  const {
+    states: {
+      global: {
+        langauges: { appLanguage },
+      },
+    },
+  } = useAppContext();
 
   useIonViewWillEnter(() => {
     document.title = tr('Register');
@@ -85,7 +93,7 @@ const Register: React.FC = () => {
       }
 
       login_change.next(true);
-      history.push('/US/eng/1/home');
+      history.push(`/US/${appLanguage.lang.tag}/1/home`);
       return;
     } else if (error === ErrorType.EmailTooLong) {
       set_is_email_too_long(true);
@@ -112,7 +120,7 @@ const Register: React.FC = () => {
   }
 
   const click_login = () => {
-    history.push('/US/eng/1/login');
+    history.push(`/US/${appLanguage.lang.tag}/1/login`);
   };
 
   return (
