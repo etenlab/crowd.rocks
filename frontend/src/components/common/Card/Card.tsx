@@ -42,7 +42,11 @@ export function Card({
   ) : null;
 
   return (
-    <CustomCard onClick={() => onClick && onClick()} routerLink={routerLink}>
+    <CustomCard
+      onClick={() => onClick && onClick()}
+      routerLink={routerLink}
+      style={{ cursor: onClick ? 'pointer' : 'unset' }}
+    >
       <CustomCardHeader>
         <CustomCardTitle>
           {content || ''}

@@ -110,6 +110,7 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
                       onClick={() => {
                         router.push(item.link);
                       }}
+                      style={{ cursor: 'pointer' }}
                     >
                       <IonCardHeader>
                         <IonCardTitle>
