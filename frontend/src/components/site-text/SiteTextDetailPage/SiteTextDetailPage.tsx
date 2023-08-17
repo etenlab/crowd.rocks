@@ -49,6 +49,7 @@ import { CaptainContainer, CardListContainer, CardContainer } from './styled';
 import { Input, Textarea } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
+import { AddFab } from '../../common/AddFab';
 
 interface SiteTextDetailPageProps
   extends RouteComponentProps<{
@@ -70,6 +71,8 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
     useState<SiteTextWordDefinitionOutput>();
   const [siteTextPhraseDefinition, setSiteTextPhraseDefinition] =
     useState<SiteTextPhraseDefinitionOutput>();
+
+  const [showModal, setShowModal] = useState(false);
 
   const modal = useRef<HTMLIonModalElement>(null);
   const input = useRef<HTMLIonInputElement>(null);
@@ -732,21 +735,17 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
 
             <hr />
 
-            <p style={{ padding: '0 16px', fontSize: 16 }}>
-              {tr('Site Text Translations')}
-            </p>
+            <h3>{tr('Site Text Translations')}</h3>
 
-            <IonButton id="open-site-text-translation-modal" expand="block">
-              + {tr('Add More Translation')}
-            </IonButton>
+            <AddFab onClick={() => setShowModal(true)} />
 
             <CardListContainer>{translationsCom}</CardListContainer>
 
-            <IonModal ref={modal} trigger="open-site-text-translation-modal">
+            <IonModal ref={modal} isOpen={showModal}>
               <IonHeader>
                 <IonToolbar>
                   <IonButtons slot="start">
-                    <IonButton onClick={() => modal.current?.dismiss()}>
+                    <IonButton onClick={() => setShowModal(false)}>
                       {tr('Cancel')}
                     </IonButton>
                   </IonButtons>

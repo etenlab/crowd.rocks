@@ -20,8 +20,4 @@ export const StThumbDiv = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid #888;
-  border-radius: 4px;
-  padding: 5px;
-  gap: 5px;
 `;

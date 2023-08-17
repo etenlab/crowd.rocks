@@ -43,6 +43,8 @@ import { CaptainContainer, CardListContainer, CardContainer } from './styled';
 import { Textarea } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
+import { AddFab } from '../../common/AddFab';
+import { VoteButtonsHerizontal } from '../../common/VoteButtonsHerizontal';
 
 interface WordDetailPageProps
   extends RouteComponentProps<{
@@ -59,6 +61,7 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
   const [allDefinitions, setAllDefinitions] =
     useState<WordDefinitionWithVoteListOutput>();
   const [wordWithVote, setWordWithVote] = useState<WordWithVoteOutput>();
+  const [showModal, setShowModal] = useState(false);
 
   const modal = useRef<HTMLIonModalElement>(null);
   const textarea = useRef<HTMLIonTextareaElement>(null);
@@ -360,30 +363,29 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
 
   const wordCom =
     !!wordWithVote && !!wordWithVote.word_with_vote ? (
-      <Card
-        content={wordWithVote.word_with_vote.word}
-        vote={{
-          upVotes: wordWithVote.word_with_vote.upvotes,
-          downVotes: wordWithVote.word_with_vote.downvotes,
-          onVoteUpClick: () => {
+      <div style={{ display: 'flex' }}>
+        <IonTitle>Word: {wordWithVote.word_with_vote.word}</IonTitle>
+        <VoteButtonsHerizontal
+          upVotes={wordWithVote.word_with_vote.upvotes}
+          downVotes={wordWithVote.word_with_vote.downvotes}
+          onVoteUpClick={() => {
             toggleWordVoteStatus({
               variables: {
                 word_id: wordWithVote!.word_with_vote!.word_id,
                 vote: true,
               },
             });
-          },
-          onVoteDownClick: () => {
+          }}
+          onVoteDownClick={() => {
             toggleWordVoteStatus({
               variables: {
                 word_id: wordWithVote!.word_with_vote!.word_id,
                 vote: false,
               },
             });
-          },
-        }}
-        voteFor="content"
-      />
+          }}
+        />
+      </div>
     ) : null;
 
   const definitionsCom = definitions
@@ -429,21 +431,18 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
 
             <hr />
 
-            <p style={{ padding: '0 16px', fontSize: 16 }}>
-              {tr('Definitions')}
-            </p>
+            <h4>{tr('Definitions')}</h4>
 
-            <IonButton id="open-dictionary-definition-modal" expand="block">
-              + {tr('Add More Definitions')}
-            </IonButton>
+            <AddFab onClick={() => setShowModal(true)} />
+            <br />
 
             <CardListContainer>{definitionsCom}</CardListContainer>
 
-            <IonModal ref={modal} trigger="open-dictionary-definition-modal">
+            <IonModal ref={modal} isOpen={showModal}>
               <IonHeader>
                 <IonToolbar>
                   <IonButtons slot="start">
-                    <IonButton onClick={() => modal.current?.dismiss()}>
+                    <IonButton onClick={() => setShowModal(false)}>
                       {tr('Cancel')}
                     </IonButton>
                   </IonButtons>

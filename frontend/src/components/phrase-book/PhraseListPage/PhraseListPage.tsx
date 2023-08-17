@@ -46,6 +46,7 @@ import {
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { AddFab } from '../../common/AddFab';
 
 interface PhraseListPageProps
   extends RouteComponentProps<{
@@ -69,7 +70,8 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
   const modal = useRef<HTMLIonModalElement>(null);
   const textarea = useRef<HTMLIonTextareaElement>(null);
 
-  //const [langInfo, setLangInfo] = useState<LanguageInfo>();
+  const [showModal, setShowModal] = useState(false);
+
   const [filter, setFilter] = useState<string>('');
 
   const [phraseWithVoteList, setPhraseWithVoteList] =
@@ -403,19 +405,17 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
             <hr />
 
-            <IonButton id="open-phrase-modal" expand="block">
-              + {tr('Add More Phrase')}
-            </IonButton>
+            <AddFab onClick={() => setShowModal(true)} />
 
             <br />
 
             <CardListContainer>{cardListComs}</CardListContainer>
 
-            <IonModal ref={modal} trigger="open-phrase-modal">
+            <IonModal ref={modal} isOpen={showModal}>
               <IonHeader>
                 <IonToolbar>
                   <IonButtons slot="start">
-                    <IonButton onClick={() => modal.current?.dismiss()}>
+                    <IonButton onClick={() => setShowModal(false)}>
                       {tr('Cancel')}
                     </IonButton>
                   </IonButtons>
