@@ -1,13 +1,23 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 import { useAppContext } from './useAppContext';
+import { langInfo2String } from '../common/langUtils';
+
+import { useSiteTextUpsertMutation } from '../generated/graphql';
 
 export function useTr() {
   const {
     states: {
-      global: { siteTextMap },
+      global: {
+        siteTexts: { originalMap, translationMap },
+        langauges: { appLanguage },
+      },
     },
   } = useAppContext();
+
+  const [siteTextUpsert] = useSiteTextUpsertMutation();
+
+  const newSiteTextsRef = useRef<Record<string, string>>({});
 
   const tr = useCallback(
     (siteText: string) => {
@@ -15,34 +25,35 @@ export function useTr() {
         return '';
       }
 
-      const allTrWordsRef: Record<string, boolean> = JSON.parse(
-        localStorage.getItem('allTrWordsRef') || '{}',
-      );
-
-      if (allTrWordsRef[siteText.trim()] === undefined) {
-        allTrWordsRef[siteText.trim()] = true;
+      if (
+        originalMap[siteText.trim()] === undefined &&
+        newSiteTextsRef.current[siteText.trim()] === undefined
+      ) {
+        newSiteTextsRef.current[siteText.trim()] = siteText.trim();
+        siteTextUpsert({
+          variables: {
+            siteTextlike_string: siteText.trim(),
+            definitionlike_string: 'Site User Interface Text',
+            language_code: 'en',
+            dialect_code: null,
+            geo_code: null,
+          },
+        });
       }
 
-      localStorage.setItem('allTrWordsRef', JSON.stringify(allTrWordsRef));
-
-      if (siteTextMap[siteText.trim()]) {
-        return siteTextMap[siteText.trim()];
+      if (
+        translationMap[langInfo2String(appLanguage)] &&
+        translationMap[langInfo2String(appLanguage)][siteText.trim()]
+      ) {
+        return translationMap[langInfo2String(appLanguage)][siteText.trim()];
       }
 
       return siteText.trim();
     },
-    [siteTextMap],
+    [translationMap, originalMap, appLanguage, siteTextUpsert],
   );
-
-  const outputAllTrWords = useCallback(() => {
-    const allTrWordsRef: Record<string, boolean> = JSON.parse(
-      localStorage.getItem('allTrWordsRef') || '',
-    );
-    console.log(allTrWordsRef);
-  }, []);
 
   return {
     tr,
-    outputAllTrWords,
   };
 }
