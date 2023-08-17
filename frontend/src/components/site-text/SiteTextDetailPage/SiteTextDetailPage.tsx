@@ -735,9 +735,12 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
 
             <hr />
 
-            <h3>{tr('Site Text Translations')}</h3>
+            <AddFab
+              title={tr('Site Text Translations')}
+              onClick={() => setShowModal(true)}
+            />
 
-            <AddFab onClick={() => setShowModal(true)} />
+            <hr />
 
             <CardListContainer>{translationsCom}</CardListContainer>
 

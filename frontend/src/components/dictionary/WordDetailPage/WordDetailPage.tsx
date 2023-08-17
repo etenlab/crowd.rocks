@@ -433,8 +433,11 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
 
             <h4>{tr('Definitions')}</h4>
 
-            <AddFab onClick={() => setShowModal(true)} />
-            <br />
+            <AddFab
+              title={tr('All Words')}
+              onClick={() => setShowModal(true)}
+            />
+            <hr />
 
             <CardListContainer>{definitionsCom}</CardListContainer>
 

@@ -405,8 +405,12 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
             <hr />
 
-            <AddFab onClick={() => setShowModal(true)} />
+            <AddFab
+              title={tr('All Phrases')}
+              onClick={() => setShowModal(true)}
+            />
 
+            <hr />
             <br />
 
             <CardListContainer>{cardListComs}</CardListContainer>

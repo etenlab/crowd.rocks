@@ -411,7 +411,12 @@ export function WordListPage({ match }: WordListPageProps) {
 
             <hr />
 
-            <AddFab onClick={() => setShowModal(true)} />
+            <AddFab
+              title={tr('All Words')}
+              onClick={() => setShowModal(true)}
+            />
+
+            <hr />
 
             <br />
 

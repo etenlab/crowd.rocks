@@ -427,9 +427,12 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
 
             <hr />
             {isAdminRes?.loggedInIsAdmin.isAdmin && (
-              <AddFab onClick={() => setShowModal(true)} />
+              <AddFab
+                title={tr('Site Text Strings')}
+                onClick={() => setShowModal(true)}
+              />
             )}
-            <br />
+            <hr />
 
             <CardListContainer>{cardListComs}</CardListContainer>
 

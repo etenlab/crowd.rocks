@@ -434,9 +434,12 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
 
             <hr />
 
-            <h4>{tr('Definitions')}</h4>
+            <AddFab
+              title={tr('Definitions')}
+              onClick={() => setShowModal(true)}
+            />
 
-            <AddFab onClick={() => setShowModal(true)} />
+            <hr />
 
             <CardListContainer>{definitionsCom}</CardListContainer>
 
