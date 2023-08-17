@@ -46,6 +46,7 @@ import {
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { AddFab } from '../../common/AddFab';
 
 interface WordListPageProps
   extends RouteComponentProps<{
@@ -70,6 +71,8 @@ export function WordListPage({ match }: WordListPageProps) {
 
   const modal = useRef<HTMLIonModalElement>(null);
   const textarea = useRef<HTMLIonTextareaElement>(null);
+
+  const [showModal, setShowModal] = useState(false);
 
   const [filter, setFilter] = useState<string>('');
 
@@ -408,19 +411,17 @@ export function WordListPage({ match }: WordListPageProps) {
 
             <hr />
 
-            <IonButton id="open-word-modal" expand="block">
-              + {tr('Add More Word')}
-            </IonButton>
+            <AddFab onClick={() => setShowModal(true)} />
 
             <br />
 
             <CardListContainer>{cardListComs}</CardListContainer>
 
-            <IonModal ref={modal} trigger="open-word-modal">
+            <IonModal ref={modal} isOpen={showModal}>
               <IonHeader>
                 <IonToolbar>
                   <IonButtons slot="start">
-                    <IonButton onClick={() => modal.current?.dismiss()}>
+                    <IonButton onClick={() => setShowModal(false)}>
                       {tr('Cancel')}
                     </IonButton>
                   </IonButtons>
