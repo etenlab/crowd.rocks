@@ -231,7 +231,7 @@ create table words(
   geo_code varchar(32),
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique (wordlike_string_id, language_code, dialect_code, geo_code)
+  unique nulls not distinct (wordlike_string_id, language_code, dialect_code, geo_code)
 );
 
 create table word_definitions(
@@ -621,5 +621,3 @@ create table translated_maps(
   content text not null,
   unique nulls not distinct (original_map_id, language_code, dialect_code, geo_code)
 );
-CREATE UNIQUE INDEX original_map_id_lang_unq
-ON public.translated_maps (original_map_id, language_code, dialect_code, geo_code)
