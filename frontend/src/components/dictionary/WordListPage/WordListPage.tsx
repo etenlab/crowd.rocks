@@ -71,7 +71,6 @@ export function WordListPage({ match }: WordListPageProps) {
   const modal = useRef<HTMLIonModalElement>(null);
   const textarea = useRef<HTMLIonTextareaElement>(null);
 
-  //const [langInfo, setLangInfo] = useState<LanguageInfo>();
   const [filter, setFilter] = useState<string>('');
 
   const [wordWithVoteList, setWordWithVoteList] =
@@ -323,7 +322,16 @@ export function WordListPage({ match }: WordListPageProps) {
       }
     }
 
-    return tempWords;
+    // TODO: make a cool generic function sort<T>() that can sort on any keyof T
+    // we already have another sort function for sitetext that essentially does the
+    // same thing as this, just with a different key.
+    return tempWords.sort((a, b) => {
+      const wordA = a.word.toLowerCase();
+      const wordB = b.word.toLowerCase();
+      if (wordA > wordB) return 1;
+      if (wordA < wordB) return -1;
+      return 0;
+    });
   }, [wordWithVoteList]);
 
   const cardListComs = words

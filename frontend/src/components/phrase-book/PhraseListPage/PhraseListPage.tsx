@@ -320,7 +320,14 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
       }
     }
 
-    return tempPhrases;
+    // TODO: reeeeeally need to use a generic sortByKey thing.
+    return tempPhrases.sort((a, b) => {
+      const keyA = a.phrase.toLowerCase();
+      const keyB = b.phrase.toLowerCase();
+      if (keyA > keyB) return 1;
+      if (keyA < keyB) return -1;
+      return 0;
+    });
   }, [phraseWithVoteList]);
 
   const cardListComs = phrases
