@@ -26,7 +26,6 @@ function AppTypeahead<Item extends { text: string; value: string }>({
   ...props
 }: TypeaheadProps<Item>) {
   const { tr } = useTr();
-
   const [filteredItems, setFilteredItems] = useState<Item[]>([...props.items]);
 
   const isValueOrTextChecked = (value: string, text: string) => {
@@ -63,12 +62,26 @@ function AppTypeahead<Item extends { text: string; value: string }>({
        * Otherwise, normalize the search
        * query and check to see which items
        * contain the search query as a substring.
+       * Prefer shorter text lengths first.
        */
       const normalizedQuery = searchQuery.toLowerCase();
       setFilteredItems(
-        props.items.filter((item) => {
-          return item.text.toLowerCase().includes(normalizedQuery);
-        }),
+        props.items
+          .filter((item) => {
+            return item.text.toLowerCase().includes(normalizedQuery);
+          })
+          .sort((a, b) => {
+            if (a.text && a.text.length > 0) {
+              return a.text.length - b.text.length;
+            }
+            if (a.text && a.text.length > 0 && a.text > b.text) {
+              return 1;
+            }
+            if (a.text && a.text.length > 0 && a.text < b.text) {
+              return -1;
+            }
+            return 0;
+          }),
       );
     }
   };
