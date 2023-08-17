@@ -12,10 +12,10 @@ import { PhraseModule } from '../phrases/phrases.module';
 @Module({
   imports: [
     forwardRef(() => CoreModule),
-    AuthenticationModule,
-    WordsModule,
-    PhraseModule,
-    DefinitionsModule,
+    forwardRef(() => AuthenticationModule),
+    forwardRef(() => WordsModule),
+    forwardRef(() => PhraseModule),
+    forwardRef(() => DefinitionsModule),
     forwardRef(() => TranslationsModule),
   ],
   providers: [MapsService, MapsResolver, MapsRepository],

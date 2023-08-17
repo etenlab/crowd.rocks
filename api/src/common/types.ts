@@ -61,10 +61,10 @@ export enum ErrorType {
   WordToPhraseTranslationNotFound = 'WordToPhraseTranslationNotFound',
   PhraseToWordTranslationNotFound = 'PhraseToWordTranslationNotFound',
 
-  SiteTextTranslationNotFound = 'SiteTextTranslationNotFound',
   SiteTextWordDefinitionAlreadyExists = 'SiteTextWordDefinitionAlreadyExists',
   SiteTextWordDefinitionNotFound = 'SiteTextWordDefinitionNotFound',
   SiteTextPhraseDefinitionAlreadyExists = 'SiteTextPhraseDefinitionAlreadyExists',
+  SiteTextPhraseDefinitionNotFound = 'SiteTextPhraseDefinitionNotFound',
 
   MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
   MapInsertFailed = 'MapInsertFailed',

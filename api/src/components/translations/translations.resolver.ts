@@ -28,9 +28,9 @@ import {
   AddWordAsTranslationForWordInput,
   WordTrVoteStatusOutputRow,
   WordTrVoteStatusInput,
-  WordToPhraseVoteStatusOutputRow,
-  PhraseToWordVoteStatusOutputRow,
-  PhraseToPhraseVoteStatusOutputRow,
+  WordToPhraseTranslationVoteStatusOutputRow,
+  PhraseToWordTranslationVoteStatusOutputRow,
+  PhraseToPhraseTranslationVoteStatusOutputRow,
   WordToWordTranslationWithVoteListOutput,
   WordToPhraseTranslationWithVoteListOutput,
   PhraseToWordTranslationWithVoteListOutput,
@@ -39,6 +39,7 @@ import {
   TranslationVoteStatusOutputRow,
   TranslationUpsertOutput,
   ToDefinitionInput,
+  TranslationWithVoteOutput,
 } from './types';
 
 @Injectable()
@@ -207,11 +208,11 @@ export class TranslationsResolver {
     return wordVoteStatus;
   }
 
-  @Query(() => WordToPhraseVoteStatusOutputRow)
+  @Query(() => WordToPhraseTranslationVoteStatusOutputRow)
   async getWordToPhraseTrVoteStatus(
     @Args('word_to_phrase_translation_id', { type: () => ID })
     word_to_phrase_translation_id: string,
-  ): Promise<WordToPhraseVoteStatusOutputRow> {
+  ): Promise<WordToPhraseTranslationVoteStatusOutputRow> {
     console.log(
       'getWordToPhraseTrVoteStatus resolver',
       word_to_phrase_translation_id,
@@ -222,13 +223,13 @@ export class TranslationsResolver {
     );
   }
 
-  @Mutation(() => WordToPhraseVoteStatusOutputRow)
+  @Mutation(() => WordToPhraseTranslationVoteStatusOutputRow)
   async toggleWordToPhraseTrVoteStatus(
     @Args('word_to_phrase_translation_id', { type: () => ID })
     word_to_phrase_translation_id: string,
     @Args('vote', { type: () => Boolean }) vote: boolean,
     @Context() req: any,
-  ): Promise<WordToPhraseVoteStatusOutputRow> {
+  ): Promise<WordToPhraseTranslationVoteStatusOutputRow> {
     console.log('toggleWordToPhraseTrVoteStatus');
 
     return this.wordToPhraseTranslationService.toggleVoteStatus(
@@ -238,11 +239,11 @@ export class TranslationsResolver {
     );
   }
 
-  @Query(() => PhraseToWordVoteStatusOutputRow)
+  @Query(() => PhraseToWordTranslationVoteStatusOutputRow)
   async getPhraseToWordTrVoteStatus(
     @Args('phrase_to_word_translation_id', { type: () => ID })
     phrase_to_word_translation_id: string,
-  ): Promise<PhraseToWordVoteStatusOutputRow> {
+  ): Promise<PhraseToWordTranslationVoteStatusOutputRow> {
     console.log(
       'getPhraseToWordTrVoteStatus resolver',
       phrase_to_word_translation_id,
@@ -253,13 +254,13 @@ export class TranslationsResolver {
     );
   }
 
-  @Mutation(() => PhraseToWordVoteStatusOutputRow)
+  @Mutation(() => PhraseToWordTranslationVoteStatusOutputRow)
   async togglePhraseToWordTrVoteStatus(
     @Args('phrase_to_word_translation_id', { type: () => ID })
     phrase_to_word_translation_id: string,
     @Args('vote', { type: () => Boolean }) vote: boolean,
     @Context() req: any,
-  ): Promise<PhraseToWordVoteStatusOutputRow> {
+  ): Promise<PhraseToWordTranslationVoteStatusOutputRow> {
     console.log('togglePhraseToWordTrVoteStatus');
 
     return this.phraseToWordTranslationService.toggleVoteStatus(
@@ -269,11 +270,11 @@ export class TranslationsResolver {
     );
   }
 
-  @Query(() => PhraseToPhraseVoteStatusOutputRow)
+  @Query(() => PhraseToPhraseTranslationVoteStatusOutputRow)
   async getPhraseToPhraseTrVoteStatus(
     @Args('phrase_to_phrase_translation_id', { type: () => ID })
     phrase_to_phrase_translation_id: string,
-  ): Promise<PhraseToPhraseVoteStatusOutputRow> {
+  ): Promise<PhraseToPhraseTranslationVoteStatusOutputRow> {
     console.log(
       'getPhraseToPhraseTrVoteStatus resolver',
       phrase_to_phrase_translation_id,
@@ -284,13 +285,13 @@ export class TranslationsResolver {
     );
   }
 
-  @Mutation(() => PhraseToPhraseVoteStatusOutputRow)
+  @Mutation(() => PhraseToPhraseTranslationVoteStatusOutputRow)
   async togglePhraseToPhraseTrVoteStatus(
     @Args('phrase_to_phrase_translation_id', { type: () => ID })
     phrase_to_phrase_translation_id: string,
     @Args('vote', { type: () => Boolean }) vote: boolean,
     @Context() req: any,
-  ): Promise<PhraseToPhraseVoteStatusOutputRow> {
+  ): Promise<PhraseToPhraseTranslationVoteStatusOutputRow> {
     console.log('togglePhraseToPhraseTrVoteStatus');
 
     return this.phraseToPhraseTranslationService.toggleVoteStatus(
@@ -391,6 +392,30 @@ export class TranslationsResolver {
       +definition_id,
       from_definition_type_is_word,
       langInfo,
+    );
+  }
+
+  @Query(() => TranslationWithVoteOutput)
+  async getRecommendedTranslationFromDefinitionID(
+    @Args('from_definition_id', { type: () => ID })
+    from_definition_id: string,
+    @Args('from_type_is_word', { type: () => Boolean })
+    from_type_is_word: boolean,
+    @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
+  ): Promise<TranslationWithVoteOutput> {
+    console.log(
+      'getTranslationsByFromDefinitionId resolver',
+      from_definition_id,
+      from_type_is_word,
+      JSON.stringify(langInfo, null, 2),
+    );
+
+    return this.translationService.getRecommendedTranslationFromDefinitionID(
+      +from_definition_id,
+      from_type_is_word,
+      langInfo.language_code,
+      langInfo.dialect_code,
+      langInfo.geo_code,
     );
   }
 

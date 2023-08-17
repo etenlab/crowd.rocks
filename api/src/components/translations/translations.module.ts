@@ -20,10 +20,10 @@ import { WordToWordTranslationRepository } from './word-to-word-translation.repo
 @Module({
   imports: [
     forwardRef(() => CoreModule),
-    DefinitionsModule,
-    WordsModule,
-    PhraseModule,
-    AuthenticationModule,
+    forwardRef(() => WordsModule),
+    forwardRef(() => PhraseModule),
+    forwardRef(() => DefinitionsModule),
+    forwardRef(() => AuthenticationModule),
     forwardRef(() => MapsModule),
   ],
   providers: [

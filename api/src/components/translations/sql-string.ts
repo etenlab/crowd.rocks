@@ -581,7 +581,7 @@ export function getPhraseToWordTranslationListByFromPhraseDefinitionId({
   return [
     `
       select distinct 
-        ptwts.phrase_to_phrase_translation_id,
+        ptwts.phrase_to_word_translation_id,
         ptwts.created_at
       from phrase_to_word_translations as ptwts
       join (

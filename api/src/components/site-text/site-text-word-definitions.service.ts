@@ -6,9 +6,7 @@ import { PostgresService } from 'src/core/postgres.service';
 import { WordDefinitionsService } from 'src/components/definitions/word-definitions.service';
 
 import {
-  SiteTextWordDefinitionReadOutput,
-  SiteTextWordDefinitionUpsertInput,
-  SiteTextWordDefinitionUpsertOutput,
+  SiteTextWordDefinitionOutput,
   SiteTextWordDefinitionListOutput,
 } from './types';
 
@@ -30,7 +28,7 @@ export class SiteTextWordDefinitionsService {
     private wordDefinitionService: WordDefinitionsService,
   ) {}
 
-  async read(id: number): Promise<SiteTextWordDefinitionReadOutput> {
+  async read(id: number): Promise<SiteTextWordDefinitionOutput> {
     try {
       const res1 =
         await this.pg.pool.query<GetSiteTextWordDefinitionObjectById>(
@@ -81,14 +79,14 @@ export class SiteTextWordDefinitionsService {
   }
 
   async upsert(
-    input: SiteTextWordDefinitionUpsertInput,
+    word_definition_id: number,
     token: string,
-  ): Promise<SiteTextWordDefinitionUpsertOutput> {
+  ): Promise<SiteTextWordDefinitionOutput> {
     try {
       const res =
         await this.pg.pool.query<SiteTextWordDefinitionUpsertProcedureOutputRow>(
           ...callSiteTextWordDefinitionUpsertProcedure({
-            word_definition_id: +input.word_definition_id,
+            word_definition_id: word_definition_id,
             token: token,
           }),
         );

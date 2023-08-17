@@ -8,9 +8,7 @@ import { type StateType as GlobalStateType } from './reducers/global.reducer';
 import { useGlobal } from './hooks/useGlobal';
 
 import {
-  useGetAllRecommendedTranslationLazyQuery,
-  WordDefinition,
-  PhraseDefinition,
+  useGetAllRecommendedSiteTextTranslationLazyQuery,
   ErrorType,
 } from './generated/graphql';
 
@@ -39,8 +37,10 @@ export function AppContextProvider({ children }: AppProviderProps) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [toastPresent] = useIonToast();
 
-  const [getAllRecommendedTranslation, { data, loading, error, called }] =
-    useGetAllRecommendedTranslationLazyQuery();
+  const [
+    getAllRecommendedSiteTextTranslation,
+    { data, loading, error, called },
+  ] = useGetAllRecommendedSiteTextTranslationLazyQuery();
 
   const {
     setSiteTextMap,
@@ -53,14 +53,17 @@ export function AppContextProvider({ children }: AppProviderProps) {
   });
 
   useEffect(() => {
-    getAllRecommendedTranslation({
+    getAllRecommendedSiteTextTranslation({
       variables: {
         language_code: state.global.langauges.appLanguage.lang.tag,
         dialect_code: state.global.langauges.appLanguage.dialect?.tag,
         geo_code: state.global.langauges.appLanguage.region?.tag,
       },
     });
-  }, [getAllRecommendedTranslation, state.global.langauges.appLanguage]);
+  }, [
+    getAllRecommendedSiteTextTranslation,
+    state.global.langauges.appLanguage,
+  ]);
 
   useEffect(() => {
     if (loading || !called) {
@@ -73,10 +76,12 @@ export function AppContextProvider({ children }: AppProviderProps) {
     }
 
     if (data) {
-      if (data.getAllRecommendedTranslation.error !== ErrorType.NoError) {
-        console.log(data.getAllRecommendedTranslation.error);
+      if (
+        data.getAllRecommendedSiteTextTranslation.error !== ErrorType.NoError
+      ) {
+        console.log(data.getAllRecommendedSiteTextTranslation.error);
         toastPresent({
-          message: data.getAllRecommendedTranslation.error,
+          message: data.getAllRecommendedSiteTextTranslation.error,
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -86,7 +91,12 @@ export function AppContextProvider({ children }: AppProviderProps) {
       }
 
       const siteTextTranslationList =
-        data.getAllRecommendedTranslation.site_text_translation_with_vote_list;
+        data.getAllRecommendedSiteTextTranslation
+          .site_text_translation_with_vote_list;
+
+      if (!siteTextTranslationList) {
+        return;
+      }
 
       const siteTextMap: Record<string, string> = {};
 
@@ -98,24 +108,30 @@ export function AppContextProvider({ children }: AppProviderProps) {
         let siteText: string;
         let translatedText: string;
 
-        if (translation.from_type_is_word) {
-          const fromDefinition = translation.from_definition as WordDefinition;
-          siteText = fromDefinition.word.word;
-        } else {
-          const fromDefinition =
-            translation.from_definition as PhraseDefinition;
-          siteText = fromDefinition.phrase.phrase;
+        switch (translation.__typename) {
+          case 'SiteTextWordToWordTranslationWithVote': {
+            siteText = translation.from_word_definition.word.word;
+            translatedText = translation.to_word_definition.word.word;
+            break;
+          }
+          case 'SiteTextWordToPhraseTranslationWithVote': {
+            siteText = translation.from_word_definition.word.word;
+            translatedText = translation.to_phrase_definition.phrase.phrase;
+            break;
+          }
+          case 'SiteTextPhraseToWordTranslationWithVote': {
+            siteText = translation.from_phrase_definition.phrase.phrase;
+            translatedText = translation.to_word_definition.word.word;
+            break;
+          }
+          case 'SiteTextPhraseToPhraseTranslationWithVote': {
+            siteText = translation.from_phrase_definition.phrase.phrase;
+            translatedText = translation.to_phrase_definition.phrase.phrase;
+            break;
+          }
         }
 
-        if (translation.to_type_is_word) {
-          const toDefinition = translation.to_definition as WordDefinition;
-          translatedText = toDefinition.word.word;
-        } else {
-          const toDefinition = translation.to_definition as PhraseDefinition;
-          translatedText = toDefinition.phrase.phrase;
-        }
-
-        siteTextMap[siteText] = translatedText;
+        siteTextMap[siteText!] = translatedText!;
       }
 
       setSiteTextMap(siteTextMap);

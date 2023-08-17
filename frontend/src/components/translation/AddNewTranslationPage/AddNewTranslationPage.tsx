@@ -26,14 +26,8 @@ import {
   useUpsertTranslationMutation,
   useUpsertTranslationFromWordAndDefinitionlikeStringMutation,
   ErrorType,
-  WordToWordTranslation,
-  WordToPhraseTranslation,
-  PhraseToWordTranslation,
-  PhraseToPhraseTranslation,
-  WordToWordTranslationWithVote,
-  WordToPhraseTranslationWithVote,
-  PhraseToWordTranslationWithVote,
-  PhraseToPhraseTranslationWithVote,
+  Translation,
+  TranslationWithVote,
 } from '../../../generated/graphql';
 
 import { GetTranslationsByFromDefinitionIdQuery } from '../../../generated/graphql';
@@ -79,13 +73,7 @@ export function AddNewTranslationPage({ match }: AddNewTranslationPageProps) {
   const [definition, setDefinition] = useState<string>('');
 
   const updateTranslationList = useCallback(
-    (
-      cache: ApolloCache<unknown>,
-      word_to_word_translation?: WordToWordTranslation | null,
-      word_to_phrase_translation?: WordToPhraseTranslation | null,
-      phrase_to_word_translation?: PhraseToWordTranslation | null,
-      phrase_to_phrase_translation?: PhraseToPhraseTranslation | null,
-    ) => {
+    (cache: ApolloCache<unknown>, translation: Translation) => {
       if (target) {
         cache.updateQuery<GetTranslationsByFromDefinitionIdQuery>(
           {
@@ -101,82 +89,54 @@ export function AddNewTranslationPage({ match }: AddNewTranslationPageProps) {
           },
           (data) => {
             if (data) {
-              const {
-                word_to_word_tr_with_vote_list,
-                word_to_phrase_tr_with_vote_list,
-                phrase_to_word_tr_with_vote_list,
-                phrase_to_phrase_tr_with_vote_list,
-              } = data.getTranslationsByFromDefinitionId;
+              const { translation_with_vote_list } =
+                data.getTranslationsByFromDefinitionId;
 
-              let new_word_to_word_tr_with_vote_list: (WordToWordTranslationWithVote | null)[] =
-                [];
-              let new_word_to_phrase_tr_with_vote_list: (WordToPhraseTranslationWithVote | null)[] =
-                [];
-              let new_phrase_to_word_tr_with_vote_list: (PhraseToWordTranslationWithVote | null)[] =
-                [];
-              let new_phrase_to_phrase_tr_with_vote_list: (PhraseToPhraseTranslationWithVote | null)[] =
-                [];
+              let newTypeName:
+                | 'WordToWordTranslationWithVote'
+                | 'WordToPhraseTranslationWithVote'
+                | 'PhraseToWordTranslationWithVote'
+                | 'PhraseToPhraseTranslationWithVote'
+                | undefined;
 
-              if (word_to_word_translation) {
-                new_word_to_word_tr_with_vote_list = [
-                  ...word_to_word_tr_with_vote_list,
-                  {
-                    ...word_to_word_translation,
-                    __typename: 'WordToWordTranslationWithVote',
-                    downvotes: 0,
-                    upvotes: 0,
-                  },
-                ];
+              switch (translation.__typename) {
+                case 'WordToWordTranslation': {
+                  newTypeName = 'WordToWordTranslationWithVote';
+                  break;
+                }
+                case 'WordToPhraseTranslation': {
+                  newTypeName = 'WordToPhraseTranslationWithVote';
+                  break;
+                }
+                case 'PhraseToWordTranslation': {
+                  newTypeName = 'PhraseToWordTranslationWithVote';
+                  break;
+                }
+                case 'PhraseToPhraseTranslation': {
+                  newTypeName = 'PhraseToPhraseTranslationWithVote';
+                  break;
+                }
               }
 
-              if (word_to_phrase_translation) {
-                new_word_to_phrase_tr_with_vote_list = [
-                  ...word_to_phrase_tr_with_vote_list,
-                  {
-                    ...word_to_phrase_translation,
-                    __typename: 'WordToPhraseTranslationWithVote',
-                    downvotes: 0,
-                    upvotes: 0,
-                  },
-                ];
+              if (newTypeName === undefined || !translation_with_vote_list) {
+                return data;
               }
 
-              if (phrase_to_word_translation) {
-                new_phrase_to_word_tr_with_vote_list = [
-                  ...phrase_to_word_tr_with_vote_list,
-                  {
-                    ...phrase_to_word_translation,
-                    __typename: 'PhraseToWordTranslationWithVote',
-                    downvotes: 0,
-                    upvotes: 0,
-                  },
-                ];
-              }
-
-              if (phrase_to_phrase_translation) {
-                new_phrase_to_phrase_tr_with_vote_list = [
-                  ...phrase_to_phrase_tr_with_vote_list,
-                  {
-                    ...phrase_to_phrase_translation,
-                    __typename: 'PhraseToPhraseTranslationWithVote',
-                    downvotes: 0,
-                    upvotes: 0,
-                  },
-                ];
-              }
+              const newTranslationWithVote = {
+                ...translation,
+                __typename: newTypeName,
+                upvotes: 0,
+                downvotes: 0,
+              } as TranslationWithVote;
 
               return {
                 ...data,
                 getTranslationsByFromDefinitionId: {
                   ...data.getTranslationsByFromDefinitionId,
-                  word_to_word_tr_with_vote_list:
-                    new_word_to_word_tr_with_vote_list,
-                  word_to_phrase_tr_with_vote_list:
-                    new_word_to_phrase_tr_with_vote_list,
-                  phrase_to_word_tr_with_vote_list:
-                    new_phrase_to_word_tr_with_vote_list,
-                  phrase_to_phrase_tr_with_vote_list:
-                    new_phrase_to_phrase_tr_with_vote_list,
+                  translation_with_vote_list: [
+                    ...translation_with_vote_list,
+                    newTranslationWithVote,
+                  ],
                 },
               };
             } else {
@@ -211,20 +171,11 @@ export function AddNewTranslationPage({ match }: AddNewTranslationPageProps) {
         return;
       }
 
-      const {
-        word_to_word_translation,
-        word_to_phrase_translation,
-        phrase_to_word_translation,
-        phrase_to_phrase_translation,
-      } = newTranslationData.upsertTranslation;
+      const { translation } = newTranslationData.upsertTranslation;
 
-      updateTranslationList(
-        cache,
-        word_to_word_translation,
-        word_to_phrase_translation,
-        phrase_to_word_translation,
-        phrase_to_phrase_translation,
-      );
+      if (translation) {
+        updateTranslationList(cache, translation);
+      }
 
       present({
         message: tr('Success at creating new translation!'),
@@ -265,20 +216,12 @@ export function AddNewTranslationPage({ match }: AddNewTranslationPageProps) {
           return;
         }
 
-        const {
-          word_to_word_translation,
-          word_to_phrase_translation,
-          phrase_to_word_translation,
-          phrase_to_phrase_translation,
-        } = newTranslationData.upsertTranslationFromWordAndDefinitionlikeString;
+        const { translation } =
+          newTranslationData.upsertTranslationFromWordAndDefinitionlikeString;
 
-        updateTranslationList(
-          cache,
-          word_to_word_translation,
-          word_to_phrase_translation,
-          phrase_to_word_translation,
-          phrase_to_phrase_translation,
-        );
+        if (translation) {
+          updateTranslationList(cache, translation);
+        }
 
         present({
           message: tr('Success at creating new translation!'),

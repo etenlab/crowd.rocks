@@ -99,7 +99,10 @@ const Body: React.FC = () => {
       return;
     }
 
-    if (languageData && languageData.getAllSiteTextLanguageList) {
+    if (
+      languageData &&
+      languageData.getAllSiteTextLanguageList.site_text_language_list
+    ) {
       setSiteTextLanguageList([
         ...languageData.getAllSiteTextLanguageList.site_text_language_list.map(
           (language) => language as SiteTextLanguage,

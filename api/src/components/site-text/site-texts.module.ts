@@ -1,9 +1,10 @@
 import { Module, forwardRef } from '@nestjs/common';
 
 import { CoreModule } from 'src/core/core.module';
-import { DefinitionsModule } from 'src/components/definitions/definitions.module';
 import { WordsModule } from '../words/words.module';
 import { PhraseModule } from '../phrases/phrases.module';
+import { DefinitionsModule } from 'src/components/definitions/definitions.module';
+import { TranslationsModule } from 'src/components/translations/translations.module';
 
 import { SiteTextsService } from './site-texts.service';
 import { SiteTextTranslationsService } from './site-text-translations.service';
@@ -16,9 +17,10 @@ import { SiteTextsResolver } from './site-texts.resolver';
 @Module({
   imports: [
     forwardRef(() => CoreModule),
-    DefinitionsModule,
-    WordsModule,
-    PhraseModule,
+    forwardRef(() => TranslationsModule),
+    forwardRef(() => WordsModule),
+    forwardRef(() => PhraseModule),
+    forwardRef(() => DefinitionsModule),
   ],
   providers: [
     SiteTextsService,
@@ -33,6 +35,7 @@ import { SiteTextsResolver } from './site-texts.resolver';
     SiteTextTranslationsService,
     SiteTextWordDefinitionsService,
     SiteTextPhraseDefinitionsService,
+    SiteTextTranslationVotesService,
   ],
 })
 export class SiteTextsModule {}
