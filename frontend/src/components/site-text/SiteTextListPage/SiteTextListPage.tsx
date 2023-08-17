@@ -21,11 +21,7 @@ import {
   useIonToast,
   InputCustomEvent,
   InputChangeEventDetail,
-  IonFab,
-  IonFabButton,
-  IonIcon,
 } from '@ionic/react';
-import { add } from 'ionicons/icons';
 
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -51,7 +47,6 @@ import {
   AppLanguageShowerContainer,
   CardListContainer,
   CardContainer,
-  FabContainer,
 } from './styled';
 
 import { useTr } from '../../../hooks/useTr';
@@ -62,6 +57,7 @@ import { TranslatedCard } from './TranslatedCard';
 
 import { sortSiteTextFn } from '../../../common/langUtils';
 import { globals } from '../../../services/globals';
+import { AddFab } from '../../common/AddFab';
 
 interface SiteTextListPageProps
   extends RouteComponentProps<{
@@ -429,14 +425,9 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
               onIonInput={handleFilterChange}
             />
 
+            <hr />
             {isAdminRes?.loggedInIsAdmin.isAdmin && (
-              <FabContainer className="section">
-                <IonFab>
-                  <IonFabButton onClick={() => setShowModal(true)}>
-                    <IonIcon icon={add} />
-                  </IonFabButton>
-                </IonFab>
-              </FabContainer>
+              <AddFab onClick={() => setShowModal(true)} />
             )}
             <br />
 
