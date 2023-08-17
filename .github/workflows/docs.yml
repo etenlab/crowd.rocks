@@ -2,7 +2,7 @@ name: DEV Upload Docs Website to S3
 on:
   push:
     branches:
-      - docs-deploy-workflow
+      - dev
 
 jobs:
   deploy:
