@@ -46,7 +46,7 @@ import {
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { AddFab } from '../../common/AddFab';
+import { AddListHeader } from '../../common/ListHeader';
 
 interface WordListPageProps
   extends RouteComponentProps<{
@@ -409,16 +409,10 @@ export function WordListPage({ match }: WordListPageProps) {
               />
             </FilterContainer>
 
-            <hr />
-
-            <AddFab
-              title={tr('All Words')}
+            <AddListHeader
+              title={tr('Words')}
               onClick={() => setShowModal(true)}
             />
-
-            <hr />
-
-            <br />
 
             <CardListContainer>{cardListComs}</CardListContainer>
 

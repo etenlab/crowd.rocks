@@ -49,7 +49,7 @@ import { CaptainContainer, CardListContainer, CardContainer } from './styled';
 import { Input, Textarea } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
-import { AddFab } from '../../common/AddFab';
+import { AddListHeader } from '../../common/ListHeader';
 
 interface SiteTextDetailPageProps
   extends RouteComponentProps<{
@@ -733,14 +733,10 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
               {phraseCom}
             </CardContainer>
 
-            <hr />
-
-            <AddFab
+            <AddListHeader
               title={tr('Site Text Translations')}
               onClick={() => setShowModal(true)}
             />
-
-            <hr />
 
             <CardListContainer>{translationsCom}</CardListContainer>
 

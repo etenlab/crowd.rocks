@@ -57,7 +57,7 @@ import { TranslatedCard } from './TranslatedCard';
 
 import { sortSiteTextFn } from '../../../common/langUtils';
 import { globals } from '../../../services/globals';
-import { AddFab } from '../../common/AddFab';
+import { AddListHeader } from '../../common/ListHeader';
 
 interface SiteTextListPageProps
   extends RouteComponentProps<{
@@ -425,14 +425,12 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
               onIonInput={handleFilterChange}
             />
 
-            <hr />
             {isAdminRes?.loggedInIsAdmin.isAdmin && (
-              <AddFab
+              <AddListHeader
                 title={tr('Site Text Strings')}
                 onClick={() => setShowModal(true)}
               />
             )}
-            <hr />
 
             <CardListContainer>{cardListComs}</CardListContainer>
 

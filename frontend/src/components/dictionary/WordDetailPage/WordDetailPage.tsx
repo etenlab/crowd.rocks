@@ -43,7 +43,7 @@ import { CaptainContainer, CardListContainer, CardContainer } from './styled';
 import { Textarea } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
-import { AddFab } from '../../common/AddFab';
+import { AddListHeader } from '../../common/ListHeader';
 import { VoteButtonsHerizontal } from '../../common/VoteButtonsHerizontal';
 
 interface WordDetailPageProps
@@ -429,15 +429,12 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
 
             <CardContainer>{wordCom}</CardContainer>
 
-            <hr />
-
             <h4>{tr('Definitions')}</h4>
 
-            <AddFab
+            <AddListHeader
               title={tr('All Words')}
               onClick={() => setShowModal(true)}
             />
-            <hr />
 
             <CardListContainer>{definitionsCom}</CardListContainer>
 
