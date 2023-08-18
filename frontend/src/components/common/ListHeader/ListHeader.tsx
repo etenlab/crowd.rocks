@@ -1,24 +1,24 @@
-import { IonIcon, IonTitle } from '@ionic/react';
+import { IonButton, IonIcon, IonTitle } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
-import { CustomIonButton, FabContainer } from './styled';
+import { ListHeader } from './styled';
 
 interface AddFabProps {
   onClick: () => void;
   title: string;
 }
 
-export function AddFab({ onClick, title }: AddFabProps) {
+export function AddListHeader({ onClick, title }: AddFabProps) {
   return (
-    <FabContainer className="section">
+    <ListHeader>
       <IonTitle>{title}</IonTitle>
-      <CustomIonButton
+      <IonButton
         fill="clear"
         size="large"
         shape="round"
         onClick={() => onClick && onClick()}
       >
         <IonIcon slot="icon-only" icon={addOutline}></IonIcon>
-      </CustomIonButton>
-    </FabContainer>
+      </IonButton>
+    </ListHeader>
   );
 }

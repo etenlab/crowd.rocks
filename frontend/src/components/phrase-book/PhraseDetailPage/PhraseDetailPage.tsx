@@ -44,7 +44,7 @@ import { CaptainContainer, CardListContainer, CardContainer } from './styled';
 import { Textarea } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
-import { AddFab } from '../../common/AddFab';
+import { AddListHeader } from '../../common/ListHeader';
 import { VoteButtonsHerizontal } from '../../common/VoteButtonsHerizontal';
 
 interface PhraseDetailPageProps
@@ -432,14 +432,10 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
 
             <CardContainer>{phraseCom}</CardContainer>
 
-            <hr />
-
-            <AddFab
+            <AddListHeader
               title={tr('Definitions')}
               onClick={() => setShowModal(true)}
             />
-
-            <hr />
 
             <CardListContainer>{definitionsCom}</CardListContainer>
 

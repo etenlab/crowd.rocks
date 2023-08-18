@@ -46,7 +46,7 @@ import {
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { AddFab } from '../../common/AddFab';
+import { AddListHeader } from '../../common/ListHeader';
 
 interface PhraseListPageProps
   extends RouteComponentProps<{
@@ -403,14 +403,11 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
               />
             </FilterContainer>
 
-            <hr />
-
-            <AddFab
+            <AddListHeader
               title={tr('All Phrases')}
               onClick={() => setShowModal(true)}
             />
 
-            <hr />
             <br />
 
             <CardListContainer>{cardListComs}</CardListContainer>
