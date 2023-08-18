@@ -203,19 +203,27 @@ const Body: React.FC = () => {
       const langInfoStr = langInfo2String(langInfo);
 
       const originalCnt = Object.keys(originalMap).length;
-      const translationCnt = Object.keys(translationMap[langInfoStr]).length;
+      const translationCnt =
+        langInfo.lang.tag !== 'en'
+          ? Object.keys(translationMap[langInfoStr]).length
+          : originalCnt;
 
       const percent =
         originalCnt > 0 ? (translationCnt / originalCnt) * 100 : 100;
 
+      const badgeColor = percent === 100 ? 'green' : undefined;
+      console.log(badgeColor);
+
       return {
-        text: `${langInfo2String(langInfo)} (${tr(
-          'translated',
-        )} : ${percent}%)`,
+        text: `${langInfo2String(langInfo)}`,
         value: langInfo2tag(langInfo) || '',
+        endBadge: {
+          value: `${Math.round(percent)}%`,
+          color: badgeColor,
+        },
       };
     });
-  }, [languages, originalMap, tr, translationMap]);
+  }, [languages, originalMap, translationMap]);
 
   return (
     <IonPage>
