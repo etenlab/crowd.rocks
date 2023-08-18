@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
-  IonPage,
   IonModal,
   IonHeader,
   IonToolbar,
@@ -40,12 +39,17 @@ import {
   PhraseDefinitionWithVoteFragmentFragmentDoc,
 } from '../../../generated/graphql';
 
-import { CaptainContainer, CardListContainer, CardContainer } from './styled';
-import { Textarea } from '../../common/styled';
+import {
+  Textarea,
+  CaptionContainer,
+  CardListContainer,
+  CardContainer,
+} from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { AddListHeader } from '../../common/ListHeader';
 import { VoteButtonsHerizontal } from '../../common/VoteButtonsHerizontal';
+import { PageLayout } from '../../common/PageLayout';
 
 interface PhraseDetailPageProps
   extends RouteComponentProps<{
@@ -422,57 +426,51 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
     : null;
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <CaptainContainer>
-              <Caption>{tr('Phrase Book')}</Caption>
-            </CaptainContainer>
+    <PageLayout>
+      <CaptionContainer>
+        <Caption>{tr('Phrase Book')}</Caption>
+      </CaptionContainer>
 
-            <CardContainer>{phraseCom}</CardContainer>
+      <CardContainer>{phraseCom}</CardContainer>
 
-            <AddListHeader
-              title={tr('Definitions')}
-              onClick={() => setShowModal(true)}
+      <AddListHeader
+        title={tr('Definitions')}
+        onClick={() => setShowModal(true)}
+      />
+
+      <CardListContainer>{definitionsCom}</CardListContainer>
+
+      <IonModal ref={modal} isOpen={showModal}>
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonButton onClick={() => setShowModal(false)}>
+                {tr('Cancel')}
+              </IonButton>
+            </IonButtons>
+            <IonTitle>{tr('Phrase Book')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <div
+            style={{
+              display: 'flex',
+              gap: '10px',
+              flexDirection: 'column',
+            }}
+          >
+            <Textarea
+              ref={textarea}
+              labelPlacement="floating"
+              fill="solid"
+              label={tr('Input New Definition')}
             />
-
-            <CardListContainer>{definitionsCom}</CardListContainer>
-
-            <IonModal ref={modal} isOpen={showModal}>
-              <IonHeader>
-                <IonToolbar>
-                  <IonButtons slot="start">
-                    <IonButton onClick={() => setShowModal(false)}>
-                      {tr('Cancel')}
-                    </IonButton>
-                  </IonButtons>
-                  <IonTitle>{tr('Phrase Book')}</IonTitle>
-                </IonToolbar>
-              </IonHeader>
-              <IonContent className="ion-padding">
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '10px',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <Textarea
-                    ref={textarea}
-                    labelPlacement="floating"
-                    fill="solid"
-                    label={tr('Input New Definition')}
-                  />
-                  <IonButton onClick={handleSaveNewDefinition}>
-                    {tr('Save')}
-                  </IonButton>
-                </div>
-              </IonContent>
-            </IonModal>
+            <IonButton onClick={handleSaveNewDefinition}>
+              {tr('Save')}
+            </IonButton>
           </div>
-        </div>
-      </IonContent>
-    </IonPage>
+        </IonContent>
+      </IonModal>
+    </PageLayout>
   );
 }

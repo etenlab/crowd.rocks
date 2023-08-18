@@ -1,6 +1,6 @@
 import { styled } from 'styled-components';
 
-export const CaptainContainer = styled.div`
+export const CaptionContainer = styled.div`
   height: 50px;
   margin: -16px;
 `;

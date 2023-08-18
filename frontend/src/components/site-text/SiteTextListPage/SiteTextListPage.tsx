@@ -9,7 +9,6 @@ import {
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
-  IonPage,
   IonBadge,
   useIonRouter,
   IonButton,
@@ -42,22 +41,26 @@ import {
 } from '../../../generated/graphql';
 
 import {
-  CaptainContainer,
-  LangSelectorContainer,
   AppLanguageShowerContainer,
-  CardListContainer,
   CardContainer,
+  CardListContainer,
 } from './styled';
+
+import {
+  Input,
+  CaptionContainer,
+  LanguageSelectorContainer,
+} from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 
-import { Input } from '../../common/styled';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { TranslatedCard } from './TranslatedCard';
 
 import { sortSiteTextFn } from '../../../common/langUtils';
 import { globals } from '../../../services/globals';
 import { AddListHeader } from '../../common/ListHeader';
+import { PageLayout } from '../../common/PageLayout';
 
 interface SiteTextListPageProps
   extends RouteComponentProps<{
@@ -383,93 +386,85 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
   }, [allSiteTextDefinitions, handleGoToDefinitionDetail, targetLang]);
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <CaptainContainer>
-              <Caption>{tr('Site Text')}</Caption>
-            </CaptainContainer>
+    <PageLayout>
+      <CaptionContainer>
+        <Caption>{tr('Site Text')}</Caption>
+      </CaptionContainer>
 
-            <LangSelectorContainer>
-              <AppLanguageShowerContainer>
-                <label style={{ fontSize: '14px', display: 'flex' }}>
-                  {tr('App Language')}:
-                </label>
-                <IonBadge color="primary">English</IonBadge>
-              </AppLanguageShowerContainer>
+      <LanguageSelectorContainer>
+        <AppLanguageShowerContainer>
+          <label style={{ fontSize: '14px', display: 'flex' }}>
+            {tr('App Language')}:
+          </label>
+          <IonBadge color="primary">English</IonBadge>
+        </AppLanguageShowerContainer>
 
-              <AppLanguageShowerContainer>
-                <label style={{ fontSize: '14px', display: 'flex' }}>
-                  {tr('Translation')}:
-                </label>
-                <LangSelector
-                  title={tr('Select')}
-                  langSelectorId="site-text-targetLangSelector"
-                  selected={targetLang ?? undefined}
-                  onChange={(_targetLangTag, targetLangInfo) => {
-                    setTargetLanguage(targetLangInfo);
-                  }}
-                  onClearClick={() => setTargetLanguage(null)}
-                />
-              </AppLanguageShowerContainer>
-            </LangSelectorContainer>
+        <AppLanguageShowerContainer>
+          <label style={{ fontSize: '14px', display: 'flex' }}>
+            {tr('Translation')}:
+          </label>
+          <LangSelector
+            title={tr('Select')}
+            langSelectorId="site-text-targetLangSelector"
+            selected={targetLang ?? undefined}
+            onChange={(_targetLangTag, targetLangInfo) => {
+              setTargetLanguage(targetLangInfo);
+            }}
+            onClearClick={() => setTargetLanguage(null)}
+          />
+        </AppLanguageShowerContainer>
+      </LanguageSelectorContainer>
 
+      <Input
+        type="text"
+        label={tr('Search')}
+        labelPlacement="floating"
+        fill="outline"
+        debounce={300}
+        value={filter}
+        onIonInput={handleFilterChange}
+      />
+
+      {isAdminRes?.loggedInIsAdmin.isAdmin && (
+        <AddListHeader
+          title={tr('Site Text Strings')}
+          onClick={() => setShowModal(true)}
+        />
+      )}
+
+      <CardListContainer>{cardListComs}</CardListContainer>
+
+      <IonModal ref={modal} isOpen={showModal}>
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonButton onClick={() => setShowModal(false)}>
+                {tr('Cancel')}
+              </IonButton>
+            </IonButtons>
+            <IonTitle>{tr('Add Site Text')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <div
+            style={{
+              display: 'flex',
+              gap: '10px',
+              flexDirection: 'column',
+            }}
+          >
             <Input
+              ref={input}
               type="text"
-              label={tr('Search')}
+              label={tr('Site Text')}
               labelPlacement="floating"
               fill="outline"
-              debounce={300}
-              value={filter}
-              onIonInput={handleFilterChange}
             />
 
-            {isAdminRes?.loggedInIsAdmin.isAdmin && (
-              <AddListHeader
-                title={tr('Site Text Strings')}
-                onClick={() => setShowModal(true)}
-              />
-            )}
-
-            <CardListContainer>{cardListComs}</CardListContainer>
-
-            <IonModal ref={modal} isOpen={showModal}>
-              <IonHeader>
-                <IonToolbar>
-                  <IonButtons slot="start">
-                    <IonButton onClick={() => setShowModal(false)}>
-                      {tr('Cancel')}
-                    </IonButton>
-                  </IonButtons>
-                  <IonTitle>{tr('Add Site Text')}</IonTitle>
-                </IonToolbar>
-              </IonHeader>
-              <IonContent className="ion-padding">
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '10px',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <Input
-                    ref={input}
-                    type="text"
-                    label={tr('Site Text')}
-                    labelPlacement="floating"
-                    fill="outline"
-                  />
-
-                  <IonButton onClick={handleSaveNewSiteText}>
-                    {tr('Save')}
-                  </IonButton>
-                </div>
-              </IonContent>
-            </IonModal>
+            <IonButton onClick={handleSaveNewSiteText}>{tr('Save')}</IonButton>
           </div>
-        </div>
-      </IonContent>
-    </IonPage>
+        </IonContent>
+      </IonModal>
+    </PageLayout>
   );
 }

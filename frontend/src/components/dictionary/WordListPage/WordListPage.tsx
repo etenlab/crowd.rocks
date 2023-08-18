@@ -11,11 +11,13 @@ import {
   InputCustomEvent,
   InputChangeEventDetail,
 } from '@ionic/react';
-import { IonContent, IonPage, useIonToast } from '@ionic/react';
+import { IonContent, useIonToast } from '@ionic/react';
 
+import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { Card } from '../../common/Card';
+import { AddListHeader } from '../../common/ListHeader';
 import { Input, Textarea } from '../../common/styled';
 
 import {
@@ -38,15 +40,14 @@ import {
 } from '../../../generated/graphql';
 
 import {
-  CaptainContainer,
+  CaptionContainer,
   FilterContainer,
   CardListContainer,
   CardContainer,
-} from './styled';
+} from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { AddListHeader } from '../../common/ListHeader';
 
 interface WordListPageProps
   extends RouteComponentProps<{
@@ -378,78 +379,67 @@ export function WordListPage({ match }: WordListPageProps) {
     : null;
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <CaptainContainer>
-              <Caption>{tr('Dictionary')}</Caption>
-            </CaptainContainer>
+    <PageLayout>
+      <CaptionContainer>
+        <Caption>{tr('Dictionary')}</Caption>
+      </CaptionContainer>
 
-            <br />
+      <FilterContainer>
+        <LangSelector
+          title={tr('Select language')}
+          langSelectorId="dictionary-langSelector"
+          selected={targetLang ?? undefined}
+          onChange={(_sourceLangTag, sourceLangInfo) => {
+            setTargetLanguage(sourceLangInfo);
+          }}
+          onClearClick={() => setTargetLanguage(null)}
+        />
+        <Input
+          type="text"
+          label={tr('Search')}
+          labelPlacement="floating"
+          fill="outline"
+          debounce={300}
+          value={filter}
+          onIonInput={handleFilterChange}
+        />
+      </FilterContainer>
 
-            <FilterContainer>
-              <LangSelector
-                title={tr('Select language')}
-                langSelectorId="dictionary-langSelector"
-                selected={targetLang ?? undefined}
-                onChange={(_sourceLangTag, sourceLangInfo) => {
-                  setTargetLanguage(sourceLangInfo);
-                }}
-                onClearClick={() => setTargetLanguage(null)}
-              />
-              <Input
-                type="text"
-                label={tr('Search')}
-                labelPlacement="floating"
-                fill="outline"
-                debounce={300}
-                value={filter}
-                onIonInput={handleFilterChange}
-              />
-            </FilterContainer>
+      <AddListHeader title={tr('Words')} onClick={() => setShowModal(true)} />
 
-            <AddListHeader
-              title={tr('Words')}
-              onClick={() => setShowModal(true)}
+      <CardListContainer>{cardListComs}</CardListContainer>
+
+      <IonModal ref={modal} isOpen={showModal}>
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonButton onClick={() => setShowModal(false)}>
+                {tr('Cancel')}
+              </IonButton>
+            </IonButtons>
+            <IonTitle>{tr('Dictionary')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <div
+            style={{
+              display: 'flex',
+              gap: '10px',
+              flexDirection: 'column',
+            }}
+          >
+            <Textarea
+              ref={textarea}
+              labelPlacement="floating"
+              fill="solid"
+              label={tr('Input New Word')}
             />
-
-            <CardListContainer>{cardListComs}</CardListContainer>
-
-            <IonModal ref={modal} isOpen={showModal}>
-              <IonHeader>
-                <IonToolbar>
-                  <IonButtons slot="start">
-                    <IonButton onClick={() => setShowModal(false)}>
-                      {tr('Cancel')}
-                    </IonButton>
-                  </IonButtons>
-                  <IonTitle>{tr('Dictionary')}</IonTitle>
-                </IonToolbar>
-              </IonHeader>
-              <IonContent className="ion-padding">
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '10px',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <Textarea
-                    ref={textarea}
-                    labelPlacement="floating"
-                    fill="solid"
-                    label={tr('Input New Word')}
-                  />
-                  <IonButton onClick={handleSaveNewDefinition}>
-                    {tr('Save')}
-                  </IonButton>
-                </div>
-              </IonContent>
-            </IonModal>
+            <IonButton onClick={handleSaveNewDefinition}>
+              {tr('Save')}
+            </IonButton>
           </div>
-        </div>
-      </IonContent>
-    </IonPage>
+        </IonContent>
+      </IonModal>
+    </PageLayout>
   );
 }

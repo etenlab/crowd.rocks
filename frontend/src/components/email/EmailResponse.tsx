@@ -1,7 +1,9 @@
 import { useEffect, useCallback } from 'react';
-import { IonButton, IonContent, IonPage, useIonToast } from '@ionic/react';
+import { IonButton, useIonToast } from '@ionic/react';
 import { RouteComponentProps, useHistory } from 'react-router';
 import { useEmailResponseMutation } from '../../generated/graphql';
+
+import { PageLayout } from '../common/PageLayout';
 
 import { useTr } from '../../hooks/useTr';
 
@@ -67,18 +69,12 @@ const EmailResponsePage: React.FC<EmailResponsePageProps> = ({ match }) => {
   };
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <div>{tr('Your response has been processed.')}</div>
-            <div>
-              <IonButton onClick={click_go_home}>{tr('Home')}</IonButton>
-            </div>
-          </div>
-        </div>
-      </IonContent>
-    </IonPage>
+    <PageLayout>
+      <div>{tr('Your response has been processed.')}</div>
+      <div>
+        <IonButton onClick={click_go_home}>{tr('Home')}</IonButton>
+      </div>
+    </PageLayout>
   );
 };
 

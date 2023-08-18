@@ -1,15 +1,12 @@
-import {
-  IonButton,
-  IonContent,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonPage,
-} from '@ionic/react';
 import { FormEvent, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
+
+import { IonButton, IonInput, IonItem, IonLabel } from '@ionic/react';
+
 import { usePasswordResetFormRequestMutation } from '../../generated/graphql';
 import './ResetEmailRequest.css';
+
+import { PageLayout } from '../common/PageLayout';
 
 import { useTr } from '../../hooks/useTr';
 
@@ -53,38 +50,32 @@ const PasswordResetFormPage: React.FC<PasswordResetFormProps> = ({ match }) => {
   }
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <h1>{tr('Reset Password')}</h1>
+    <PageLayout>
+      <h1>{tr('Reset Password')}</h1>
 
-            <form onSubmit={(event) => handle_submit(event)}>
-              <IonItem counter={true}>
-                <IonLabel position="floating">{tr('Password')}</IonLabel>
-                <IonInput
-                  value={password}
-                  type="password"
-                  inputmode="text"
-                  minlength={1}
-                  maxlength={512}
-                  onIonChange={(e) => set_password(e.detail.value!)}
-                  required
-                />
-              </IonItem>
+      <form onSubmit={(event) => handle_submit(event)}>
+        <IonItem counter={true}>
+          <IonLabel position="floating">{tr('Password')}</IonLabel>
+          <IonInput
+            value={password}
+            type="password"
+            inputmode="text"
+            minlength={1}
+            maxlength={512}
+            onIonChange={(e) => set_password(e.detail.value!)}
+            required
+          />
+        </IonItem>
 
-              {show_response && <div>{tr('Your password has been reset')}</div>}
+        {show_response && <div>{tr('Your password has been reset')}</div>}
 
-              {!show_response && (
-                <IonButton type="submit" color="primary">
-                  {tr('Reset Password')}
-                </IonButton>
-              )}
-            </form>
-          </div>
-        </div>
-      </IonContent>
-    </IonPage>
+        {!show_response && (
+          <IonButton type="submit" color="primary">
+            {tr('Reset Password')}
+          </IonButton>
+        )}
+      </form>
+    </PageLayout>
   );
 };
 
