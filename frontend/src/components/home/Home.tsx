@@ -1,8 +1,5 @@
 import { useState } from 'react';
 import {
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
   IonContent,
   IonIcon,
   IonItem,
@@ -112,17 +109,15 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
                       }}
                       style={{ cursor: 'pointer' }}
                     >
-                      <IonCardHeader>
-                        <IonCardTitle>
-                          <div className="home-card-title">
-                            <IonIcon icon={item.icon}></IonIcon>
-                            <div className="home-card-title-text">
-                              <IonText>{item.title}</IonText>
-                            </div>
-                          </div>
-                        </IonCardTitle>
-                        <IonCardSubtitle>{item.description}</IonCardSubtitle>
-                      </IonCardHeader>
+                      <div className="home-card-title">
+                        <IonIcon icon={item.icon}></IonIcon>
+                        <div className="home-card-title-text">
+                          <IonText>{item.title}</IonText>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: '5px' }}>
+                        <IonText>{item.description}</IonText>
+                      </div>
                     </CustomIonCard>
                   </IonItem>
                 ))}
