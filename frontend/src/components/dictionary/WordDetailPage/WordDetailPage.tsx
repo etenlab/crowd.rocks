@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
-  IonPage,
   IonModal,
   IonHeader,
   IonToolbar,
@@ -11,6 +10,8 @@ import {
   IonTitle,
   useIonToast,
 } from '@ionic/react';
+
+import { PageLayout } from '../../common/PageLayout';
 
 import { Caption } from '../../common/Caption/Caption';
 import { Card } from '../../common/Card';
@@ -39,8 +40,12 @@ import {
   WordWithDefinitionsFragmentFragmentDoc,
 } from '../../../generated/graphql';
 
-import { CaptainContainer, CardListContainer, CardContainer } from './styled';
-import { Textarea } from '../../common/styled';
+import {
+  Textarea,
+  CaptainContainer,
+  CardListContainer,
+  CardContainer,
+} from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { AddListHeader } from '../../common/ListHeader';
@@ -419,59 +424,53 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
     : null;
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <CaptainContainer>
-              <Caption>{tr('Dictionary')}</Caption>
-            </CaptainContainer>
+    <PageLayout>
+      <CaptainContainer>
+        <Caption>{tr('Dictionary')}</Caption>
+      </CaptainContainer>
 
-            <CardContainer>{wordCom}</CardContainer>
+      <CardContainer>{wordCom}</CardContainer>
 
-            <h4>{tr('Definitions')}</h4>
+      <h4>{tr('Definitions')}</h4>
 
-            <AddListHeader
-              title={tr('All Words')}
-              onClick={() => setShowModal(true)}
+      <AddListHeader
+        title={tr('All Words')}
+        onClick={() => setShowModal(true)}
+      />
+
+      <CardListContainer>{definitionsCom}</CardListContainer>
+
+      <IonModal ref={modal} isOpen={showModal}>
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonButton onClick={() => setShowModal(false)}>
+                {tr('Cancel')}
+              </IonButton>
+            </IonButtons>
+            <IonTitle>{tr('Dictionary')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <div
+            style={{
+              display: 'flex',
+              gap: '10px',
+              flexDirection: 'column',
+            }}
+          >
+            <Textarea
+              ref={textarea}
+              labelPlacement="floating"
+              fill="solid"
+              label={tr('Input New Definition')}
             />
-
-            <CardListContainer>{definitionsCom}</CardListContainer>
-
-            <IonModal ref={modal} isOpen={showModal}>
-              <IonHeader>
-                <IonToolbar>
-                  <IonButtons slot="start">
-                    <IonButton onClick={() => setShowModal(false)}>
-                      {tr('Cancel')}
-                    </IonButton>
-                  </IonButtons>
-                  <IonTitle>{tr('Dictionary')}</IonTitle>
-                </IonToolbar>
-              </IonHeader>
-              <IonContent className="ion-padding">
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '10px',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <Textarea
-                    ref={textarea}
-                    labelPlacement="floating"
-                    fill="solid"
-                    label={tr('Input New Definition')}
-                  />
-                  <IonButton onClick={handleSaveNewDefinition}>
-                    {tr('Save')}
-                  </IonButton>
-                </div>
-              </IonContent>
-            </IonModal>
+            <IonButton onClick={handleSaveNewDefinition}>
+              {tr('Save')}
+            </IonButton>
           </div>
-        </div>
-      </IonContent>
-    </IonPage>
+        </IonContent>
+      </IonModal>
+    </PageLayout>
   );
 }

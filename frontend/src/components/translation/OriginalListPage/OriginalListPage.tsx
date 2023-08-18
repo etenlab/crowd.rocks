@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
-  IonContent,
-  IonPage,
   InputCustomEvent,
   InputChangeEventDetail,
   useIonRouter,
@@ -29,6 +27,7 @@ import { Input } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { PageLayout } from '../../common/PageLayout';
 
 interface OriginalListPageProps
   extends RouteComponentProps<{
@@ -87,55 +86,49 @@ export function OriginalListPage({ match }: OriginalListPageProps) {
   };
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <CaptainContainer>
-              <Caption>{tr('Translation')}</Caption>
-            </CaptainContainer>
+    <PageLayout>
+      <CaptainContainer>
+        <Caption>{tr('Translation')}</Caption>
+      </CaptainContainer>
 
-            <FilterContainer>
-              <LanguageSelectorContainer>
-                <LangSelector
-                  title={tr('Source language')}
-                  langSelectorId="translation-source-langSelector"
-                  selected={source as LanguageInfo | undefined}
-                  onChange={(_sourceLangTag, sourceLangInfo) => {
-                    changeTranslationSourceLanguage(sourceLangInfo);
-                  }}
-                  onClearClick={() => changeTranslationSourceLanguage(null)}
-                />
-                <LangSelector
-                  title={tr('Target language')}
-                  langSelectorId="translation-target-langSelector"
-                  selected={target as LanguageInfo | undefined}
-                  onChange={(_targetLangTag, targetLanguageInfo) => {
-                    changeTranslationTargetLanguage(targetLanguageInfo);
-                  }}
-                  onClearClick={() => changeTranslationTargetLanguage(null)}
-                />
-              </LanguageSelectorContainer>
+      <FilterContainer>
+        <LanguageSelectorContainer>
+          <LangSelector
+            title={tr('Source language')}
+            langSelectorId="translation-source-langSelector"
+            selected={source as LanguageInfo | undefined}
+            onChange={(_sourceLangTag, sourceLangInfo) => {
+              changeTranslationSourceLanguage(sourceLangInfo);
+            }}
+            onClearClick={() => changeTranslationSourceLanguage(null)}
+          />
+          <LangSelector
+            title={tr('Target language')}
+            langSelectorId="translation-target-langSelector"
+            selected={target as LanguageInfo | undefined}
+            onChange={(_targetLangTag, targetLanguageInfo) => {
+              changeTranslationTargetLanguage(targetLanguageInfo);
+            }}
+            onClearClick={() => changeTranslationTargetLanguage(null)}
+          />
+        </LanguageSelectorContainer>
 
-              <Input
-                type="text"
-                label={tr('Search')}
-                labelPlacement="floating"
-                fill="outline"
-                debounce={300}
-                value={filter}
-                onIonInput={handleFilterChange}
-              />
-            </FilterContainer>
+        <Input
+          type="text"
+          label={tr('Search')}
+          labelPlacement="floating"
+          fill="outline"
+          debounce={300}
+          value={filter}
+          onIonInput={handleFilterChange}
+        />
+      </FilterContainer>
 
-            <WordOrPhraseList
-              langInfo={source}
-              filter={filter}
-              onClickDefinition={handleClickDefinition}
-            />
-          </div>
-        </div>
-      </IonContent>
-    </IonPage>
+      <WordOrPhraseList
+        langInfo={source}
+        filter={filter}
+        onClickDefinition={handleClickDefinition}
+      />
+    </PageLayout>
   );
 }

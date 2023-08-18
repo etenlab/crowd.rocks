@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router';
-import { IonPage, IonContent, useIonToast, useIonRouter } from '@ionic/react';
+import { useIonToast, useIonRouter } from '@ionic/react';
 
 import { Caption } from '../../common/Caption/Caption';
 import { Card } from '../../common/Card';
@@ -40,6 +40,7 @@ import {
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { PageLayout } from '../../common/PageLayout';
 
 interface TranslationListPageProps
   extends RouteComponentProps<{
@@ -551,35 +552,29 @@ export function TranslationListPage({ match }: TranslationListPageProps) {
   ]);
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <CaptainContainer>
-              <Caption>{tr('Translation')}</Caption>
-            </CaptainContainer>
-            <Stack>
-              {wordOrPhraseCom}
+    <PageLayout>
+      <CaptainContainer>
+        <Caption>{tr('Translation')}</Caption>
+      </CaptainContainer>
+      <Stack>
+        {wordOrPhraseCom}
 
-              <Button
-                onClick={handleGoToAddNewTranslationPage}
-                expand="block"
-                fill="outline"
-              >
-                + {tr('Add New Translation')}
-              </Button>
+        <Button
+          onClick={handleGoToAddNewTranslationPage}
+          expand="block"
+          fill="outline"
+        >
+          + {tr('Add New Translation')}
+        </Button>
 
-              <p style={{ fontSize: 16 }}>{tr('Translations')}</p>
+        <p style={{ fontSize: 16 }}>{tr('Translations')}</p>
 
-              <CardListContainer>
-                {translationComList.length > 0
-                  ? translationComList
-                  : tr(`No translations`)}
-              </CardListContainer>
-            </Stack>
-          </div>
-        </div>
-      </IonContent>
-    </IonPage>
+        <CardListContainer>
+          {translationComList.length > 0
+            ? translationComList
+            : tr(`No translations`)}
+        </CardListContainer>
+      </Stack>
+    </PageLayout>
   );
 }

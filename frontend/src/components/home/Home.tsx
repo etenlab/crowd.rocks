@@ -3,13 +3,11 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
-  IonContent,
   IonIcon,
   IonItem,
   IonItemDivider,
   IonItemGroup,
   IonLabel,
-  IonPage,
   IonText,
   useIonRouter,
   useIonViewWillEnter,
@@ -25,6 +23,7 @@ import { RouteComponentProps } from 'react-router';
 import './Home.css';
 import { CustomIonCard } from './styled';
 import { useTr } from '../../hooks/useTr';
+import { PageLayout } from '../common/PageLayout';
 
 interface HomePageProps
   extends RouteComponentProps<{
@@ -94,47 +93,41 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
   ];
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            {menu.map((group) => (
-              <IonItemGroup key={group.group}>
-                <IonItemDivider>
-                  <IonLabel>{group.group}</IonLabel>
-                </IonItemDivider>
+    <PageLayout>
+      {menu.map((group) => (
+        <IonItemGroup key={group.group}>
+          <IonItemDivider>
+            <IonLabel>{group.group}</IonLabel>
+          </IonItemDivider>
 
-                {group.subMenu.map((item) => (
-                  <IonItem lines="none" key={item.title}>
-                    <CustomIonCard
-                      onClick={() => {
-                        router.push(item.link);
-                      }}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <IonCardHeader>
-                        <IonCardTitle>
-                          <div className="home-card-title">
-                            <IonIcon icon={item.icon}></IonIcon>
-                            <div className="home-card-title-text">
-                              <IonText>{item.title}</IonText>
-                            </div>
-                          </div>
-                        </IonCardTitle>
-                        <IonCardSubtitle>{item.description}</IonCardSubtitle>
-                      </IonCardHeader>
-                    </CustomIonCard>
-                  </IonItem>
-                ))}
-              </IonItemGroup>
-            ))}
+          {group.subMenu.map((item) => (
+            <IonItem lines="none" key={item.title}>
+              <CustomIonCard
+                onClick={() => {
+                  router.push(item.link);
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <IonCardHeader>
+                  <IonCardTitle>
+                    <div className="home-card-title">
+                      <IonIcon icon={item.icon}></IonIcon>
+                      <div className="home-card-title-text">
+                        <IonText>{item.title}</IonText>
+                      </div>
+                    </div>
+                  </IonCardTitle>
+                  <IonCardSubtitle>{item.description}</IonCardSubtitle>
+                </IonCardHeader>
+              </CustomIonCard>
+            </IonItem>
+          ))}
+        </IonItemGroup>
+      ))}
 
-            <br />
-            <br />
-
-            <div className="home-footer">
-              <div className="ion-text-end">
-                {/* <IonFab className="home-footer-create-button-wrap">
+      <div className="home-footer">
+        <div className="ion-text-end">
+          {/* <IonFab className="home-footer-create-button-wrap">
                   <IonFabButton
                     onClick={() => {
                       if (globals.get_user_id()) {
@@ -149,54 +142,54 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
                     <IonIcon icon={add}></IonIcon>
                   </IonFabButton>
                 </IonFab> */}
-              </div>
+        </div>
 
-              {show_legal_menu && (
-                <div>
-                  <div>
-                    <a href="https://app.termly.io/document/terms-of-use-for-website/[todo]">
-                      {tr('Terms of Service')}
-                    </a>
-                  </div>
+        {show_legal_menu && (
+          <div>
+            <div>
+              <a href="https://app.termly.io/document/terms-of-use-for-website/[todo]">
+                {tr('Terms of Service')}
+              </a>
+            </div>
 
-                  <div>
-                    <a href="https://app.termly.io/document/cookie-policy/[todo]">
-                      {tr('Cookie Policy')}
-                    </a>
-                  </div>
+            <div>
+              <a href="https://app.termly.io/document/cookie-policy/[todo]">
+                {tr('Cookie Policy')}
+              </a>
+            </div>
 
-                  <div>
-                    <a href="https://app.termly.io/document/acceptable-use-policy/[todo]">
-                      {tr('Acceptable Use Policy')}
-                    </a>
-                  </div>
+            <div>
+              <a href="https://app.termly.io/document/acceptable-use-policy/[todo]">
+                {tr('Acceptable Use Policy')}
+              </a>
+            </div>
 
-                  <div>
-                    <a href="https://app.termly.io/document/disclaimer/[todo]">
-                      {tr('Disclaimer')}
-                    </a>
-                  </div>
+            <div>
+              <a href="https://app.termly.io/document/disclaimer/[todo]">
+                {tr('Disclaimer')}
+              </a>
+            </div>
 
-                  <div>
-                    <a href="https://app.termly.io/document/eula/[todo]">
-                      {tr('EULA')}
-                    </a>
-                  </div>
+            <div>
+              <a href="https://app.termly.io/document/eula/[todo]">
+                {tr('EULA')}
+              </a>
+            </div>
 
-                  <div>
-                    <a href="https://app.termly.io/document/privacy-policy/[todo]">
-                      {tr('Privacy Policy')}
-                    </a>
-                  </div>
-                  <div>
-                    <a href="https://app.termly.io/notify/[todo]">
-                      {tr('Do Not Sell or Share My Personal information')}
-                    </a>
-                  </div>
-                </div>
-              )}
+            <div>
+              <a href="https://app.termly.io/document/privacy-policy/[todo]">
+                {tr('Privacy Policy')}
+              </a>
+            </div>
+            <div>
+              <a href="https://app.termly.io/notify/[todo]">
+                {tr('Do Not Sell or Share My Personal information')}
+              </a>
+            </div>
+          </div>
+        )}
 
-              {/* <div
+        {/* <div
                 className="home-footer-legal-button clickable"
                 onClick={() => {
                   set_show_legal_menu((_show_legal_menu) => !_show_legal_menu);
@@ -204,11 +197,8 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
               >
                 {tr('Legal')}
               </div> */}
-            </div>
-          </div>
-        </div>
-      </IonContent>
-    </IonPage>
+      </div>
+    </PageLayout>
   );
 };
 

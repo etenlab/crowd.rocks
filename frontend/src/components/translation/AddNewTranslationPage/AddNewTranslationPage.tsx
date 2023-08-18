@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
-  IonPage,
   IonButton,
   IonContent,
   useIonToast,
@@ -39,6 +38,7 @@ import { Input, Textarea } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { PageLayout } from '../../common/PageLayout';
 
 interface AddNewTranslationPageProps
   extends RouteComponentProps<{
@@ -317,89 +317,80 @@ export function AddNewTranslationPage({ match }: AddNewTranslationPageProps) {
   };
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <CaptainContainer>
-              <Caption>{tr('New Translation')}</Caption>
-            </CaptainContainer>
+    <PageLayout>
+      <CaptainContainer>
+        <Caption>{tr('New Translation')}</Caption>
+      </CaptainContainer>
 
+      <Stack>
+        <Button
+          id="open-translation-definition-list-modal"
+          expand="block"
+          fill="outline"
+        >
+          + {tr('Select From Definition List')}
+        </Button>
+
+        <Input
+          type="text"
+          label={tr('Input New Word or Phrase')}
+          labelPlacement="floating"
+          fill="outline"
+          value={wordOrPhrase}
+          onIonInput={handleWordOrPhraseChange}
+        />
+        <Textarea
+          labelPlacement="floating"
+          fill="solid"
+          label={tr('Input New Definition')}
+          value={definition}
+          onIonInput={handleDefinitionChange}
+        />
+
+        <Button onClick={handleSaveNewTranslation} expand="block">
+          {tr('Save')}
+        </Button>
+      </Stack>
+
+      <IonModal ref={modal} trigger="open-translation-definition-list-modal">
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonButton onClick={() => modal.current?.dismiss()}>
+                {tr('Cancel')}
+              </IonButton>
+            </IonButtons>
+            <IonTitle>{tr('Dictionary')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <div
+            style={{
+              display: 'flex',
+              gap: '10px',
+              flexDirection: 'column',
+            }}
+          >
             <Stack>
-              <Button
-                id="open-translation-definition-list-modal"
-                expand="block"
-                fill="outline"
-              >
-                + {tr('Select From Definition List')}
-              </Button>
-
               <Input
                 type="text"
-                label={tr('Input New Word or Phrase')}
+                label={tr('Search')}
                 labelPlacement="floating"
                 fill="outline"
-                value={wordOrPhrase}
-                onIonInput={handleWordOrPhraseChange}
-              />
-              <Textarea
-                labelPlacement="floating"
-                fill="solid"
-                label={tr('Input New Definition')}
-                value={definition}
-                onIonInput={handleDefinitionChange}
+                debounce={300}
+                value={filter}
+                onIonInput={handleFilterChange}
               />
 
-              <Button onClick={handleSaveNewTranslation} expand="block">
-                {tr('Save')}
-              </Button>
+              <WordOrPhraseList
+                filter={filter}
+                langInfo={target}
+                onClickDefinition={handleClickDefinition}
+              />
             </Stack>
-
-            <IonModal
-              ref={modal}
-              trigger="open-translation-definition-list-modal"
-            >
-              <IonHeader>
-                <IonToolbar>
-                  <IonButtons slot="start">
-                    <IonButton onClick={() => modal.current?.dismiss()}>
-                      {tr('Cancel')}
-                    </IonButton>
-                  </IonButtons>
-                  <IonTitle>{tr('Dictionary')}</IonTitle>
-                </IonToolbar>
-              </IonHeader>
-              <IonContent className="ion-padding">
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '10px',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <Stack>
-                    <Input
-                      type="text"
-                      label={tr('Search')}
-                      labelPlacement="floating"
-                      fill="outline"
-                      debounce={300}
-                      value={filter}
-                      onIonInput={handleFilterChange}
-                    />
-
-                    <WordOrPhraseList
-                      filter={filter}
-                      langInfo={target}
-                      onClickDefinition={handleClickDefinition}
-                    />
-                  </Stack>
-                </div>
-              </IonContent>
-            </IonModal>
           </div>
-        </div>
-      </IonContent>
-    </IonPage>
+        </IonContent>
+      </IonModal>
+    </PageLayout>
   );
 }

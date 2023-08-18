@@ -18,6 +18,9 @@ http://ionicframework.com/docs/theming/ */
 }
 
 .section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   flex-grow: 1;
   width: 100%;
   max-width: 777px;

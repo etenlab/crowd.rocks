@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
-  IonPage,
   IonModal,
   IonHeader,
   IonToolbar,
@@ -45,11 +44,17 @@ import {
   SiteTextPhraseToPhraseTranslationWithVoteFragmentFragmentDoc,
 } from '../../../generated/graphql';
 
-import { CaptainContainer, CardListContainer, CardContainer } from './styled';
-import { Input, Textarea } from '../../common/styled';
+import {
+  Input,
+  Textarea,
+  CaptainContainer,
+  CardListContainer,
+  CardContainer,
+} from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { AddListHeader } from '../../common/ListHeader';
+import { PageLayout } from '../../common/PageLayout';
 
 interface SiteTextDetailPageProps
   extends RouteComponentProps<{
@@ -718,71 +723,65 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
     title;
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <CaptainContainer>
-              <Caption>
-                {tr('Site Text')} - {title}
-              </Caption>
-            </CaptainContainer>
+    <PageLayout>
+      <CaptainContainer>
+        <Caption>
+          {tr('Site Text')} - {title}
+        </Caption>
+      </CaptainContainer>
 
-            <CardContainer>
-              {wordCom}
-              {phraseCom}
-            </CardContainer>
+      <CardContainer>
+        {wordCom}
+        {phraseCom}
+      </CardContainer>
 
-            <AddListHeader
-              title={tr('Site Text Translations')}
-              onClick={() => setShowModal(true)}
+      <AddListHeader
+        title={tr('Site Text Translations')}
+        onClick={() => setShowModal(true)}
+      />
+
+      <CardListContainer>{translationsCom}</CardListContainer>
+
+      <IonModal ref={modal} isOpen={showModal}>
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonButton onClick={() => setShowModal(false)}>
+                {tr('Cancel')}
+              </IonButton>
+            </IonButtons>
+            <IonTitle>
+              {tr('Site Text')} - {title}
+            </IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <div
+            style={{
+              display: 'flex',
+              gap: '10px',
+              flexDirection: 'column',
+            }}
+          >
+            <Input
+              ref={input}
+              type="text"
+              label={tr('Site Text')}
+              labelPlacement="floating"
+              fill="outline"
             />
-
-            <CardListContainer>{translationsCom}</CardListContainer>
-
-            <IonModal ref={modal} isOpen={showModal}>
-              <IonHeader>
-                <IonToolbar>
-                  <IonButtons slot="start">
-                    <IonButton onClick={() => setShowModal(false)}>
-                      {tr('Cancel')}
-                    </IonButton>
-                  </IonButtons>
-                  <IonTitle>
-                    {tr('Site Text')} - {title}
-                  </IonTitle>
-                </IonToolbar>
-              </IonHeader>
-              <IonContent className="ion-padding">
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '10px',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <Input
-                    ref={input}
-                    type="text"
-                    label={tr('Site Text')}
-                    labelPlacement="floating"
-                    fill="outline"
-                  />
-                  <Textarea
-                    ref={textarea}
-                    labelPlacement="floating"
-                    fill="solid"
-                    label={tr('Site Text Definition')}
-                  />
-                  <IonButton onClick={handleSaveNewTranslation}>
-                    {tr('Save')}
-                  </IonButton>
-                </div>
-              </IonContent>
-            </IonModal>
+            <Textarea
+              ref={textarea}
+              labelPlacement="floating"
+              fill="solid"
+              label={tr('Site Text Definition')}
+            />
+            <IonButton onClick={handleSaveNewTranslation}>
+              {tr('Save')}
+            </IonButton>
           </div>
-        </div>
-      </IonContent>
-    </IonPage>
+        </IonContent>
+      </IonModal>
+    </PageLayout>
   );
 }

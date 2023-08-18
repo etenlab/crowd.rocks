@@ -47,18 +47,22 @@ export function Card({
       routerLink={routerLink}
       style={{ cursor: onClick ? 'pointer' : 'unset' }}
     >
-      <CustomCardHeader>
-        <CustomCardTitle>
-          {content || ''}
-          {voteFor === 'content' ? voteButtonCom : null}
-        </CustomCardTitle>
-      </CustomCardHeader>
+      {content ? (
+        <CustomCardHeader>
+          <CustomCardTitle>
+            {content || ''}
+            {voteFor === 'content' ? voteButtonCom : null}
+          </CustomCardTitle>
+        </CustomCardHeader>
+      ) : null}
 
-      <CustomCardContent>
-        {description}
-        {voteFor === 'description' ? voteButtonCom : null}
-        {chatButton}
-      </CustomCardContent>
+      {description ? (
+        <CustomCardContent>
+          {description}
+          {voteFor === 'description' ? voteButtonCom : null}
+          {chatButton}
+        </CustomCardContent>
+      ) : null}
     </CustomCard>
   );
 }
