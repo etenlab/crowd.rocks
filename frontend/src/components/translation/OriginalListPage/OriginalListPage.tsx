@@ -19,7 +19,7 @@ import {} from '../../../generated/graphql';
 import {} from '../../../generated/graphql';
 
 import {
-  CaptainContainer,
+  CaptionContainer,
   FilterContainer,
   LanguageSelectorContainer,
 } from './styled';
@@ -87,9 +87,9 @@ export function OriginalListPage({ match }: OriginalListPageProps) {
 
   return (
     <PageLayout>
-      <CaptainContainer>
+      <CaptionContainer>
         <Caption>{tr('Translation')}</Caption>
-      </CaptainContainer>
+      </CaptionContainer>
 
       <FilterContainer>
         <LanguageSelectorContainer>

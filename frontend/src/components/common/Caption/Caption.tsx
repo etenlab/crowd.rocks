@@ -20,18 +20,18 @@ export const Caption = ({ handleBackClick, children }: TCaptionProps) => {
   }
 
   return (
-    <CaptainContainer>
+    <CaptionContainer>
       <StIonIcon
         color="black"
         icon={arrowBack}
         onClick={() => onClickAction()}
       />
       <StIonText>{children}</StIonText>
-    </CaptainContainer>
+    </CaptionContainer>
   );
 };
 
-const CaptainContainer = styled.div`
+const CaptionContainer = styled.div`
   display: flex;
   padding: 16px;
   flex-direction: row;

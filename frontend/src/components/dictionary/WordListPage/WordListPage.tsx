@@ -40,7 +40,7 @@ import {
 } from '../../../generated/graphql';
 
 import {
-  CaptainContainer,
+  CaptionContainer,
   FilterContainer,
   CardListContainer,
   CardContainer,
@@ -380,9 +380,9 @@ export function WordListPage({ match }: WordListPageProps) {
 
   return (
     <PageLayout>
-      <CaptainContainer>
+      <CaptionContainer>
         <Caption>{tr('Dictionary')}</Caption>
-      </CaptainContainer>
+      </CaptionContainer>
 
       <FilterContainer>
         <LangSelector

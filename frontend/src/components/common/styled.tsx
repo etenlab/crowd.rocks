@@ -14,7 +14,7 @@ export const Textarea = styled(IonTextarea)(() => ({
   '--border-radius': '16px',
 }));
 
-export const CaptainContainer = styled.div`
+export const CaptionContainer = styled.div`
   height: 50px;
   margin-left: -16px;
 `;

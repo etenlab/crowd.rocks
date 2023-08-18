@@ -47,7 +47,7 @@ import {
 import {
   Input,
   Textarea,
-  CaptainContainer,
+  CaptionContainer,
   CardListContainer,
   CardContainer,
 } from '../../common/styled';
@@ -724,11 +724,11 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
 
   return (
     <PageLayout>
-      <CaptainContainer>
+      <CaptionContainer>
         <Caption>
           {tr('Site Text')} - {title}
         </Caption>
-      </CaptainContainer>
+      </CaptionContainer>
 
       <CardContainer>
         {wordCom}

@@ -33,7 +33,7 @@ import { GetTranslationsByFromDefinitionIdQuery } from '../../../generated/graph
 
 import { GetTranslationsByFromDefinitionIdDocument } from '../../../generated/graphql';
 
-import { CaptainContainer, Stack, Button } from './styled';
+import { CaptionContainer, Stack, Button } from './styled';
 import { Input, Textarea } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
@@ -318,9 +318,9 @@ export function AddNewTranslationPage({ match }: AddNewTranslationPageProps) {
 
   return (
     <PageLayout>
-      <CaptainContainer>
+      <CaptionContainer>
         <Caption>{tr('New Translation')}</Caption>
-      </CaptainContainer>
+      </CaptionContainer>
 
       <Stack>
         <Button

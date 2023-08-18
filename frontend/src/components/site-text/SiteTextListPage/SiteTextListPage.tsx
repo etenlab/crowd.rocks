@@ -48,7 +48,7 @@ import {
 
 import {
   Input,
-  CaptainContainer,
+  CaptionContainer,
   LanguageSelectorContainer,
 } from '../../common/styled';
 
@@ -387,9 +387,9 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
 
   return (
     <PageLayout>
-      <CaptainContainer>
+      <CaptionContainer>
         <Caption>{tr('Site Text')}</Caption>
-      </CaptainContainer>
+      </CaptionContainer>
 
       <LanguageSelectorContainer>
         <AppLanguageShowerContainer>

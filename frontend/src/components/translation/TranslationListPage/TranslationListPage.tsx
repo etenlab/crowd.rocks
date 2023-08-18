@@ -31,7 +31,7 @@ import {
 } from '../../../generated/graphql';
 
 import {
-  CaptainContainer,
+  CaptionContainer,
   CardListContainer,
   CardContainer,
   Button,
@@ -553,9 +553,9 @@ export function TranslationListPage({ match }: TranslationListPageProps) {
 
   return (
     <PageLayout>
-      <CaptainContainer>
+      <CaptionContainer>
         <Caption>{tr('Translation')}</Caption>
-      </CaptainContainer>
+      </CaptionContainer>
       <Stack>
         {wordOrPhraseCom}
 

@@ -42,7 +42,7 @@ import {
 
 import {
   Textarea,
-  CaptainContainer,
+  CaptionContainer,
   CardListContainer,
   CardContainer,
 } from '../../common/styled';
@@ -425,9 +425,9 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
 
   return (
     <PageLayout>
-      <CaptainContainer>
+      <CaptionContainer>
         <Caption>{tr('Dictionary')}</Caption>
-      </CaptainContainer>
+      </CaptionContainer>
 
       <CardContainer>{wordCom}</CardContainer>
 

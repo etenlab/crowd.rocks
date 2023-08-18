@@ -2,7 +2,7 @@ import { styled } from 'styled-components';
 
 import { IonButton } from '@ionic/react';
 
-export const CaptainContainer = styled.div`
+export const CaptionContainer = styled.div`
   height: 50px;
   margin: -16px;
   margin-bottom: 20px;

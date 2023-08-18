@@ -41,7 +41,7 @@ import {
 
 import {
   Textarea,
-  CaptainContainer,
+  CaptionContainer,
   CardListContainer,
   CardContainer,
 } from '../../common/styled';
@@ -427,9 +427,9 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
 
   return (
     <PageLayout>
-      <CaptainContainer>
+      <CaptionContainer>
         <Caption>{tr('Phrase Book')}</Caption>
-      </CaptainContainer>
+      </CaptionContainer>
 
       <CardContainer>{phraseCom}</CardContainer>
 

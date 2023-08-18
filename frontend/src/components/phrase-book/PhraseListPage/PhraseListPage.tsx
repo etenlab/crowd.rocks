@@ -38,7 +38,7 @@ import {
 } from '../../../generated/graphql';
 
 import {
-  CaptainContainer,
+  CaptionContainer,
   FilterContainer,
   CardListContainer,
   CardContainer,
@@ -374,9 +374,9 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
   return (
     <PageLayout>
-      <CaptainContainer>
+      <CaptionContainer>
         <Caption>{tr('Phrase Book')}</Caption>
-      </CaptainContainer>
+      </CaptionContainer>
 
       <FilterContainer>
         <LangSelector
