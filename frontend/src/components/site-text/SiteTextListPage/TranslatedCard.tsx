@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
 
+import { Card } from '../../common/Card';
+
 import { useGetRecommendedTranslationFromSiteTextDefinitionIdLazyQuery } from '../../../generated/graphql';
 import {
   ErrorType,
   SiteTextTranslationWithVote,
 } from '../../../generated/graphql';
-
-import {
-  IonCardHeader,
-  IonCardTitle,
-  IonCard,
-  IonCardContent,
-} from '@ionic/react';
-import styled from 'styled-components';
 
 interface TranslatedCardProps {
   siteTextId: string;
@@ -128,29 +122,10 @@ export function TranslatedCard(props: TranslatedCardProps) {
   }
 
   return (
-    <StCard onClick={() => props.onClick()}>
-      <CustomCardHeader>
-        <CustomCardTitle>{siteTextlikeString || ''}</CustomCardTitle>
-      </CustomCardHeader>
-      <CustomCardContent>
-        <div>{definitionlikeString || ''}</div>
-      </CustomCardContent>
-    </StCard>
+    <Card
+      content={siteTextlikeString}
+      description={definitionlikeString}
+      onClick={() => props.onClick()}
+    />
   );
 }
-
-const StCard = styled(IonCard)(() => ({
-  width: '90%',
-  height: '90px',
-}));
-
-export const CustomCardTitle = styled(IonCardTitle)(() => ({
-  fontSize: '17px',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-}));
-
-export const CustomCardContent = styled(IonCardContent)(() => ({}));
-
-export const CustomCardHeader = styled(IonCardHeader)(() => ({}));

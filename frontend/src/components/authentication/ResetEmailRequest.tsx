@@ -1,17 +1,11 @@
-import {
-  IonButton,
-  IonContent,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonPage,
-} from '@ionic/react';
+import { IonButton, IonInput, IonItem, IonLabel } from '@ionic/react';
 import { FormEvent, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { useResetEmailRequestMutation } from '../../generated/graphql';
 import './ResetEmailRequest.css';
 
 import { useTr } from '../../hooks/useTr';
+import { PageLayout } from '../common/PageLayout';
 
 interface ResetEmailRequestProps
   extends RouteComponentProps<{
@@ -49,43 +43,37 @@ const ResetEmailRequestPage: React.FC<ResetEmailRequestProps> = () => {
   }
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <h1>{tr('Request a Password Reset')}</h1>
+    <PageLayout>
+      <h1>{tr('Request a Password Reset')}</h1>
 
-            <form onSubmit={(event) => handle_submit(event)}>
-              <IonItem counter={true}>
-                <IonLabel position="floating">{tr('Email')}</IonLabel>
-                <IonInput
-                  value={email}
-                  inputmode="email"
-                  minlength={1}
-                  maxlength={512}
-                  onIonChange={(e) => set_email(e.detail.value!)}
-                  required
-                />
-              </IonItem>
+      <form onSubmit={(event) => handle_submit(event)}>
+        <IonItem counter={true}>
+          <IonLabel position="floating">{tr('Email')}</IonLabel>
+          <IonInput
+            value={email}
+            inputmode="email"
+            minlength={1}
+            maxlength={512}
+            onIonChange={(e) => set_email(e.detail.value!)}
+            required
+          />
+        </IonItem>
 
-              {show_response && (
-                <div>
-                  {tr(
-                    'If your email exists in our database a reset link has been sent.',
-                  )}
-                </div>
-              )}
-
-              {!show_response && (
-                <IonButton type="submit" color="primary">
-                  {tr('Send Password Reset Email')}
-                </IonButton>
-              )}
-            </form>
+        {show_response && (
+          <div>
+            {tr(
+              'If your email exists in our database a reset link has been sent.',
+            )}
           </div>
-        </div>
-      </IonContent>
-    </IonPage>
+        )}
+
+        {!show_response && (
+          <IonButton type="submit" color="primary">
+            {tr('Send Password Reset Email')}
+          </IonButton>
+        )}
+      </form>
+    </PageLayout>
   );
 };
 
