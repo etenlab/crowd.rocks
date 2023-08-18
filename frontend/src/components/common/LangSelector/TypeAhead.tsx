@@ -10,9 +10,11 @@ import {
   IonSearchbar,
   IonToolbar,
   IonIcon,
+  IonBadge,
 } from '@ionic/react';
 import { useTr } from '../../../hooks/useTr';
 import { checkmark } from 'ionicons/icons';
+import { styled } from 'styled-components';
 
 interface TypeaheadProps<T> {
   items: T[];
@@ -22,9 +24,16 @@ interface TypeaheadProps<T> {
   onSelectionChange?: (item: string | undefined) => void;
 }
 
-function AppTypeahead<Item extends { text: string; value: string }>({
-  ...props
-}: TypeaheadProps<Item>) {
+function AppTypeahead<
+  Item extends {
+    text: string;
+    value: string;
+    endBadge?: {
+      value: string;
+      color?: string;
+    };
+  },
+>({ ...props }: TypeaheadProps<Item>) {
   const { tr } = useTr();
   const [filteredItems, setFilteredItems] = useState<Item[]>([...props.items]);
 
@@ -112,7 +121,7 @@ function AppTypeahead<Item extends { text: string; value: string }>({
       </IonHeader>
 
       <IonContent color="light" class="ion-padding">
-        <IonList id="modal-list" inset={true}>
+        <IonList inset={true}>
           {filteredItems.slice(0, 20).map((item) => (
             <IonItem
               button
@@ -122,6 +131,11 @@ function AppTypeahead<Item extends { text: string; value: string }>({
               {isValueOrTextChecked(item.value, item.text) && (
                 <IonIcon slot="end" icon={checkmark} />
               )}
+              {item.endBadge && (
+                <CustomBadge slot="end" $color={item.endBadge.color}>
+                  {item.endBadge.value}
+                </CustomBadge>
+              )}
               {item.text}
             </IonItem>
           ))}
@@ -130,4 +144,13 @@ function AppTypeahead<Item extends { text: string; value: string }>({
     </>
   );
 }
+
+const CustomBadge = styled(IonBadge)<{ $color?: string }>`
+  ${(props) =>
+    props.$color &&
+    `
+    background: ${props.$color};
+  `}
+`;
+
 export default AppTypeahead;
