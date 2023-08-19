@@ -212,7 +212,6 @@ const Body: React.FC = () => {
         originalCnt > 0 ? (translationCnt / originalCnt) * 100 : 100;
 
       const badgeColor = percent === 100 ? 'green' : undefined;
-      console.log(badgeColor);
 
       return {
         text: `${langInfo2String(langInfo)}`,

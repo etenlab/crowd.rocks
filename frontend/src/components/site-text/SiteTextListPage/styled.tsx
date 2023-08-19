@@ -21,6 +21,4 @@ export const CardListContainer = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  height: 500px;
-  overflow-y: auto;
 `;
