@@ -184,6 +184,7 @@ export class MapsService {
       };
     } catch (error) {
       await dbPoolClient.query('ROLLBACK');
+      throw error;
     } finally {
       dbPoolClient.release();
     }
