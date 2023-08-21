@@ -29,7 +29,7 @@ import { PhraseDefinitionsService } from '../definitions/phrase-definitions.serv
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
-const FINAL_TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
+const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
 const DEFAULT_MAP_WORD_DEFINITION = 'A geographical place';
 const DEFAULT_MAP_PHRASE_DEFINITION = 'A geographical place phrase';
@@ -266,19 +266,22 @@ export class MapsService {
     const foundTexts: string[] = [];
     this.iterateOverINode(svgAsINode, SKIP_INODE_NAMES, (node) => {
       if (
-        FINAL_TEXTY_INODE_NAMES.includes(node.name) ||
+        TEXTY_INODE_NAMES.includes(node.name) ||
         POSSIBLE_TEXTY_INODE_NAMES.includes(node.name)
       ) {
         let currNodeAllText = node.value || '';
-        let lookForInnerTextyNodes = false;
+        let hasInnerTextyNodes = false;
         if (node.children && node.children.length > 0) {
           this.iterateOverINode(node, [], (subNode) => {
             currNodeAllText += subNode.value;
-            lookForInnerTextyNodes =
+            if (
               POSSIBLE_TEXTY_INODE_NAMES.includes(node.name) &&
-              FINAL_TEXTY_INODE_NAMES.includes(subNode.name);
+              TEXTY_INODE_NAMES.includes(subNode.name)
+            ) {
+              hasInnerTextyNodes = true;
+            }
           });
-          if (!lookForInnerTextyNodes) {
+          if (!hasInnerTextyNodes) {
             node.children = [
               {
                 value: currNodeAllText,
