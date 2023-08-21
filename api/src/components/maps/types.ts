@@ -1,6 +1,7 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { WordTranslations } from '../words/types';
 import { LanguageInput, LanguageOutput } from 'src/components/common/types';
+import { GenericOutput } from '../../common/types';
 
 @ObjectType()
 export class MapFileOutput {
@@ -15,6 +16,10 @@ export class MapFileOutput {
 @InputType()
 export class GetOrigMapListInput {
   @Field(() => String, { nullable: true }) search?: string;
+}
+@ObjectType()
+export class MapUploadOutput extends GenericOutput {
+  @Field(() => MapFileOutput) mapFileOutput: MapFileOutput;
 }
 
 @ObjectType()
