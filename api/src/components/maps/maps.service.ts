@@ -28,6 +28,7 @@ import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
+const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
 const DEFAULT_MAP_WORD_DEFINITION = 'A geographical place';
@@ -264,28 +265,42 @@ export class MapsService {
     const svgAsINode = readSvg(originalSvgString);
     const foundTexts: string[] = [];
     this.iterateOverINode(svgAsINode, SKIP_INODE_NAMES, (node) => {
-      if (TEXTY_INODE_NAMES.includes(node.name)) {
+      if (
+        TEXTY_INODE_NAMES.includes(node.name) ||
+        POSSIBLE_TEXTY_INODE_NAMES.includes(node.name)
+      ) {
         let currNodeAllText = node.value || '';
+        let hasInnerTextyNodes = false;
         if (node.children && node.children.length > 0) {
           this.iterateOverINode(node, [], (subNode) => {
             currNodeAllText += subNode.value;
+            if (
+              POSSIBLE_TEXTY_INODE_NAMES.includes(node.name) &&
+              TEXTY_INODE_NAMES.includes(subNode.name)
+            ) {
+              hasInnerTextyNodes = true;
+            }
           });
-          node.children = [
-            {
-              value: currNodeAllText,
-              type: 'text',
-              name: '',
-              children: [],
-              attributes: {},
-            },
-          ]; // mutate svgAsINode, if node is texty and has children nodes, make it text with concatanated value from children's balues
+          if (!hasInnerTextyNodes) {
+            node.children = [
+              {
+                value: currNodeAllText,
+                type: 'text',
+                name: '',
+                children: [],
+                attributes: {},
+              },
+            ]; // mutate svgAsINode, if node is final texty and has children nodes, make it text with concatanated value from children's values
+          } else {
+            currNodeAllText = null; // if possible texty inode has inner texty nodes, do nothing here and dive deeper to inspect these inner nodes.
+          }
         }
 
         if (!currNodeAllText) return;
         currNodeAllText = currNodeAllText.trim();
         if (currNodeAllText.length <= 1) return;
         if (!isNaN(Number(currNodeAllText))) return;
-        const isExist = foundTexts.findIndex((w) => w === currNodeAllText);
+        const isExist = foundTexts.findIndex((t) => t === currNodeAllText);
 
         if (isExist < 0) {
           foundTexts.push(currNodeAllText);
@@ -503,3 +518,12 @@ export class MapsService {
     return foundLangs;
   }
 }
+
+// if (POSSIBLE_TEXTY_INODE_NAMES.includes(node.name)) {
+//   let doesHaveInnerNodes = false;
+//   this.iterateOverINode(node, [], (subNode) => {
+//     if (TEXTY_INODE_NAMES.includes(subNode.name)) {
+//       doesHaveInnerNodes = true;
+//     }
+//   });
+// }
