@@ -81,6 +81,10 @@ export class MapsRepository {
       [mapFileName, fileBody, token, language_code, dialect_code, geo_code],
     );
 
+    if (!res.rows[0].p_map_id) {
+      throw new Error(res.rows[0].p_error_type);
+    }
+
     return {
       map_file_name: mapFileName,
       map_id: res.rows[0].p_map_id,

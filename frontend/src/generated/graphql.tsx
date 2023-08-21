@@ -270,6 +270,12 @@ export type MapFileOutput = {
   translated_map_id?: Maybe<Scalars['ID']['output']>;
 };
 
+export type MapUploadOutput = {
+  __typename?: 'MapUploadOutput';
+  error: ErrorType;
+  mapFileOutput: MapFileOutput;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   addWordAsTranslationForWord: AddWordAsTranslationForWordOutput;
@@ -277,7 +283,7 @@ export type Mutation = {
   emailResponseResolver: EmailResponseOutput;
   login: LoginOutput;
   logout: LogoutOutput;
-  mapUpload: MapFileOutput;
+  mapUpload: MapUploadOutput;
   passwordResetFormResolver: LoginOutput;
   phraseDefinitionUpsert: PhraseDefinitionUpsertOutput;
   phraseToPhraseTranslationUpsert: PhraseToPhraseTranslationUpsertOutput;
@@ -1861,7 +1867,7 @@ export type MapUploadMutationVariables = Exact<{
 }>;
 
 
-export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typename?: 'MapFileOutput', original_map_id: string, map_file_name: string } };
+export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typename?: 'MapUploadOutput', error: ErrorType, mapFileOutput: { __typename?: 'MapFileOutput', original_map_id: string, map_file_name: string } } };
 
 export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string };
 
@@ -3328,8 +3334,11 @@ export type GetOrigMapContentQueryResult = Apollo.QueryResult<GetOrigMapContentQ
 export const MapUploadDocument = gql`
     mutation MapUpload($file: Upload!) {
   mapUpload(file: $file) {
-    original_map_id
-    map_file_name
+    error
+    mapFileOutput {
+      original_map_id
+      map_file_name
+    }
   }
 }
     `;
