@@ -6,6 +6,10 @@ import { PhraseDefinition } from 'src/components/definitions/types';
 export class Phrase {
   @Field(() => ID) phrase_id: string;
   @Field(() => String) phrase: string;
+  // TODO: should we add it here?
+  // @Field(() => String) language_code: string;
+  // @Field(() => String, { nullable: true }) dialect_code: string | null;
+  // @Field(() => String, { nullable: true }) geo_code: string | null;
 }
 
 @InputType()

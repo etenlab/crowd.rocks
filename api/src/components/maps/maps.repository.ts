@@ -6,10 +6,14 @@ import { LanguageInput } from 'src/components/common/types';
 import { WordTranslations, WordWithVotes } from '../words/types';
 import {
   GetOrigMapContentOutput,
+  GetOrigMapPhrasesOutput,
   GetOrigMapsListOutput,
   GetOrigMapWordsOutput,
   GetTranslatedMapContentOutput,
   MapFileOutput,
+  MapPhraseTranslations,
+  MapPhraseWithVotes,
+  OriginalMapPhraseInput,
   OriginalMapWordInput,
 } from './types';
 
@@ -350,6 +354,25 @@ export class MapsRepository {
     };
   }
 
+  async saveOriginalMapPhraseInTrn(
+    { phrase_id, original_map_id }: OriginalMapPhraseInput,
+    dbPoolClient: PoolClient,
+  ): Promise<{ original_map_phrase_id: string | null } & GenericOutput> {
+    const resQ = await dbPoolClient.query(
+      `
+        insert into original_map_phrases(phrase_id , original_map_id )  values($1, $2) 
+        on conflict (phrase_id, original_map_id) do update set phrase_id = excluded.phrase_id 
+        returning original_map_phrase_id  
+      `,
+      [phrase_id, original_map_id],
+    );
+
+    return {
+      original_map_phrase_id: resQ.rows[0].original_map_word_id,
+      error: ErrorType.NoError,
+    };
+  }
+
   /**
    * Note that orginal language params restrict whole selection on language that pass this params
    * instead target language params restrict only left join words.
@@ -490,6 +513,191 @@ export class MapsRepository {
       origMapWords: words,
     };
   }
+
+  async getOrigMapPhrases(
+    original_map_id: string,
+    {
+      o_language_code,
+      o_dialect_code,
+      o_geo_code,
+      t_language_code,
+      t_dialect_code,
+      t_geo_code,
+    }: ILangsRestrictions,
+  ): Promise<GetOrigMapPhrasesOutput> {
+    const params = [];
+    let tLanguageRestrictionClause = '';
+    if (t_language_code) {
+      params.push(t_language_code);
+      tLanguageRestrictionClause += ` and tw.language_code =  $${params.length} `;
+    }
+    if (t_dialect_code) {
+      params.push(t_dialect_code);
+      tLanguageRestrictionClause += ` and tw.dialect_code =  $${params.length} `;
+    }
+    if (t_geo_code) {
+      params.push(t_geo_code);
+      tLanguageRestrictionClause += ` and tw.geo_code =  $${params.length} `;
+    }
+
+    // note that 'disctinct' because of same phrase can be at several original maps.
+
+    let sqlStr = `
+      select distinct
+        oph.phrase_id,
+        oph.phraselike_string as phrase,
+        ophd.definition as o_definition,
+        ophd.phrase_definition_id  as o_definition_id,
+        w.language_code as o_language_code,
+        w.dialect_code as o_dialect_code,
+        w.geo_code as o_geo_code,
+        ptpt.to_phrase_definition_id,
+        ptpt.phrase_to_phrase_translation_id,
+        tphd.definition as t_definition,
+        tphd.phrase_definition_id as t_definition_id,
+        tph.phraselike_string as t_phraselike_string,
+        tw.language_code as t_language_code,
+        tw.dialect_code as t_dialect_code,
+        tw.geo_code as t_geo_code,
+        tw.word_id as t_word_id
+--        up.up_votes_count,
+--        down.down_votes_count
+      from
+        phrases oph
+      left join 
+      	phrase_definitions ophd on oph.phrase_id= ophd.phrase_id
+      inner join 
+      	original_map_phrases omph on oph.phrase_id = omph.phrase_id
+      left join 
+      	phrase_to_phrase_translations ptpt on ptpt.from_phrase_definition_id = ophd.phrase_definition_id
+--      	word_to_word_translations wtwt on wtwt.from_word_definition_id=owd.word_definition_id
+      left join
+      	phrase_definitions tphd  on ptpt.to_phrase_definition_id  = tphd.phrase_definition_id 
+--      	word_definitions twd on wtwt.to_word_definition_id = twd.word_definition_id
+      left join 
+      	phrases tph on tphd.phrase_id  = tph.phrase_id ${tLanguageRestrictionClause}
+--      left join v_word_to_word_translations_upvotes_count up on wtwt.word_to_word_translation_id = up.word_to_word_translation_id
+--      left join v_word_to_word_translations_downvotes_count down on wtwt.word_to_word_translation_id = down.word_to_word_translation_id
+      join words w on w.word_id = oph.words[1]
+      join words tw on tw.word_id = tph.words[1]
+      where true
+    `;
+
+    if (original_map_id) {
+      params.push(original_map_id);
+      sqlStr += ` and omw.original_map_id = $${params.length}`;
+    }
+    if (o_language_code) {
+      params.push(o_language_code);
+      sqlStr += ` and w.language_code = $${params.length}`;
+    }
+    if (o_dialect_code) {
+      params.push(o_dialect_code);
+      sqlStr += ` and w.dialect_code = $${params.length}`;
+    }
+    if (o_geo_code) {
+      params.push(o_geo_code);
+      sqlStr += ` and w.geo_code = $${params.length}`;
+    }
+
+    const resQ = await this.pg.pool.query(sqlStr, params);
+
+    const phrases: MapPhraseTranslations[] = resQ.rows.reduce(
+      (phrases: MapPhraseTranslations[], r) => {
+        const currTranslation: MapPhraseWithVotes = {
+          phrase_id: r.t_phrase_id,
+          phrase: r.t_phraselike_string,
+          definition: r.t_definition,
+          definition_id: r.t_definition_id,
+          language_code: r.t_language_code,
+          dialect_code: r.t_dialect_code,
+          geo_code: r.t_geo_code,
+          up_votes: r.up_votes_count || 0,
+          down_votes: r.down_votes_count || 0,
+          translation_id: r.phrase_to_phrase_translation_id,
+        };
+
+        const existingPhraseIdx = phrases.findIndex(
+          (ph) =>
+            ph.phrase_id === r.phrase_id &&
+            ph.definition_id === r.o_definition_id,
+        );
+
+        if (existingPhraseIdx >= 0) {
+          currTranslation.phrase_id &&
+            phrases[existingPhraseIdx].translations.push(currTranslation);
+        } else {
+          phrases.push({
+            phrase_id: r.phrase_id,
+            phrase: r.phrase,
+            language_code: r.o_language_code,
+            dialect_code: r.o_dialect_code,
+            geo_code: r.o_geo_code,
+            definition: r.o_definition,
+            definition_id: r.o_definition_id,
+            translations: currTranslation.phrase_id ? [currTranslation] : [],
+          });
+        }
+
+        return phrases;
+      },
+      [] as MapPhraseTranslations[],
+    );
+
+    return {
+      origMapPhraseTranslations: phrases,
+    };
+  }
+
+  // async getOrigMapPhraseIds(
+  //   original_map_id: string,
+  //   { o_language_code, o_dialect_code, o_geo_code }: ILangsRestrictions,
+  // ): Promise<string[]> {
+  //   const params = [];
+
+  //   // note that 'disctinct' because of same phrase can be at several original maps.
+
+  //   let sqlStr = `
+  //     select distinct
+  //       oph.phrase_id,
+  //       oph.phraselike_string as phrase,
+  //       omph.original_map_id,
+  //       ophd.definition as o_definition,
+  //       ophd.phrase_definition_id  as o_definition_id,
+  //       w
+  //     from
+  //       phrases oph
+  //     left join
+  //     	phrase_definitions ophd on oph.phrase_id= ophd.phrase_id
+  //     inner join
+  //     	original_map_phrases omph on oph.phrase_id  = omph.phrase_id
+  //     join words as w
+  //     on w.word_id = oph.words[1]
+  //     where true
+  //   `;
+
+  //   if (original_map_id) {
+  //     params.push(original_map_id);
+  //     sqlStr += ` and omph.original_map_id = $${params.length}`;
+  //   }
+  //   if (o_language_code) {
+  //     params.push(o_language_code);
+  //     sqlStr += ` and w.language_code = $${params.length}`;
+  //   }
+  //   if (o_dialect_code) {
+  //     params.push(o_dialect_code);
+  //     sqlStr += ` and w.dialect_code = $${params.length}`;
+  //   }
+  //   if (o_geo_code) {
+  //     params.push(o_geo_code);
+  //     sqlStr += ` and w.geo_code = $${params.length}`;
+  //   }
+
+  //   const resQ = await this.pg.pool.query(sqlStr, params);
+  //   const phrasesIds = resQ.rows.map((r) => String(r.phrase_id));
+
+  //   return phrasesIds;
+  // }
 
   async getOrigMapIdsByWordDefinition(
     wordDefinitionId: string,

@@ -21,6 +21,7 @@ export class WordWithVotes extends WordWithDefinition {
   @Field(() => String) down_votes: string;
   @Field(() => String) translation_id: string;
 }
+
 @ObjectType()
 export class WordTranslations extends WordWithDefinition {
   @Field(() => [WordWithVotes], { nullable: true })

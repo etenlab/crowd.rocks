@@ -158,6 +158,20 @@ input GetOrigMapListInput {
   search: String
 }
 
+input GetOrigMapPhrasesInput {
+  o_dialect_code: String
+  o_geo_code: String
+  o_language_code: String
+  original_map_id: ID
+  t_dialect_code: String
+  t_geo_code: String
+  t_language_code: String
+}
+
+type GetOrigMapPhrasesOutput {
+  origMapPhraseTranslations: [MapPhraseTranslations!]!
+}
+
 input GetOrigMapWordsInput {
   o_dialect_code: String
   o_geo_code: String
@@ -238,6 +252,30 @@ type MapFileOutput {
   map_file_name: String!
   original_map_id: ID!
   translated_map_id: ID
+}
+
+type MapPhraseTranslations {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  phrase: String!
+  phrase_id: ID!
+  translations: [MapPhraseWithVotes!]
+}
+
+type MapPhraseWithVotes {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  down_votes: String!
+  geo_code: String
+  language_code: String!
+  phrase: String!
+  phrase_id: ID!
+  translation_id: String!
+  up_votes: String!
 }
 
 type MapUploadOutput {
@@ -526,6 +564,7 @@ type Query {
   getAllSiteTextLanguageList: SiteTextLanguageListOutput!
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
   getOrigMapContent(input: GetOrigMapContentInput!): GetOrigMapContentOutput!
+  getOrigMapPhrases(input: GetOrigMapPhrasesInput): GetOrigMapPhrasesOutput!
   getOrigMapWords(input: GetOrigMapWordsInput): GetOrigMapWordsOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!

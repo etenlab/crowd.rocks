@@ -4,6 +4,8 @@ import { ReadStream } from 'fs';
 import {
   GetAllMapsListOutput,
   GetOrigMapContentOutput,
+  GetOrigMapPhrasesInput,
+  GetOrigMapPhrasesOutput,
   GetOrigMapsListOutput,
   GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
@@ -26,6 +28,11 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
+import { TranslationsService } from '../translations/translations.service';
+import {
+  PhraseToPhraseTranslationWithVote,
+  TranslationWithVoteListOutput,
+} from '../translations/types';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
@@ -56,6 +63,7 @@ export class MapsService {
     private phraseDefinitionsService: PhraseDefinitionsService,
     private wordDefinitionsService: WordDefinitionsService,
     private wordToWordTranslationsService: WordToWordTranslationsService,
+    private translationsService: TranslationsService,
   ) {}
 
   async parseAndSaveNewMap({
@@ -108,7 +116,7 @@ export class MapsService {
         await this.saveOriginalMapWord(wordInput, map_id, token, dbPoolClient);
       }
 
-      //--save found phrases, split into words and save words with definitions and original map boundng
+      //--save found phrases and  bound them to original map
 
       for (const phrase of foundPhrases) {
         const phraseInput: PhraseUpsertInput = {
@@ -117,56 +125,12 @@ export class MapsService {
           dialect_code,
           geo_code,
         };
-        const savedPhrase = await this.phrasesService.upsertInTrn(
+        await this.saveOriginalMapPhrase(
           phraseInput,
+          map_id,
           token,
           dbPoolClient,
         );
-
-        await this.phraseDefinitionsService.upsertInTrn(
-          {
-            definition: DEFAULT_MAP_PHRASE_DEFINITION,
-            phrase_id: String(savedPhrase.phrase_id),
-          },
-          token,
-          dbPoolClient,
-        );
-
-        if (!savedPhrase.phrase_id) {
-          throw Error(
-            `MapsService#parseAndSaveNewMap: 
-              Error ${savedPhrase.error} with saving phrase ${JSON.stringify(
-              phraseInput,
-            )}`,
-          );
-        }
-
-        if (savedPhrase.word_ids) {
-          for (const phraseWordId of savedPhrase.word_ids) {
-            const savedDefinition =
-              await this.wordDefinitionsService.upsertInTrn(
-                {
-                  definition: DEFAULT_MAP_WORD_DEFINITION,
-                  word_id: String(phraseWordId),
-                },
-                token,
-                dbPoolClient,
-              );
-            if (!savedDefinition.word_definition_id) {
-              throw new Error(
-                `MapsService#parseAndSaveNewMap: Error ${savedDefinition.error} with saving definition for wordId ${phraseWordId}`,
-              );
-            }
-
-            await this.saveOriginalMapWordInTrn(
-              {
-                word_id: String(phraseWordId),
-                original_map_id: map_id,
-              },
-              dbPoolClient,
-            );
-          }
-        }
       }
 
       await dbPoolClient.query('COMMIT');
@@ -223,12 +187,57 @@ export class MapsService {
       );
     }
 
-    await this.saveOriginalMapWordInTrn(
+    await this.mapsRepository.saveOriginalMapWordInTrn(
       { word_id: savedWord.word_id, original_map_id: map_id },
       dbPoolClient,
     );
 
     return savedWord.word_id;
+  }
+
+  async saveOriginalMapPhrase(
+    phraseInput: PhraseUpsertInput,
+    map_id: string,
+    token: string,
+    dbPoolClient: PoolClient,
+  ): Promise<string> {
+    const savedPhrase = await this.phrasesService.upsertInTrn(
+      phraseInput,
+      token,
+      dbPoolClient,
+    );
+    if (!savedPhrase.phrase_id) {
+      throw new Error(
+        `MapsService#parseAndSaveNewMap: 
+        Error ${savedPhrase.error} with saving word ${JSON.stringify(
+          phraseInput,
+        )}`,
+      );
+    }
+
+    const savedPhraseDefinition =
+      await this.phraseDefinitionsService.upsertInTrn(
+        {
+          definition: DEFAULT_MAP_PHRASE_DEFINITION,
+          phrase_id: String(savedPhrase.phrase_id),
+        },
+        token,
+        dbPoolClient,
+      );
+    if (!savedPhraseDefinition.phrase_definition_id) {
+      throw new Error(
+        `MapsService#parseAndSaveNewMap: 
+        Error ${savedPhraseDefinition.error} 
+        with saving definition for phrase ${JSON.stringify(phraseInput)}`,
+      );
+    }
+
+    await this.mapsRepository.saveOriginalMapPhraseInTrn(
+      { phrase_id: String(savedPhrase.phrase_id), original_map_id: map_id },
+      dbPoolClient,
+    );
+
+    return String(savedPhrase.phrase_id);
   }
 
   async getOrigMaps(): Promise<GetOrigMapsListOutput> {
@@ -328,18 +337,21 @@ export class MapsService {
     };
   }
 
-  async saveOriginalMapWordInTrn(
-    input: OriginalMapWordInput,
-    dbPoolClient: PoolClient,
-  ): Promise<{ original_map_word_id: string | null } & GenericOutput> {
-    return this.mapsRepository.saveOriginalMapWordInTrn(input, dbPoolClient);
-  }
-
   async getOrigMapWords(
     input: GetOrigMapWordsInput,
   ): Promise<GetOrigMapWordsOutput> {
     const { original_map_id, ...langRestrictions } = input;
     return this.mapsRepository.getOrigMapWords(
+      original_map_id,
+      langRestrictions,
+    );
+  }
+
+  async getOrigMapPhrases(
+    input: GetOrigMapPhrasesInput,
+  ): Promise<GetOrigMapPhrasesOutput> {
+    const { original_map_id, ...langRestrictions } = input;
+    return this.mapsRepository.getOrigMapPhrases(
       original_map_id,
       langRestrictions,
     );
@@ -518,3 +530,56 @@ export class MapsService {
     return foundLangs;
   }
 }
+
+// async getOrigMapPhrases(
+//   input: GetOrigMapPhrasesInput,
+// ): Promise<GetOrigMapPhrasesOutput> {
+//   const { original_map_id, ...langRestrictions } = input;
+//   const origMapPhrasesIds = await this.mapsRepository.getOrigMapPhraseIds(
+//     original_map_id,
+//     langRestrictions,
+//   );
+//   const res: GetOrigMapPhrasesOutput = { origMapPhraseTranslations: [] };
+//   for (const origMapPhraseId of origMapPhrasesIds) {
+//     const origMapPhrasesDefinitions =
+//       await this.phraseDefinitionsService.getPhraseDefinitionsByPhraseId(
+//         Number(origMapPhraseId),
+//       );
+//     for (const origMapPhrasesDefinition of origMapPhrasesDefinitions.phrase_definition_list) {
+//       const translations: TranslationWithVoteListOutput =
+//         await this.translationsService.getTranslationsByFromDefinitionId(
+//           Number(origMapPhrasesDefinition.phrase_definition_id),
+//           false,
+//           {
+//             language_code: langRestrictions.o_language_code,
+//             dialect_code: langRestrictions.o_dialect_code,
+//             geo_code: langRestrictions.o_geo_code,
+//           },
+//         );
+
+//       translations.translation_with_vote_list.forEach(t => {
+
+//         if (t instanceof PhraseToPhraseTranslationWithVote) {
+//           const t_phrase = t.from_phrase_definition.phrase.phrase
+//         }
+
+//       });
+
+//       res.origMapPhraseTranslations.push({
+//         phrase: translations.translation_with_vote_list[0].from_phrase_definition.
+//       })
+//     }
+//   }
+
+//   return {
+//     _origMapPhraseTranslations: [
+//       {
+//         phrase: 'asdf',
+//         definition: 'asdf',
+//         definition_id: '1',
+//         phrase_id: '1',
+//         translations: [{}],
+//       },
+//     ],
+//   };
+// }
