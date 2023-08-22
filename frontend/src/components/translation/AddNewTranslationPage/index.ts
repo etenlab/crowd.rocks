@@ -1,1 +1,0 @@
-export { AddNewTranslationPage } from './AddNewTranslationPage';
