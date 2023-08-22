@@ -290,7 +290,7 @@ export class MapsService {
                 children: [],
                 attributes: {},
               },
-            ]; // mutate svgAsINode, if node is final texty and has children nodes, make it text with concatanated value from children's values
+            ]; // mutate svgAsINode, if node is final texty and has children nodes, assign to its text value concatanated value from children's values
           } else {
             currNodeAllText = null; // if possible texty inode has inner texty nodes, do nothing here and dive deeper to inspect these inner nodes.
           }
@@ -463,7 +463,7 @@ export class MapsService {
   }
 
   /**
-   * Mutetes INode sturcture - replaces subnodes' values using provided valuesToReplace
+   * Mutetes INode sturcture - replaces subnodes' each word using provided valuesToReplace
    * @param iNodeStructure INode structure to replace values inside it.
    * @param valuesToReplace
    */
@@ -518,12 +518,3 @@ export class MapsService {
     return foundLangs;
   }
 }
-
-// if (POSSIBLE_TEXTY_INODE_NAMES.includes(node.name)) {
-//   let doesHaveInnerNodes = false;
-//   this.iterateOverINode(node, [], (subNode) => {
-//     if (TEXTY_INODE_NAMES.includes(subNode.name)) {
-//       doesHaveInnerNodes = true;
-//     }
-//   });
-// }
