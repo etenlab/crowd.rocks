@@ -2,7 +2,7 @@ name: Build, Dockerize, Upload
 on:
   push:
     branches:
-      - dev
+      - prod
 
 jobs:
   package:
@@ -49,5 +49,5 @@ jobs:
         with:
           task-definition: task-definition.json
           service: crowdrocksApiServerService
-          cluster: dev-cluster
+          cluster: prod-cluster
           wait-for-service-stability: true
