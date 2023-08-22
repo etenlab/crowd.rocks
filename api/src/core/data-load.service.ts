@@ -60,7 +60,14 @@ export class DataLoadService {
 
       const from_type_is_word = (site_text_definition as any)?.word_definition
         ? true
-        : false;
+        : (site_text_definition as any)?.phrase_definition
+        ? false
+        : null;
+
+      if (from_type_is_word === null) {
+        continue;
+      }
+
       const from_definition_id = from_type_is_word
         ? (site_text_definition as SiteTextWordDefinition).word_definition
             .word_definition_id
