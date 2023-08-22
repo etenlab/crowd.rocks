@@ -54,3 +54,7 @@ export const LanguageSelectorContainer = styled.div`
 export const FabContainer = styled.div`
   text-align: right;
 `;
+
+export const FullWidthContainer = styled.div`
+  width: 100%;
+`;
