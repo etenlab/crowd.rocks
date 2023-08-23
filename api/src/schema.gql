@@ -265,7 +265,7 @@ type Mutation {
   togglePhraseVoteStatus(phrase_id: ID!, vote: Boolean!): PhraseVoteStatusOutputRow!
   toggleSiteTextTranslationVoteStatus(from_type_is_word: Boolean!, to_type_is_word: Boolean!, translation_id: ID!, vote: Boolean!): SiteTextTranslationVoteStatusOutputRow!
   toggleTranslationVoteStatus(from_definition_type_is_word: Boolean!, to_definition_type_is_word: Boolean!, translation_id: ID!, vote: Boolean!): TranslationVoteStatusOutputRow!
-  toggleWordDefinitonVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
+  toggleWordDefinitionVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   toggleWordTrVoteStatus(input: WordTrVoteStatusInput!): WordTrVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
@@ -290,6 +290,9 @@ input PasswordResetFormInput {
 }
 
 type Phrase {
+  dialect_code: String
+  geo_code: String
+  language_code: String!
   phrase: String!
   phrase_id: ID!
 }
@@ -464,14 +467,20 @@ input PhraseVoteUpsertInput {
 
 type PhraseWithDefinitions {
   definitions: [PhraseDefinition]!
+  dialect_code: String
   downvotes: Int!
+  geo_code: String
+  language_code: String!
   phrase: String!
   phrase_id: ID!
   upvotes: Int!
 }
 
 type PhraseWithVote {
+  dialect_code: String
   downvotes: Int!
+  geo_code: String
+  language_code: String!
   phrase: String!
   phrase_id: ID!
   upvotes: Int!
