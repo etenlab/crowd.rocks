@@ -1,0 +1,1 @@
+export { NewWordOrPhraseWithDefinitionForm } from './NewWordOrPhraseWithDefinitionForm';
