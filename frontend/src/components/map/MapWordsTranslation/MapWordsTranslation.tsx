@@ -3,13 +3,21 @@ import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { styled } from 'styled-components';
-import { TranslatedWordCards } from '../../word/TranslatedWordCards/TranslatedWordCards';
-import { useGetOrigMapWordsLazyQuery } from '../../../generated/graphql';
-import { WordTranslationsCom } from './WordTranslationsCom';
+import { TranslatedCards } from '../../word/TranslatedWordCards/TranslatedWordCards';
+import {
+  useGetOrigMapPhrasesLazyQuery,
+  useGetOrigMapWordsLazyQuery,
+  MapPhraseTranslations,
+  WordTranslations,
+  WordWithVotes,
+  MapPhraseWithVotes,
+} from '../../../generated/graphql';
+import { TranslationsCom } from './TranslationsCom';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 interface MapWordsTranslationProps extends RouteComponentProps {}
+type TWordOrPhraseId = { word_id: string } | { phrase_id: string };
 
 export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   const { tr } = useTr();
@@ -24,11 +32,13 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   } = useAppContext();
 
   //const [targetLang, setTargetLang] = useState<LanguageInfo>();
-  const [selectedWordId, setSelectedWordId] = useState<string>();
+  const [selectedId, setSelectedId] = useState<TWordOrPhraseId>();
 
   const [origMapWordsRead, { data: wordsData }] = useGetOrigMapWordsLazyQuery();
+  const [origMapPhrasesRead, { data: phrasesData }] =
+    useGetOrigMapPhrasesLazyQuery();
 
-  const fetchMapWords = useCallback(() => {
+  const fetchMapWordsAndPhrases = useCallback(() => {
     if (!targetLang?.lang.tag) {
       return;
     }
@@ -42,28 +52,68 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
       Object.assign(variables, { t_geo_code: targetLang.region.tag });
 
     origMapWordsRead({ variables, fetchPolicy: 'no-cache' });
+    origMapPhrasesRead({ variables, fetchPolicy: 'no-cache' });
   }, [
+    origMapPhrasesRead,
     origMapWordsRead,
-    targetLang?.dialect?.tag,
     targetLang?.lang.tag,
+    targetLang?.dialect?.tag,
     targetLang?.region?.tag,
   ]);
 
   useEffect(() => {
-    fetchMapWords();
-  }, [fetchMapWords]);
+    fetchMapWordsAndPhrases();
+  }, [fetchMapWordsAndPhrases]);
 
-  const selectedWord = useMemo(
-    () =>
-      wordsData?.getOrigMapWords.origMapWords.find(
-        (omw) => omw.word_id === selectedWordId,
-      ),
-    [selectedWordId, wordsData?.getOrigMapWords.origMapWords],
-  );
+  const selected = useMemo(() => {
+    // make common prop 'value' for words and phrases and translations
+    // to be able to use common components
+    let res:
+      | ((WordTranslations | MapPhraseTranslations) & {
+          value?: string | undefined;
+        })
+      | undefined;
+    if (selectedId && 'word_id' in selectedId) {
+      res = wordsData?.getOrigMapWords.origMapWords.find(
+        (omw) => omw.word_id === selectedId.word_id,
+      );
+      if (res) res.value = res?.word;
+    } else if (selectedId && 'phrase_id' in selectedId) {
+      res = phrasesData?.getOrigMapPhrases.origMapPhrases.find(
+        (ph) => ph.phrase_id === selectedId.phrase_id,
+      );
+      if (res) res.value = res?.phrase;
+    }
+    if (!res) return null;
+    const res1 = JSON.parse(JSON.stringify(res)) as (
+      | WordTranslations
+      | MapPhraseTranslations
+    ) & {
+      value: string;
+      translations: [(WordWithVotes | MapPhraseWithVotes) & { value: string }];
+    };
+
+    if (res1?.translations) {
+      res1?.translations.forEach(
+        (tr: (WordWithVotes | MapPhraseWithVotes) & { value: string }, i) => {
+          if ('word' in tr) {
+            res1.translations[i] = { ...tr, value: tr.word || '' };
+          } else if ('phrase' in tr) {
+            res1.translations[i] = { ...tr, value: tr.phrase || '' };
+          }
+        },
+      );
+    }
+    return res1;
+  }, [
+    phrasesData?.getOrigMapPhrases.origMapPhrases,
+    selectedId,
+    wordsData?.getOrigMapWords.origMapWords,
+  ]);
 
   return (
     <>
-      {!selectedWord || !targetLang ? (
+      {!selected || !targetLang ? (
         <>
           <Caption>{tr('Map Translation')}</Caption>
           {/* <LangSelectorBox>  // source language is always 'English' for now, so we don't need this selector yet
@@ -91,22 +141,34 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
               wordsData.getOrigMapWords.origMapWords
                 .sort((omw1, omw2) => omw1.word.localeCompare(omw2.word))
                 .map((omw) => (
-                  <TranslatedWordCards
+                  <TranslatedCards
                     key={omw.word_id}
                     wordTranslated={omw}
-                    onClick={() => setSelectedWordId(omw.word_id)}
+                    onClick={() => setSelectedId({ word_id: omw.word_id })}
+                  />
+                ))}
+          </WordsBox>
+          <WordsBox>
+            {phrasesData &&
+              phrasesData.getOrigMapPhrases.origMapPhrases
+                .sort((ph1, ph2) => ph1.phrase.localeCompare(ph2.phrase))
+                .map((ph) => (
+                  <TranslatedCards
+                    key={ph.phrase_id}
+                    wordTranslated={ph}
+                    onClick={() => setSelectedId({ phrase_id: ph.phrase_id })}
                   />
                 ))}
           </WordsBox>
         </>
       ) : (
-        <WordTranslationsCom
+        <TranslationsCom
           tLangInfo={targetLang}
-          wordWithTranslations={selectedWord}
+          wordOrPhraseWithTranslations={selected}
           onBackClick={() => {
-            setSelectedWordId(undefined);
+            setSelectedId(undefined);
           }}
-          fetchMapWordsFn={() => fetchMapWords()}
+          fetchMapWordsFn={() => fetchMapWordsAndPhrases()}
         />
       )}
     </>

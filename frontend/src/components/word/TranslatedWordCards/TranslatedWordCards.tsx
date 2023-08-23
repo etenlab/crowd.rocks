@@ -1,15 +1,18 @@
-import { WordTranslations } from '../../../generated/graphql';
+import {
+  MapPhraseTranslations,
+  WordTranslations,
+} from '../../../generated/graphql';
 import { useMapTranslationTools } from '../../map/hooks/useMapTranslationTools';
-import { WordCard } from '../WordCard/WordCard';
+import { WordOrPhraseCard } from '../WordCard/WordOrPhraseCard';
 import { styled } from 'styled-components';
 
 export type TWordTranslationCardProps = {
-  wordTranslated: WordTranslations;
+  wordTranslated: WordTranslations | MapPhraseTranslations;
   routerLink?: string;
   onClick?: () => void;
 };
 
-export const TranslatedWordCards = ({
+export const TranslatedCards = ({
   wordTranslated,
   routerLink,
   onClick,
@@ -18,19 +21,32 @@ export const TranslatedWordCards = ({
 
   const wordBestTranslation = chooseBestTranslation(wordTranslated);
 
+  let textOriginal = '';
+  let textTranslated = '';
+  if ('word' in wordTranslated) {
+    textOriginal = wordTranslated.word;
+  } else if ('phrase' in wordTranslated) {
+    textOriginal = wordTranslated.phrase;
+  }
+  if ('word' in wordBestTranslation) {
+    textTranslated = wordBestTranslation.word;
+  } else if ('phrase' in wordBestTranslation) {
+    textTranslated = wordBestTranslation.phrase;
+  }
+
   return (
     <StCards>
       <StCard>
-        <WordCard
-          word={wordTranslated.word}
+        <WordOrPhraseCard
+          word={textOriginal}
           definition={wordTranslated.definition}
           onClick={onClick}
           routerLink={routerLink}
         />
       </StCard>
       <StCard>
-        <WordCard
-          word={wordBestTranslation?.word || ''}
+        <WordOrPhraseCard
+          word={textTranslated}
           definition={wordBestTranslation?.definition || ''}
           onClick={onClick}
           routerLink={routerLink}

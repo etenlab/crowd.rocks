@@ -1,15 +1,12 @@
-// import { gql, useApolloClient } from '@apollo/client';
 import { useCallback } from 'react';
-import { WordTranslations, WordWithVotes } from '../../../generated/graphql';
+import { MapPhraseWithVotes, WordWithVotes } from '../../../generated/graphql';
 
-// export const UPLOAD_FILE_MUTATION = gql`
-//   mutation MapUpload($file: Upload!) {
-//     mapUpload(file: $file) {
-//       original_map_id
-//       map_file_name
-//     }
-//   }
-// `;
+export interface ITranslationsVotes {
+  translations?:
+    | Array<{ up_votes: string; down_votes: string }>
+    | null
+    | undefined;
+}
 
 export function useMapTranslationTools() {
   // const apolloClient = useApolloClient();
@@ -45,31 +42,33 @@ export function useMapTranslationTools() {
   // );
 
   const chooseBestTranslation = useCallback(
-    (wordTranslated: WordTranslations) => {
-      const res = wordTranslated?.translations?.reduce((bestTr, currTr) => {
-        if (bestTr?.up_votes === undefined) {
-          return currTr;
-        }
+    <T extends ITranslationsVotes>(wordTranslated: T) => {
+      const res = wordTranslated?.translations?.reduce(
+        (bestTr, currTr) => {
+          if (bestTr?.up_votes === undefined) {
+            return currTr;
+          }
 
-        const bestTrTotal =
-          Number(bestTr?.up_votes || 0) - Number(bestTr?.down_votes || 0);
+          const bestTrTotal =
+            Number(bestTr?.up_votes || 0) - Number(bestTr?.down_votes || 0);
 
-        const currTrTotal =
-          Number(currTr?.up_votes || 0) - Number(currTr?.down_votes || 0);
+          const currTrTotal =
+            Number(currTr?.up_votes || 0) - Number(currTr?.down_votes || 0);
 
-        if (currTrTotal > bestTrTotal) {
-          return currTr;
-        }
+          if (currTrTotal > bestTrTotal) {
+            return currTr;
+          }
 
-        return bestTr;
-      }, {} as WordWithVotes);
-      return res;
+          return bestTr;
+        },
+        {} as WordWithVotes | MapPhraseWithVotes,
+      );
+      return res as WordWithVotes | MapPhraseWithVotes;
     },
     [],
   );
 
   return {
-    // sendMapFile,
     chooseBestTranslation,
   };
 }

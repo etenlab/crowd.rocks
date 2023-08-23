@@ -13,7 +13,7 @@ type TWordCardProps = {
   routerLink?: string;
 };
 
-export const WordCard = ({
+export const WordOrPhraseCard = ({
   word,
   definition,
   onClick,

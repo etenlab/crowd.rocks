@@ -1,30 +1,42 @@
 import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Caption } from '../../common/Caption/Caption';
-import { WordCard } from '../../word/WordCard/WordCard';
+import { WordOrPhraseCard } from '../../word/WordCard/WordOrPhraseCard';
 import { IonButton, IonIcon, IonInput, useIonToast } from '@ionic/react';
 import { chatbubbleEllipses } from 'ionicons/icons';
 import { VoteButtonsVertical } from '../../common/VoteButtonsVertical/VoteButtonsVertical';
 import {
+  MapPhraseTranslations,
   WordTranslations,
   useAddWordAsTranslationForWordMutation,
   useToggleWordTranslationVoteStatusMutation,
 } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
 
-interface WordTranslationsComProps {
-  wordWithTranslations: WordTranslations;
+interface TranslationsComProps {
+  wordOrPhraseWithTranslations: (WordTranslations | MapPhraseTranslations) & {
+    value?: string;
+    translations?: [
+      {
+        value: string;
+        definition?: string | undefined | null;
+        translation_id: string;
+        up_votes: string;
+        down_votes: string;
+      },
+    ];
+  };
   tLangInfo: LanguageInfo;
   onBackClick: () => void;
   fetchMapWordsFn: () => void;
 }
 
-export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
-  wordWithTranslations,
+export const TranslationsCom: React.FC<TranslationsComProps> = ({
+  wordOrPhraseWithTranslations,
   tLangInfo,
   onBackClick,
   fetchMapWordsFn,
-}: WordTranslationsComProps) => {
+}: TranslationsComProps) => {
   const { tr } = useTr();
   const [present] = useIonToast();
 
@@ -70,7 +82,7 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
       });
       return;
     }
-    if (!wordWithTranslations.definition_id) {
+    if (!wordOrPhraseWithTranslations.definition_id) {
       alert(`Not found wordWithTranslations.definition_id`);
       return;
     }
@@ -86,7 +98,7 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
 
     await addWordAsTranslation({
       variables: {
-        originalDefinitionId: wordWithTranslations.definition_id,
+        originalDefinitionId: wordOrPhraseWithTranslations.definition_id,
         translationWord: {
           wordlike_string: String(newTrRef.current.value),
           language_code: tLangInfo.lang.tag,
@@ -122,9 +134,9 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
     <>
       <Caption handleBackClick={() => onBackClick()}>Translations</Caption>
       <StSourceWordDiv>
-        <WordCard
-          word={wordWithTranslations?.word}
-          definition={wordWithTranslations?.definition}
+        <WordOrPhraseCard
+          word={wordOrPhraseWithTranslations.value}
+          definition={wordOrPhraseWithTranslations.definition}
         />
         <StIonIcon
           icon={chatbubbleEllipses}
@@ -133,12 +145,15 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
       </StSourceWordDiv>
 
       <StTranslationsDiv>
-        {wordWithTranslations.translations &&
-          wordWithTranslations.translations
-            .sort((wtr1, wtr2) => wtr1.word.localeCompare(wtr2.word))
-            .map((wtr) => (
-              <StTranslationDiv key={wtr.word_id}>
-                <WordCard word={wtr.word} definition={wtr.definition} />
+        {wordOrPhraseWithTranslations.translations &&
+          wordOrPhraseWithTranslations.translations
+            .sort((wtr1, wtr2) => wtr1.value.localeCompare(wtr2.value))
+            .map((wtr, i) => (
+              <StTranslationDiv key={i}>
+                <WordOrPhraseCard
+                  word={wtr.value}
+                  definition={wtr.definition}
+                />
                 <VoteButtonsVertical
                   onVoteUpClick={() =>
                     handleVoteClick(wtr.translation_id, true)

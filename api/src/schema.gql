@@ -169,7 +169,7 @@ input GetOrigMapPhrasesInput {
 }
 
 type GetOrigMapPhrasesOutput {
-  origMapPhraseTranslations: [MapPhraseTranslations!]!
+  origMapPhrases: [MapPhraseTranslations!]!
 }
 
 input GetOrigMapWordsInput {

@@ -87,7 +87,7 @@ export class GetOrigMapPhrasesInput {
 @ObjectType()
 export class GetOrigMapPhrasesOutput {
   @Field(() => [MapPhraseTranslations])
-  origMapPhraseTranslations: MapPhraseTranslations[];
+  origMapPhrases: MapPhraseTranslations[];
 }
 
 export type OriginalMapWordInput = {

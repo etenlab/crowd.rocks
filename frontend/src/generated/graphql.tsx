@@ -180,6 +180,21 @@ export type GetOrigMapListInput = {
   search?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type GetOrigMapPhrasesInput = {
+  o_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  o_geo_code?: InputMaybe<Scalars['String']['input']>;
+  o_language_code?: InputMaybe<Scalars['String']['input']>;
+  original_map_id?: InputMaybe<Scalars['ID']['input']>;
+  t_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  t_geo_code?: InputMaybe<Scalars['String']['input']>;
+  t_language_code?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GetOrigMapPhrasesOutput = {
+  __typename?: 'GetOrigMapPhrasesOutput';
+  origMapPhrases: Array<MapPhraseTranslations>;
+};
+
 export type GetOrigMapWordsInput = {
   o_dialect_code?: InputMaybe<Scalars['String']['input']>;
   o_geo_code?: InputMaybe<Scalars['String']['input']>;
@@ -268,6 +283,32 @@ export type MapFileOutput = {
   map_file_name: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
   translated_map_id?: Maybe<Scalars['ID']['output']>;
+};
+
+export type MapPhraseTranslations = {
+  __typename?: 'MapPhraseTranslations';
+  definition?: Maybe<Scalars['String']['output']>;
+  definition_id?: Maybe<Scalars['String']['output']>;
+  dialect_code?: Maybe<Scalars['String']['output']>;
+  geo_code?: Maybe<Scalars['String']['output']>;
+  language_code: Scalars['String']['output'];
+  phrase: Scalars['String']['output'];
+  phrase_id: Scalars['ID']['output'];
+  translations?: Maybe<Array<MapPhraseWithVotes>>;
+};
+
+export type MapPhraseWithVotes = {
+  __typename?: 'MapPhraseWithVotes';
+  definition?: Maybe<Scalars['String']['output']>;
+  definition_id?: Maybe<Scalars['String']['output']>;
+  dialect_code?: Maybe<Scalars['String']['output']>;
+  down_votes: Scalars['String']['output'];
+  geo_code?: Maybe<Scalars['String']['output']>;
+  language_code: Scalars['String']['output'];
+  phrase: Scalars['String']['output'];
+  phrase_id: Scalars['ID']['output'];
+  translation_id: Scalars['String']['output'];
+  up_votes: Scalars['String']['output'];
 };
 
 export type MapUploadOutput = {
@@ -818,6 +859,7 @@ export type Query = {
   getAllSiteTextLanguageList: SiteTextLanguageListOutput;
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
   getOrigMapContent: GetOrigMapContentOutput;
+  getOrigMapPhrases: GetOrigMapPhrasesOutput;
   getOrigMapWords: GetOrigMapWordsOutput;
   getOrigMapsList: GetOrigMapsListOutput;
   getPhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
@@ -896,6 +938,11 @@ export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
 
 export type QueryGetOrigMapContentArgs = {
   input: GetOrigMapContentInput;
+};
+
+
+export type QueryGetOrigMapPhrasesArgs = {
+  input?: InputMaybe<GetOrigMapPhrasesInput>;
 };
 
 
@@ -1833,6 +1880,17 @@ export type GetOrigMapWordsQueryVariables = Exact<{
 
 
 export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'WordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'WordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
+
+export type GetOrigMapPhrasesQueryVariables = Exact<{
+  original_map_id?: InputMaybe<Scalars['ID']['input']>;
+  o_language_code?: InputMaybe<Scalars['String']['input']>;
+  t_language_code?: InputMaybe<Scalars['String']['input']>;
+  t_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  t_geo_code?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetOrigMapPhrasesQuery = { __typename?: 'Query', getOrigMapPhrases: { __typename?: 'GetOrigMapPhrasesOutput', origMapPhrases: Array<{ __typename?: 'MapPhraseTranslations', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'MapPhraseWithVotes', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
 
 export type GetAllMapsListQueryVariables = Exact<{
   lang?: InputMaybe<LanguageInput>;
@@ -3166,6 +3224,67 @@ export function useGetOrigMapWordsLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type GetOrigMapWordsQueryHookResult = ReturnType<typeof useGetOrigMapWordsQuery>;
 export type GetOrigMapWordsLazyQueryHookResult = ReturnType<typeof useGetOrigMapWordsLazyQuery>;
 export type GetOrigMapWordsQueryResult = Apollo.QueryResult<GetOrigMapWordsQuery, GetOrigMapWordsQueryVariables>;
+export const GetOrigMapPhrasesDocument = gql`
+    query GetOrigMapPhrases($original_map_id: ID, $o_language_code: String, $t_language_code: String, $t_dialect_code: String, $t_geo_code: String) {
+  getOrigMapPhrases(
+    input: {original_map_id: $original_map_id, o_language_code: $o_language_code, t_language_code: $t_language_code, t_dialect_code: $t_dialect_code, t_geo_code: $t_geo_code}
+  ) {
+    origMapPhrases {
+      phrase
+      phrase_id
+      language_code
+      dialect_code
+      geo_code
+      definition
+      definition_id
+      translations {
+        phrase
+        phrase_id
+        language_code
+        dialect_code
+        geo_code
+        definition
+        definition_id
+        up_votes
+        down_votes
+        translation_id
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetOrigMapPhrasesQuery__
+ *
+ * To run a query within a React component, call `useGetOrigMapPhrasesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOrigMapPhrasesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOrigMapPhrasesQuery({
+ *   variables: {
+ *      original_map_id: // value for 'original_map_id'
+ *      o_language_code: // value for 'o_language_code'
+ *      t_language_code: // value for 't_language_code'
+ *      t_dialect_code: // value for 't_dialect_code'
+ *      t_geo_code: // value for 't_geo_code'
+ *   },
+ * });
+ */
+export function useGetOrigMapPhrasesQuery(baseOptions?: Apollo.QueryHookOptions<GetOrigMapPhrasesQuery, GetOrigMapPhrasesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetOrigMapPhrasesQuery, GetOrigMapPhrasesQueryVariables>(GetOrigMapPhrasesDocument, options);
+      }
+export function useGetOrigMapPhrasesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOrigMapPhrasesQuery, GetOrigMapPhrasesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetOrigMapPhrasesQuery, GetOrigMapPhrasesQueryVariables>(GetOrigMapPhrasesDocument, options);
+        }
+export type GetOrigMapPhrasesQueryHookResult = ReturnType<typeof useGetOrigMapPhrasesQuery>;
+export type GetOrigMapPhrasesLazyQueryHookResult = ReturnType<typeof useGetOrigMapPhrasesLazyQuery>;
+export type GetOrigMapPhrasesQueryResult = Apollo.QueryResult<GetOrigMapPhrasesQuery, GetOrigMapPhrasesQueryVariables>;
 export const GetAllMapsListDocument = gql`
     query GetAllMapsList($lang: LanguageInput) {
   getAllMapsList(input: {lang: $lang}) {
@@ -4773,6 +4892,7 @@ export const namedOperations = {
     GetWordDefinitionsByWordId: 'GetWordDefinitionsByWordId',
     GetWordWithVoteById: 'GetWordWithVoteById',
     GetOrigMapWords: 'GetOrigMapWords',
+    GetOrigMapPhrases: 'GetOrigMapPhrases',
     GetAllMapsList: 'GetAllMapsList',
     GetTranslatedMapContent: 'GetTranslatedMapContent',
     IsAdminLoggedIn: 'IsAdminLoggedIn',

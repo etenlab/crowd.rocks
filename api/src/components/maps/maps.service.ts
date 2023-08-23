@@ -10,14 +10,13 @@ import {
   GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
   MapFileOutput,
-  OriginalMapWordInput,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
 import { WordsService } from '../words/words.service';
 import { MapsRepository } from './maps.repository';
 import { WordTranslations, WordUpsertInput } from '../words/types';
-import { GenericOutput, LanguageInfo } from '../../common/types';
+import { LanguageInfo } from '../../common/types';
 import { DEFAULT_NEW_MAP_LANGUAGE } from '../../common/const';
 import { PostgresService } from '../../core/postgres.service';
 import { WordDefinitionsService } from '../definitions/word-definitions.service';
@@ -29,10 +28,6 @@ import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
 import { TranslationsService } from '../translations/translations.service';
-import {
-  PhraseToPhraseTranslationWithVote,
-  TranslationWithVoteListOutput,
-} from '../translations/types';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
@@ -63,7 +58,6 @@ export class MapsService {
     private phraseDefinitionsService: PhraseDefinitionsService,
     private wordDefinitionsService: WordDefinitionsService,
     private wordToWordTranslationsService: WordToWordTranslationsService,
-    private translationsService: TranslationsService,
   ) {}
 
   async parseAndSaveNewMap({

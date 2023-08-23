@@ -38,6 +38,46 @@ query GetOrigMapWords(
   }
 }
 
+query GetOrigMapPhrases(
+  $original_map_id: ID
+  $o_language_code: String
+  $t_language_code: String
+  $t_dialect_code: String
+  $t_geo_code: String
+) {
+  getOrigMapPhrases(
+    input: {
+      original_map_id: $original_map_id
+      o_language_code: $o_language_code
+      t_language_code: $t_language_code
+      t_dialect_code: $t_dialect_code
+      t_geo_code: $t_geo_code
+    }
+  ) {
+    origMapPhrases {
+      phrase
+      phrase_id
+      language_code
+      dialect_code
+      geo_code
+      definition
+      definition_id
+      translations {
+        phrase
+        phrase_id
+        language_code
+        dialect_code
+        geo_code
+        definition
+        definition_id
+        up_votes
+        down_votes
+        translation_id
+      }
+    }
+  }
+}
+
 query GetAllMapsList($lang: LanguageInput) {
   getAllMapsList(input: { lang: $lang }) {
     allMapsList {
