@@ -21,6 +21,14 @@ export const importEcsSecrets = (
       ? new secretsmanager.Secret(scope, `${secret.taskDefSecretName}Secret`, {
           secretName: secret.secretsManagerSecretName,
           removalPolicy: cdk.RemovalPolicy.DESTROY,
+          generateSecretString: {
+            excludeUppercase: false,
+            includeSpace: false,
+            excludePunctuation: true,
+            excludeLowercase: false,
+            excludeNumbers: false
+          }
+
         })
       : secretsmanager.Secret.fromSecretPartialArn(
           scope,
