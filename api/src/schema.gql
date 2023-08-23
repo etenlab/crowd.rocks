@@ -240,13 +240,18 @@ type MapFileOutput {
   translated_map_id: ID
 }
 
+type MapUploadOutput {
+  error: ErrorType!
+  mapFileOutput: MapFileOutput!
+}
+
 type Mutation {
   addWordAsTranslationForWord(input: AddWordAsTranslationForWordInput!): AddWordAsTranslationForWordOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
-  mapUpload(file: Upload!): MapFileOutput!
+  mapUpload(file: Upload!): MapUploadOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationUpsertOutput!

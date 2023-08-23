@@ -3,6 +3,10 @@
   background-color: var(--ca-menu-background-color);
 }
 
+ion-card {
+  box-shadow: 1px 1px 3px;
+}
+
 .header-content {
   display: flex;
   justify-content: space-between;

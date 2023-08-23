@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import {
+  IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
   IonIcon,
   IonItem,
-  IonItemDivider,
-  IonItemGroup,
   IonLabel,
   IonText,
   useIonRouter,
@@ -21,7 +20,12 @@ import {
 } from 'ionicons/icons';
 import { RouteComponentProps } from 'react-router';
 import './Home.css';
-import { CustomIonCard } from './styled';
+import {
+  CustomGroup,
+  CustomIonCard,
+  CustomIonLabel,
+  StIonCardTitleContainer,
+} from './styled';
 import { useTr } from '../../hooks/useTr';
 import { PageLayout } from '../common/PageLayout';
 
@@ -95,34 +99,38 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
   return (
     <PageLayout>
       {menu.map((group) => (
-        <IonItemGroup key={group.group}>
-          <IonItemDivider>
+        <CustomGroup key={group.group}>
+          <CustomIonLabel>
             <IonLabel>{group.group}</IonLabel>
-          </IonItemDivider>
-
+          </CustomIonLabel>
+          <hr style={{ marginTop: '7px', marginBottom: '0px' }} />
           {group.subMenu.map((item) => (
             <IonItem lines="none" key={item.title}>
               <CustomIonCard
                 onClick={() => {
                   router.push(item.link);
                 }}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', padding: '0px' }}
               >
                 <IonCardHeader>
-                  <IonCardTitle>
-                    <div className="home-card-title">
-                      <IonIcon icon={item.icon}></IonIcon>
-                      <div className="home-card-title-text">
-                        <IonText>{item.title}</IonText>
+                  <StIonCardTitleContainer>
+                    <IonCardTitle>
+                      <div className="home-card-title">
+                        <IonIcon icon={item.icon}></IonIcon>
+                        <div className="home-card-title-text">
+                          <IonText>{item.title}</IonText>
+                        </div>
                       </div>
-                    </div>
-                  </IonCardTitle>
-                  <IonCardSubtitle>{item.description}</IonCardSubtitle>
+                    </IonCardTitle>
+                  </StIonCardTitleContainer>
                 </IonCardHeader>
+                <IonCardContent>
+                  <IonCardSubtitle>{item.description}</IonCardSubtitle>
+                </IonCardContent>
               </CustomIonCard>
             </IonItem>
           ))}
-        </IonItemGroup>
+        </CustomGroup>
       ))}
 
       <div className="home-footer">

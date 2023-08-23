@@ -169,7 +169,11 @@ export function AppContextProvider({ children }: AppProviderProps) {
               }
             }
 
-            translationMap[siteText!] = translatedText!;
+            if (langInfo.lang.tag === 'en') {
+              translationMap[siteText!] = siteText!;
+            } else {
+              translationMap[siteText!] = translatedText!;
+            }
           }
         }
 

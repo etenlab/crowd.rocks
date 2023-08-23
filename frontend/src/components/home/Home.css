@@ -55,8 +55,11 @@
 .home-card-title {
   display: flex;
   align-items: center;
+  font-size:large;
 }
 
 .home-card-title-text {
   margin-left: 10px;
+  font-weight: bold;
+  color: var(--ion-text-color-rgb);
 }

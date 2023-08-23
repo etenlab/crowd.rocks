@@ -4,6 +4,7 @@ import {
   IonInput,
   IonItem,
   IonLabel,
+  useIonLoading,
   useIonViewWillEnter,
 } from '@ionic/react';
 import { useHistory } from 'react-router';
@@ -37,6 +38,8 @@ const Login: React.FC = () => {
 
   const [email, set_email] = useState('');
   const [password, set_password] = useState('');
+  const [login_disable, set_login_disable] = useState(false);
+  const [present_loading, dismiss_loading] = useIonLoading();
 
   const [is_email_too_long, set_is_email_too_long] = useState(false);
   const [is_email_too_short, set_is_email_too_short] = useState(false);
@@ -54,6 +57,8 @@ const Login: React.FC = () => {
   async function handle_submit(event: FormEvent) {
     event.preventDefault();
     event.stopPropagation();
+    set_login_disable(true);
+    present_loading({ message: tr('Logging in...') });
 
     let result;
     try {
@@ -77,8 +82,6 @@ const Login: React.FC = () => {
     set_is_invalid_email_or_password(false);
 
     if (error === ErrorType.NoError) {
-      set_email('');
-      set_password('');
       // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       const session = result?.data?.login.session!;
       globals.set_token(session.token);
@@ -95,13 +98,17 @@ const Login: React.FC = () => {
       await apollo_client.clearStore();
       await apollo_client.resetStore();
 
+      set_email('');
+      set_password('');
       if (redirect === 'back') {
+        set_login_disable(false);
         localStorage.removeItem('login-redirect');
         history.goBack();
       } else {
         history.push(`/US/${appLanguage.lang.tag}/1/home`);
+        set_login_disable(false);
       }
-
+      dismiss_loading();
       return;
     } else if (error === ErrorType.EmailTooLong) {
       set_is_email_too_long(true);
@@ -166,7 +173,12 @@ const Login: React.FC = () => {
         {is_password_too_long && <div>{tr('Password too long')}</div>}
         {is_password_too_short && <div>{tr('Password too short')}</div>}
 
-        <IonButton type="submit" color="primary">
+        <IonButton
+          id="loading"
+          type="submit"
+          color="primary"
+          disabled={login_disable}
+        >
           {tr('Login')}
         </IonButton>
 

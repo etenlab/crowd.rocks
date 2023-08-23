@@ -1,4 +1,4 @@
-import { IonButton, IonIcon, IonTitle } from '@ionic/react';
+import { IonButton, IonIcon } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { ListHeader } from './styled';
 
@@ -10,7 +10,7 @@ interface AddFabProps {
 export function AddListHeader({ onClick, title }: AddFabProps) {
   return (
     <ListHeader>
-      <IonTitle>{title}</IonTitle>
+      <h3>{title}</h3>
       <IonButton
         fill="clear"
         size="large"
