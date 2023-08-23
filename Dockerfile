@@ -9,7 +9,11 @@ COPY api /api/
 WORKDIR /frontend
 
 RUN npm install
-RUN npm run build
+RUN if [ "$BUILD_MODE" = "staging" ]; then \
+        npm run build:staging; \
+    else \
+        npm run build:prod; \
+    fi
 
 WORKDIR /../api
 
