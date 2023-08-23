@@ -2,7 +2,7 @@ name: Build, Dockerize, Upload
 on:
   push:
     branches:
-      - translation-ui-tweak
+      - dev
 
 jobs:
   package:
