@@ -11,7 +11,7 @@ import { useTr } from '../../../hooks/useTr';
 
 import { ConfirmButtons } from '../../common/ConfirmButtons';
 
-type NewSiteTextDefinitionFormProps = {
+type NewSiteTextTranslationFormProps = {
   site_text_id: number;
   is_word_definition: boolean;
   langInfo: LanguageInfo;
@@ -19,13 +19,13 @@ type NewSiteTextDefinitionFormProps = {
   onCancel(): void;
 };
 
-export function NewSiteTextDefinitionForm({
+export function NewSiteTextTranslationForm({
   site_text_id,
   is_word_definition,
   langInfo,
   onCreated,
   onCancel,
-}: NewSiteTextDefinitionFormProps) {
+}: NewSiteTextTranslationFormProps) {
   const { tr } = useTr();
 
   const [present] = useIonToast();
