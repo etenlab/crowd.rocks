@@ -1,4 +1,4 @@
-import { Field, ObjectType, Int, ID } from '@nestjs/graphql';
+import { Field, ObjectType, Int } from '@nestjs/graphql';
 
 @ObjectType()
 export class IFile {
@@ -25,6 +25,3 @@ export class IFile {
 export class GetFileListOutput {
   @Field(() => [IFile]) fileList: IFile[];
 }
-
-
-

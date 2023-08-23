@@ -6,8 +6,8 @@ import { ReadStream } from 'fs';
 import { Transform } from 'stream';
 import { createHash } from 'crypto';
 import { nanoid } from 'nanoid';
-import * as dotenv from 'dotenv';
 import { Upload } from '@aws-sdk/lib-storage';
+import * as dotenv from 'dotenv';
 import { FileRepository } from './file.repository';
 import { IFile } from './types';
 
@@ -15,9 +15,7 @@ dotenv.config();
 
 @Injectable()
 export class FileService {
-  constructor(
-    private fileRepository: FileRepository,
-  ) {}
+  constructor(private fileRepository: FileRepository) {}
 
   async uploadFile(
     readStream: ReadStream,
@@ -95,14 +93,13 @@ export class FileService {
         return fileEntity;
       }
 
-      return  this.fileRepository.save({
+      return this.fileRepository.save({
         file_name: fileName,
         file_type: fileType,
         file_size: fileSize,
         file_url: `https://${bucketName}.s3.${region}.amazonaws.com/${fileKey}`, //TODO: it'd be cool to generate differently for local environments
         file_hash: hashValue,
       });
-
     } catch (err) {
       console.log('File upload failed', err);
     }
@@ -116,7 +113,9 @@ export class FileService {
     fileSize: number,
   ): Promise<IFile> {
     try {
-      const oldFileEntity = await this.fileRepository.find({ where: {file_id: id }});
+      const oldFileEntity = await this.fileRepository.find({
+        where: { file_id: id },
+      });
       if (!oldFileEntity) throw new Error(`Not found file with id=${id}`);
 
       const accessKeyId = process.env.AWS_S3_ACCESS_ID;
@@ -192,7 +191,7 @@ export class FileService {
 
   async findOne(id: number) {
     return await this.fileRepository.find({
-      where: {file_id: id},
+      where: { file_id: id },
     });
   }
 }
