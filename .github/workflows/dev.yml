@@ -31,7 +31,7 @@ jobs:
           push: true
           tags: etenlab/crowd-rocks:latest
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: BUILD_MODE=staging
+          build-args: BUILD_MODE="staging"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
