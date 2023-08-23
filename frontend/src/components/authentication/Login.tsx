@@ -130,7 +130,7 @@ const Login: React.FC = () => {
     }
   }
 
-  const click_reset_password = () => {
+  const click_forgot_password = () => {
     history.push(`/US/${appLanguage.lang.tag}/1/reset-email-request`);
   };
 
@@ -186,9 +186,9 @@ const Login: React.FC = () => {
           type="button"
           color="primary"
           fill="clear"
-          onClick={click_reset_password}
+          onClick={click_forgot_password}
         >
-          {tr('Reset Password')}
+          {tr('Forgot Password')}
         </IonButton>
 
         <IonButton
