@@ -1,5 +1,10 @@
 import { useCallback } from 'react';
-import { MapPhraseWithVotes, WordWithVotes } from '../../../generated/graphql';
+import {
+  MapPhraseTranslations,
+  MapPhraseWithVotes,
+  WordTranslations,
+  WordWithVotes,
+} from '../../../generated/graphql';
 
 export interface ITranslationsVotes {
   translations?:
@@ -7,6 +12,18 @@ export interface ITranslationsVotes {
     | null
     | undefined;
 }
+
+export type WordOrPhraseWithValue = (
+  | WordTranslations
+  | MapPhraseTranslations
+) & {
+  value?: string | null | undefined;
+  translations: Array<
+    (WordWithVotes | MapPhraseWithVotes) & {
+      value?: string | null | undefined;
+    }
+  >;
+};
 
 export function useMapTranslationTools() {
   // const apolloClient = useApolloClient();
@@ -68,7 +85,36 @@ export function useMapTranslationTools() {
     [],
   );
 
+  const addValueToWordsOrPhrases = useCallback(
+    (wordOrPhrases: WordOrPhraseWithValue[] | undefined) => {
+      const res: WordOrPhraseWithValue[] = [];
+      wordOrPhrases?.forEach((wordOrPhrase) => {
+        let mainValue = '';
+        if (wordOrPhrase.__typename === 'WordTranslations') {
+          mainValue = wordOrPhrase.word;
+        } else if (wordOrPhrase.__typename === 'MapPhraseTranslations') {
+          mainValue = wordOrPhrase.phrase;
+        }
+
+        if (wordOrPhrase?.translations) {
+          wordOrPhrase?.translations.forEach((tr, i) => {
+            if (tr.__typename === 'WordWithVotes') {
+              wordOrPhrase.translations[i] = { ...tr, value: tr.word || '' };
+            } else if (tr.__typename === 'MapPhraseWithVotes') {
+              wordOrPhrase.translations[i] = { ...tr, value: tr.phrase || '' };
+            }
+          });
+        }
+        res.push({ ...wordOrPhrase, value: mainValue });
+      });
+
+      return res;
+    },
+    [],
+  );
+
   return {
     chooseBestTranslation,
+    addValueToWordsOrPhrases,
   };
 }

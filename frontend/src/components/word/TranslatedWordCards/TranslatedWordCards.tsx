@@ -13,24 +13,25 @@ export type TWordTranslationCardProps = {
 };
 
 export const TranslatedCards = ({
-  wordTranslated,
+  wordTranslated: wordOrPhraseTranslated,
   routerLink,
   onClick,
 }: TWordTranslationCardProps) => {
   const { chooseBestTranslation } = useMapTranslationTools();
 
-  const wordBestTranslation = chooseBestTranslation(wordTranslated);
+  const wordBestTranslation = chooseBestTranslation(wordOrPhraseTranslated);
 
   let textOriginal = '';
   let textTranslated = '';
-  if ('word' in wordTranslated) {
-    textOriginal = wordTranslated.word;
-  } else if ('phrase' in wordTranslated) {
-    textOriginal = wordTranslated.phrase;
+  if (wordOrPhraseTranslated.__typename === 'WordTranslations') {
+    textOriginal = wordOrPhraseTranslated.word;
+  } else if (wordOrPhraseTranslated.__typename === 'MapPhraseTranslations') {
+    textOriginal = wordOrPhraseTranslated.phrase;
   }
-  if ('word' in wordBestTranslation) {
+
+  if (wordBestTranslation.__typename === 'WordWithVotes') {
     textTranslated = wordBestTranslation.word;
-  } else if ('phrase' in wordBestTranslation) {
+  } else if (wordBestTranslation.__typename === 'MapPhraseWithVotes') {
     textTranslated = wordBestTranslation.phrase;
   }
 
@@ -38,15 +39,15 @@ export const TranslatedCards = ({
     <StCards>
       <StCard>
         <WordOrPhraseCard
-          word={textOriginal}
-          definition={wordTranslated.definition}
+          value={textOriginal}
+          definition={wordOrPhraseTranslated.definition}
           onClick={onClick}
           routerLink={routerLink}
         />
       </StCard>
       <StCard>
         <WordOrPhraseCard
-          word={textTranslated}
+          value={textTranslated}
           definition={wordBestTranslation?.definition || ''}
           onClick={onClick}
           routerLink={routerLink}

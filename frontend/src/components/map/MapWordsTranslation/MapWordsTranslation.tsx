@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -7,17 +7,17 @@ import { TranslatedCards } from '../../word/TranslatedWordCards/TranslatedWordCa
 import {
   useGetOrigMapPhrasesLazyQuery,
   useGetOrigMapWordsLazyQuery,
-  MapPhraseTranslations,
-  WordTranslations,
-  WordWithVotes,
-  MapPhraseWithVotes,
 } from '../../../generated/graphql';
 import { TranslationsCom } from './TranslationsCom';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
+import {
+  WordOrPhraseWithValue,
+  useMapTranslationTools,
+} from '../hooks/useMapTranslationTools';
 
 interface MapWordsTranslationProps extends RouteComponentProps {}
-type TWordOrPhraseId = { word_id: string } | { phrase_id: string };
+export type TWordOrPhraseId = { word_id: string } | { phrase_id: string };
 
 export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   const { tr } = useTr();
@@ -31,12 +31,13 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
     actions: { setTargetLanguage },
   } = useAppContext();
 
-  //const [targetLang, setTargetLang] = useState<LanguageInfo>();
+  const { addValueToWordsOrPhrases } = useMapTranslationTools();
   const [selectedId, setSelectedId] = useState<TWordOrPhraseId>();
 
   const [origMapWordsRead, { data: wordsData }] = useGetOrigMapWordsLazyQuery();
   const [origMapPhrasesRead, { data: phrasesData }] =
     useGetOrigMapPhrasesLazyQuery();
+  const wordsAndPhrases = useRef<WordOrPhraseWithValue[]>([]);
 
   const fetchMapWordsAndPhrases = useCallback(() => {
     if (!targetLang?.lang.tag) {
@@ -60,72 +61,45 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
     targetLang?.dialect?.tag,
     targetLang?.region?.tag,
   ]);
+  useEffect(() => {
+    wordsAndPhrases.current = [
+      ...addValueToWordsOrPhrases(
+        wordsData?.getOrigMapWords.origMapWords as WordOrPhraseWithValue[],
+      ),
+      ...addValueToWordsOrPhrases(
+        phrasesData?.getOrigMapPhrases
+          .origMapPhrases as WordOrPhraseWithValue[],
+      ),
+    ];
+  }, [wordsData, phrasesData, addValueToWordsOrPhrases]);
 
   useEffect(() => {
     fetchMapWordsAndPhrases();
   }, [fetchMapWordsAndPhrases]);
 
   const selected = useMemo(() => {
-    // make common prop 'value' for words and phrases and translations
-    // to be able to use common components
-    let res:
-      | ((WordTranslations | MapPhraseTranslations) & {
-          value?: string | undefined;
-        })
-      | undefined;
+    let res: WordOrPhraseWithValue | undefined;
     if (selectedId && 'word_id' in selectedId) {
-      res = wordsData?.getOrigMapWords.origMapWords.find(
-        (omw) => omw.word_id === selectedId.word_id,
+      res = wordsAndPhrases.current.find(
+        (wap) =>
+          wap.__typename === 'WordTranslations' &&
+          wap.word_id === selectedId.word_id,
       );
-      if (res) res.value = res?.word;
     } else if (selectedId && 'phrase_id' in selectedId) {
-      res = phrasesData?.getOrigMapPhrases.origMapPhrases.find(
-        (ph) => ph.phrase_id === selectedId.phrase_id,
-      );
-      if (res) res.value = res?.phrase;
-    }
-    if (!res) return null;
-    const res1 = JSON.parse(JSON.stringify(res)) as (
-      | WordTranslations
-      | MapPhraseTranslations
-    ) & {
-      value: string;
-      translations: [(WordWithVotes | MapPhraseWithVotes) & { value: string }];
-    };
-
-    if (res1?.translations) {
-      res1?.translations.forEach(
-        (tr: (WordWithVotes | MapPhraseWithVotes) & { value: string }, i) => {
-          if ('word' in tr) {
-            res1.translations[i] = { ...tr, value: tr.word || '' };
-          } else if ('phrase' in tr) {
-            res1.translations[i] = { ...tr, value: tr.phrase || '' };
-          }
-        },
+      res = wordsAndPhrases.current.find(
+        (wap) =>
+          wap.__typename === 'MapPhraseTranslations' &&
+          wap.phrase_id === selectedId.phrase_id,
       );
     }
-    return res1;
-  }, [
-    phrasesData?.getOrigMapPhrases.origMapPhrases,
-    selectedId,
-    wordsData?.getOrigMapWords.origMapWords,
-  ]);
+    return res;
+  }, [selectedId]);
 
   return (
     <>
       {!selected || !targetLang ? (
         <>
           <Caption>{tr('Map Translation')}</Caption>
-          {/* <LangSelectorBox>  // source language is always 'English' for now, so we don't need this selector yet
-            <LangSelector
-              title="Select source language"
-              langSelectorId="sourceLangSelector"
-              selected={sourceLang}
-              onChange={(sourcseLangTag, sourceLangInfo) => {
-                setSourceLang(sourceLangInfo);
-              }}
-            ></LangSelector>
-          </LangSelectorBox> */}
           <LangSelectorBox>
             <LangSelector
               title={tr('Select target language')}
@@ -137,34 +111,30 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
             />
           </LangSelectorBox>
           <WordsBox>
-            {wordsData &&
-              wordsData.getOrigMapWords.origMapWords
-                .sort((omw1, omw2) => omw1.word.localeCompare(omw2.word))
-                .map((omw) => (
-                  <TranslatedCards
-                    key={omw.word_id}
-                    wordTranslated={omw}
-                    onClick={() => setSelectedId({ word_id: omw.word_id })}
-                  />
-                ))}
-          </WordsBox>
-          <WordsBox>
-            {phrasesData &&
-              phrasesData.getOrigMapPhrases.origMapPhrases
-                .sort((ph1, ph2) => ph1.phrase.localeCompare(ph2.phrase))
-                .map((ph) => (
-                  <TranslatedCards
-                    key={ph.phrase_id}
-                    wordTranslated={ph}
-                    onClick={() => setSelectedId({ phrase_id: ph.phrase_id })}
-                  />
-                ))}
+            {wordsAndPhrases.current
+              .sort((omw1, omw2) => {
+                if (!omw1.value || !omw2.value) return 0;
+                return omw1.value.localeCompare(omw2.value);
+              })
+              .map((omw, i) => (
+                <TranslatedCards
+                  key={i}
+                  wordTranslated={omw}
+                  onClick={() => {
+                    omw.__typename === 'WordTranslations' &&
+                      setSelectedId({ word_id: omw.word_id });
+                    omw.__typename === 'MapPhraseTranslations' &&
+                      setSelectedId({ phrase_id: omw.phrase_id });
+                  }}
+                />
+              ))}
           </WordsBox>
         </>
       ) : (
         <TranslationsCom
           tLangInfo={targetLang}
-          wordOrPhraseWithTranslations={selected}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          wordOrPhraseWithTranslations={selected as any}
           onBackClick={() => {
             setSelectedId(undefined);
           }}

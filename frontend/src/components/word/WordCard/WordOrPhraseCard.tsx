@@ -7,14 +7,14 @@ import {
 import { styled } from 'styled-components';
 
 type TWordCardProps = {
-  word?: string | null;
+  value?: string | null;
   definition?: string | null;
   onClick?: () => void;
   routerLink?: string;
 };
 
 export const WordOrPhraseCard = ({
-  word,
+  value,
   definition,
   onClick,
   routerLink,
@@ -22,7 +22,7 @@ export const WordOrPhraseCard = ({
   return (
     <StCard onClick={() => onClick && onClick()} routerLink={routerLink}>
       <IonCardHeader>
-        <IonCardTitle>{word || ''}</IonCardTitle>
+        <IonCardTitle>{value || ''}</IonCardTitle>
         <IonCardSubtitle>
           <div>{definition || ''}</div>
         </IonCardSubtitle>

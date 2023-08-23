@@ -15,7 +15,7 @@ import { useTr } from '../../../hooks/useTr';
 
 interface TranslationsComProps {
   wordOrPhraseWithTranslations: (WordTranslations | MapPhraseTranslations) & {
-    value?: string;
+    value?: string | null | undefined;
     translations?: [
       {
         value: string;
@@ -135,7 +135,7 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
       <Caption handleBackClick={() => onBackClick()}>Translations</Caption>
       <StSourceWordDiv>
         <WordOrPhraseCard
-          word={wordOrPhraseWithTranslations.value}
+          value={wordOrPhraseWithTranslations.value}
           definition={wordOrPhraseWithTranslations.definition}
         />
         <StIonIcon
@@ -151,7 +151,7 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
             .map((wtr, i) => (
               <StTranslationDiv key={i}>
                 <WordOrPhraseCard
-                  word={wtr.value}
+                  value={wtr.value}
                   definition={wtr.definition}
                 />
                 <VoteButtonsVertical
