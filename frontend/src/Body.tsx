@@ -48,14 +48,12 @@ import { WordDetailPage } from './components/dictionary/WordDetailPage';
 import { PhraseListPage } from './components/phrase-book/PhraseListPage';
 import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
 
-import { OriginalListPage } from './components/translation/OriginalListPage';
-import { TranslationListPage } from './components/translation/TranslationListPage';
+import { TranslationPage } from './components/translation/TranslationPage';
 
 import { useAppContext } from './hooks/useAppContext';
 import { useTr } from './hooks/useTr';
 
 import AppTypeahead from './components/common/LangSelector/TypeAhead';
-import { AddNewTranslationPage } from './components/translation/AddNewTranslationPage';
 
 const Body: React.FC = () => {
   const {
@@ -378,18 +376,8 @@ const Body: React.FC = () => {
           />
           <Route
             exact
-            path="/:nation_id/:language_id/:cluster_id/translation-list"
-            component={OriginalListPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/translation-list/:definition_kind/:definition_id"
-            component={TranslationListPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/add-new-translation/:definition_kind/:definition_id"
-            component={AddNewTranslationPage}
+            path="/:nation_id/:language_id/:cluster_id/translation"
+            component={TranslationPage}
           />
           <Route exact path="/">
             <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />

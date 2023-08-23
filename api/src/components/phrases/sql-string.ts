@@ -2,14 +2,22 @@ import { ErrorType } from 'src/common/types';
 
 export type GetPhraseObjByIdResultRow = {
   phrase: string;
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
 };
 
 export function getPhraseObjById(id: number): [string, [number]] {
   return [
     `
       select 
-        phrases.phraselike_string as phrase
+        phrases.phraselike_string as phrase,
+        words.language_code as language_code,
+        words.dialect_code as dialect_code,
+        words.geo_code as geo_code
       from phrases
+      join words
+      on words.word_id = any(phrases.words)
       where phrases.phrase_id = $1
     `,
     [id],

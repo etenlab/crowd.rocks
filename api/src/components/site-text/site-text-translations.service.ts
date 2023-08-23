@@ -71,7 +71,9 @@ export class SiteTextTranslationsService {
     }
 
     try {
-      const words = toInput.translationlike_string.split(' ');
+      const words = toInput.translationlike_string
+        .split(' ')
+        .filter((w) => w !== '');
 
       if (words.length > 1) {
         const { error, phrase_definition } =

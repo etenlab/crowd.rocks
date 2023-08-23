@@ -1,0 +1,1 @@
+export { OriginalWordOrPhraseList } from './OriginalWordOrPhraseList';
