@@ -185,7 +185,7 @@ export class DefinitionsResolver {
   }
 
   @Mutation(() => DefinitionVoteStatusOutputRow)
-  async toggleWordDefinitonVoteStatus(
+  async toggleWordDefinitionVoteStatus(
     @Args('word_definition_id', { type: () => ID }) word_definition_id: string,
     @Args('vote', { type: () => Boolean }) vote: boolean,
     @Context() req: any,

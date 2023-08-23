@@ -137,13 +137,13 @@ query GetTranslationsByFromDefinitionId(
 }
 
 query GetRecommendedTranslationFromDefinitionID(
-  $from_definition_id: ID!,
-  $from_type_is_word: Boolean!,
+  $from_definition_id: ID!
+  $from_type_is_word: Boolean!
   $language_code: String!
   $dialect_code: String
   $geo_code: String
 ) {
-  getRecommendedTranslationFromDefinitionID( 
+  getRecommendedTranslationFromDefinitionID(
     from_definition_id: $from_definition_id
     from_type_is_word: $from_type_is_word
     langInfo: {
@@ -234,6 +234,52 @@ mutation UpsertTranslationFromWordAndDefinitionlikeString(
       ...WordToPhraseTranslationFragment
       ...PhraseToWordTranslationFragment
       ...PhraseToPhraseTranslationFragment
+    }
+  }
+}
+
+mutation UpsertWordDefinitionFromWordAndDefinitionlikeString(
+  $wordlike_string: String!
+  $definitionlike_string: String!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  upsertWordDefinitionFromWordAndDefinitionlikeString(
+    input: {
+      wordlike_string: $wordlike_string
+      definitionlike_string: $definitionlike_string
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
+    error
+    word_definition {
+      ...WordDefinitionFragment
+    }
+  }
+}
+
+mutation UpsertPhraseDefinitionFromPhraseAndDefinitionlikeString(
+  $phraselike_string: String!
+  $definitionlike_string: String!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(
+    input: {
+      phraselike_string: $phraselike_string
+      definitionlike_string: $definitionlike_string
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
+    error
+    phrase_definition {
+      ...PhraseDefinitionFragment
     }
   }
 }

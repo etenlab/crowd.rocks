@@ -44,7 +44,10 @@ export class SiteTextsService {
     }
 
     try {
-      const words = input.siteTextlike_string.trim().split(' ');
+      const words = input.siteTextlike_string
+        .trim()
+        .split(' ')
+        .filter((w) => w !== '');
 
       if (words.length > 1) {
         const phraseOuptut = await this.phraseService.upsert(

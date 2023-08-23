@@ -1,6 +1,9 @@
 fragment PhraseFragment on Phrase {
   phrase_id
   phrase
+  language_code
+  dialect_code
+  geo_code
 }
 
 fragment PhraseDefinitionFragment on PhraseDefinition {
@@ -11,10 +14,12 @@ fragment PhraseDefinitionFragment on PhraseDefinition {
   }
 }
 
-
 fragment PhraseWithDefinitionsFragment on PhraseWithDefinitions {
   phrase_id
   phrase
+  language_code
+  dialect_code
+  geo_code
   definitions {
     ...PhraseDefinitionFragment
   }
@@ -36,6 +41,9 @@ fragment PhraseDefinitionWithVoteFragment on PhraseDefinitionWithVote {
 fragment PhraseWithVoteFragment on PhraseWithVote {
   phrase_id
   phrase
+  language_code
+  dialect_code
+  geo_code
   downvotes
   upvotes
 }

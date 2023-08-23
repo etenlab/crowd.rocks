@@ -12,15 +12,8 @@ import { setContext } from '@apollo/client/link/context';
 
 import { typePolicies } from './cacheTypePolicies';
 
-let server_url = 'http://localhost:3000/graphql';
+const server_url = `${import.meta.env.VITE_APP_SERVER_URL}/graphql`;
 
-if (process.env.NODE_ENV == 'production') {
-  server_url = 'https://dev.crowd.rocks/graphql';
-}
-
-// const httpLink = createHttpLink({
-//   uri: server_url,
-// });
 const httpLink = createUploadLink({
   uri: server_url,
   headers: {
