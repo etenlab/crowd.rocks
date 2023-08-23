@@ -4,7 +4,7 @@ import {
   IonInput,
   IonItem,
   IonLabel,
-  useIonLoading,
+  IonSpinner,
   useIonViewWillEnter,
 } from '@ionic/react';
 import { useHistory } from 'react-router';
@@ -19,6 +19,7 @@ import './Login.css';
 
 import { useTr } from '../../hooks/useTr';
 import { useAppContext } from '../../hooks/useAppContext';
+import { styled } from 'styled-components';
 
 const Login: React.FC = () => {
   const history = useHistory();
@@ -39,7 +40,7 @@ const Login: React.FC = () => {
   const [email, set_email] = useState('');
   const [password, set_password] = useState('');
   const [login_disable, set_login_disable] = useState(false);
-  const [present_loading, dismiss_loading] = useIonLoading();
+  const [is_spinning, set_spinning] = useState(false);
 
   const [is_email_too_long, set_is_email_too_long] = useState(false);
   const [is_email_too_short, set_is_email_too_short] = useState(false);
@@ -58,7 +59,7 @@ const Login: React.FC = () => {
     event.preventDefault();
     event.stopPropagation();
     set_login_disable(true);
-    present_loading({ message: tr('Logging in...') });
+    // present_loading({ message: tr('Logging in...') });
 
     let result;
     try {
@@ -84,6 +85,7 @@ const Login: React.FC = () => {
     if (error === ErrorType.NoError) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       const session = result?.data?.login.session!;
+      set_spinning(true);
       globals.set_token(session.token);
       globals.set_user_id(+session.user_id);
       globals.set_avatar(session.avatar);
@@ -100,15 +102,17 @@ const Login: React.FC = () => {
 
       set_email('');
       set_password('');
+
       if (redirect === 'back') {
         set_login_disable(false);
+        set_spinning(false);
         localStorage.removeItem('login-redirect');
         history.goBack();
       } else {
         history.push(`/US/${appLanguage.lang.tag}/1/home`);
         set_login_disable(false);
+        set_spinning(false);
       }
-      dismiss_loading();
       return;
     } else if (error === ErrorType.EmailTooLong) {
       set_is_email_too_long(true);
@@ -128,6 +132,8 @@ const Login: React.FC = () => {
       set_is_unknown_error(true);
       console.error(error);
     }
+    // dismiss_loading();
+    set_login_disable(false);
   }
 
   const click_reset_password = () => {
@@ -180,6 +186,7 @@ const Login: React.FC = () => {
           disabled={login_disable}
         >
           {tr('Login')}
+          {is_spinning && <StIonSpinner />}
         </IonButton>
 
         <IonButton
@@ -201,11 +208,21 @@ const Login: React.FC = () => {
         </IonButton>
 
         {is_invalid_email_or_password && (
-          <div>{tr('Invalid email or password')}</div>
+          <Invalid>{tr('Invalid email or password')}</Invalid>
         )}
       </form>
     </PageLayout>
   );
 };
+
+const Invalid = styled.div`
+  color: var(--ion-color-danger);
+`;
+
+const StIonSpinner = styled(IonSpinner)(() => ({
+  width: '15px',
+  height: '15px',
+  marginLeft: '2px',
+}));
 
 export default Login;
