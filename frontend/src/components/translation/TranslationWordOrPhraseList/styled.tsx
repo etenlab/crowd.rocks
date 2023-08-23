@@ -1,5 +1,5 @@
 import { styled } from 'styled-components';
-import { IonRadioGroup, IonIcon } from '@ionic/react';
+import { IonIcon } from '@ionic/react';
 
 export const CardContainer = styled.div`
   display: flex;
@@ -16,16 +16,16 @@ export const NoDefinition = styled.div`
   color: rgb(153, 153, 153);
 `;
 
-export const CustomIonRadioGroup = styled(IonRadioGroup)(() => ({
-  display: 'flex',
-  flexDirection: 'column',
-  width: '100%',
-  alignItems: 'center',
-  justifyContent: 'flex-start',
-  gap: '16px',
-  height: '500px',
-  overflowY: 'auto',
-}));
+export const CardListContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  height: 500px;
+  overflow-y: auto;
+  gap: 16px;
+`;
 
 export const StButtonsDiv = styled.div`
   display: flex;

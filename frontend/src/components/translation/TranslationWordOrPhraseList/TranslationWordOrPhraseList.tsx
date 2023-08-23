@@ -28,8 +28,7 @@ import { useTr } from '../../../hooks/useTr';
 
 import { NewWordOrPhraseWithDefinitionForm } from '../NewWordOrPhraseWithDefinitionForm';
 
-import { CardListContainer } from '../../common/styled';
-import { NoDefinition, CardContainer } from './styled';
+import { NoDefinition, CardContainer, CardListContainer } from './styled';
 import { WordOrPhraseListContainer } from '../styled';
 
 interface TranslationWordOrPhraseListProps {
