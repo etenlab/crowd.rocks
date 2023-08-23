@@ -29,7 +29,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: etenlab/crowd-rocks:latest
+          tags: etenlab/crowd-rocks:prod
           labels: ${{ steps.meta.outputs.labels }}
           build-args: BUILD_MODE=production
 
