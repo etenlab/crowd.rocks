@@ -46,6 +46,70 @@ enum TagSpecialDescriptions {
   PRIVATE_USE = 'Private use',
 }
 
+// make it async to test and prepare for possible language library change to async
+const getLangsRegistry = async (): Promise<LangsRegistry> => {
+  return new Promise((resolve) => {
+    const allTags = tags.search(/.*/);
+    const langs: Array<TLang> = [];
+    const dialects: Array<TDialect> = [
+      { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
+    ];
+    const regions: Array<TRegion> = [
+      { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
+    ];
+    for (const currTag of allTags) {
+      // TODO temporary limitation - need to optimize to allow full list
+      //----------
+      // const enabledTags = [
+      //   'en',
+      //   'uk',
+      //   'apq',
+      //   'aas',
+      //   'jp',
+      //   'zh',
+      //   'hi',
+      //   'de',
+      // ];
+      // if (!enabledTags.includes(currTag.format())) continue;
+      //---------
+
+      if (
+        currTag.deprecated() ||
+        currTag.descriptions().includes(TagSpecialDescriptions.PRIVATE_USE)
+      ) {
+        continue;
+      }
+
+      if (currTag.type() === TagTypes.LANGUAGE) {
+        langs.push({
+          tag: currTag.format(),
+          descriptions: currTag.descriptions(),
+        });
+      }
+      if (currTag.type() === TagTypes.REGION) {
+        regions.push({
+          tag: currTag.format(),
+          descriptions: currTag.descriptions(),
+        });
+      }
+      if (currTag.type() === TagTypes.DIALECT) {
+        dialects.push({
+          tag: currTag.format(),
+          descriptions: currTag.descriptions(),
+        });
+      }
+    }
+    langs.sort(sortTagInfosFn);
+    dialects.sort(sortTagInfosFn);
+    regions.sort(sortTagInfosFn);
+    resolve({
+      langs,
+      dialects,
+      regions,
+    });
+  });
+};
+
 export function LangSelector({
   title = 'Select language',
   langSelectorId,
@@ -57,9 +121,9 @@ export function LangSelector({
   const [langsRegistry, setLangsRegistry] =
     useState<LangsRegistry>(emptyLangsRegistry);
 
-  const [selectedLang, setSelectedLang] = useState<TLang | null>(null);
-  const [selectedDialect, setSelectedDialect] = useState<TDialect | null>(null);
-  const [selectedRegion, setSelectedRegion] = useState<TRegion | null>(null);
+  // const [selectedLang, setSelectedLang] = useState<TLang | null>(null);
+  // const [selectedDialect, setSelectedDialect] = useState<TDialect | null>(null);
+  // const [selectedRegion, setSelectedRegion] = useState<TRegion | null>(null);
 
   const modal = useRef<HTMLIonModalElement>(null);
 
@@ -67,69 +131,6 @@ export function LangSelector({
     if (setLoadingState) {
       setLoadingState(true);
     }
-    // make it async to test and prepare for possible language library change to async
-    const getLangsRegistry = async (): Promise<LangsRegistry> => {
-      return new Promise((resolve) => {
-        const allTags = tags.search(/.*/);
-        const langs: Array<TLang> = [];
-        const dialects: Array<TDialect> = [
-          { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
-        ];
-        const regions: Array<TRegion> = [
-          { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
-        ];
-        for (const currTag of allTags) {
-          // TODO temporary limitation - need to optimize to allow full list
-          //----------
-          // const enabledTags = [
-          //   'en',
-          //   'uk',
-          //   'apq',
-          //   'aas',
-          //   'jp',
-          //   'zh',
-          //   'hi',
-          //   'de',
-          // ];
-          // if (!enabledTags.includes(currTag.format())) continue;
-          //---------
-
-          if (
-            currTag.deprecated() ||
-            currTag.descriptions().includes(TagSpecialDescriptions.PRIVATE_USE)
-          ) {
-            continue;
-          }
-
-          if (currTag.type() === TagTypes.LANGUAGE) {
-            langs.push({
-              tag: currTag.format(),
-              descriptions: currTag.descriptions(),
-            });
-          }
-          if (currTag.type() === TagTypes.REGION) {
-            regions.push({
-              tag: currTag.format(),
-              descriptions: currTag.descriptions(),
-            });
-          }
-          if (currTag.type() === TagTypes.DIALECT) {
-            dialects.push({
-              tag: currTag.format(),
-              descriptions: currTag.descriptions(),
-            });
-          }
-        }
-        langs.sort(sortTagInfosFn);
-        dialects.sort(sortTagInfosFn);
-        regions.sort(sortTagInfosFn);
-        resolve({
-          langs,
-          dialects,
-          regions,
-        });
-      });
-    };
 
     getLangsRegistry().then((lr) => {
       setLangsRegistry(lr);
@@ -139,41 +140,37 @@ export function LangSelector({
     });
   }, [setLoadingState]);
 
-  useEffect(() => {
-    setSelectedLang(selected?.lang || null);
-    setSelectedDialect(selected?.dialect || null);
-    setSelectedRegion(selected?.region || null);
-  }, [selected]);
-
-  useEffect(() => {
-    if (!selectedLang) return;
-    let langTag = selectedLang.tag;
-    selectedRegion?.tag && (langTag += '-' + selectedRegion.tag);
-    selectedDialect?.tag && (langTag += '-' + selectedDialect.tag);
-    const langTagFormatted = tags(langTag).format();
-
-    if (langInfo2tag(selected) === langTagFormatted) return;
-
-    onChange(langTagFormatted, {
-      lang: selectedLang,
-      dialect: selectedDialect?.tag ? selectedDialect : undefined,
-      region: selectedRegion?.tag ? selectedRegion : undefined,
-    });
-  }, [onChange, selected, selectedDialect, selectedLang, selectedRegion]);
+  // useEffect(() => {
+  //   setSelectedLang(selected?.lang || null);
+  //   setSelectedDialect(selected?.dialect || null);
+  //   setSelectedRegion(selected?.region || null);
+  // }, [selected]);
 
   const handleSetLanguage = useCallback(
     (tag: string | undefined) => {
       if (!tag) return;
       const lang = langsRegistry.langs.find((lr) => lr.tag === tag);
       if (!lang) return;
-      setSelectedLang(lang);
+
+      const langTag = lang.tag;
+
+      const langTagFormatted = tags(langTag).format();
+
+      if (langInfo2tag(selected) === langTagFormatted) return;
+
+      onChange(langTagFormatted, {
+        lang: lang,
+        dialect: undefined,
+        region: undefined,
+      });
+
       modal.current?.dismiss();
     },
-    [langsRegistry.langs],
+    [langsRegistry.langs, onChange, selected],
   );
 
   const selectedLangValue =
-    selectedLang?.descriptions?.join(DESCRIPTIONS_JOINER) || title;
+    selected?.lang?.descriptions?.join(DESCRIPTIONS_JOINER) || title;
 
   return (
     <>
@@ -185,9 +182,6 @@ export function LangSelector({
           <StIonIcon
             icon={removeCircleOutline}
             onClick={() => {
-              setSelectedLang(null);
-              setSelectedDialect(null);
-              setSelectedRegion(null);
               onClearClick();
             }}
           />
@@ -202,7 +196,7 @@ export function LangSelector({
               : l.tag,
             value: l.tag,
           }))}
-          selectedItem={selectedLang?.tag ? selectedLang.tag : undefined}
+          selectedItem={selected?.lang?.tag ? selected?.lang?.tag : undefined}
           onSelectionCancel={() => modal.current?.dismiss()}
           onSelectionChange={(tag) => handleSetLanguage(tag)}
         />
