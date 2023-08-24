@@ -1,5 +1,10 @@
 import { useState } from 'react';
 
+export enum StringContentTypes {
+  WORD = 'word',
+  PHRASE = 'phrase',
+}
+
 export function useForceUpdate() {
   const [value, setState] = useState(true);
   return () => setState(!value);
@@ -74,4 +79,10 @@ export const downloadFromSrc = (file_name: string, src: string) => {
   hiddenElement.href = src;
   hiddenElement.download = file_name;
   hiddenElement.click();
+};
+
+export const stingType = (wordOrPhrase: string): StringContentTypes => {
+  const parts = wordOrPhrase.split(' ');
+  if (parts.length === 1) return StringContentTypes.WORD;
+  return StringContentTypes.PHRASE;
 };

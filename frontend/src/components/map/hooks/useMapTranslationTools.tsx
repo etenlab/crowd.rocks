@@ -13,7 +13,7 @@ export interface ITranslationsVotes {
     | undefined;
 }
 
-export type WordOrPhraseWithValue = (
+export type WordOrPhraseWithValueAndTranslations = (
   | WordTranslations
   | MapPhraseTranslations
 ) & {
@@ -86,8 +86,8 @@ export function useMapTranslationTools() {
   );
 
   const addValueToWordsOrPhrases = useCallback(
-    (wordOrPhrases: WordOrPhraseWithValue[] | undefined) => {
-      const res: WordOrPhraseWithValue[] = [];
+    (wordOrPhrases: WordOrPhraseWithValueAndTranslations[] | undefined) => {
+      const res: WordOrPhraseWithValueAndTranslations[] = [];
       wordOrPhrases?.forEach((wordOrPhrase) => {
         let mainValue = '';
         if (wordOrPhrase.__typename === 'WordTranslations') {

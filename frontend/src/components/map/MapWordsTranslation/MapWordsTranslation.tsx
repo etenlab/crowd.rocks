@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -12,7 +12,7 @@ import { TranslationsCom } from './TranslationsCom';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import {
-  WordOrPhraseWithValue,
+  WordOrPhraseWithValueAndTranslations,
   useMapTranslationTools,
 } from '../hooks/useMapTranslationTools';
 
@@ -37,7 +37,10 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   const [origMapWordsRead, { data: wordsData }] = useGetOrigMapWordsLazyQuery();
   const [origMapPhrasesRead, { data: phrasesData }] =
     useGetOrigMapPhrasesLazyQuery();
-  const wordsAndPhrases = useRef<WordOrPhraseWithValue[]>([]);
+  // const wordsAndPhrases = useRef<WordOrPhraseWithValueAndTranslations[]>([]);
+  const [wordsAndPhrases, setWordsAndPhrases] = useState<
+    WordOrPhraseWithValueAndTranslations[]
+  >([]);
 
   const fetchMapWordsAndPhrases = useCallback(() => {
     if (!targetLang?.lang.tag) {
@@ -61,16 +64,18 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
     targetLang?.dialect?.tag,
     targetLang?.region?.tag,
   ]);
+
   useEffect(() => {
-    wordsAndPhrases.current = [
+    setWordsAndPhrases([
       ...addValueToWordsOrPhrases(
-        wordsData?.getOrigMapWords.origMapWords as WordOrPhraseWithValue[],
+        wordsData?.getOrigMapWords
+          .origMapWords as WordOrPhraseWithValueAndTranslations[],
       ),
       ...addValueToWordsOrPhrases(
         phrasesData?.getOrigMapPhrases
-          .origMapPhrases as WordOrPhraseWithValue[],
+          .origMapPhrases as WordOrPhraseWithValueAndTranslations[],
       ),
-    ];
+    ]);
   }, [wordsData, phrasesData, addValueToWordsOrPhrases]);
 
   useEffect(() => {
@@ -78,22 +83,22 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   }, [fetchMapWordsAndPhrases]);
 
   const selected = useMemo(() => {
-    let res: WordOrPhraseWithValue | undefined;
+    let res: WordOrPhraseWithValueAndTranslations | undefined;
     if (selectedId && 'word_id' in selectedId) {
-      res = wordsAndPhrases.current.find(
+      res = wordsAndPhrases.find(
         (wap) =>
           wap.__typename === 'WordTranslations' &&
           wap.word_id === selectedId.word_id,
       );
     } else if (selectedId && 'phrase_id' in selectedId) {
-      res = wordsAndPhrases.current.find(
+      res = wordsAndPhrases.find(
         (wap) =>
           wap.__typename === 'MapPhraseTranslations' &&
           wap.phrase_id === selectedId.phrase_id,
       );
     }
     return res;
-  }, [selectedId]);
+  }, [selectedId, wordsAndPhrases]);
 
   return (
     <>
@@ -111,7 +116,7 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
             />
           </LangSelectorBox>
           <WordsBox>
-            {wordsAndPhrases.current
+            {wordsAndPhrases
               .sort((omw1, omw2) => {
                 if (!omw1.value || !omw2.value) return 0;
                 return omw1.value.localeCompare(omw2.value);
@@ -133,12 +138,10 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
       ) : (
         <TranslationsCom
           tLangInfo={targetLang}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          wordOrPhraseWithTranslations={selected as any}
+          wordOrPhraseWithTranslations={selected}
           onBackClick={() => {
             setSelectedId(undefined);
           }}
-          fetchMapWordsFn={() => fetchMapWordsAndPhrases()}
         />
       )}
     </>
