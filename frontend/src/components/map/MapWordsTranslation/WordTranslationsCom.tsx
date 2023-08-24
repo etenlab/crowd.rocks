@@ -2,8 +2,7 @@ import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Caption } from '../../common/Caption/Caption';
 import { WordCard } from '../../word/WordCard/WordCard';
-import { IonButton, IonIcon, IonInput, useIonToast } from '@ionic/react';
-import { chatbubbleEllipses } from 'ionicons/icons';
+import { IonButton, IonInput, useIonToast } from '@ionic/react';
 import { VoteButtonsVertical } from '../../common/VoteButtonsVertical/VoteButtonsVertical';
 import {
   WordTranslations,
@@ -126,12 +125,7 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
           word={wordWithTranslations?.word}
           definition={wordWithTranslations?.definition}
         />
-        <StIonIcon
-          icon={chatbubbleEllipses}
-          onClick={() => alert('mock discussion')}
-        />
       </StSourceWordDiv>
-
       <StTranslationsDiv>
         {wordWithTranslations.translations &&
           wordWithTranslations.translations
@@ -152,7 +146,6 @@ export const WordTranslationsCom: React.FC<WordTranslationsComProps> = ({
               </StTranslationDiv>
             ))}
       </StTranslationsDiv>
-
       <StNewTranslationDiv>
         <IonInput
           label={tr('New Translation')}
@@ -185,11 +178,6 @@ const StSourceWordDiv = styled.div`
   align-items: center;
   justify-content: space-between;
 `;
-
-const StIonIcon = styled(IonIcon)(() => ({
-  fontSize: '30px',
-  cursor: 'pointer',
-}));
 
 const StNewTranslationDiv = styled.div`
   width: 90%;
