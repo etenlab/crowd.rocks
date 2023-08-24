@@ -291,7 +291,7 @@ type MapWordTranslations {
   dialect_code: String
   geo_code: String
   language_code: String!
-  translations: [MapWordWithVotes!]
+  translations: [MapWordOrPhraseTranslationWithVotes!]
   word: String!
   word_id: ID!
 }

@@ -2539,8 +2539,8 @@
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
-                  "kind": "OBJECT",
-                  "name": "MapWordWithVotes",
+                  "kind": "UNION",
+                  "name": "MapWordOrPhraseTranslationWithVotes",
                   "ofType": null
                 }
               }

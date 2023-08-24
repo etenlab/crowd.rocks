@@ -464,7 +464,8 @@ export class MapsRepository {
         wtpt.word_to_phrase_translation_id,
         tphd.definition as t_definition,
         tphd.phrase_definition_id as t_definition_id,
-        tph.phraselike_string as t_phraselile_string,
+        tph.phraselike_string as t_phraselike_string,
+        tph.phrase_id as t_phrase_id,
         tw.language_code as t_language_code,
         tw.dialect_code as t_dialect_code,
         tw.geo_code as t_geo_code,
@@ -513,7 +514,7 @@ export class MapsRepository {
     }
 
     const resQ_wtwt = await this.pg.pool.query(wtwt_sqlStr, params);
-    // const resQ_wtpt = await this.pg.pool.query(wtwp_sqlStr, params);
+    const resQ_wtpt = await this.pg.pool.query(wtwp_sqlStr, params);
     const words: MapWordTranslations[] = [];
 
     resQ_wtwt.rows.forEach((r) => {
@@ -551,40 +552,40 @@ export class MapsRepository {
       }
     });
 
-    // resQ_wtpt.rows.forEach((r) => {
-    //   const currTranslation: MapPhraseWithVotes = {
-    //     phrase_id: r.t_phrase_id,
-    //     phrase: r.t_phraselike_string,
-    //     definition: r.t_definition,
-    //     definition_id: r.t_definition_id,
-    //     language_code: r.t_language_code,
-    //     dialect_code: r.t_dialect_code,
-    //     geo_code: r.t_geo_code,
-    //     up_votes: r.up_votes_count || 0,
-    //     down_votes: r.down_votes_count || 0,
-    //     translation_id: r.word_to_phrase_translation_id,
-    //   };
+    resQ_wtpt.rows.forEach((r) => {
+      const currTranslation: MapPhraseWithVotes = {
+        phrase_id: r.t_phrase_id,
+        phrase: r.t_phraselike_string,
+        definition: r.t_definition,
+        definition_id: r.t_definition_id,
+        language_code: r.t_language_code,
+        dialect_code: r.t_dialect_code,
+        geo_code: r.t_geo_code,
+        up_votes: r.up_votes_count || 0,
+        down_votes: r.down_votes_count || 0,
+        translation_id: r.word_to_phrase_translation_id,
+      };
 
-    //   const existingWordIdx = words.findIndex(
-    //     (w) => w.word_id === r.word_id && w.definition_id === r.o_definition_id,
-    //   );
+      const existingWordIdx = words.findIndex(
+        (w) => w.word_id === r.word_id && w.definition_id === r.o_definition_id,
+      );
 
-    //   if (existingWordIdx >= 0) {
-    //     currTranslation.phrase_id &&
-    //       words[existingWordIdx].translations.push(currTranslation);
-    //   } else {
-    //     words.push({
-    //       word_id: r.word_id,
-    //       word: r.word,
-    //       language_code: r.o_language_code,
-    //       dialect_code: r.o_dialect_code,
-    //       geo_code: r.o_geo_code,
-    //       definition: r.o_definition,
-    //       definition_id: r.o_definition_id,
-    //       translations: currTranslation.phrase_id ? [currTranslation] : [],
-    //     });
-    //   }
-    // });
+      if (existingWordIdx >= 0) {
+        currTranslation.phrase_id &&
+          words[existingWordIdx].translations.push(currTranslation);
+      } else {
+        words.push({
+          word_id: r.word_id,
+          word: r.word,
+          language_code: r.o_language_code,
+          dialect_code: r.o_dialect_code,
+          geo_code: r.o_geo_code,
+          definition: r.o_definition,
+          definition_id: r.o_definition_id,
+          translations: currTranslation.phrase_id ? [currTranslation] : [],
+        });
+      }
+    });
 
     return {
       origMapWords: words,

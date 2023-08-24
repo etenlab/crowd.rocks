@@ -326,7 +326,7 @@ export type MapWordTranslations = {
   dialect_code?: Maybe<Scalars['String']['output']>;
   geo_code?: Maybe<Scalars['String']['output']>;
   language_code: Scalars['String']['output'];
-  translations?: Maybe<Array<MapWordWithVotes>>;
+  translations?: Maybe<Array<MapWordOrPhraseTranslationWithVotes>>;
   word: Scalars['String']['output'];
   word_id: Scalars['ID']['output'];
 };
@@ -1885,7 +1885,7 @@ export type GetOrigMapWordsQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'MapWordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'MapWordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
+export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'MapWordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'MapPhraseWithVotes', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string } | { __typename?: 'MapWordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
 
 export type GetOrigMapPhrasesQueryVariables = Exact<{
   original_map_id?: InputMaybe<Scalars['ID']['input']>;
@@ -3211,21 +3211,14 @@ export const GetOrigMapWordsDocument = gql`
       definition
       definition_id
       translations {
-        word
-        word_id
-        language_code
-        dialect_code
-        geo_code
-        definition
-        definition_id
-        up_votes
-        down_votes
-        translation_id
+        ...MapPhraseWithVotesFragment
+        ...WordWithVotesFragment
       }
     }
   }
 }
-    `;
+    ${MapPhraseWithVotesFragmentFragmentDoc}
+${WordWithVotesFragmentFragmentDoc}`;
 
 /**
  * __useGetOrigMapWordsQuery__

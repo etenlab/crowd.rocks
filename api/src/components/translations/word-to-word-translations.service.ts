@@ -28,7 +28,11 @@ import { WordUpsertInput } from '../words/types';
 import { PoolClient } from 'pg';
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 import { LanguageInput } from 'src/components/common/types';
-import { MapWordTranslations, MapWordWithVotes } from '../maps/types';
+import {
+  MapPhraseWithVotes,
+  MapWordTranslations,
+  MapWordWithVotes,
+} from '../maps/types';
 
 @Injectable()
 export class WordToWordTranslationsService {
@@ -302,7 +306,7 @@ export class WordToWordTranslationsService {
   chooseBestTranslation(
     wordTranslated: MapWordTranslations,
     langRestrictions?: LanguageInput,
-  ): MapWordWithVotes {
+  ): MapWordWithVotes | MapPhraseWithVotes {
     const res = wordTranslated?.translations?.reduce((bestTr, currTr) => {
       if (
         langRestrictions?.language_code &&
@@ -337,7 +341,7 @@ export class WordToWordTranslationsService {
         return currTr;
       }
       return bestTr;
-    }, {} as MapWordWithVotes);
+    }, {} as MapWordWithVotes | MapPhraseWithVotes);
     return res;
   }
 

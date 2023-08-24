@@ -153,6 +153,6 @@ export class MapWordWithVotes extends MapWordWithDefinition {
 
 @ObjectType()
 export class MapWordTranslations extends MapWordWithDefinition {
-  @Field(() => [MapWordWithVotes], { nullable: true })
-  translations?: MapWordWithVotes[];
+  @Field(() => [MapWordOrPhraseTranslationWithVotes], { nullable: true })
+  translations?: Array<MapPhraseWithVotes | MapWordWithVotes>;
 }

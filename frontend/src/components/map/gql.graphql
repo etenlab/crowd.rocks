@@ -49,16 +49,8 @@ query GetOrigMapWords(
       definition
       definition_id
       translations {
-        word
-        word_id
-        language_code
-        dialect_code
-        geo_code
-        definition
-        definition_id
-        up_votes
-        down_votes
-        translation_id
+        ...MapPhraseWithVotesFragment
+        ...WordWithVotesFragment
       }
     }
   }

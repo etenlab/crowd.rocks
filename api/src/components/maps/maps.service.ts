@@ -414,7 +414,10 @@ export class MapsService {
           );
         translations.push({
           source: origWordTranslations.word,
-          translation: origWordTranslated.word || origWordTranslations.word,
+          translation:
+            'word' in origWordTranslated
+              ? origWordTranslated.word || ''
+              : origWordTranslated.phrase || '',
         });
       }
 
