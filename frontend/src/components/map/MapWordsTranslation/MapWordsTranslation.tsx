@@ -37,7 +37,6 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   const [origMapWordsRead, { data: wordsData }] = useGetOrigMapWordsLazyQuery();
   const [origMapPhrasesRead, { data: phrasesData }] =
     useGetOrigMapPhrasesLazyQuery();
-  // const wordsAndPhrases = useRef<WordOrPhraseWithValueAndTranslations[]>([]);
   const [wordsAndPhrases, setWordsAndPhrases] = useState<
     WordOrPhraseWithValueAndTranslations[]
   >([]);
@@ -87,7 +86,7 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
     if (selectedId && 'word_id' in selectedId) {
       res = wordsAndPhrases.find(
         (wap) =>
-          wap.__typename === 'WordTranslations' &&
+          wap.__typename === 'MapWordTranslations' &&
           wap.word_id === selectedId.word_id,
       );
     } else if (selectedId && 'phrase_id' in selectedId) {
@@ -126,7 +125,7 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
                   key={i}
                   wordTranslated={omw}
                   onClick={() => {
-                    omw.__typename === 'WordTranslations' &&
+                    omw.__typename === 'MapWordTranslations' &&
                       setSelectedId({ word_id: omw.word_id });
                     omw.__typename === 'MapPhraseTranslations' &&
                       setSelectedId({ phrase_id: omw.phrase_id });

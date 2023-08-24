@@ -24,14 +24,11 @@ import {
   getWordToWordTranslationListByFromWordDefinitionId,
 } from './sql-string';
 import { WordsService } from '../words/words.service';
-import {
-  WordTranslations,
-  WordUpsertInput,
-  WordWithVotes,
-} from '../words/types';
+import { WordUpsertInput } from '../words/types';
 import { PoolClient } from 'pg';
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 import { LanguageInput } from 'src/components/common/types';
+import { MapWordTranslations, MapWordWithVotes } from '../maps/types';
 
 @Injectable()
 export class WordToWordTranslationsService {
@@ -303,9 +300,9 @@ export class WordToWordTranslationsService {
   }
 
   chooseBestTranslation(
-    wordTranslated: WordTranslations,
+    wordTranslated: MapWordTranslations,
     langRestrictions?: LanguageInput,
-  ): WordWithVotes {
+  ): MapWordWithVotes {
     const res = wordTranslated?.translations?.reduce((bestTr, currTr) => {
       if (
         langRestrictions?.language_code &&
@@ -340,7 +337,7 @@ export class WordToWordTranslationsService {
         return currTr;
       }
       return bestTr;
-    }, {} as WordWithVotes);
+    }, {} as MapWordWithVotes);
     return res;
   }
 

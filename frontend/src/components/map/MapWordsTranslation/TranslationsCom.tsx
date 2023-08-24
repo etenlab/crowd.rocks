@@ -6,15 +6,14 @@ import { IonButton, IonIcon, IonInput, useIonToast } from '@ionic/react';
 import { chatbubbleEllipses } from 'ionicons/icons';
 import { VoteButtonsVertical } from '../../common/VoteButtonsVertical/VoteButtonsVertical';
 import {
-  // MapPhraseTranslations,
-  // MapPhraseWithVotes,
-  // WordTranslations,
-  // WordWithVote,
   useToggleTranslationVoteStatusMutation,
   useUpsertTranslationFromWordAndDefinitionlikeStringMutation,
 } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
-import { WordOrPhraseWithValueAndTranslations } from '../hooks/useMapTranslationTools';
+import {
+  WordOrPhraseWithValueAndTranslations,
+  WordOrPhraseWithVotesAndValue,
+} from '../hooks/useMapTranslationTools';
 import { StringContentTypes, stingType } from '../../../common/utility';
 
 interface TranslationsComProps {
@@ -135,14 +134,17 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
             })
             .map((tr, i) => (
               <StTranslationDiv key={i}>
-                <WordOrPhraseCard value={tr.value} definition={tr.definition} />
+                <WordOrPhraseCard
+                  value={(tr as WordOrPhraseWithVotesAndValue).value} // typing is somehave have lost after .sort
+                  definition={tr.definition}
+                />
                 <VoteButtonsVertical
                   onVoteUpClick={() =>
                     handleVoteClick(
                       tr.translation_id,
                       wordOrPhraseWithTranslations.__typename ===
-                        'WordTranslations',
-                      tr.__typename === 'WordWithVotes',
+                        'MapWordTranslations',
+                      tr.__typename === 'MapWordWithVotes',
                       true,
                     )
                   }
@@ -150,8 +152,8 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
                     handleVoteClick(
                       tr.translation_id,
                       wordOrPhraseWithTranslations.__typename ===
-                        'WordTranslations',
-                      tr.__typename === 'WordWithVotes',
+                        'MapWordTranslations',
+                      tr.__typename === 'MapWordWithVotes',
                       false,
                     )
                   }
@@ -173,7 +175,13 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
           labelPlacement="floating"
           ref={newDefinitionRef}
         />
-        <StButton onClick={() => handleNewTranslation(true)}>
+        <StButton
+          onClick={() =>
+            handleNewTranslation(
+              wordOrPhraseWithTranslations.__typename === 'MapWordTranslations',
+            )
+          }
+        >
           {tr('Submit')}
         </StButton>
       </StNewTranslationDiv>

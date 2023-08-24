@@ -23,13 +23,13 @@ export const TranslatedCards = ({
 
   let textOriginal = '';
   let textTranslated = '';
-  if (wordOrPhraseTranslated.__typename === 'WordTranslations') {
+  if (wordOrPhraseTranslated.__typename === 'MapWordTranslations') {
     textOriginal = wordOrPhraseTranslated.word;
   } else if (wordOrPhraseTranslated.__typename === 'MapPhraseTranslations') {
     textOriginal = wordOrPhraseTranslated.phrase;
   }
 
-  if (wordBestTranslation.__typename === 'WordWithVotes') {
+  if (wordBestTranslation.__typename === 'MapWordWithVotes') {
     textTranslated = wordBestTranslation.word;
   } else if (wordBestTranslation.__typename === 'MapPhraseWithVotes') {
     textTranslated = wordBestTranslation.phrase;

@@ -1,12 +1,14 @@
-import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
-import { WordTranslations } from '../words/types';
+import {
+  createUnionType,
+  Field,
+  ID,
+  InputType,
+  ObjectType,
+} from '@nestjs/graphql';
 import { LanguageInput, LanguageOutput } from 'src/components/common/types';
 import { GenericOutput } from '../../common/types';
-import {
-  PhraseToPhraseTranslation,
-  TranslationWithVote,
-} from '../translations/types';
 import { Phrase } from '../phrases/types';
+import { Word } from '../words/types';
 
 @ObjectType()
 export class MapFileOutput {
@@ -71,7 +73,7 @@ export class GetOrigMapWordsInput {
 
 @ObjectType()
 export class GetOrigMapWordsOutput {
-  @Field(() => [WordTranslations]) origMapWords: WordTranslations[];
+  @Field(() => [MapWordTranslations]) origMapWords: MapWordTranslations[];
 }
 @InputType()
 export class GetOrigMapPhrasesInput {
@@ -108,14 +110,49 @@ export class MapPhraseWithDefinition extends Phrase {
   @Field(() => String, { nullable: true }) definition: string;
   @Field(() => String, { nullable: true }) definition_id: string;
 }
+
+// todo: rename to MapPhraseAsTranslationWithVotes
 @ObjectType()
 export class MapPhraseWithVotes extends MapPhraseWithDefinition {
   @Field(() => String) up_votes: string;
   @Field(() => String) down_votes: string;
   @Field(() => String) translation_id: string;
 }
+
+const MapWordOrPhraseTranslationWithVotes = createUnionType({
+  name: 'MapWordOrPhraseTranslationWithVotes',
+  types: () => [MapPhraseWithVotes, MapWordWithVotes],
+  resolveType(value) {
+    if (value.phrase_id) {
+      return MapPhraseWithVotes;
+    }
+    return MapWordWithVotes;
+  },
+});
+
 @ObjectType()
 export class MapPhraseTranslations extends MapPhraseWithDefinition {
-  @Field(() => [MapPhraseWithVotes], { nullable: true })
-  translations?: MapPhraseWithVotes[];
+  @Field(() => [MapWordOrPhraseTranslationWithVotes], { nullable: true })
+  translations?: Array<MapPhraseWithVotes | MapWordWithVotes>;
+}
+
+// word types
+
+@ObjectType()
+export class MapWordWithDefinition extends Word {
+  @Field(() => String, { nullable: true }) definition: string;
+  @Field(() => String, { nullable: true }) definition_id: string;
+}
+
+@ObjectType()
+export class MapWordWithVotes extends MapWordWithDefinition {
+  @Field(() => String) up_votes: string;
+  @Field(() => String) down_votes: string;
+  @Field(() => String) translation_id: string;
+}
+
+@ObjectType()
+export class MapWordTranslations extends MapWordWithDefinition {
+  @Field(() => [MapWordWithVotes], { nullable: true })
+  translations?: MapWordWithVotes[];
 }

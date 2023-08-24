@@ -207,7 +207,7 @@ export type GetOrigMapWordsInput = {
 
 export type GetOrigMapWordsOutput = {
   __typename?: 'GetOrigMapWordsOutput';
-  origMapWords: Array<WordTranslations>;
+  origMapWords: Array<MapWordTranslations>;
 };
 
 export type GetOrigMapsListOutput = {
@@ -294,7 +294,7 @@ export type MapPhraseTranslations = {
   language_code: Scalars['String']['output'];
   phrase: Scalars['String']['output'];
   phrase_id: Scalars['ID']['output'];
-  translations?: Maybe<Array<MapPhraseWithVotes>>;
+  translations?: Maybe<Array<MapWordOrPhraseTranslationWithVotes>>;
 };
 
 export type MapPhraseWithVotes = {
@@ -315,6 +315,34 @@ export type MapUploadOutput = {
   __typename?: 'MapUploadOutput';
   error: ErrorType;
   mapFileOutput: MapFileOutput;
+};
+
+export type MapWordOrPhraseTranslationWithVotes = MapPhraseWithVotes | MapWordWithVotes;
+
+export type MapWordTranslations = {
+  __typename?: 'MapWordTranslations';
+  definition?: Maybe<Scalars['String']['output']>;
+  definition_id?: Maybe<Scalars['String']['output']>;
+  dialect_code?: Maybe<Scalars['String']['output']>;
+  geo_code?: Maybe<Scalars['String']['output']>;
+  language_code: Scalars['String']['output'];
+  translations?: Maybe<Array<MapWordWithVotes>>;
+  word: Scalars['String']['output'];
+  word_id: Scalars['ID']['output'];
+};
+
+export type MapWordWithVotes = {
+  __typename?: 'MapWordWithVotes';
+  definition?: Maybe<Scalars['String']['output']>;
+  definition_id?: Maybe<Scalars['String']['output']>;
+  dialect_code?: Maybe<Scalars['String']['output']>;
+  down_votes: Scalars['String']['output'];
+  geo_code?: Maybe<Scalars['String']['output']>;
+  language_code: Scalars['String']['output'];
+  translation_id: Scalars['String']['output'];
+  up_votes: Scalars['String']['output'];
+  word: Scalars['String']['output'];
+  word_id: Scalars['ID']['output'];
 };
 
 export type Mutation = {
@@ -1636,18 +1664,6 @@ export type WordTrVoteStatusOutputRow = {
   vote_status?: Maybe<WordTrVoteStatus>;
 };
 
-export type WordTranslations = {
-  __typename?: 'WordTranslations';
-  definition?: Maybe<Scalars['String']['output']>;
-  definition_id?: Maybe<Scalars['String']['output']>;
-  dialect_code?: Maybe<Scalars['String']['output']>;
-  geo_code?: Maybe<Scalars['String']['output']>;
-  language_code: Scalars['String']['output'];
-  translations?: Maybe<Array<WordWithVotes>>;
-  word: Scalars['String']['output'];
-  word_id: Scalars['ID']['output'];
-};
-
 export type WordUpsertInput = {
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
@@ -1727,20 +1743,6 @@ export type WordWithVoteOutput = {
   __typename?: 'WordWithVoteOutput';
   error: ErrorType;
   word_with_vote?: Maybe<WordWithVote>;
-};
-
-export type WordWithVotes = {
-  __typename?: 'WordWithVotes';
-  definition?: Maybe<Scalars['String']['output']>;
-  definition_id?: Maybe<Scalars['String']['output']>;
-  dialect_code?: Maybe<Scalars['String']['output']>;
-  down_votes: Scalars['String']['output'];
-  geo_code?: Maybe<Scalars['String']['output']>;
-  language_code: Scalars['String']['output'];
-  translation_id: Scalars['String']['output'];
-  up_votes: Scalars['String']['output'];
-  word: Scalars['String']['output'];
-  word_id: Scalars['ID']['output'];
 };
 
 export type SessionFieldsFragment = { __typename?: 'Session', user_id: string, token: string, avatar: string, avatar_url?: string | null };
@@ -1870,6 +1872,10 @@ export type EmailResponseMutationVariables = Exact<{
 
 export type EmailResponseMutation = { __typename?: 'Mutation', emailResponseResolver: { __typename?: 'EmailResponseOutput', error: ErrorType } };
 
+export type MapPhraseWithVotesFragmentFragment = { __typename?: 'MapPhraseWithVotes', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string };
+
+export type WordWithVotesFragmentFragment = { __typename?: 'MapWordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string };
+
 export type GetOrigMapWordsQueryVariables = Exact<{
   original_map_id?: InputMaybe<Scalars['ID']['input']>;
   o_language_code?: InputMaybe<Scalars['String']['input']>;
@@ -1879,7 +1885,7 @@ export type GetOrigMapWordsQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'WordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'WordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
+export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'MapWordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'MapWordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
 
 export type GetOrigMapPhrasesQueryVariables = Exact<{
   original_map_id?: InputMaybe<Scalars['ID']['input']>;
@@ -1890,7 +1896,7 @@ export type GetOrigMapPhrasesQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapPhrasesQuery = { __typename?: 'Query', getOrigMapPhrases: { __typename?: 'GetOrigMapPhrasesOutput', origMapPhrases: Array<{ __typename?: 'MapPhraseTranslations', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'MapPhraseWithVotes', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
+export type GetOrigMapPhrasesQuery = { __typename?: 'Query', getOrigMapPhrases: { __typename?: 'GetOrigMapPhrasesOutput', origMapPhrases: Array<{ __typename?: 'MapPhraseTranslations', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'MapPhraseWithVotes', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string } | { __typename?: 'MapWordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
 
 export type GetAllMapsListQueryVariables = Exact<{
   lang?: InputMaybe<LanguageInput>;
@@ -2339,6 +2345,34 @@ export const WordVoteStatusFragmentFragmentDoc = gql`
   word_id
   downvotes
   upvotes
+}
+    `;
+export const MapPhraseWithVotesFragmentFragmentDoc = gql`
+    fragment MapPhraseWithVotesFragment on MapPhraseWithVotes {
+  phrase
+  phrase_id
+  language_code
+  dialect_code
+  geo_code
+  definition
+  definition_id
+  up_votes
+  down_votes
+  translation_id
+}
+    `;
+export const WordWithVotesFragmentFragmentDoc = gql`
+    fragment WordWithVotesFragment on MapWordWithVotes {
+  word
+  word_id
+  language_code
+  dialect_code
+  geo_code
+  definition
+  definition_id
+  up_votes
+  down_votes
+  translation_id
 }
     `;
 export const PhraseFragmentFragmentDoc = gql`
@@ -3238,21 +3272,14 @@ export const GetOrigMapPhrasesDocument = gql`
       definition
       definition_id
       translations {
-        phrase
-        phrase_id
-        language_code
-        dialect_code
-        geo_code
-        definition
-        definition_id
-        up_votes
-        down_votes
-        translation_id
+        ...MapPhraseWithVotesFragment
+        ...WordWithVotesFragment
       }
     }
   }
 }
-    `;
+    ${MapPhraseWithVotesFragmentFragmentDoc}
+${WordWithVotesFragmentFragmentDoc}`;
 
 /**
  * __useGetOrigMapPhrasesQuery__
@@ -4853,6 +4880,10 @@ export type AddWordAsTranslationForWordMutationOptions = Apollo.BaseMutationOpti
       }
       const result: PossibleTypesResultData = {
   "possibleTypes": {
+    "MapWordOrPhraseTranslationWithVotes": [
+      "MapPhraseWithVotes",
+      "MapWordWithVotes"
+    ],
     "SiteTextDefinition": [
       "SiteTextPhraseDefinition",
       "SiteTextWordDefinition"
@@ -4952,6 +4983,8 @@ export const namedOperations = {
     WordWithVoteFragment: 'WordWithVoteFragment',
     DefinitionVoteStatusFragment: 'DefinitionVoteStatusFragment',
     WordVoteStatusFragment: 'WordVoteStatusFragment',
+    MapPhraseWithVotesFragment: 'MapPhraseWithVotesFragment',
+    WordWithVotesFragment: 'WordWithVotesFragment',
     PhraseFragment: 'PhraseFragment',
     PhraseDefinitionFragment: 'PhraseDefinitionFragment',
     PhraseWithDefinitionsFragment: 'PhraseWithDefinitionsFragment',

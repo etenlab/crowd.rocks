@@ -183,7 +183,7 @@ input GetOrigMapWordsInput {
 }
 
 type GetOrigMapWordsOutput {
-  origMapWords: [WordTranslations!]!
+  origMapWords: [MapWordTranslations!]!
 }
 
 type GetOrigMapsListOutput {
@@ -262,7 +262,7 @@ type MapPhraseTranslations {
   language_code: String!
   phrase: String!
   phrase_id: ID!
-  translations: [MapPhraseWithVotes!]
+  translations: [MapWordOrPhraseTranslationWithVotes!]
 }
 
 type MapPhraseWithVotes {
@@ -281,6 +281,32 @@ type MapPhraseWithVotes {
 type MapUploadOutput {
   error: ErrorType!
   mapFileOutput: MapFileOutput!
+}
+
+union MapWordOrPhraseTranslationWithVotes = MapPhraseWithVotes | MapWordWithVotes
+
+type MapWordTranslations {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  translations: [MapWordWithVotes!]
+  word: String!
+  word_id: ID!
+}
+
+type MapWordWithVotes {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  down_votes: String!
+  geo_code: String
+  language_code: String!
+  translation_id: String!
+  up_votes: String!
+  word: String!
+  word_id: ID!
 }
 
 type Mutation {
@@ -1025,17 +1051,6 @@ type WordTrVoteStatusOutputRow {
   vote_status: WordTrVoteStatus
 }
 
-type WordTranslations {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  geo_code: String
-  language_code: String!
-  translations: [WordWithVotes!]
-  word: String!
-  word_id: ID!
-}
-
 input WordUpsertInput {
   dialect_code: String
   geo_code: String
@@ -1106,17 +1121,4 @@ type WordWithVoteListOutput {
 type WordWithVoteOutput {
   error: ErrorType!
   word_with_vote: WordWithVote
-}
-
-type WordWithVotes {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  down_votes: String!
-  geo_code: String
-  language_code: String!
-  translation_id: String!
-  up_votes: String!
-  word: String!
-  word_id: ID!
 }

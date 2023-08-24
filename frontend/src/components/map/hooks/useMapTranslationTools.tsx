@@ -2,8 +2,8 @@ import { useCallback } from 'react';
 import {
   MapPhraseTranslations,
   MapPhraseWithVotes,
-  WordTranslations,
-  WordWithVotes,
+  MapWordTranslations,
+  MapWordWithVotes,
 } from '../../../generated/graphql';
 
 export interface ITranslationsVotes {
@@ -13,51 +13,23 @@ export interface ITranslationsVotes {
     | undefined;
 }
 
+export type WordOrPhraseWithVotesAndValue =
+  | (MapWordWithVotes & {
+      value?: string | null | undefined;
+    })
+  | (MapPhraseWithVotes & {
+      value?: string | null | undefined;
+    });
+
 export type WordOrPhraseWithValueAndTranslations = (
-  | WordTranslations
+  | MapWordTranslations
   | MapPhraseTranslations
 ) & {
   value?: string | null | undefined;
-  translations: Array<
-    (WordWithVotes | MapPhraseWithVotes) & {
-      value?: string | null | undefined;
-    }
-  >;
+  translations: Array<WordOrPhraseWithVotesAndValue>;
 };
 
 export function useMapTranslationTools() {
-  // const apolloClient = useApolloClient();
-
-  // const sendMapFile = useCallback(
-  //   async (
-  //     file: File,
-  //     afterSuccess: (uploadedFileData: {
-  //       id: string;
-  //       fileName: string;
-  //     }) => void,
-  //     afterFail: (error: Error) => void,
-  //   ): Promise<void> => {
-  //     apolloClient
-  //       .mutate({
-  //         mutation: UPLOAD_FILE_MUTATION,
-  //         variables: {
-  //           file,
-  //         },
-  //         refetchQueries: ['GetAllMapsList'],
-  //       })
-  //       .then((res) => {
-  //         console.log(`Map file (name:${file.name}) is uploaded.`);
-  //         const { original_map_id, map_file_name } = res.data.mapUpload;
-  //         afterSuccess({ id: original_map_id, fileName: map_file_name });
-  //       })
-  //       .catch((error) => {
-  //         console.log(error);
-  //         afterFail(error);
-  //       });
-  //   },
-  //   [apolloClient],
-  // );
-
   const chooseBestTranslation = useCallback(
     <T extends ITranslationsVotes>(wordTranslated: T) => {
       const res = wordTranslated?.translations?.reduce(
@@ -78,9 +50,9 @@ export function useMapTranslationTools() {
 
           return bestTr;
         },
-        {} as WordWithVotes | MapPhraseWithVotes,
+        {} as MapWordWithVotes | MapPhraseWithVotes,
       );
-      return res as WordWithVotes | MapPhraseWithVotes;
+      return res as MapWordWithVotes | MapPhraseWithVotes;
     },
     [],
   );
@@ -90,7 +62,7 @@ export function useMapTranslationTools() {
       const res: WordOrPhraseWithValueAndTranslations[] = [];
       wordOrPhrases?.forEach((wordOrPhrase) => {
         let mainValue = '';
-        if (wordOrPhrase.__typename === 'WordTranslations') {
+        if (wordOrPhrase.__typename === 'MapWordTranslations') {
           mainValue = wordOrPhrase.word;
         } else if (wordOrPhrase.__typename === 'MapPhraseTranslations') {
           mainValue = wordOrPhrase.phrase;
@@ -98,7 +70,7 @@ export function useMapTranslationTools() {
 
         if (wordOrPhrase?.translations) {
           wordOrPhrase?.translations.forEach((tr, i) => {
-            if (tr.__typename === 'WordWithVotes') {
+            if (tr.__typename === 'MapWordWithVotes') {
               wordOrPhrase.translations[i] = { ...tr, value: tr.word || '' };
             } else if (tr.__typename === 'MapPhraseWithVotes') {
               wordOrPhrase.translations[i] = { ...tr, value: tr.phrase || '' };

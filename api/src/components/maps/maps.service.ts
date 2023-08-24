@@ -10,12 +10,13 @@ import {
   GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
   MapFileOutput,
+  MapWordTranslations,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
 import { WordsService } from '../words/words.service';
 import { MapsRepository } from './maps.repository';
-import { WordTranslations, WordUpsertInput } from '../words/types';
+import { WordUpsertInput } from '../words/types';
 import { LanguageInfo } from '../../common/types';
 import { DEFAULT_NEW_MAP_LANGUAGE } from '../../common/const';
 import { PostgresService } from '../../core/postgres.service';
@@ -27,7 +28,6 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
-import { TranslationsService } from '../translations/translations.service';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
@@ -507,7 +507,7 @@ export class MapsService {
     }
   }
 
-  getLangFullTags(words: WordTranslations[]): Array<string> {
+  getLangFullTags(words: MapWordTranslations[]): Array<string> {
     const foundLangs: Array<string> = [];
     words.forEach((word) => {
       word.translations.forEach((tr) => {
