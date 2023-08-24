@@ -2,16 +2,16 @@
 
 The [map translation tool](https://crowd.rocks/US/en/1/maps/list) on crowd.rocks only works on specially processed `.svg` files. To designate the special processing we do on these maps, we change the file suffix to `.cf.svg`, which stands for "crowd friendly svg" file.  
 
-In order to map a 'normal' svg map crowd-friendly, there are a few changes that need to be made:  
-1. All translatable strings need to be in leaf nodes.  
+In order to make a 'normal' svg map crowd-friendly, there are a few changes that need to be made:  
+1. All translatable strings need to be in leaf nodes, not in any parent node.  
 1. Visual placement of strings on the map need to accommodate an increase in string size in the appropriate direction of expansion.  
-1. Abbreviations of any kind need to be expanded so translators know what they are.  
+1. Abbreviations of any kind should be expanded so translators know what they are.  
 
 ## Translatable Strings in Leaf Nodes
 
 The map parser has been kept to be as simple as possible, since there are too many ways any given tool may choose to construct an svg document. It would be too difficult to accommodate every possible svg file.   
 
-The current svg parser only creates a translatable string from leaf nodes, and will never combine two or more leaf nodes to create a translatable string. The current leaf nodes it looks for are `<text>` and `<tspan>`. If a `<text>` node has children, any string content in that node will be ignored.   
+The current svg parser only creates a translatable string from leaf nodes, and will never combine two or more leaf nodes to create a translatable string. The current leaf nodes it looks for are `<text>` and `<tspan>` tags. If a `<text>` node has children, any string content in that node will be ignored.   
 
 Consider the following non-crowd-friendly snippet:  
 ```xml
