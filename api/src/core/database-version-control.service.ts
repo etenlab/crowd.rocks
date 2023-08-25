@@ -182,7 +182,18 @@ export class DatabaseVersionControlService {
   }
 
   async loadVersion2(): Promise<void> {
-    // put v2 change scripts here
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase_translation_votes_count.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase_translation_votes_count.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word_translation_votes_count.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase_translation_votes_count.sql',
+    );
 
     await this.setVersionNumber(2);
   }
