@@ -21,13 +21,10 @@ export type WordOrPhraseWithVotesAndValue =
       value?: string | null | undefined;
     });
 
-export type WordOrPhraseWithValueAndTranslations = (
-  | MapWordTranslations
-  | MapPhraseTranslations
-) & {
+export type WordOrPhraseWithValueAndTranslations = {
   value?: string | null | undefined;
   translations: Array<WordOrPhraseWithVotesAndValue>;
-};
+} & (MapWordTranslations | MapPhraseTranslations);
 
 export function useMapTranslationTools() {
   const chooseBestTranslation = useCallback(

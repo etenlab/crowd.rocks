@@ -2,17 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input AddWordAsTranslationForWordInput {
-  originalDefinitionId: String!
-  translationDefinition: String!
-  translationWord: WordUpsertInput!
-}
-
-type AddWordAsTranslationForWordOutput {
-  error: ErrorType!
-  wordTranslationId: String!
-}
-
 input AvatarUpdateInput {
   avatar: String!
 }
@@ -310,7 +299,6 @@ type MapWordWithVotes {
 }
 
 type Mutation {
-  addWordAsTranslationForWord(input: AddWordAsTranslationForWordInput!): AddWordAsTranslationForWordOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   login(input: LoginInput!): LoginOutput!
@@ -336,7 +324,6 @@ type Mutation {
   toggleTranslationVoteStatus(from_definition_type_is_word: Boolean!, to_definition_type_is_word: Boolean!, translation_id: ID!, vote: Boolean!): TranslationVoteStatusOutputRow!
   toggleWordDefinitonVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
-  toggleWordTrVoteStatus(input: WordTrVoteStatusInput!): WordTrVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
   upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): TranslationUpsertOutput!
@@ -1039,11 +1026,6 @@ type WordTrVoteStatus {
   downvotes: Int!
   upvotes: Int!
   word_to_word_translation_id: String!
-}
-
-input WordTrVoteStatusInput {
-  vote: Boolean!
-  word_to_word_translation_id: ID!
 }
 
 type WordTrVoteStatusOutputRow {

@@ -10,6 +10,7 @@ import {
   GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
   MapFileOutput,
+  MapPhraseTranslations,
   MapWordTranslations,
 } from './types';
 import { type INode } from 'svgson';
@@ -28,6 +29,7 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
+import { DefinitionsService } from '../definitions/definitions.service';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
@@ -258,7 +260,7 @@ export class MapsService {
 
   /**
    * Since we must concatenate word if it is divided into several subtags inside some texty tag,
-   * we also have transformed file with replaced (concatenated) each texty tag.
+   * so as result we have transformed file with replaced (concatenated) each texty tag.
    */
   parseSvgMapString(originalSvgString: string): {
     transformedSvgINode: INode;
@@ -345,19 +347,66 @@ export class MapsService {
     input: GetOrigMapPhrasesInput,
   ): Promise<GetOrigMapPhrasesOutput> {
     const { original_map_id, ...langRestrictions } = input;
-    return this.mapsRepository.getOrigMapPhrases(
+    const origMapPhrases = await this.mapsRepository.getOrigMapPhrases(
       original_map_id,
       langRestrictions,
     );
+    if (!this.checkForLanguageCodePresence(origMapPhrases.origMapPhrases)) {
+      throw new Error('Phrase or its translation doesnt have language code');
+    }
+
+    return origMapPhrases;
   }
 
-  async translateMapsWithWordDefinitionId(
-    wordDefinitionId: string,
+  checkForLanguageCodePresence(
+    origMapWordsOrPhrases: Array<MapWordTranslations | MapPhraseTranslations>,
+  ): boolean {
+    origMapWordsOrPhrases.forEach((wordOrPhrase) => {
+      if (!wordOrPhrase.language_code) {
+        console.log(
+          `Word or phrase ${JSON.stringify(
+            wordOrPhrase,
+          )} doesn't have language tag `,
+        );
+        return false;
+      }
+      wordOrPhrase.translations.forEach((tr) => {
+        if (!tr.language_code) {
+          console.log(
+            `Translation ${JSON.stringify(tr)} doesn't have language tag `,
+          );
+          return false;
+        }
+      });
+    });
+    return true;
+  }
+
+  async translateMapsWithTranslationId({
+    translation_id,
+    from_definition_type_is_word,
+    to_definition_type_is_word,
+    token,
+  }: {
+    translation_id: string;
+    from_definition_type_is_word: boolean;
+    to_definition_type_is_word: boolean;
+    token: string;
+  }) {
+    const origMapIds =
+      await this.mapsRepository.getOrigMapsIdsByTranslationData({
+        translation_id,
+        from_definition_type_is_word,
+        to_definition_type_is_word,
+      });
+
+    return this.translateOrigMapsByIds(origMapIds, token);
+  }
+
+  async translateOrigMapsByIds(
+    origMapIds: Array<string>,
     token: string,
   ): Promise<Array<string>> {
-    const origMapIds = await this.mapsRepository.getOrigMapIdsByWordDefinition(
-      wordDefinitionId,
-    );
     const translatedMapsIds: string[] = [];
     for (const origMapId of origMapIds) {
       const translatedToSomeLanguages = await this.translateMapAndSave(
@@ -367,6 +416,28 @@ export class MapsService {
       translatedMapsIds.push(...translatedToSomeLanguages);
     }
     return translatedMapsIds;
+  }
+
+  async translateMapsWithDefinitionId({
+    from_definition_id,
+    from_definition_type_is_word,
+    token,
+  }: {
+    from_definition_id: string;
+    from_definition_type_is_word: boolean;
+    token: string;
+  }): Promise<Array<string>> {
+    let origMapIds = [];
+    if (from_definition_type_is_word) {
+      origMapIds = await this.mapsRepository.getOrigMapsIdsByWordDefinition(
+        from_definition_id,
+      );
+    } else {
+      origMapIds = await this.mapsRepository.getOrigMapsIdsByPhraseDefinition(
+        from_definition_id,
+      );
+    }
+    return this.translateOrigMapsByIds(origMapIds, token);
   }
 
   async translateMapAndSave(
@@ -382,6 +453,14 @@ export class MapsService {
       original_map_id: origMapId,
     });
 
+    const { origMapPhrases } = await this.getOrigMapPhrases({
+      original_map_id: origMapId,
+    });
+
+    const origMapWordsAndPhrases: Array<
+      MapWordTranslations | MapPhraseTranslations
+    > = [...origMapWords, ...origMapPhrases];
+
     let targetLanguagesFullTags: Array<string>;
     if (toLang) {
       targetLanguagesFullTags = [
@@ -392,7 +471,7 @@ export class MapsService {
         }),
       ];
     } else {
-      targetLanguagesFullTags = this.getLangFullTags(origMapWords);
+      targetLanguagesFullTags = this.getLangFullTags(origMapWordsAndPhrases);
     }
 
     for (const languageFullTag of targetLanguagesFullTags) {
@@ -406,19 +485,49 @@ export class MapsService {
         source: string;
         translation: string;
       }> = [];
-      for (const origWordTranslations of origMapWords) {
-        const origWordTranslated =
+      for (const origMapWordOrPhrase of origMapWordsAndPhrases) {
+        const origWordOrPhraseTranslated =
           this.wordToWordTranslationsService.chooseBestTranslation(
-            origWordTranslations,
+            origMapWordOrPhrase,
             { language_code, dialect_code, geo_code },
           );
-        translations.push({
-          source: origWordTranslations.word,
-          translation:
-            'word' in origWordTranslated
-              ? origWordTranslated.word || ''
-              : origWordTranslated.phrase || '',
-        });
+        if ('word' in origMapWordOrPhrase) {
+          if (
+            'word' in origWordOrPhraseTranslated &&
+            origWordOrPhraseTranslated.word.length > 0
+          ) {
+            translations.push({
+              source: origMapWordOrPhrase.word,
+              translation: origWordOrPhraseTranslated.word,
+            });
+          } else if (
+            'phrase' in origWordOrPhraseTranslated &&
+            origWordOrPhraseTranslated.phrase.length > 0
+          ) {
+            translations.push({
+              source: origMapWordOrPhrase.word,
+              translation: origWordOrPhraseTranslated.phrase,
+            });
+          }
+        } else {
+          if (
+            'word' in origWordOrPhraseTranslated &&
+            origWordOrPhraseTranslated.word.length > 0
+          ) {
+            translations.push({
+              source: origMapWordOrPhrase.phrase,
+              translation: origWordOrPhraseTranslated.word,
+            });
+          } else if (
+            'phrase' in origWordOrPhraseTranslated &&
+            origWordOrPhraseTranslated.phrase.length > 0
+          ) {
+            translations.push({
+              source: origMapWordOrPhrase.phrase,
+              translation: origWordOrPhraseTranslated.phrase,
+            });
+          }
+        }
       }
 
       const { translatedMap } = await this.translateMapString(
@@ -448,7 +557,7 @@ export class MapsService {
     }>,
   ): MapTranslationResult | undefined {
     const { transformedSvgINode } = this.parseSvgMapString(sourceSvgString);
-    this.replaceINodeTagValuesWordByWord(transformedSvgINode, translations);
+    this.replaceINodeTagValues(transformedSvgINode, translations);
     const translatedMap = stringify(transformedSvgINode);
     return { translatedMap, translations };
   }
@@ -471,33 +580,6 @@ export class MapsService {
     });
   }
 
-  /**
-   * Mutetes INode sturcture - replaces subnodes' each word using provided valuesToReplace
-   * @param iNodeStructure INode structure to replace values inside it.
-   * @param valuesToReplace
-   */
-  replaceINodeTagValuesWordByWord(
-    iNodeStructure: INode,
-    valuesToReplace: { source: string; translation: string }[],
-  ): void {
-    this.iterateOverINode(iNodeStructure, SKIP_INODE_NAMES, (node) => {
-      const nodeWords = node.value
-        .split(WORDS_SEPARATOR)
-        .map((w) => w.trim())
-        .filter((w) => w.length > 1);
-      nodeWords.forEach((nodeWord, i) => {
-        const translationIdx = valuesToReplace.findIndex(
-          ({ source }) => source === nodeWord,
-        );
-        if (translationIdx >= 0) {
-          nodeWords[i] = valuesToReplace[translationIdx].translation;
-        }
-      });
-      const newNodeText = nodeWords.join(WORDS_SEPARATOR);
-      node.value = newNodeText;
-    });
-  }
-
   iterateOverINode(
     node: INode,
     skipNodeNames: string[],
@@ -510,10 +592,18 @@ export class MapsService {
     }
   }
 
-  getLangFullTags(words: MapWordTranslations[]): Array<string> {
+  getLangFullTags(
+    wordsOrPhrases: Array<MapWordTranslations | MapPhraseTranslations>,
+  ): Array<string> {
     const foundLangs: Array<string> = [];
-    words.forEach((word) => {
-      word.translations.forEach((tr) => {
+    wordsOrPhrases.forEach((wordOrPhrase) => {
+      wordOrPhrase.translations.forEach((tr) => {
+        if (!tr.language_code)
+          throw new Error(
+            `word or phrase translation id ${JSON.stringify(
+              tr,
+            )} does't have language tag`,
+          );
         const currTag = subTags2Tag({
           lang: tr.language_code,
           region: tr.geo_code,
@@ -527,56 +617,3 @@ export class MapsService {
     return foundLangs;
   }
 }
-
-// async getOrigMapPhrases(
-//   input: GetOrigMapPhrasesInput,
-// ): Promise<GetOrigMapPhrasesOutput> {
-//   const { original_map_id, ...langRestrictions } = input;
-//   const origMapPhrasesIds = await this.mapsRepository.getOrigMapPhraseIds(
-//     original_map_id,
-//     langRestrictions,
-//   );
-//   const res: GetOrigMapPhrasesOutput = { origMapPhraseTranslations: [] };
-//   for (const origMapPhraseId of origMapPhrasesIds) {
-//     const origMapPhrasesDefinitions =
-//       await this.phraseDefinitionsService.getPhraseDefinitionsByPhraseId(
-//         Number(origMapPhraseId),
-//       );
-//     for (const origMapPhrasesDefinition of origMapPhrasesDefinitions.phrase_definition_list) {
-//       const translations: TranslationWithVoteListOutput =
-//         await this.translationsService.getTranslationsByFromDefinitionId(
-//           Number(origMapPhrasesDefinition.phrase_definition_id),
-//           false,
-//           {
-//             language_code: langRestrictions.o_language_code,
-//             dialect_code: langRestrictions.o_dialect_code,
-//             geo_code: langRestrictions.o_geo_code,
-//           },
-//         );
-
-//       translations.translation_with_vote_list.forEach(t => {
-
-//         if (t instanceof PhraseToPhraseTranslationWithVote) {
-//           const t_phrase = t.from_phrase_definition.phrase.phrase
-//         }
-
-//       });
-
-//       res.origMapPhraseTranslations.push({
-//         phrase: translations.translation_with_vote_list[0].from_phrase_definition.
-//       })
-//     }
-//   }
-
-//   return {
-//     _origMapPhraseTranslations: [
-//       {
-//         phrase: 'asdf',
-//         definition: 'asdf',
-//         definition_id: '1',
-//         phrase_id: '1',
-//         translations: [{}],
-//       },
-//     ],
-//   };
-// }

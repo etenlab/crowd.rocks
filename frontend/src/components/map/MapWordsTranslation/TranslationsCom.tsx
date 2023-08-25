@@ -10,10 +10,7 @@ import {
   useUpsertTranslationFromWordAndDefinitionlikeStringMutation,
 } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
-import {
-  WordOrPhraseWithValueAndTranslations,
-  WordOrPhraseWithVotesAndValue,
-} from '../hooks/useMapTranslationTools';
+import { WordOrPhraseWithValueAndTranslations } from '../hooks/useMapTranslationTools';
 import { StringContentTypes, stingType } from '../../../common/utility';
 
 interface TranslationsComProps {
@@ -135,7 +132,7 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
             .map((tr, i) => (
               <StTranslationDiv key={i}>
                 <WordOrPhraseCard
-                  value={(tr as WordOrPhraseWithVotesAndValue).value} // typing is somehave have lost after .sort
+                  value={tr.value} // typing is somehave have lost after .sort
                   definition={tr.definition}
                 />
                 <VoteButtonsVertical

@@ -536,7 +536,7 @@ export class MapsRepository {
       );
 
       if (existingWordIdx >= 0) {
-        currTranslation.word_id &&
+        currTranslation.language_code &&
           words[existingWordIdx].translations.push(currTranslation);
       } else {
         words.push({
@@ -547,7 +547,7 @@ export class MapsRepository {
           geo_code: r.o_geo_code,
           definition: r.o_definition,
           definition_id: r.o_definition_id,
-          translations: currTranslation.word_id ? [currTranslation] : [],
+          translations: currTranslation.language_code ? [currTranslation] : [],
         });
       }
     });
@@ -571,7 +571,7 @@ export class MapsRepository {
       );
 
       if (existingWordIdx >= 0) {
-        currTranslation.phrase_id &&
+        currTranslation.language_code &&
           words[existingWordIdx].translations.push(currTranslation);
       } else {
         words.push({
@@ -582,7 +582,7 @@ export class MapsRepository {
           geo_code: r.o_geo_code,
           definition: r.o_definition,
           definition_id: r.o_definition_id,
-          translations: currTranslation.phrase_id ? [currTranslation] : [],
+          translations: currTranslation.language_code ? [currTranslation] : [],
         });
       }
     });
@@ -628,6 +628,9 @@ export class MapsRepository {
         ow.language_code as o_language_code,
         ow.dialect_code as o_dialect_code,
         ow.geo_code as o_geo_code,
+        tw.language_code as t_language_code,
+        tw.dialect_code as t_dialect_code,
+        tw.geo_code as t_geo_code,
         ptpt.to_phrase_definition_id,
         ptpt.phrase_to_phrase_translation_id,
         tphd.phrase_id as t_phrase_id,
@@ -666,6 +669,9 @@ export class MapsRepository {
         ow.language_code as o_language_code,
         ow.dialect_code as o_dialect_code,
         ow.geo_code as o_geo_code,
+        tw.language_code as t_language_code,
+        tw.dialect_code as t_dialect_code,
+        tw.geo_code as t_geo_code,
         ptwt.to_word_definition_id,
         ptwt.phrase_to_word_translation_id,
         twd.word_id as t_word_id,
@@ -696,8 +702,8 @@ export class MapsRepository {
 
     if (original_map_id) {
       params.push(original_map_id);
-      ptpt_sqlStr += ` and omw.original_map_id = $${params.length}`;
-      ptwt_sqlStr += ` and omw.original_map_id = $${params.length}`;
+      ptpt_sqlStr += ` and omph.original_map_id = $${params.length}`;
+      ptwt_sqlStr += ` and omph.original_map_id = $${params.length}`;
     }
     if (o_language_code) {
       params.push(o_language_code);
@@ -725,9 +731,9 @@ export class MapsRepository {
         phrase: r.t_phraselike_string,
         definition: r.t_definition,
         definition_id: r.t_definition_id,
-        language_code: t_language_code,
-        dialect_code: t_dialect_code,
-        geo_code: t_geo_code,
+        language_code: r.t_language_code,
+        dialect_code: r.t_dialect_code,
+        geo_code: r.t_geo_code,
         up_votes: r.up_votes_count || 0,
         down_votes: r.down_votes_count || 0,
         translation_id: r.phrase_to_phrase_translation_id,
@@ -738,7 +744,7 @@ export class MapsRepository {
           ph.definition_id === r.o_definition_id,
       );
       if (existingPhraseIdx >= 0) {
-        currTranslation.phrase_id &&
+        currTranslation.language_code &&
           phrases[existingPhraseIdx].translations.push(currTranslation);
       } else {
         phrases.push({
@@ -749,7 +755,7 @@ export class MapsRepository {
           geo_code: r.o_geo_code,
           definition: r.o_definition,
           definition_id: r.o_definition_id,
-          translations: currTranslation.phrase_id ? [currTranslation] : [],
+          translations: currTranslation.language_code ? [currTranslation] : [],
         });
       }
     });
@@ -760,9 +766,9 @@ export class MapsRepository {
         word: r.t_wordlike_string,
         definition: r.t_definition,
         definition_id: r.t_definition_id,
-        language_code: t_language_code,
-        dialect_code: t_dialect_code,
-        geo_code: t_geo_code,
+        language_code: r.t_language_code,
+        dialect_code: r.t_dialect_code,
+        geo_code: r.t_geo_code,
         up_votes: r.up_votes_count || 0,
         down_votes: r.down_votes_count || 0,
         translation_id: r.phrase_to_word_translation_id,
@@ -773,7 +779,7 @@ export class MapsRepository {
           ph.definition_id === r.o_definition_id,
       );
       if (existingPhraseIdx >= 0) {
-        currTranslation.word_id &&
+        currTranslation.language_code &&
           phrases[existingPhraseIdx].translations.push(currTranslation);
       } else {
         phrases.push({
@@ -784,7 +790,7 @@ export class MapsRepository {
           geo_code: r.o_geo_code,
           definition: r.o_definition,
           definition_id: r.o_definition_id,
-          translations: currTranslation.word_id ? [currTranslation] : [],
+          translations: currTranslation.language_code ? [currTranslation] : [],
         });
       }
     });
@@ -794,7 +800,7 @@ export class MapsRepository {
     };
   }
 
-  async getOrigMapIdsByWordDefinition(
+  async getOrigMapsIdsByWordDefinition(
     wordDefinitionId: string,
   ): Promise<string[]> {
     const params = [wordDefinitionId];
@@ -809,6 +815,82 @@ export class MapsRepository {
         omw.word_id = w.word_id 
       left join word_definitions wd on w.word_id = wd.word_id 
       where wd.word_definition_id  = $1
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    return resQ.rows.map((row) => row.original_map_id);
+  }
+
+  async getOrigMapsIdsByPhraseDefinition(
+    phraseDefinitionId: string,
+  ): Promise<string[]> {
+    const params = [phraseDefinitionId];
+    const sqlStr = `
+      select distinct
+        om.original_map_id
+      from
+        original_maps om
+      left join original_map_phrases omph on
+        om.original_map_id = omph.original_map_id
+      left join phrases ph on
+        omph.phrase_id = ph.phrase_id
+      left join phrase_definitions phd on ph.phrase_id = phd.phrase_id
+      where phd.phrase_definition_id  = $1
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    return resQ.rows.map((row) => row.original_map_id);
+  }
+
+  async getOrigMapsIdsByTranslationData({
+    translation_id,
+    from_definition_type_is_word,
+    to_definition_type_is_word,
+  }: {
+    translation_id: string;
+    from_definition_type_is_word: boolean;
+    to_definition_type_is_word: boolean;
+  }): Promise<string[]> {
+    const params: string[] = [translation_id];
+    let conditions = '';
+
+    if (from_definition_type_is_word && to_definition_type_is_word) {
+      conditions = ' and wtwt.word_to_word_translation_id = $1';
+    } else if (from_definition_type_is_word && !to_definition_type_is_word) {
+      conditions = ' and wtpt.word_to_phrase_translation_id = $1';
+    } else if (!from_definition_type_is_word && to_definition_type_is_word) {
+      conditions = ' and ptwt.phrase_to_word_translation_id = $1';
+    } else {
+      conditions = ' and ptpt.phrase_to_phrase_translation_id = $1';
+    }
+
+    const sqlStr = `
+      select distinct 
+        om.original_map_id
+      from
+        original_maps om
+-- phrases       
+      left join original_map_phrases omph on
+        om.original_map_id = omph.original_map_id
+      left join phrases oph on
+        omph.phrase_id = oph.phrase_id 
+      left join phrase_definitions ophd on 
+      	oph.phrase_id = ophd.phrase_id
+      left join phrase_to_phrase_translations ptpt on
+        ophd.phrase_definition_id = ptpt.from_phrase_definition_id
+      left join phrase_to_word_translations ptwt on
+        ophd.phrase_definition_id = ptwt.from_phrase_definition_id
+-- words
+      left join original_map_words omw on
+        om.original_map_id = omw.original_map_id
+      left join words ow on
+        omw.word_id = ow.word_id  
+      left join word_definitions owd on 
+      	ow.word_id = owd.word_id
+      left join word_to_phrase_translations wtpt on
+        owd.word_definition_id = wtpt.from_word_definition_id
+      left join word_to_word_translations wtwt on
+        owd.word_definition_id = wtwt.from_word_definition_id
+      where true
+      ${conditions}
     `;
     const resQ = await this.pg.pool.query(sqlStr, params);
     return resQ.rows.map((row) => row.original_map_id);
