@@ -24,21 +24,21 @@ export class DatabaseVersionControlService {
   async init() {
     const exists = await this.getIsDbInit();
 
-    if (exists) {
-      const version = +(await this.getSchemaVersion());
-      console.log('Database schema version:', version);
-
-      switch (version) {
-        case 1:
-          console.log('Updating database to version 2');
-          this.loadVersion2();
-          break;
-        default:
-          console.error('Database version is current');
-      }
-    } else {
+    if (!exists) {
       console.log('Creating database schema');
       await this.loadVersion1();
+    }
+
+    const version = +(await this.getSchemaVersion());
+    console.log('Database schema version:', version);
+
+    switch (version) {
+      case 1:
+        console.log('Updating database to version 2');
+        this.loadVersion2();
+      // note that there is no break needed in the switch's cases
+      default:
+        console.error('Database version is current');
     }
 
     console.log('Database version check complete');
