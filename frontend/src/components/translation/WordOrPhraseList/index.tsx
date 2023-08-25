@@ -1,1 +1,0 @@
-export { WordOrPhraseList } from './WordOrPhraseList';

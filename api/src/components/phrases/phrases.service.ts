@@ -44,7 +44,7 @@ export class PhrasesService {
         ...getPhraseObjById(+input.phrase_id),
       );
 
-      if (res1.rowCount !== 1) {
+      if (res1.rowCount === 0) {
         console.error(`no phrase for id: ${input.phrase_id}`);
       } else {
         return {
@@ -52,6 +52,9 @@ export class PhrasesService {
           phrase: {
             phrase_id: input.phrase_id,
             phrase: res1.rows[0].phrase,
+            language_code: res1.rows[0].language_code,
+            dialect_code: res1.rows[0].dialect_code,
+            geo_code: res1.rows[0].geo_code,
           },
         };
       }
@@ -70,7 +73,9 @@ export class PhrasesService {
     token: string,
   ): Promise<PhraseReadOutput> {
     try {
-      const wordlikeStrings = input.phraselike_string.split(' ');
+      const wordlikeStrings = input.phraselike_string
+        .split(' ')
+        .filter((w) => w !== '');
       const wordIds: number[] = [];
 
       for (const wordlikeStr of wordlikeStrings) {
