@@ -1,13 +1,13 @@
 import {
   MapPhraseTranslations,
-  WordTranslations,
+  MapWordTranslations,
 } from '../../../generated/graphql';
 import { useMapTranslationTools } from '../../map/hooks/useMapTranslationTools';
 import { WordOrPhraseCard } from '../WordCard/WordOrPhraseCard';
 import { styled } from 'styled-components';
 
 export type TWordTranslationCardProps = {
-  wordTranslated: WordTranslations | MapPhraseTranslations;
+  wordTranslated: MapWordTranslations | MapPhraseTranslations;
   routerLink?: string;
   onClick?: () => void;
 };
