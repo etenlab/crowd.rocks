@@ -439,11 +439,21 @@ export class TranslationsResolver {
   ): Promise<TranslationUpsertOutput> {
     console.log('upsertTranslationFromWordAndDefinitionlikeString');
 
-    return this.translationService.upsertTranslationFromWordAndDefinitionlikeString(
-      +from_definition_id,
-      from_definition_type_is_word,
-      to_definition_input,
-      getBearer(req),
-    );
+    const res =
+      await this.translationService.upsertTranslationFromWordAndDefinitionlikeString(
+        +from_definition_id,
+        from_definition_type_is_word,
+        to_definition_input,
+        getBearer(req),
+      );
+
+    if (res.error === ErrorType.NoError) {
+      this.mapsService.translateMapsWithDefinitionId({
+        from_definition_id,
+        from_definition_type_is_word,
+        token: getBearer(req),
+      });
+    }
+    return res;
   }
 }
