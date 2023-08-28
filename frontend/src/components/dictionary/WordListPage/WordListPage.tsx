@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
+  IonButton,
+  IonSpinner,
   IonModal,
   IonHeader,
   IonTitle,
@@ -35,6 +37,8 @@ import { useToggleWordVoteStatusMutation } from '../../../hooks/useToggleWordVot
 
 import { NewWordForm } from '../NewWordForm';
 
+import { PAGE_SIZE } from '../../../const/commonConst';
+
 interface WordListPageProps
   extends RouteComponentProps<{
     nation_id: string;
@@ -60,7 +64,7 @@ export function WordListPage({ match }: WordListPageProps) {
 
   const [filter, setFilter] = useState<string>('');
 
-  const [getWordsByLanguage, { data: wordsData, error }] =
+  const [getWordsByLanguage, { data: wordsData, loading, error, fetchMore }] =
     useGetWordsByLanguageLazyQuery();
   const [toggleWordVoteStatus] = useToggleWordVoteStatusMutation();
 
@@ -71,6 +75,8 @@ export function WordListPage({ match }: WordListPageProps) {
 
     getWordsByLanguage({
       variables: {
+        first: PAGE_SIZE,
+        after: null,
         language_code: targetLang.lang.tag,
         dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
         geo_code: targetLang.region ? targetLang.region.tag : null,
@@ -94,6 +100,21 @@ export function WordListPage({ match }: WordListPageProps) {
     setFilter(event.detail.value!);
   };
 
+  const handleFetchMore = () => {
+    if (wordsData?.getWordsByLanguage.pageInfo.hasNextPage && targetLang) {
+      fetchMore({
+        variables: {
+          first: PAGE_SIZE,
+          after: wordsData.getWordsByLanguage.pageInfo.endCursor,
+          language_code: targetLang.lang.tag,
+          dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
+          geo_code: targetLang.region ? targetLang.region.tag : null,
+          filter: filter.trim(),
+        },
+      });
+    }
+  };
+
   const cardListComs = useMemo(() => {
     const tempWords: {
       word_id: string;
@@ -114,18 +135,20 @@ export function WordListPage({ match }: WordListPageProps) {
       return null;
     }
 
-    const wordWithVoteList = wordsData.getWordsByLanguage.word_with_vote_list;
+    const wordWithVoteListEdges = wordsData.getWordsByLanguage.edges;
 
-    for (const wordWithVote of wordWithVoteList) {
-      if (wordWithVote) {
+    for (const edge of wordWithVoteListEdges) {
+      const { node } = edge;
+
+      if (node) {
         tempWords.push({
-          word_id: wordWithVote.word_id,
-          word: wordWithVote.word,
-          definitionlike_strings: wordWithVote.definitions.map(
+          word_id: node.word_id,
+          word: node.word,
+          definitionlike_strings: node.definitions.map(
             (definition) => definition?.definition,
           ) as string[],
-          upvotes: wordWithVote.upvotes,
-          downvotes: wordWithVote.downvotes,
+          upvotes: node.upvotes,
+          downvotes: node.downvotes,
         });
       }
     }
@@ -224,6 +247,16 @@ export function WordListPage({ match }: WordListPageProps) {
       />
 
       <CardListContainer>{cardListComs}</CardListContainer>
+
+      <IonButton
+        fill="outline"
+        shape="round"
+        onClick={handleFetchMore}
+        disabled={!wordsData?.getWordsByLanguage.pageInfo.hasNextPage}
+      >
+        {tr('Load More')}
+        {loading ? <IonSpinner name="bubbles" /> : null}
+      </IonButton>
 
       <IonModal isOpen={isOpenModal}>
         <IonHeader>
