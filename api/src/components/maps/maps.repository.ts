@@ -272,10 +272,57 @@ export class MapsRepository {
     return { origMapList };
   }
 
+  async getMapInfo(id: string): Promise<MapFileOutput> {
+    const params = [id];
+    const sqlStr = `
+        select
+          original_map_id,
+          map_file_name,
+          created_at,
+          created_by,
+          language_code,
+          dialect_code,
+          geo_code
+        from
+          original_maps
+        where original_map_id = $1
+      `;
+
+    const resQ = await this.pg.pool.query(sqlStr, params);
+
+    const origMapList = resQ.rows.map<MapFileOutput>(
+      ({
+        original_map_id,
+        map_file_name,
+        created_at,
+        created_by,
+        language_code,
+        dialect_code,
+        geo_code,
+      }) => ({
+        original_map_id,
+        map_file_name,
+        created_at,
+        created_by,
+        is_original: true,
+        language: { language_code, dialect_code, geo_code },
+      }),
+    );
+
+    return { ...origMapList[0] };
+  }
+
   async getOrigMapContent(id: string): Promise<GetOrigMapContentOutput> {
     const resQ = await this.pg.pool.query(
       `
-        select content, map_file_name, created_at, created_by, language_code,	dialect_code,	geo_code
+        select 
+          content, 
+          map_file_name, 
+          created_at, 
+          created_by, 
+          language_code,	
+          dialect_code,	
+          geo_code
         from original_maps where original_map_id = $1
       `,
       [id],
@@ -327,7 +374,7 @@ export class MapsRepository {
       created_at: resQ.rows[0].created_at,
       created_by: resQ.rows[0].created_by,
       content: resQ.rows[0].content,
-      is_original: true,
+      is_original: false,
       language: {
         language_code: resQ.rows[0].language_code,
         dialect_code: resQ.rows[0].dialect_code,

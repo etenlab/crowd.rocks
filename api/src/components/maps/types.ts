@@ -15,6 +15,7 @@ export class MapFileOutput {
   @Field(() => Boolean) is_original: boolean;
   @Field(() => ID) original_map_id: string;
   @Field(() => ID, { nullable: true }) translated_map_id?: string;
+  @Field(() => String, { nullable: true }) translated_percent?: string;
   @Field(() => String) map_file_name: string;
   @Field(() => String) created_at: string;
   @Field(() => LanguageOutput) language: LanguageOutput;

@@ -162,6 +162,7 @@ export type GetOrigMapContentOutput = {
   map_file_name: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
   translated_map_id?: Maybe<Scalars['ID']['output']>;
+  translated_percent?: Maybe<Scalars['String']['output']>;
 };
 
 export type GetOrigMapListInput = {
@@ -217,6 +218,7 @@ export type GetTranslatedMapContentOutput = {
   map_file_name: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
   translated_map_id?: Maybe<Scalars['ID']['output']>;
+  translated_percent?: Maybe<Scalars['String']['output']>;
 };
 
 export type IsAdminIdInput = {
@@ -271,6 +273,7 @@ export type MapFileOutput = {
   map_file_name: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
   translated_map_id?: Maybe<Scalars['ID']['output']>;
+  translated_percent?: Maybe<Scalars['String']['output']>;
 };
 
 export type MapPhraseTranslations = {
@@ -1883,14 +1886,14 @@ export type GetAllMapsListQueryVariables = Exact<{
 }>;
 
 
-export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'GetAllMapsListOutput', allMapsList: Array<{ __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, created_at: string, created_by: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
+export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'GetAllMapsListOutput', allMapsList: Array<{ __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
 export type GetTranslatedMapContentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'GetTranslatedMapContentOutput', translated_map_id?: string | null, map_file_name: string, created_at: string, created_by: string, content: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'GetTranslatedMapContentOutput', translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, content: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
 
 export type IsAdminLoggedInQueryVariables = Exact<{
   input: IsAdminIdInput;
@@ -3307,6 +3310,7 @@ export const GetAllMapsListDocument = gql`
       original_map_id
       translated_map_id
       map_file_name
+      translated_percent
       language {
         language_code
         dialect_code
@@ -3351,6 +3355,7 @@ export const GetTranslatedMapContentDocument = gql`
   getTranslatedMapContent(input: {translated_map_id: $id}) {
     translated_map_id
     map_file_name
+    translated_percent
     language {
       language_code
       dialect_code

@@ -118,7 +118,10 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
           {mapItem.is_original ? (
             <OrigBadge>Original</OrigBadge>
           ) : (
-            <IonBadge>{langInfo2String(langInfo)}</IonBadge>
+            <IonBadge>
+              {langInfo2String(langInfo) +
+                ` [${mapItem.translated_percent || ''}%]`}
+            </IonBadge>
           )}
           <IonIcon
             icon={downloadOutline}

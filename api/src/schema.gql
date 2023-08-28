@@ -141,6 +141,7 @@ type GetOrigMapContentOutput {
   map_file_name: String!
   original_map_id: ID!
   translated_map_id: ID
+  translated_percent: String
 }
 
 input GetOrigMapListInput {
@@ -192,6 +193,7 @@ type GetTranslatedMapContentOutput {
   map_file_name: String!
   original_map_id: ID!
   translated_map_id: ID
+  translated_percent: String
 }
 
 input IsAdminIdInput {
@@ -241,6 +243,7 @@ type MapFileOutput {
   map_file_name: String!
   original_map_id: ID!
   translated_map_id: ID
+  translated_percent: String
 }
 
 type MapPhraseTranslations {
