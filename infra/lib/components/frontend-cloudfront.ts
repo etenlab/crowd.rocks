@@ -124,7 +124,7 @@ export class FrontendCloudfront extends Construct {
     }
 
     const [subdomain, ...rest] = domainName.split('.');
-    const rootdomain = rest.length > 2 ? rest.join('.') : domainName;
+    const rootdomain = rest.length >= 2 ? rest.join('.') : domainName;
 
     return rootdomain;
   }
