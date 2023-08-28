@@ -1,3 +1,29 @@
+fragment MapPhraseWithVotesFragment on MapPhraseWithVotes {
+  phrase
+  phrase_id
+  language_code
+  dialect_code
+  geo_code
+  definition
+  definition_id
+  up_votes
+  down_votes
+  translation_id
+}
+
+fragment WordWithVotesFragment on MapWordWithVotes {
+  word
+  word_id
+  language_code
+  dialect_code
+  geo_code
+  definition
+  definition_id
+  up_votes
+  down_votes
+  translation_id
+}
+
 query GetOrigMapWords(
   $original_map_id: ID
   $o_language_code: String
@@ -23,16 +49,40 @@ query GetOrigMapWords(
       definition
       definition_id
       translations {
-        word
-        word_id
-        language_code
-        dialect_code
-        geo_code
-        definition
-        definition_id
-        up_votes
-        down_votes
-        translation_id
+        ...MapPhraseWithVotesFragment
+        ...WordWithVotesFragment
+      }
+    }
+  }
+}
+
+query GetOrigMapPhrases(
+  $original_map_id: ID
+  $o_language_code: String
+  $t_language_code: String
+  $t_dialect_code: String
+  $t_geo_code: String
+) {
+  getOrigMapPhrases(
+    input: {
+      original_map_id: $original_map_id
+      o_language_code: $o_language_code
+      t_language_code: $t_language_code
+      t_dialect_code: $t_dialect_code
+      t_geo_code: $t_geo_code
+    }
+  ) {
+    origMapPhrases {
+      phrase
+      phrase_id
+      language_code
+      dialect_code
+      geo_code
+      definition
+      definition_id
+      translations {
+        ...MapPhraseWithVotesFragment
+        ...WordWithVotesFragment
       }
     }
   }
