@@ -221,7 +221,6 @@ export function TranslationPage() {
           originalDefinition={originalDefinition}
           selectedValues={translationDefinitions}
           onToggleSelectedValue={handleToggleSelectedValue}
-          // renderFlag={renderFlag}
         />
       </ListContainer>
 

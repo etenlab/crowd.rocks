@@ -1,6 +1,13 @@
 import { TypePolicies } from '@apollo/client';
+import { relayStylePagination } from '@apollo/client/utilities';
 
 export const typePolicies: TypePolicies = {
+  Query: {
+    fields: {
+      getWordsByLanguage: relayStylePagination(['input']),
+      getPhrasesByLanguage: relayStylePagination(['input']),
+    },
+  },
   WordWithDefinitions: {
     keyFields: ['word_id'],
   },
@@ -9,6 +16,9 @@ export const typePolicies: TypePolicies = {
   },
   WordWithVote: {
     keyFields: ['word_id'],
+  },
+  WordWithVoteListEdge: {
+    keyFields: ['cursor'],
   },
   WordVoteStatus: {
     keyFields: ['word_id'],
@@ -21,6 +31,9 @@ export const typePolicies: TypePolicies = {
   },
   PhraseWithVote: {
     keyFields: ['phrase_id'],
+  },
+  PhraseWithVoteListEdge: {
+    keyFields: ['cursor'],
   },
   PhraseVoteStatus: {
     keyFields: ['phrase_id'],
