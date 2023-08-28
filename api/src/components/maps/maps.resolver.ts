@@ -10,6 +10,8 @@ import {
   GetOrigMapContentInput,
   GetOrigMapContentOutput,
   GetOrigMapListInput,
+  GetOrigMapPhrasesInput,
+  GetOrigMapPhrasesOutput,
   GetOrigMapsListOutput,
   GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
@@ -73,11 +75,6 @@ export class MapsResolver {
   async getOrigMapsList(
     @Args('input') input: GetOrigMapListInput,
   ): Promise<GetOrigMapsListOutput> {
-    // TODO: refactor auth system. existing sysyem via passing token to sql proc is unconvinient
-    // when no need in sql proc (request too small - just single-line select)
-    // TODO: search by pattern
-    // console.log(input.search);
-
     const maps = await this.mapService.getOrigMaps();
     return maps;
   }
@@ -94,9 +91,6 @@ export class MapsResolver {
   async getOrigMapContent(
     @Args('input') input: GetOrigMapContentInput,
   ): Promise<GetOrigMapContentOutput> {
-    // TODO: refactor auth system. existing sysyem via passing token to sql proc is unconvinient
-    // when no need in sql proc (request too small - just single-line select)
-
     const mapContent = await this.mapService.getOrigMapContent(
       input.original_map_id,
     );
@@ -120,5 +114,15 @@ export class MapsResolver {
     const words = await this.mapService.getOrigMapWords(input);
 
     return words;
+  }
+
+  @Query(() => GetOrigMapPhrasesOutput)
+  async getOrigMapPhrases(
+    @Args('input', { nullable: true }) input?: GetOrigMapPhrasesInput,
+  ): Promise<GetOrigMapPhrasesOutput> {
+    const origMapPhraseTranslations = await this.mapService.getOrigMapPhrases(
+      input,
+    );
+    return origMapPhraseTranslations;
   }
 }

@@ -24,12 +24,21 @@ export class DatabaseVersionControlService {
   async init() {
     const exists = await this.getIsDbInit();
 
-    if (exists) {
-      const version = await this.getSchemaVersion();
-      console.log('Database schema version:', version);
-    } else {
+    if (!exists) {
       console.log('Creating database schema');
-      await this.loadSchemaAndFunctions();
+      await this.loadVersion1();
+    }
+
+    const version = +(await this.getSchemaVersion());
+    console.log('Database schema version:', version);
+
+    switch (version) {
+      case 1:
+        console.log('Updating database to version 2');
+        this.loadVersion2();
+      // note that there is no break needed in the switch's cases
+      default:
+        console.error('Database version is current');
     }
 
     console.log('Database version check complete');
@@ -68,7 +77,7 @@ export class DatabaseVersionControlService {
     return 0;
   }
 
-  async loadSchemaAndFunctions() {
+  async loadVersion1(): Promise<void> {
     // schema
     await this.runSqlFile('./src/core/sql/schema/v1.schema.sql');
 
@@ -161,14 +170,39 @@ export class DatabaseVersionControlService {
     // update db version
     await this.setVersionNumber(1);
 
-    await this.registerUser('admin@crowd.rocks', 'Admin', this.config.CR_ADMIN_PASSWORD || 'asdfasdf');
+    await this.registerUser(
+      'admin@crowd.rocks',
+      'Admin',
+      this.config.CR_ADMIN_PASSWORD || 'asdfasdf',
+    );
     await this.registerUser('anonymous@crowd.rocks', 'Anonymous', 'asdfasdf');
 
     // load data
     await this.dataloader.loadSiteTextData();
   }
 
-  async registerUser(email: string, avatar: string, password: string) {
+  async loadVersion2(): Promise<void> {
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase_translation_votes_count.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase_translation_votes_count.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word_translation_votes_count.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase_translation_votes_count.sql',
+    );
+
+    await this.setVersionNumber(2);
+  }
+
+  async registerUser(
+    email: string,
+    avatar: string,
+    password: string,
+  ): Promise<void> {
     const registerService = new RegisterResolver(
       this.pg,
       this.ses,
@@ -184,7 +218,7 @@ export class DatabaseVersionControlService {
     );
   }
 
-  async setVersionNumber(version: number) {
+  async setVersionNumber(version: number): Promise<void> {
     await this.pg.pool.query(
       `
       insert into database_version_control(version) values($1);
@@ -193,7 +227,7 @@ export class DatabaseVersionControlService {
     );
   }
 
-  async runSqlFile(path: string) {
+  async runSqlFile(path: string): Promise<void> {
     console.log('loading SQL:', path);
     const data = readFileSync(path, 'utf8');
     await this.pg.pool.query(data, []);

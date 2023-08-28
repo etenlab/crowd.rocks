@@ -34,17 +34,17 @@ group by
 
 -- totalvotes view
 
-create view v_word_to_word_translations_totalvotes_count as 
-	select 
-		wtwt.word_to_word_translation_id,
-		uw.up_votes_count, 
-		dw.down_votes_count,
-		coalesce(uw.up_votes_count, 0) - coalesce(dw.down_votes_count, 0) as Total
-	from
-		word_to_word_translations wtwt
-	left join v_word_to_word_translations_upvotes_count uw on
-		wtwt.word_to_word_translation_id = uw.word_to_word_translation_id
-	left join v_word_to_word_translations_downvotes_count dw on
-		wtwt.word_to_word_translation_id = dw.word_to_word_translation_id;
+-- create view v_word_to_word_translations_totalvotes_count as 
+-- 	select 
+-- 		wtwt.word_to_word_translation_id,
+-- 		uw.up_votes_count, 
+-- 		dw.down_votes_count,
+-- 		coalesce(uw.up_votes_count, 0) - coalesce(dw.down_votes_count, 0) as Total
+-- 	from
+-- 		word_to_word_translations wtwt
+-- 	left join v_word_to_word_translations_upvotes_count uw on
+-- 		wtwt.word_to_word_translation_id = uw.word_to_word_translation_id
+-- 	left join v_word_to_word_translations_downvotes_count dw on
+-- 		wtwt.word_to_word_translation_id = dw.word_to_word_translation_id;
 
 	

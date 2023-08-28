@@ -5,6 +5,7 @@ import { CommonStack } from '../lib/stacks/common-stack';
 import { StorageStack } from '../lib/stacks/storage-stack';
 import { getConfig } from './getConfig';
 import { ApiServiceStack } from '../lib/stacks/api-service-stack';
+import { FrontendStack } from '../lib/stacks/frontend-stack';
 
 enum TAGS {
   PROJECT = 'project',
@@ -13,8 +14,6 @@ enum TAGS {
 
 const app = new cdk.App();
 const config = getConfig(app);
-
-cdk.Tags.of(app).add(TAGS.ENVIRONMENT, config.environment);
 
 /** Common resources */
 const commonStack = new CommonStack(app, `${config.environment}CommonStack`, {
@@ -139,6 +138,23 @@ const apiServiceStack = new ApiServiceStack(
   },
 );
 
+/** API docs */
+const { docsApp } = config;
+const docsStack = new FrontendStack(app, `${config.environment}DocsAppStack`, {
+  env: {
+    account: config.awsAccountId,
+    region: config.awsRegion,
+  },
+  appPrefix: config.appPrefix,
+  envName: config.environment,
+  domainName: docsApp.domainName,
+  appId: docsApp.appId,
+  enabled: docsApp.enabled,
+  createCustomDomain: docsApp.createCustomDomain,
+});
+
 /** Tags */
+cdk.Tags.of(app).add(TAGS.ENVIRONMENT, config.environment);
 cdk.Tags.of(databaseStack).add(TAGS.PROJECT, 'crowd');
 cdk.Tags.of(apiServiceStack).add(TAGS.PROJECT, 'crowd');
+cdk.Tags.of(docsStack).add(TAGS.PROJECT, 'crowd');

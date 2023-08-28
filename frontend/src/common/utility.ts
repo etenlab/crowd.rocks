@@ -1,4 +1,14 @@
 import { useState } from 'react';
+export type TLangCodes = {
+  language_code: string;
+  dialect_code?: string | null | undefined;
+  geo_code?: string | null | undefined;
+};
+
+export enum StringContentTypes {
+  WORD = 'word',
+  PHRASE = 'phrase',
+}
 
 export function useForceUpdate() {
   const [value, setState] = useState(true);
@@ -62,16 +72,58 @@ export function get_cardinal_suffix(vote: number): string {
   return suffix;
 }
 
-export const downloadFromUrl = (file_name: string, file_url: string) => {
+export const putLangCodesToFileName = (
+  file_name: string,
+  langCodes: TLangCodes,
+): string => {
+  if (!langCodes.language_code) {
+    throw new Error(`language_code insn't provided!`);
+  }
+  const nameParts = file_name.split('.');
+  const extension = nameParts.at(-1);
+  const fname = nameParts.slice(0, -1);
+  let newFileName = fname.join('.');
+  if (langCodes.language_code) {
+    newFileName += `.${langCodes.language_code}`;
+  }
+  if (langCodes.dialect_code) {
+    newFileName += `-${langCodes.dialect_code}`;
+  }
+  if (langCodes.geo_code) {
+    newFileName += `-${langCodes.geo_code}`;
+  }
+  newFileName += '.cf.' + extension;
+  return newFileName;
+};
+
+export const downloadFromUrl = (
+  file_name: string,
+  file_url: string,
+  langCodes?: TLangCodes,
+) => {
   const hiddenElement = document.createElement('a');
   hiddenElement.href = encodeURI(file_url);
-  hiddenElement.download = file_name;
+  hiddenElement.download = langCodes
+    ? putLangCodesToFileName(file_name, langCodes)
+    : file_name;
   hiddenElement.click();
 };
 
-export const downloadFromSrc = (file_name: string, src: string) => {
+export const downloadFromSrc = (
+  file_name: string,
+  src: string,
+  langCodes?: TLangCodes,
+) => {
   const hiddenElement = document.createElement('a');
   hiddenElement.href = src;
-  hiddenElement.download = file_name;
+  hiddenElement.download = langCodes
+    ? putLangCodesToFileName(file_name, langCodes)
+    : file_name;
   hiddenElement.click();
+};
+
+export const typeOfString = (wordOrPhrase: string): StringContentTypes => {
+  const parts = wordOrPhrase.split(' ');
+  if (parts.length === 1) return StringContentTypes.WORD;
+  return StringContentTypes.PHRASE;
 };

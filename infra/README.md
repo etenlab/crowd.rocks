@@ -9,6 +9,7 @@ This project consist of:
 - 1 Application load balancer
 - 1 ECS service (Fargate deployment)
 - 1 public S3 bucket
+- 1 static S3 website + Cloudfront for docs
 
 ## First-time deployment
 
@@ -19,6 +20,7 @@ This project consist of:
 5. Deploy Common stack: `npm run deploy-common:dev`
 6. Deploy Database stack `npm run deploy-database:dev`
 7. Deploy Api Service stack: `npm run deploy-api:dev`.
+8. Deploy Docs App stack: `npm run deploy-docs:dev`.
 
 ## How to redeploy API stack
 
