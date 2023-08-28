@@ -91,9 +91,6 @@ export class MapsResolver {
   async getOrigMapContent(
     @Args('input') input: GetOrigMapContentInput,
   ): Promise<GetOrigMapContentOutput> {
-    // TODO: refactor auth system. existing sysyem via passing token to sql proc is unconvinient
-    // when no need in sql proc (request too small - just single-line select)
-
     const mapContent = await this.mapService.getOrigMapContent(
       input.original_map_id,
     );
