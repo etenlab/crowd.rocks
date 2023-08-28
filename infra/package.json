@@ -11,6 +11,8 @@
     "deploy-database:prod": "cdk deploy -c env=prod prodDatabaseStack",
     "deploy-api:dev": "cdk deploy -c env=dev devApiServiceStack",
     "deploy-api:prod": "cdk deploy -c env=prod prodApiServiceStack",
+    "deploy-docs:dev": "cdk deploy -c env=dev devDocsAppStack",
+    "deploy-docs:prod": "cdk deploy -c env=prod prodDocsAppStack",
     "lint": "./node_modules/.bin/eslint . --ext .ts",
     "lint-fix": "npm run lint -- --fix",
     "test": "jest",

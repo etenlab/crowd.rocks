@@ -48,3 +48,9 @@ apiService:
   cpu: 2048
   memory: 4096
   healthCheckPath: '/'
+
+docsApp:
+  appId: docs
+  domainName: docs.crowd.rocks
+  enabled: true
+  createCustomDomain: true
