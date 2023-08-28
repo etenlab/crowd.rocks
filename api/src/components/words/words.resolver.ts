@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
+import {
+  Args,
+  Query,
+  Resolver,
+  Mutation,
+  Context,
+  ID,
+  Int,
+} from '@nestjs/graphql';
 
 import { WordsService } from './words.service';
 import { WordVotesService } from './word-votes.service';
@@ -13,7 +21,7 @@ import {
   WordVoteOutput,
   WordVoteUpsertInput,
   WordVoteStatusOutputRow,
-  WordWithVoteListOutput,
+  WordWithVoteListConnection,
   WordWithVoteOutput,
 } from './types';
 import { getBearer } from 'src/common/utility';
@@ -87,16 +95,18 @@ export class WordsResolver {
     );
   }
 
-  @Query(() => WordWithVoteListOutput)
+  @Query(() => WordWithVoteListConnection)
   async getWordsByLanguage(
     @Args('input', { type: () => LanguageInput }) input: LanguageInput,
-  ): Promise<WordWithVoteListOutput> {
+    @Args('first', { type: () => Int }) first: number,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<WordWithVoteListConnection> {
     console.log(
       'get words by language resolver',
-      JSON.stringify(input, null, 2),
+      JSON.stringify({ ...input, first, after }, null, 2),
     );
 
-    return this.wordsService.getWordsByLanguage(input);
+    return this.wordsService.getWordsByLanguage(input, first, after);
   }
 
   @Query(() => WordWithVoteOutput)

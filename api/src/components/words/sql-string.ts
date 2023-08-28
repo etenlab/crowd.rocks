@@ -152,6 +152,7 @@ export function toggleWordVoteStatus({
 
 export type GetWordListByLang = {
   word_id: string;
+  wordlike_string: string;
 };
 
 export function getWordListByLang({
@@ -212,12 +213,14 @@ export function getWordListByLang({
   return [
     `
       select distinct
-        w.word_id
+        w.word_id as word_id,
+        ws.wordlike_string as wordlike_string
       from words as w
       join wordlike_strings as ws
       on ws.wordlike_string_id = w.wordlike_string_id
       where w.language_code = $1
-        ${wherePlsStr};
+        ${wherePlsStr}
+      order by ws.wordlike_string;
     `,
     [...returnArr],
   ];

@@ -1,6 +1,7 @@
 import { Field, ID, InputType, ObjectType, Int } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
 import { WordDefinition } from 'src/components/definitions/types';
+import { PageInfo } from 'src/components/common/types';
 
 @ObjectType()
 export class Word {
@@ -97,9 +98,15 @@ export class WordWithDefinitions extends WordWithVote {
 }
 
 @ObjectType()
-export class WordWithVoteListOutput extends GenericOutput {
-  @Field(() => [WordWithDefinitions], { nullable: 'items' })
-  word_with_vote_list: WordWithDefinitions[];
+export class WordWithVoteListEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => WordWithDefinitions) node: WordWithDefinitions;
+}
+
+@ObjectType()
+export class WordWithVoteListConnection extends GenericOutput {
+  @Field(() => [WordWithVoteListEdge]) edges: WordWithVoteListEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
 }
 
 @ObjectType()
