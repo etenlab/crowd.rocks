@@ -5,8 +5,9 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 
 export interface FargateServiceSecret {
   taskDefSecretName: string;
-  secretsMangerSecretField: string;
   secretsManagerSecretName: string;
+  secretsMangerSecretField?: string;
+  createNewSecret?: boolean;
 }
 
 export const importEcsSecrets = (
@@ -16,11 +17,25 @@ export const importEcsSecrets = (
   const secrets: { [key: string]: ecs.Secret } = {};
 
   secretsToImport.forEach((secret) => {
-    const secretsManagerSecret = secretsmanager.Secret.fromSecretPartialArn(
-      scope,
-      `${secret.taskDefSecretName}Secret`,
-      `arn:aws:secretsmanager:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:secret:${secret.secretsManagerSecretName}`,
-    );
+    const secretsManagerSecret = secret.createNewSecret
+      ? new secretsmanager.Secret(scope, `${secret.taskDefSecretName}Secret`, {
+          secretName: secret.secretsManagerSecretName,
+          removalPolicy: cdk.RemovalPolicy.DESTROY,
+          generateSecretString: {
+            excludeUppercase: false,
+            includeSpace: false,
+            excludePunctuation: true,
+            excludeLowercase: false,
+            excludeNumbers: false
+          }
+
+        })
+      : secretsmanager.Secret.fromSecretPartialArn(
+          scope,
+          `${secret.taskDefSecretName}Secret`,
+          `arn:aws:secretsmanager:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:secret:${secret.secretsManagerSecretName}`,
+        );
+
     secrets[secret.taskDefSecretName] = ecs.Secret.fromSecretsManager(
       secretsManagerSecret,
       secret.secretsMangerSecretField,

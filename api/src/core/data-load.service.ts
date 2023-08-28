@@ -9,6 +9,10 @@ import { SiteTextTranslationsService } from 'src/components/site-text/site-text-
 import { siteText } from './data/lang_sample_1';
 
 import { getAdminTokenSQL } from './sql-string';
+import {
+  SiteTextPhraseDefinition,
+  SiteTextWordDefinition,
+} from 'src/components/site-text/types';
 
 @Injectable()
 export class DataLoadService {
@@ -35,17 +39,16 @@ export class DataLoadService {
     for (const [siteTextlike_string, translationObj] of Object.entries(
       siteText,
     )) {
-      const { site_text_word_definition, site_text_phrase_definition, error } =
-        await this.siteTextService.upsert(
-          {
-            siteTextlike_string,
-            definitionlike_string: 'Site User Interface Text',
-            language_code: 'en',
-            dialect_code: null,
-            geo_code: null,
-          },
-          token,
-        );
+      const { site_text_definition, error } = await this.siteTextService.upsert(
+        {
+          siteTextlike_string,
+          definitionlike_string: 'Site User Interface Text',
+          language_code: 'en',
+          dialect_code: null,
+          geo_code: null,
+        },
+        token,
+      );
 
       if (error !== ErrorType.NoError) {
         console.log(
@@ -55,10 +58,21 @@ export class DataLoadService {
         continue;
       }
 
-      const from_type_is_word = site_text_word_definition ? true : false;
+      const from_type_is_word = (site_text_definition as any)?.word_definition
+        ? true
+        : (site_text_definition as any)?.phrase_definition
+        ? false
+        : null;
+
+      if (from_type_is_word === null) {
+        continue;
+      }
+
       const from_definition_id = from_type_is_word
-        ? site_text_word_definition.word_definition.word_definition_id
-        : site_text_phrase_definition.phrase_definition.phrase_definition_id;
+        ? (site_text_definition as SiteTextWordDefinition).word_definition
+            .word_definition_id
+        : (site_text_definition as SiteTextPhraseDefinition).phrase_definition
+            .phrase_definition_id;
 
       for (const [langTag, translationlike_string] of Object.entries(
         translationObj,

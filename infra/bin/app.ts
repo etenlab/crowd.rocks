@@ -105,6 +105,11 @@ const apiServiceStack = new ApiServiceStack(
     ],
     secrets: [
       {
+        taskDefSecretName: 'ADMIN_PASSWORD',
+        secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/adminPassword`,
+        createNewSecret: true,
+      },
+      {
         taskDefSecretName: 'CR_DB_USER',
         secretsManagerSecretName: config.dbCredentialSecret,
         secretsMangerSecretField: 'username',

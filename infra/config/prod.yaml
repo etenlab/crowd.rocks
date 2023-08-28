@@ -31,7 +31,7 @@ dbSecurityGroupSsmParam: '/prod/db-sg-id'
 dbCredentialSecret: 'prod/db/credentials'
 
 # Whether database is accessible outside of VPC
-dbPublicAccess: false
+dbPublicAccess: true
 
 # DNS setup
 dns:
@@ -44,7 +44,7 @@ apiService:
   priority: 10
   rootdomain: 'crowd.rocks'
   serviceName: 'crowdrocksApiServer'
-  dockerImageUrl: 'etenlab/crowd-rocks'
+  dockerImageUrl: 'etenlab/crowd-rocks:latest'
   cpu: 2048
   memory: 4096
   healthCheckPath: '/'

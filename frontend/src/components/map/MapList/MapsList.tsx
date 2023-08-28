@@ -1,4 +1,4 @@
-import { IonList, useIonRouter } from '@ionic/react';
+import { IonList, useIonRouter, useIonToast } from '@ionic/react';
 import { MapItem } from './MapItem';
 import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
@@ -17,11 +17,12 @@ import { globals } from '../../../services/globals';
 export const MapList: React.FC = () => {
   const router = useIonRouter();
   const { tr } = useTr();
+  const [present] = useIonToast();
 
   const {
     states: {
       global: {
-        langauges: { targetLang },
+        langauges: { targetLang, appLanguage },
       },
     },
     actions: { setTargetLanguage },
@@ -34,8 +35,6 @@ export const MapList: React.FC = () => {
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
   });
-  //const [mapListLang, setMapListLang] = useState<LanguageInfo>();
-  //console.log(mapListLang);
 
   useEffect(() => {
     const user_id = globals.get_user_id();
@@ -61,11 +60,24 @@ export const MapList: React.FC = () => {
   }, [getAllMapsList, targetLang]);
 
   const handleAddMap = useCallback(
-    (file: File) => {
+    async (file: File) => {
       if (!file) return;
-      sendMapFile({ variables: { file }, refetchQueries: ['GetAllMapsList'] });
+      try {
+        await sendMapFile({
+          variables: { file },
+          refetchQueries: ['GetAllMapsList'],
+        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        present({
+          message: error.message,
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+      }
     },
-    [sendMapFile],
+    [present, sendMapFile],
   );
 
   return (
@@ -85,7 +97,7 @@ export const MapList: React.FC = () => {
       </LangSelectorBox>
       <MapTools
         onTranslationsClick={() => {
-          router.push(`/US/eng/1/maps/translation`);
+          router.push(`/US/${appLanguage.lang.tag}/1/maps/translation`);
         }}
         onAddClick={
           isAdminRes?.loggedInIsAdmin.isAdmin ? handleAddMap : undefined

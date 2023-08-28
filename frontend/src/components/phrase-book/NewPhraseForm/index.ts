@@ -1,0 +1,1 @@
+export { NewPhraseForm } from './NewPhraseForm';

@@ -92,19 +92,19 @@ fragment WordTrVoteStatusFragment on WordTrVoteStatus {
   downvotes
 }
 
-fragment WordToPhraseVoteStatusFragment on WordToPhraseVoteStatus {
+fragment WordToPhraseTranslationVoteStatusFragment on WordToPhraseTranslationVoteStatus {
   word_to_phrase_translation_id
   upvotes
   downvotes
 }
 
-fragment PhraseToWordVoteStatusFragment on PhraseToWordVoteStatus {
+fragment PhraseToWordTranslationVoteStatusFragment on PhraseToWordTranslationVoteStatus {
   phrase_to_word_translation_id
   upvotes
   downvotes
 }
 
-fragment PhraseToPhraseVoteStatusFragment on PhraseToPhraseVoteStatus {
+fragment PhraseToPhraseTranslationVoteStatusFragment on PhraseToPhraseTranslationVoteStatus {
   phrase_to_phrase_translation_id
   upvotes
   downvotes
@@ -127,16 +127,36 @@ query GetTranslationsByFromDefinitionId(
     }
   ) {
     error
-    word_to_word_tr_with_vote_list {
+    translation_with_vote_list {
       ...WordToWordTranslationWithVoteFragment
-    }
-    word_to_phrase_tr_with_vote_list {
       ...WordToPhraseTranslationWithVoteFragment
-    }
-    phrase_to_word_tr_with_vote_list {
       ...PhraseToWordTranslationWithVoteFragment
+      ...PhraseToPhraseTranslationWithVoteFragment
     }
-    phrase_to_phrase_tr_with_vote_list {
+  }
+}
+
+query GetRecommendedTranslationFromDefinitionID(
+  $from_definition_id: ID!
+  $from_type_is_word: Boolean!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  getRecommendedTranslationFromDefinitionID(
+    from_definition_id: $from_definition_id
+    from_type_is_word: $from_type_is_word
+    langInfo: {
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
+    error
+    translation_with_vote {
+      ...WordToWordTranslationWithVoteFragment
+      ...WordToPhraseTranslationWithVoteFragment
+      ...PhraseToWordTranslationWithVoteFragment
       ...PhraseToPhraseTranslationWithVoteFragment
     }
   }
@@ -155,17 +175,11 @@ mutation ToggleTranslationVoteStatus(
     to_definition_type_is_word: $to_definition_type_is_word
   ) {
     error
-    phrase_to_phrase_vote_status {
-      ...PhraseToPhraseVoteStatusFragment
-    }
-    phrase_to_word_vote_status {
-      ...PhraseToWordVoteStatusFragment
-    }
-    word_to_phrase_vote_status {
-      ...WordToPhraseVoteStatusFragment
-    }
-    word_to_word_vote_status {
+    translation_vote_status {
       ...WordTrVoteStatusFragment
+      ...WordToPhraseTranslationVoteStatusFragment
+      ...PhraseToWordTranslationVoteStatusFragment
+      ...PhraseToPhraseTranslationVoteStatusFragment
     }
   }
 }
@@ -183,16 +197,10 @@ mutation UpsertTranslation(
     to_definition_type_is_word: $to_definition_type_is_word
   ) {
     error
-    word_to_word_translation {
+    translation {
       ...WordToWordTranslationFragment
-    }
-    word_to_phrase_translation {
       ...WordToPhraseTranslationFragment
-    }
-    phrase_to_word_translation {
       ...PhraseToWordTranslationFragment
-    }
-    phrase_to_phrase_translation {
       ...PhraseToPhraseTranslationFragment
     }
   }
@@ -221,17 +229,57 @@ mutation UpsertTranslationFromWordAndDefinitionlikeString(
     }
   ) {
     error
-    word_to_word_translation {
+    translation {
       ...WordToWordTranslationFragment
-    }
-    word_to_phrase_translation {
       ...WordToPhraseTranslationFragment
-    }
-    phrase_to_word_translation {
       ...PhraseToWordTranslationFragment
-    }
-    phrase_to_phrase_translation {
       ...PhraseToPhraseTranslationFragment
+    }
+  }
+}
+
+mutation UpsertWordDefinitionFromWordAndDefinitionlikeString(
+  $wordlike_string: String!
+  $definitionlike_string: String!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  upsertWordDefinitionFromWordAndDefinitionlikeString(
+    input: {
+      wordlike_string: $wordlike_string
+      definitionlike_string: $definitionlike_string
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
+    error
+    word_definition {
+      ...WordDefinitionFragment
+    }
+  }
+}
+
+mutation UpsertPhraseDefinitionFromPhraseAndDefinitionlikeString(
+  $phraselike_string: String!
+  $definitionlike_string: String!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(
+    input: {
+      phraselike_string: $phraselike_string
+      definitionlike_string: $definitionlike_string
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
+    error
+    phrase_definition {
+      ...PhraseDefinitionFragment
     }
   }
 }

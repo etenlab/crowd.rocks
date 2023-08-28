@@ -1,8 +1,4 @@
-import {
-  SendEmailCommand,
-  SendEmailRequest,
-  SESv2Client,
-} from '@aws-sdk/client-sesv2';
+import { SendEmailCommand, SESv2Client } from '@aws-sdk/client-sesv2';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from './config.service';
 

@@ -1,18 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+
+import { Card } from '../../common/Card';
+
+import { useGetRecommendedTranslationFromSiteTextDefinitionIdLazyQuery } from '../../../generated/graphql';
 import {
-  SiteTextTranslationWithVoteListOutput,
-  useGetAllTranslationFromSiteTextDefinitionIdLazyQuery,
   ErrorType,
-  PhraseDefinition,
-  WordDefinition,
+  SiteTextTranslationWithVote,
 } from '../../../generated/graphql';
-import {
-  IonCardHeader,
-  IonCardTitle,
-  IonCard,
-  IonCardContent,
-} from '@ionic/react';
-import styled from 'styled-components';
 
 interface TranslatedCardProps {
   siteTextId: string;
@@ -21,56 +15,21 @@ interface TranslatedCardProps {
   onClick: () => void;
 }
 
-interface Translation {
-  siteTextTranslationId: string;
-  isWord: boolean;
-  siteTextlikeString: string;
-  definitionlikeString: string;
-  upvotes: number;
-  downvotes: number;
-}
-
 export function TranslatedCard(props: TranslatedCardProps) {
-  const [allTranslations, setAllTranslations] =
-    useState<SiteTextTranslationWithVoteListOutput>();
+  const [siteTextTranslationWithVote, setSiteTextTranslationWithVote] =
+    useState<SiteTextTranslationWithVote | null>(null);
 
   const [
-    getAllTranslationFromSiteTextDefinitionID,
-    {
-      data: translationsData,
-      error: translationsError,
-      loading: translationsLoading,
-      called: translationsCalled,
-    },
-  ] = useGetAllTranslationFromSiteTextDefinitionIdLazyQuery();
-
-  const chooseBestTranslation = useCallback((translations?: Translation[]) => {
-    const res = translations?.reduce((bestTr, currTr) => {
-      if (bestTr?.upvotes === undefined) {
-        return currTr;
-      }
-
-      const bestTrTotal =
-        Number(bestTr?.upvotes || 0) - Number(bestTr?.downvotes || 0);
-
-      const currTrTotal =
-        Number(currTr?.upvotes || 0) - Number(currTr?.downvotes || 0);
-
-      if (currTrTotal > bestTrTotal) {
-        return currTr;
-      }
-
-      return bestTr;
-    }, {} as Translation);
-    return res;
-  }, []);
+    getRecommendedTranslationFromSiteTextDefinitionId,
+    { data, error, loading, called },
+  ] = useGetRecommendedTranslationFromSiteTextDefinitionIdLazyQuery();
 
   useEffect(() => {
     if (!props.languageInfo?.lang.tag) {
       return;
     }
 
-    getAllTranslationFromSiteTextDefinitionID({
+    getRecommendedTranslationFromSiteTextDefinitionId({
       variables: {
         site_text_id: props.siteTextId,
         site_text_type_is_word: props.isWord,
@@ -80,7 +39,7 @@ export function TranslatedCard(props: TranslatedCardProps) {
       },
     });
   }, [
-    getAllTranslationFromSiteTextDefinitionID,
+    getRecommendedTranslationFromSiteTextDefinitionId,
     props.isWord,
     props.languageInfo?.dialect?.tag,
     props.languageInfo?.lang.tag,
@@ -89,110 +48,84 @@ export function TranslatedCard(props: TranslatedCardProps) {
   ]);
 
   useEffect(() => {
-    if (translationsError) {
-      console.log(translationsError);
+    if (error) {
+      console.log(error);
       alert('Error');
 
       return;
     }
 
-    if (translationsLoading || !translationsCalled) {
+    if (loading || !called) {
       return;
     }
 
-    if (translationsData) {
+    if (data) {
       if (
-        translationsData.getAllTranslationFromSiteTextDefinitionID.error !==
+        data.getRecommendedTranslationFromSiteTextDefinitionID.error !==
         ErrorType.NoError
       ) {
         console.log(
-          translationsData.getAllTranslationFromSiteTextDefinitionID.error,
+          data.getRecommendedTranslationFromSiteTextDefinitionID.error,
         );
-        alert(translationsData.getAllTranslationFromSiteTextDefinitionID.error);
+        alert(data.getRecommendedTranslationFromSiteTextDefinitionID.error);
         return;
       }
-      setAllTranslations(
-        translationsData.getAllTranslationFromSiteTextDefinitionID,
-      );
-    }
-  }, [
-    translationsData,
-    translationsError,
-    translationsLoading,
-    translationsCalled,
-  ]);
 
-  const translations = useMemo(() => {
-    const tempTranslations: {
-      siteTextTranslationId: string;
-      isWord: boolean;
-      siteTextlikeString: string;
-      definitionlikeString: string;
-      upvotes: number;
-      downvotes: number;
-    }[] = [];
-
-    if (!allTranslations) {
-      return tempTranslations;
-    }
-
-    for (const translation of allTranslations.site_text_translation_with_vote_list) {
-      if (translation) {
-        if (translation.to_type_is_word) {
-          tempTranslations.push({
-            siteTextTranslationId: translation.site_text_translation_id,
-            isWord: true,
-            siteTextlikeString: (translation.to_definition as WordDefinition)
-              .word.word,
-            definitionlikeString: (translation.to_definition as WordDefinition)
-              .definition,
-            upvotes: translation.upvotes,
-            downvotes: translation.downvotes,
-          });
-        } else {
-          tempTranslations.push({
-            siteTextTranslationId: translation.site_text_translation_id,
-            isWord: false,
-            siteTextlikeString: (translation.to_definition as PhraseDefinition)
-              .phrase.phrase,
-            definitionlikeString: (
-              translation.to_definition as PhraseDefinition
-            ).definition,
-            upvotes: translation.upvotes,
-            downvotes: translation.downvotes,
-          });
-        }
+      if (
+        data.getRecommendedTranslationFromSiteTextDefinitionID
+          .site_text_translation_with_vote
+      ) {
+        setSiteTextTranslationWithVote(
+          data.getRecommendedTranslationFromSiteTextDefinitionID
+            .site_text_translation_with_vote,
+        );
+      } else {
+        setSiteTextTranslationWithVote(null);
       }
     }
+  }, [data, error, loading, called]);
 
-    return tempTranslations;
-  }, [allTranslations]);
+  let siteTextlikeString = '';
+  let definitionlikeString = '';
 
-  const bestTr = chooseBestTranslation(translations);
+  if (siteTextTranslationWithVote) {
+    switch (siteTextTranslationWithVote.__typename) {
+      case 'SiteTextWordToWordTranslationWithVote': {
+        siteTextlikeString =
+          siteTextTranslationWithVote.to_word_definition.word.word;
+        definitionlikeString =
+          siteTextTranslationWithVote.to_word_definition.definition;
+        break;
+      }
+      case 'SiteTextWordToPhraseTranslationWithVote': {
+        siteTextlikeString =
+          siteTextTranslationWithVote.to_phrase_definition.phrase.phrase;
+        definitionlikeString =
+          siteTextTranslationWithVote.to_phrase_definition.definition;
+        break;
+      }
+      case 'SiteTextPhraseToWordTranslationWithVote': {
+        siteTextlikeString =
+          siteTextTranslationWithVote.to_word_definition.word.word;
+        definitionlikeString =
+          siteTextTranslationWithVote.to_word_definition.definition;
+        break;
+      }
+      case 'SiteTextPhraseToPhraseTranslationWithVote': {
+        siteTextlikeString =
+          siteTextTranslationWithVote.to_phrase_definition.phrase.phrase;
+        definitionlikeString =
+          siteTextTranslationWithVote.to_phrase_definition.definition;
+        break;
+      }
+    }
+  }
 
   return (
-    <StCard onClick={() => props.onClick()}>
-      <CustomCardHeader>
-        <CustomCardTitle>{bestTr?.siteTextlikeString || ''}</CustomCardTitle>
-      </CustomCardHeader>
-      <CustomCardContent>
-        <div>{bestTr?.definitionlikeString || ''}</div>
-      </CustomCardContent>
-    </StCard>
+    <Card
+      content={siteTextlikeString}
+      description={definitionlikeString}
+      onClick={() => props.onClick()}
+    />
   );
 }
-const StCard = styled(IonCard)(() => ({
-  width: '90%',
-  height: '90px',
-}));
-
-export const CustomCardTitle = styled(IonCardTitle)(() => ({
-  fontSize: '17px',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-}));
-
-export const CustomCardContent = styled(IonCardContent)(() => ({}));
-
-export const CustomCardHeader = styled(IonCardHeader)(() => ({}));

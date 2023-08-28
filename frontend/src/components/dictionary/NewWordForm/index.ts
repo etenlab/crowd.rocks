@@ -1,0 +1,1 @@
+export { NewWordForm } from './NewWordForm';

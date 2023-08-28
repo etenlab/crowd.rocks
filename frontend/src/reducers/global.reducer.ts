@@ -1,6 +1,8 @@
 import { actions } from './global.actions';
 import { type ActionType } from '.';
 
+import { SiteTextLanguage } from '../generated/graphql';
+
 export interface StateType {
   langauges: {
     appLanguage: LanguageInfo;
@@ -10,7 +12,11 @@ export interface StateType {
     };
     targetLang: LanguageInfo | null;
   };
-  siteTextMap: Record<string, string>;
+  siteTexts: {
+    originalMap: Record<string, string>;
+    translationMap: Record<string, Record<string, string>>;
+    languages: SiteTextLanguage[];
+  };
 }
 
 export const initialState: StateType = {
@@ -27,7 +33,11 @@ export const initialState: StateType = {
     },
     targetLang: null,
   },
-  siteTextMap: {},
+  siteTexts: {
+    originalMap: {},
+    translationMap: {},
+    languages: [],
+  },
 };
 
 export function reducer(
@@ -47,10 +57,41 @@ export function reducer(
         },
       };
     }
-    case actions.SET_SITE_TEXT_MAP: {
+    case actions.SET_SITE_TEXT_LANGUAGE_LIST: {
       return {
         ...prevState,
-        siteTextMap: action.payload as Record<string, string>,
+        siteTexts: {
+          ...prevState.siteTexts,
+          languages: action.payload as SiteTextLanguage[],
+        },
+      };
+    }
+    case actions.SET_ORIGINAL_SITE_TEXT_MAP: {
+      return {
+        ...prevState,
+        siteTexts: {
+          ...prevState.siteTexts,
+          originalMap: action.payload as Record<string, string>,
+        },
+      };
+    }
+    case actions.SET_TRANSLATION_SITE_TEXT_MAP: {
+      const prevTranslationMap = prevState.siteTexts.translationMap;
+      const { languageKey, translationMap } = action.payload as {
+        languageKey: string;
+        translationMap: Record<string, string>;
+      };
+
+      prevTranslationMap[languageKey] = translationMap;
+
+      return {
+        ...prevState,
+        siteTexts: {
+          ...prevState.siteTexts,
+          translationMap: {
+            ...prevTranslationMap,
+          },
+        },
       };
     }
     case actions.CHANGE_TRANSLATION_PAGE_SOURCE_LANGAUGE: {

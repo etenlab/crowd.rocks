@@ -9,7 +9,7 @@ import { PhraseDefinitionsService } from 'src/components/definitions/phrase-defi
 import {
   PhraseToPhraseTranslationReadOutput,
   PhraseToPhraseTranslationUpsertOutput,
-  PhraseToPhraseVoteStatusOutputRow,
+  PhraseToPhraseTranslationVoteStatusOutputRow,
   PhraseToPhraseTranslationWithVote,
   PhraseToPhraseTranslationWithVoteListOutput,
 } from './types';
@@ -133,7 +133,7 @@ export class PhraseToPhraseTranslationsService {
   }
   async getVoteStatus(
     phrase_to_phrase_translation_id: number,
-  ): Promise<PhraseToPhraseVoteStatusOutputRow> {
+  ): Promise<PhraseToPhraseTranslationVoteStatusOutputRow> {
     try {
       const res1 =
         await this.pg.pool.query<GetPhraseToPhraseTranslationVoteStatus>(
@@ -177,7 +177,7 @@ export class PhraseToPhraseTranslationsService {
     phrase_to_phrase_translation_id: number,
     vote: boolean,
     token: string,
-  ): Promise<PhraseToPhraseVoteStatusOutputRow> {
+  ): Promise<PhraseToPhraseTranslationVoteStatusOutputRow> {
     try {
       const res1 =
         await this.pg.pool.query<TogglePhraseToPhraseTranslationVoteStatus>(

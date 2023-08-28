@@ -4,10 +4,8 @@ import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 
 import {
-  SiteTextTranslationVoteUpsertInput,
-  SiteTextTranslationVoteUpsertOutput,
-  SiteTextTranslationVoteReadOutput,
-  VoteStatusOutputRow,
+  SiteTextTranslationVoteOutput,
+  SiteTextTranslationVoteStatusOutputRow,
 } from './types';
 
 import {
@@ -25,7 +23,7 @@ import {
 export class SiteTextTranslationVotesService {
   constructor(private pg: PostgresService) {}
 
-  async read(id: number): Promise<SiteTextTranslationVoteReadOutput> {
+  async read(id: number): Promise<SiteTextTranslationVoteOutput> {
     try {
       const res1 =
         await this.pg.pool.query<GetSiteTextTranslationVoteObjectById>(
@@ -39,8 +37,9 @@ export class SiteTextTranslationVotesService {
           error: ErrorType.NoError,
           site_text_translation_vote: {
             site_text_translation_vote_id: id + '',
-            site_text_translation_id:
-              res1.rows[0].site_text_translation_id + '',
+            translation_id: res1.rows[0].translation_id + '',
+            from_type_is_word: res1.rows[0].from_type_is_word,
+            to_type_is_word: res1.rows[0].to_type_is_word,
             user_id: res1.rows[0].user_id + '',
             vote: res1.rows[0].vote,
             last_updated_at: new Date(res1.rows[0].last_updated_at),
@@ -58,15 +57,20 @@ export class SiteTextTranslationVotesService {
   }
 
   async upsert(
-    input: SiteTextTranslationVoteUpsertInput,
+    translation_id: number,
+    from_type_is_word: boolean,
+    to_type_is_word: boolean,
+    vote: boolean,
     token: string,
-  ): Promise<SiteTextTranslationVoteUpsertOutput> {
+  ): Promise<SiteTextTranslationVoteOutput> {
     try {
       const res =
         await this.pg.pool.query<SiteTextTranslationVoteUpsertProcedureOutputRow>(
           ...callSiteTextTranslationVoteUpsertProcedure({
-            site_text_translation_id: +input.site_text_translation_id,
-            vote: input.vote,
+            translation_id,
+            from_type_is_word,
+            to_type_is_word,
+            vote,
             token: token,
           }),
         );
@@ -97,18 +101,26 @@ export class SiteTextTranslationVotesService {
   }
 
   async getVoteStatus(
-    site_text_translation_id: number,
-  ): Promise<VoteStatusOutputRow> {
+    translation_id: number,
+    from_type_is_word: boolean,
+    to_type_is_word: boolean,
+  ): Promise<SiteTextTranslationVoteStatusOutputRow> {
     try {
       const res1 = await this.pg.pool.query<GetSiteTextTranslationVoteStatus>(
-        ...getSiteTextTranslationVoteStatus(site_text_translation_id),
+        ...getSiteTextTranslationVoteStatus(
+          translation_id,
+          from_type_is_word,
+          to_type_is_word,
+        ),
       );
 
       if (res1.rowCount !== 1) {
         return {
           error: ErrorType.NoError,
           vote_status: {
-            site_text_translation_id: site_text_translation_id + '',
+            translation_id: translation_id + '',
+            from_type_is_word,
+            to_type_is_word,
             upvotes: 0,
             downvotes: 0,
           },
@@ -117,8 +129,9 @@ export class SiteTextTranslationVotesService {
         return {
           error: ErrorType.NoError,
           vote_status: {
-            site_text_translation_id:
-              res1.rows[0].site_text_translation_id + '',
+            translation_id: translation_id + '',
+            from_type_is_word,
+            to_type_is_word,
             upvotes: res1.rows[0].upvotes,
             downvotes: res1.rows[0].downvotes,
           },
@@ -135,15 +148,19 @@ export class SiteTextTranslationVotesService {
   }
 
   async toggleVoteStatus(
-    site_text_translation_id: number,
+    translation_id: number,
+    from_type_is_word: boolean,
+    to_type_is_word: boolean,
     vote: boolean,
     token: string,
-  ): Promise<VoteStatusOutputRow> {
+  ): Promise<SiteTextTranslationVoteStatusOutputRow> {
     try {
       const res1 =
         await this.pg.pool.query<ToggleSiteTextTranslationVoteStatus>(
           ...toggleSiteTextTranslationVoteStatus({
-            site_text_translation_id,
+            translation_id,
+            from_type_is_word,
+            to_type_is_word,
             vote,
             token,
           }),
@@ -163,7 +180,11 @@ export class SiteTextTranslationVotesService {
         };
       }
 
-      return this.getVoteStatus(site_text_translation_id);
+      return this.getVoteStatus(
+        translation_id,
+        from_type_is_word,
+        to_type_is_word,
+      );
     } catch (e) {
       console.error(e);
     }

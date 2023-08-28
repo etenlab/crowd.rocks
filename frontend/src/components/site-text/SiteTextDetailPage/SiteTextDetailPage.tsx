@@ -1,49 +1,38 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
-  IonPage,
   IonModal,
   IonHeader,
   IonToolbar,
-  IonButtons,
-  IonButton,
   IonTitle,
-  useIonToast,
+  // useIonToast,
 } from '@ionic/react';
 
 import { Caption } from '../../common/Caption/Caption';
 import { Card } from '../../common/Card';
 
-import { useQuery } from '../../hooks/useQuery';
-
 import {
   useGetAllTranslationFromSiteTextDefinitionIdLazyQuery,
   useSiteTextPhraseDefinitionReadLazyQuery,
   useSiteTextWordDefinitionReadLazyQuery,
-  useUpsertSiteTextTranslationMutation,
-  useToggleVoteStatusMutation,
 } from '../../../generated/graphql';
+
+import { ErrorType } from '../../../generated/graphql';
 
 import {
-  SiteTextTranslationWithVoteListOutput,
-  SiteTextPhraseDefinitionReadOutput,
-  SiteTextWordDefinitionReadOutput,
-  SiteTextTranslationWithVote,
-  PhraseDefinition,
-  WordDefinition,
-  ErrorType,
-} from '../../../generated/graphql';
-
-import {
-  SiteTextTranslationWithVoteFragmentFragmentDoc,
-  GetAllTranslationFromSiteTextDefinitionIdDocument,
-} from '../../../generated/graphql';
-
-import { CaptainContainer, CardListContainer, CardContainer } from './styled';
-import { Input, Textarea } from '../../common/styled';
+  CaptionContainer,
+  CardListContainer,
+  CardContainer,
+} from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
+import { useAppContext } from '../../../hooks/useAppContext';
+import { useToggleSiteTextTranslationVoteStatusMutation } from '../../../hooks/useToggleSiteTextTranslationVoteStatusMutation';
+
+import { AddListHeader } from '../../common/ListHeader';
+import { PageLayout } from '../../common/PageLayout';
+import { NewSiteTextTranslationForm } from '../NewSiteTextTranslationForm';
 
 interface SiteTextDetailPageProps
   extends RouteComponentProps<{
@@ -54,164 +43,34 @@ interface SiteTextDetailPageProps
   }> {}
 
 export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
-  const query = useQuery();
   const { tr } = useTr();
-  const [present] = useIonToast();
+  // const [present] = useIonToast();
 
-  const [allTranslations, setAllTranslations] =
-    useState<SiteTextTranslationWithVoteListOutput>();
-  const [siteTextWordDefinition, setSiteTextWordDefinition] =
-    useState<SiteTextWordDefinitionReadOutput>();
-  const [siteTextPhraseDefinition, setSiteTextPhraseDefinition] =
-    useState<SiteTextPhraseDefinitionReadOutput>();
+  const {
+    states: {
+      global: {
+        langauges: { targetLang },
+      },
+    },
+  } = useAppContext();
 
-  const modal = useRef<HTMLIonModalElement>(null);
-  const input = useRef<HTMLIonInputElement>(null);
-  const textarea = useRef<HTMLIonTextareaElement>(null);
+  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
 
   const [
     getAllTranslationFromSiteTextDefinitionID,
-    {
-      data: translationsData,
-      error: translationsError,
-      loading: translationsLoading,
-      called: translationsCalled,
-    },
+    { data: translationsData, error: translationsError },
   ] = useGetAllTranslationFromSiteTextDefinitionIdLazyQuery();
-  const [
-    siteTextWordDefinitionRead,
-    {
-      data: wordData,
-      error: wordError,
-      loading: wordLoading,
-      called: wordCalled,
-    },
-  ] = useSiteTextWordDefinitionReadLazyQuery();
+  const [siteTextWordDefinitionRead, { data: wordData, error: wordError }] =
+    useSiteTextWordDefinitionReadLazyQuery();
   const [
     siteTextPhraseDefinitionRead,
-    {
-      data: phraseData,
-      error: phraseError,
-      loading: phraseLoading,
-      called: phraseCalled,
-    },
+    { data: phraseData, error: phraseError },
   ] = useSiteTextPhraseDefinitionReadLazyQuery();
-  const [upsertTranslation] = useUpsertSiteTextTranslationMutation({
-    update(cache, { data, errors }) {
-      if (
-        !errors &&
-        data &&
-        data.upsertSiteTextTranslation.error === ErrorType.NoError &&
-        translationsData &&
-        translationsData.getAllTranslationFromSiteTextDefinitionID.error ===
-          ErrorType.NoError
-      ) {
-        const newSiteTextTranslation =
-          data.upsertSiteTextTranslation.site_text_translation;
 
-        cache.writeQuery({
-          query: GetAllTranslationFromSiteTextDefinitionIdDocument,
-          data: {
-            ...translationsData,
-            getAllTranslationFromSiteTextDefinitionID: {
-              ...translationsData.getAllTranslationFromSiteTextDefinitionID,
-              site_text_translation_with_vote_list: [
-                ...translationsData.getAllTranslationFromSiteTextDefinitionID.site_text_translation_with_vote_list.filter(
-                  (translation) =>
-                    translation?.site_text_translation_id !==
-                    newSiteTextTranslation?.site_text_translation_id,
-                ),
-                {
-                  ...newSiteTextTranslation,
-                  __typename: 'SiteTextTranslationWithVote',
-                  upvotes: 0,
-                  downvotes: 0,
-                  created_at: new Date().toISOString(),
-                },
-              ],
-            },
-          },
-          variables: {
-            site_text_id: match.params.site_text_id,
-            site_text_type_is_word:
-              match.params.definition_type === 'word' ? true : false,
-            language_code: query.get('language_code')!,
-            dialect_code: query.get('dialect_code'),
-            geo_code: query.get('geo_code'),
-          },
-        });
-
-        present({
-          message: tr('Success at creating new site text translation!'),
-          duration: 1500,
-          position: 'top',
-          color: 'success',
-        });
-
-        modal.current?.dismiss();
-      } else {
-        console.log('useUpsertTranslationMutation: ', errors);
-        console.log(data?.upsertSiteTextTranslation.error);
-
-        present({
-          message: `${tr(
-            'Failed at creating new site text translation!',
-          )} [${data?.upsertSiteTextTranslation.error}]`,
-          duration: 1500,
-          position: 'top',
-          color: 'danger',
-        });
-      }
-    },
-  });
-  const [toggleVoteStatus] = useToggleVoteStatusMutation({
-    update(cache, { data, errors }) {
-      if (
-        !errors &&
-        data &&
-        data.toggleVoteStatus.vote_status &&
-        data.toggleVoteStatus.error === ErrorType.NoError
-      ) {
-        const newVoteStatus = data.toggleVoteStatus.vote_status;
-
-        cache.updateFragment<SiteTextTranslationWithVote>(
-          {
-            id: cache.identify({
-              __typename: 'SiteTextTranslationWithVote',
-              site_text_translation_id: newVoteStatus.site_text_translation_id,
-            }),
-            fragment: SiteTextTranslationWithVoteFragmentFragmentDoc,
-            fragmentName: 'SiteTextTranslationWithVoteFragment',
-          },
-          (data) => {
-            if (data) {
-              return {
-                ...data,
-                upvotes: newVoteStatus.upvotes,
-                downvotes: newVoteStatus.downvotes,
-              };
-            } else {
-              return data;
-            }
-          },
-        );
-      } else {
-        console.log('useToggleVoteStatusMutation: ', errors);
-        console.log(data?.toggleVoteStatus.error);
-
-        present({
-          message: `${tr('Failed at voting!')} [${data?.toggleVoteStatus
-            .error}]`,
-          duration: 1500,
-          position: 'top',
-          color: 'danger',
-        });
-      }
-    },
-  });
+  const [toggleVoteStatus] = useToggleSiteTextTranslationVoteStatusMutation();
 
   useEffect(() => {
-    if (!query.get('language_code')) {
+    if (!targetLang) {
       return;
     }
 
@@ -220,12 +79,12 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
         site_text_id: match.params.site_text_id,
         site_text_type_is_word:
           match.params.definition_type === 'word' ? true : false,
-        language_code: query.get('language_code')!,
-        dialect_code: query.get('dialect_code'),
-        geo_code: query.get('geo_code'),
+        language_code: targetLang.lang.tag,
+        dialect_code: targetLang.dialect?.tag,
+        geo_code: targetLang.region?.tag,
       },
     });
-  }, [getAllTranslationFromSiteTextDefinitionID, query, match]);
+  }, [getAllTranslationFromSiteTextDefinitionID, match, targetLang]);
 
   useEffect(() => {
     if (match.params.definition_type === 'word') {
@@ -243,200 +102,160 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
     }
   }, [siteTextWordDefinitionRead, siteTextPhraseDefinitionRead, match]);
 
-  useEffect(() => {
-    if (translationsError) {
-      console.log(translationsError);
-      alert('Error');
-
-      return;
-    }
-
-    if (translationsLoading || !translationsCalled) {
-      return;
-    }
-
-    if (translationsData) {
-      if (
-        translationsData.getAllTranslationFromSiteTextDefinitionID.error !==
-        ErrorType.NoError
-      ) {
-        console.log(
-          translationsData.getAllTranslationFromSiteTextDefinitionID.error,
-        );
-        alert(translationsData.getAllTranslationFromSiteTextDefinitionID.error);
-        return;
-      }
-      setAllTranslations(
-        translationsData.getAllTranslationFromSiteTextDefinitionID,
-      );
-    }
-  }, [
-    translationsData,
-    translationsError,
-    translationsLoading,
-    translationsCalled,
-  ]);
-
-  useEffect(() => {
+  const wordCom = useMemo(() => {
     if (wordError) {
-      console.log(wordError);
-      alert('Error');
-
-      return;
+      return null;
     }
 
-    if (wordLoading || !wordCalled) {
-      return;
+    if (
+      !wordData ||
+      wordData.siteTextWordDefinitionRead.error !== ErrorType.NoError
+    ) {
+      return null;
     }
 
-    if (wordData) {
-      if (wordData.siteTextWordDefinitionRead.error !== ErrorType.NoError) {
-        console.log(wordData.siteTextWordDefinitionRead.error);
-        alert(wordData.siteTextWordDefinitionRead.error);
-        return;
-      }
+    const siteTextWordDefinition =
+      wordData.siteTextWordDefinitionRead.site_text_word_definition;
 
-      setSiteTextWordDefinition(wordData.siteTextWordDefinitionRead);
+    if (!siteTextWordDefinition) {
+      return null;
     }
-  }, [wordData, wordError, wordLoading, wordCalled]);
 
-  useEffect(() => {
+    return (
+      <Card
+        content={siteTextWordDefinition.word_definition.word.word}
+        description={siteTextWordDefinition.word_definition.definition}
+      />
+    );
+  }, [wordData, wordError]);
+
+  const phraseCom = useMemo(() => {
     if (phraseError) {
-      console.log(phraseError);
-      alert('Error');
-
-      return;
+      return null;
     }
 
-    if (phraseLoading || !phraseCalled) {
-      return;
+    if (
+      !phraseData ||
+      phraseData.siteTextPhraseDefinitionRead.error !== ErrorType.NoError
+    ) {
+      return null;
     }
 
-    if (phraseData) {
-      if (phraseData.siteTextPhraseDefinitionRead.error !== ErrorType.NoError) {
-        console.log(phraseData.siteTextPhraseDefinitionRead.error);
-        alert(phraseData.siteTextPhraseDefinitionRead.error);
-        return;
-      }
+    const siteTextPhraseDefinition =
+      phraseData.siteTextPhraseDefinitionRead.site_text_phrase_definition;
 
-      setSiteTextPhraseDefinition(phraseData.siteTextPhraseDefinitionRead);
-    }
-  }, [phraseData, phraseError, phraseLoading, phraseCalled]);
-
-  const handleSaveNewTranslation = () => {
-    const inputEl = input.current;
-    const textareaEl = textarea.current;
-
-    if (!inputEl || !textareaEl) {
-      alert('Input or Textarea not exists');
-      return;
+    if (!siteTextPhraseDefinition) {
+      return null;
     }
 
-    const inputVal = (inputEl.value + '').trim();
-    const textareaVal = (textareaEl.value + '').trim();
+    return (
+      <Card
+        content={siteTextPhraseDefinition.phrase_definition.phrase.phrase}
+        description={siteTextPhraseDefinition.phrase_definition.definition}
+      />
+    );
+  }, [phraseData, phraseError]);
 
-    if (inputVal.length === 0) {
-      alert('Invalid input');
-      return;
-    }
-
-    upsertTranslation({
-      variables: {
-        site_text_id: match.params.site_text_id,
-        is_word_definition:
-          match.params.definition_type === 'word' ? true : false,
-        translationlike_string: inputVal,
-        definitionlike_string:
-          textareaVal === ''
-            ? 'Site User Interface Text Translation'
-            : textareaVal,
-        language_code: query.get('language_code')!,
-        dialect_code: query.get('dialect_code'),
-        geo_code: query.get('geo_code'),
-      },
-    });
-  };
-
-  const translations = useMemo(() => {
+  const translationsCom = useMemo(() => {
     const tempTranslations: {
-      siteTextTranslationId: string;
-      isWord: boolean;
+      key: string;
+      translationId: string;
+      from_type_is_word: boolean;
+      to_type_is_word: boolean;
       siteTextlikeString: string;
       definitionlikeString: string;
       upvotes: number;
       downvotes: number;
     }[] = [];
 
-    if (!allTranslations) {
-      return tempTranslations;
+    if (translationsError) {
+      return null;
     }
 
-    for (const translation of allTranslations.site_text_translation_with_vote_list) {
-      if (translation) {
-        if (translation.to_type_is_word) {
+    if (
+      !translationsData ||
+      translationsData.getAllTranslationFromSiteTextDefinitionID.error !==
+        ErrorType.NoError
+    ) {
+      return null;
+    }
+
+    const translationWithVoteList =
+      translationsData.getAllTranslationFromSiteTextDefinitionID
+        .site_text_translation_with_vote_list;
+
+    if (!translationWithVoteList) {
+      return null;
+    }
+
+    for (const translationWithVote of translationWithVoteList) {
+      switch (translationWithVote.__typename) {
+        case 'SiteTextWordToWordTranslationWithVote': {
           tempTranslations.push({
-            siteTextTranslationId: translation.site_text_translation_id,
-            isWord: true,
-            siteTextlikeString: (translation.to_definition as WordDefinition)
-              .word.word,
-            definitionlikeString: (translation.to_definition as WordDefinition)
-              .definition,
-            upvotes: translation.upvotes,
-            downvotes: translation.downvotes,
+            key: `SiteTextWordToWordTranslationWithVote_${translationWithVote.word_to_word_translation_id}`,
+            translationId: translationWithVote.word_to_word_translation_id,
+            from_type_is_word: true,
+            to_type_is_word: true,
+            siteTextlikeString:
+              translationWithVote.to_word_definition.word.word,
+            definitionlikeString:
+              translationWithVote.to_word_definition.definition,
+            upvotes: translationWithVote.upvotes,
+            downvotes: translationWithVote.downvotes,
           });
-        } else {
+          break;
+        }
+        case 'SiteTextWordToPhraseTranslationWithVote': {
           tempTranslations.push({
-            siteTextTranslationId: translation.site_text_translation_id,
-            isWord: false,
-            siteTextlikeString: (translation.to_definition as PhraseDefinition)
-              .phrase.phrase,
-            definitionlikeString: (
-              translation.to_definition as PhraseDefinition
-            ).definition,
-            upvotes: translation.upvotes,
-            downvotes: translation.downvotes,
+            key: `SiteTextWordToPhraseTranslationWithVote_${translationWithVote.word_to_phrase_translation_id}`,
+            translationId: translationWithVote.word_to_phrase_translation_id,
+            from_type_is_word: true,
+            to_type_is_word: false,
+            siteTextlikeString:
+              translationWithVote.to_phrase_definition.phrase.phrase,
+            definitionlikeString:
+              translationWithVote.to_phrase_definition.definition,
+            upvotes: translationWithVote.upvotes,
+            downvotes: translationWithVote.downvotes,
           });
+          break;
+        }
+        case 'SiteTextPhraseToWordTranslationWithVote': {
+          tempTranslations.push({
+            key: `SiteTextPhraseToWordTranslationWithVote-${translationWithVote.phrase_to_word_translation_id}`,
+            translationId: translationWithVote.phrase_to_word_translation_id,
+            from_type_is_word: false,
+            to_type_is_word: true,
+            siteTextlikeString:
+              translationWithVote.to_word_definition.word.word,
+            definitionlikeString:
+              translationWithVote.to_word_definition.definition,
+            upvotes: translationWithVote.upvotes,
+            downvotes: translationWithVote.downvotes,
+          });
+          break;
+        }
+        case 'SiteTextPhraseToPhraseTranslationWithVote': {
+          tempTranslations.push({
+            key: `SiteTextPhraseToPhraseTranslationWithVote-${translationWithVote.phrase_to_phrase_translation_id}`,
+            translationId: translationWithVote.phrase_to_phrase_translation_id,
+            from_type_is_word: false,
+            to_type_is_word: false,
+            siteTextlikeString:
+              translationWithVote.to_phrase_definition.phrase.phrase,
+            definitionlikeString:
+              translationWithVote.to_phrase_definition.definition,
+            upvotes: translationWithVote.upvotes,
+            downvotes: translationWithVote.downvotes,
+          });
+          break;
         }
       }
     }
 
-    return tempTranslations;
-  }, [allTranslations]);
-
-  const wordCom =
-    siteTextWordDefinition &&
-    siteTextWordDefinition.site_text_word_definition ? (
-      <Card
-        content={
-          siteTextWordDefinition.site_text_word_definition.word_definition.word
-            .word
-        }
-        description={
-          siteTextWordDefinition.site_text_word_definition.word_definition
-            .definition
-        }
-      />
-    ) : null;
-
-  const phraseCom =
-    siteTextPhraseDefinition &&
-    siteTextPhraseDefinition.site_text_phrase_definition ? (
-      <Card
-        content={
-          siteTextPhraseDefinition.site_text_phrase_definition.phrase_definition
-            .phrase.phrase
-        }
-        description={
-          siteTextPhraseDefinition.site_text_phrase_definition.phrase_definition
-            .definition
-        }
-      />
-    ) : null;
-
-  const translationsCom = translations
-    ? translations.map((translation) => (
+    return tempTranslations.map((translation) => (
+      <CardContainer key={translation.key}>
         <Card
-          key={translation.siteTextTranslationId}
           content={translation.siteTextlikeString}
           description={translation.definitionlikeString}
           vote={{
@@ -445,7 +264,9 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
             onVoteUpClick: () => {
               toggleVoteStatus({
                 variables: {
-                  site_text_translation_id: translation.siteTextTranslationId,
+                  translation_id: translation.translationId + '',
+                  from_type_is_word: translation.from_type_is_word,
+                  to_type_is_word: translation.to_type_is_word,
                   vote: true,
                 },
               });
@@ -453,7 +274,9 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
             onVoteDownClick: () => {
               toggleVoteStatus({
                 variables: {
-                  site_text_translation_id: translation.siteTextTranslationId,
+                  translation_id: translation.translationId + '',
+                  from_type_is_word: translation.from_type_is_word,
+                  to_type_is_word: translation.to_type_is_word,
                   vote: false,
                 },
               });
@@ -461,94 +284,62 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
           }}
           voteFor="description"
         />
-      ))
-    : null;
+      </CardContainer>
+    ));
+  }, [translationsError, translationsData, toggleVoteStatus]);
 
   let title = 'Loading';
   title =
-    (siteTextWordDefinition &&
-      siteTextWordDefinition.site_text_word_definition &&
-      siteTextWordDefinition.site_text_word_definition.word_definition.word
-        .word) ||
-    title;
+    wordData?.siteTextWordDefinitionRead?.site_text_word_definition
+      ?.word_definition.word.word || title;
   title =
-    (siteTextPhraseDefinition &&
-      siteTextPhraseDefinition.site_text_phrase_definition &&
-      siteTextPhraseDefinition.site_text_phrase_definition.phrase_definition
-        .phrase.phrase) ||
-    title;
+    phraseData?.siteTextPhraseDefinitionRead?.site_text_phrase_definition
+      ?.phrase_definition?.phrase.phrase || title;
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <CaptainContainer>
-              <Caption>
-                {tr('Site Text')} - {title}
-              </Caption>
-            </CaptainContainer>
+    <PageLayout>
+      <CaptionContainer>
+        <Caption>
+          {tr('Site Text')} - {title}
+        </Caption>
+      </CaptionContainer>
 
-            <CardContainer>
-              {wordCom}
-              {phraseCom}
-            </CardContainer>
+      <CardContainer>
+        {wordCom}
+        {phraseCom}
+      </CardContainer>
 
-            <hr />
+      <AddListHeader
+        title={tr('Site Text Translations')}
+        onClick={() => setIsOpenModal(true)}
+      />
 
-            <p style={{ padding: '0 16px', fontSize: 16 }}>
-              {tr('Site Text Translations')}
-            </p>
+      <CardListContainer>{translationsCom}</CardListContainer>
 
-            <IonButton id="open-site-text-translation-modal" expand="block">
-              + {tr('Add More Translation')}
-            </IonButton>
-
-            <CardListContainer>{translationsCom}</CardListContainer>
-
-            <IonModal ref={modal} trigger="open-site-text-translation-modal">
-              <IonHeader>
-                <IonToolbar>
-                  <IonButtons slot="start">
-                    <IonButton onClick={() => modal.current?.dismiss()}>
-                      {tr('Cancel')}
-                    </IonButton>
-                  </IonButtons>
-                  <IonTitle>
-                    {tr('Site Text')} - {title}
-                  </IonTitle>
-                </IonToolbar>
-              </IonHeader>
-              <IonContent className="ion-padding">
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '10px',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <Input
-                    ref={input}
-                    type="text"
-                    label={tr('Site Text')}
-                    labelPlacement="floating"
-                    fill="outline"
-                  />
-                  <Textarea
-                    ref={textarea}
-                    labelPlacement="floating"
-                    fill="solid"
-                    label={tr('Site Text Definition')}
-                  />
-                  <IonButton onClick={handleSaveNewTranslation}>
-                    {tr('Save')}
-                  </IonButton>
-                </div>
-              </IonContent>
-            </IonModal>
-          </div>
-        </div>
-      </IonContent>
-    </IonPage>
+      <IonModal isOpen={isOpenModal}>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('Add New Translation')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {targetLang ? (
+            <NewSiteTextTranslationForm
+              site_text_id={+match.params.site_text_id}
+              is_word_definition={
+                match.params.definition_type === 'word' ? true : false
+              }
+              langInfo={targetLang}
+              onCreated={() => {
+                setIsOpenModal(false);
+              }}
+              onCancel={() => {
+                setIsOpenModal(false);
+              }}
+            />
+          ) : null}
+        </IonContent>
+      </IonModal>
+    </PageLayout>
   );
 }

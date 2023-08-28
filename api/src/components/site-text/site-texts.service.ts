@@ -6,7 +6,6 @@ import { PostgresService } from 'src/core/postgres.service';
 import { SiteTextWordDefinitionsService } from './site-text-word-definitions.service';
 import { SiteTextPhraseDefinitionsService } from './site-text-phrase-definitions.service';
 
-import { DefinitionsService } from 'src/components/definitions/definitions.service';
 import { WordDefinitionsService } from 'src/components/definitions/word-definitions.service';
 import { PhraseDefinitionsService } from 'src/components/definitions/phrase-definitions.service';
 import { WordsService } from 'src/components/words/words.service';
@@ -14,15 +13,10 @@ import { PhrasesService } from 'src/components/phrases/phrases.service';
 
 import {
   SiteTextUpsertInput,
-  SiteTextUpsertOutput,
+  SiteTextDefinitionOutput,
   SiteTextDefinitionListOutput,
   SiteTextLanguageListOutput,
 } from './types';
-
-import {
-  DefinitionUpdateaInput,
-  DefinitionUpdateOutput,
-} from 'src/components/definitions/types';
 
 import { GetSiteTextLanguageList, getSiteTextLanguageList } from './sql-string';
 
@@ -32,7 +26,6 @@ export class SiteTextsService {
     private pg: PostgresService,
     private siteTextWordDefinitionService: SiteTextWordDefinitionsService,
     private siteTextPhraseDefinitionService: SiteTextPhraseDefinitionsService,
-    private definitionService: DefinitionsService,
     private wordDefinitionService: WordDefinitionsService,
     private phraseDefinitionService: PhraseDefinitionsService,
     private phraseService: PhrasesService,
@@ -42,17 +35,19 @@ export class SiteTextsService {
   async upsert(
     input: SiteTextUpsertInput,
     token: string,
-  ): Promise<SiteTextUpsertOutput> {
+  ): Promise<SiteTextDefinitionOutput> {
     if (input.siteTextlike_string.trim() === '') {
       return {
         error: ErrorType.InvalidInputs,
-        site_text_phrase_definition: null,
-        site_text_word_definition: null,
+        site_text_definition: null,
       };
     }
 
     try {
-      const words = input.siteTextlike_string.trim().split(' ');
+      const words = input.siteTextlike_string
+        .trim()
+        .split(' ')
+        .filter((w) => w !== '');
 
       if (words.length > 1) {
         const phraseOuptut = await this.phraseService.upsert(
@@ -68,8 +63,7 @@ export class SiteTextsService {
         if (phraseOuptut.error !== ErrorType.NoError || !phraseOuptut.phrase) {
           return {
             error: phraseOuptut.error,
-            site_text_phrase_definition: null,
-            site_text_word_definition: null,
+            site_text_definition: null,
           };
         }
 
@@ -94,8 +88,7 @@ export class SiteTextsService {
           ) {
             return {
               error: phraseDefinitionOutput.error,
-              site_text_phrase_definition: null,
-              site_text_word_definition: null,
+              site_text_definition: null,
             };
           }
 
@@ -107,16 +100,13 @@ export class SiteTextsService {
           error: siteTextWordDefinitionError,
           site_text_phrase_definition,
         } = await this.siteTextPhraseDefinitionService.upsert(
-          {
-            phrase_definition_id: phrase_definition_id + '',
-          },
+          phrase_definition_id,
           token,
         );
 
         return {
           error: siteTextWordDefinitionError,
-          site_text_word_definition: null,
-          site_text_phrase_definition,
+          site_text_definition: site_text_phrase_definition,
         };
       } else {
         const wordOutput = await this.wordService.upsert(
@@ -132,8 +122,7 @@ export class SiteTextsService {
         if (wordOutput.error !== ErrorType.NoError || !wordOutput.word) {
           return {
             error: wordOutput.error,
-            site_text_phrase_definition: null,
-            site_text_word_definition: null,
+            site_text_definition: null,
           };
         }
 
@@ -157,8 +146,7 @@ export class SiteTextsService {
           ) {
             return {
               error: wordDefinitionOutput.error,
-              site_text_phrase_definition: null,
-              site_text_word_definition: null,
+              site_text_definition: null,
             };
           }
 
@@ -170,16 +158,13 @@ export class SiteTextsService {
           error: siteTextWordDefinitionError,
           site_text_word_definition,
         } = await this.siteTextWordDefinitionService.upsert(
-          {
-            word_definition_id: word_definition_id + '',
-          },
+          word_definition_id,
           token,
         );
 
         return {
           error: siteTextWordDefinitionError,
-          site_text_phrase_definition: null,
-          site_text_word_definition,
+          site_text_definition: site_text_word_definition,
         };
       }
     } catch (e) {
@@ -188,16 +173,8 @@ export class SiteTextsService {
 
     return {
       error: ErrorType.UnknownError,
-      site_text_phrase_definition: null,
-      site_text_word_definition: null,
+      site_text_definition: null,
     };
-  }
-
-  async updateDefinition(
-    input: DefinitionUpdateaInput,
-    token: string,
-  ): Promise<DefinitionUpdateOutput> {
-    return this.definitionService.updateDefinition(input, token);
   }
 
   async getAllSiteTextDefinitions(
@@ -212,8 +189,7 @@ export class SiteTextsService {
       if (wordError !== ErrorType.NoError) {
         return {
           error: wordError,
-          site_text_phrase_definition_list: [],
-          site_text_word_definition_list: [],
+          site_text_definition_list: null,
         };
       }
 
@@ -225,15 +201,16 @@ export class SiteTextsService {
       if (phraseError !== ErrorType.NoError) {
         return {
           error: phraseError,
-          site_text_phrase_definition_list: [],
-          site_text_word_definition_list: [],
+          site_text_definition_list: null,
         };
       }
 
       return {
         error: ErrorType.NoError,
-        site_text_word_definition_list,
-        site_text_phrase_definition_list,
+        site_text_definition_list: [
+          ...site_text_word_definition_list,
+          ...site_text_phrase_definition_list,
+        ],
       };
     } catch (e) {
       console.error(e);
@@ -241,8 +218,7 @@ export class SiteTextsService {
 
     return {
       error: ErrorType.UnknownError,
-      site_text_word_definition_list: [],
-      site_text_phrase_definition_list: [],
+      site_text_definition_list: null,
     };
   }
 

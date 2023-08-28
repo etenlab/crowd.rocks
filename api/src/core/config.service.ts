@@ -12,6 +12,8 @@ export class ConfigService {
   public readonly CR_DB_USER = process.env.CR_DB_USER;
   public readonly CR_DB_PASSWORD = process.env.CR_DB_PASSWORD;
 
+  public readonly CR_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
   public readonly AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
   public readonly AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
   public readonly AWS_REGION = process.env.AWS_REGION;

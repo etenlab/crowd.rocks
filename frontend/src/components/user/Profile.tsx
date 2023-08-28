@@ -1,12 +1,10 @@
 import {
   IonButton,
-  IonContent,
   IonIcon,
   IonImg,
   IonInput,
   IonItem,
   IonLabel,
-  IonPage,
   useIonViewWillEnter,
 } from '@ionic/react';
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
@@ -21,10 +19,21 @@ import { imageOutline } from 'ionicons/icons';
 import { CropperComp } from '../post/Cropper';
 
 import { useTr } from '../../hooks/useTr';
+import { useAppContext } from '../../hooks/useAppContext';
+import { PageLayout } from '../common/PageLayout';
+import { styled } from 'styled-components';
 
 const Profile: React.FC = () => {
   const history = useHistory();
   const { tr } = useTr();
+
+  const {
+    states: {
+      global: {
+        langauges: { appLanguage },
+      },
+    },
+  } = useAppContext();
 
   const [avatarUpdateMutation] = useAvatarUpdateMutation();
 
@@ -56,9 +65,9 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     if (globals.get_token() === null) {
-      history.push('/US/eng/1/home');
+      history.push(`/US/${appLanguage.lang.tag}/1/home`);
     }
-  }, [history]);
+  }, [appLanguage, history]);
 
   const show_avatar_form = () => {
     set_show_update_avatar_form(true);
@@ -136,143 +145,145 @@ const Profile: React.FC = () => {
       }
     }
   };
+  const click_reset_password = () => {
+    history.push(`/US/${appLanguage.lang.tag}/1/reset-email-request`);
+  };
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <h1>{tr('Profile')}</h1>
+    <PageLayout>
+      <h1>{tr('Profile')}</h1>
 
-            <IonItem>
-              <IonLabel>{tr('User ID')}</IonLabel>
-              {globals.get_user_id()}
-            </IonItem>
+      <IonItem>
+        <IonLabel>{tr('User ID')}</IonLabel>
+        {globals.get_user_id()}
+      </IonItem>
 
-            {!show_update_avatar_form && (
-              <IonItem>
-                <IonLabel>{tr('Avatar')}</IonLabel>
-                <div className="clickable" onClick={show_avatar_form}>
-                  {globals.get_avatar()}
-                </div>
-              </IonItem>
-            )}
+      {!show_update_avatar_form && (
+        <IonItem>
+          <IonLabel>{tr('Avatar')}</IonLabel>
+          <div className="clickable" onClick={show_avatar_form}>
+            {globals.get_avatar()}
+          </div>
+        </IonItem>
+      )}
 
-            {show_update_avatar_form && (
-              <div>
-                <IonItem>
-                  <IonLabel position="floating">{tr('Avatar')}</IonLabel>
-                  <IonInput
-                    value={new_avatar}
-                    type="text"
-                    inputMode="text"
-                    onIonChange={(e) => set_new_avatar(e.detail.value!)}
-                    required
-                  />
-                </IonItem>
-                <div className="avatar-update-form-buttons">
-                  <IonButton
-                    type="submit"
-                    color="primary"
-                    onClick={update_avatar}
-                  >
-                    {tr('Submit')}
-                  </IonButton>
-                  <IonButton
-                    type="button"
-                    color="secondary"
-                    onClick={() => set_show_update_avatar_form(false)}
-                  >
-                    {tr('Cancel')}
-                  </IonButton>
-                </div>
-              </div>
-            )}
-
-            <IonItem>
-              <IonLabel>{tr('Avatar Image')}</IonLabel>
-
-              <form key={image_form_key}>
-                <input
-                  ref={fileInput}
-                  hidden
-                  type="file"
-                  accept="image/*"
-                  onChange={on_file_change}
-                  onClick={(e) => {
-                    console.log(e);
-                  }}
-                />
-              </form>
-
-              {globals.get_profile_url() && (
-                <IonImg
-                  className="avatar-image clickable"
-                  // eslint-disable-next-line @typescript-eslint/no-extra-non-null-assertion
-                  src={globals.get_profile_url()!!}
-                  onClick={() => {
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    fileInput?.current?.click();
-                    set_show_image_update_form(true);
-                  }}
-                />
-              )}
-
-              {!globals.get_profile_url() && (
-                <IonButton
-                  color="primary"
-                  onClick={() => {
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    fileInput?.current?.click();
-                    set_show_image_update_form(true);
-                    // setBackgroundOption(BackgroundOptionType.Gradient);
-                  }}
-                >
-                  {tr('Add')}
-                  <IonIcon slot="end" icon={imageOutline} />
-                </IonButton>
-              )}
-            </IonItem>
-
-            {show_image_update_form && (
-              <IonItem>
-                <IonLabel>{tr('New Avatar Image')}</IonLabel>
-                <div className="new-avatar-image-cropper">
-                  {file_url && (
-                    <CropperComp
-                      url={file_url}
-                      update_blob={update_avatar_image}
-                    />
-                  )}
-                </div>
-              </IonItem>
-            )}
-
-            {show_image_update_form && (
-              <IonItem>
-                <IonLabel>
-                  <IonButton onClick={submit_new_avatar_image}>
-                    {tr('Update Avatar Image')}
-                  </IonButton>
-                </IonLabel>
-
-                <IonButton
-                  color={'danger'}
-                  onClick={() => {
-                    set_show_image_update_form(false);
-                  }}
-                >
-                  {tr('Cancel')}
-                </IonButton>
-              </IonItem>
-            )}
+      {show_update_avatar_form && (
+        <div>
+          <IonItem>
+            <IonLabel position="floating">{tr('Avatar')}</IonLabel>
+            <IonInput
+              value={new_avatar}
+              type="text"
+              inputMode="text"
+              onIonChange={(e) => set_new_avatar(e.detail.value!)}
+              required
+            />
+          </IonItem>
+          <div className="avatar-update-form-buttons">
+            <IonButton type="submit" color="primary" onClick={update_avatar}>
+              {tr('Submit')}
+            </IonButton>
+            <IonButton
+              type="button"
+              color="secondary"
+              onClick={() => set_show_update_avatar_form(false)}
+            >
+              {tr('Cancel')}
+            </IonButton>
           </div>
         </div>
-      </IonContent>
-    </IonPage>
+      )}
+
+      <IonItem>
+        <IonLabel>{tr('Avatar Image')}</IonLabel>
+
+        <form key={image_form_key}>
+          <input
+            ref={fileInput}
+            hidden
+            type="file"
+            accept="image/*"
+            onChange={on_file_change}
+            onClick={(e) => {
+              console.log(e);
+            }}
+          />
+        </form>
+
+        {globals.get_profile_url() && (
+          <IonImg
+            className="avatar-image clickable"
+            // eslint-disable-next-line @typescript-eslint/no-extra-non-null-assertion
+            src={globals.get_profile_url()!!}
+            onClick={() => {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              fileInput?.current?.click();
+              set_show_image_update_form(true);
+            }}
+          />
+        )}
+
+        {!globals.get_profile_url() && (
+          <IonButton
+            color="primary"
+            onClick={() => {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              fileInput?.current?.click();
+              set_show_image_update_form(true);
+              // setBackgroundOption(BackgroundOptionType.Gradient);
+            }}
+          >
+            {tr('Add')}
+            <IonIcon slot="end" icon={imageOutline} />
+          </IonButton>
+        )}
+      </IonItem>
+
+      {show_image_update_form && (
+        <IonItem>
+          <IonLabel>{tr('New Avatar Image')}</IonLabel>
+          <div className="new-avatar-image-cropper">
+            {file_url && (
+              <CropperComp url={file_url} update_blob={update_avatar_image} />
+            )}
+          </div>
+        </IonItem>
+      )}
+
+      {show_image_update_form && (
+        <IonItem>
+          <IonLabel>
+            <IonButton onClick={submit_new_avatar_image}>
+              {tr('Update Avatar Image')}
+            </IonButton>
+          </IonLabel>
+
+          <IonButton
+            color={'danger'}
+            onClick={() => {
+              set_show_image_update_form(false);
+            }}
+          >
+            {tr('Cancel')}
+          </IonButton>
+        </IonItem>
+      )}
+      <StIonButton
+        type="button"
+        color="primary"
+        fill="clear"
+        onClick={click_reset_password}
+      >
+        {tr('Reset Password')}
+      </StIonButton>
+    </PageLayout>
   );
 };
+
+const StIonButton = styled(IonButton)(() => ({
+  width: '200px',
+}));
 
 export default Profile;

@@ -1,36 +1,53 @@
-import { WordTranslations } from '../../../generated/graphql';
+import {
+  MapPhraseTranslations,
+  MapWordTranslations,
+} from '../../../generated/graphql';
 import { useMapTranslationTools } from '../../map/hooks/useMapTranslationTools';
-import { WordCard } from '../WordCard/WordCard';
+import { WordOrPhraseCard } from '../WordCard/WordOrPhraseCard';
 import { styled } from 'styled-components';
 
 export type TWordTranslationCardProps = {
-  wordTranslated: WordTranslations;
+  wordTranslated: MapWordTranslations | MapPhraseTranslations;
   routerLink?: string;
   onClick?: () => void;
 };
 
-export const TranslatedWordCards = ({
-  wordTranslated,
+export const TranslatedCards = ({
+  wordTranslated: wordOrPhraseTranslated,
   routerLink,
   onClick,
 }: TWordTranslationCardProps) => {
   const { chooseBestTranslation } = useMapTranslationTools();
 
-  const wordBestTranslation = chooseBestTranslation(wordTranslated);
+  const wordBestTranslation = chooseBestTranslation(wordOrPhraseTranslated);
+
+  let textOriginal = '';
+  let textTranslated = '';
+  if (wordOrPhraseTranslated.__typename === 'MapWordTranslations') {
+    textOriginal = wordOrPhraseTranslated.word;
+  } else if (wordOrPhraseTranslated.__typename === 'MapPhraseTranslations') {
+    textOriginal = wordOrPhraseTranslated.phrase;
+  }
+
+  if (wordBestTranslation.__typename === 'MapWordWithVotes') {
+    textTranslated = wordBestTranslation.word;
+  } else if (wordBestTranslation.__typename === 'MapPhraseWithVotes') {
+    textTranslated = wordBestTranslation.phrase;
+  }
 
   return (
     <StCards>
       <StCard>
-        <WordCard
-          word={wordTranslated.word}
-          definition={wordTranslated.definition}
+        <WordOrPhraseCard
+          value={textOriginal}
+          definition={wordOrPhraseTranslated.definition}
           onClick={onClick}
           routerLink={routerLink}
         />
       </StCard>
       <StCard>
-        <WordCard
-          word={wordBestTranslation?.word || ''}
+        <WordOrPhraseCard
+          value={textTranslated}
           definition={wordBestTranslation?.definition || ''}
           onClick={onClick}
           routerLink={routerLink}

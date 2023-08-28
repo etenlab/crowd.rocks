@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import { Redirect, Route } from 'react-router';
 import {
   IonContent,
@@ -24,10 +24,6 @@ import { login_change } from './services/subscriptions';
 import { apollo_client } from './main';
 
 import {
-  useGetAllSiteTextLanguageListQuery,
-  SiteTextLanguage,
-} from './generated/graphql';
-import {
   langInfo2String,
   subTags2LangInfo,
   langInfo2tag,
@@ -52,61 +48,37 @@ import { WordDetailPage } from './components/dictionary/WordDetailPage';
 import { PhraseListPage } from './components/phrase-book/PhraseListPage';
 import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
 
-import { OriginalListPage } from './components/translation/OriginalListPage';
-import { TranslationListPage } from './components/translation/TranslationListPage';
+import { TranslationPage } from './components/translation/TranslationPage';
 
 import { useAppContext } from './hooks/useAppContext';
 import { useTr } from './hooks/useTr';
 
 import AppTypeahead from './components/common/LangSelector/TypeAhead';
-import { AddNewTranslationPage } from './components/translation/AddNewTranslationPage';
 
 const Body: React.FC = () => {
   const {
     states: {
       global: {
         langauges: { appLanguage },
+        siteTexts: { languages, originalMap, translationMap },
       },
     },
     actions: { changeAppLanguage },
   } = useAppContext();
 
   const router = useIonRouter();
-  const { tr, outputAllTrWords } = useTr();
+  const { tr } = useTr();
 
   const [show_menu, set_show_menu] = useState(false);
   const [is_logged_in, set_is_logged_in] = useState(false);
   const [show_dark_mode, set_show_dark_mode] = useState(false);
-  const [siteTextLanguageList, setSiteTextLanguageList] = useState<
-    SiteTextLanguage[]
-  >([]);
 
   const modal = useRef<HTMLIonModalElement>(null);
-
-  const {
-    loading: languageLoading,
-    error: languageError,
-    data: languageData,
-  } = useGetAllSiteTextLanguageListQuery();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [logoutMutation, { data, loading, error }] = useLogoutMutation();
 
   let sub: Subscription;
-
-  useEffect(() => {
-    if (languageError || languageError) {
-      return;
-    }
-
-    if (languageData && languageData.getAllSiteTextLanguageList) {
-      setSiteTextLanguageList([
-        ...languageData.getAllSiteTextLanguageList.site_text_language_list.map(
-          (language) => language as SiteTextLanguage,
-        ),
-      ]);
-    }
-  }, [languageError, languageLoading, languageData]);
 
   useIonViewWillEnter(() => {
     const theme_storage = localStorage.getItem('theme');
@@ -147,17 +119,17 @@ const Body: React.FC = () => {
 
   const click_profile = () => {
     toggleMenu();
-    router.push('/US/eng/1/profile');
+    router.push(`/US/${appLanguage.lang.tag}/1/profile`);
   };
 
   const click_register = () => {
     toggleMenu();
-    router.push('/US/eng/1/register');
+    router.push(`/US/${appLanguage.lang.tag}/1/register`);
   };
 
   const click_login = () => {
     toggleMenu();
-    router.push('/US/eng/1/login');
+    router.push(`/US/${appLanguage.lang.tag}/1/login`);
   };
 
   const click_logout = async () => {
@@ -184,7 +156,7 @@ const Body: React.FC = () => {
     await apollo_client.clearStore();
     await apollo_client.resetStore();
 
-    router.push('/US/eng/1/home');
+    router.push(`/US/${appLanguage.lang.tag}/1/home`);
   };
 
   const toggle_theme = () => {
@@ -203,31 +175,52 @@ const Body: React.FC = () => {
   };
 
   const goHome = () => {
-    router.push('/US/eng/1/home');
+    router.push(`/US/${appLanguage.lang.tag}/1/home`);
   };
 
   const handleChangeAppLanguage = useCallback(
     (value: string | undefined) => {
       if (value) {
         changeAppLanguage(tag2langInfo(value));
+        router.push(`/US/${value}/1/home`);
       }
-
-      outputAllTrWords();
 
       modal.current?.dismiss();
     },
-    [changeAppLanguage, outputAllTrWords],
+    [changeAppLanguage, router],
   );
 
-  const languages = useMemo(() => {
-    return siteTextLanguageList.map((language) => {
-      return subTags2LangInfo({
+  const languageList = useMemo(() => {
+    return languages.map((language) => {
+      const langInfo = subTags2LangInfo({
         lang: language.language_code,
         dialect: language.dialect_code as string | undefined,
         region: language.geo_code as string | undefined,
       });
+
+      const langInfoStr = langInfo2String(langInfo);
+
+      const originalCnt = Object.keys(originalMap).length;
+      const translationCnt =
+        langInfo.lang.tag !== 'en'
+          ? Object.keys(translationMap[langInfoStr]).length
+          : originalCnt;
+
+      const percent =
+        originalCnt > 0 ? (translationCnt / originalCnt) * 100 : 100;
+
+      const badgeColor = percent === 100 ? 'green' : undefined;
+
+      return {
+        text: `${langInfo2String(langInfo)}`,
+        value: langInfo2tag(langInfo) || '',
+        endBadge: {
+          value: `${Math.round(percent)}%`,
+          color: badgeColor,
+        },
+      };
     });
-  }, [siteTextLanguageList]);
+  }, [languages, originalMap, translationMap]);
 
   return (
     <IonPage>
@@ -313,10 +306,7 @@ const Body: React.FC = () => {
         <IonModal ref={modal} trigger="open-language-modal">
           <AppTypeahead
             title={tr('App Language')}
-            items={languages.map((language) => ({
-              text: langInfo2String(language),
-              value: langInfo2tag(language) || '',
-            }))}
+            items={languageList}
             selectedItem={langInfo2String(appLanguage)}
             onSelectionCancel={() => modal.current?.dismiss()}
             onSelectionChange={handleChangeAppLanguage}
@@ -386,21 +376,11 @@ const Body: React.FC = () => {
           />
           <Route
             exact
-            path="/:nation_id/:language_id/:cluster_id/translation-list"
-            component={OriginalListPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/translation-list/:definition_kind/:definition_id"
-            component={TranslationListPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/add-new-translation/:definition_kind/:definition_id"
-            component={AddNewTranslationPage}
+            path="/:nation_id/:language_id/:cluster_id/translation"
+            component={TranslationPage}
           />
           <Route exact path="/">
-            <Redirect to="/US/eng/1/home" />
+            <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />
           </Route>
         </IonRouterOutlet>
       </IonContent>

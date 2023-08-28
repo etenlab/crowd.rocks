@@ -1,10 +1,8 @@
 import {
   IonButton,
-  IonContent,
   IonInput,
   IonItem,
   IonLabel,
-  IonPage,
   useIonViewWillEnter,
 } from '@ionic/react';
 import { FormEvent, useState } from 'react';
@@ -15,10 +13,19 @@ import { login_change } from '../../services/subscriptions';
 import './Register.css';
 
 import { useTr } from '../../hooks/useTr';
+import { useAppContext } from '../../hooks/useAppContext';
+import { PageLayout } from '../common/PageLayout';
 
 const Register: React.FC = () => {
   const history = useHistory();
   const { tr } = useTr();
+  const {
+    states: {
+      global: {
+        langauges: { appLanguage },
+      },
+    },
+  } = useAppContext();
 
   useIonViewWillEnter(() => {
     document.title = tr('Register');
@@ -85,7 +92,7 @@ const Register: React.FC = () => {
       }
 
       login_change.next(true);
-      history.push('/US/eng/1/home');
+      history.push(`/US/${appLanguage.lang.tag}/1/home`);
       return;
     } else if (error === ErrorType.EmailTooLong) {
       set_is_email_too_long(true);
@@ -112,81 +119,73 @@ const Register: React.FC = () => {
   }
 
   const click_login = () => {
-    history.push('/US/eng/1/login');
+    history.push(`/US/${appLanguage.lang.tag}/1/login`);
   };
 
   return (
-    <IonPage>
-      <IonContent>
-        <div className="page">
-          <div className="section">
-            <h1>{tr('Register')}</h1>
-            <form onSubmit={(event) => handle_submit(event)}>
-              <IonItem>
-                <IonLabel position="floating">{tr('Email')}</IonLabel>
-                <IonInput
-                  value={email}
-                  inputmode="email"
-                  minlength={4}
-                  maxlength={255}
-                  onIonChange={(e) => set_email(e.detail.value!)}
-                  required
-                />
-              </IonItem>
+    <PageLayout>
+      <h1>{tr('Register')}</h1>
+      <form onSubmit={(event) => handle_submit(event)}>
+        <IonItem>
+          <IonLabel position="floating">{tr('Email')}</IonLabel>
+          <IonInput
+            value={email}
+            inputmode="email"
+            minlength={4}
+            maxlength={255}
+            onIonChange={(e) => set_email(e.detail.value!)}
+            required
+          />
+        </IonItem>
 
-              {is_email_too_long && <div>{tr('Email too long')}</div>}
-              {is_email_too_short && <div>{tr('Email too short')}</div>}
-              {is_email_invalid && <div>{tr('Email Invalid')}</div>}
+        {is_email_too_long && <div>{tr('Email too long')}</div>}
+        {is_email_too_short && <div>{tr('Email too short')}</div>}
+        {is_email_invalid && <div>{tr('Email Invalid')}</div>}
 
-              <IonItem counter={true}>
-                <IonLabel position="floating">{tr('Avatar')}</IonLabel>
-                <IonInput
-                  value={avatar}
-                  inputmode="text"
-                  minlength={1}
-                  maxlength={64}
-                  onIonChange={(e) => set_avatar(e.detail.value!)}
-                  required
-                />
-              </IonItem>
+        <IonItem counter={true}>
+          <IonLabel position="floating">{tr('Avatar')}</IonLabel>
+          <IonInput
+            value={avatar}
+            inputmode="text"
+            minlength={1}
+            maxlength={64}
+            onIonChange={(e) => set_avatar(e.detail.value!)}
+            required
+          />
+        </IonItem>
 
-              {is_avatar_too_long && <div>{tr('Avatar too long')}</div>}
-              {is_avatar_too_short && <div>{tr('Avatar too short')}</div>}
-              {is_avatar_unavailable && <div>{tr('Avatar Unavailable')}</div>}
-              <IonItem counter={true}>
-                <IonLabel position="floating">{tr('Password')}</IonLabel>
-                <IonInput
-                  value={password}
-                  type="password"
-                  minlength={8}
-                  maxlength={128}
-                  onIonChange={(e) => set_password(e.detail.value!)}
-                  required
-                />
-              </IonItem>
+        {is_avatar_too_long && <div>{tr('Avatar too long')}</div>}
+        {is_avatar_too_short && <div>{tr('Avatar too short')}</div>}
+        {is_avatar_unavailable && <div>{tr('Avatar Unavailable')}</div>}
+        <IonItem counter={true}>
+          <IonLabel position="floating">{tr('Password')}</IonLabel>
+          <IonInput
+            value={password}
+            type="password"
+            minlength={8}
+            maxlength={128}
+            onIonChange={(e) => set_password(e.detail.value!)}
+            required
+          />
+        </IonItem>
 
-              {is_password_too_long && <div>{tr('Password too long')}</div>}
-              {is_password_too_short && <div>{tr('Password too short')}</div>}
+        {is_password_too_long && <div>{tr('Password too long')}</div>}
+        {is_password_too_short && <div>{tr('Password too short')}</div>}
 
-              <IonButton type="submit" color="primary">
-                {tr('Register')}
-              </IonButton>
-            </form>
+        <IonButton type="submit" color="primary">
+          {tr('Register')}
+        </IonButton>
+      </form>
 
-            <br />
-
-            <IonButton
-              type="button"
-              color="primary"
-              fill="clear"
-              onClick={click_login}
-            >
-              {tr('Login')}
-            </IonButton>
-          </div>
-        </div>
-      </IonContent>
-    </IonPage>
+      <IonButton
+        type="button"
+        color="primary"
+        fill="clear"
+        onClick={click_login}
+      >
+        {tr('Login')}
+      </IonButton>
+    </PageLayout>
   );
 };
 

@@ -2,17 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input AddWordAsTranslationForWordInput {
-  originalDefinitionId: String!
-  translationDefinition: String!
-  translationWord: WordUpsertInput!
-}
-
-type AddWordAsTranslationForWordOutput {
-  error: ErrorType!
-  wordTranslationId: String!
-}
-
 input AvatarUpdateInput {
   avatar: String!
 }
@@ -26,14 +15,6 @@ type AvatarUpdateOutput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
-
-union Definition = PhraseDefinition | WordDefinition
-
-type DefinitionUpdateOutput {
-  error: ErrorType!
-  phrase_definition: PhraseDefinition
-  word_definition: WordDefinition
-}
 
 input DefinitionUpdateaInput {
   definition_id: ID!
@@ -98,7 +79,7 @@ enum ErrorType {
   RankInvalid
   RankUnchanged
   SiteTextPhraseDefinitionAlreadyExists
-  SiteTextTranslationNotFound
+  SiteTextPhraseDefinitionNotFound
   SiteTextWordDefinitionAlreadyExists
   SiteTextWordDefinitionNotFound
   TokenInvalid
@@ -166,6 +147,20 @@ input GetOrigMapListInput {
   search: String
 }
 
+input GetOrigMapPhrasesInput {
+  o_dialect_code: String
+  o_geo_code: String
+  o_language_code: String
+  original_map_id: ID
+  t_dialect_code: String
+  t_geo_code: String
+  t_language_code: String
+}
+
+type GetOrigMapPhrasesOutput {
+  origMapPhrases: [MapPhraseTranslations!]!
+}
+
 input GetOrigMapWordsInput {
   o_dialect_code: String
   o_geo_code: String
@@ -177,7 +172,7 @@ input GetOrigMapWordsInput {
 }
 
 type GetOrigMapWordsOutput {
-  origMapWords: [WordTranslations!]!
+  origMapWords: [MapWordTranslations!]!
 }
 
 type GetOrigMapsListOutput {
@@ -248,13 +243,67 @@ type MapFileOutput {
   translated_map_id: ID
 }
 
+type MapPhraseTranslations {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  phrase: String!
+  phrase_id: ID!
+  translations: [MapWordOrPhraseTranslationWithVotes!]
+}
+
+type MapPhraseWithVotes {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  down_votes: String!
+  geo_code: String
+  language_code: String!
+  phrase: String!
+  phrase_id: ID!
+  translation_id: String!
+  up_votes: String!
+}
+
+type MapUploadOutput {
+  error: ErrorType!
+  mapFileOutput: MapFileOutput!
+}
+
+union MapWordOrPhraseTranslationWithVotes = MapPhraseWithVotes | MapWordWithVotes
+
+type MapWordTranslations {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  translations: [MapWordOrPhraseTranslationWithVotes!]
+  word: String!
+  word_id: ID!
+}
+
+type MapWordWithVotes {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  down_votes: String!
+  geo_code: String
+  language_code: String!
+  translation_id: String!
+  up_votes: String!
+  word: String!
+  word_id: ID!
+}
+
 type Mutation {
-  addWordAsTranslationForWord(input: AddWordAsTranslationForWordInput!): AddWordAsTranslationForWordOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
-  mapUpload(file: Upload!): MapFileOutput!
+  mapUpload(file: Upload!): MapUploadOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationUpsertOutput!
@@ -263,25 +312,23 @@ type Mutation {
   postCreateResolver(input: PostCreateInput!): PostCreateOutput!
   register(input: RegisterInput!): RegisterOutput!
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
-  siteTextPhraseDefinitionUpsert(input: SiteTextPhraseDefinitionUpsertInput!): SiteTextPhraseDefinitionUpsertOutput!
-  siteTextTranslationUpsert(input: SiteTextTranslationInput!): SiteTextTranslationUpsertOutput!
-  siteTextTranslationVoteUpsert(input: SiteTextTranslationVoteUpsertInput!): SiteTextTranslationVoteUpsertOutput!
-  siteTextUpsert(input: SiteTextUpsertInput!): SiteTextUpsertOutput!
-  siteTextWordDefinitionUpsert(input: SiteTextWordDefinitionUpsertInput!): SiteTextWordDefinitionUpsertOutput!
+  siteTextPhraseDefinitionUpsert(phrase_definition_id: ID!): SiteTextPhraseDefinitionOutput!
+  siteTextTranslationVoteUpsert(from_type_is_word: Boolean!, to_type_is_word: Boolean!, translation_id: ID!, vote: Boolean!): SiteTextTranslationVoteOutput!
+  siteTextUpsert(input: SiteTextUpsertInput!): SiteTextDefinitionOutput!
+  siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
   togglePhraseDefinitionVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
-  togglePhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!, vote: Boolean!): PhraseToPhraseVoteStatusOutputRow!
-  togglePhraseToWordTrVoteStatus(phrase_to_word_translation_id: ID!, vote: Boolean!): PhraseToWordVoteStatusOutputRow!
+  togglePhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!, vote: Boolean!): PhraseToPhraseTranslationVoteStatusOutputRow!
+  togglePhraseToWordTrVoteStatus(phrase_to_word_translation_id: ID!, vote: Boolean!): PhraseToWordTranslationVoteStatusOutputRow!
   togglePhraseVoteStatus(phrase_id: ID!, vote: Boolean!): PhraseVoteStatusOutputRow!
+  toggleSiteTextTranslationVoteStatus(from_type_is_word: Boolean!, to_type_is_word: Boolean!, translation_id: ID!, vote: Boolean!): SiteTextTranslationVoteStatusOutputRow!
   toggleTranslationVoteStatus(from_definition_type_is_word: Boolean!, to_definition_type_is_word: Boolean!, translation_id: ID!, vote: Boolean!): TranslationVoteStatusOutputRow!
-  toggleVoteStatus(site_text_translation_id: String!, vote: Boolean!): VoteStatusOutputRow!
-  toggleWordDefinitonVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
-  toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseVoteStatusOutputRow!
-  toggleWordTrVoteStatus(input: WordTrVoteStatusInput!): WordTrVoteStatusOutputRow!
+  toggleWordDefinitionVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
+  toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
-  upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): SiteTextTranslationUpsertOutput!
+  upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): TranslationUpsertOutput!
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(input: FromPhraseAndDefintionlikeStringUpsertInput!): PhraseDefinitionUpsertOutput!
-  upsertSiteTextTranslation(input: SiteTextTranslationUpsertInput!): SiteTextTranslationUpsertOutput!
+  upsertSiteTextTranslation(input: SiteTextTranslationUpsertInput!): TranslationUpsertOutput!
   upsertTranslation(from_definition_id: ID!, from_definition_type_is_word: Boolean!, to_definition_id: ID!, to_definition_type_is_word: Boolean!): TranslationUpsertOutput!
   upsertTranslationFromWordAndDefinitionlikeString(from_definition_id: ID!, from_definition_type_is_word: Boolean!, to_definition_input: ToDefinitionInput!): TranslationUpsertOutput!
   upsertWordDefinitionFromWordAndDefinitionlikeString(input: FromWordAndDefintionlikeStringUpsertInput!): WordDefinitionUpsertOutput!
@@ -299,6 +346,9 @@ input PasswordResetFormInput {
 }
 
 type Phrase {
+  dialect_code: String
+  geo_code: String
+  language_code: String!
   phrase: String!
   phrase_id: ID!
 }
@@ -376,6 +426,17 @@ type PhraseToPhraseTranslationUpsertOutput {
   phrase_to_phrase_translation: PhraseToPhraseTranslation
 }
 
+type PhraseToPhraseTranslationVoteStatus {
+  downvotes: Int!
+  phrase_to_phrase_translation_id: ID!
+  upvotes: Int!
+}
+
+type PhraseToPhraseTranslationVoteStatusOutputRow {
+  error: ErrorType!
+  vote_status: PhraseToPhraseTranslationVoteStatus
+}
+
 type PhraseToPhraseTranslationWithVote {
   downvotes: Int!
   from_phrase_definition: PhraseDefinition!
@@ -386,24 +447,24 @@ type PhraseToPhraseTranslationWithVote {
 
 type PhraseToPhraseTranslationWithVoteListOutput {
   error: ErrorType!
-  phrase_to_phrase_tr_with_vote_list: [PhraseToPhraseTranslationWithVote]!
-}
-
-type PhraseToPhraseVoteStatus {
-  downvotes: Int!
-  phrase_to_phrase_translation_id: ID!
-  upvotes: Int!
-}
-
-type PhraseToPhraseVoteStatusOutputRow {
-  error: ErrorType!
-  vote_status: PhraseToPhraseVoteStatus
+  phrase_to_phrase_tr_with_vote_list: [PhraseToPhraseTranslationWithVote!]
 }
 
 type PhraseToWordTranslation {
   from_phrase_definition: PhraseDefinition!
   phrase_to_word_translation_id: ID!
   to_word_definition: WordDefinition!
+}
+
+type PhraseToWordTranslationVoteStatus {
+  downvotes: Int!
+  phrase_to_word_translation_id: ID!
+  upvotes: Int!
+}
+
+type PhraseToWordTranslationVoteStatusOutputRow {
+  error: ErrorType!
+  vote_status: PhraseToWordTranslationVoteStatus
 }
 
 type PhraseToWordTranslationWithVote {
@@ -416,18 +477,7 @@ type PhraseToWordTranslationWithVote {
 
 type PhraseToWordTranslationWithVoteListOutput {
   error: ErrorType!
-  phrase_to_word_tr_with_vote_list: [PhraseToWordTranslationWithVote]!
-}
-
-type PhraseToWordVoteStatus {
-  downvotes: Int!
-  phrase_to_word_translation_id: ID!
-  upvotes: Int!
-}
-
-type PhraseToWordVoteStatusOutputRow {
-  error: ErrorType!
-  vote_status: PhraseToWordVoteStatus
+  phrase_to_word_tr_with_vote_list: [PhraseToWordTranslationWithVote!]
 }
 
 input PhraseUpsertInput {
@@ -473,14 +523,20 @@ input PhraseVoteUpsertInput {
 
 type PhraseWithDefinitions {
   definitions: [PhraseDefinition]!
+  dialect_code: String
   downvotes: Int!
+  geo_code: String
+  language_code: String!
   phrase: String!
   phrase_id: ID!
   upvotes: Int!
 }
 
 type PhraseWithVote {
+  dialect_code: String
   downvotes: Int!
+  geo_code: String
+  language_code: String!
   phrase: String!
   phrase_id: ID!
   upvotes: Int!
@@ -524,31 +580,34 @@ type PostReadOutput {
 type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
   getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
-  getAllRecommendedTranslation(dialect_code: String, geo_code: String, language_code: String!): SiteTextTranslationWithVoteListOutput!
+  getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput!
+  getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): SiteTextTranslationWithVoteListByLanguageOutput!
   getAllSiteTextDefinitions(filter: String): SiteTextDefinitionListOutput!
   getAllSiteTextLanguageList: SiteTextLanguageListOutput!
-  getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
+  getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
   getOrigMapContent(input: GetOrigMapContentInput!): GetOrigMapContentOutput!
+  getOrigMapPhrases(input: GetOrigMapPhrasesInput): GetOrigMapPhrasesOutput!
   getOrigMapWords(input: GetOrigMapWordsInput): GetOrigMapWordsOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getPhraseDefinitionsByLanguage(input: LanguageInput!): PhraseDefinitionWithVoteListOutput!
   getPhraseDefinitionsByPhraseId(phrase_id: ID!): PhraseDefinitionWithVoteListOutput!
-  getPhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!): PhraseToPhraseVoteStatusOutputRow!
+  getPhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!): PhraseToPhraseTranslationVoteStatusOutputRow!
   getPhraseToPhraseTranslationsByFromPhraseDefinitionId(from_phrase_definition_id: ID!, langInfo: LanguageInput!): PhraseToPhraseTranslationWithVoteListOutput!
-  getPhraseToWordTrVoteStatus(phrase_to_word_translation_id: ID!): PhraseToWordVoteStatusOutputRow!
+  getPhraseToWordTrVoteStatus(phrase_to_word_translation_id: ID!): PhraseToWordTranslationVoteStatusOutputRow!
   getPhraseToWordTranslationsByFromPhraseDefinitionId(from_phrase_definition_id: ID!, langInfo: LanguageInput!): PhraseToWordTranslationWithVoteListOutput!
   getPhraseVoteStatus(phrase_id: ID!): PhraseVoteStatusOutputRow!
   getPhraseWithVoteById(phrase_id: ID!): PhraseWithVoteOutput!
   getPhrasesByLanguage(input: LanguageInput!): PhraseWithVoteListOutput!
-  getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: String!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
+  getRecommendedTranslationFromDefinitionID(from_definition_id: ID!, from_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteOutput!
+  getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
+  getSiteTextTranslationVoteStatus(from_type_is_word: Boolean!, to_type_is_word: Boolean!, translation_id: ID!): SiteTextTranslationVoteStatusOutputRow!
   getTranslatedMapContent(input: GetTranslatedMapContentInput!): GetTranslatedMapContentOutput!
   getTranslationsByFromDefinitionId(definition_id: ID!, from_definition_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteListOutput!
-  getVoteStatus(site_text_translation_id: String!): SiteTextTranslationVoteReadOutput!
   getWordDefinitionVoteStatus(word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getWordDefinitionsByLanguage(input: LanguageInput!): WordDefinitionWithVoteListOutput!
   getWordDefinitionsByWordId(word_id: ID!): WordDefinitionWithVoteListOutput!
-  getWordToPhraseTrVoteStatus(word_to_phrase_translation_id: ID!): WordToPhraseVoteStatusOutputRow!
+  getWordToPhraseTrVoteStatus(word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   getWordToPhraseTranslationsByFromWordDefinitionId(from_word_definition_id: ID!, langInfo: LanguageInput!): WordToPhraseTranslationWithVoteListOutput!
   getWordToWordTrVoteStatus(word_to_word_translation_id: ID!): WordTrVoteStatusOutputRow!
   getWordToWordTranslationsByFromWordDefinitionId(from_word_definition_id: ID!, langInfo: LanguageInput!): WordToWordTranslationWithVoteListOutput!
@@ -561,10 +620,9 @@ type Query {
   phraseToPhraseTranslationRead(id: ID!): PhraseToPhraseTranslationReadOutput!
   phraseVoteRead(id: ID!): PhraseVoteOutput!
   postReadResolver(input: PostReadInput!): PostReadOutput!
-  siteTextPhraseDefinitionRead(id: String!): SiteTextPhraseDefinitionReadOutput!
-  siteTextTranslationRead(id: String!): SiteTextTranslationReadOutput!
-  siteTextTranslationVoteRead(id: String!): SiteTextTranslationVoteReadOutput!
-  siteTextWordDefinitionRead(id: String!): SiteTextWordDefinitionReadOutput!
+  siteTextPhraseDefinitionRead(id: String!): SiteTextPhraseDefinitionOutput!
+  siteTextTranslationVoteRead(id: String!): SiteTextTranslationVoteOutput!
+  siteTextWordDefinitionRead(id: String!): SiteTextWordDefinitionOutput!
   userReadResolver(input: UserReadInput!): UserReadOutput!
   wordDefinitionRead(id: ID!): WordDefinitionReadOutput!
   wordRead(input: WordReadInput!): WordReadOutput!
@@ -599,10 +657,16 @@ type Session {
   user_id: ID!
 }
 
+union SiteTextDefinition = SiteTextPhraseDefinition | SiteTextWordDefinition
+
 type SiteTextDefinitionListOutput {
   error: ErrorType!
-  site_text_phrase_definition_list: [SiteTextPhraseDefinition]!
-  site_text_word_definition_list: [SiteTextWordDefinition]!
+  site_text_definition_list: [SiteTextDefinition!]
+}
+
+type SiteTextDefinitionOutput {
+  error: ErrorType!
+  site_text_definition: SiteTextDefinition
 }
 
 type SiteTextLanguage {
@@ -613,7 +677,7 @@ type SiteTextLanguage {
 
 type SiteTextLanguageListOutput {
   error: ErrorType!
-  site_text_language_list: [SiteTextLanguage]!
+  site_text_language_list: [SiteTextLanguage!]
 }
 
 type SiteTextPhraseDefinition {
@@ -621,38 +685,25 @@ type SiteTextPhraseDefinition {
   site_text_id: ID!
 }
 
-type SiteTextPhraseDefinitionReadOutput {
+type SiteTextPhraseDefinitionOutput {
   error: ErrorType!
   site_text_phrase_definition: SiteTextPhraseDefinition
 }
 
-input SiteTextPhraseDefinitionUpsertInput {
-  phrase_definition_id: ID!
+type SiteTextPhraseToPhraseTranslationWithVote {
+  downvotes: Int!
+  from_phrase_definition: PhraseDefinition!
+  phrase_to_phrase_translation_id: ID!
+  to_phrase_definition: PhraseDefinition!
+  upvotes: Int!
 }
 
-type SiteTextPhraseDefinitionUpsertOutput {
-  error: ErrorType!
-  site_text_phrase_definition: SiteTextPhraseDefinition
-}
-
-type SiteTextTranslation {
-  from_definition: Definition!
-  from_type_is_word: Boolean!
-  site_text_translation_id: ID!
-  to_definition: Definition!
-  to_type_is_word: Boolean!
-}
-
-input SiteTextTranslationInput {
-  from_definition_id: ID!
-  from_type_is_word: Boolean!
-  to_definition_id: ID!
-  to_type_is_word: Boolean!
-}
-
-type SiteTextTranslationReadOutput {
-  error: ErrorType!
-  site_text_translation: SiteTextTranslation
+type SiteTextPhraseToWordTranslationWithVote {
+  downvotes: Int!
+  from_phrase_definition: PhraseDefinition!
+  phrase_to_word_translation_id: ID!
+  to_word_definition: WordDefinition!
+  upvotes: Int!
 }
 
 input SiteTextTranslationUpsertInput {
@@ -665,48 +716,56 @@ input SiteTextTranslationUpsertInput {
   translationlike_string: String!
 }
 
-type SiteTextTranslationUpsertOutput {
-  error: ErrorType!
-  site_text_translation: SiteTextTranslation
-}
-
 type SiteTextTranslationVote {
+  from_type_is_word: Boolean!
   last_updated_at: DateTime!
-  site_text_translation_id: ID!
   site_text_translation_vote_id: ID!
+  to_type_is_word: Boolean!
+  translation_id: ID!
   user_id: ID!
   vote: Boolean!
 }
 
-type SiteTextTranslationVoteReadOutput {
+type SiteTextTranslationVoteOutput {
   error: ErrorType!
   site_text_translation_vote: SiteTextTranslationVote
 }
 
-input SiteTextTranslationVoteUpsertInput {
-  site_text_translation_id: ID!
-  vote: Boolean!
-}
-
-type SiteTextTranslationVoteUpsertOutput {
-  error: ErrorType!
-  site_text_translation_vote: SiteTextTranslationVote
-}
-
-type SiteTextTranslationWithVote {
-  created_at: String!
+type SiteTextTranslationVoteStatus {
   downvotes: Int!
-  from_definition: Definition!
   from_type_is_word: Boolean!
-  site_text_translation_id: ID!
-  to_definition: Definition!
   to_type_is_word: Boolean!
+  translation_id: ID!
   upvotes: Int!
+}
+
+type SiteTextTranslationVoteStatusOutputRow {
+  error: ErrorType!
+  vote_status: SiteTextTranslationVoteStatus
+}
+
+union SiteTextTranslationWithVote = SiteTextPhraseToPhraseTranslationWithVote | SiteTextPhraseToWordTranslationWithVote | SiteTextWordToPhraseTranslationWithVote | SiteTextWordToWordTranslationWithVote
+
+type SiteTextTranslationWithVoteListByLanguage {
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  site_text_translation_with_vote_list: [SiteTextTranslationWithVote!]
+}
+
+type SiteTextTranslationWithVoteListByLanguageListOutput {
+  error: ErrorType!
+  site_text_translation_with_vote_list_by_language_list: [SiteTextTranslationWithVoteListByLanguage!]
+}
+
+type SiteTextTranslationWithVoteListByLanguageOutput {
+  error: ErrorType!
+  site_text_translation_with_vote_list_by_language: SiteTextTranslationWithVoteListByLanguage!
 }
 
 type SiteTextTranslationWithVoteListOutput {
   error: ErrorType!
-  site_text_translation_with_vote_list: [SiteTextTranslationWithVote]!
+  site_text_translation_with_vote_list: [SiteTextTranslationWithVote!]
 }
 
 type SiteTextTranslationWithVoteOutput {
@@ -735,29 +794,30 @@ input SiteTextUpsertInput {
   siteTextlike_string: String!
 }
 
-type SiteTextUpsertOutput {
-  error: ErrorType!
-  site_text_phrase_definition: SiteTextPhraseDefinition
-  site_text_word_definition: SiteTextWordDefinition
-}
-
 type SiteTextWordDefinition {
   site_text_id: ID!
   word_definition: WordDefinition!
 }
 
-type SiteTextWordDefinitionReadOutput {
+type SiteTextWordDefinitionOutput {
   error: ErrorType!
   site_text_word_definition: SiteTextWordDefinition
 }
 
-input SiteTextWordDefinitionUpsertInput {
-  word_definition_id: ID!
+type SiteTextWordToPhraseTranslationWithVote {
+  downvotes: Int!
+  from_word_definition: WordDefinition!
+  to_phrase_definition: PhraseDefinition!
+  upvotes: Int!
+  word_to_phrase_translation_id: ID!
 }
 
-type SiteTextWordDefinitionUpsertOutput {
-  error: ErrorType!
-  site_text_word_definition: SiteTextWordDefinition
+type SiteTextWordToWordTranslationWithVote {
+  downvotes: Int!
+  from_word_definition: WordDefinition!
+  to_word_definition: WordDefinition!
+  upvotes: Int!
+  word_to_word_translation_id: ID!
 }
 
 input ToDefinitionInput {
@@ -769,28 +829,30 @@ input ToDefinitionInput {
   word_or_phrase: String!
 }
 
+union Translation = PhraseToPhraseTranslation | PhraseToWordTranslation | WordToPhraseTranslation | WordToWordTranslation
+
 type TranslationUpsertOutput {
   error: ErrorType!
-  phrase_to_phrase_translation: PhraseToPhraseTranslation
-  phrase_to_word_translation: PhraseToWordTranslation
-  word_to_phrase_translation: WordToPhraseTranslation
-  word_to_word_translation: WordToWordTranslation
+  translation: Translation
 }
+
+union TranslationVoteStatus = PhraseToPhraseTranslationVoteStatus | PhraseToWordTranslationVoteStatus | WordToPhraseTranslationVoteStatus | WordTrVoteStatus
 
 type TranslationVoteStatusOutputRow {
   error: ErrorType!
-  phrase_to_phrase_vote_status: PhraseToPhraseVoteStatus
-  phrase_to_word_vote_status: PhraseToWordVoteStatus
-  word_to_phrase_vote_status: WordToPhraseVoteStatus
-  word_to_word_vote_status: WordTrVoteStatus
+  translation_vote_status: TranslationVoteStatus
 }
+
+union TranslationWithVote = PhraseToPhraseTranslationWithVote | PhraseToWordTranslationWithVote | WordToPhraseTranslationWithVote | WordToWordTranslationWithVote
 
 type TranslationWithVoteListOutput {
   error: ErrorType!
-  phrase_to_phrase_tr_with_vote_list: [PhraseToPhraseTranslationWithVote]!
-  phrase_to_word_tr_with_vote_list: [PhraseToWordTranslationWithVote]!
-  word_to_phrase_tr_with_vote_list: [WordToPhraseTranslationWithVote]!
-  word_to_word_tr_with_vote_list: [WordToWordTranslationWithVote]!
+  translation_with_vote_list: [TranslationWithVote!]
+}
+
+type TranslationWithVoteOutput {
+  error: ErrorType!
+  translation_with_vote: TranslationWithVote
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -828,17 +890,6 @@ input VersionCreateInput {
 type VersionCreateOutput {
   error: ErrorType!
   version: Version
-}
-
-type VoteStatus {
-  downvotes: Int!
-  site_text_translation_id: String!
-  upvotes: Int!
-}
-
-type VoteStatusOutputRow {
-  error: ErrorType!
-  vote_status: VoteStatus
 }
 
 type Word {
@@ -922,6 +973,17 @@ type WordToPhraseTranslationUpsertOutput {
   word_to_phrase_translation: WordToPhraseTranslation
 }
 
+type WordToPhraseTranslationVoteStatus {
+  downvotes: Int!
+  upvotes: Int!
+  word_to_phrase_translation_id: ID!
+}
+
+type WordToPhraseTranslationVoteStatusOutputRow {
+  error: ErrorType!
+  vote_status: WordToPhraseTranslationVoteStatus
+}
+
 type WordToPhraseTranslationWithVote {
   downvotes: Int!
   from_word_definition: WordDefinition!
@@ -932,18 +994,7 @@ type WordToPhraseTranslationWithVote {
 
 type WordToPhraseTranslationWithVoteListOutput {
   error: ErrorType!
-  word_to_phrase_tr_with_vote_list: [WordToPhraseTranslationWithVote]!
-}
-
-type WordToPhraseVoteStatus {
-  downvotes: Int!
-  upvotes: Int!
-  word_to_phrase_translation_id: ID!
-}
-
-type WordToPhraseVoteStatusOutputRow {
-  error: ErrorType!
-  vote_status: WordToPhraseVoteStatus
+  word_to_phrase_tr_with_vote_list: [WordToPhraseTranslationWithVote!]
 }
 
 type WordToWordTranslation {
@@ -977,7 +1028,7 @@ type WordToWordTranslationWithVote {
 
 type WordToWordTranslationWithVoteListOutput {
   error: ErrorType!
-  word_to_word_tr_with_vote_list: [WordToWordTranslationWithVote]!
+  word_to_word_tr_with_vote_list: [WordToWordTranslationWithVote!]
 }
 
 type WordTrVoteStatus {
@@ -986,25 +1037,9 @@ type WordTrVoteStatus {
   word_to_word_translation_id: String!
 }
 
-input WordTrVoteStatusInput {
-  vote: Boolean!
-  word_to_word_translation_id: ID!
-}
-
 type WordTrVoteStatusOutputRow {
   error: ErrorType!
   vote_status: WordTrVoteStatus
-}
-
-type WordTranslations {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  geo_code: String
-  language_code: String!
-  translations: [WordWithVotes!]
-  word: String!
-  word_id: ID!
 }
 
 input WordUpsertInput {
@@ -1077,17 +1112,4 @@ type WordWithVoteListOutput {
 type WordWithVoteOutput {
   error: ErrorType!
   word_with_vote: WordWithVote
-}
-
-type WordWithVotes {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  down_votes: String!
-  geo_code: String
-  language_code: String!
-  translation_id: String!
-  up_votes: String!
-  word: String!
-  word_id: ID!
 }

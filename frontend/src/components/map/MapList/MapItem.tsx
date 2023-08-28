@@ -10,13 +10,24 @@ import {
 } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
-import { downloadFromSrc } from '../../../common/utility';
+import {
+  downloadFromSrc,
+  putLangCodesToFileName,
+} from '../../../common/utility';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
   mapItem: MapFileOutput;
 };
 
 const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
+  const {
+    states: {
+      global: {
+        langauges: { appLanguage },
+      },
+    },
+  } = useAppContext();
   const downloadFlagRef = useRef<'original' | 'translated' | null>(null);
 
   const [getOrigMapContent, origMapContent] = useGetOrigMapContentLazyQuery({
@@ -27,8 +38,8 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
 
   const routerLink =
     mapItem.is_original || !mapItem.translated_map_id
-      ? `/US/eng/1/maps/details-original/${mapItem.original_map_id}`
-      : `/US/eng/1/maps/details-translated/${mapItem.translated_map_id}`;
+      ? `/US/${appLanguage.lang.tag}/1/maps/details-original/${mapItem.original_map_id}`
+      : `/US/${appLanguage.lang.tag}/1/maps/details-translated/${mapItem.translated_map_id}`;
 
   const langInfo = subTags2LangInfo({
     lang: mapItem.language.language_code,
@@ -83,6 +94,11 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
       `data:image/svg+xml;utf8,${encodeURIComponent(
         translatedMapContent.data.getTranslatedMapContent.content,
       )}`,
+      {
+        language_code: mapItem.language.language_code,
+        dialect_code: mapItem.language.dialect_code || undefined,
+        geo_code: mapItem.language.geo_code || undefined,
+      },
     );
     downloadFlagRef.current = null;
   }
@@ -90,11 +106,20 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
   return (
     <IonItem {...rest} routerLink={routerLink}>
       <StItem>
-        <FileName>{mapItem.map_file_name}</FileName>
+        <FileName>
+          {mapItem.is_original
+            ? mapItem.map_file_name
+            : putLangCodesToFileName(
+                mapItem.map_file_name,
+                mapItem.language || undefined,
+              )}
+        </FileName>
         <div>
-          {!mapItem.is_original ? (
+          {mapItem.is_original ? (
+            <OrigBadge>Original</OrigBadge>
+          ) : (
             <IonBadge>{langInfo2String(langInfo)}</IonBadge>
-          ) : null}
+          )}
           <IonIcon
             icon={downloadOutline}
             onClick={handleDownloadSvg}
@@ -122,3 +147,7 @@ const StItem = styled.div`
   justify-content: space-between;
   width: 100%;
 `;
+
+const OrigBadge = styled(IonBadge)(() => ({
+  background: 'purple',
+}));

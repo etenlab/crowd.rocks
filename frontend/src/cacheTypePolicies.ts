@@ -43,14 +43,17 @@ export const typePolicies: TypePolicies = {
   SiteTextWordDefinition: {
     keyFields: ['site_text_id'],
   },
-  SiteTextTranslationWithVote: {
-    keyFields: ['site_text_translation_id'],
+  SiteTextWordToWordTranslationWithVote: {
+    keyFields: ['word_to_word_translation_id'],
   },
-  SiteTextTranslation: {
-    keyFields: ['site_text_translation_id'],
+  SiteTextWordToPhraseTranslationWithVote: {
+    keyFields: ['word_to_phrase_translation_id'],
   },
-  VoteStatus: {
-    keyFields: ['site_text_translation_id'],
+  SiteTextPhraseToWordTranslationWithVote: {
+    keyFields: ['phrase_to_word_translation_id'],
+  },
+  SiteTextPhraseToPhraseTranslationWithVote: {
+    keyFields: ['phrase_to_phrase_translation_id'],
   },
   WordToWordTranslationWithVote: {
     keyFields: ['word_to_word_translation_id'],
@@ -62,6 +65,18 @@ export const typePolicies: TypePolicies = {
     keyFields: ['phrase_to_word_translation_id'],
   },
   PhraseToPhraseTranslationWithVote: {
+    keyFields: ['phrase_to_phrase_translation_id'],
+  },
+  WordToWordTranslation: {
+    keyFields: ['word_to_word_translation_id'],
+  },
+  WordToPhraseTranslation: {
+    keyFields: ['word_to_phrase_translation_id'],
+  },
+  PhraseToWordTranslation: {
+    keyFields: ['phrase_to_word_translation_id'],
+  },
+  PhraseToPhraseTranslation: {
     keyFields: ['phrase_to_phrase_translation_id'],
   },
 };
