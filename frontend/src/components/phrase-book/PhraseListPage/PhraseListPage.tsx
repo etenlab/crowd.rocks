@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
+  IonButton,
+  IonSpinner,
   IonContent,
   IonModal,
   IonToolbar,
@@ -36,6 +38,8 @@ import { AddListHeader } from '../../common/ListHeader';
 import { PageLayout } from '../../common/PageLayout';
 import { NewPhraseForm } from '../NewPhraseForm';
 
+import { PAGE_SIZE } from '../../../const/commonConst';
+
 interface PhraseListPageProps
   extends RouteComponentProps<{
     nation_id: string;
@@ -59,8 +63,10 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
   const [filter, setFilter] = useState<string>('');
 
-  const [getPhrasesByLanguage, { data: phrasesData, error }] =
-    useGetPhrasesByLanguageLazyQuery();
+  const [
+    getPhrasesByLanguage,
+    { data: phrasesData, loading, error, fetchMore },
+  ] = useGetPhrasesByLanguageLazyQuery();
   const [togglePhraseVoteStatus] = useTogglePhraseVoteStatusMutation();
 
   useEffect(() => {
@@ -70,6 +76,8 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
     getPhrasesByLanguage({
       variables: {
+        first: PAGE_SIZE,
+        after: null,
         language_code: targetLang.lang.tag,
         dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
         geo_code: targetLang.region ? targetLang.region.tag : null,
@@ -93,6 +101,21 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
     setFilter(event.detail.value!);
   };
 
+  const handleFetchMore = () => {
+    if (phrasesData?.getPhrasesByLanguage.pageInfo.hasNextPage && targetLang) {
+      fetchMore({
+        variables: {
+          first: PAGE_SIZE,
+          after: phrasesData.getPhrasesByLanguage.pageInfo.endCursor,
+          language_code: targetLang.lang.tag,
+          dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
+          geo_code: targetLang.region ? targetLang.region.tag : null,
+          filter: filter.trim(),
+        },
+      });
+    }
+  };
+
   const cardListComs = useMemo(() => {
     const tempPhrases: {
       phrase_id: string;
@@ -113,19 +136,20 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
       return null;
     }
 
-    const phraseWithVoteList =
-      phrasesData.getPhrasesByLanguage.phrase_with_vote_list;
+    const phraseWithVoteListEdges = phrasesData.getPhrasesByLanguage.edges;
 
-    for (const phraseWithVote of phraseWithVoteList) {
-      if (phraseWithVote) {
+    for (const edge of phraseWithVoteListEdges) {
+      const { node } = edge;
+
+      if (node) {
         tempPhrases.push({
-          phrase_id: phraseWithVote.phrase_id,
-          phrase: phraseWithVote.phrase,
-          definitionlike_strings: phraseWithVote.definitions.map(
+          phrase_id: node.phrase_id,
+          phrase: node.phrase,
+          definitionlike_strings: node.definitions.map(
             (definition) => definition?.definition,
           ) as string[],
-          upvotes: phraseWithVote.upvotes,
-          downvotes: phraseWithVote.downvotes,
+          upvotes: node.upvotes,
+          downvotes: node.downvotes,
         });
       }
     }
@@ -210,6 +234,16 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
       />
 
       <CardListContainer>{cardListComs}</CardListContainer>
+
+      <IonButton
+        fill="outline"
+        shape="round"
+        onClick={handleFetchMore}
+        disabled={!phrasesData?.getPhrasesByLanguage.pageInfo.hasNextPage}
+      >
+        {tr('Load More')}
+        {loading ? <IonSpinner name="bubbles" /> : null}
+      </IonButton>
 
       <IonModal isOpen={isOpenModal}>
         <IonHeader>

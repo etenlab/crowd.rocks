@@ -93,3 +93,9 @@ export type LanguageInfo = {
   dialect?: TDialect | undefined;
   region?: TRegion | undefined;
 };
+
+export type TLangCodes = {
+  language_code: string;
+  dialect_code?: string | null | undefined;
+  geo_code?: string | null | undefined;
+};

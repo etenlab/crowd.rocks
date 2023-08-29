@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
+import {
+  Args,
+  Query,
+  Resolver,
+  Mutation,
+  Context,
+  ID,
+  Int,
+} from '@nestjs/graphql';
 
 import { getBearer } from 'src/common/utility';
 
@@ -15,7 +23,7 @@ import {
   PhraseVoteOutput,
   PhraseVoteUpsertInput,
   PhraseVoteStatusOutputRow,
-  PhraseWithVoteListOutput,
+  PhraseWithVoteListConnection,
   PhraseWithVoteOutput,
 } from './types';
 
@@ -96,16 +104,18 @@ export class PhrasesResolver {
     );
   }
 
-  @Query(() => PhraseWithVoteListOutput)
+  @Query(() => PhraseWithVoteListConnection)
   async getPhrasesByLanguage(
     @Args('input', { type: () => LanguageInput }) input: LanguageInput,
-  ): Promise<PhraseWithVoteListOutput> {
+    @Args('first', { type: () => Int }) first: number,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<PhraseWithVoteListConnection> {
     console.log(
       'get phrases by language resolver',
       JSON.stringify(input, null, 2),
     );
 
-    return this.phraseService.getPhrasesByLanguage(input);
+    return this.phraseService.getPhrasesByLanguage(input, first, after);
   }
 
   @Query(() => PhraseWithVoteOutput)

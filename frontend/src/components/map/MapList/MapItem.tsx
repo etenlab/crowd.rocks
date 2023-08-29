@@ -10,10 +10,7 @@ import {
 } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
-import {
-  downloadFromSrc,
-  putLangCodesToFileName,
-} from '../../../common/utility';
+import { downloadFromSrc } from '../../../common/utility';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
@@ -90,15 +87,11 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
     downloadFlagRef.current === 'translated'
   ) {
     downloadFromSrc(
-      translatedMapContent.data.getTranslatedMapContent.map_file_name,
+      translatedMapContent.data.getTranslatedMapContent
+        .map_file_name_with_langs,
       `data:image/svg+xml;utf8,${encodeURIComponent(
         translatedMapContent.data.getTranslatedMapContent.content,
       )}`,
-      {
-        language_code: mapItem.language.language_code,
-        dialect_code: mapItem.language.dialect_code || undefined,
-        geo_code: mapItem.language.geo_code || undefined,
-      },
     );
     downloadFlagRef.current = null;
   }
@@ -109,10 +102,7 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
         <FileName>
           {mapItem.is_original
             ? mapItem.map_file_name
-            : putLangCodesToFileName(
-                mapItem.map_file_name,
-                mapItem.language || undefined,
-              )}
+            : mapItem.map_file_name_with_langs}
         </FileName>
         <div>
           {mapItem.is_original ? (

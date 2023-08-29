@@ -72,53 +72,17 @@ export function get_cardinal_suffix(vote: number): string {
   return suffix;
 }
 
-export const putLangCodesToFileName = (
-  file_name: string,
-  langCodes: TLangCodes,
-): string => {
-  if (!langCodes.language_code) {
-    throw new Error(`language_code insn't provided!`);
-  }
-  const nameParts = file_name.split('.');
-  const extension = nameParts.at(-1);
-  const fname = nameParts.slice(0, -1);
-  let newFileName = fname.join('.');
-  if (langCodes.language_code) {
-    newFileName += `.${langCodes.language_code}`;
-  }
-  if (langCodes.dialect_code) {
-    newFileName += `-${langCodes.dialect_code}`;
-  }
-  if (langCodes.geo_code) {
-    newFileName += `-${langCodes.geo_code}`;
-  }
-  newFileName += '.cf.' + extension;
-  return newFileName;
-};
-
-export const downloadFromUrl = (
-  file_name: string,
-  file_url: string,
-  langCodes?: TLangCodes,
-) => {
+export const downloadFromUrl = (file_name: string, file_url: string) => {
   const hiddenElement = document.createElement('a');
   hiddenElement.href = encodeURI(file_url);
-  hiddenElement.download = langCodes
-    ? putLangCodesToFileName(file_name, langCodes)
-    : file_name;
+  hiddenElement.download = file_name;
   hiddenElement.click();
 };
 
-export const downloadFromSrc = (
-  file_name: string,
-  src: string,
-  langCodes?: TLangCodes,
-) => {
+export const downloadFromSrc = (file_name: string, src: string) => {
   const hiddenElement = document.createElement('a');
   hiddenElement.href = src;
-  hiddenElement.download = langCodes
-    ? putLangCodesToFileName(file_name, langCodes)
-    : file_name;
+  hiddenElement.download = file_name;
   hiddenElement.click();
 };
 

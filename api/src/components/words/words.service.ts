@@ -12,8 +12,8 @@ import {
   WordReadInput,
   WordReadOutput,
   WordUpsertInput,
-  WordWithDefinitions,
-  WordWithVoteListOutput,
+  WordWithVoteListEdge,
+  WordWithVoteListConnection,
   WordWithVoteOutput,
 } from './types';
 import { LanguageInput } from 'src/components/common/types';
@@ -191,7 +191,9 @@ export class WordsService {
 
   async getWordsByLanguage(
     input: LanguageInput,
-  ): Promise<WordWithVoteListOutput> {
+    first: number,
+    after: string | null,
+  ): Promise<WordWithVoteListConnection> {
     try {
       const res1 = await this.pg.pool.query<GetWordListByLang>(
         ...getWordListByLang({
@@ -199,10 +201,38 @@ export class WordsService {
         }),
       );
 
-      const wordWithVoteList: WordWithDefinitions[] = [];
+      const wordWithVoteListEdge: WordWithVoteListEdge[] = [];
+
+      let offset: number | null = null;
+      let hasNextPage = false;
+      let startCursor: string | null = null;
+      let endCursor: string | null = null;
 
       for (let i = 0; i < res1.rowCount; i++) {
         const { word_id } = res1.rows[i];
+
+        if (after === null && offset === null) {
+          offset = 0;
+        }
+
+        if (word_id !== after && offset === null) {
+          continue;
+        }
+
+        if (word_id === after && offset === null) {
+          offset = 0;
+          continue;
+        }
+
+        if (offset === 0) {
+          startCursor = word_id;
+        }
+
+        if (offset >= first) {
+          hasNextPage = true;
+          break;
+        }
+
         const { error, vote_status } = await this.wordVoteService.getVoteStatus(
           +word_id,
         );
@@ -210,7 +240,13 @@ export class WordsService {
         if (error !== ErrorType.NoError) {
           return {
             error,
-            word_with_vote_list: [],
+            edges: [],
+            pageInfo: {
+              hasNextPage: false,
+              hasPreviousPage: false,
+              startCursor: null,
+              endCursor: null,
+            },
           };
         }
 
@@ -220,32 +256,56 @@ export class WordsService {
         if (definitionError !== ErrorType.NoError) {
           return {
             error: definitionError,
-            word_with_vote_list: [],
+            edges: [],
+            pageInfo: {
+              hasNextPage: false,
+              hasPreviousPage: false,
+              startCursor: null,
+              endCursor: null,
+            },
           };
         }
 
         const { error: readError, word } = await this.read({
-          word_id,
+          word_id: word_id,
         });
 
         if (readError !== ErrorType.NoError) {
           return {
             error: readError,
-            word_with_vote_list: [],
+            edges: [],
+            pageInfo: {
+              hasNextPage: false,
+              hasPreviousPage: false,
+              startCursor: null,
+              endCursor: null,
+            },
           };
         }
 
-        wordWithVoteList.push({
-          ...word,
-          upvotes: vote_status.upvotes,
-          downvotes: vote_status.downvotes,
-          definitions,
+        wordWithVoteListEdge.push({
+          cursor: word_id,
+          node: {
+            ...word,
+            upvotes: vote_status.upvotes,
+            downvotes: vote_status.downvotes,
+            definitions,
+          },
         });
+
+        endCursor = word_id;
+        offset++;
       }
 
       return {
         error: ErrorType.NoError,
-        word_with_vote_list: wordWithVoteList,
+        edges: wordWithVoteListEdge,
+        pageInfo: {
+          hasNextPage,
+          hasPreviousPage: false,
+          startCursor,
+          endCursor,
+        },
       };
     } catch (e) {
       console.error(e);
@@ -253,7 +313,13 @@ export class WordsService {
 
     return {
       error: ErrorType.UnknownError,
-      word_with_vote_list: [],
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+      },
     };
   }
 

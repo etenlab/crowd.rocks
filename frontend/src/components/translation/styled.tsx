@@ -9,4 +9,8 @@ export const ListContainer = styled.div`
 
 export const WordOrPhraseListContainer = styled.div`
   width: 48%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
 `;

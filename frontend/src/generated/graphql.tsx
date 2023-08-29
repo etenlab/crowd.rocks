@@ -161,6 +161,7 @@ export type GetOrigMapContentOutput = {
   is_original: Scalars['Boolean']['output'];
   language: LanguageOutput;
   map_file_name: Scalars['String']['output'];
+  map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
@@ -217,6 +218,7 @@ export type GetTranslatedMapContentOutput = {
   is_original: Scalars['Boolean']['output'];
   language: LanguageOutput;
   map_file_name: Scalars['String']['output'];
+  map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
@@ -272,6 +274,7 @@ export type MapFileOutput = {
   is_original: Scalars['Boolean']['output'];
   language: LanguageOutput;
   map_file_name: Scalars['String']['output'];
+  map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
@@ -597,6 +600,14 @@ export type MutationWordVoteUpsertArgs = {
   input: WordVoteUpsertInput;
 };
 
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  endCursor?: Maybe<Scalars['ID']['output']>;
+  hasNextPage: Scalars['Boolean']['output'];
+  hasPreviousPage: Scalars['Boolean']['output'];
+  startCursor?: Maybe<Scalars['ID']['output']>;
+};
+
 export type PasswordResetFormInput = {
   password: Scalars['String']['input'];
   token: Scalars['String']['input'];
@@ -826,10 +837,17 @@ export type PhraseWithVote = {
   upvotes: Scalars['Int']['output'];
 };
 
-export type PhraseWithVoteListOutput = {
-  __typename?: 'PhraseWithVoteListOutput';
+export type PhraseWithVoteListConnection = {
+  __typename?: 'PhraseWithVoteListConnection';
+  edges: Array<PhraseWithVoteListEdge>;
   error: ErrorType;
-  phrase_with_vote_list: Array<Maybe<PhraseWithDefinitions>>;
+  pageInfo: PageInfo;
+};
+
+export type PhraseWithVoteListEdge = {
+  __typename?: 'PhraseWithVoteListEdge';
+  cursor: Scalars['ID']['output'];
+  node: PhraseWithDefinitions;
 };
 
 export type PhraseWithVoteOutput = {
@@ -902,7 +920,7 @@ export type Query = {
   getPhraseToWordTranslationsByFromPhraseDefinitionId: PhraseToWordTranslationWithVoteListOutput;
   getPhraseVoteStatus: PhraseVoteStatusOutputRow;
   getPhraseWithVoteById: PhraseWithVoteOutput;
-  getPhrasesByLanguage: PhraseWithVoteListOutput;
+  getPhrasesByLanguage: PhraseWithVoteListConnection;
   getRecommendedTranslationFromDefinitionID: TranslationWithVoteOutput;
   getRecommendedTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteOutput;
   getSiteTextTranslationVoteStatus: SiteTextTranslationVoteStatusOutputRow;
@@ -917,7 +935,7 @@ export type Query = {
   getWordToWordTranslationsByFromWordDefinitionId: WordToWordTranslationWithVoteListOutput;
   getWordVoteStatus: WordVoteStatusOutputRow;
   getWordWithVoteById: WordWithVoteOutput;
-  getWordsByLanguage: WordWithVoteListOutput;
+  getWordsByLanguage: WordWithVoteListConnection;
   loggedInIsAdmin: IsAdminIdOutput;
   phraseDefinitionRead: PhraseDefinitionReadOutput;
   phraseRead: PhraseReadOutput;
@@ -1036,6 +1054,8 @@ export type QueryGetPhraseWithVoteByIdArgs = {
 
 
 export type QueryGetPhrasesByLanguageArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first: Scalars['Int']['input'];
   input: LanguageInput;
 };
 
@@ -1123,6 +1143,8 @@ export type QueryGetWordWithVoteByIdArgs = {
 
 
 export type QueryGetWordsByLanguageArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first: Scalars['Int']['input'];
   input: LanguageInput;
 };
 
@@ -1737,10 +1759,17 @@ export type WordWithVote = {
   word_id: Scalars['ID']['output'];
 };
 
-export type WordWithVoteListOutput = {
-  __typename?: 'WordWithVoteListOutput';
+export type WordWithVoteListConnection = {
+  __typename?: 'WordWithVoteListConnection';
+  edges: Array<WordWithVoteListEdge>;
   error: ErrorType;
-  word_with_vote_list: Array<Maybe<WordWithDefinitions>>;
+  pageInfo: PageInfo;
+};
+
+export type WordWithVoteListEdge = {
+  __typename?: 'WordWithVoteListEdge';
+  cursor: Scalars['ID']['output'];
+  node: WordWithDefinitions;
 };
 
 export type WordWithVoteOutput = {
@@ -1823,6 +1852,10 @@ export type DefinitionVoteStatusFragmentFragment = { __typename?: 'DefinitionVot
 
 export type WordVoteStatusFragmentFragment = { __typename?: 'WordVoteStatus', word_id: string, downvotes: number, upvotes: number };
 
+export type WordWithVoteListEdgeFragmentFragment = { __typename?: 'WordWithVoteListEdge', cursor: string, node: { __typename?: 'WordWithDefinitions', word_id: string, word: string, downvotes: number, upvotes: number, language_code: string, dialect_code?: string | null, geo_code?: string | null, definitions: Array<{ __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null> } };
+
+export type PageInfoFragmentFragment = { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null };
+
 export type WordDefinitionReadQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -1831,6 +1864,8 @@ export type WordDefinitionReadQueryVariables = Exact<{
 export type WordDefinitionReadQuery = { __typename?: 'Query', wordDefinitionRead: { __typename?: 'WordDefinitionReadOutput', error: ErrorType, word_definition?: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
 
 export type GetWordsByLanguageQueryVariables = Exact<{
+  first: Scalars['Int']['input'];
+  after?: InputMaybe<Scalars['ID']['input']>;
   language_code: Scalars['String']['input'];
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
@@ -1838,7 +1873,7 @@ export type GetWordsByLanguageQueryVariables = Exact<{
 }>;
 
 
-export type GetWordsByLanguageQuery = { __typename?: 'Query', getWordsByLanguage: { __typename?: 'WordWithVoteListOutput', error: ErrorType, word_with_vote_list: Array<{ __typename?: 'WordWithDefinitions', word_id: string, word: string, downvotes: number, upvotes: number, language_code: string, dialect_code?: string | null, geo_code?: string | null, definitions: Array<{ __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null> } | null> } };
+export type GetWordsByLanguageQuery = { __typename?: 'Query', getWordsByLanguage: { __typename?: 'WordWithVoteListConnection', error: ErrorType, edges: Array<{ __typename?: 'WordWithVoteListEdge', cursor: string, node: { __typename?: 'WordWithDefinitions', word_id: string, word: string, downvotes: number, upvotes: number, language_code: string, dialect_code?: string | null, geo_code?: string | null, definitions: Array<{ __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null> } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type GetWordDefinitionsByWordIdQueryVariables = Exact<{
   word_id: Scalars['ID']['input'];
@@ -1926,14 +1961,14 @@ export type GetAllMapsListQueryVariables = Exact<{
 }>;
 
 
-export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'GetAllMapsListOutput', allMapsList: Array<{ __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
+export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'GetAllMapsListOutput', allMapsList: Array<{ __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
 export type GetTranslatedMapContentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'GetTranslatedMapContentOutput', translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, content: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'GetTranslatedMapContentOutput', translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, content: string, map_file_name_with_langs: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
 
 export type IsAdminLoggedInQueryVariables = Exact<{
   input: IsAdminIdInput;
@@ -1947,7 +1982,7 @@ export type GetOrigMapContentQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: { __typename?: 'GetOrigMapContentOutput', original_map_id: string, map_file_name: string, created_at: string, created_by: string, content: string } };
+export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: { __typename?: 'GetOrigMapContentOutput', original_map_id: string, map_file_name_with_langs: string, map_file_name: string, created_at: string, created_by: string, content: string } };
 
 export type MapUploadMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
@@ -1968,6 +2003,8 @@ export type PhraseWithVoteFragmentFragment = { __typename?: 'PhraseWithVote', ph
 
 export type PhraseVoteStatusFragmentFragment = { __typename?: 'PhraseVoteStatus', downvotes: number, phrase_id: string, upvotes: number };
 
+export type PhraseWithVoteListEdgeFragmentFragment = { __typename?: 'PhraseWithVoteListEdge', cursor: string, node: { __typename?: 'PhraseWithDefinitions', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, downvotes: number, upvotes: number, definitions: Array<{ __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null> } };
+
 export type PhraseDefinitionReadQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -1976,6 +2013,8 @@ export type PhraseDefinitionReadQueryVariables = Exact<{
 export type PhraseDefinitionReadQuery = { __typename?: 'Query', phraseDefinitionRead: { __typename?: 'PhraseDefinitionReadOutput', error: ErrorType, phrase_definition?: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
 
 export type GetPhrasesByLanguageQueryVariables = Exact<{
+  first: Scalars['Int']['input'];
+  after?: InputMaybe<Scalars['ID']['input']>;
   language_code: Scalars['String']['input'];
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
@@ -1983,7 +2022,7 @@ export type GetPhrasesByLanguageQueryVariables = Exact<{
 }>;
 
 
-export type GetPhrasesByLanguageQuery = { __typename?: 'Query', getPhrasesByLanguage: { __typename?: 'PhraseWithVoteListOutput', error: ErrorType, phrase_with_vote_list: Array<{ __typename?: 'PhraseWithDefinitions', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, downvotes: number, upvotes: number, definitions: Array<{ __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null> } | null> } };
+export type GetPhrasesByLanguageQuery = { __typename?: 'Query', getPhrasesByLanguage: { __typename?: 'PhraseWithVoteListConnection', error: ErrorType, edges: Array<{ __typename?: 'PhraseWithVoteListEdge', cursor: string, node: { __typename?: 'PhraseWithDefinitions', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, downvotes: number, upvotes: number, definitions: Array<{ __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null> } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type GetPhraseDefinitionsByPhraseIdQueryVariables = Exact<{
   phrase_id: Scalars['ID']['input'];
@@ -2317,29 +2356,6 @@ export const WordFragmentFragmentDoc = gql`
   geo_code
 }
     `;
-export const WordDefinitionFragmentFragmentDoc = gql`
-    fragment WordDefinitionFragment on WordDefinition {
-  word_definition_id
-  word {
-    ...WordFragment
-  }
-  definition
-}
-    ${WordFragmentFragmentDoc}`;
-export const WordWithDefinitionsFragmentFragmentDoc = gql`
-    fragment WordWithDefinitionsFragment on WordWithDefinitions {
-  word_id
-  word
-  definitions {
-    ...WordDefinitionFragment
-  }
-  downvotes
-  upvotes
-  language_code
-  dialect_code
-  geo_code
-}
-    ${WordDefinitionFragmentFragmentDoc}`;
 export const WordDefinitionWithVoteFragmentFragmentDoc = gql`
     fragment WordDefinitionWithVoteFragment on WordDefinitionWithVote {
   word_definition_id
@@ -2375,6 +2391,45 @@ export const WordVoteStatusFragmentFragmentDoc = gql`
   word_id
   downvotes
   upvotes
+}
+    `;
+export const WordDefinitionFragmentFragmentDoc = gql`
+    fragment WordDefinitionFragment on WordDefinition {
+  word_definition_id
+  word {
+    ...WordFragment
+  }
+  definition
+}
+    ${WordFragmentFragmentDoc}`;
+export const WordWithDefinitionsFragmentFragmentDoc = gql`
+    fragment WordWithDefinitionsFragment on WordWithDefinitions {
+  word_id
+  word
+  definitions {
+    ...WordDefinitionFragment
+  }
+  downvotes
+  upvotes
+  language_code
+  dialect_code
+  geo_code
+}
+    ${WordDefinitionFragmentFragmentDoc}`;
+export const WordWithVoteListEdgeFragmentFragmentDoc = gql`
+    fragment WordWithVoteListEdgeFragment on WordWithVoteListEdge {
+  cursor
+  node {
+    ...WordWithDefinitionsFragment
+  }
+}
+    ${WordWithDefinitionsFragmentFragmentDoc}`;
+export const PageInfoFragmentFragmentDoc = gql`
+    fragment PageInfoFragment on PageInfo {
+  endCursor
+  hasNextPage
+  hasPreviousPage
+  startCursor
 }
     `;
 export const MapPhraseWithVotesFragmentFragmentDoc = gql`
@@ -2414,29 +2469,6 @@ export const PhraseFragmentFragmentDoc = gql`
   geo_code
 }
     `;
-export const PhraseDefinitionFragmentFragmentDoc = gql`
-    fragment PhraseDefinitionFragment on PhraseDefinition {
-  phrase_definition_id
-  definition
-  phrase {
-    ...PhraseFragment
-  }
-}
-    ${PhraseFragmentFragmentDoc}`;
-export const PhraseWithDefinitionsFragmentFragmentDoc = gql`
-    fragment PhraseWithDefinitionsFragment on PhraseWithDefinitions {
-  phrase_id
-  phrase
-  language_code
-  dialect_code
-  geo_code
-  definitions {
-    ...PhraseDefinitionFragment
-  }
-  downvotes
-  upvotes
-}
-    ${PhraseDefinitionFragmentFragmentDoc}`;
 export const PhraseDefinitionWithVoteFragmentFragmentDoc = gql`
     fragment PhraseDefinitionWithVoteFragment on PhraseDefinitionWithVote {
   phrase_definition_id
@@ -2467,6 +2499,37 @@ export const PhraseVoteStatusFragmentFragmentDoc = gql`
   upvotes
 }
     `;
+export const PhraseDefinitionFragmentFragmentDoc = gql`
+    fragment PhraseDefinitionFragment on PhraseDefinition {
+  phrase_definition_id
+  definition
+  phrase {
+    ...PhraseFragment
+  }
+}
+    ${PhraseFragmentFragmentDoc}`;
+export const PhraseWithDefinitionsFragmentFragmentDoc = gql`
+    fragment PhraseWithDefinitionsFragment on PhraseWithDefinitions {
+  phrase_id
+  phrase
+  language_code
+  dialect_code
+  geo_code
+  definitions {
+    ...PhraseDefinitionFragment
+  }
+  downvotes
+  upvotes
+}
+    ${PhraseDefinitionFragmentFragmentDoc}`;
+export const PhraseWithVoteListEdgeFragmentFragmentDoc = gql`
+    fragment PhraseWithVoteListEdgeFragment on PhraseWithVoteListEdge {
+  cursor
+  node {
+    ...PhraseWithDefinitionsFragment
+  }
+}
+    ${PhraseWithDefinitionsFragmentFragmentDoc}`;
 export const VersionFieldsFragmentDoc = gql`
     fragment VersionFields on Version {
   version_id
@@ -3010,17 +3073,23 @@ export type WordDefinitionReadQueryHookResult = ReturnType<typeof useWordDefinit
 export type WordDefinitionReadLazyQueryHookResult = ReturnType<typeof useWordDefinitionReadLazyQuery>;
 export type WordDefinitionReadQueryResult = Apollo.QueryResult<WordDefinitionReadQuery, WordDefinitionReadQueryVariables>;
 export const GetWordsByLanguageDocument = gql`
-    query GetWordsByLanguage($language_code: String!, $dialect_code: String, $geo_code: String, $filter: String) {
+    query GetWordsByLanguage($first: Int!, $after: ID, $language_code: String!, $dialect_code: String, $geo_code: String, $filter: String) {
   getWordsByLanguage(
+    first: $first
+    after: $after
     input: {language_code: $language_code, dialect_code: $dialect_code, geo_code: $geo_code, filter: $filter}
   ) {
     error
-    word_with_vote_list {
-      ...WordWithDefinitionsFragment
+    edges {
+      ...WordWithVoteListEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
-    ${WordWithDefinitionsFragmentFragmentDoc}`;
+    ${WordWithVoteListEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
 
 /**
  * __useGetWordsByLanguageQuery__
@@ -3034,6 +3103,8 @@ export const GetWordsByLanguageDocument = gql`
  * @example
  * const { data, loading, error } = useGetWordsByLanguageQuery({
  *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *      language_code: // value for 'language_code'
  *      dialect_code: // value for 'dialect_code'
  *      geo_code: // value for 'geo_code'
@@ -3440,6 +3511,7 @@ export const GetAllMapsListDocument = gql`
       }
       created_at
       created_by
+      map_file_name_with_langs
     }
   }
 }
@@ -3486,6 +3558,7 @@ export const GetTranslatedMapContentDocument = gql`
     created_at
     created_by
     content
+    map_file_name_with_langs
   }
 }
     `;
@@ -3556,6 +3629,7 @@ export const GetOrigMapContentDocument = gql`
     query GetOrigMapContent($id: ID!) {
   getOrigMapContent(input: {original_map_id: $id}) {
     original_map_id
+    map_file_name_with_langs
     map_file_name
     created_at
     created_by
@@ -3667,17 +3741,23 @@ export type PhraseDefinitionReadQueryHookResult = ReturnType<typeof usePhraseDef
 export type PhraseDefinitionReadLazyQueryHookResult = ReturnType<typeof usePhraseDefinitionReadLazyQuery>;
 export type PhraseDefinitionReadQueryResult = Apollo.QueryResult<PhraseDefinitionReadQuery, PhraseDefinitionReadQueryVariables>;
 export const GetPhrasesByLanguageDocument = gql`
-    query GetPhrasesByLanguage($language_code: String!, $dialect_code: String, $geo_code: String, $filter: String) {
+    query GetPhrasesByLanguage($first: Int!, $after: ID, $language_code: String!, $dialect_code: String, $geo_code: String, $filter: String) {
   getPhrasesByLanguage(
+    first: $first
+    after: $after
     input: {language_code: $language_code, dialect_code: $dialect_code, geo_code: $geo_code, filter: $filter}
   ) {
     error
-    phrase_with_vote_list {
-      ...PhraseWithDefinitionsFragment
+    edges {
+      ...PhraseWithVoteListEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
-    ${PhraseWithDefinitionsFragmentFragmentDoc}`;
+    ${PhraseWithVoteListEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
 
 /**
  * __useGetPhrasesByLanguageQuery__
@@ -3691,6 +3771,8 @@ export const GetPhrasesByLanguageDocument = gql`
  * @example
  * const { data, loading, error } = useGetPhrasesByLanguageQuery({
  *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *      language_code: // value for 'language_code'
  *      dialect_code: // value for 'dialect_code'
  *      geo_code: // value for 'geo_code'
@@ -5067,6 +5149,8 @@ export const namedOperations = {
     WordWithVoteFragment: 'WordWithVoteFragment',
     DefinitionVoteStatusFragment: 'DefinitionVoteStatusFragment',
     WordVoteStatusFragment: 'WordVoteStatusFragment',
+    WordWithVoteListEdgeFragment: 'WordWithVoteListEdgeFragment',
+    PageInfoFragment: 'PageInfoFragment',
     MapPhraseWithVotesFragment: 'MapPhraseWithVotesFragment',
     WordWithVotesFragment: 'WordWithVotesFragment',
     PhraseFragment: 'PhraseFragment',
@@ -5075,6 +5159,7 @@ export const namedOperations = {
     PhraseDefinitionWithVoteFragment: 'PhraseDefinitionWithVoteFragment',
     PhraseWithVoteFragment: 'PhraseWithVoteFragment',
     PhraseVoteStatusFragment: 'PhraseVoteStatusFragment',
+    PhraseWithVoteListEdgeFragment: 'PhraseWithVoteListEdgeFragment',
     VersionFields: 'VersionFields',
     SiteTextWordToWordTranslationWithVoteFragment: 'SiteTextWordToWordTranslationWithVoteFragment',
     SiteTextWordToPhraseTranslationWithVoteFragment: 'SiteTextWordToPhraseTranslationWithVoteFragment',
