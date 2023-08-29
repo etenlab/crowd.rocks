@@ -4,6 +4,7 @@ import { PostReadResolver } from './post-read.resolver';
 import { PostCreateResolver } from './post-create.resolver';
 import { VersionCreateResolver } from './version-create.resolver';
 import { UserReadResolver } from '../user/user-read.resolver';
+import { PostService } from './post.service';
 
 @Module({
   imports: [CoreModule],
@@ -12,6 +13,7 @@ import { UserReadResolver } from '../user/user-read.resolver';
     PostReadResolver,
     PostCreateResolver,
     VersionCreateResolver,
+    PostService,
   ],
   exports: [PostReadResolver, PostCreateResolver, VersionCreateResolver],
 })

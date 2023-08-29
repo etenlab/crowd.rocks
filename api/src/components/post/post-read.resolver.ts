@@ -4,6 +4,7 @@ import { ErrorType } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
 import { PostgresService } from 'src/core/postgres.service';
 import { UserReadResolver } from '../user/user-read.resolver';
+import { PostService } from './post.service';
 import {
   Post,
   PostReadInput,
@@ -17,6 +18,7 @@ import {
 export class PostReadResolver {
   constructor(
     private pg: PostgresService,
+    private postService: PostService,
     private userRead: UserReadResolver,
   ) {}
   @Query(() => PostReadOutput)
@@ -113,11 +115,14 @@ export class PostReadResolver {
             p.post_id,
             p.created_at,
             p.created_by,
-            v.content
+            v.content,
+            t.name
           from 
             posts p
           join versions v
             on p.post_id = v.post_id
+          join threads t
+		        on p.thread_id = t.thread_id
           where
             true
             and p.parent_table = $1
@@ -127,64 +132,30 @@ export class PostReadResolver {
         [input.parent_name, input.parent_id],
       );
 
+      let title = null; // TODO
       const posts = await Promise.all(
         res1.rows.map<Promise<Post>>(
-          async ({ post_id, created_at, created_by, content }) => {
+          async ({ post_id, created_at, created_by, content, name }) => {
             const user = (
               await this.userRead.userReadResolver({ user_id: created_by }, req)
             ).user;
-            return { post_id, created_at, created_by_user: user, content };
+            title = name;
+            return {
+              post_id,
+              created_at,
+              created_by_user: user,
+              content,
+            };
           },
         ),
       );
-      let title = null;
 
-      switch (input.parent_name) {
-        case 'words': {
-          title = 'Dictionary - ';
-          const titleRes = await this.pg.pool.query(
-            `
-              select 
-                wls.wordlike_string
-              from
-                words w
-              join wordlike_strings wls
-                on w.wordlike_string_id = wls.wordlike_string_id
-              where
-                w.word_id = $1
-              `,
-            [input.parent_id],
-          );
-          title += titleRes.rows[0].wordlike_string;
-          break;
-        }
-        case 'word_definitions': {
-          title = 'Dictionary - ';
-          const titleRes = await this.pg.pool.query(
-            `
-              select 
-                wd.definition,
-                wls.wordlike_string
-              from
-                word_definitions wd
-              join words w
-                on w.word_id = wd.word_id
-              join wordlike_strings wls
-                on w.wordlike_string_id = wls.wordlike_string_id
-              where wd.word_definition_id = $1
-              `,
-            [input.parent_id],
-          );
-          title +=
-            titleRes.rows[0].wordlike_string +
-            ': ' +
-            titleRes.rows[0].definition;
-          break;
-        }
-        default: {
-          //TODO;
-          break;
-        }
+      if (title === null) {
+        const { thread_name } = await this.postService.generatePostNames(
+          Number(input.parent_id),
+          input.parent_name,
+        );
+        title = thread_name;
       }
 
       return {

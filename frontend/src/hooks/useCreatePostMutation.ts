@@ -39,7 +39,7 @@ export function usePostCreateMutation({
         console.log(data?.postCreateResolver.error);
 
         present({
-          message: `${tr('Failed at creating new word!')} [${data
+          message: `${tr('Failed at creating new post!')} [${data
             ?.postCreateResolver.error}]`,
           duration: 1500,
           position: 'top',

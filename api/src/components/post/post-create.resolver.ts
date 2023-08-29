@@ -3,6 +3,7 @@ import { ErrorType } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
 import { PostgresService } from 'src/core/postgres.service';
 import { PostReadResolver } from './post-read.resolver';
+import { PostService } from './post.service';
 import { Post, PostCreateInput, PostCreateOutput } from './types';
 
 @Resolver(Post)
@@ -10,6 +11,7 @@ export class PostCreateResolver {
   constructor(
     private pg: PostgresService,
     private postRead: PostReadResolver,
+    private postService: PostService,
   ) {}
   @Mutation(() => PostCreateOutput)
   async postCreateResolver(
@@ -21,11 +23,24 @@ export class PostCreateResolver {
       const bearer = getBearer(req);
 
       try {
+        const { folder_name, forum_name, thread_name } =
+          await this.postService.generatePostNames(
+            input.parent_id,
+            input.parent_table,
+          );
         const res = await this.pg.pool.query(
           `
-          call post_create($1, $2, $3, $4,null,null,null,null,null);
+          call post_create($1, $2, $3, $4, $5, $6, $7,null,null,null,null,null);
         `,
-          [input.content, bearer, input.parent_table, input.parent_id],
+          [
+            input.content,
+            bearer,
+            input.parent_table,
+            forum_name,
+            folder_name,
+            thread_name,
+            input.parent_id,
+          ],
         );
 
         const error = res.rows[0].p_error_type;
