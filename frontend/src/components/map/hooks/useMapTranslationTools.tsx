@@ -82,8 +82,33 @@ export function useMapTranslationTools() {
     [],
   );
 
+  const saveMapThumbnail = async ({ file }: { file: File }): Promise<void> => {
+    console.log(file.name);
+    const canvas = document.createElement('canvas');
+    canvas.id = 'mapThumbnail';
+    Object.assign(canvas.style, {
+      // height: '100px',
+      'background-color': 'white',
+      // width: '100px',
+      color: 'black',
+      border: '1px solid black',
+      position: 'absolute',
+    });
+    const content = await file.text();
+
+    const img = new Image();
+    img.src = `data:image/svg+xml;utf8,${encodeURIComponent(content)}`;
+    const ctx = canvas.getContext('2d');
+    img.onload = () => {
+      ctx?.drawImage(img, 0, 0);
+    };
+
+    document.body.appendChild(canvas);
+  };
+
   return {
     chooseBestTranslation,
     addValueToWordsOrPhrases,
+    saveMapThumbnail,
   };
 }

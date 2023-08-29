@@ -19,6 +19,7 @@ import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { globals } from '../../../services/globals';
 import { FilterContainer, Input } from '../../common/styled';
+import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 
 export const MapList: React.FC = () => {
   const router = useIonRouter();
@@ -42,6 +43,8 @@ export const MapList: React.FC = () => {
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
   });
+
+  const { saveMapThumbnail } = useMapTranslationTools();
 
   useEffect(() => {
     const user_id = globals.get_user_id();
@@ -80,6 +83,7 @@ export const MapList: React.FC = () => {
           variables: { file },
           refetchQueries: ['GetAllMapsList'],
         });
+        await saveMapThumbnail({ file });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         present({
@@ -90,7 +94,7 @@ export const MapList: React.FC = () => {
         });
       }
     },
-    [present, sendMapFile],
+    [present, saveMapThumbnail, sendMapFile],
   );
 
   return (
