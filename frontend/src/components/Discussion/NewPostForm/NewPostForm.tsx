@@ -19,10 +19,10 @@ export function NewPostForm({
   onCancel,
   onCreated,
 }: NewPostFormParams) {
-  const [createPost, { data, loading, error, called }] = usePostCreateMutation(
+  const [createPost, { data, loading, error, called }] = usePostCreateMutation({
     parent_id,
-    parent,
-  );
+    parent_name: parent,
+  });
   const [content, set_content] = useState('');
   const [present] = useIonToast();
 

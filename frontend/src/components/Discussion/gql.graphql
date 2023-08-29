@@ -1,34 +1,36 @@
+fragment UserFields on User {
+  user_id
+  avatar
+  avatar_url
+}
+
 fragment PostFields on Post {
   post_id
   content
   created_at
   created_by_user {
-    user_id
-    avatar
-    avatar_url
+    ...UserFields
   }
 }
 
-
 query PostsByParent($parent_id: ID!, $parent_name: String!) {
-  postsByParent(input: {parent_id: $parent_id, parent_name: $parent_name}) {
+  postsByParent(input: { parent_id: $parent_id, parent_name: $parent_name }) {
     error
     title
     posts {
-      created_at
-      created_by_user {
-        user_id
-        avatar
-        avatar_url
-      }
-      content
-      post_id
+      ...PostFields
     }
   }
 }
 
-mutation PostCreate ($content: String!, $parentId: Int!, $parentTable: String!){
-  postCreateResolver(input: { content: $content, parent_id: $parentId, parent_table: $parentTable}) {
+mutation PostCreate($content: String!, $parentId: Int!, $parentTable: String!) {
+  postCreateResolver(
+    input: {
+      content: $content
+      parent_id: $parentId
+      parent_table: $parentTable
+    }
+  ) {
     error
     post {
       ...PostFields

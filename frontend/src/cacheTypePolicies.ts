@@ -92,4 +92,7 @@ export const typePolicies: TypePolicies = {
   PhraseToPhraseTranslation: {
     keyFields: ['phrase_to_phrase_translation_id'],
   },
+  Post: {
+    keyFields: ['post_id'],
+  },
 };

@@ -1778,6 +1778,8 @@ export type WordWithVoteOutput = {
   word_with_vote?: Maybe<WordWithVote>;
 };
 
+export type UserFieldsFragment = { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null };
+
 export type PostFieldsFragment = { __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } };
 
 export type PostsByParentQueryVariables = Exact<{
@@ -1786,7 +1788,7 @@ export type PostsByParentQueryVariables = Exact<{
 }>;
 
 
-export type PostsByParentQuery = { __typename?: 'Query', postsByParent: { __typename?: 'PostsByParentOutput', error: ErrorType, title?: string | null, posts?: Array<{ __typename?: 'Post', created_at: any, content: string, post_id: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } }> | null } };
+export type PostsByParentQuery = { __typename?: 'Query', postsByParent: { __typename?: 'PostsByParentOutput', error: ErrorType, title?: string | null, posts?: Array<{ __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } }> | null } };
 
 export type PostCreateMutationVariables = Exact<{
   content: Scalars['String']['input'];
@@ -2327,18 +2329,23 @@ export type GetFileUploadUrlQueryVariables = Exact<{
 
 export type GetFileUploadUrlQuery = { __typename?: 'Query', fileUploadUrlRequest: { __typename?: 'FileUploadUrlResponse', error: ErrorType, url: string, avatar_image_url: string } };
 
+export const UserFieldsFragmentDoc = gql`
+    fragment UserFields on User {
+  user_id
+  avatar
+  avatar_url
+}
+    `;
 export const PostFieldsFragmentDoc = gql`
     fragment PostFields on Post {
   post_id
   content
   created_at
   created_by_user {
-    user_id
-    avatar
-    avatar_url
+    ...UserFields
   }
 }
-    `;
+    ${UserFieldsFragmentDoc}`;
 export const SessionFieldsFragmentDoc = gql`
     fragment SessionFields on Session {
   user_id
@@ -2775,18 +2782,11 @@ export const PostsByParentDocument = gql`
     error
     title
     posts {
-      created_at
-      created_by_user {
-        user_id
-        avatar
-        avatar_url
-      }
-      content
-      post_id
+      ...PostFields
     }
   }
 }
-    `;
+    ${PostFieldsFragmentDoc}`;
 
 /**
  * __usePostsByParentQuery__
@@ -5140,6 +5140,7 @@ export const namedOperations = {
     AvatarUpdate: 'AvatarUpdate'
   },
   Fragment: {
+    UserFields: 'UserFields',
     PostFields: 'PostFields',
     SessionFields: 'SessionFields',
     WordFragment: 'WordFragment',

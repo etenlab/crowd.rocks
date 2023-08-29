@@ -6,7 +6,13 @@ import { ErrorType } from '../generated/graphql';
 import { useTr } from './useTr';
 import { updateCacheWithCreatePost } from '../cacheUpdators/createPost';
 
-export function usePostCreateMutation(parent: string, parent_id: string) {
+export function usePostCreateMutation({
+  parent_name,
+  parent_id,
+}: {
+  parent_name: string;
+  parent_id: string;
+}) {
   const { tr } = useTr();
   const [present] = useIonToast();
 
@@ -20,7 +26,7 @@ export function usePostCreateMutation(parent: string, parent_id: string) {
       ) {
         const newPost = data.postCreateResolver.post;
 
-        updateCacheWithCreatePost(cache, { newPost, parent, parent_id });
+        updateCacheWithCreatePost(cache, { newPost, parent_name, parent_id });
 
         present({
           message: tr('Success at creating new post!'),

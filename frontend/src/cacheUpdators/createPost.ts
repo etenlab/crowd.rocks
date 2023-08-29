@@ -10,17 +10,17 @@ export function updateCacheWithCreatePost(
   data: {
     newPost: Post;
     parent_id: string;
-    parent: string;
+    parent_name: string;
   },
 ) {
-  const { newPost, parent_id, parent } = data;
-  console.log('updating cache');
+  const { newPost, parent_id, parent_name } = data;
+
   cache.updateQuery<PostsByParentQuery>(
     {
       query: PostsByParentDocument,
       variables: {
-        parent: parent,
-        parent_id: parent_id + '',
+        parent_id: parent_id,
+        parent_name: parent_name,
       },
     },
     (data) => {
