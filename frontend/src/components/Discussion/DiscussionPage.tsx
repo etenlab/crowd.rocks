@@ -65,7 +65,6 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
     if (allPosts) {
       for (const post of allPosts) {
         if (post) {
-          console.log(post.created_at);
           tempPosts.push({
             content: post.content,
             created_by_user: post.created_by_user,

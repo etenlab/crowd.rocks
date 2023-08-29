@@ -58,7 +58,7 @@ export function Post({
         <CustomCardTitle>
           <AuthorContainer>
             {created_by}
-            <TimestampContainer>{created_at}</TimestampContainer>
+            <TimestampContainer>| {created_at}</TimestampContainer>
           </AuthorContainer>
           {voteFor === 'content' ? voteButtonCom : null}
         </CustomCardTitle>

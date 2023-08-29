@@ -20,16 +20,17 @@ export const CustomCardTitle = styled(IonCardTitle)(() => ({
 
 export const AuthorContainer = styled.div`
   color: var(--ion-color-medium);
+  font-size: 12px;
   display: flex;
 `;
 
 export const TimestampContainer = styled.div`
-  font-size: 12px;
   margin-left: 10px;
-  margin-top: 10px;
 `;
 
-export const CustomCardContent = styled(IonCardContent)(() => ({}));
+export const CustomCardContent = styled(IonCardContent)(() => ({
+  color: 'var(--ion-text-color)',
+}));
 
 export const CustomCardHeader = styled(IonCardHeader)(() => ({}));
 

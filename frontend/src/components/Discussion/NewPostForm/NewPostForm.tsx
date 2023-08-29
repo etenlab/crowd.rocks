@@ -27,13 +27,6 @@ export function NewPostForm({
   const [present] = useIonToast();
 
   useEffect(() => {
-    const presentToast = (position: 'top' | 'middle' | 'bottom') => {
-      present({
-        message: 'Create Success!!',
-        duration: 2000,
-        position: position,
-      });
-    };
     if (error) {
       return;
     }
@@ -45,7 +38,6 @@ export function NewPostForm({
         return;
       }
       onCreated();
-      presentToast('top');
     }
   }, [called, data, error, loading, onCreated, present]);
 
