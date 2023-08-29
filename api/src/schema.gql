@@ -343,6 +343,13 @@ type Mutation {
   wordVoteUpsert(input: WordVoteUpsertInput!): WordVoteOutput!
 }
 
+type PageInfo {
+  endCursor: ID
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: ID
+}
+
 input PasswordResetFormInput {
   password: String!
   token: String!
@@ -545,9 +552,15 @@ type PhraseWithVote {
   upvotes: Int!
 }
 
-type PhraseWithVoteListOutput {
+type PhraseWithVoteListConnection {
+  edges: [PhraseWithVoteListEdge!]!
   error: ErrorType!
-  phrase_with_vote_list: [PhraseWithDefinitions]!
+  pageInfo: PageInfo!
+}
+
+type PhraseWithVoteListEdge {
+  cursor: ID!
+  node: PhraseWithDefinitions!
 }
 
 type PhraseWithVoteOutput {
@@ -601,7 +614,7 @@ type Query {
   getPhraseToWordTranslationsByFromPhraseDefinitionId(from_phrase_definition_id: ID!, langInfo: LanguageInput!): PhraseToWordTranslationWithVoteListOutput!
   getPhraseVoteStatus(phrase_id: ID!): PhraseVoteStatusOutputRow!
   getPhraseWithVoteById(phrase_id: ID!): PhraseWithVoteOutput!
-  getPhrasesByLanguage(input: LanguageInput!): PhraseWithVoteListOutput!
+  getPhrasesByLanguage(after: ID, first: Int!, input: LanguageInput!): PhraseWithVoteListConnection!
   getRecommendedTranslationFromDefinitionID(from_definition_id: ID!, from_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteOutput!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
   getSiteTextTranslationVoteStatus(from_type_is_word: Boolean!, to_type_is_word: Boolean!, translation_id: ID!): SiteTextTranslationVoteStatusOutputRow!
@@ -616,7 +629,7 @@ type Query {
   getWordToWordTranslationsByFromWordDefinitionId(from_word_definition_id: ID!, langInfo: LanguageInput!): WordToWordTranslationWithVoteListOutput!
   getWordVoteStatus(word_id: ID!): WordVoteStatusOutputRow!
   getWordWithVoteById(word_id: ID!): WordWithVoteOutput!
-  getWordsByLanguage(input: LanguageInput!): WordWithVoteListOutput!
+  getWordsByLanguage(after: ID, first: Int!, input: LanguageInput!): WordWithVoteListConnection!
   loggedInIsAdmin(input: IsAdminIdInput!): IsAdminIdOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!
   phraseRead(input: PhraseReadInput!): PhraseReadOutput!
@@ -1107,9 +1120,15 @@ type WordWithVote {
   word_id: ID!
 }
 
-type WordWithVoteListOutput {
+type WordWithVoteListConnection {
+  edges: [WordWithVoteListEdge!]!
   error: ErrorType!
-  word_with_vote_list: [WordWithDefinitions]!
+  pageInfo: PageInfo!
+}
+
+type WordWithVoteListEdge {
+  cursor: ID!
+  node: WordWithDefinitions!
 }
 
 type WordWithVoteOutput {

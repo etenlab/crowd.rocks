@@ -148,6 +148,7 @@ export function togglePhraseVoteStatus({
 
 export type GetPhraseListByLang = {
   phrase_id: string;
+  phraselike_string: string;
 };
 
 export function getPhraseListByLang({
@@ -208,12 +209,14 @@ export function getPhraseListByLang({
   return [
     `
       select distinct 
-        p.phrase_id
+        p.phrase_id as phrase_id,
+        p.phraselike_string as phraselike_string
       from phrases as p
       join words as w
       on w.word_id = any(p.words)
       where w.language_code = $1
-        ${wherePlsStr};
+        ${wherePlsStr}
+      order by p.phraselike_string;
     `,
     [...returnArr],
   ];

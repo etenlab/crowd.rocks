@@ -11,8 +11,8 @@ import {
   PhraseReadInput,
   PhraseReadOutput,
   PhraseUpsertInput,
-  PhraseWithVoteListOutput,
-  PhraseWithDefinitions,
+  PhraseWithVoteListEdge,
+  PhraseWithVoteListConnection,
   PhraseWithVoteOutput,
 } from './types';
 import { WordUpsertInput } from 'src/components/words/types';
@@ -254,7 +254,9 @@ export class PhrasesService {
 
   async getPhrasesByLanguage(
     input: LanguageInput,
-  ): Promise<PhraseWithVoteListOutput> {
+    first: number,
+    after: string | null,
+  ): Promise<PhraseWithVoteListConnection> {
     try {
       const res1 = await this.pg.pool.query<GetPhraseListByLang>(
         ...getPhraseListByLang({
@@ -262,17 +264,51 @@ export class PhrasesService {
         }),
       );
 
-      const phraseWithVoteList: PhraseWithDefinitions[] = [];
+      const phraseWithVoteListEdge: PhraseWithVoteListEdge[] = [];
+
+      let offset: number | null = null;
+      let hasNextPage = false;
+      let startCursor: string | null = null;
+      let endCursor: string | null = null;
 
       for (let i = 0; i < res1.rowCount; i++) {
         const { phrase_id } = res1.rows[i];
+
+        if (after === null && offset === null) {
+          offset = 0;
+        }
+
+        if (phrase_id !== after && offset === null) {
+          continue;
+        }
+
+        if (phrase_id === after && offset === null) {
+          offset = 0;
+          continue;
+        }
+
+        if (offset === 0) {
+          startCursor = phrase_id;
+        }
+
+        if (offset >= first) {
+          hasNextPage = true;
+          break;
+        }
+
         const { error, vote_status } =
           await this.phraseVoteService.getVoteStatus(+phrase_id);
 
         if (error !== ErrorType.NoError) {
           return {
             error,
-            phrase_with_vote_list: [],
+            edges: [],
+            pageInfo: {
+              hasNextPage: false,
+              hasPreviousPage: false,
+              startCursor: null,
+              endCursor: null,
+            },
           };
         }
 
@@ -284,7 +320,13 @@ export class PhrasesService {
         if (error !== ErrorType.NoError) {
           return {
             error: definitionError,
-            phrase_with_vote_list: [],
+            edges: [],
+            pageInfo: {
+              hasNextPage: false,
+              hasPreviousPage: false,
+              startCursor: null,
+              endCursor: null,
+            },
           };
         }
 
@@ -295,21 +337,39 @@ export class PhrasesService {
         if (readError !== ErrorType.NoError) {
           return {
             error: readError,
-            phrase_with_vote_list: [],
+            edges: [],
+            pageInfo: {
+              hasNextPage: false,
+              hasPreviousPage: false,
+              startCursor: null,
+              endCursor: null,
+            },
           };
         }
 
-        phraseWithVoteList.push({
-          ...phrase,
-          upvotes: vote_status.upvotes,
-          downvotes: vote_status.downvotes,
-          definitions,
+        phraseWithVoteListEdge.push({
+          cursor: phrase_id,
+          node: {
+            ...phrase,
+            upvotes: vote_status.upvotes,
+            downvotes: vote_status.downvotes,
+            definitions,
+          },
         });
+
+        endCursor = phrase_id;
+        offset++;
       }
 
       return {
         error: ErrorType.NoError,
-        phrase_with_vote_list: phraseWithVoteList,
+        edges: phraseWithVoteListEdge,
+        pageInfo: {
+          hasNextPage,
+          hasPreviousPage: false,
+          startCursor,
+          endCursor,
+        },
       };
     } catch (e) {
       console.error(e);
@@ -317,7 +377,13 @@ export class PhrasesService {
 
     return {
       error: ErrorType.UnknownError,
-      phrase_with_vote_list: [],
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+      },
     };
   }
 }

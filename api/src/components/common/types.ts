@@ -1,4 +1,4 @@
-import { Field, InputType, ObjectType, Int } from '@nestjs/graphql';
+import { Field, InputType, ObjectType, Int, ID } from '@nestjs/graphql';
 
 @InputType()
 export class LanguageInput {
@@ -19,4 +19,12 @@ export class LanguageOutput {
 export class PartialVoteStatus {
   @Field(() => Int) upvotes: number;
   @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class PageInfo {
+  @Field(() => Boolean) hasNextPage: boolean;
+  @Field(() => Boolean) hasPreviousPage: boolean;
+  @Field(() => ID, { nullable: true }) startCursor: string | null;
+  @Field(() => ID, { nullable: true }) endCursor: string | null;
 }

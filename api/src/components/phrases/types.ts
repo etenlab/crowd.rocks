@@ -1,6 +1,7 @@
 import { Field, ID, InputType, ObjectType, Int } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
 import { PhraseDefinition } from 'src/components/definitions/types';
+import { PageInfo } from 'src/components/common/types';
 
 @ObjectType()
 export class Phrase {
@@ -81,9 +82,15 @@ export class PhraseWithDefinitions extends PhraseWithVote {
 }
 
 @ObjectType()
-export class PhraseWithVoteListOutput extends GenericOutput {
-  @Field(() => [PhraseWithDefinitions], { nullable: 'items' })
-  phrase_with_vote_list: PhraseWithDefinitions[];
+export class PhraseWithVoteListEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => PhraseWithDefinitions) node: PhraseWithDefinitions;
+}
+
+@ObjectType()
+export class PhraseWithVoteListConnection extends GenericOutput {
+  @Field(() => [PhraseWithVoteListEdge]) edges: PhraseWithVoteListEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
 }
 
 @ObjectType()
