@@ -80,20 +80,19 @@ export const putLangCodesToFileName = (
     throw new Error(`language_code insn't provided!`);
   }
   const nameParts = file_name.split('.');
-  const extension = nameParts.at(-1);
-  const fname = nameParts.slice(0, -1);
-  let newFileName = fname.join('.');
+  const suffixes = nameParts.slice(1);
+  let fname = nameParts[0];
   if (langCodes.language_code) {
-    newFileName += `.${langCodes.language_code}`;
+    fname += `.${langCodes.language_code}`;
   }
   if (langCodes.dialect_code) {
-    newFileName += `-${langCodes.dialect_code}`;
+    fname += `-${langCodes.dialect_code}`;
   }
   if (langCodes.geo_code) {
-    newFileName += `-${langCodes.geo_code}`;
+    fname += `-${langCodes.geo_code}`;
   }
-  newFileName += '.cf.' + extension;
-  return newFileName;
+  fname += '.' + suffixes.join('.');
+  return fname;
 };
 
 export const downloadFromUrl = (
