@@ -100,7 +100,7 @@ export const MapList: React.FC = () => {
       <FilterContainer>
         <LangSelector
           title={tr('Select language')}
-          langSelectorId="dictionary-langSelector"
+          langSelectorId="mapsListLangSelector"
           selected={targetLang ?? undefined}
           onChange={(_sourceLangTag, sourceLangInfo) => {
             setTargetLanguage(sourceLangInfo);
