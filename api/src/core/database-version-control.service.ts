@@ -35,7 +35,7 @@ export class DatabaseVersionControlService {
     switch (version) {
       case 1:
         console.log('Updating database to version 2');
-        this.loadVersion2();
+        await this.loadVersion2();
       // note that there is no break needed in the switch's cases
       default:
         console.error('Database version is current');
