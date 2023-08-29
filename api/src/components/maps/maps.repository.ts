@@ -369,7 +369,8 @@ export class MapsRepository {
     );
 
     return {
-      original_map_id: String(id),
+      original_map_id: resQ.rows[0].original_map_id,
+      translated_map_id: resQ.rows[0].transalted_map_id,
       map_file_name: resQ.rows[0].map_file_name,
       created_at: resQ.rows[0].created_at,
       created_by: resQ.rows[0].created_by,
