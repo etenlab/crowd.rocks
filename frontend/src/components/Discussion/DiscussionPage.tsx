@@ -19,8 +19,8 @@ import {
 } from '../../generated/graphql';
 import { useEffect, useMemo, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
-import { Card } from '../common/Card';
 import { NewPostForm } from './NewPostForm/NewPostForm';
+import { Post } from './Post/Post';
 
 interface DiscussionPageProps
   extends RouteComponentProps<{
@@ -76,9 +76,10 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
       }
       return tempPosts.map((post) => (
         <CardContainer key={post.id}>
-          <Card
-            content={`${post.created_by_user.avatar} - ${post.created_at}`}
-            description={
+          <Post
+            created_by={post.created_by_user.avatar}
+            created_at={post.created_at}
+            chatContent={
               <div
                 dangerouslySetInnerHTML={{ __html: `${post.content}` }}
               ></div>
