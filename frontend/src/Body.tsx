@@ -54,7 +54,7 @@ import { useAppContext } from './hooks/useAppContext';
 import { useTr } from './hooks/useTr';
 
 import AppTypeahead from './components/common/LangSelector/TypeAhead';
-import { DiscussionPage } from './components/Discussion/DiscussionPage';
+import { DiscussionPage } from './components/discussion/DiscussionPage';
 
 const Body: React.FC = () => {
   const {
@@ -362,7 +362,7 @@ const Body: React.FC = () => {
           />
           <Route
             exact
-            path="/:nation_id/:language_id/:cluster_id/discussion/:title/:subtitle"
+            path="/:nation_id/:language_id/:cluster_id/discussion/:parent/:parent_id"
             component={DiscussionPage}
           />
           <Route

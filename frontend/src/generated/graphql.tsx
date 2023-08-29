@@ -91,6 +91,7 @@ export enum ErrorType {
   PhraseToWordTranslationNotFound = 'PhraseToWordTranslationNotFound',
   PositionInvalid = 'PositionInvalid',
   PostCreateFailed = 'PostCreateFailed',
+  PostNotFound = 'PostNotFound',
   PrefixInvalid = 'PrefixInvalid',
   PrefixTooLong = 'PrefixTooLong',
   PrefixTooShort = 'PrefixTooShort',
@@ -836,14 +837,16 @@ export type PhraseWithVoteOutput = {
 
 export type Post = {
   __typename?: 'Post';
+  content: Scalars['String']['output'];
   created_at: Scalars['String']['output'];
-  created_by: Scalars['Int']['output'];
+  created_by_user: User;
   post_id: Scalars['ID']['output'];
 };
 
 export type PostCreateInput = {
   content: Scalars['String']['input'];
-  parent_id?: InputMaybe<Scalars['Int']['input']>;
+  parent_id: Scalars['Int']['input'];
+  parent_table: Scalars['String']['input'];
 };
 
 export type PostCreateOutput = {
@@ -860,6 +863,18 @@ export type PostReadOutput = {
   __typename?: 'PostReadOutput';
   error: ErrorType;
   post?: Maybe<Post>;
+};
+
+export type PostsByParentInput = {
+  parent_id: Scalars['ID']['input'];
+  parent_name: Scalars['String']['input'];
+};
+
+export type PostsByParentOutput = {
+  __typename?: 'PostsByParentOutput';
+  error: ErrorType;
+  posts?: Maybe<Array<Post>>;
+  title?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query = {
@@ -906,6 +921,7 @@ export type Query = {
   phraseToPhraseTranslationRead: PhraseToPhraseTranslationReadOutput;
   phraseVoteRead: PhraseVoteOutput;
   postReadResolver: PostReadOutput;
+  postsByParent: PostsByParentOutput;
   siteTextPhraseDefinitionRead: SiteTextPhraseDefinitionOutput;
   siteTextTranslationVoteRead: SiteTextTranslationVoteOutput;
   siteTextWordDefinitionRead: SiteTextWordDefinitionOutput;
@@ -1135,6 +1151,11 @@ export type QueryPhraseVoteReadArgs = {
 
 export type QueryPostReadResolverArgs = {
   input: PostReadInput;
+};
+
+
+export type QueryPostsByParentArgs = {
+  input: PostsByParentInput;
 };
 
 
@@ -1845,6 +1866,25 @@ export type WordUpsertMutationVariables = Exact<{
 
 export type WordUpsertMutation = { __typename?: 'Mutation', wordUpsert: { __typename?: 'WordUpsertOutput', error: ErrorType, word?: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
 
+export type PostFieldsFragment = { __typename?: 'Post', post_id: string, content: string, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } };
+
+export type PostsByParentQueryVariables = Exact<{
+  parent_id: Scalars['ID']['input'];
+  parent_name: Scalars['String']['input'];
+}>;
+
+
+export type PostsByParentQuery = { __typename?: 'Query', postsByParent: { __typename?: 'PostsByParentOutput', error: ErrorType, title?: string | null, posts?: Array<{ __typename?: 'Post', created_at: string, content: string, post_id: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } }> | null } };
+
+export type PostCreateMutationVariables = Exact<{
+  content: Scalars['String']['input'];
+  parentId: Scalars['Int']['input'];
+  parentTable: Scalars['String']['input'];
+}>;
+
+
+export type PostCreateMutation = { __typename?: 'Mutation', postCreateResolver: { __typename?: 'PostCreateOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, content: string, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } } | null } };
+
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
 }>;
@@ -1992,16 +2032,6 @@ export type PhraseUpsertMutation = { __typename?: 'Mutation', phraseUpsert: { __
 
 export type VersionFieldsFragment = { __typename?: 'Version', version_id: string, post_id: number, created_at: string, license_title: string, content: string };
 
-export type PostFieldsFragment = { __typename?: 'Post', post_id: string, created_at: string, created_by: number };
-
-export type PostCreateMutationVariables = Exact<{
-  content: Scalars['String']['input'];
-  parentId?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type PostCreateMutation = { __typename?: 'Mutation', postCreateResolver: { __typename?: 'PostCreateOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, created_at: string, created_by: number } | null } };
-
 export type VersionCreateMutationVariables = Exact<{
   postId: Scalars['Int']['input'];
   content: Scalars['String']['input'];
@@ -2016,7 +2046,7 @@ export type PostReadQueryVariables = Exact<{
 }>;
 
 
-export type PostReadQuery = { __typename?: 'Query', postReadResolver: { __typename?: 'PostReadOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, created_at: string, created_by: number } | null } };
+export type PostReadQuery = { __typename?: 'Query', postReadResolver: { __typename?: 'PostReadOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, content: string, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } } | null } };
 
 export type SiteTextWordToWordTranslationWithVoteFragmentFragment = { __typename?: 'SiteTextWordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
 
@@ -2332,6 +2362,18 @@ export const WordVoteStatusFragmentFragmentDoc = gql`
   upvotes
 }
     `;
+export const PostFieldsFragmentDoc = gql`
+    fragment PostFields on Post {
+  post_id
+  content
+  created_at
+  created_by_user {
+    user_id
+    avatar
+    avatar_url
+  }
+}
+    `;
 export const MapPhraseWithVotesFragmentFragmentDoc = gql`
     fragment MapPhraseWithVotesFragment on MapPhraseWithVotes {
   phrase
@@ -2429,13 +2471,6 @@ export const VersionFieldsFragmentDoc = gql`
   created_at
   license_title
   content
-}
-    `;
-export const PostFieldsFragmentDoc = gql`
-    fragment PostFields on Post {
-  post_id
-  created_at
-  created_by
 }
     `;
 export const SiteTextPhraseDefinitionFragmentFragmentDoc = gql`
@@ -3158,6 +3193,93 @@ export function useWordUpsertMutation(baseOptions?: Apollo.MutationHookOptions<W
 export type WordUpsertMutationHookResult = ReturnType<typeof useWordUpsertMutation>;
 export type WordUpsertMutationResult = Apollo.MutationResult<WordUpsertMutation>;
 export type WordUpsertMutationOptions = Apollo.BaseMutationOptions<WordUpsertMutation, WordUpsertMutationVariables>;
+export const PostsByParentDocument = gql`
+    query PostsByParent($parent_id: ID!, $parent_name: String!) {
+  postsByParent(input: {parent_id: $parent_id, parent_name: $parent_name}) {
+    error
+    title
+    posts {
+      created_at
+      created_by_user {
+        user_id
+        avatar
+        avatar_url
+      }
+      content
+      post_id
+    }
+  }
+}
+    `;
+
+/**
+ * __usePostsByParentQuery__
+ *
+ * To run a query within a React component, call `usePostsByParentQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePostsByParentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePostsByParentQuery({
+ *   variables: {
+ *      parent_id: // value for 'parent_id'
+ *      parent_name: // value for 'parent_name'
+ *   },
+ * });
+ */
+export function usePostsByParentQuery(baseOptions: Apollo.QueryHookOptions<PostsByParentQuery, PostsByParentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PostsByParentQuery, PostsByParentQueryVariables>(PostsByParentDocument, options);
+      }
+export function usePostsByParentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostsByParentQuery, PostsByParentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PostsByParentQuery, PostsByParentQueryVariables>(PostsByParentDocument, options);
+        }
+export type PostsByParentQueryHookResult = ReturnType<typeof usePostsByParentQuery>;
+export type PostsByParentLazyQueryHookResult = ReturnType<typeof usePostsByParentLazyQuery>;
+export type PostsByParentQueryResult = Apollo.QueryResult<PostsByParentQuery, PostsByParentQueryVariables>;
+export const PostCreateDocument = gql`
+    mutation PostCreate($content: String!, $parentId: Int!, $parentTable: String!) {
+  postCreateResolver(
+    input: {content: $content, parent_id: $parentId, parent_table: $parentTable}
+  ) {
+    error
+    post {
+      ...PostFields
+    }
+  }
+}
+    ${PostFieldsFragmentDoc}`;
+export type PostCreateMutationFn = Apollo.MutationFunction<PostCreateMutation, PostCreateMutationVariables>;
+
+/**
+ * __usePostCreateMutation__
+ *
+ * To run a mutation, you first call `usePostCreateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePostCreateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [postCreateMutation, { data, loading, error }] = usePostCreateMutation({
+ *   variables: {
+ *      content: // value for 'content'
+ *      parentId: // value for 'parentId'
+ *      parentTable: // value for 'parentTable'
+ *   },
+ * });
+ */
+export function usePostCreateMutation(baseOptions?: Apollo.MutationHookOptions<PostCreateMutation, PostCreateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PostCreateMutation, PostCreateMutationVariables>(PostCreateDocument, options);
+      }
+export type PostCreateMutationHookResult = ReturnType<typeof usePostCreateMutation>;
+export type PostCreateMutationResult = Apollo.MutationResult<PostCreateMutation>;
+export type PostCreateMutationOptions = Apollo.BaseMutationOptions<PostCreateMutation, PostCreateMutationVariables>;
 export const EmailResponseDocument = gql`
     mutation EmailResponse($token: String!) {
   emailResponseResolver(input: {token: $token}) {
@@ -3813,43 +3935,6 @@ export function usePhraseUpsertMutation(baseOptions?: Apollo.MutationHookOptions
 export type PhraseUpsertMutationHookResult = ReturnType<typeof usePhraseUpsertMutation>;
 export type PhraseUpsertMutationResult = Apollo.MutationResult<PhraseUpsertMutation>;
 export type PhraseUpsertMutationOptions = Apollo.BaseMutationOptions<PhraseUpsertMutation, PhraseUpsertMutationVariables>;
-export const PostCreateDocument = gql`
-    mutation PostCreate($content: String!, $parentId: Int) {
-  postCreateResolver(input: {content: $content, parent_id: $parentId}) {
-    error
-    post {
-      ...PostFields
-    }
-  }
-}
-    ${PostFieldsFragmentDoc}`;
-export type PostCreateMutationFn = Apollo.MutationFunction<PostCreateMutation, PostCreateMutationVariables>;
-
-/**
- * __usePostCreateMutation__
- *
- * To run a mutation, you first call `usePostCreateMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `usePostCreateMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [postCreateMutation, { data, loading, error }] = usePostCreateMutation({
- *   variables: {
- *      content: // value for 'content'
- *      parentId: // value for 'parentId'
- *   },
- * });
- */
-export function usePostCreateMutation(baseOptions?: Apollo.MutationHookOptions<PostCreateMutation, PostCreateMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<PostCreateMutation, PostCreateMutationVariables>(PostCreateDocument, options);
-      }
-export type PostCreateMutationHookResult = ReturnType<typeof usePostCreateMutation>;
-export type PostCreateMutationResult = Apollo.MutationResult<PostCreateMutation>;
-export type PostCreateMutationOptions = Apollo.BaseMutationOptions<PostCreateMutation, PostCreateMutationVariables>;
 export const VersionCreateDocument = gql`
     mutation VersionCreate($postId: Int!, $content: String!, $license_title: String!) {
   versionCreateResolver(
@@ -4914,6 +4999,7 @@ export const namedOperations = {
     GetWordsByLanguage: 'GetWordsByLanguage',
     GetWordDefinitionsByWordId: 'GetWordDefinitionsByWordId',
     GetWordWithVoteById: 'GetWordWithVoteById',
+    PostsByParent: 'PostsByParent',
     GetOrigMapWords: 'GetOrigMapWords',
     GetOrigMapPhrases: 'GetOrigMapPhrases',
     GetAllMapsList: 'GetAllMapsList',
@@ -4948,13 +5034,13 @@ export const namedOperations = {
     ToggleWordDefinitionVoteStatus: 'ToggleWordDefinitionVoteStatus',
     ToggleWordVoteStatus: 'ToggleWordVoteStatus',
     WordUpsert: 'WordUpsert',
+    PostCreate: 'PostCreate',
     EmailResponse: 'EmailResponse',
     MapUpload: 'MapUpload',
     PhraseDefinitionUpsert: 'PhraseDefinitionUpsert',
     TogglePhraseDefinitionVoteStatus: 'TogglePhraseDefinitionVoteStatus',
     TogglePhraseVoteStatus: 'TogglePhraseVoteStatus',
     PhraseUpsert: 'PhraseUpsert',
-    PostCreate: 'PostCreate',
     VersionCreate: 'VersionCreate',
     UpsertSiteTextTranslation: 'UpsertSiteTextTranslation',
     ToggleSiteTextTranslationVoteStatus: 'ToggleSiteTextTranslationVoteStatus',
@@ -4975,6 +5061,7 @@ export const namedOperations = {
     WordWithVoteFragment: 'WordWithVoteFragment',
     DefinitionVoteStatusFragment: 'DefinitionVoteStatusFragment',
     WordVoteStatusFragment: 'WordVoteStatusFragment',
+    PostFields: 'PostFields',
     MapPhraseWithVotesFragment: 'MapPhraseWithVotesFragment',
     WordWithVotesFragment: 'WordWithVotesFragment',
     PhraseFragment: 'PhraseFragment',
@@ -4984,7 +5071,6 @@ export const namedOperations = {
     PhraseWithVoteFragment: 'PhraseWithVoteFragment',
     PhraseVoteStatusFragment: 'PhraseVoteStatusFragment',
     VersionFields: 'VersionFields',
-    PostFields: 'PostFields',
     SiteTextWordToWordTranslationWithVoteFragment: 'SiteTextWordToWordTranslationWithVoteFragment',
     SiteTextWordToPhraseTranslationWithVoteFragment: 'SiteTextWordToPhraseTranslationWithVoteFragment',
     SiteTextPhraseToWordTranslationWithVoteFragment: 'SiteTextPhraseToWordTranslationWithVoteFragment',
