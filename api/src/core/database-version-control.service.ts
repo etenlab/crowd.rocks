@@ -194,9 +194,7 @@ export class DatabaseVersionControlService {
     await this.runSqlFile(
       './src/core/sql/translation/phrase_to_phrase_translation_votes_count.sql',
     );
-    await this.runSqlFile(
-      './src/core/sql/post/post_create.v2.sql',
-    )
+    await this.runSqlFile('./src/core/sql/post/post_create.v2.sql');
 
     await this.setVersionNumber(2);
   }

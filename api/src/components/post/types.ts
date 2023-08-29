@@ -42,13 +42,11 @@ export class PostsByParentInput {
   @Field(() => String) parent_name: string;
 }
 
-
 @ObjectType()
 export class PostsByParentOutput extends GenericOutput {
   @Field(() => [Post], { nullable: true }) posts: Post[];
-  @Field(() => String, { nullable: true}) title: string | null;
+  @Field(() => String, { nullable: true }) title: string | null;
 }
-
 
 @ObjectType()
 export class PostReadOutput extends GenericOutput {

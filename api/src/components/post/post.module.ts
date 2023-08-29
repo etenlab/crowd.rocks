@@ -7,7 +7,12 @@ import { UserReadResolver } from '../user/user-read.resolver';
 
 @Module({
   imports: [CoreModule],
-  providers: [UserReadResolver, PostReadResolver, PostCreateResolver, VersionCreateResolver],
+  providers: [
+    UserReadResolver,
+    PostReadResolver,
+    PostCreateResolver,
+    VersionCreateResolver,
+  ],
   exports: [PostReadResolver, PostCreateResolver, VersionCreateResolver],
 })
 export class PostModule {}

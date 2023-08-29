@@ -4,12 +4,21 @@ import { ErrorType } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
 import { PostgresService } from 'src/core/postgres.service';
 import { UserReadResolver } from '../user/user-read.resolver';
-import { Post, PostReadInput, PostReadOutput, PostsByParentInput, PostsByParentOutput } from './types';
+import {
+  Post,
+  PostReadInput,
+  PostReadOutput,
+  PostsByParentInput,
+  PostsByParentOutput,
+} from './types';
 
 @Injectable()
 @Resolver(Post)
 export class PostReadResolver {
-  constructor(private pg: PostgresService, private userRead: UserReadResolver) {}
+  constructor(
+    private pg: PostgresService,
+    private userRead: UserReadResolver,
+  ) {}
   @Query(() => PostReadOutput)
   async postReadResolver(
     @Args('input') input: PostReadInput,
@@ -60,17 +69,22 @@ export class PostReadResolver {
           console.error(`no post for id: ${input.post_id}`);
           return {
             error: ErrorType.PostNotFound,
-            post: null
-          }
+            post: null,
+          };
         } else {
-          const createdBy = (await this.userRead.userReadResolver({user_id: res1.rows[0].created_by}, req)).user;
+          const createdBy = (
+            await this.userRead.userReadResolver(
+              { user_id: res1.rows[0].created_by },
+              req,
+            )
+          ).user;
           const post = {
             error: ErrorType.NoError,
             post: {
               post_id: res1.rows[0].post_id,
               created_at: res1.rows[0].created_at,
               created_by_user: createdBy,
-              content: res1.rows[0].content
+              content: res1.rows[0].content,
             },
           };
           return post;
@@ -93,8 +107,8 @@ export class PostReadResolver {
     console.log('post read resolver, parent_id:', input.parent_id);
     console.log('post read resolver, parent_table:', input.parent_name);
     try {
-        const res1 = await this.pg.pool.query(
-          `
+      const res1 = await this.pg.pool.query(
+        `
           select
             p.post_id,
             p.created_at,
@@ -110,21 +124,26 @@ export class PostReadResolver {
             and p.parent_id = $2
           order by p.created_at ASC
         `,
-          [input.parent_name, input.parent_id],
-        );
+        [input.parent_name, input.parent_id],
+      );
 
-        const posts = await Promise.all(res1.rows.map<Promise<Post>>(async ({post_id, created_at, created_by, content}) => {
-          const user = (await this.userRead.userReadResolver({user_id: created_by}, req)).user;
-          return {post_id, created_at, created_by_user: user, content}
-        }
-        ))
-        let title = null;
+      const posts = await Promise.all(
+        res1.rows.map<Promise<Post>>(
+          async ({ post_id, created_at, created_by, content }) => {
+            const user = (
+              await this.userRead.userReadResolver({ user_id: created_by }, req)
+            ).user;
+            return { post_id, created_at, created_by_user: user, content };
+          },
+        ),
+      );
+      let title = null;
 
-        switch(input.parent_name) {
-          case 'words': {
-            title = "Dictionary - "
-            const titleRes = await this.pg.pool.query(
-              `
+      switch (input.parent_name) {
+        case 'words': {
+          title = 'Dictionary - ';
+          const titleRes = await this.pg.pool.query(
+            `
               select 
                 wls.wordlike_string
               from
@@ -134,15 +153,15 @@ export class PostReadResolver {
               where
                 w.word_id = $1
               `,
-              [input.parent_id]
-            )
-            title += titleRes.rows[0].wordlike_string;
-            break;
-          }
-          case 'word_definitions': {
-            title = "Dictionary - ";
-            const titleRes = await this.pg.pool.query(
-              `
+            [input.parent_id],
+          );
+          title += titleRes.rows[0].wordlike_string;
+          break;
+        }
+        case 'word_definitions': {
+          title = 'Dictionary - ';
+          const titleRes = await this.pg.pool.query(
+            `
               select 
                 wd.definition,
                 wls.wordlike_string
@@ -154,21 +173,25 @@ export class PostReadResolver {
                 on w.wordlike_string_id = wls.wordlike_string_id
               where wd.word_definition_id = $1
               `,
-              [input.parent_id]);
-            title += titleRes.rows[0].wordlike_string + ": " + titleRes.rows[0].definition;
-            break;
-          }
-          default: {
-            //TODO;
-            break;
-          }
+            [input.parent_id],
+          );
+          title +=
+            titleRes.rows[0].wordlike_string +
+            ': ' +
+            titleRes.rows[0].definition;
+          break;
         }
+        default: {
+          //TODO;
+          break;
+        }
+      }
 
-          return {
-            error: ErrorType.NoError,
-            posts: posts,
-            title
-          }
+      return {
+        error: ErrorType.NoError,
+        posts: posts,
+        title,
+      };
     } catch (e) {
       console.error(e);
     }
