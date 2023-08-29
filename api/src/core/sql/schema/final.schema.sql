@@ -191,6 +191,7 @@ create table threads (
 
 create table posts(
   post_id bigserial primary key,
+  thread_id bigint not null references threads(thread_id),
   parent_table varchar(64) not null,
   parent_id bigint not null,
   created_at timestamp not null default CURRENT_TIMESTAMP,
