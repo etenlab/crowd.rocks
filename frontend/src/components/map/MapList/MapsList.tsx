@@ -1,23 +1,31 @@
-import { IonList, useIonRouter, useIonToast } from '@ionic/react';
+import {
+  InputChangeEventDetail,
+  InputCustomEvent,
+  IonList,
+  useIonRouter,
+  useIonToast,
+} from '@ionic/react';
 import { MapItem } from './MapItem';
 import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   useGetAllMapsListLazyQuery,
   useIsAdminLoggedInLazyQuery,
   useMapUploadMutation,
 } from '../../../generated/graphql';
-import { styled } from 'styled-components';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { globals } from '../../../services/globals';
+import { FilterContainer, Input } from '../../common/styled';
+import { putLangCodesToFileName } from '../../../common/utility';
 
 export const MapList: React.FC = () => {
   const router = useIonRouter();
   const { tr } = useTr();
   const [present] = useIonToast();
+  const [filter, setFilter] = useState<string>('');
 
   const {
     states: {
@@ -59,6 +67,12 @@ export const MapList: React.FC = () => {
     getAllMapsList({ variables });
   }, [getAllMapsList, targetLang]);
 
+  const handleFilterChange = (
+    event: InputCustomEvent<InputChangeEventDetail>,
+  ) => {
+    setFilter(event.detail.value!);
+  };
+
   const handleAddMap = useCallback(
     async (file: File) => {
       if (!file) return;
@@ -84,17 +98,26 @@ export const MapList: React.FC = () => {
     <>
       <Caption>{tr('Maps')}</Caption>
 
-      <LangSelectorBox>
+      <FilterContainer>
         <LangSelector
           title={tr('Select language')}
-          langSelectorId="mapsListLangSelector"
+          langSelectorId="dictionary-langSelector"
           selected={targetLang ?? undefined}
-          onChange={(_mapListLangTag, mapListLangInfo) => {
-            setTargetLanguage(mapListLangInfo);
+          onChange={(_sourceLangTag, sourceLangInfo) => {
+            setTargetLanguage(sourceLangInfo);
           }}
           onClearClick={() => setTargetLanguage(null)}
         />
-      </LangSelectorBox>
+        <Input
+          type="text"
+          label={tr('Search')}
+          labelPlacement="floating"
+          fill="outline"
+          debounce={300}
+          value={filter}
+          onIonInput={handleFilterChange}
+        />
+      </FilterContainer>
       <MapTools
         onTranslationsClick={() => {
           router.push(`/US/${appLanguage.lang.tag}/1/maps/translation`);
@@ -105,9 +128,17 @@ export const MapList: React.FC = () => {
       />
       <IonList lines="none">
         {allMapsQuery?.getAllMapsList.allMapsList?.length ? (
-          allMapsQuery?.getAllMapsList.allMapsList?.map((m, i) => (
-            <MapItem mapItem={m} key={i} />
-          ))
+          allMapsQuery?.getAllMapsList.allMapsList
+            ?.filter((m) =>
+              putLangCodesToFileName(m.map_file_name, {
+                language_code: m.language.language_code,
+                dialect_code: m.language.dialect_code,
+                geo_code: m.language.geo_code,
+              })
+                .toLowerCase()
+                .includes(filter.toLowerCase()),
+            )
+            .map((m, i) => <MapItem mapItem={m} key={i} />)
         ) : (
           <div> {tr('No maps found')} </div>
         )}
@@ -115,7 +146,3 @@ export const MapList: React.FC = () => {
     </>
   );
 };
-
-const LangSelectorBox = styled.div`
-  margin-top: 10px;
-`;
