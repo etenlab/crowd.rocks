@@ -9,10 +9,7 @@ import { Caption } from '../../common/Caption/Caption';
 import { useGetTranslatedMapContentLazyQuery } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
-import {
-  downloadFromSrc,
-  putLangCodesToFileName,
-} from '../../../common/utility';
+import { downloadFromSrc } from '../../../common/utility';
 
 import { useTr } from '../../../hooks/useTr';
 
@@ -53,7 +50,7 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
   const handleDownloadSvg = () => {
     if (currentMapWithContent) {
       downloadFromSrc(
-        currentMapWithContent.map_file_name,
+        currentMapWithContent.map_file_name_with_langs,
         `data:image/svg+xml;utf8,${encodeURIComponent(
           currentMapWithContent.content,
         )}`,
@@ -73,12 +70,7 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
     <>
       <Caption>
         <>
-          {tr('Map')} -{' '}
-          {currentMapWithContent?.map_file_name &&
-            putLangCodesToFileName(
-              currentMapWithContent?.map_file_name,
-              currentMapWithContent.language,
-            )}
+          {tr('Map')} - {currentMapWithContent?.map_file_name_with_langs}
           <IonBadge>
             {tr('translated to')} {langInfo2String(langInfo)}
             {currentMapWithContent?.translated_percent

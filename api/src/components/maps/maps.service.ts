@@ -31,6 +31,7 @@ import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
 import { DefinitionsService } from '../definitions/definitions.service';
+import { putLangCodesToFileName } from '../../common/utility';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
@@ -134,6 +135,11 @@ export class MapsService {
 
       return {
         map_file_name,
+        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+          language_code,
+          dialect_code,
+          geo_code,
+        }),
         original_map_id: map_id,
         created_at,
         created_by,
