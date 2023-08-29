@@ -17,6 +17,7 @@ import {
   OriginalMapPhraseInput,
   OriginalMapWordInput,
 } from './types';
+import { putLangCodesToFileName } from '../../common/utility';
 
 interface ISaveMapParams {
   mapFileName: string;
@@ -201,6 +202,11 @@ export class MapsRepository {
       }) => ({
         original_map_id,
         map_file_name,
+        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+          language_code,
+          dialect_code,
+          geo_code,
+        }),
         created_at,
         created_by,
         is_original: true,
@@ -262,6 +268,11 @@ export class MapsRepository {
         translated_map_id,
         original_map_id,
         map_file_name,
+        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+          language_code,
+          dialect_code,
+          geo_code,
+        }),
         created_at,
         created_by,
         is_original: false,
@@ -302,6 +313,11 @@ export class MapsRepository {
       }) => ({
         original_map_id,
         map_file_name,
+        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+          language_code,
+          dialect_code,
+          geo_code,
+        }),
         created_at,
         created_by,
         is_original: true,
@@ -316,6 +332,7 @@ export class MapsRepository {
     const resQ = await this.pg.pool.query(
       `
         select 
+          original_map_id,
           content, 
           map_file_name, 
           created_at, 
@@ -328,18 +345,29 @@ export class MapsRepository {
       [id],
     );
 
+    const {
+      original_map_id,
+      map_file_name,
+      created_at,
+      created_by,
+      language_code,
+      dialect_code,
+      geo_code,
+    } = resQ.rows[0];
+
     return {
-      original_map_id: String(id),
-      map_file_name: resQ.rows[0].map_file_name,
-      created_at: resQ.rows[0].created_at,
-      created_by: resQ.rows[0].created_by,
+      original_map_id,
+      map_file_name,
+      map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+        language_code,
+        dialect_code,
+        geo_code,
+      }),
+      created_at,
+      created_by,
       content: resQ.rows[0].content,
       is_original: true,
-      language: {
-        language_code: resQ.rows[0].language_code,
-        dialect_code: resQ.rows[0].dialect_code,
-        geo_code: resQ.rows[0].geo_code,
-      },
+      language: { language_code, dialect_code, geo_code },
     };
   }
 
@@ -368,19 +396,32 @@ export class MapsRepository {
       [id],
     );
 
+    const {
+      original_map_id,
+      translated_map_id,
+      map_file_name,
+      created_at,
+      created_by,
+      content,
+      language_code,
+      dialect_code,
+      geo_code,
+    } = resQ.rows[0];
+
     return {
-      original_map_id: resQ.rows[0].original_map_id,
-      translated_map_id: resQ.rows[0].transalted_map_id,
-      map_file_name: resQ.rows[0].map_file_name,
-      created_at: resQ.rows[0].created_at,
-      created_by: resQ.rows[0].created_by,
-      content: resQ.rows[0].content,
+      original_map_id,
+      translated_map_id,
+      map_file_name,
+      created_at,
+      created_by,
+      content,
       is_original: false,
-      language: {
-        language_code: resQ.rows[0].language_code,
-        dialect_code: resQ.rows[0].dialect_code,
-        geo_code: resQ.rows[0].geo_code,
-      },
+      language: { language_code, dialect_code, geo_code },
+      map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+        language_code,
+        dialect_code,
+        geo_code,
+      }),
     };
   }
 

@@ -1055,6 +1055,22 @@
             "deprecationReason": null
           },
           {
+            "name": "map_file_name_with_langs",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "original_map_id",
             "description": null,
             "args": [],
@@ -1547,6 +1563,22 @@
             "deprecationReason": null
           },
           {
+            "name": "map_file_name_with_langs",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "original_map_id",
             "description": null,
             "args": [],
@@ -1987,6 +2019,22 @@
           },
           {
             "name": "map_file_name",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "map_file_name_with_langs",
             "description": null,
             "args": [],
             "type": {

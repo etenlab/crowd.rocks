@@ -19,7 +19,6 @@ import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { globals } from '../../../services/globals';
 import { FilterContainer, Input } from '../../common/styled';
-import { putLangCodesToFileName } from '../../../common/utility';
 
 export const MapList: React.FC = () => {
   const router = useIonRouter();
@@ -129,14 +128,15 @@ export const MapList: React.FC = () => {
       <IonList lines="none">
         {allMapsQuery?.getAllMapsList.allMapsList?.length ? (
           allMapsQuery?.getAllMapsList.allMapsList
-            ?.filter((m) =>
-              putLangCodesToFileName(m.map_file_name, {
-                language_code: m.language.language_code,
-                dialect_code: m.language.dialect_code,
-                geo_code: m.language.geo_code,
-              })
+            ?.filter((m) => {
+              return m.map_file_name_with_langs
                 .toLowerCase()
-                .includes(filter.toLowerCase()),
+                .includes(filter.toLowerCase());
+            })
+            .sort((m1, m2) =>
+              m1.map_file_name_with_langs.localeCompare(
+                m2.map_file_name_with_langs,
+              ),
             )
             .map((m, i) => <MapItem mapItem={m} key={i} />)
         ) : (

@@ -1,3 +1,5 @@
+import { TLangCodes } from './types';
+
 export function createToken(length = 64): string {
   let result = '';
   const characters =
@@ -51,3 +53,26 @@ export function get_avatar_image_url(object_key: string | null): string | null {
 export function calc_vote_weight(upvotes: number, downvotes: number): number {
   return upvotes * 2 - downvotes;
 }
+
+export const putLangCodesToFileName = (
+  file_name: string,
+  langCodes: TLangCodes,
+): string => {
+  if (!langCodes.language_code) {
+    throw new Error(`language_code insn't provided!`);
+  }
+  const nameParts = file_name.split('.');
+  const suffixes = nameParts.slice(1);
+  let fname = nameParts[0];
+  if (langCodes.language_code) {
+    fname += `.${langCodes.language_code}`;
+  }
+  if (langCodes.dialect_code) {
+    fname += `-${langCodes.dialect_code}`;
+  }
+  if (langCodes.geo_code) {
+    fname += `-${langCodes.geo_code}`;
+  }
+  fname += '.' + suffixes.join('.');
+  return fname;
+};
