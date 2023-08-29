@@ -11,7 +11,7 @@ import {
 } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
 import { WordOrPhraseWithValueAndTranslations } from '../hooks/useMapTranslationTools';
-import { StringContentTypes, stingType } from '../../../common/utility';
+import { StringContentTypes, typeOfString } from '../../../common/utility';
 
 interface TranslationsComProps {
   wordOrPhraseWithTranslations: WordOrPhraseWithValueAndTranslations;
@@ -80,7 +80,7 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
         definition: String(newDefinitionRef.current.value),
         from_definition_id: wordOrPhraseWithTranslations.definition_id,
         from_definition_type_is_word,
-        is_type_word: stingType(word_or_phrase) === StringContentTypes.WORD,
+        is_type_word: typeOfString(word_or_phrase) === StringContentTypes.WORD,
       },
     });
 

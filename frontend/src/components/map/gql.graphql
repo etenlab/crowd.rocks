@@ -95,6 +95,7 @@ query GetAllMapsList($lang: LanguageInput) {
       original_map_id
       translated_map_id
       map_file_name
+      translated_percent
       language {
         language_code
         dialect_code
@@ -110,6 +111,7 @@ query GetTranslatedMapContent($id: ID!) {
   getTranslatedMapContent(input: { translated_map_id: $id }) {
     translated_map_id
     map_file_name
+    translated_percent
     language {
       language_code
       dialect_code

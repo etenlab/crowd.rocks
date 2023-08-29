@@ -10,7 +10,10 @@ import {
 } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
-import { downloadFromSrc } from '../../../common/utility';
+import {
+  downloadFromSrc,
+  putLangCodesToFileName,
+} from '../../../common/utility';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
@@ -91,6 +94,11 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
       `data:image/svg+xml;utf8,${encodeURIComponent(
         translatedMapContent.data.getTranslatedMapContent.content,
       )}`,
+      {
+        language_code: mapItem.language.language_code,
+        dialect_code: mapItem.language.dialect_code || undefined,
+        geo_code: mapItem.language.geo_code || undefined,
+      },
     );
     downloadFlagRef.current = null;
   }
@@ -98,12 +106,22 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
   return (
     <IonItem {...rest} routerLink={routerLink}>
       <StItem>
-        <FileName>{mapItem.map_file_name}</FileName>
+        <FileName>
+          {mapItem.is_original
+            ? mapItem.map_file_name
+            : putLangCodesToFileName(
+                mapItem.map_file_name,
+                mapItem.language || undefined,
+              )}
+        </FileName>
         <div>
           {mapItem.is_original ? (
             <OrigBadge>Original</OrigBadge>
           ) : (
-            <IonBadge>{langInfo2String(langInfo)}</IonBadge>
+            <IonBadge>
+              {langInfo2String(langInfo) +
+                ` [${mapItem.translated_percent || ''}%]`}
+            </IonBadge>
           )}
           <IonIcon
             icon={downloadOutline}

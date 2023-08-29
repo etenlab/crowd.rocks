@@ -9,7 +9,10 @@ import { Caption } from '../../common/Caption/Caption';
 import { useGetTranslatedMapContentLazyQuery } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
-import { downloadFromSrc } from '../../../common/utility';
+import {
+  downloadFromSrc,
+  putLangCodesToFileName,
+} from '../../../common/utility';
 
 import { useTr } from '../../../hooks/useTr';
 
@@ -42,8 +45,6 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
 
   useEffect(() => {
     const getMap = async () => {
-      // const map = await getOrigMapContent(_mapId);
-      // setCurrentMapWithContent(map);
       getTranslatedMapContent({ variables: { id: mapId } });
     };
     getMap();
@@ -72,9 +73,17 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
     <>
       <Caption>
         <>
-          {tr('Map')} - {currentMapWithContent?.map_file_name || ''}
+          {tr('Map')} -{' '}
+          {currentMapWithContent?.map_file_name &&
+            putLangCodesToFileName(
+              currentMapWithContent?.map_file_name,
+              currentMapWithContent.language,
+            )}
           <IonBadge>
             {tr('translated to')} {langInfo2String(langInfo)}
+            {currentMapWithContent?.translated_percent
+              ? ` [${currentMapWithContent.translated_percent}%]`
+              : ''}
           </IonBadge>
           <IonIcon
             icon={downloadOutline}
