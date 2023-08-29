@@ -19,8 +19,8 @@ import {
 } from '../../generated/graphql';
 import { useEffect, useMemo, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
+import { Post } from './Post';
 import { NewPostForm } from './NewPostForm/NewPostForm';
-import { Post } from './Post/Post';
 
 interface DiscussionPageProps
   extends RouteComponentProps<{

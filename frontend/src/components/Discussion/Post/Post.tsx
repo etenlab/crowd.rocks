@@ -1,16 +1,16 @@
 import { ReactNode } from 'react';
-import {
-  CustomCard,
-  CustomCardTitle,
-  CustomCardContent,
-  CustomCardHeader,
-  AuthorContainer,
-  TimestampContainer,
-} from './styled';
 
 import { chatbubbleEllipsesSharp } from 'ionicons/icons';
 import { StChatIcon } from '../../common/styled';
 import { VoteButtonsHerizontal } from '../../common/VoteButtonsHerizontal';
+import {
+  AuthorContainer,
+  CustomCard,
+  CustomCardContent,
+  CustomCardHeader,
+  CustomCardTitle,
+  TimestampContainer,
+} from './styled';
 
 type PostProps = {
   created_by: string;

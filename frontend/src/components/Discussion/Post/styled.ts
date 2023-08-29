@@ -26,6 +26,7 @@ export const AuthorContainer = styled.div`
 export const TimestampContainer = styled.div`
   font-size: 12px;
   margin-left: 10px;
+  margin-top: 10px;
 `;
 
 export const CustomCardContent = styled(IonCardContent)(() => ({}));

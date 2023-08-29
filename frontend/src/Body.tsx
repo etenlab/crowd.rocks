@@ -54,7 +54,7 @@ import { useAppContext } from './hooks/useAppContext';
 import { useTr } from './hooks/useTr';
 
 import AppTypeahead from './components/common/LangSelector/TypeAhead';
-import { DiscussionPage } from './components/discussion/DiscussionPage';
+import { DiscussionPage } from './components/Discussion/DiscussionPage';
 
 const Body: React.FC = () => {
   const {
