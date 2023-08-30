@@ -45,7 +45,6 @@ export class PostsByParentInput {
 @ObjectType()
 export class PostsByParentOutput extends GenericOutput {
   @Field(() => [Post], { nullable: true }) posts: Post[];
-  @Field(() => String, { nullable: true }) title: string | null;
 }
 
 @ObjectType()

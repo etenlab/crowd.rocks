@@ -4,7 +4,6 @@ import { ErrorType } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
 import { PostgresService } from 'src/core/postgres.service';
 import { UserReadResolver } from '../user/user-read.resolver';
-import { PostService } from './post.service';
 import {
   Post,
   PostReadInput,
@@ -18,7 +17,6 @@ import {
 export class PostReadResolver {
   constructor(
     private pg: PostgresService,
-    private postService: PostService,
     private userRead: UserReadResolver,
   ) {}
   @Query(() => PostReadOutput)
@@ -116,13 +114,10 @@ export class PostReadResolver {
             p.created_at,
             p.created_by,
             v.content,
-            t.name
           from 
             posts p
           join versions v
             on p.post_id = v.post_id
-          join threads t
-		        on p.thread_id = t.thread_id
           where
             true
             and p.parent_table = $1
@@ -132,14 +127,12 @@ export class PostReadResolver {
         [input.parent_name, input.parent_id],
       );
 
-      let title = null; // TODO
       const posts = await Promise.all(
         res1.rows.map<Promise<Post>>(
-          async ({ post_id, created_at, created_by, content, name }) => {
+          async ({ post_id, created_at, created_by, content }) => {
             const user = (
               await this.userRead.userReadResolver({ user_id: created_by }, req)
             ).user;
-            title = name;
             return {
               post_id,
               created_at,
@@ -150,18 +143,9 @@ export class PostReadResolver {
         ),
       );
 
-      if (title === null) {
-        const { thread_name } = await this.postService.generatePostNames(
-          Number(input.parent_id),
-          input.parent_name,
-        );
-        title = thread_name;
-      }
-
       return {
         error: ErrorType.NoError,
         posts: posts,
-        title,
       };
     } catch (e) {
       console.error(e);
@@ -169,7 +153,6 @@ export class PostReadResolver {
 
     return {
       error: ErrorType.UnknownError,
-      title: null,
       posts: [],
     };
   }

@@ -362,7 +362,7 @@ const Body: React.FC = () => {
           />
           <Route
             exact
-            path="/:nation_id/:language_id/:cluster_id/discussion/:parent/:parent_id"
+            path="/:nation_id/:language_id/:cluster_id/discussion/:parent/:parent_id/:page_title"
             component={DiscussionPage}
           />
           <Route
