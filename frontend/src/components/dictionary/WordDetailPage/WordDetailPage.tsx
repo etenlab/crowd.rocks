@@ -6,7 +6,7 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
-  // useIonToast,
+  useIonRouter,
 } from '@ionic/react';
 
 import { PageLayout } from '../../common/PageLayout';
@@ -25,6 +25,7 @@ import {
   CaptionContainer,
   CardListContainer,
   CardContainer,
+  StChatIcon,
 } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
@@ -34,6 +35,7 @@ import { useToggleWordDefinitionVoteStatusMutation } from '../../../hooks/useTog
 import { AddListHeader } from '../../common/ListHeader';
 import { VoteButtonsHerizontal } from '../../common/VoteButtonsHerizontal';
 import { NewWordDefinitionForm } from '../NewWordDefinitionForm';
+import { chatbubbleEllipsesSharp } from 'ionicons/icons';
 
 interface WordDetailPageProps
   extends RouteComponentProps<{
@@ -44,6 +46,7 @@ interface WordDetailPageProps
 
 export function WordDetailPage({ match }: WordDetailPageProps) {
   const { tr } = useTr();
+  const router = useIonRouter();
   // const [present] = useIonToast();
 
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
@@ -125,11 +128,25 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
               });
             },
           }}
+          discussion={{
+            onChatClick: () =>
+              router.push(
+                `/${match.params.nation_id}/${match.params.language_id}/1/discussion/word_definitions/${definition.word_definition_id}/Dictionary: ${wordData?.getWordWithVoteById.word_with_vote?.word} - ${definition.definition}`,
+              ),
+          }}
           voteFor="description"
         />
       </CardContainer>
     ));
-  }, [definitionData, definitionError, toggleWordDefinitionVoteStatus]);
+  }, [
+    definitionData,
+    definitionError,
+    match.params.language_id,
+    match.params.nation_id,
+    router,
+    toggleWordDefinitionVoteStatus,
+    wordData?.getWordWithVoteById.word_with_vote?.word,
+  ]);
 
   const wordCom = useMemo(() => {
     if (wordError) {
@@ -145,7 +162,6 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
     if (!wordWithVote) {
       return null;
     }
-
     return (
       <div style={{ display: 'flex' }}>
         <IonTitle>Word: {wordWithVote.word}</IonTitle>
@@ -169,9 +185,24 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
             });
           }}
         />
+        <StChatIcon
+          icon={chatbubbleEllipsesSharp}
+          onClick={() =>
+            router.push(
+              `/${match.params.nation_id}/${match.params.language_id}/1/discussion/words/${wordWithVote.word_id}/Dictionary: ${wordWithVote.word}`,
+            )
+          }
+        />
       </div>
     );
-  }, [toggleWordVoteStatus, wordData, wordError]);
+  }, [
+    match.params.language_id,
+    match.params.nation_id,
+    router,
+    toggleWordVoteStatus,
+    wordData,
+    wordError,
+  ]);
 
   return (
     <PageLayout>
@@ -181,10 +212,8 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
 
       <CardContainer>{wordCom}</CardContainer>
 
-      <h4>{tr('Definitions')}</h4>
-
       <AddListHeader
-        title={tr('All Words')}
+        title={tr('Definitions')}
         onClick={() => setIsOpenModal(true)}
       />
 

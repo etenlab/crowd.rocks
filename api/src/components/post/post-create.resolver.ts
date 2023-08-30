@@ -1,4 +1,4 @@
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { ErrorType } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
 import { PostgresService } from 'src/core/postgres.service';
@@ -16,28 +16,20 @@ export class PostCreateResolver {
     @Args('input') input: PostCreateInput,
     @Context() req: any,
   ): Promise<PostCreateOutput> {
-    console.log('post create resolver');
+    console.log(`post create resolver. content: ${input.content}`);
     try {
       const bearer = getBearer(req);
 
       try {
         const res = await this.pg.pool.query(
           `
-          call post_create($1, $2, $3, $4, 0, 0, 0, false, 0, null, 0, 0, 0, '');
+          call post_create($1, $2, $3, $4,null,null,null,null,null);
         `,
-          [],
+          [input.content, bearer, input.parent_table, input.parent_id],
         );
 
         const error = res.rows[0].p_error_type;
         const post_id = res.rows[0].p_post_id;
-        const candidate = res.rows[0].p_candidate;
-        const rank = res.rows[0].p_rank;
-        const tie = res.rows[0].p_tie;
-        const discussion_election = res.rows[0].p_discussion_election;
-        const created_at = res.rows[0].p_created_at;
-        const user_id = res.rows[0].p_user_id;
-        const part_id = res.rows[0].p_part_id;
-        const version_id = res.rows[0].p_version_id;
 
         if (error !== ErrorType.NoError || !post_id) {
           return {

@@ -1,4 +1,4 @@
-import { IonInput, IonTextarea } from '@ionic/react';
+import { IonIcon, IonInput, IonTextarea } from '@ionic/react';
 import { styled } from 'styled-components';
 
 export const Input = styled(IonInput)(() => ({
@@ -56,3 +56,11 @@ export const FabContainer = styled.div`
 export const FullWidthContainer = styled.div`
   width: 100%;
 `;
+
+export const StChatIcon = styled(IonIcon)(() => ({
+  width: '20px',
+  height: '20px',
+  marginLeft: '10px',
+  marginTop: '5px',
+  cursor: 'pointer',
+}));

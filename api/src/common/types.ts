@@ -69,6 +69,8 @@ export enum ErrorType {
   MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
   MapInsertFailed = 'MapInsertFailed',
 
+  PostNotFound = 'PostNotFound',
+
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
 }

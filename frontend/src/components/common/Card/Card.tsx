@@ -4,11 +4,11 @@ import {
   CustomCardTitle,
   CustomCardContent,
   CustomCardHeader,
-  CustomChatIcon,
 } from './styled';
 
 import { VoteButtonsHerizontal } from '../VoteButtonsHerizontal';
 import { chatbubbleEllipsesSharp } from 'ionicons/icons';
+import { StChatIcon } from '../styled';
 
 type CardProps = {
   content?: string;
@@ -38,7 +38,10 @@ export function Card({
 }: CardProps) {
   const voteButtonCom = vote ? <VoteButtonsHerizontal {...vote} /> : null;
   const chatButton = discussion ? (
-    <CustomChatIcon icon={chatbubbleEllipsesSharp} />
+    <StChatIcon
+      icon={chatbubbleEllipsesSharp}
+      onClick={() => discussion.onChatClick && discussion.onChatClick()}
+    />
   ) : null;
 
   return (
@@ -59,8 +62,10 @@ export function Card({
       {description ? (
         <CustomCardContent>
           {description}
-          {voteFor === 'description' ? voteButtonCom : null}
-          {chatButton}
+          <div style={{ display: 'flex' }}>
+            {voteFor === 'description' ? voteButtonCom : null}
+            {chatButton}
+          </div>
         </CustomCardContent>
       ) : null}
     </CustomCard>

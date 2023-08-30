@@ -91,6 +91,7 @@ export enum ErrorType {
   PhraseToWordTranslationNotFound = 'PhraseToWordTranslationNotFound',
   PositionInvalid = 'PositionInvalid',
   PostCreateFailed = 'PostCreateFailed',
+  PostNotFound = 'PostNotFound',
   PrefixInvalid = 'PrefixInvalid',
   PrefixTooLong = 'PrefixTooLong',
   PrefixTooShort = 'PrefixTooShort',
@@ -600,6 +601,14 @@ export type MutationWordVoteUpsertArgs = {
   input: WordVoteUpsertInput;
 };
 
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  endCursor?: Maybe<Scalars['ID']['output']>;
+  hasNextPage: Scalars['Boolean']['output'];
+  hasPreviousPage: Scalars['Boolean']['output'];
+  startCursor?: Maybe<Scalars['ID']['output']>;
+};
+
 export type PasswordResetFormInput = {
   password: Scalars['String']['input'];
   token: Scalars['String']['input'];
@@ -829,10 +838,17 @@ export type PhraseWithVote = {
   upvotes: Scalars['Int']['output'];
 };
 
-export type PhraseWithVoteListOutput = {
-  __typename?: 'PhraseWithVoteListOutput';
+export type PhraseWithVoteListConnection = {
+  __typename?: 'PhraseWithVoteListConnection';
+  edges: Array<PhraseWithVoteListEdge>;
   error: ErrorType;
-  phrase_with_vote_list: Array<Maybe<PhraseWithDefinitions>>;
+  pageInfo: PageInfo;
+};
+
+export type PhraseWithVoteListEdge = {
+  __typename?: 'PhraseWithVoteListEdge';
+  cursor: Scalars['ID']['output'];
+  node: PhraseWithDefinitions;
 };
 
 export type PhraseWithVoteOutput = {
@@ -843,14 +859,16 @@ export type PhraseWithVoteOutput = {
 
 export type Post = {
   __typename?: 'Post';
-  created_at: Scalars['String']['output'];
-  created_by: Scalars['Int']['output'];
+  content: Scalars['String']['output'];
+  created_at: Scalars['DateTime']['output'];
+  created_by_user: User;
   post_id: Scalars['ID']['output'];
 };
 
 export type PostCreateInput = {
   content: Scalars['String']['input'];
-  parent_id?: InputMaybe<Scalars['Int']['input']>;
+  parent_id: Scalars['Int']['input'];
+  parent_table: Scalars['String']['input'];
 };
 
 export type PostCreateOutput = {
@@ -867,6 +885,17 @@ export type PostReadOutput = {
   __typename?: 'PostReadOutput';
   error: ErrorType;
   post?: Maybe<Post>;
+};
+
+export type PostsByParentInput = {
+  parent_id: Scalars['ID']['input'];
+  parent_name: Scalars['String']['input'];
+};
+
+export type PostsByParentOutput = {
+  __typename?: 'PostsByParentOutput';
+  error: ErrorType;
+  posts?: Maybe<Array<Post>>;
 };
 
 export type Query = {
@@ -891,7 +920,7 @@ export type Query = {
   getPhraseToWordTranslationsByFromPhraseDefinitionId: PhraseToWordTranslationWithVoteListOutput;
   getPhraseVoteStatus: PhraseVoteStatusOutputRow;
   getPhraseWithVoteById: PhraseWithVoteOutput;
-  getPhrasesByLanguage: PhraseWithVoteListOutput;
+  getPhrasesByLanguage: PhraseWithVoteListConnection;
   getRecommendedTranslationFromDefinitionID: TranslationWithVoteOutput;
   getRecommendedTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteOutput;
   getSiteTextTranslationVoteStatus: SiteTextTranslationVoteStatusOutputRow;
@@ -906,13 +935,14 @@ export type Query = {
   getWordToWordTranslationsByFromWordDefinitionId: WordToWordTranslationWithVoteListOutput;
   getWordVoteStatus: WordVoteStatusOutputRow;
   getWordWithVoteById: WordWithVoteOutput;
-  getWordsByLanguage: WordWithVoteListOutput;
+  getWordsByLanguage: WordWithVoteListConnection;
   loggedInIsAdmin: IsAdminIdOutput;
   phraseDefinitionRead: PhraseDefinitionReadOutput;
   phraseRead: PhraseReadOutput;
   phraseToPhraseTranslationRead: PhraseToPhraseTranslationReadOutput;
   phraseVoteRead: PhraseVoteOutput;
   postReadResolver: PostReadOutput;
+  postsByParent: PostsByParentOutput;
   siteTextPhraseDefinitionRead: SiteTextPhraseDefinitionOutput;
   siteTextTranslationVoteRead: SiteTextTranslationVoteOutput;
   siteTextWordDefinitionRead: SiteTextWordDefinitionOutput;
@@ -1024,6 +1054,8 @@ export type QueryGetPhraseWithVoteByIdArgs = {
 
 
 export type QueryGetPhrasesByLanguageArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first: Scalars['Int']['input'];
   input: LanguageInput;
 };
 
@@ -1111,6 +1143,8 @@ export type QueryGetWordWithVoteByIdArgs = {
 
 
 export type QueryGetWordsByLanguageArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first: Scalars['Int']['input'];
   input: LanguageInput;
 };
 
@@ -1142,6 +1176,11 @@ export type QueryPhraseVoteReadArgs = {
 
 export type QueryPostReadResolverArgs = {
   input: PostReadInput;
+};
+
+
+export type QueryPostsByParentArgs = {
+  input: PostsByParentInput;
 };
 
 
@@ -1461,7 +1500,7 @@ export type UserReadOutput = {
 export type Version = {
   __typename?: 'Version';
   content: Scalars['String']['output'];
-  created_at: Scalars['String']['output'];
+  created_at: Scalars['DateTime']['output'];
   license_title: Scalars['String']['output'];
   post_id: Scalars['Int']['output'];
   version_id: Scalars['ID']['output'];
@@ -1720,10 +1759,17 @@ export type WordWithVote = {
   word_id: Scalars['ID']['output'];
 };
 
-export type WordWithVoteListOutput = {
-  __typename?: 'WordWithVoteListOutput';
+export type WordWithVoteListConnection = {
+  __typename?: 'WordWithVoteListConnection';
+  edges: Array<WordWithVoteListEdge>;
   error: ErrorType;
-  word_with_vote_list: Array<Maybe<WordWithDefinitions>>;
+  pageInfo: PageInfo;
+};
+
+export type WordWithVoteListEdge = {
+  __typename?: 'WordWithVoteListEdge';
+  cursor: Scalars['ID']['output'];
+  node: WordWithDefinitions;
 };
 
 export type WordWithVoteOutput = {
@@ -1731,6 +1777,27 @@ export type WordWithVoteOutput = {
   error: ErrorType;
   word_with_vote?: Maybe<WordWithVote>;
 };
+
+export type UserFieldsFragment = { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null };
+
+export type PostFieldsFragment = { __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } };
+
+export type PostsByParentQueryVariables = Exact<{
+  parent_id: Scalars['ID']['input'];
+  parent_name: Scalars['String']['input'];
+}>;
+
+
+export type PostsByParentQuery = { __typename?: 'Query', postsByParent: { __typename?: 'PostsByParentOutput', error: ErrorType, posts?: Array<{ __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } }> | null } };
+
+export type PostCreateMutationVariables = Exact<{
+  content: Scalars['String']['input'];
+  parentId: Scalars['Int']['input'];
+  parentTable: Scalars['String']['input'];
+}>;
+
+
+export type PostCreateMutation = { __typename?: 'Mutation', postCreateResolver: { __typename?: 'PostCreateOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } } | null } };
 
 export type SessionFieldsFragment = { __typename?: 'Session', user_id: string, token: string, avatar: string, avatar_url?: string | null };
 
@@ -1787,6 +1854,10 @@ export type DefinitionVoteStatusFragmentFragment = { __typename?: 'DefinitionVot
 
 export type WordVoteStatusFragmentFragment = { __typename?: 'WordVoteStatus', word_id: string, downvotes: number, upvotes: number };
 
+export type WordWithVoteListEdgeFragmentFragment = { __typename?: 'WordWithVoteListEdge', cursor: string, node: { __typename?: 'WordWithDefinitions', word_id: string, word: string, downvotes: number, upvotes: number, language_code: string, dialect_code?: string | null, geo_code?: string | null, definitions: Array<{ __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null> } };
+
+export type PageInfoFragmentFragment = { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null };
+
 export type WordDefinitionReadQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -1795,6 +1866,8 @@ export type WordDefinitionReadQueryVariables = Exact<{
 export type WordDefinitionReadQuery = { __typename?: 'Query', wordDefinitionRead: { __typename?: 'WordDefinitionReadOutput', error: ErrorType, word_definition?: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
 
 export type GetWordsByLanguageQueryVariables = Exact<{
+  first: Scalars['Int']['input'];
+  after?: InputMaybe<Scalars['ID']['input']>;
   language_code: Scalars['String']['input'];
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
@@ -1802,7 +1875,7 @@ export type GetWordsByLanguageQueryVariables = Exact<{
 }>;
 
 
-export type GetWordsByLanguageQuery = { __typename?: 'Query', getWordsByLanguage: { __typename?: 'WordWithVoteListOutput', error: ErrorType, word_with_vote_list: Array<{ __typename?: 'WordWithDefinitions', word_id: string, word: string, downvotes: number, upvotes: number, language_code: string, dialect_code?: string | null, geo_code?: string | null, definitions: Array<{ __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null> } | null> } };
+export type GetWordsByLanguageQuery = { __typename?: 'Query', getWordsByLanguage: { __typename?: 'WordWithVoteListConnection', error: ErrorType, edges: Array<{ __typename?: 'WordWithVoteListEdge', cursor: string, node: { __typename?: 'WordWithDefinitions', word_id: string, word: string, downvotes: number, upvotes: number, language_code: string, dialect_code?: string | null, geo_code?: string | null, definitions: Array<{ __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null> } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type GetWordDefinitionsByWordIdQueryVariables = Exact<{
   word_id: Scalars['ID']['input'];
@@ -1933,6 +2006,8 @@ export type PhraseWithVoteFragmentFragment = { __typename?: 'PhraseWithVote', ph
 
 export type PhraseVoteStatusFragmentFragment = { __typename?: 'PhraseVoteStatus', downvotes: number, phrase_id: string, upvotes: number };
 
+export type PhraseWithVoteListEdgeFragmentFragment = { __typename?: 'PhraseWithVoteListEdge', cursor: string, node: { __typename?: 'PhraseWithDefinitions', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, downvotes: number, upvotes: number, definitions: Array<{ __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null> } };
+
 export type PhraseDefinitionReadQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -1941,6 +2016,8 @@ export type PhraseDefinitionReadQueryVariables = Exact<{
 export type PhraseDefinitionReadQuery = { __typename?: 'Query', phraseDefinitionRead: { __typename?: 'PhraseDefinitionReadOutput', error: ErrorType, phrase_definition?: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
 
 export type GetPhrasesByLanguageQueryVariables = Exact<{
+  first: Scalars['Int']['input'];
+  after?: InputMaybe<Scalars['ID']['input']>;
   language_code: Scalars['String']['input'];
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
@@ -1948,7 +2025,7 @@ export type GetPhrasesByLanguageQueryVariables = Exact<{
 }>;
 
 
-export type GetPhrasesByLanguageQuery = { __typename?: 'Query', getPhrasesByLanguage: { __typename?: 'PhraseWithVoteListOutput', error: ErrorType, phrase_with_vote_list: Array<{ __typename?: 'PhraseWithDefinitions', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, downvotes: number, upvotes: number, definitions: Array<{ __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null> } | null> } };
+export type GetPhrasesByLanguageQuery = { __typename?: 'Query', getPhrasesByLanguage: { __typename?: 'PhraseWithVoteListConnection', error: ErrorType, edges: Array<{ __typename?: 'PhraseWithVoteListEdge', cursor: string, node: { __typename?: 'PhraseWithDefinitions', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, downvotes: number, upvotes: number, definitions: Array<{ __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null> } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type GetPhraseDefinitionsByPhraseIdQueryVariables = Exact<{
   phrase_id: Scalars['ID']['input'];
@@ -1998,17 +2075,7 @@ export type PhraseUpsertMutationVariables = Exact<{
 
 export type PhraseUpsertMutation = { __typename?: 'Mutation', phraseUpsert: { __typename?: 'PhraseUpsertOutput', error: ErrorType, phrase?: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
 
-export type VersionFieldsFragment = { __typename?: 'Version', version_id: string, post_id: number, created_at: string, license_title: string, content: string };
-
-export type PostFieldsFragment = { __typename?: 'Post', post_id: string, created_at: string, created_by: number };
-
-export type PostCreateMutationVariables = Exact<{
-  content: Scalars['String']['input'];
-  parentId?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type PostCreateMutation = { __typename?: 'Mutation', postCreateResolver: { __typename?: 'PostCreateOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, created_at: string, created_by: number } | null } };
+export type VersionFieldsFragment = { __typename?: 'Version', version_id: string, post_id: number, created_at: any, license_title: string, content: string };
 
 export type VersionCreateMutationVariables = Exact<{
   postId: Scalars['Int']['input'];
@@ -2017,14 +2084,14 @@ export type VersionCreateMutationVariables = Exact<{
 }>;
 
 
-export type VersionCreateMutation = { __typename?: 'Mutation', versionCreateResolver: { __typename?: 'VersionCreateOutput', error: ErrorType, version?: { __typename?: 'Version', version_id: string, post_id: number, created_at: string, license_title: string, content: string } | null } };
+export type VersionCreateMutation = { __typename?: 'Mutation', versionCreateResolver: { __typename?: 'VersionCreateOutput', error: ErrorType, version?: { __typename?: 'Version', version_id: string, post_id: number, created_at: any, license_title: string, content: string } | null } };
 
 export type PostReadQueryVariables = Exact<{
   postId: Scalars['ID']['input'];
 }>;
 
 
-export type PostReadQuery = { __typename?: 'Query', postReadResolver: { __typename?: 'PostReadOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, created_at: string, created_by: number } | null } };
+export type PostReadQuery = { __typename?: 'Query', postReadResolver: { __typename?: 'PostReadOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } } | null } };
 
 export type SiteTextWordToWordTranslationWithVoteFragmentFragment = { __typename?: 'SiteTextWordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
 
@@ -2263,6 +2330,23 @@ export type GetFileUploadUrlQueryVariables = Exact<{
 
 export type GetFileUploadUrlQuery = { __typename?: 'Query', fileUploadUrlRequest: { __typename?: 'FileUploadUrlResponse', error: ErrorType, url: string, avatar_image_url: string } };
 
+export const UserFieldsFragmentDoc = gql`
+    fragment UserFields on User {
+  user_id
+  avatar
+  avatar_url
+}
+    `;
+export const PostFieldsFragmentDoc = gql`
+    fragment PostFields on Post {
+  post_id
+  content
+  created_at
+  created_by_user {
+    ...UserFields
+  }
+}
+    ${UserFieldsFragmentDoc}`;
 export const SessionFieldsFragmentDoc = gql`
     fragment SessionFields on Session {
   user_id
@@ -2280,29 +2364,6 @@ export const WordFragmentFragmentDoc = gql`
   geo_code
 }
     `;
-export const WordDefinitionFragmentFragmentDoc = gql`
-    fragment WordDefinitionFragment on WordDefinition {
-  word_definition_id
-  word {
-    ...WordFragment
-  }
-  definition
-}
-    ${WordFragmentFragmentDoc}`;
-export const WordWithDefinitionsFragmentFragmentDoc = gql`
-    fragment WordWithDefinitionsFragment on WordWithDefinitions {
-  word_id
-  word
-  definitions {
-    ...WordDefinitionFragment
-  }
-  downvotes
-  upvotes
-  language_code
-  dialect_code
-  geo_code
-}
-    ${WordDefinitionFragmentFragmentDoc}`;
 export const WordDefinitionWithVoteFragmentFragmentDoc = gql`
     fragment WordDefinitionWithVoteFragment on WordDefinitionWithVote {
   word_definition_id
@@ -2338,6 +2399,45 @@ export const WordVoteStatusFragmentFragmentDoc = gql`
   word_id
   downvotes
   upvotes
+}
+    `;
+export const WordDefinitionFragmentFragmentDoc = gql`
+    fragment WordDefinitionFragment on WordDefinition {
+  word_definition_id
+  word {
+    ...WordFragment
+  }
+  definition
+}
+    ${WordFragmentFragmentDoc}`;
+export const WordWithDefinitionsFragmentFragmentDoc = gql`
+    fragment WordWithDefinitionsFragment on WordWithDefinitions {
+  word_id
+  word
+  definitions {
+    ...WordDefinitionFragment
+  }
+  downvotes
+  upvotes
+  language_code
+  dialect_code
+  geo_code
+}
+    ${WordDefinitionFragmentFragmentDoc}`;
+export const WordWithVoteListEdgeFragmentFragmentDoc = gql`
+    fragment WordWithVoteListEdgeFragment on WordWithVoteListEdge {
+  cursor
+  node {
+    ...WordWithDefinitionsFragment
+  }
+}
+    ${WordWithDefinitionsFragmentFragmentDoc}`;
+export const PageInfoFragmentFragmentDoc = gql`
+    fragment PageInfoFragment on PageInfo {
+  endCursor
+  hasNextPage
+  hasPreviousPage
+  startCursor
 }
     `;
 export const MapPhraseWithVotesFragmentFragmentDoc = gql`
@@ -2377,29 +2477,6 @@ export const PhraseFragmentFragmentDoc = gql`
   geo_code
 }
     `;
-export const PhraseDefinitionFragmentFragmentDoc = gql`
-    fragment PhraseDefinitionFragment on PhraseDefinition {
-  phrase_definition_id
-  definition
-  phrase {
-    ...PhraseFragment
-  }
-}
-    ${PhraseFragmentFragmentDoc}`;
-export const PhraseWithDefinitionsFragmentFragmentDoc = gql`
-    fragment PhraseWithDefinitionsFragment on PhraseWithDefinitions {
-  phrase_id
-  phrase
-  language_code
-  dialect_code
-  geo_code
-  definitions {
-    ...PhraseDefinitionFragment
-  }
-  downvotes
-  upvotes
-}
-    ${PhraseDefinitionFragmentFragmentDoc}`;
 export const PhraseDefinitionWithVoteFragmentFragmentDoc = gql`
     fragment PhraseDefinitionWithVoteFragment on PhraseDefinitionWithVote {
   phrase_definition_id
@@ -2430,6 +2507,37 @@ export const PhraseVoteStatusFragmentFragmentDoc = gql`
   upvotes
 }
     `;
+export const PhraseDefinitionFragmentFragmentDoc = gql`
+    fragment PhraseDefinitionFragment on PhraseDefinition {
+  phrase_definition_id
+  definition
+  phrase {
+    ...PhraseFragment
+  }
+}
+    ${PhraseFragmentFragmentDoc}`;
+export const PhraseWithDefinitionsFragmentFragmentDoc = gql`
+    fragment PhraseWithDefinitionsFragment on PhraseWithDefinitions {
+  phrase_id
+  phrase
+  language_code
+  dialect_code
+  geo_code
+  definitions {
+    ...PhraseDefinitionFragment
+  }
+  downvotes
+  upvotes
+}
+    ${PhraseDefinitionFragmentFragmentDoc}`;
+export const PhraseWithVoteListEdgeFragmentFragmentDoc = gql`
+    fragment PhraseWithVoteListEdgeFragment on PhraseWithVoteListEdge {
+  cursor
+  node {
+    ...PhraseWithDefinitionsFragment
+  }
+}
+    ${PhraseWithDefinitionsFragmentFragmentDoc}`;
 export const VersionFieldsFragmentDoc = gql`
     fragment VersionFields on Version {
   version_id
@@ -2437,13 +2545,6 @@ export const VersionFieldsFragmentDoc = gql`
   created_at
   license_title
   content
-}
-    `;
-export const PostFieldsFragmentDoc = gql`
-    fragment PostFields on Post {
-  post_id
-  created_at
-  created_by
 }
     `;
 export const SiteTextPhraseDefinitionFragmentFragmentDoc = gql`
@@ -2676,6 +2777,85 @@ export const PhraseToPhraseTranslationVoteStatusFragmentFragmentDoc = gql`
   downvotes
 }
     `;
+export const PostsByParentDocument = gql`
+    query PostsByParent($parent_id: ID!, $parent_name: String!) {
+  postsByParent(input: {parent_id: $parent_id, parent_name: $parent_name}) {
+    error
+    posts {
+      ...PostFields
+    }
+  }
+}
+    ${PostFieldsFragmentDoc}`;
+
+/**
+ * __usePostsByParentQuery__
+ *
+ * To run a query within a React component, call `usePostsByParentQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePostsByParentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePostsByParentQuery({
+ *   variables: {
+ *      parent_id: // value for 'parent_id'
+ *      parent_name: // value for 'parent_name'
+ *   },
+ * });
+ */
+export function usePostsByParentQuery(baseOptions: Apollo.QueryHookOptions<PostsByParentQuery, PostsByParentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PostsByParentQuery, PostsByParentQueryVariables>(PostsByParentDocument, options);
+      }
+export function usePostsByParentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostsByParentQuery, PostsByParentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PostsByParentQuery, PostsByParentQueryVariables>(PostsByParentDocument, options);
+        }
+export type PostsByParentQueryHookResult = ReturnType<typeof usePostsByParentQuery>;
+export type PostsByParentLazyQueryHookResult = ReturnType<typeof usePostsByParentLazyQuery>;
+export type PostsByParentQueryResult = Apollo.QueryResult<PostsByParentQuery, PostsByParentQueryVariables>;
+export const PostCreateDocument = gql`
+    mutation PostCreate($content: String!, $parentId: Int!, $parentTable: String!) {
+  postCreateResolver(
+    input: {content: $content, parent_id: $parentId, parent_table: $parentTable}
+  ) {
+    error
+    post {
+      ...PostFields
+    }
+  }
+}
+    ${PostFieldsFragmentDoc}`;
+export type PostCreateMutationFn = Apollo.MutationFunction<PostCreateMutation, PostCreateMutationVariables>;
+
+/**
+ * __usePostCreateMutation__
+ *
+ * To run a mutation, you first call `usePostCreateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePostCreateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [postCreateMutation, { data, loading, error }] = usePostCreateMutation({
+ *   variables: {
+ *      content: // value for 'content'
+ *      parentId: // value for 'parentId'
+ *      parentTable: // value for 'parentTable'
+ *   },
+ * });
+ */
+export function usePostCreateMutation(baseOptions?: Apollo.MutationHookOptions<PostCreateMutation, PostCreateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PostCreateMutation, PostCreateMutationVariables>(PostCreateDocument, options);
+      }
+export type PostCreateMutationHookResult = ReturnType<typeof usePostCreateMutation>;
+export type PostCreateMutationResult = Apollo.MutationResult<PostCreateMutation>;
+export type PostCreateMutationOptions = Apollo.BaseMutationOptions<PostCreateMutation, PostCreateMutationVariables>;
 export const RegisterDocument = gql`
     mutation Register($email: String!, $avatar: String!, $password: String!) {
   register(input: {email: $email, avatar: $avatar, password: $password}) {
@@ -2893,17 +3073,23 @@ export type WordDefinitionReadQueryHookResult = ReturnType<typeof useWordDefinit
 export type WordDefinitionReadLazyQueryHookResult = ReturnType<typeof useWordDefinitionReadLazyQuery>;
 export type WordDefinitionReadQueryResult = Apollo.QueryResult<WordDefinitionReadQuery, WordDefinitionReadQueryVariables>;
 export const GetWordsByLanguageDocument = gql`
-    query GetWordsByLanguage($language_code: String!, $dialect_code: String, $geo_code: String, $filter: String) {
+    query GetWordsByLanguage($first: Int!, $after: ID, $language_code: String!, $dialect_code: String, $geo_code: String, $filter: String) {
   getWordsByLanguage(
+    first: $first
+    after: $after
     input: {language_code: $language_code, dialect_code: $dialect_code, geo_code: $geo_code, filter: $filter}
   ) {
     error
-    word_with_vote_list {
-      ...WordWithDefinitionsFragment
+    edges {
+      ...WordWithVoteListEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
-    ${WordWithDefinitionsFragmentFragmentDoc}`;
+    ${WordWithVoteListEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
 
 /**
  * __useGetWordsByLanguageQuery__
@@ -2917,6 +3103,8 @@ export const GetWordsByLanguageDocument = gql`
  * @example
  * const { data, loading, error } = useGetWordsByLanguageQuery({
  *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *      language_code: // value for 'language_code'
  *      dialect_code: // value for 'dialect_code'
  *      geo_code: // value for 'geo_code'
@@ -3554,17 +3742,23 @@ export type PhraseDefinitionReadQueryHookResult = ReturnType<typeof usePhraseDef
 export type PhraseDefinitionReadLazyQueryHookResult = ReturnType<typeof usePhraseDefinitionReadLazyQuery>;
 export type PhraseDefinitionReadQueryResult = Apollo.QueryResult<PhraseDefinitionReadQuery, PhraseDefinitionReadQueryVariables>;
 export const GetPhrasesByLanguageDocument = gql`
-    query GetPhrasesByLanguage($language_code: String!, $dialect_code: String, $geo_code: String, $filter: String) {
+    query GetPhrasesByLanguage($first: Int!, $after: ID, $language_code: String!, $dialect_code: String, $geo_code: String, $filter: String) {
   getPhrasesByLanguage(
+    first: $first
+    after: $after
     input: {language_code: $language_code, dialect_code: $dialect_code, geo_code: $geo_code, filter: $filter}
   ) {
     error
-    phrase_with_vote_list {
-      ...PhraseWithDefinitionsFragment
+    edges {
+      ...PhraseWithVoteListEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
-    ${PhraseWithDefinitionsFragmentFragmentDoc}`;
+    ${PhraseWithVoteListEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
 
 /**
  * __useGetPhrasesByLanguageQuery__
@@ -3578,6 +3772,8 @@ export const GetPhrasesByLanguageDocument = gql`
  * @example
  * const { data, loading, error } = useGetPhrasesByLanguageQuery({
  *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *      language_code: // value for 'language_code'
  *      dialect_code: // value for 'dialect_code'
  *      geo_code: // value for 'geo_code'
@@ -3827,43 +4023,6 @@ export function usePhraseUpsertMutation(baseOptions?: Apollo.MutationHookOptions
 export type PhraseUpsertMutationHookResult = ReturnType<typeof usePhraseUpsertMutation>;
 export type PhraseUpsertMutationResult = Apollo.MutationResult<PhraseUpsertMutation>;
 export type PhraseUpsertMutationOptions = Apollo.BaseMutationOptions<PhraseUpsertMutation, PhraseUpsertMutationVariables>;
-export const PostCreateDocument = gql`
-    mutation PostCreate($content: String!, $parentId: Int) {
-  postCreateResolver(input: {content: $content, parent_id: $parentId}) {
-    error
-    post {
-      ...PostFields
-    }
-  }
-}
-    ${PostFieldsFragmentDoc}`;
-export type PostCreateMutationFn = Apollo.MutationFunction<PostCreateMutation, PostCreateMutationVariables>;
-
-/**
- * __usePostCreateMutation__
- *
- * To run a mutation, you first call `usePostCreateMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `usePostCreateMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [postCreateMutation, { data, loading, error }] = usePostCreateMutation({
- *   variables: {
- *      content: // value for 'content'
- *      parentId: // value for 'parentId'
- *   },
- * });
- */
-export function usePostCreateMutation(baseOptions?: Apollo.MutationHookOptions<PostCreateMutation, PostCreateMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<PostCreateMutation, PostCreateMutationVariables>(PostCreateDocument, options);
-      }
-export type PostCreateMutationHookResult = ReturnType<typeof usePostCreateMutation>;
-export type PostCreateMutationResult = Apollo.MutationResult<PostCreateMutation>;
-export type PostCreateMutationOptions = Apollo.BaseMutationOptions<PostCreateMutation, PostCreateMutationVariables>;
 export const VersionCreateDocument = gql`
     mutation VersionCreate($postId: Int!, $content: String!, $license_title: String!) {
   versionCreateResolver(
@@ -4924,6 +5083,7 @@ export type GetFileUploadUrlQueryResult = Apollo.QueryResult<GetFileUploadUrlQue
     
 export const namedOperations = {
   Query: {
+    PostsByParent: 'PostsByParent',
     WordDefinitionRead: 'WordDefinitionRead',
     GetWordsByLanguage: 'GetWordsByLanguage',
     GetWordDefinitionsByWordId: 'GetWordDefinitionsByWordId',
@@ -4953,6 +5113,7 @@ export const namedOperations = {
     GetFileUploadUrl: 'GetFileUploadUrl'
   },
   Mutation: {
+    PostCreate: 'PostCreate',
     Register: 'Register',
     Login: 'Login',
     Logout: 'Logout',
@@ -4968,7 +5129,6 @@ export const namedOperations = {
     TogglePhraseDefinitionVoteStatus: 'TogglePhraseDefinitionVoteStatus',
     TogglePhraseVoteStatus: 'TogglePhraseVoteStatus',
     PhraseUpsert: 'PhraseUpsert',
-    PostCreate: 'PostCreate',
     VersionCreate: 'VersionCreate',
     UpsertSiteTextTranslation: 'UpsertSiteTextTranslation',
     ToggleSiteTextTranslationVoteStatus: 'ToggleSiteTextTranslationVoteStatus',
@@ -4981,6 +5141,8 @@ export const namedOperations = {
     AvatarUpdate: 'AvatarUpdate'
   },
   Fragment: {
+    UserFields: 'UserFields',
+    PostFields: 'PostFields',
     SessionFields: 'SessionFields',
     WordFragment: 'WordFragment',
     WordDefinitionFragment: 'WordDefinitionFragment',
@@ -4989,6 +5151,8 @@ export const namedOperations = {
     WordWithVoteFragment: 'WordWithVoteFragment',
     DefinitionVoteStatusFragment: 'DefinitionVoteStatusFragment',
     WordVoteStatusFragment: 'WordVoteStatusFragment',
+    WordWithVoteListEdgeFragment: 'WordWithVoteListEdgeFragment',
+    PageInfoFragment: 'PageInfoFragment',
     MapPhraseWithVotesFragment: 'MapPhraseWithVotesFragment',
     WordWithVotesFragment: 'WordWithVotesFragment',
     PhraseFragment: 'PhraseFragment',
@@ -4997,8 +5161,8 @@ export const namedOperations = {
     PhraseDefinitionWithVoteFragment: 'PhraseDefinitionWithVoteFragment',
     PhraseWithVoteFragment: 'PhraseWithVoteFragment',
     PhraseVoteStatusFragment: 'PhraseVoteStatusFragment',
+    PhraseWithVoteListEdgeFragment: 'PhraseWithVoteListEdgeFragment',
     VersionFields: 'VersionFields',
-    PostFields: 'PostFields',
     SiteTextWordToWordTranslationWithVoteFragment: 'SiteTextWordToWordTranslationWithVoteFragment',
     SiteTextWordToPhraseTranslationWithVoteFragment: 'SiteTextWordToPhraseTranslationWithVoteFragment',
     SiteTextPhraseToWordTranslationWithVoteFragment: 'SiteTextPhraseToWordTranslationWithVoteFragment',

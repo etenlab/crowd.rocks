@@ -2,15 +2,40 @@ import { ApolloCache } from '@apollo/client';
 
 import {
   Word,
+  WordWithVoteListEdge,
   WordWithDefinitions,
   GetWordsByLanguageQuery,
 } from '../generated/graphql';
-import { GetWordsByLanguageDocument } from '../generated/graphql';
+import {
+  WordWithVoteListEdgeFragmentFragmentDoc,
+  GetWordsByLanguageDocument,
+} from '../generated/graphql';
 
 export function updateCacheWithUpsertWord(
   cache: ApolloCache<unknown>,
   newWord: Word,
 ) {
+  cache.writeFragment<WordWithVoteListEdge>({
+    id: cache.identify({
+      __typename: 'WordWithVoteListEdge',
+      cursor: newWord.word_id,
+    }),
+    fragment: WordWithVoteListEdgeFragmentFragmentDoc,
+    fragmentName: 'WordWithVoteListEdgeFragment',
+    data: {
+      __typename: 'WordWithVoteListEdge',
+      cursor: newWord.word_id,
+      node: {
+        ...newWord,
+        __typename: 'WordWithDefinitions',
+        definitions: [],
+        upvotes: 0,
+        downvotes: 0,
+        created_at: new Date().toISOString(),
+      } as WordWithDefinitions,
+    },
+  });
+
   cache.updateQuery<GetWordsByLanguageQuery>(
     {
       query: GetWordsByLanguageDocument,
@@ -23,10 +48,9 @@ export function updateCacheWithUpsertWord(
     },
     (data) => {
       if (data) {
-        const alreadyExists =
-          data.getWordsByLanguage.word_with_vote_list.filter((wordWithVote) => {
-            return wordWithVote?.word_id === newWord.word_id;
-          });
+        const alreadyExists = data.getWordsByLanguage.edges.filter((edge) => {
+          return edge.node.word_id === newWord.word_id;
+        });
 
         if (alreadyExists.length > 0) {
           return data;
@@ -36,17 +60,24 @@ export function updateCacheWithUpsertWord(
           ...data,
           getWordsByLanguage: {
             ...data.getWordsByLanguage,
-            word_with_vote_list: [
-              ...data.getWordsByLanguage.word_with_vote_list,
+            edges: [
+              ...data.getWordsByLanguage.edges,
               {
-                ...newWord,
-                __typename: 'WordWithDefinitions',
-                definitions: [],
-                upvotes: 0,
-                downvotes: 0,
-                created_at: new Date().toISOString(),
-              } as WordWithDefinitions,
+                __typename: 'WordWithVoteListEdge',
+                cursor: newWord.word_id,
+                node: {
+                  ...newWord,
+                  __typename: 'WordWithDefinitions',
+                  definitions: [],
+                  upvotes: 0,
+                  downvotes: 0,
+                  created_at: new Date().toISOString(),
+                } as WordWithDefinitions,
+              } as WordWithVoteListEdge,
             ],
+            pageInfo: {
+              ...data.getWordsByLanguage.pageInfo,
+            },
           },
         };
       } else {
