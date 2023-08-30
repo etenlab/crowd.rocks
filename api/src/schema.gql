@@ -607,7 +607,6 @@ input PostsByParentInput {
 type PostsByParentOutput {
   error: ErrorType!
   posts: [Post!]
-  title: String
 }
 
 type Query {

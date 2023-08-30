@@ -895,7 +895,6 @@ export type PostsByParentOutput = {
   __typename?: 'PostsByParentOutput';
   error: ErrorType;
   posts?: Maybe<Array<Post>>;
-  title?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query = {
@@ -1788,7 +1787,7 @@ export type PostsByParentQueryVariables = Exact<{
 }>;
 
 
-export type PostsByParentQuery = { __typename?: 'Query', postsByParent: { __typename?: 'PostsByParentOutput', error: ErrorType, title?: string | null, posts?: Array<{ __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } }> | null } };
+export type PostsByParentQuery = { __typename?: 'Query', postsByParent: { __typename?: 'PostsByParentOutput', error: ErrorType, posts?: Array<{ __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } }> | null } };
 
 export type PostCreateMutationVariables = Exact<{
   content: Scalars['String']['input'];
@@ -2780,7 +2779,6 @@ export const PostsByParentDocument = gql`
     query PostsByParent($parent_id: ID!, $parent_name: String!) {
   postsByParent(input: {parent_id: $parent_id, parent_name: $parent_name}) {
     error
-    title
     posts {
       ...PostFields
     }

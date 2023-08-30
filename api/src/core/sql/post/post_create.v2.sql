@@ -24,8 +24,8 @@ begin
   end if;
 
   -- create post entry
-  insert into posts(parent_table, parent_id, thread_id, created_by)
-  values (p_parent_table, p_parent_id, p_thread_id, p_user_id)
+  insert into posts(parent_table, parent_id, created_by)
+  values (p_parent_table, p_parent_id, p_user_id)
   returning post_id, created_at
   into p_post_id, p_created_at;
 

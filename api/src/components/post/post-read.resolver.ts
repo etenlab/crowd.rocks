@@ -113,7 +113,7 @@ export class PostReadResolver {
             p.post_id,
             p.created_at,
             p.created_by,
-            v.content,
+            v.content
           from 
             posts p
           join versions v
