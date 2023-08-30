@@ -44,7 +44,7 @@ export const MapList: React.FC = () => {
     fetchPolicy: 'no-cache',
   });
 
-  const { saveMapThumbnail } = useMapTranslationTools();
+  const { makeMapThumbnail } = useMapTranslationTools();
 
   useEffect(() => {
     const user_id = globals.get_user_id();
@@ -83,7 +83,11 @@ export const MapList: React.FC = () => {
           variables: { file },
           refetchQueries: ['GetAllMapsList'],
         });
-        await saveMapThumbnail({ file });
+        const thumbnail = await makeMapThumbnail(await file.text(), {
+          toWidth: 100,
+          toHeight: 100,
+        });
+        console.log('[thumbnail]', thumbnail);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         present({
@@ -94,7 +98,7 @@ export const MapList: React.FC = () => {
         });
       }
     },
-    [present, saveMapThumbnail, sendMapFile],
+    [present, makeMapThumbnail, sendMapFile],
   );
 
   return (

@@ -82,33 +82,53 @@ export function useMapTranslationTools() {
     [],
   );
 
-  const saveMapThumbnail = async ({ file }: { file: File }): Promise<void> => {
-    console.log(file.name);
+  const makeMapThumbnail = async (
+    content: string,
+    { toWidth, toHeight }: { toWidth: number; toHeight: number },
+  ): Promise<string> => {
+    const scaleToFit = (
+      img: HTMLImageElement,
+      ctx: CanvasRenderingContext2D,
+    ): void => {
+      // get the scale
+      const scale = Math.min(
+        canvas.width / img.width,
+        canvas.height / img.height,
+      );
+      // get the top left position of the image
+      const x = canvas.width / 2 - (img.width / 2) * scale;
+      const y = canvas.height / 2 - (img.height / 2) * scale;
+      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+    };
+
     const canvas = document.createElement('canvas');
     canvas.id = 'mapThumbnail';
     Object.assign(canvas.style, {
-      // height: '100px',
+      height: `${toHeight}px`,
       'background-color': 'white',
-      // width: '100px',
+      width: `${toWidth}px`,
       color: 'black',
       border: '1px solid black',
       position: 'absolute',
     });
-    const content = await file.text();
+    canvas.width = toWidth;
+    canvas.height = toHeight;
 
     const img = new Image();
     img.src = `data:image/svg+xml;utf8,${encodeURIComponent(content)}`;
     const ctx = canvas.getContext('2d');
-    img.onload = () => {
-      ctx?.drawImage(img, 0, 0);
-    };
-
-    document.body.appendChild(canvas);
+    return new Promise((resolve) => {
+      img.onload = () => {
+        scaleToFit(img, ctx!);
+        document.body.appendChild(canvas);
+        resolve(canvas.toDataURL());
+      };
+    });
   };
 
   return {
     chooseBestTranslation,
     addValueToWordsOrPhrases,
-    saveMapThumbnail,
+    makeMapThumbnail,
   };
 }
