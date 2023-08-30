@@ -50,7 +50,7 @@
     "graphql-upload-ts": "^2.0.9",
     "jsonwebtoken": "^9.0.1",
     "language-tags": "^1.0.8",
-    "nanoid": "^4.0.2",
+    "nanoid": "^3.3.0",
     "pg": "^8.11.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^5.0.1",

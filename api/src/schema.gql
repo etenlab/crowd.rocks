@@ -94,6 +94,15 @@ enum ErrorType {
   WordToWordTranslationNotFound
 }
 
+type FileDecoratorsGQL {
+  fileHash: String!
+  fileName: String!
+  fileSize: Int!
+  fileType: String!
+  fileUrl: String!
+  id: Int!
+}
+
 input FileUploadUrlRequest {
   user_id: ID!
 }
@@ -196,6 +205,15 @@ type GetTranslatedMapContentOutput {
   original_map_id: ID!
   translated_map_id: ID
   translated_percent: String
+}
+
+type IFile {
+  fileHash: String!
+  fileName: String!
+  fileSize: Int!
+  fileType: String!
+  fileUrl: String!
+  id: Int!
 }
 
 input IsAdminIdInput {
@@ -332,6 +350,8 @@ type Mutation {
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
+  updateFile(file: Upload!, file_size: Int!, file_type: String!, id: Int!): FileDecoratorsGQL!
+  uploadFile(file: Upload!, file_size: Int!, file_type: String!): FileDecoratorsGQL!
   upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): TranslationUpsertOutput!
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(input: FromPhraseAndDefintionlikeStringUpsertInput!): PhraseDefinitionUpsertOutput!
   upsertSiteTextTranslation(input: SiteTextTranslationUpsertInput!): TranslationUpsertOutput!
@@ -584,6 +604,8 @@ type PostReadOutput {
 }
 
 type Query {
+  file(id: Int!): FileDecoratorsGQL!
+  fileList: [FileDecoratorsGQL!]!
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
   getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput!

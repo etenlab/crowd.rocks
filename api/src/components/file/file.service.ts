@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import 'react-native-get-random-values';
-import 'react-native-url-polyfill/auto';
+// import 'react-native-get-random-values';
+// import 'react-native-url-polyfill/auto';
 import { ReadStream } from 'fs';
 import { Transform } from 'stream';
 import { createHash } from 'crypto';

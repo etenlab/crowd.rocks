@@ -1002,4 +1002,14 @@ export class MapsRepository {
     const resQ = await this.pg.pool.query(sqlStr, params);
     return resQ.rows[0].translated_map_word_id;
   }
+
+  async setPreviewFileId(mapId: string, previewFileId): Promise<string> {
+    const params = [mapId, previewFileId];
+    const sqlStr = `
+      update  original_maps set preview_file_id = $1 where original_map_id = $2
+      returning translated_map_id
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    return resQ.rows[0].translated_map_id;
+  }
 }

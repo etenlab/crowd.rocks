@@ -22,6 +22,8 @@ import {
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { ErrorType } from 'src/common/types';
+import { FileService } from '../file/file.service';
+import { IFile } from '../file/types';
 
 @Injectable()
 @Resolver(Map)
@@ -29,6 +31,7 @@ export class MapsResolver {
   constructor(
     private mapService: MapsService,
     private authenticationService: AuthenticationService,
+    private fileService: FileService,
   ) {}
 
   @Mutation(() => MapUploadOutput)
@@ -41,7 +44,7 @@ export class MapsResolver {
   ): Promise<MapUploadOutput> {
     const bearer = getBearer(req);
     let fileBody: string;
-    let thumbFileBody: string;
+    // let thumbFileBody: string;
     // need to get all uploads to prevent the request to hang up in pending state
     for await (const chunk of createReadStream()) {
       if (!fileBody) {
@@ -51,15 +54,15 @@ export class MapsResolver {
       }
     }
 
-    if (mapThumbUpload) {
-      for await (const chunk of mapThumbUpload.createReadStream()) {
-        if (!thumbFileBody) {
-          thumbFileBody = chunk;
-        } else {
-          thumbFileBody += chunk;
-        }
-      }
-    }
+    // if (mapThumbUpload) {
+    //   for await (const chunk of mapThumbUpload.createReadStream()) {
+    //     if (!thumbFileBody) {
+    //       thumbFileBody = chunk;
+    //     } else {
+    //       thumbFileBody += chunk;
+    //     }
+    //   }
+    // }
 
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       bearer,
@@ -81,6 +84,21 @@ export class MapsResolver {
         mapFileName: map_file_name,
         token: userToken,
       });
+      let previewFile: IFile;
+      if (mapThumbUpload.createReadStream) {
+        previewFile = await this.fileService.uploadFile(
+          mapThumbUpload.createReadStream(),
+          mapThumbUpload.filename,
+          mapThumbUpload.mimetype,
+          20, //todo get real size
+        );
+      }
+
+      await this.mapService.setPreviewFileId(
+        map.original_map_id,
+        previewFile.id,
+      );
+
       return {
         error: ErrorType.NoError,
         mapFileOutput: map,
