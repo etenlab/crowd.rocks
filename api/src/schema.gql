@@ -73,6 +73,7 @@ enum ErrorType {
   PhraseToWordTranslationNotFound
   PositionInvalid
   PostCreateFailed
+  PostNotFound
   PrefixInvalid
   PrefixTooLong
   PrefixTooShort
@@ -572,14 +573,16 @@ type PhraseWithVoteOutput {
 }
 
 type Post {
-  created_at: String!
-  created_by: Int!
+  content: String!
+  created_at: DateTime!
+  created_by_user: User!
   post_id: ID!
 }
 
 input PostCreateInput {
   content: String!
-  parent_id: Int
+  parent_id: Int!
+  parent_table: String!
 }
 
 type PostCreateOutput {
@@ -594,6 +597,16 @@ input PostReadInput {
 type PostReadOutput {
   error: ErrorType!
   post: Post
+}
+
+input PostsByParentInput {
+  parent_id: ID!
+  parent_name: String!
+}
+
+type PostsByParentOutput {
+  error: ErrorType!
+  posts: [Post!]
 }
 
 type Query {
@@ -639,6 +652,7 @@ type Query {
   phraseToPhraseTranslationRead(id: ID!): PhraseToPhraseTranslationReadOutput!
   phraseVoteRead(id: ID!): PhraseVoteOutput!
   postReadResolver(input: PostReadInput!): PostReadOutput!
+  postsByParent(input: PostsByParentInput!): PostsByParentOutput!
   siteTextPhraseDefinitionRead(id: String!): SiteTextPhraseDefinitionOutput!
   siteTextTranslationVoteRead(id: String!): SiteTextTranslationVoteOutput!
   siteTextWordDefinitionRead(id: String!): SiteTextWordDefinitionOutput!
@@ -894,7 +908,7 @@ type UserReadOutput {
 
 type Version {
   content: String!
-  created_at: String!
+  created_at: DateTime!
   license_title: String!
   post_id: Int!
   version_id: ID!

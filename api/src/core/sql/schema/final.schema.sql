@@ -1,7 +1,6 @@
 -- final.schema.sql
--- this is a helper file that isn't used in the app
--- this is the "final" schema that exists after the v1.schema.sql file and
--- all change files are run
+-- this is a helper file that isn't used in the app. it's not called by any code. it only exists to help developers understand the table schema without looking through the v1.schema.sql file and all the change scripts. this is the "final" schema that exists after the v1.schema.sql file and all change files are run. when your new features needs a schema change, first update the database-version-control.service.ts file with your modification statements, then update this file so its easy to see what the final schema looks like.
+
 
 create schema if not exists "public";
 
