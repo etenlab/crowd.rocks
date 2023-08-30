@@ -191,7 +191,7 @@ export class WordsService {
 
   async getWordsByLanguage(
     input: LanguageInput,
-    first: number,
+    first: number | null,
     after: string | null,
   ): Promise<WordWithVoteListConnection> {
     try {
@@ -228,7 +228,7 @@ export class WordsService {
           startCursor = word_id;
         }
 
-        if (offset >= first) {
+        if (first !== null && offset >= first) {
           hasNextPage = true;
           break;
         }
