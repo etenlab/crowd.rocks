@@ -232,11 +232,23 @@ export type IsAdminIdOutput = {
   isAdmin: Scalars['Boolean']['output'];
 };
 
+export type LanguageForGoogleTranslate = {
+  __typename?: 'LanguageForGoogleTranslate';
+  code: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type LanguageInput = {
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   filter?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
   language_code: Scalars['String']['input'];
+};
+
+export type LanguageListForGoogleTranslateOutput = {
+  __typename?: 'LanguageListForGoogleTranslateOutput';
+  error: ErrorType;
+  languages?: Maybe<Array<LanguageForGoogleTranslate>>;
 };
 
 export type LanguageOutput = {
@@ -367,6 +379,7 @@ export type Mutation = {
   toggleWordDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   toggleWordToPhraseTrVoteStatus: WordToPhraseTranslationVoteStatusOutputRow;
   toggleWordVoteStatus: WordVoteStatusOutputRow;
+  translateAllWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByGoogleOutput;
   updateDefinition: PhraseDefinitionUpsertOutput;
   upsertFromTranslationlikeString: TranslationUpsertOutput;
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString: PhraseDefinitionUpsertOutput;
@@ -526,6 +539,12 @@ export type MutationToggleWordToPhraseTrVoteStatusArgs = {
 export type MutationToggleWordVoteStatusArgs = {
   vote: Scalars['Boolean']['input'];
   word_id: Scalars['ID']['input'];
+};
+
+
+export type MutationTranslateAllWordsAndPhrasesByGoogleArgs = {
+  from_language: LanguageInput;
+  to_language: LanguageInput;
 };
 
 
@@ -921,6 +940,7 @@ export type Query = {
   getWordVoteStatus: WordVoteStatusOutputRow;
   getWordWithVoteById: WordWithVoteOutput;
   getWordsByLanguage: WordWithVoteListConnection;
+  languagesForGoogleTranslate: LanguageListForGoogleTranslateOutput;
   loggedInIsAdmin: IsAdminIdOutput;
   phraseDefinitionRead: PhraseDefinitionReadOutput;
   phraseRead: PhraseReadOutput;
@@ -1039,7 +1059,7 @@ export type QueryGetPhraseWithVoteByIdArgs = {
 
 export type QueryGetPhrasesByLanguageArgs = {
   after?: InputMaybe<Scalars['ID']['input']>;
-  first: Scalars['Int']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
   input: LanguageInput;
 };
 
@@ -1128,7 +1148,7 @@ export type QueryGetWordWithVoteByIdArgs = {
 
 export type QueryGetWordsByLanguageArgs = {
   after?: InputMaybe<Scalars['ID']['input']>;
-  first: Scalars['Int']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
   input: LanguageInput;
 };
 
@@ -1427,6 +1447,21 @@ export type ToDefinitionInput = {
   is_type_word: Scalars['Boolean']['input'];
   language_code: Scalars['String']['input'];
   word_or_phrase: Scalars['String']['input'];
+};
+
+export type TranslateAllWordsAndPhrasesByGoogleOutput = {
+  __typename?: 'TranslateAllWordsAndPhrasesByGoogleOutput';
+  error: ErrorType;
+  result?: Maybe<TranslateAllWordsAndPhrasesByGoogleResult>;
+};
+
+export type TranslateAllWordsAndPhrasesByGoogleResult = {
+  __typename?: 'TranslateAllWordsAndPhrasesByGoogleResult';
+  requestedCharactors: Scalars['Int']['output'];
+  totalPhraseCount: Scalars['Int']['output'];
+  totalWordCount: Scalars['Int']['output'];
+  translatedPhraseCount: Scalars['Int']['output'];
+  translatedWordCount: Scalars['Int']['output'];
 };
 
 export type Translation = PhraseToPhraseTranslation | PhraseToWordTranslation | WordToPhraseTranslation | WordToWordTranslation;
@@ -2219,6 +2254,23 @@ export type GetRecommendedTranslationFromDefinitionIdQueryVariables = Exact<{
 
 
 export type GetRecommendedTranslationFromDefinitionIdQuery = { __typename?: 'Query', getRecommendedTranslationFromDefinitionID: { __typename?: 'TranslationWithVoteOutput', error: ErrorType, translation_with_vote?: { __typename?: 'PhraseToPhraseTranslationWithVote', phrase_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | { __typename?: 'PhraseToWordTranslationWithVote', phrase_to_word_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | { __typename?: 'WordToPhraseTranslationWithVote', word_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | { __typename?: 'WordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null } };
+
+export type LanguagesForGoogleTranslateQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LanguagesForGoogleTranslateQuery = { __typename?: 'Query', languagesForGoogleTranslate: { __typename?: 'LanguageListForGoogleTranslateOutput', error: ErrorType, languages?: Array<{ __typename?: 'LanguageForGoogleTranslate', code: string, name: string }> | null } };
+
+export type TranslateAllWordsAndPhrasesByGoogleMutationVariables = Exact<{
+  from_language_code: Scalars['String']['input'];
+  from_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  from_geo_code?: InputMaybe<Scalars['String']['input']>;
+  to_language_code: Scalars['String']['input'];
+  to_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  to_geo_code?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type TranslateAllWordsAndPhrasesByGoogleMutation = { __typename?: 'Mutation', translateAllWordsAndPhrasesByGoogle: { __typename?: 'TranslateAllWordsAndPhrasesByGoogleOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByGoogleResult', requestedCharactors: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
 
 export type ToggleTranslationVoteStatusMutationVariables = Exact<{
   translation_id: Scalars['ID']['input'];
@@ -4599,6 +4651,92 @@ export function useGetRecommendedTranslationFromDefinitionIdLazyQuery(baseOption
 export type GetRecommendedTranslationFromDefinitionIdQueryHookResult = ReturnType<typeof useGetRecommendedTranslationFromDefinitionIdQuery>;
 export type GetRecommendedTranslationFromDefinitionIdLazyQueryHookResult = ReturnType<typeof useGetRecommendedTranslationFromDefinitionIdLazyQuery>;
 export type GetRecommendedTranslationFromDefinitionIdQueryResult = Apollo.QueryResult<GetRecommendedTranslationFromDefinitionIdQuery, GetRecommendedTranslationFromDefinitionIdQueryVariables>;
+export const LanguagesForGoogleTranslateDocument = gql`
+    query LanguagesForGoogleTranslate {
+  languagesForGoogleTranslate {
+    error
+    languages {
+      code
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useLanguagesForGoogleTranslateQuery__
+ *
+ * To run a query within a React component, call `useLanguagesForGoogleTranslateQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLanguagesForGoogleTranslateQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLanguagesForGoogleTranslateQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useLanguagesForGoogleTranslateQuery(baseOptions?: Apollo.QueryHookOptions<LanguagesForGoogleTranslateQuery, LanguagesForGoogleTranslateQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LanguagesForGoogleTranslateQuery, LanguagesForGoogleTranslateQueryVariables>(LanguagesForGoogleTranslateDocument, options);
+      }
+export function useLanguagesForGoogleTranslateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LanguagesForGoogleTranslateQuery, LanguagesForGoogleTranslateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LanguagesForGoogleTranslateQuery, LanguagesForGoogleTranslateQueryVariables>(LanguagesForGoogleTranslateDocument, options);
+        }
+export type LanguagesForGoogleTranslateQueryHookResult = ReturnType<typeof useLanguagesForGoogleTranslateQuery>;
+export type LanguagesForGoogleTranslateLazyQueryHookResult = ReturnType<typeof useLanguagesForGoogleTranslateLazyQuery>;
+export type LanguagesForGoogleTranslateQueryResult = Apollo.QueryResult<LanguagesForGoogleTranslateQuery, LanguagesForGoogleTranslateQueryVariables>;
+export const TranslateAllWordsAndPhrasesByGoogleDocument = gql`
+    mutation TranslateAllWordsAndPhrasesByGoogle($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String, $to_language_code: String!, $to_dialect_code: String, $to_geo_code: String) {
+  translateAllWordsAndPhrasesByGoogle(
+    from_language: {language_code: $from_language_code, dialect_code: $from_dialect_code, geo_code: $from_geo_code}
+    to_language: {language_code: $to_language_code, dialect_code: $to_dialect_code, geo_code: $to_geo_code}
+  ) {
+    error
+    result {
+      requestedCharactors
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+    `;
+export type TranslateAllWordsAndPhrasesByGoogleMutationFn = Apollo.MutationFunction<TranslateAllWordsAndPhrasesByGoogleMutation, TranslateAllWordsAndPhrasesByGoogleMutationVariables>;
+
+/**
+ * __useTranslateAllWordsAndPhrasesByGoogleMutation__
+ *
+ * To run a mutation, you first call `useTranslateAllWordsAndPhrasesByGoogleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTranslateAllWordsAndPhrasesByGoogleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [translateAllWordsAndPhrasesByGoogleMutation, { data, loading, error }] = useTranslateAllWordsAndPhrasesByGoogleMutation({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      from_dialect_code: // value for 'from_dialect_code'
+ *      from_geo_code: // value for 'from_geo_code'
+ *      to_language_code: // value for 'to_language_code'
+ *      to_dialect_code: // value for 'to_dialect_code'
+ *      to_geo_code: // value for 'to_geo_code'
+ *   },
+ * });
+ */
+export function useTranslateAllWordsAndPhrasesByGoogleMutation(baseOptions?: Apollo.MutationHookOptions<TranslateAllWordsAndPhrasesByGoogleMutation, TranslateAllWordsAndPhrasesByGoogleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TranslateAllWordsAndPhrasesByGoogleMutation, TranslateAllWordsAndPhrasesByGoogleMutationVariables>(TranslateAllWordsAndPhrasesByGoogleDocument, options);
+      }
+export type TranslateAllWordsAndPhrasesByGoogleMutationHookResult = ReturnType<typeof useTranslateAllWordsAndPhrasesByGoogleMutation>;
+export type TranslateAllWordsAndPhrasesByGoogleMutationResult = Apollo.MutationResult<TranslateAllWordsAndPhrasesByGoogleMutation>;
+export type TranslateAllWordsAndPhrasesByGoogleMutationOptions = Apollo.BaseMutationOptions<TranslateAllWordsAndPhrasesByGoogleMutation, TranslateAllWordsAndPhrasesByGoogleMutationVariables>;
 export const ToggleTranslationVoteStatusDocument = gql`
     mutation ToggleTranslationVoteStatus($translation_id: ID!, $vote: Boolean!, $from_definition_type_is_word: Boolean!, $to_definition_type_is_word: Boolean!) {
   toggleTranslationVoteStatus(
@@ -5022,6 +5160,7 @@ export const namedOperations = {
     GetAllRecommendedSiteTextTranslationList: 'GetAllRecommendedSiteTextTranslationList',
     GetTranslationsByFromDefinitionId: 'GetTranslationsByFromDefinitionId',
     GetRecommendedTranslationFromDefinitionID: 'GetRecommendedTranslationFromDefinitionID',
+    LanguagesForGoogleTranslate: 'LanguagesForGoogleTranslate',
     UserRead: 'UserRead',
     GetFileUploadUrl: 'GetFileUploadUrl'
   },
@@ -5046,6 +5185,7 @@ export const namedOperations = {
     UpsertSiteTextTranslation: 'UpsertSiteTextTranslation',
     ToggleSiteTextTranslationVoteStatus: 'ToggleSiteTextTranslationVoteStatus',
     SiteTextUpsert: 'SiteTextUpsert',
+    TranslateAllWordsAndPhrasesByGoogle: 'TranslateAllWordsAndPhrasesByGoogle',
     ToggleTranslationVoteStatus: 'ToggleTranslationVoteStatus',
     UpsertTranslation: 'UpsertTranslation',
     UpsertTranslationFromWordAndDefinitionlikeString: 'UpsertTranslationFromWordAndDefinitionlikeString',
