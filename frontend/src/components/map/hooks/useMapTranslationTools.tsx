@@ -85,7 +85,7 @@ export function useMapTranslationTools() {
   const makeMapThumbnail = async (
     content: string,
     { toWidth, toHeight }: { toWidth: number; toHeight: number },
-  ): Promise<string> => {
+  ): Promise<HTMLCanvasElement> => {
     const scaleToFit = (
       img: HTMLImageElement,
       ctx: CanvasRenderingContext2D,
@@ -120,8 +120,7 @@ export function useMapTranslationTools() {
     return new Promise((resolve) => {
       img.onload = () => {
         scaleToFit(img, ctx!);
-        document.body.appendChild(canvas);
-        resolve(canvas.toDataURL());
+        resolve(canvas);
       };
     });
   };
