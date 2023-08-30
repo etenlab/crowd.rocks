@@ -49,6 +49,7 @@ import { PhraseListPage } from './components/phrase-book/PhraseListPage';
 import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
 
 import { TranslationPage } from './components/translation/TranslationPage';
+import { GoogleTranslationPage } from './components/translation/GoogleTranslationPage';
 
 import { useAppContext } from './hooks/useAppContext';
 import { useTr } from './hooks/useTr';
@@ -346,6 +347,7 @@ const Body: React.FC = () => {
             component={MapsPage}
           />
           <Route
+            exact
             path="/:nation_id/:language_id/:cluster_id/site-text-list"
             component={SiteTextListPage}
           />
@@ -378,6 +380,11 @@ const Body: React.FC = () => {
             exact
             path="/:nation_id/:language_id/:cluster_id/translation"
             component={TranslationPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/google-translate"
+            component={GoogleTranslationPage}
           />
           <Route exact path="/">
             <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />
