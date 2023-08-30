@@ -275,7 +275,7 @@ type MapPhraseWithVotes {
 
 type MapUploadOutput {
   error: ErrorType!
-  mapFileOutput: MapFileOutput!
+  mapFileOutput: MapFileOutput
 }
 
 union MapWordOrPhraseTranslationWithVotes = MapPhraseWithVotes | MapWordWithVotes
@@ -309,7 +309,7 @@ type Mutation {
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
-  mapUpload(file: Upload!): MapUploadOutput!
+  mapUpload(file: Upload!, thumbnailFile: Upload): MapUploadOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationUpsertOutput!

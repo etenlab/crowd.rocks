@@ -308,7 +308,7 @@ export type MapPhraseWithVotes = {
 export type MapUploadOutput = {
   __typename?: 'MapUploadOutput';
   error: ErrorType;
-  mapFileOutput: MapFileOutput;
+  mapFileOutput?: Maybe<MapFileOutput>;
 };
 
 export type MapWordOrPhraseTranslationWithVotes = MapPhraseWithVotes | MapWordWithVotes;
@@ -405,6 +405,7 @@ export type MutationLogoutArgs = {
 
 export type MutationMapUploadArgs = {
   file: Scalars['Upload']['input'];
+  thumbnailFile?: InputMaybe<Scalars['Upload']['input']>;
 };
 
 
@@ -1914,10 +1915,11 @@ export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: 
 
 export type MapUploadMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
+  thumbnailFile?: InputMaybe<Scalars['Upload']['input']>;
 }>;
 
 
-export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typename?: 'MapUploadOutput', error: ErrorType, mapFileOutput: { __typename?: 'MapFileOutput', original_map_id: string, map_file_name: string } } };
+export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typename?: 'MapUploadOutput', error: ErrorType, mapFileOutput?: { __typename?: 'MapFileOutput', original_map_id: string, map_file_name: string } | null } };
 
 export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
@@ -3476,8 +3478,8 @@ export type GetOrigMapContentQueryHookResult = ReturnType<typeof useGetOrigMapCo
 export type GetOrigMapContentLazyQueryHookResult = ReturnType<typeof useGetOrigMapContentLazyQuery>;
 export type GetOrigMapContentQueryResult = Apollo.QueryResult<GetOrigMapContentQuery, GetOrigMapContentQueryVariables>;
 export const MapUploadDocument = gql`
-    mutation MapUpload($file: Upload!) {
-  mapUpload(file: $file) {
+    mutation MapUpload($file: Upload!, $thumbnailFile: Upload) {
+  mapUpload(file: $file, thumbnailFile: $thumbnailFile) {
     error
     mapFileOutput {
       original_map_id
@@ -3502,6 +3504,7 @@ export type MapUploadMutationFn = Apollo.MutationFunction<MapUploadMutation, Map
  * const [mapUploadMutation, { data, loading, error }] = useMapUploadMutation({
  *   variables: {
  *      file: // value for 'file'
+ *      thumbnailFile: // value for 'thumbnailFile'
  *   },
  * });
  */

@@ -35,27 +35,49 @@ export class MapsResolver {
   async mapUpload(
     @Args({ name: 'file', type: () => GraphQLUpload })
     { createReadStream, filename: map_file_name }: FileUpload,
+    @Args({ name: 'thumbnailFile', type: () => GraphQLUpload, nullable: true })
+    mapThumbUpload: FileUpload | undefined | null,
     @Context() req: any,
   ): Promise<MapUploadOutput> {
     const bearer = getBearer(req);
-    console.log(`bearer: ${bearer}`);
+    let fileBody: string;
+    let thumbFileBody: string;
+    // need to get all uploads to prevent the request to hang up in pending state
+    for await (const chunk of createReadStream()) {
+      if (!fileBody) {
+        fileBody = chunk;
+      } else {
+        fileBody += chunk;
+      }
+    }
+
+    if (mapThumbUpload) {
+      for await (const chunk of mapThumbUpload.createReadStream()) {
+        if (!thumbFileBody) {
+          thumbFileBody = chunk;
+        } else {
+          thumbFileBody += chunk;
+        }
+      }
+    }
 
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       bearer,
     );
 
     const admin_id = await this.authenticationService.get_admin_id();
-    console.log(`user_id ${user_id}`);
-    console.log(`admin_id ${admin_id}`);
 
     if (admin_id !== user_id) {
-      throw new Error(`${ErrorType.Unauthorized}`);
+      return {
+        error: ErrorType.Unauthorized,
+        mapFileOutput: null,
+      };
     }
 
     const userToken = await this.authenticationService.getAdminToken();
     try {
       const map = await this.mapService.parseAndSaveNewMap({
-        readStream: createReadStream(),
+        fileBody,
         mapFileName: map_file_name,
         token: userToken,
       });
@@ -65,7 +87,7 @@ export class MapsResolver {
       };
     } catch (error) {
       return {
-        error,
+        error: error,
         mapFileOutput: null,
       };
     }

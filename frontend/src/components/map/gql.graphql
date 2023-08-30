@@ -142,8 +142,8 @@ query GetOrigMapContent($id: ID!) {
   }
 }
 
-mutation MapUpload($file: Upload!) {
-  mapUpload(file: $file) {
+mutation MapUpload($file: Upload!, $thumbnailFile: Upload) {
+  mapUpload(file: $file, thumbnailFile: $thumbnailFile) {
     error
     mapFileOutput {
       original_map_id

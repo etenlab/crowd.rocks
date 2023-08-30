@@ -84,8 +84,12 @@ export function useMapTranslationTools() {
 
   const makeMapThumbnail = async (
     content: string,
-    { toWidth, toHeight }: { toWidth: number; toHeight: number },
-  ): Promise<HTMLCanvasElement> => {
+    {
+      toWidth,
+      toHeight,
+      asFile,
+    }: { toWidth: number; toHeight: number; asFile?: string },
+  ): Promise<HTMLCanvasElement | File> => {
     const scaleToFit = (
       img: HTMLImageElement,
       ctx: CanvasRenderingContext2D,
@@ -120,10 +124,45 @@ export function useMapTranslationTools() {
     return new Promise((resolve) => {
       img.onload = () => {
         scaleToFit(img, ctx!);
-        resolve(canvas);
+        if (asFile) {
+          canvas.toBlob((thumbnailBlob) => {
+            // thumbnailBlob is .png by default
+            if (!thumbnailBlob) {
+              throw new Error(`Can not convert canvas into BLOB`);
+            }
+            const file = new File([thumbnailBlob], `${asFile}.png`, {
+              type: 'image/png',
+            });
+            resolve(file);
+          });
+        } else {
+          resolve(canvas);
+        }
       };
     });
   };
+
+  // const sendMapThumbnail = async (
+  //   mapId: string,
+  //   thumbnailCanvas: HTMLCanvasElement,
+  // ): Promise<IFile> => {
+  //   return new Promise((resolve, reject) => {
+  //     thumbnailCanvas.toBlob((thumbnailBlob) => {
+  //       // thumbnailBlob is .png by default
+  //       if (!thumbnailBlob) {
+  //         throw new Error(`Can not convert canvas into BLOB`);
+  //       }
+  //       const file = new File([thumbnailBlob], `map-${mapId}-thumb.png`, {
+  //         type: 'image/png',
+  //       });
+
+  //       const thumbFileSaveResult: IFile = someservice.sendFile(file);
+  //       const { file_url } = thumbFileSaveResult;
+  //       resolve(thumbFileSaveResult);
+  //       // fd.append("canvasImage", file);
+  //     });
+  //   });
+  // };
 
   return {
     chooseBestTranslation,

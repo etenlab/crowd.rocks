@@ -47,6 +47,10 @@ export const MapList: React.FC = () => {
   const { makeMapThumbnail } = useMapTranslationTools();
 
   useEffect(() => {
+    console.log('[uploadResult]', uploadResult);
+  }, [uploadResult]);
+
+  useEffect(() => {
     const user_id = globals.get_user_id();
 
     if (!user_id) return;
@@ -79,15 +83,25 @@ export const MapList: React.FC = () => {
     async (file: File) => {
       if (!file) return;
       try {
-        await sendMapFile({
+        const thumbnailFile = (await makeMapThumbnail(await file.text(), {
+          toWidth: 100,
+          toHeight: 100,
+          asFile: `map-${file.name}-thumb`,
+        })) as File;
+        console.log('[thumbnailFile]', thumbnailFile);
+
+        const mapUploadResult = await sendMapFile({
           variables: { file },
           refetchQueries: ['GetAllMapsList'],
         });
-        const thumbnail = await makeMapThumbnail(await file.text(), {
-          toWidth: 100,
-          toHeight: 100,
-        });
-        console.log('[thumbnail]', thumbnail);
+
+        if (
+          mapUploadResult.errors?.length &&
+          mapUploadResult.errors?.length > 0
+        ) {
+          throw new Error(JSON.stringify(mapUploadResult.errors));
+        }
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         present({
@@ -98,7 +112,7 @@ export const MapList: React.FC = () => {
         });
       }
     },
-    [present, makeMapThumbnail, sendMapFile],
+    [sendMapFile, makeMapThumbnail, present],
   );
 
   return (

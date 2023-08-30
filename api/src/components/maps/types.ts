@@ -28,7 +28,8 @@ export class GetOrigMapListInput {
 }
 @ObjectType()
 export class MapUploadOutput extends GenericOutput {
-  @Field(() => MapFileOutput) mapFileOutput: MapFileOutput;
+  @Field(() => MapFileOutput, { nullable: true })
+  mapFileOutput?: MapFileOutput | null | undefined;
 }
 
 @ObjectType()

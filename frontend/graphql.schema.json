@@ -2403,13 +2403,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "MapFileOutput",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "MapFileOutput",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -2875,6 +2871,18 @@
                     "name": "Upload",
                     "ofType": null
                   }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "thumbnailFile",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Upload",
+                  "ofType": null
                 },
                 "defaultValue": null,
                 "isDeprecated": false,
