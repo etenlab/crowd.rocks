@@ -113,6 +113,16 @@ export enum ErrorType {
   WordToWordTranslationNotFound = 'WordToWordTranslationNotFound'
 }
 
+export type FileDecoratorsGql = {
+  __typename?: 'FileDecoratorsGQL';
+  fileHash: Scalars['String']['output'];
+  fileName: Scalars['String']['output'];
+  fileSize: Scalars['Int']['output'];
+  fileType: Scalars['String']['output'];
+  fileUrl: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+};
+
 export type FileUploadUrlRequest = {
   user_id: Scalars['ID']['input'];
 };
@@ -222,6 +232,16 @@ export type GetTranslatedMapContentOutput = {
   original_map_id: Scalars['ID']['output'];
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
+};
+
+export type IFile = {
+  __typename?: 'IFile';
+  fileHash: Scalars['String']['output'];
+  fileName: Scalars['String']['output'];
+  fileSize: Scalars['Int']['output'];
+  fileType: Scalars['String']['output'];
+  fileUrl: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
 };
 
 export type IsAdminIdInput = {
@@ -369,6 +389,8 @@ export type Mutation = {
   toggleWordToPhraseTrVoteStatus: WordToPhraseTranslationVoteStatusOutputRow;
   toggleWordVoteStatus: WordVoteStatusOutputRow;
   updateDefinition: PhraseDefinitionUpsertOutput;
+  updateFile: FileDecoratorsGql;
+  uploadFile: FileDecoratorsGql;
   upsertFromTranslationlikeString: TranslationUpsertOutput;
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString: PhraseDefinitionUpsertOutput;
   upsertSiteTextTranslation: TranslationUpsertOutput;
@@ -533,6 +555,21 @@ export type MutationToggleWordVoteStatusArgs = {
 
 export type MutationUpdateDefinitionArgs = {
   input: DefinitionUpdateaInput;
+};
+
+
+export type MutationUpdateFileArgs = {
+  file: Scalars['Upload']['input'];
+  file_size: Scalars['Int']['input'];
+  file_type: Scalars['String']['input'];
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationUploadFileArgs = {
+  file: Scalars['Upload']['input'];
+  file_size: Scalars['Int']['input'];
+  file_type: Scalars['String']['input'];
 };
 
 
@@ -900,6 +937,8 @@ export type PostsByParentOutput = {
 
 export type Query = {
   __typename?: 'Query';
+  file: FileDecoratorsGql;
+  fileList: Array<FileDecoratorsGql>;
   fileUploadUrlRequest: FileUploadUrlResponse;
   getAllMapsList: GetAllMapsListOutput;
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput;
@@ -952,6 +991,11 @@ export type Query = {
   wordToPhraseTranslationRead: WordToPhraseTranslationReadOutput;
   wordToWordTranslationRead: WordToWordTranslationReadOutput;
   wordVoteRead: WordVoteOutput;
+};
+
+
+export type QueryFileArgs = {
+  id: Scalars['Int']['input'];
 };
 
 

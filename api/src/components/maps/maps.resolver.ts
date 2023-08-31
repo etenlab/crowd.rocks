@@ -44,7 +44,7 @@ export class MapsResolver {
   ): Promise<MapUploadOutput> {
     const bearer = getBearer(req);
     let fileBody: string;
-    // let thumbFileBody: string;
+    let thumbFileBody: string;
     // need to get all uploads to prevent the request to hang up in pending state
     for await (const chunk of createReadStream()) {
       if (!fileBody) {
@@ -53,16 +53,15 @@ export class MapsResolver {
         fileBody += chunk;
       }
     }
-
-    // if (mapThumbUpload) {
-    //   for await (const chunk of mapThumbUpload.createReadStream()) {
-    //     if (!thumbFileBody) {
-    //       thumbFileBody = chunk;
-    //     } else {
-    //       thumbFileBody += chunk;
-    //     }
-    //   }
-    // }
+    if (mapThumbUpload) {
+      for await (const chunk of mapThumbUpload.createReadStream()) {
+        if (!thumbFileBody) {
+          thumbFileBody = chunk;
+        } else {
+          thumbFileBody += chunk;
+        }
+      }
+    }
 
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       bearer,
@@ -86,12 +85,13 @@ export class MapsResolver {
       });
       let previewFile: IFile;
       if (mapThumbUpload.createReadStream) {
-        previewFile = await this.fileService.uploadFile(
-          mapThumbUpload.createReadStream(),
-          mapThumbUpload.filename,
-          mapThumbUpload.mimetype,
-          20, //todo get real size
-        );
+        // previewFile = await this.fileService.uploadFile(
+        //   mapThumbUpload.createReadStream(),
+        //   mapThumbUpload.filename,
+        //   mapThumbUpload.mimetype,
+        //   20, //todo get real size
+        // );
+        console.log('asdfasdfas');
       }
 
       await this.mapService.setPreviewFileId(

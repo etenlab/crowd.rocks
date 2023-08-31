@@ -88,10 +88,9 @@ export const MapList: React.FC = () => {
           toHeight: 100,
           asFile: `map-${file.name}-thumb`,
         })) as File;
-        console.log('[thumbnailFile]', thumbnailFile);
 
         const mapUploadResult = await sendMapFile({
-          variables: { file },
+          variables: { file, thumbnailFile },
           refetchQueries: ['GetAllMapsList'],
         });
 
