@@ -23,6 +23,7 @@ export type LangSelectorProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setLoadingState?(isLoading: boolean): any;
   onClearClick?: () => void;
+  enabledTags?: string[];
 };
 
 type LangsRegistry = {
@@ -47,7 +48,9 @@ enum TagSpecialDescriptions {
 }
 
 // make it async to test and prepare for possible language library change to async
-const getLangsRegistry = async (): Promise<LangsRegistry> => {
+const getLangsRegistry = async (
+  enabledTags?: string[],
+): Promise<LangsRegistry> => {
   return new Promise((resolve) => {
     const allTags = tags.search(/.*/);
     const langs: Array<TLang> = [];
@@ -57,21 +60,16 @@ const getLangsRegistry = async (): Promise<LangsRegistry> => {
     const regions: Array<TRegion> = [
       { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
     ];
+
+    const strEnabledTags = enabledTags ? enabledTags.join(',') : null;
+
     for (const currTag of allTags) {
-      // TODO temporary limitation - need to optimize to allow full list
-      //----------
-      // const enabledTags = [
-      //   'en',
-      //   'uk',
-      //   'apq',
-      //   'aas',
-      //   'jp',
-      //   'zh',
-      //   'hi',
-      //   'de',
-      // ];
-      // if (!enabledTags.includes(currTag.format())) continue;
-      //---------
+      if (
+        strEnabledTags !== null &&
+        !strEnabledTags.includes(currTag.format())
+      ) {
+        continue;
+      }
 
       if (
         currTag.deprecated() ||
@@ -102,6 +100,7 @@ const getLangsRegistry = async (): Promise<LangsRegistry> => {
     langs.sort(sortTagInfosFn);
     dialects.sort(sortTagInfosFn);
     regions.sort(sortTagInfosFn);
+
     resolve({
       langs,
       dialects,
@@ -117,13 +116,10 @@ export function LangSelector({
   onChange,
   setLoadingState,
   onClearClick,
+  enabledTags,
 }: LangSelectorProps) {
   const [langsRegistry, setLangsRegistry] =
     useState<LangsRegistry>(emptyLangsRegistry);
-
-  // const [selectedLang, setSelectedLang] = useState<TLang | null>(null);
-  // const [selectedDialect, setSelectedDialect] = useState<TDialect | null>(null);
-  // const [selectedRegion, setSelectedRegion] = useState<TRegion | null>(null);
 
   const modal = useRef<HTMLIonModalElement>(null);
 
@@ -132,19 +128,13 @@ export function LangSelector({
       setLoadingState(true);
     }
 
-    getLangsRegistry().then((lr) => {
+    getLangsRegistry(enabledTags).then((lr) => {
       setLangsRegistry(lr);
       if (setLoadingState) {
         setLoadingState(false);
       }
     });
-  }, [setLoadingState]);
-
-  // useEffect(() => {
-  //   setSelectedLang(selected?.lang || null);
-  //   setSelectedDialect(selected?.dialect || null);
-  //   setSelectedRegion(selected?.region || null);
-  // }, [selected]);
+  }, [setLoadingState, enabledTags]);
 
   const handleSetLanguage = useCallback(
     (tag: string | undefined) => {

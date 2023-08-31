@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { v2 } from '@google-cloud/translate';
 
 import { ErrorType } from 'src/common/types';
 import { calc_vote_weight } from 'src/common/utility';
 
 import { LanguageInput } from 'src/components/common/types';
 
+import { ConfigService } from 'src/core/config.service';
+
 import { DefinitionsService } from 'src/components/definitions/definitions.service';
+import { WordsService } from '../words/words.service';
+import { PhrasesService } from '../phrases/phrases.service';
 
 import { WordToWordTranslationsService } from './word-to-word-translations.service';
 import { WordToPhraseTranslationsService } from './word-to-phrase-translations.service';
@@ -22,17 +27,42 @@ import {
   WordToPhraseTranslationWithVote,
   PhraseToWordTranslationWithVote,
   PhraseToPhraseTranslationWithVote,
+  LanguageListForGoogleTranslateOutput,
+  TranslateAllWordsAndPhrasesByGoogleOutput,
 } from './types';
+
+const LIMITS = 6000000;
+
+function delay(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
 
 @Injectable()
 export class TranslationsService {
+  private gcpTranslateClient: v2.Translate | null;
+
   constructor(
     private wordToWordTrService: WordToWordTranslationsService,
     private wordToPhraseTrService: WordToPhraseTranslationsService,
     private phraseToWordTrService: PhraseToWordTranslationsService,
     private phraseToPhraseTrService: PhraseToPhraseTranslationsService,
     private definitionService: DefinitionsService,
-  ) {}
+    private wordsService: WordsService,
+    private phrasesService: PhrasesService,
+    private config: ConfigService,
+  ) {
+    if (
+      this.config.GCP_API_KEY &&
+      this.config.GCP_API_KEY.trim().length > 0 &&
+      this.config.GCP_PROJECT_ID &&
+      this.config.GCP_PROJECT_ID.trim().length > 0
+    ) {
+      this.gcpTranslateClient = new v2.Translate({
+        projectId: this.config.GCP_PROJECT_ID,
+        key: this.config.GCP_API_KEY,
+      });
+    }
+  }
 
   async getTranslationsByFromDefinitionId(
     definition_id: number,
@@ -403,6 +433,246 @@ export class TranslationsService {
     return {
       error: ErrorType.UnknownError,
       translation_vote_status: null,
+    };
+  }
+
+  async translateAllWordsAndPhrasesByGoogle(
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+    try {
+      const originalTextsObj: Record<string, { text: string; id: number }> = {};
+      let uniqueId = 0;
+
+      const wordsConnection = await this.wordsService.getWordsByLanguage(
+        from_language,
+        null,
+        null,
+      );
+
+      if (wordsConnection.error === ErrorType.NoError) {
+        for (const edge of wordsConnection.edges) {
+          const { node } = edge;
+
+          if (originalTextsObj[node.word] === undefined) {
+            originalTextsObj[node.word] = {
+              text: node.word,
+              id: uniqueId++,
+            };
+          }
+
+          for (const definition of node.definitions) {
+            if (originalTextsObj[definition.definition] === undefined) {
+              originalTextsObj[definition.definition] = {
+                text: definition.definition,
+                id: uniqueId++,
+              };
+            }
+          }
+        }
+      }
+
+      const phrasesConnection = await this.phrasesService.getPhrasesByLanguage(
+        from_language,
+        null,
+        null,
+      );
+
+      if (phrasesConnection.error === ErrorType.NoError) {
+        for (const edge of phrasesConnection.edges) {
+          const { node } = edge;
+
+          if (originalTextsObj[node.phrase] === undefined) {
+            originalTextsObj[node.phrase] = {
+              text: node.phrase,
+              id: uniqueId++,
+            };
+          }
+
+          for (const definition of node.definitions) {
+            if (originalTextsObj[definition.definition] === undefined) {
+              originalTextsObj[definition.definition] = {
+                text: definition.definition,
+                id: uniqueId++,
+              };
+            }
+          }
+        }
+      }
+
+      const originalTexts = Object.values(originalTextsObj)
+        .sort((a, b) => a.id - b.id)
+        .map((obj) => obj.text);
+
+      let chunks = [];
+      let chunksLength = 0;
+      let translationTexts = [];
+      let firstRequest = true;
+
+      let requestedCharactors = 0;
+      let translatedWordCount = 0;
+      let translatedPhraseCount = 0;
+
+      const processApiCall = async () => {
+        if (!firstRequest) {
+          await delay(1000);
+        }
+
+        firstRequest = false;
+
+        const [translations] = await this.gcpTranslateClient.translate(
+          chunks.join('\n'),
+          {
+            from: from_language.language_code,
+            to: to_language.language_code,
+          },
+        );
+
+        translationTexts = [...translationTexts, ...translations.split('\n')];
+
+        console.log(translations.split('\n').length);
+
+        requestedCharactors = requestedCharactors + chunksLength;
+        chunks = [];
+        chunksLength = 0;
+      };
+
+      for (const originalText of originalTexts) {
+        chunks.push(originalText);
+        chunksLength = chunksLength + originalText.length;
+
+        if (chunksLength > LIMITS - LIMITS / 10) {
+          await processApiCall();
+          break;
+        }
+      }
+
+      if (chunks.length > 0) {
+        await processApiCall();
+      }
+
+      if (wordsConnection.error === ErrorType.NoError) {
+        for (const edge of wordsConnection.edges) {
+          const { node } = edge;
+
+          if (originalTextsObj[node.word] === undefined) {
+            continue;
+          }
+
+          const translatedWord =
+            translationTexts[originalTextsObj[node.word].id];
+          const is_type_word =
+            translatedWord
+              .trim()
+              .split(' ')
+              .filter((w) => w !== '').length === 1;
+
+          for (const definition of node.definitions) {
+            if (originalTextsObj[definition.definition] === undefined) {
+              continue;
+            }
+
+            const translatedDefinition =
+              translationTexts[originalTextsObj[definition.definition].id];
+
+            await this.upsertTranslationFromWordAndDefinitionlikeString(
+              +definition.word_definition_id,
+              true,
+              {
+                word_or_phrase: translatedWord,
+                is_type_word,
+                definition: translatedDefinition,
+                language_code: to_language.language_code,
+                dialect_code: to_language.dialect_code,
+                geo_code: to_language.geo_code,
+              },
+              token,
+            );
+
+            translatedWordCount++;
+          }
+        }
+      }
+
+      if (phrasesConnection.error === ErrorType.NoError) {
+        for (const edge of phrasesConnection.edges) {
+          const { node } = edge;
+
+          if (originalTextsObj[node.phrase] === undefined) {
+            continue;
+          }
+
+          const translatedPhrase =
+            translationTexts[originalTextsObj[node.phrase].id];
+          const is_type_word =
+            translatedPhrase
+              .trim()
+              .split(' ')
+              .filter((w) => w !== '').length === 1;
+
+          for (const definition of node.definitions) {
+            if (originalTextsObj[definition.definition] === undefined) {
+              continue;
+            }
+
+            const translatedDefinition =
+              translationTexts[originalTextsObj[definition.definition].id];
+
+            await this.upsertTranslationFromWordAndDefinitionlikeString(
+              +definition.phrase_definition_id,
+              false,
+              {
+                word_or_phrase: translatedPhrase,
+                is_type_word,
+                definition: translatedDefinition,
+                language_code: to_language.language_code,
+                dialect_code: to_language.dialect_code,
+                geo_code: to_language.geo_code,
+              },
+              token,
+            );
+
+            translatedPhraseCount++;
+          }
+        }
+      }
+
+      return {
+        error: ErrorType.UnknownError,
+        result: {
+          requestedCharactors,
+          totalWordCount: wordsConnection.edges.length,
+          totalPhraseCount: phrasesConnection.edges.length,
+          translatedWordCount,
+          translatedPhraseCount,
+        },
+      };
+    } catch (err) {
+      console.error(err);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      result: null,
+    };
+  }
+
+  async languagesForGoogleTranslate(): Promise<LanguageListForGoogleTranslateOutput> {
+    try {
+      const [languages] = await this.gcpTranslateClient.getLanguages();
+
+      return {
+        error: ErrorType.NoError,
+        languages,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      languages: null,
     };
   }
 }
