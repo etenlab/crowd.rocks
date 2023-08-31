@@ -55,6 +55,8 @@ enum ErrorType {
   EmailTooLong
   EmailTooShort
   EmailUnavailable
+  FileSaveFailed
+  FileWithFilenameAlreadyExists
   InvalidEmailOrPassword
   InvalidInputs
   LimitInvalid
@@ -93,15 +95,6 @@ enum ErrorType {
   WordNotFound
   WordToPhraseTranslationNotFound
   WordToWordTranslationNotFound
-}
-
-type FileDecoratorsGQL {
-  fileHash: String!
-  fileName: String!
-  fileSize: Int!
-  fileType: String!
-  fileUrl: String!
-  id: Int!
 }
 
 input FileUploadUrlRequest {
@@ -215,6 +208,11 @@ type IFile {
   fileType: String!
   fileUrl: String!
   id: Int!
+}
+
+type IFileOutput {
+  error: ErrorType!
+  file: IFile
 }
 
 input IsAdminIdInput {
@@ -351,8 +349,8 @@ type Mutation {
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
-  updateFile(file: Upload!, file_size: Int!, file_type: String!, id: Int!): FileDecoratorsGQL!
-  uploadFile(file: Upload!, file_size: Int!, file_type: String!): FileDecoratorsGQL!
+  updateFile(file: Upload, file_size: Int, file_type: String, id: Int!): IFileOutput!
+  uploadFile(file: Upload!, file_size: Int!, file_type: String!): IFileOutput!
   upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): TranslationUpsertOutput!
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(input: FromPhraseAndDefintionlikeStringUpsertInput!): PhraseDefinitionUpsertOutput!
   upsertSiteTextTranslation(input: SiteTextTranslationUpsertInput!): TranslationUpsertOutput!
@@ -630,8 +628,8 @@ type PostsByParentOutput {
 }
 
 type Query {
-  file(id: Int!): FileDecoratorsGQL!
-  fileList: [FileDecoratorsGQL!]!
+  file(id: Int!): IFileOutput!
+  fileList: [IFile!]!
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
   getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput!
