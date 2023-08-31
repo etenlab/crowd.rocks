@@ -2,9 +2,7 @@ import { useRef } from 'react';
 import styled from 'styled-components';
 import { Caption } from '../../common/Caption/Caption';
 import { WordOrPhraseCard } from '../../word/WordCard/WordOrPhraseCard';
-import { IonButton, IonIcon, IonInput, useIonToast } from '@ionic/react';
-import { chatbubbleEllipses } from 'ionicons/icons';
-import { VoteButtonsVertical } from '../../common/VoteButtonsVertical/VoteButtonsVertical';
+import { IonButton, IonInput, useIonRouter, useIonToast } from '@ionic/react';
 import {
   useToggleTranslationVoteStatusMutation,
   useUpsertTranslationFromWordAndDefinitionlikeStringMutation,
@@ -17,15 +15,20 @@ interface TranslationsComProps {
   wordOrPhraseWithTranslations: WordOrPhraseWithValueAndTranslations;
   tLangInfo: LanguageInfo;
   onBackClick: () => void;
+  nation_id: string;
+  language_id: string;
 }
 
 export const TranslationsCom: React.FC<TranslationsComProps> = ({
   wordOrPhraseWithTranslations,
   tLangInfo,
   onBackClick,
+  nation_id,
+  language_id,
 }: TranslationsComProps) => {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const router = useIonRouter();
 
   const newTrRef = useRef<HTMLIonInputElement | null>(null);
   const newDefinitionRef = useRef<HTMLIonInputElement | null>(null);
@@ -107,6 +110,8 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
       },
     });
   };
+  const isWord =
+    wordOrPhraseWithTranslations.__typename === 'MapWordTranslations';
 
   return (
     <>
@@ -115,10 +120,16 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
         <WordOrPhraseCard
           value={wordOrPhraseWithTranslations.value}
           definition={wordOrPhraseWithTranslations.definition}
-        />
-        <StIonIcon
-          icon={chatbubbleEllipses}
-          onClick={() => alert('mock discussion')}
+          discussion={{
+            onChatClick: () =>
+              router.push(
+                `/${nation_id}/${language_id}/1/discussion/${
+                  isWord ? 'words' : 'phrases'
+                }/${wordOrPhraseWithTranslations.id}/${
+                  isWord ? 'Dictionary' : 'Phrase Book'
+                }: ${wordOrPhraseWithTranslations.value}`,
+              ),
+          }}
         />
       </StSourceWordDiv>
 
@@ -129,36 +140,50 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
               if (!tr1.value || !tr2.value) return 0;
               return tr1.value.localeCompare(tr2.value);
             })
-            .map((tr, i) => (
-              <StTranslationDiv key={i}>
-                <WordOrPhraseCard
-                  value={tr.value} // typing is somehave have lost after .sort
-                  definition={tr.definition}
-                />
-                <VoteButtonsVertical
-                  onVoteUpClick={() =>
-                    handleVoteClick(
-                      tr.translation_id,
-                      wordOrPhraseWithTranslations.__typename ===
-                        'MapWordTranslations',
-                      tr.__typename === 'MapWordWithVotes',
-                      true,
-                    )
-                  }
-                  onVoteDownClick={() =>
-                    handleVoteClick(
-                      tr.translation_id,
-                      wordOrPhraseWithTranslations.__typename ===
-                        'MapWordTranslations',
-                      tr.__typename === 'MapWordWithVotes',
-                      false,
-                    )
-                  }
-                  upVotes={Number(tr.up_votes || 0)}
-                  downVotes={Number(tr.down_votes || 0)}
-                />
-              </StTranslationDiv>
-            ))}
+            .map((tr, i) => {
+              const isWord = tr.__typename === 'MapWordWithVotes';
+
+              return (
+                <StTranslationDiv key={i}>
+                  <WordOrPhraseCard
+                    value={tr.value} // typing is somehave have lost after .sort
+                    definition={tr.definition}
+                    discussion={{
+                      onChatClick: () =>
+                        router.push(
+                          `/${nation_id}/${language_id}/1/discussion/${
+                            isWord ? 'words' : 'phrases'
+                          }/${tr.id}/${
+                            // eslint-disable-next-line prettier/prettier
+                          isWord ? 'Dictionary' : 'Phrase Book'}:${tr.value}`,
+                        ),
+                    }}
+                    vote={{
+                      upVotes: Number(tr.up_votes || 0),
+                      downVotes: Number(tr.down_votes || 0),
+                      onVoteUpClick: () => {
+                        handleVoteClick(
+                          tr.translation_id,
+                          wordOrPhraseWithTranslations.__typename ===
+                            'MapWordTranslations',
+                          tr.__typename === 'MapWordWithVotes',
+                          true,
+                        );
+                      },
+                      onVoteDownClick: () => {
+                        handleVoteClick(
+                          tr.translation_id,
+                          wordOrPhraseWithTranslations.__typename ===
+                            'MapWordTranslations',
+                          tr.__typename === 'MapWordWithVotes',
+                          false,
+                        );
+                      },
+                    }}
+                  />
+                </StTranslationDiv>
+              );
+            })}
       </StTranslationsDiv>
 
       <StNewTranslationDiv>
@@ -199,11 +224,6 @@ const StSourceWordDiv = styled.div`
   align-items: center;
   justify-content: space-between;
 `;
-
-const StIonIcon = styled(IonIcon)(() => ({
-  fontSize: '30px',
-  cursor: 'pointer',
-}));
 
 const StNewTranslationDiv = styled.div`
   width: 90%;

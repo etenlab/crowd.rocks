@@ -1,6 +1,5 @@
-import { IonIcon } from '@ionic/react';
 import { thumbsDown, thumbsUp } from 'ionicons/icons';
-import { styled } from 'styled-components';
+import { StIonVoteIcon, StThumbDiv, StVoteButtonsDiv } from '../styled';
 
 export type TVoteButtonsVerticalProps = {
   onVoteUpClick: () => void;
@@ -16,46 +15,23 @@ export const VoteButtonsVertical = ({
   downVotes,
 }: TVoteButtonsVerticalProps) => {
   return (
-    <StButtonsDiv>
+    <StVoteButtonsDiv style={{ flexDirection: 'column' }}>
       <StThumbDiv>
-        <StIonIcon
-          color="green"
+        <StIonVoteIcon
+          color="success"
           icon={thumbsUp}
           onClick={() => onVoteUpClick()}
         />
         {upVotes}
       </StThumbDiv>
       <StThumbDiv>
-        <StIonIcon
-          color="red"
+        <StIonVoteIcon
+          color="danger"
           icon={thumbsDown}
           onClick={() => onVoteDownClick()}
         />
         {downVotes}
       </StThumbDiv>
-    </StButtonsDiv>
+    </StVoteButtonsDiv>
   );
 };
-
-const StButtonsDiv = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10px;
-  gap: 10px;
-`;
-
-const StIonIcon = styled(IonIcon)(() => ({
-  cursor: 'pointer',
-  fontSize: '20px',
-  padding: '5px',
-}));
-
-const StThumbDiv = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 5px;
-`;

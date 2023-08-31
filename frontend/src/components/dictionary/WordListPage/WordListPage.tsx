@@ -196,12 +196,26 @@ export function WordListPage({ match }: WordListPageProps) {
                 });
               },
             }}
+            discussion={{
+              onChatClick: () =>
+                router.push(
+                  `/${match.params.nation_id}/${match.params.language_id}/1/discussion/words/${word.word_id}/Dictionary: ${word.word}`,
+                ),
+            }}
             voteFor="content"
             onClick={() => handleGoToDefinitionDetail(word.word_id)}
           />
         </CardContainer>
       ));
-  }, [error, handleGoToDefinitionDetail, toggleWordVoteStatus, wordsData]);
+  }, [
+    error,
+    handleGoToDefinitionDetail,
+    match.params.language_id,
+    match.params.nation_id,
+    router,
+    toggleWordVoteStatus,
+    wordsData,
+  ]);
 
   return (
     <PageLayout>

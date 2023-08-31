@@ -16,13 +16,16 @@ export interface ITranslationsVotes {
 export type WordOrPhraseWithVotesAndValue =
   | (MapWordWithVotes & {
       value?: string | null | undefined;
+      id: string;
     })
   | (MapPhraseWithVotes & {
       value?: string | null | undefined;
+      id: string;
     });
 
 export type WordOrPhraseWithValueAndTranslations = {
   value?: string | null | undefined;
+  id: string;
   translations: Array<WordOrPhraseWithVotesAndValue>;
 } & (MapWordTranslations | MapPhraseTranslations);
 
@@ -59,22 +62,33 @@ export function useMapTranslationTools() {
       const res: WordOrPhraseWithValueAndTranslations[] = [];
       wordOrPhrases?.forEach((wordOrPhrase) => {
         let mainValue = '';
+        let id = '';
         if (wordOrPhrase.__typename === 'MapWordTranslations') {
           mainValue = wordOrPhrase.word;
+          id = wordOrPhrase.word_id;
         } else if (wordOrPhrase.__typename === 'MapPhraseTranslations') {
           mainValue = wordOrPhrase.phrase;
+          id = wordOrPhrase.phrase_id;
         }
 
         if (wordOrPhrase?.translations) {
           wordOrPhrase?.translations.forEach((tr, i) => {
             if (tr.__typename === 'MapWordWithVotes') {
-              wordOrPhrase.translations[i] = { ...tr, value: tr.word || '' };
+              wordOrPhrase.translations[i] = {
+                ...tr,
+                value: tr.word || '',
+                id: tr.word_id,
+              };
             } else if (tr.__typename === 'MapPhraseWithVotes') {
-              wordOrPhrase.translations[i] = { ...tr, value: tr.phrase || '' };
+              wordOrPhrase.translations[i] = {
+                ...tr,
+                value: tr.phrase || '',
+                id: tr.phrase_id,
+              };
             }
           });
         }
-        res.push({ ...wordOrPhrase, value: mainValue });
+        res.push({ ...wordOrPhrase, value: mainValue, id });
       });
 
       return res;

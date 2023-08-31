@@ -1,6 +1,5 @@
 import { thumbsDown, thumbsUp } from 'ionicons/icons';
-
-import { StButtonsDiv, StThumbDiv, StIonIcon } from './styled';
+import { StIonVoteIcon, StThumbDiv, StVoteButtonsDiv } from '../styled';
 
 export type VoteButtonsHerizontalProps = {
   onVoteUpClick: () => void;
@@ -16,9 +15,9 @@ export function VoteButtonsHerizontal({
   downVotes,
 }: VoteButtonsHerizontalProps) {
   return (
-    <StButtonsDiv>
+    <StVoteButtonsDiv style={{ flexDirection: 'row' }}>
       <StThumbDiv>
-        <StIonIcon
+        <StIonVoteIcon
           color="success"
           icon={thumbsUp}
           onClick={(e) => {
@@ -29,7 +28,7 @@ export function VoteButtonsHerizontal({
         {upVotes}
       </StThumbDiv>
       <StThumbDiv>
-        <StIonIcon
+        <StIonVoteIcon
           color="danger"
           icon={thumbsDown}
           onClick={(e) => {
@@ -39,6 +38,6 @@ export function VoteButtonsHerizontal({
         />
         {downVotes}
       </StThumbDiv>
-    </StButtonsDiv>
+    </StVoteButtonsDiv>
   );
 }
