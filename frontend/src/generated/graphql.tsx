@@ -428,7 +428,7 @@ export type MutationLogoutArgs = {
 
 export type MutationMapUploadArgs = {
   file: Scalars['Upload']['input'];
-  thumbnailFile?: InputMaybe<Scalars['Upload']['input']>;
+  previewFileId?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -2032,11 +2032,20 @@ export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: 
 
 export type MapUploadMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
-  thumbnailFile?: InputMaybe<Scalars['Upload']['input']>;
+  previewFileId?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
 export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typename?: 'MapUploadOutput', error: ErrorType, mapFileOutput?: { __typename?: 'MapFileOutput', original_map_id: string, map_file_name: string } | null } };
+
+export type UploadFileMutationVariables = Exact<{
+  file: Scalars['Upload']['input'];
+  file_size: Scalars['Int']['input'];
+  file_type: Scalars['String']['input'];
+}>;
+
+
+export type UploadFileMutation = { __typename?: 'Mutation', uploadFile: { __typename?: 'FileDecoratorsGQL', id: number } };
 
 export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
@@ -3710,8 +3719,8 @@ export type GetOrigMapContentQueryHookResult = ReturnType<typeof useGetOrigMapCo
 export type GetOrigMapContentLazyQueryHookResult = ReturnType<typeof useGetOrigMapContentLazyQuery>;
 export type GetOrigMapContentQueryResult = Apollo.QueryResult<GetOrigMapContentQuery, GetOrigMapContentQueryVariables>;
 export const MapUploadDocument = gql`
-    mutation MapUpload($file: Upload!, $thumbnailFile: Upload) {
-  mapUpload(file: $file, thumbnailFile: $thumbnailFile) {
+    mutation MapUpload($file: Upload!, $previewFileId: String) {
+  mapUpload(file: $file, previewFileId: $previewFileId) {
     error
     mapFileOutput {
       original_map_id
@@ -3736,7 +3745,7 @@ export type MapUploadMutationFn = Apollo.MutationFunction<MapUploadMutation, Map
  * const [mapUploadMutation, { data, loading, error }] = useMapUploadMutation({
  *   variables: {
  *      file: // value for 'file'
- *      thumbnailFile: // value for 'thumbnailFile'
+ *      previewFileId: // value for 'previewFileId'
  *   },
  * });
  */
@@ -3747,6 +3756,41 @@ export function useMapUploadMutation(baseOptions?: Apollo.MutationHookOptions<Ma
 export type MapUploadMutationHookResult = ReturnType<typeof useMapUploadMutation>;
 export type MapUploadMutationResult = Apollo.MutationResult<MapUploadMutation>;
 export type MapUploadMutationOptions = Apollo.BaseMutationOptions<MapUploadMutation, MapUploadMutationVariables>;
+export const UploadFileDocument = gql`
+    mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
+  uploadFile(file: $file, file_size: $file_size, file_type: $file_type) {
+    id
+  }
+}
+    `;
+export type UploadFileMutationFn = Apollo.MutationFunction<UploadFileMutation, UploadFileMutationVariables>;
+
+/**
+ * __useUploadFileMutation__
+ *
+ * To run a mutation, you first call `useUploadFileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUploadFileMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [uploadFileMutation, { data, loading, error }] = useUploadFileMutation({
+ *   variables: {
+ *      file: // value for 'file'
+ *      file_size: // value for 'file_size'
+ *      file_type: // value for 'file_type'
+ *   },
+ * });
+ */
+export function useUploadFileMutation(baseOptions?: Apollo.MutationHookOptions<UploadFileMutation, UploadFileMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UploadFileMutation, UploadFileMutationVariables>(UploadFileDocument, options);
+      }
+export type UploadFileMutationHookResult = ReturnType<typeof useUploadFileMutation>;
+export type UploadFileMutationResult = Apollo.MutationResult<UploadFileMutation>;
+export type UploadFileMutationOptions = Apollo.BaseMutationOptions<UploadFileMutation, UploadFileMutationVariables>;
 export const PhraseDefinitionReadDocument = gql`
     query PhraseDefinitionRead($id: ID!) {
   phraseDefinitionRead(id: $id) {
@@ -5169,6 +5213,7 @@ export const namedOperations = {
     WordUpsert: 'WordUpsert',
     EmailResponse: 'EmailResponse',
     MapUpload: 'MapUpload',
+    UploadFile: 'UploadFile',
     PhraseDefinitionUpsert: 'PhraseDefinitionUpsert',
     TogglePhraseDefinitionVoteStatus: 'TogglePhraseDefinitionVoteStatus',
     TogglePhraseVoteStatus: 'TogglePhraseVoteStatus',

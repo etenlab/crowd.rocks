@@ -38,7 +38,7 @@ import { MiddlewareModule } from './core/middleware/middleware.module';
     DefinitionsModule,
     PhraseModule,
     SiteTextsModule,
-    MiddlewareModule
+    MiddlewareModule,
   ],
   controllers: [],
   providers: [],

@@ -23,7 +23,6 @@ import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { ErrorType } from 'src/common/types';
 import { FileService } from '../file/file.service';
-import { IFile } from '../file/types';
 
 @Injectable()
 @Resolver(Map)
@@ -38,14 +37,12 @@ export class MapsResolver {
   async mapUpload(
     @Args({ name: 'file', type: () => GraphQLUpload })
     { createReadStream, filename: map_file_name }: FileUpload,
-    @Args({ name: 'thumbnailFile', type: () => GraphQLUpload, nullable: true })
-    mapThumbUpload: FileUpload | undefined | null,
+    @Args({ name: 'previewFileId', type: () => String, nullable: true })
+    previewFileId: string | undefined | null,
     @Context() req: any,
   ): Promise<MapUploadOutput> {
     const bearer = getBearer(req);
     let fileBody: string;
-    let thumbFileBody: string;
-    // need to get all uploads to prevent the request to hang up in pending state
     for await (const chunk of createReadStream()) {
       if (!fileBody) {
         fileBody = chunk;
@@ -53,52 +50,25 @@ export class MapsResolver {
         fileBody += chunk;
       }
     }
-    if (mapThumbUpload) {
-      for await (const chunk of mapThumbUpload.createReadStream()) {
-        if (!thumbFileBody) {
-          thumbFileBody = chunk;
-        } else {
-          thumbFileBody += chunk;
-        }
-      }
-    }
 
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       bearer,
     );
-
     const admin_id = await this.authenticationService.get_admin_id();
-
     if (admin_id !== user_id) {
       return {
         error: ErrorType.Unauthorized,
         mapFileOutput: null,
       };
     }
-
     const userToken = await this.authenticationService.getAdminToken();
     try {
       const map = await this.mapService.parseAndSaveNewMap({
         fileBody,
         mapFileName: map_file_name,
+        previewFileId,
         token: userToken,
       });
-      let previewFile: IFile;
-      if (mapThumbUpload.createReadStream) {
-        // previewFile = await this.fileService.uploadFile(
-        //   mapThumbUpload.createReadStream(),
-        //   mapThumbUpload.filename,
-        //   mapThumbUpload.mimetype,
-        //   20, //todo get real size
-        // );
-        console.log('asdfasdfas');
-      }
-
-      await this.mapService.setPreviewFileId(
-        map.original_map_id,
-        previewFile.id,
-      );
-
       return {
         error: ErrorType.NoError,
         mapFileOutput: map,

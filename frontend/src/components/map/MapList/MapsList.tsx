@@ -13,6 +13,7 @@ import {
   useGetAllMapsListLazyQuery,
   useIsAdminLoggedInLazyQuery,
   useMapUploadMutation,
+  useUploadFileMutation,
 } from '../../../generated/graphql';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { useTr } from '../../../hooks/useTr';
@@ -39,16 +40,13 @@ export const MapList: React.FC = () => {
   const [isAdmin, { data: isAdminRes }] = useIsAdminLoggedInLazyQuery();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sendMapFile, { data: uploadResult }] = useMapUploadMutation();
+  const [sendMapFile] = useMapUploadMutation();
+  const [uploadFile] = useUploadFileMutation();
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
   });
 
   const { makeMapThumbnail } = useMapTranslationTools();
-
-  useEffect(() => {
-    console.log('[uploadResult]', uploadResult);
-  }, [uploadResult]);
 
   useEffect(() => {
     const user_id = globals.get_user_id();
@@ -89,8 +87,22 @@ export const MapList: React.FC = () => {
           asFile: `map-${file.name}-thumb`,
         })) as File;
 
+        const uploadPreviewResult = await uploadFile({
+          variables: {
+            file: thumbnailFile,
+            file_size: thumbnailFile.size,
+            file_type: thumbnailFile.type,
+          },
+        });
+        const previewFileId = uploadPreviewResult.data?.uploadFile.id
+          ? String(uploadPreviewResult.data?.uploadFile.id)
+          : undefined;
+
         const mapUploadResult = await sendMapFile({
-          variables: { file, thumbnailFile },
+          variables: {
+            file,
+            previewFileId,
+          },
           refetchQueries: ['GetAllMapsList'],
         });
 
@@ -111,7 +123,7 @@ export const MapList: React.FC = () => {
         });
       }
     },
-    [sendMapFile, makeMapThumbnail, present],
+    [makeMapThumbnail, uploadFile, sendMapFile, present],
   );
 
   return (

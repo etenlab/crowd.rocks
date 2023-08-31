@@ -142,28 +142,6 @@ export function useMapTranslationTools() {
     });
   };
 
-  // const sendMapThumbnail = async (
-  //   mapId: string,
-  //   thumbnailCanvas: HTMLCanvasElement,
-  // ): Promise<IFile> => {
-  //   return new Promise((resolve, reject) => {
-  //     thumbnailCanvas.toBlob((thumbnailBlob) => {
-  //       // thumbnailBlob is .png by default
-  //       if (!thumbnailBlob) {
-  //         throw new Error(`Can not convert canvas into BLOB`);
-  //       }
-  //       const file = new File([thumbnailBlob], `map-${mapId}-thumb.png`, {
-  //         type: 'image/png',
-  //       });
-
-  //       const thumbFileSaveResult: IFile = someservice.sendFile(file);
-  //       const { file_url } = thumbFileSaveResult;
-  //       resolve(thumbFileSaveResult);
-  //       // fd.append("canvasImage", file);
-  //     });
-  //   });
-  // };
-
   return {
     chooseBestTranslation,
     addValueToWordsOrPhrases,

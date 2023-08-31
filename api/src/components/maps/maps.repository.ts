@@ -22,6 +22,7 @@ import { putLangCodesToFileName } from '../../common/utility';
 interface ISaveMapParams {
   mapFileName: string;
   fileBody: string;
+  previewFileId;
   token: string;
   language_code: string;
   dialect_code?: string;
@@ -70,6 +71,7 @@ export class MapsRepository {
   async saveOriginalMap({
     mapFileName,
     fileBody,
+    previewFileId,
     token,
     dbPoolClient,
     language_code,
@@ -82,9 +84,17 @@ export class MapsRepository {
 
     const res = await poolClient.query(
       `
-          call original_map_create($1,$2,$3,$4,$5,$6, null,null,null,null)
+          call original_map_create($1,$2,$3,$4,$5,$6,$7 null,null,null,null)
         `,
-      [mapFileName, fileBody, token, language_code, dialect_code, geo_code],
+      [
+        mapFileName,
+        fileBody,
+        token,
+        language_code,
+        dialect_code,
+        geo_code,
+        previewFileId,
+      ],
     );
 
     if (!res.rows[0].p_map_id) {

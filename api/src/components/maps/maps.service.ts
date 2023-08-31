@@ -47,6 +47,7 @@ export type MapTranslationResult = {
 interface parseAndSaveNewMapParams {
   fileBody: string;
   mapFileName: string;
+  previewFileId?: string;
   mapLanguage?: LanguageInfo;
   token: string;
 }
@@ -65,6 +66,7 @@ export class MapsService {
   async parseAndSaveNewMap({
     fileBody,
     mapFileName,
+    previewFileId,
     mapLanguage = DEFAULT_NEW_MAP_LANGUAGE,
     token,
   }: parseAndSaveNewMapParams): Promise<MapFileOutput> {
@@ -85,6 +87,7 @@ export class MapsService {
         await this.mapsRepository.saveOriginalMap({
           mapFileName,
           fileBody,
+          previewFileId,
           token,
           dbPoolClient,
           language_code,

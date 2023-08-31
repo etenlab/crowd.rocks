@@ -328,7 +328,7 @@ type Mutation {
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
-  mapUpload(file: Upload!, thumbnailFile: Upload): MapUploadOutput!
+  mapUpload(file: Upload!, previewFileId: String): MapUploadOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationUpsertOutput!
