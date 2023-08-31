@@ -1,12 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { v2 } from '@google-cloud/translate';
 
 import { ErrorType } from 'src/common/types';
 import { calc_vote_weight } from 'src/common/utility';
 
 import { LanguageInput } from 'src/components/common/types';
-
-import { ConfigService } from 'src/core/config.service';
 
 import { DefinitionsService } from 'src/components/definitions/definitions.service';
 import { WordsService } from '../words/words.service';
@@ -16,6 +13,7 @@ import { WordToWordTranslationsService } from './word-to-word-translations.servi
 import { WordToPhraseTranslationsService } from './word-to-phrase-translations.service';
 import { PhraseToWordTranslationsService } from './phrase-to-word-translations.service';
 import { PhraseToPhraseTranslationsService } from './phrase-to-phrase-translations.service';
+import { GoogleTranslateService } from './google-translate.service';
 
 import {
   TranslationWithVoteListOutput,
@@ -31,16 +29,8 @@ import {
   TranslateAllWordsAndPhrasesByGoogleOutput,
 } from './types';
 
-const LIMITS = 6000000;
-
-function delay(time) {
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
-
 @Injectable()
 export class TranslationsService {
-  private gcpTranslateClient: v2.Translate | null;
-
   constructor(
     private wordToWordTrService: WordToWordTranslationsService,
     private wordToPhraseTrService: WordToPhraseTranslationsService,
@@ -49,20 +39,8 @@ export class TranslationsService {
     private definitionService: DefinitionsService,
     private wordsService: WordsService,
     private phrasesService: PhrasesService,
-    private config: ConfigService,
-  ) {
-    if (
-      this.config.GCP_API_KEY &&
-      this.config.GCP_API_KEY.trim().length > 0 &&
-      this.config.GCP_PROJECT_ID &&
-      this.config.GCP_PROJECT_ID.trim().length > 0
-    ) {
-      this.gcpTranslateClient = new v2.Translate({
-        projectId: this.config.GCP_PROJECT_ID,
-        key: this.config.GCP_API_KEY,
-      });
-    }
-  }
+    private gTrService: GoogleTranslateService,
+  ) {}
 
   async getTranslationsByFromDefinitionId(
     definition_id: number,
@@ -505,52 +483,16 @@ export class TranslationsService {
         .sort((a, b) => a.id - b.id)
         .map((obj) => obj.text);
 
-      let chunks = [];
-      let chunksLength = 0;
-      let translationTexts = [];
-      let firstRequest = true;
+      const translationTexts = await this.gTrService.translate(
+        originalTexts,
+        from_language,
+        to_language,
+      );
 
-      let requestedCharactors = 0;
+      const requestedCharactors = originalTexts.join('\n').length;
+
       let translatedWordCount = 0;
       let translatedPhraseCount = 0;
-
-      const processApiCall = async () => {
-        if (!firstRequest) {
-          await delay(1000);
-        }
-
-        firstRequest = false;
-
-        const [translations] = await this.gcpTranslateClient.translate(
-          chunks.join('\n'),
-          {
-            from: from_language.language_code,
-            to: to_language.language_code,
-          },
-        );
-
-        translationTexts = [...translationTexts, ...translations.split('\n')];
-
-        console.log(translations.split('\n').length);
-
-        requestedCharactors = requestedCharactors + chunksLength;
-        chunks = [];
-        chunksLength = 0;
-      };
-
-      for (const originalText of originalTexts) {
-        chunks.push(originalText);
-        chunksLength = chunksLength + originalText.length;
-
-        if (chunksLength > LIMITS - LIMITS / 10) {
-          await processApiCall();
-          break;
-        }
-      }
-
-      if (chunks.length > 0) {
-        await processApiCall();
-      }
 
       if (wordsConnection.error === ErrorType.NoError) {
         for (const edge of wordsConnection.edges) {
@@ -660,7 +602,7 @@ export class TranslationsService {
 
   async languagesForGoogleTranslate(): Promise<LanguageListForGoogleTranslateOutput> {
     try {
-      const [languages] = await this.gcpTranslateClient.getLanguages();
+      const languages = await this.gTrService.getLanguages();
 
       return {
         error: ErrorType.NoError,

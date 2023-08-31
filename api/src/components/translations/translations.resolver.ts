@@ -367,6 +367,8 @@ export class TranslationsResolver {
 
   @Query(() => LanguageListForGoogleTranslateOutput)
   async languagesForGoogleTranslate(): Promise<LanguageListForGoogleTranslateOutput> {
+    console.log('languagesForGoogleTranslate resolver');
+
     return this.translationService.languagesForGoogleTranslate();
   }
 

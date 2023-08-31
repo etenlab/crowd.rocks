@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
-
+import { useEffect } from 'react';
 import { Card } from '../../common/Card';
 
 import { useGetRecommendedTranslationFromSiteTextDefinitionIdLazyQuery } from '../../../generated/graphql';
 import {
   ErrorType,
-  SiteTextTranslationWithVote,
+  // SiteTextTranslationWithVote,
 } from '../../../generated/graphql';
 
 interface TranslatedCardProps {
@@ -16,16 +15,13 @@ interface TranslatedCardProps {
 }
 
 export function TranslatedCard(props: TranslatedCardProps) {
-  const [siteTextTranslationWithVote, setSiteTextTranslationWithVote] =
-    useState<SiteTextTranslationWithVote | null>(null);
-
   const [
     getRecommendedTranslationFromSiteTextDefinitionId,
-    { data, error, loading, called },
+    { data, error, loading },
   ] = useGetRecommendedTranslationFromSiteTextDefinitionIdLazyQuery();
 
   useEffect(() => {
-    if (!props.languageInfo?.lang.tag) {
+    if (!props.languageInfo) {
       return;
     }
 
@@ -41,52 +37,22 @@ export function TranslatedCard(props: TranslatedCardProps) {
   }, [
     getRecommendedTranslationFromSiteTextDefinitionId,
     props.isWord,
-    props.languageInfo?.dialect?.tag,
-    props.languageInfo?.lang.tag,
-    props.languageInfo?.region?.tag,
+    props.languageInfo,
     props.siteTextId,
   ]);
 
-  useEffect(() => {
-    if (error) {
-      console.log(error);
-      alert('Error');
-
-      return;
-    }
-
-    if (loading || !called) {
-      return;
-    }
-
-    if (data) {
-      if (
-        data.getRecommendedTranslationFromSiteTextDefinitionID.error !==
-        ErrorType.NoError
-      ) {
-        console.log(
-          data.getRecommendedTranslationFromSiteTextDefinitionID.error,
-        );
-        alert(data.getRecommendedTranslationFromSiteTextDefinitionID.error);
-        return;
-      }
-
-      if (
-        data.getRecommendedTranslationFromSiteTextDefinitionID
-          .site_text_translation_with_vote
-      ) {
-        setSiteTextTranslationWithVote(
-          data.getRecommendedTranslationFromSiteTextDefinitionID
-            .site_text_translation_with_vote,
-        );
-      } else {
-        setSiteTextTranslationWithVote(null);
-      }
-    }
-  }, [data, error, loading, called]);
-
   let siteTextlikeString = '';
   let definitionlikeString = '';
+
+  const siteTextTranslationWithVote =
+    !error &&
+    !loading &&
+    data &&
+    data.getRecommendedTranslationFromSiteTextDefinitionID.error ===
+      ErrorType.NoError
+      ? data.getRecommendedTranslationFromSiteTextDefinitionID
+          .site_text_translation_with_vote
+      : null;
 
   if (siteTextTranslationWithVote) {
     switch (siteTextTranslationWithVote.__typename) {
