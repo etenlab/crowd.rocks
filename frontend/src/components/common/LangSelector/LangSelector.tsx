@@ -3,14 +3,13 @@ import { IonIcon, IonItem, IonLabel, IonModal } from '@ionic/react';
 
 import tags from 'language-tags';
 
-import { langInfo2tag, sortTagInfosFn } from '../../../common/langUtils';
+import { langInfo2tag, getLangsRegistry } from '../../../common/langUtils';
 
 import AppTypeahead from './TypeAhead';
 
 import {
   DESCRIPTIONS_JOINER,
   LOADING_TAG_PLACEHOLDER,
-  NOT_DEFINED_PLACEHOLDER,
 } from '../../../const/langConst';
 import { styled } from 'styled-components';
 import { removeCircleOutline } from 'ionicons/icons';
@@ -24,6 +23,7 @@ export type LangSelectorProps = {
   setLoadingState?(isLoading: boolean): any;
   onClearClick?: () => void;
   enabledTags?: string[];
+  disabled?: boolean;
 };
 
 type LangsRegistry = {
@@ -38,77 +38,6 @@ const emptyLangsRegistry: LangsRegistry = {
   regions: [LOADING_TAG_PLACEHOLDER],
 };
 
-enum TagTypes {
-  LANGUAGE = 'language',
-  REGION = 'region',
-  DIALECT = 'variant',
-}
-enum TagSpecialDescriptions {
-  PRIVATE_USE = 'Private use',
-}
-
-// make it async to test and prepare for possible language library change to async
-const getLangsRegistry = async (
-  enabledTags?: string[],
-): Promise<LangsRegistry> => {
-  return new Promise((resolve) => {
-    const allTags = tags.search(/.*/);
-    const langs: Array<TLang> = [];
-    const dialects: Array<TDialect> = [
-      { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
-    ];
-    const regions: Array<TRegion> = [
-      { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
-    ];
-
-    const strEnabledTags = enabledTags ? enabledTags.join(',') : null;
-
-    for (const currTag of allTags) {
-      if (
-        strEnabledTags !== null &&
-        !strEnabledTags.includes(currTag.format())
-      ) {
-        continue;
-      }
-
-      if (
-        currTag.deprecated() ||
-        currTag.descriptions().includes(TagSpecialDescriptions.PRIVATE_USE)
-      ) {
-        continue;
-      }
-
-      if (currTag.type() === TagTypes.LANGUAGE) {
-        langs.push({
-          tag: currTag.format(),
-          descriptions: currTag.descriptions(),
-        });
-      }
-      if (currTag.type() === TagTypes.REGION) {
-        regions.push({
-          tag: currTag.format(),
-          descriptions: currTag.descriptions(),
-        });
-      }
-      if (currTag.type() === TagTypes.DIALECT) {
-        dialects.push({
-          tag: currTag.format(),
-          descriptions: currTag.descriptions(),
-        });
-      }
-    }
-    langs.sort(sortTagInfosFn);
-    dialects.sort(sortTagInfosFn);
-    regions.sort(sortTagInfosFn);
-
-    resolve({
-      langs,
-      dialects,
-      regions,
-    });
-  });
-};
-
 export function LangSelector({
   title = 'Select language',
   langSelectorId,
@@ -117,6 +46,7 @@ export function LangSelector({
   setLoadingState,
   onClearClick,
   enabledTags,
+  disabled,
 }: LangSelectorProps) {
   const [langsRegistry, setLangsRegistry] =
     useState<LangsRegistry>(emptyLangsRegistry);
@@ -165,7 +95,12 @@ export function LangSelector({
   return (
     <>
       <StSelectorDiv>
-        <StIonItem button={true} detail={false} id={langSelectorId}>
+        <StIonItem
+          button={true}
+          detail={false}
+          id={langSelectorId}
+          disabled={disabled}
+        >
           <IonLabel>{selectedLangValue}</IonLabel>
         </StIonItem>
         {onClearClick && selectedLangValue !== title && (
