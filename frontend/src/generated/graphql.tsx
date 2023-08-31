@@ -73,6 +73,8 @@ export enum ErrorType {
   EmailTooLong = 'EmailTooLong',
   EmailTooShort = 'EmailTooShort',
   EmailUnavailable = 'EmailUnavailable',
+  FileSaveFailed = 'FileSaveFailed',
+  FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
   InvalidInputs = 'InvalidInputs',
   LimitInvalid = 'LimitInvalid',
@@ -112,16 +114,6 @@ export enum ErrorType {
   WordToPhraseTranslationNotFound = 'WordToPhraseTranslationNotFound',
   WordToWordTranslationNotFound = 'WordToWordTranslationNotFound'
 }
-
-export type FileDecoratorsGql = {
-  __typename?: 'FileDecoratorsGQL';
-  fileHash: Scalars['String']['output'];
-  fileName: Scalars['String']['output'];
-  fileSize: Scalars['Int']['output'];
-  fileType: Scalars['String']['output'];
-  fileUrl: Scalars['String']['output'];
-  id: Scalars['Int']['output'];
-};
 
 export type FileUploadUrlRequest = {
   user_id: Scalars['ID']['input'];
@@ -242,6 +234,12 @@ export type IFile = {
   fileType: Scalars['String']['output'];
   fileUrl: Scalars['String']['output'];
   id: Scalars['Int']['output'];
+};
+
+export type IFileOutput = {
+  __typename?: 'IFileOutput';
+  error: ErrorType;
+  file?: Maybe<IFile>;
 };
 
 export type IsAdminIdInput = {
@@ -389,8 +387,8 @@ export type Mutation = {
   toggleWordToPhraseTrVoteStatus: WordToPhraseTranslationVoteStatusOutputRow;
   toggleWordVoteStatus: WordVoteStatusOutputRow;
   updateDefinition: PhraseDefinitionUpsertOutput;
-  updateFile: FileDecoratorsGql;
-  uploadFile: FileDecoratorsGql;
+  updateFile: IFileOutput;
+  uploadFile: IFileOutput;
   upsertFromTranslationlikeString: TranslationUpsertOutput;
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString: PhraseDefinitionUpsertOutput;
   upsertSiteTextTranslation: TranslationUpsertOutput;
@@ -559,9 +557,9 @@ export type MutationUpdateDefinitionArgs = {
 
 
 export type MutationUpdateFileArgs = {
-  file: Scalars['Upload']['input'];
-  file_size: Scalars['Int']['input'];
-  file_type: Scalars['String']['input'];
+  file?: InputMaybe<Scalars['Upload']['input']>;
+  file_size?: InputMaybe<Scalars['Int']['input']>;
+  file_type?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['Int']['input'];
 };
 
@@ -937,8 +935,8 @@ export type PostsByParentOutput = {
 
 export type Query = {
   __typename?: 'Query';
-  file: FileDecoratorsGql;
-  fileList: Array<FileDecoratorsGql>;
+  file: IFileOutput;
+  fileList: Array<IFile>;
   fileUploadUrlRequest: FileUploadUrlResponse;
   getAllMapsList: GetAllMapsListOutput;
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput;
@@ -2045,7 +2043,7 @@ export type UploadFileMutationVariables = Exact<{
 }>;
 
 
-export type UploadFileMutation = { __typename?: 'Mutation', uploadFile: { __typename?: 'FileDecoratorsGQL', id: number } };
+export type UploadFileMutation = { __typename?: 'Mutation', uploadFile: { __typename?: 'IFileOutput', error: ErrorType, file?: { __typename?: 'IFile', id: number } | null } };
 
 export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
@@ -3759,7 +3757,10 @@ export type MapUploadMutationOptions = Apollo.BaseMutationOptions<MapUploadMutat
 export const UploadFileDocument = gql`
     mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
   uploadFile(file: $file, file_size: $file_size, file_type: $file_type) {
-    id
+    error
+    file {
+      id
+    }
   }
 }
     `;

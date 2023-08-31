@@ -154,6 +154,9 @@ mutation MapUpload($file: Upload!, $previewFileId: String) {
 
 mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
   uploadFile(file: $file, file_size: $file_size, file_type: $file_type) {
-    id
+    error
+    file {
+      id
+    }
   }
 }

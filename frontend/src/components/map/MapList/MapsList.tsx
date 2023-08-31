@@ -10,6 +10,7 @@ import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
 import { useCallback, useEffect, useState } from 'react';
 import {
+  ErrorType,
   useGetAllMapsListLazyQuery,
   useIsAdminLoggedInLazyQuery,
   useMapUploadMutation,
@@ -94,9 +95,12 @@ export const MapList: React.FC = () => {
             file_type: thumbnailFile.type,
           },
         });
-        const previewFileId = uploadPreviewResult.data?.uploadFile.id
-          ? String(uploadPreviewResult.data?.uploadFile.id)
+        const previewFileId = uploadPreviewResult.data?.uploadFile.file?.id
+          ? String(uploadPreviewResult.data?.uploadFile.file.id)
           : undefined;
+        if (uploadPreviewResult.data?.uploadFile.error !== ErrorType.NoError) {
+          throw new Error(uploadPreviewResult.data?.uploadFile.error);
+        }
 
         const mapUploadResult = await sendMapFile({
           variables: {
@@ -115,6 +119,7 @@ export const MapList: React.FC = () => {
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
+        console.log(error);
         present({
           message: error.message,
           duration: 1500,
