@@ -55,6 +55,8 @@ enum ErrorType {
   EmailTooLong
   EmailTooShort
   EmailUnavailable
+  FileSaveFailed
+  FileWithFilenameAlreadyExists
   InvalidEmailOrPassword
   InvalidInputs
   LimitInvalid
@@ -77,6 +79,7 @@ enum ErrorType {
   PrefixInvalid
   PrefixTooLong
   PrefixTooShort
+  ProvidedIdIsMalformed
   RankInvalid
   RankUnchanged
   SiteTextPhraseDefinitionAlreadyExists
@@ -142,6 +145,7 @@ type GetOrigMapContentOutput {
   map_file_name: String!
   map_file_name_with_langs: String!
   original_map_id: ID!
+  preview_file_url: ID
   translated_map_id: ID
   translated_percent: String
 }
@@ -195,8 +199,23 @@ type GetTranslatedMapContentOutput {
   map_file_name: String!
   map_file_name_with_langs: String!
   original_map_id: ID!
+  preview_file_url: ID
   translated_map_id: ID
   translated_percent: String
+}
+
+type IFile {
+  fileHash: String!
+  fileName: String!
+  fileSize: Int!
+  fileType: String!
+  fileUrl: String!
+  id: Int!
+}
+
+type IFileOutput {
+  error: ErrorType!
+  file: IFile
 }
 
 input IsAdminIdInput {
@@ -207,11 +226,21 @@ type IsAdminIdOutput {
   isAdmin: Boolean!
 }
 
+type LanguageForGoogleTranslate {
+  code: String!
+  name: String!
+}
+
 input LanguageInput {
   dialect_code: String
   filter: String
   geo_code: String
   language_code: String!
+}
+
+type LanguageListForGoogleTranslateOutput {
+  error: ErrorType!
+  languages: [LanguageForGoogleTranslate!]
 }
 
 type LanguageOutput {
@@ -246,6 +275,7 @@ type MapFileOutput {
   map_file_name: String!
   map_file_name_with_langs: String!
   original_map_id: ID!
+  preview_file_url: ID
   translated_map_id: ID
   translated_percent: String
 }
@@ -276,7 +306,7 @@ type MapPhraseWithVotes {
 
 type MapUploadOutput {
   error: ErrorType!
-  mapFileOutput: MapFileOutput!
+  mapFileOutput: MapFileOutput
 }
 
 union MapWordOrPhraseTranslationWithVotes = MapPhraseWithVotes | MapWordWithVotes
@@ -310,7 +340,7 @@ type Mutation {
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
-  mapUpload(file: Upload!): MapUploadOutput!
+  mapUpload(file: Upload!, previewFileId: String): MapUploadOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationUpsertOutput!
@@ -332,7 +362,10 @@ type Mutation {
   toggleWordDefinitionVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
+  translateAllWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
+  updateFile(file: Upload, file_size: Int, file_type: String, id: Int!): IFileOutput!
+  uploadFile(file: Upload!, file_size: Int!, file_type: String!): IFileOutput!
   upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): TranslationUpsertOutput!
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(input: FromPhraseAndDefintionlikeStringUpsertInput!): PhraseDefinitionUpsertOutput!
   upsertSiteTextTranslation(input: SiteTextTranslationUpsertInput!): TranslationUpsertOutput!
@@ -610,6 +643,8 @@ type PostsByParentOutput {
 }
 
 type Query {
+  file(id: Int!): IFileOutput!
+  fileList: [IFile!]!
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
   getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput!
@@ -630,7 +665,7 @@ type Query {
   getPhraseToWordTranslationsByFromPhraseDefinitionId(from_phrase_definition_id: ID!, langInfo: LanguageInput!): PhraseToWordTranslationWithVoteListOutput!
   getPhraseVoteStatus(phrase_id: ID!): PhraseVoteStatusOutputRow!
   getPhraseWithVoteById(phrase_id: ID!): PhraseWithVoteOutput!
-  getPhrasesByLanguage(after: ID, first: Int!, input: LanguageInput!): PhraseWithVoteListConnection!
+  getPhrasesByLanguage(after: ID, first: Int, input: LanguageInput!): PhraseWithVoteListConnection!
   getRecommendedTranslationFromDefinitionID(from_definition_id: ID!, from_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteOutput!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
   getSiteTextTranslationVoteStatus(from_type_is_word: Boolean!, to_type_is_word: Boolean!, translation_id: ID!): SiteTextTranslationVoteStatusOutputRow!
@@ -645,7 +680,8 @@ type Query {
   getWordToWordTranslationsByFromWordDefinitionId(from_word_definition_id: ID!, langInfo: LanguageInput!): WordToWordTranslationWithVoteListOutput!
   getWordVoteStatus(word_id: ID!): WordVoteStatusOutputRow!
   getWordWithVoteById(word_id: ID!): WordWithVoteOutput!
-  getWordsByLanguage(after: ID, first: Int!, input: LanguageInput!): WordWithVoteListConnection!
+  getWordsByLanguage(after: ID, first: Int, input: LanguageInput!): WordWithVoteListConnection!
+  languagesForGoogleTranslate: LanguageListForGoogleTranslateOutput!
   loggedInIsAdmin(input: IsAdminIdInput!): IsAdminIdOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!
   phraseRead(input: PhraseReadInput!): PhraseReadOutput!
@@ -860,6 +896,19 @@ input ToDefinitionInput {
   is_type_word: Boolean!
   language_code: String!
   word_or_phrase: String!
+}
+
+type TranslateAllWordsAndPhrasesByGoogleOutput {
+  error: ErrorType!
+  result: TranslateAllWordsAndPhrasesByGoogleResult
+}
+
+type TranslateAllWordsAndPhrasesByGoogleResult {
+  requestedCharactors: Int!
+  totalPhraseCount: Int!
+  totalWordCount: Int!
+  translatedPhraseCount: Int!
+  translatedWordCount: Int!
 }
 
 union Translation = PhraseToPhraseTranslation | PhraseToWordTranslation | WordToPhraseTranslation | WordToWordTranslation

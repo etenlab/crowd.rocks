@@ -14,6 +14,7 @@ import { WordToPhraseTranslationsService } from './word-to-phrase-translations.s
 import { PhraseToPhraseTranslationsService } from './phrase-to-phrase-translations.service';
 import { PhraseToWordTranslationsService } from './phrase-to-word-translations.service';
 import { TranslationsService } from './translations.service';
+import { GoogleTranslateService } from './google-translate.service';
 
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 
@@ -33,6 +34,7 @@ import { WordToWordTranslationRepository } from './word-to-word-translation.repo
     WordToPhraseTranslationsService,
     PhraseToWordTranslationsService,
     PhraseToPhraseTranslationsService,
+    GoogleTranslateService,
     TranslationsService,
   ],
   exports: [
@@ -40,6 +42,7 @@ import { WordToWordTranslationRepository } from './word-to-word-translation.repo
     WordToPhraseTranslationsService,
     PhraseToWordTranslationsService,
     PhraseToPhraseTranslationsService,
+    GoogleTranslateService,
     TranslationsService,
   ],
 })

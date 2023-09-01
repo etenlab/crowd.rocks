@@ -23,6 +23,9 @@ export enum ErrorType {
   EmailIsBlocked = 'EmailIsBlocked',
   EmailUnavailable = 'EmailUnavailable',
 
+  FileSaveFailed = 'FileSaveFailed',
+  FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
+
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
   InvalidInputs = 'InvalidInputs',
   LimitInvalid = 'LimitInvalid',
@@ -73,6 +76,7 @@ export enum ErrorType {
 
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
+  ProvidedIdIsMalformed = 'ProvidedIdIsMalformed',
 }
 
 registerEnumType(ErrorType, {
