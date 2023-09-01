@@ -377,3 +377,30 @@ export class TranslationUpsertOutput extends GenericOutput {
     | PhraseToPhraseTranslation
     | null;
 }
+
+@ObjectType()
+export class LanguageForGoogleTranslate {
+  @Field(() => String) code: string;
+  @Field(() => String) name: string;
+}
+
+@ObjectType()
+export class LanguageListForGoogleTranslateOutput extends GenericOutput {
+  @Field(() => [LanguageForGoogleTranslate], { nullable: true })
+  languages: LanguageForGoogleTranslate[] | null;
+}
+
+@ObjectType()
+export class TranslateAllWordsAndPhrasesByGoogleResult {
+  @Field(() => Int) requestedCharactors: number;
+  @Field(() => Int) totalWordCount: number;
+  @Field(() => Int) totalPhraseCount: number;
+  @Field(() => Int) translatedWordCount: number;
+  @Field(() => Int) translatedPhraseCount: number;
+}
+
+@ObjectType()
+export class TranslateAllWordsAndPhrasesByGoogleOutput extends GenericOutput {
+  @Field(() => TranslateAllWordsAndPhrasesByGoogleResult, { nullable: true })
+  result: TranslateAllWordsAndPhrasesByGoogleResult;
+}

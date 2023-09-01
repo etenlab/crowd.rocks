@@ -15,6 +15,9 @@ export const Textarea = styled(IonTextarea)(() => ({
 }));
 
 export const CaptionContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   height: 50px;
   margin-left: -16px;
 `;

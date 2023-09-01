@@ -1,13 +1,16 @@
 import { useState, useCallback } from 'react';
+import { RouteComponentProps } from 'react-router';
 import {
   IonButton,
   InputCustomEvent,
   InputChangeEventDetail,
   useIonToast,
+  useIonRouter,
 } from '@ionic/react';
 
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
+import { globals } from '../../../services/globals';
 
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { OriginalWordOrPhraseList } from '../OriginalWordOrPhraseList';
@@ -27,9 +30,15 @@ import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useUpsertTranslationMutation } from '../../../hooks/useUpsertTranslationMutation';
 
-export function TranslationPage() {
+interface TranslationPageProps
+  extends RouteComponentProps<{
+    nation_id: string;
+    language_id: string;
+  }> {}
+
+export function TranslationPage({ match }: TranslationPageProps) {
   const { tr } = useTr();
-  // const router = useIonRouter();
+  const router = useIonRouter();
   const [present] = useIonToast();
 
   const {
@@ -147,14 +156,26 @@ export function TranslationPage() {
         },
       });
     }
-
-    // setRenderFlag((flag) => !flag);
   };
+
+  const handleGoToGoogleTranslate = () => {
+    router.push(
+      `/${match.params.nation_id}/${match.params.language_id}/1/google-translate`,
+    );
+  };
+
+  const userId = globals.get_user_id();
+  const isAdmin = userId ? userId === 1 : false;
 
   return (
     <PageLayout>
       <CaptionContainer>
         <Caption>{tr('Translation')}</Caption>
+        {isAdmin ? (
+          <IonButton onClick={handleGoToGoogleTranslate}>
+            {tr('Use Google Translate')}
+          </IonButton>
+        ) : null}
       </CaptionContainer>
 
       <FilterContainer>
@@ -179,6 +200,7 @@ export function TranslationPage() {
               onIonInput={handleOriginalFilterChange}
             />
           </FullWidthContainer>
+
           <FullWidthContainer>
             <LangSelector
               title={tr('Target language')}
@@ -223,8 +245,6 @@ export function TranslationPage() {
           onToggleSelectedValue={handleToggleSelectedValue}
         />
       </ListContainer>
-
-      <br />
 
       <IonButton
         disabled={

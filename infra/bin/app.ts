@@ -110,6 +110,16 @@ const apiServiceStack = new ApiServiceStack(
         createNewSecret: true,
       },
       {
+        taskDefSecretName: 'GCP_PROJECT_ID',
+        secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/gcpProjectId`,
+        createNewSecret: true,
+      },
+      {
+        taskDefSecretName: 'GCP_API_KEY',
+        secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/gcpApiKey`,
+        createNewSecret: true,
+      },
+      {
         taskDefSecretName: 'CR_DB_USER',
         secretsManagerSecretName: config.dbCredentialSecret,
         secretsMangerSecretField: 'username',

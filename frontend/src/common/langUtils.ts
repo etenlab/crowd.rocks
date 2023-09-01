@@ -137,3 +137,75 @@ export const compareLangInfo = (
 
   return true;
 };
+
+type LangsRegistry = {
+  langs: Array<TLang>;
+  dialects: Array<TDialect>;
+  regions: Array<TRegion>;
+};
+
+enum TagSpecialDescriptions {
+  PRIVATE_USE = 'Private use',
+}
+
+// make it async to test and prepare for possible language library change to async
+export const getLangsRegistry = async (
+  enabledTags?: string[],
+): Promise<LangsRegistry> => {
+  return new Promise((resolve) => {
+    const allTags = Tags.search(/.*/);
+    const langs: Array<TLang> = [];
+    const dialects: Array<TDialect> = [
+      { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
+    ];
+    const regions: Array<TRegion> = [
+      { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
+    ];
+
+    const strEnabledTags = enabledTags ? enabledTags.join(',') : null;
+
+    for (const currTag of allTags) {
+      if (
+        strEnabledTags !== null &&
+        !strEnabledTags.includes(currTag.format())
+      ) {
+        continue;
+      }
+
+      if (
+        currTag.deprecated() ||
+        currTag.descriptions().includes(TagSpecialDescriptions.PRIVATE_USE)
+      ) {
+        continue;
+      }
+
+      if (currTag.type() === TagTypes.LANGUAGE) {
+        langs.push({
+          tag: currTag.format(),
+          descriptions: currTag.descriptions(),
+        });
+      }
+      if (currTag.type() === TagTypes.REGION) {
+        regions.push({
+          tag: currTag.format(),
+          descriptions: currTag.descriptions(),
+        });
+      }
+      if (currTag.type() === TagTypes.DIALECT) {
+        dialects.push({
+          tag: currTag.format(),
+          descriptions: currTag.descriptions(),
+        });
+      }
+    }
+    langs.sort(sortTagInfosFn);
+    dialects.sort(sortTagInfosFn);
+    regions.sort(sortTagInfosFn);
+
+    resolve({
+      langs,
+      dialects,
+      regions,
+    });
+  });
+};

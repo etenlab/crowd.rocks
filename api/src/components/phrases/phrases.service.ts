@@ -254,7 +254,7 @@ export class PhrasesService {
 
   async getPhrasesByLanguage(
     input: LanguageInput,
-    first: number,
+    first: number | null,
     after: string | null,
   ): Promise<PhraseWithVoteListConnection> {
     try {
@@ -291,7 +291,7 @@ export class PhrasesService {
           startCursor = phrase_id;
         }
 
-        if (offset >= first) {
+        if (first !== null && offset >= first) {
           hasNextPage = true;
           break;
         }

@@ -226,11 +226,21 @@ type IsAdminIdOutput {
   isAdmin: Boolean!
 }
 
+type LanguageForGoogleTranslate {
+  code: String!
+  name: String!
+}
+
 input LanguageInput {
   dialect_code: String
   filter: String
   geo_code: String
   language_code: String!
+}
+
+type LanguageListForGoogleTranslateOutput {
+  error: ErrorType!
+  languages: [LanguageForGoogleTranslate!]
 }
 
 type LanguageOutput {
@@ -352,6 +362,7 @@ type Mutation {
   toggleWordDefinitionVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
+  translateAllWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionUpsertOutput!
   updateFile(file: Upload, file_size: Int, file_type: String, id: Int!): IFileOutput!
   uploadFile(file: Upload!, file_size: Int!, file_type: String!): IFileOutput!
@@ -654,7 +665,7 @@ type Query {
   getPhraseToWordTranslationsByFromPhraseDefinitionId(from_phrase_definition_id: ID!, langInfo: LanguageInput!): PhraseToWordTranslationWithVoteListOutput!
   getPhraseVoteStatus(phrase_id: ID!): PhraseVoteStatusOutputRow!
   getPhraseWithVoteById(phrase_id: ID!): PhraseWithVoteOutput!
-  getPhrasesByLanguage(after: ID, first: Int!, input: LanguageInput!): PhraseWithVoteListConnection!
+  getPhrasesByLanguage(after: ID, first: Int, input: LanguageInput!): PhraseWithVoteListConnection!
   getRecommendedTranslationFromDefinitionID(from_definition_id: ID!, from_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteOutput!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteOutput!
   getSiteTextTranslationVoteStatus(from_type_is_word: Boolean!, to_type_is_word: Boolean!, translation_id: ID!): SiteTextTranslationVoteStatusOutputRow!
@@ -669,7 +680,8 @@ type Query {
   getWordToWordTranslationsByFromWordDefinitionId(from_word_definition_id: ID!, langInfo: LanguageInput!): WordToWordTranslationWithVoteListOutput!
   getWordVoteStatus(word_id: ID!): WordVoteStatusOutputRow!
   getWordWithVoteById(word_id: ID!): WordWithVoteOutput!
-  getWordsByLanguage(after: ID, first: Int!, input: LanguageInput!): WordWithVoteListConnection!
+  getWordsByLanguage(after: ID, first: Int, input: LanguageInput!): WordWithVoteListConnection!
+  languagesForGoogleTranslate: LanguageListForGoogleTranslateOutput!
   loggedInIsAdmin(input: IsAdminIdInput!): IsAdminIdOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!
   phraseRead(input: PhraseReadInput!): PhraseReadOutput!
@@ -884,6 +896,19 @@ input ToDefinitionInput {
   is_type_word: Boolean!
   language_code: String!
   word_or_phrase: String!
+}
+
+type TranslateAllWordsAndPhrasesByGoogleOutput {
+  error: ErrorType!
+  result: TranslateAllWordsAndPhrasesByGoogleResult
+}
+
+type TranslateAllWordsAndPhrasesByGoogleResult {
+  requestedCharactors: Int!
+  totalPhraseCount: Int!
+  totalWordCount: Int!
+  translatedPhraseCount: Int!
+  translatedWordCount: Int!
 }
 
 union Translation = PhraseToPhraseTranslation | PhraseToWordTranslation | WordToPhraseTranslation | WordToWordTranslation

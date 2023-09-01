@@ -37,6 +37,8 @@ import {
   TranslationUpsertOutput,
   ToDefinitionInput,
   TranslationWithVoteOutput,
+  LanguageListForGoogleTranslateOutput,
+  TranslateAllWordsAndPhrasesByGoogleOutput,
 } from './types';
 import { ErrorType } from '../../common/types';
 
@@ -360,6 +362,36 @@ export class TranslationsResolver {
       langInfo.language_code,
       langInfo.dialect_code,
       langInfo.geo_code,
+    );
+  }
+
+  @Query(() => LanguageListForGoogleTranslateOutput)
+  async languagesForGoogleTranslate(): Promise<LanguageListForGoogleTranslateOutput> {
+    console.log('languagesForGoogleTranslate resolver');
+
+    return this.translationService.languagesForGoogleTranslate();
+  }
+
+  @Mutation(() => TranslateAllWordsAndPhrasesByGoogleOutput)
+  async translateAllWordsAndPhrasesByGoogle(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+    console.log(
+      'translateAllWordsAndPhrasesByGoogle',
+      JSON.stringify({
+        from_language,
+        to_language,
+      }),
+    );
+
+    return this.translationService.translateAllWordsAndPhrasesByGoogle(
+      from_language,
+      to_language,
+      getBearer(req),
     );
   }
 
