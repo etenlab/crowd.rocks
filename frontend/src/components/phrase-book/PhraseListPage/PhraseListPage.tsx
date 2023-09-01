@@ -194,12 +194,26 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
                 });
               },
             }}
+            discussion={{
+              onChatClick: () =>
+                router.push(
+                  `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrases/${phrase.phrase_id}/Phrase Book: ${phrase.phrase}`,
+                ),
+            }}
             voteFor="content"
             onClick={() => handleGoToDefinitionDetail(phrase.phrase_id)}
           />
         </CardContainer>
       ));
-  }, [error, handleGoToDefinitionDetail, phrasesData, togglePhraseVoteStatus]);
+  }, [
+    error,
+    handleGoToDefinitionDetail,
+    match.params.language_id,
+    match.params.nation_id,
+    phrasesData,
+    router,
+    togglePhraseVoteStatus,
+  ]);
 
   return (
     <PageLayout>

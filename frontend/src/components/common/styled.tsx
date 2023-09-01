@@ -63,6 +63,7 @@ export const StChatIcon = styled(IonIcon)(() => ({
   marginLeft: '10px',
   marginTop: '5px',
   cursor: 'pointer',
+  color: 'grey',
 }));
 
 export const StThumbDiv = styled.div`
