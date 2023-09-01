@@ -21,6 +21,7 @@ export class MapFileOutput {
   @Field(() => LanguageOutput) language: LanguageOutput;
   @Field(() => ID) created_by: string;
   @Field(() => ID, { nullable: true }) translated_map_id?: string;
+  @Field(() => ID, { nullable: true }) preview_file_url?: string;
 }
 @InputType()
 export class GetOrigMapListInput {
@@ -28,7 +29,8 @@ export class GetOrigMapListInput {
 }
 @ObjectType()
 export class MapUploadOutput extends GenericOutput {
-  @Field(() => MapFileOutput) mapFileOutput: MapFileOutput;
+  @Field(() => MapFileOutput, { nullable: true })
+  mapFileOutput?: MapFileOutput | null | undefined;
 }
 
 @ObjectType()

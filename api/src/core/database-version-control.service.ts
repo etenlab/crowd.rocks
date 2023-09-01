@@ -183,9 +183,7 @@ export class DatabaseVersionControlService {
 
   async loadVersion2(): Promise<void> {
     // schema
-    await this.runSqlFile(
-      './src/core/sql/schema/v2.schema.sql',
-    );
+    await this.runSqlFile('./src/core/sql/schema/v2.schema.sql');
 
     // translation
     await this.runSqlFile(
@@ -203,6 +201,9 @@ export class DatabaseVersionControlService {
 
     // post
     await this.runSqlFile('./src/core/sql/post/post_create.v2.sql');
+
+    // file
+    await this.runSqlFile('./src/core/sql/file/file_create.sql');
 
     await this.setVersionNumber(2);
   }

@@ -10,15 +10,18 @@ import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
 import { useCallback, useEffect, useState } from 'react';
 import {
+  ErrorType,
   useGetAllMapsListLazyQuery,
   useIsAdminLoggedInLazyQuery,
   useMapUploadMutation,
+  useUploadFileMutation,
 } from '../../../generated/graphql';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { globals } from '../../../services/globals';
 import { FilterContainer, Input } from '../../common/styled';
+import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 
 export const MapList: React.FC = () => {
   const router = useIonRouter();
@@ -38,10 +41,13 @@ export const MapList: React.FC = () => {
   const [isAdmin, { data: isAdminRes }] = useIsAdminLoggedInLazyQuery();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sendMapFile, { data: uploadResult }] = useMapUploadMutation();
+  const [sendMapFile] = useMapUploadMutation();
+  const [uploadFile] = useUploadFileMutation();
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
   });
+
+  const { makeMapThumbnail } = useMapTranslationTools();
 
   useEffect(() => {
     const user_id = globals.get_user_id();
@@ -76,12 +82,44 @@ export const MapList: React.FC = () => {
     async (file: File) => {
       if (!file) return;
       try {
-        await sendMapFile({
-          variables: { file },
+        const thumbnailFile = (await makeMapThumbnail(await file.text(), {
+          toWidth: 100,
+          toHeight: 100,
+          asFile: `${file.name}-thmb`,
+        })) as File;
+
+        const uploadPreviewResult = await uploadFile({
+          variables: {
+            file: thumbnailFile,
+            file_size: thumbnailFile.size,
+            file_type: thumbnailFile.type,
+          },
+        });
+        const previewFileId = uploadPreviewResult.data?.uploadFile.file?.id
+          ? String(uploadPreviewResult.data?.uploadFile.file.id)
+          : undefined;
+        if (uploadPreviewResult.data?.uploadFile.error !== ErrorType.NoError) {
+          throw new Error(uploadPreviewResult.data?.uploadFile.error);
+        }
+
+        const mapUploadResult = await sendMapFile({
+          variables: {
+            file,
+            previewFileId,
+          },
           refetchQueries: ['GetAllMapsList'],
         });
+
+        if (
+          mapUploadResult.errors?.length &&
+          mapUploadResult.errors?.length > 0
+        ) {
+          throw new Error(JSON.stringify(mapUploadResult.errors));
+        }
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
+        console.log(error);
         present({
           message: error.message,
           duration: 1500,
@@ -90,7 +128,7 @@ export const MapList: React.FC = () => {
         });
       }
     },
-    [present, sendMapFile],
+    [makeMapThumbnail, uploadFile, sendMapFile, present],
   );
 
   return (

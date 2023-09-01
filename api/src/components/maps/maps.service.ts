@@ -30,7 +30,6 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
-import { DefinitionsService } from '../definitions/definitions.service';
 import { putLangCodesToFileName } from '../../common/utility';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
@@ -39,7 +38,6 @@ const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes'
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
 const DEFAULT_MAP_WORD_DEFINITION = 'A geographical place';
 const DEFAULT_MAP_PHRASE_DEFINITION = 'A geographical place phrase';
-const WORDS_SEPARATOR = ' ';
 
 export type MapTranslationResult = {
   translatedMap: string;
@@ -47,8 +45,9 @@ export type MapTranslationResult = {
 };
 
 interface parseAndSaveNewMapParams {
-  readStream: ReadStream;
+  fileBody: string;
   mapFileName: string;
+  previewFileId?: string;
   mapLanguage?: LanguageInfo;
   token: string;
 }
@@ -65,19 +64,12 @@ export class MapsService {
   ) {}
 
   async parseAndSaveNewMap({
-    readStream,
+    fileBody,
     mapFileName,
+    previewFileId,
     mapLanguage = DEFAULT_NEW_MAP_LANGUAGE,
     token,
   }: parseAndSaveNewMapParams): Promise<MapFileOutput> {
-    let fileBody: string;
-    for await (const chunk of readStream) {
-      if (!fileBody) {
-        fileBody = chunk;
-      } else {
-        fileBody += chunk;
-      }
-    }
     const language_code = mapLanguage.lang.tag;
     const dialect_code = mapLanguage.dialect?.tag;
     const geo_code = mapLanguage.region?.tag;
@@ -95,6 +87,7 @@ export class MapsService {
         await this.mapsRepository.saveOriginalMap({
           mapFileName,
           fileBody,
+          previewFileId,
           token,
           dbPoolClient,
           language_code,

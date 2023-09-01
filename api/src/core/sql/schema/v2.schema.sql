@@ -6,3 +6,6 @@ create table flags(
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+
+ALTER TABLE public.files ALTER COLUMN file_name TYPE varchar(128) USING file_name::varchar;
+ALTER TABLE public.files ALTER COLUMN file_url TYPE varchar(255) USING file_url::varchar;
