@@ -7,7 +7,10 @@ export class HttpLoggerMiddleware implements NestMiddleware {
   private logger = new Logger('HTTP');
 
   use(request: Request, response: Response, next: NextFunction): void {
-    if (process.env.HTTP_LOGGING.toLowerCase().trim() === 'true') {
+    if (
+      process.env.HTTP_LOGGING &&
+      process.env.HTTP_LOGGING.toLowerCase().trim() === 'true'
+    ) {
       const { ip, method, path: url, body } = request;
       const userAgent = request.get('user-agent') || '';
 
