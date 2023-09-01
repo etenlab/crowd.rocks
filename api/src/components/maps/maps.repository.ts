@@ -22,7 +22,7 @@ import { putLangCodesToFileName } from '../../common/utility';
 interface ISaveMapParams {
   mapFileName: string;
   fileBody: string;
-  previewFileId;
+  previewFileId: string;
   token: string;
   language_code: string;
   dialect_code?: string;
@@ -78,13 +78,17 @@ export class MapsRepository {
     dialect_code,
     geo_code,
   }: ISaveMapParams): Promise<ISaveMapRes> {
+    const previewFileIdN = Number(previewFileId);
+    if (isNaN(previewFileIdN)) {
+      throw new Error(ErrorType.ProvidedIdIsMalformed);
+    }
     const poolClient = dbPoolClient
       ? dbPoolClient // use given pool client
       : this.pg.pool; //some `random` client from pool will be used
 
     const res = await poolClient.query(
       `
-          call original_map_create($1,$2,$3,$4,$5,$6,$7 null,null,null,null)
+          call original_map_create($1,$2,$3,$4,$5,$6,$7, null,null,null,null)
         `,
       [
         mapFileName,
@@ -93,7 +97,7 @@ export class MapsRepository {
         language_code,
         dialect_code,
         geo_code,
-        previewFileId,
+        previewFileIdN,
       ],
     );
 

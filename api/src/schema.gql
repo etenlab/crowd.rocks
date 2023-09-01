@@ -79,6 +79,7 @@ enum ErrorType {
   PrefixInvalid
   PrefixTooLong
   PrefixTooShort
+  ProvidedIdIsMalformed
   RankInvalid
   RankUnchanged
   SiteTextPhraseDefinitionAlreadyExists

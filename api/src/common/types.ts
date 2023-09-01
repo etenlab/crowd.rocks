@@ -76,6 +76,7 @@ export enum ErrorType {
 
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
+  ProvidedIdIsMalformed = 'ProvidedIdIsMalformed',
 }
 
 registerEnumType(ErrorType, {

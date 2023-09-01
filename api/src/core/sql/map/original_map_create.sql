@@ -6,7 +6,7 @@ or replace procedure original_map_create(
   in p_language_code varchar(32),
   in p_dialect_code varchar(32),
   in p_geo_code varchar(32),
-  in p_preview_file_id varchar(32),
+  in p_preview_file_id bigint,
   inout p_map_id bigint,
   inout p_created_at varchar(32),
   inout p_created_by varchar(32),
@@ -55,7 +55,6 @@ insert into
     language_code,
     dialect_code,
     geo_code,
-    original_map_create,
     preview_file_id
   )
 values

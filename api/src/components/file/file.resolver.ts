@@ -54,6 +54,7 @@ export class FileResolver {
       file_size,
       bearer,
     );
+    console.log('[file]:', JSON.stringify(file));
     return file;
   }
 
