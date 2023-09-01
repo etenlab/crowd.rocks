@@ -66,4 +66,26 @@ export const StChatIcon = styled(IonIcon)(() => ({
   marginLeft: '10px',
   marginTop: '5px',
   cursor: 'pointer',
+  color: 'grey',
 }));
+
+export const StThumbDiv = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+export const StIonVoteIcon = styled(IonIcon)(() => ({
+  cursor: 'pointer',
+  fontSize: '20px',
+  padding: '5px',
+}));
+
+export const StVoteButtonsDiv = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+`;

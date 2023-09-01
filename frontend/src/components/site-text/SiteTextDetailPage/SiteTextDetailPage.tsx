@@ -6,6 +6,7 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
+  useIonRouter,
   // useIonToast,
 } from '@ionic/react';
 
@@ -45,7 +46,7 @@ interface SiteTextDetailPageProps
 export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
   const { tr } = useTr();
   // const [present] = useIonToast();
-
+  const router = useIonRouter();
   const {
     states: {
       global: {
@@ -166,6 +167,7 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
       definitionlikeString: string;
       upvotes: number;
       downvotes: number;
+      to_word_or_phrase_id: string;
     }[] = [];
 
     if (translationsError) {
@@ -202,6 +204,8 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
               translationWithVote.to_word_definition.definition,
             upvotes: translationWithVote.upvotes,
             downvotes: translationWithVote.downvotes,
+            to_word_or_phrase_id:
+              translationWithVote.to_word_definition.word.word_id,
           });
           break;
         }
@@ -217,6 +221,8 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
               translationWithVote.to_phrase_definition.definition,
             upvotes: translationWithVote.upvotes,
             downvotes: translationWithVote.downvotes,
+            to_word_or_phrase_id:
+              translationWithVote.to_phrase_definition.phrase.phrase_id,
           });
           break;
         }
@@ -232,6 +238,8 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
               translationWithVote.to_word_definition.definition,
             upvotes: translationWithVote.upvotes,
             downvotes: translationWithVote.downvotes,
+            to_word_or_phrase_id:
+              translationWithVote.to_word_definition.word.word_id,
           });
           break;
         }
@@ -247,6 +255,8 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
               translationWithVote.to_phrase_definition.definition,
             upvotes: translationWithVote.upvotes,
             downvotes: translationWithVote.downvotes,
+            to_word_or_phrase_id:
+              translationWithVote.to_phrase_definition.phrase.phrase_id,
           });
           break;
         }
@@ -283,10 +293,29 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
             },
           }}
           voteFor="description"
+          discussion={{
+            onChatClick: () =>
+              router.push(
+                `/${match.params.nation_id}/${
+                  match.params.language_id
+                }/1/discussion/${
+                  translation.to_type_is_word ? 'words' : 'phrases'
+                }/${translation.to_word_or_phrase_id}/${
+                  // eslint-disable-next-line prettier/prettier
+                translation.to_type_is_word ? 'Dictionary' : 'Phrase Book'}: ${translation.siteTextlikeString}`,
+              ),
+          }}
         />
       </CardContainer>
     ));
-  }, [translationsError, translationsData, toggleVoteStatus]);
+  }, [
+    translationsError,
+    translationsData,
+    toggleVoteStatus,
+    router,
+    match.params.nation_id,
+    match.params.language_id,
+  ]);
 
   let title = 'Loading';
   title =
