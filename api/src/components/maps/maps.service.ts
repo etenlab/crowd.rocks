@@ -696,8 +696,4 @@ export class MapsService {
     });
     return foundLangs;
   }
-
-  async setPreviewFileId(mapId: string, previewFileId): Promise<string> {
-    return this.mapsRepository.setPreviewFileId(mapId, previewFileId);
-  }
 }

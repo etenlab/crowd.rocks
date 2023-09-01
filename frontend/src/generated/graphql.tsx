@@ -97,6 +97,7 @@ export enum ErrorType {
   PrefixInvalid = 'PrefixInvalid',
   PrefixTooLong = 'PrefixTooLong',
   PrefixTooShort = 'PrefixTooShort',
+  ProvidedIdIsMalformed = 'ProvidedIdIsMalformed',
   RankInvalid = 'RankInvalid',
   RankUnchanged = 'RankUnchanged',
   SiteTextPhraseDefinitionAlreadyExists = 'SiteTextPhraseDefinitionAlreadyExists',
@@ -165,6 +166,7 @@ export type GetOrigMapContentOutput = {
   map_file_name: Scalars['String']['output'];
   map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
+  preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
 };
@@ -222,6 +224,7 @@ export type GetTranslatedMapContentOutput = {
   map_file_name: Scalars['String']['output'];
   map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
+  preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
 };
@@ -294,6 +297,7 @@ export type MapFileOutput = {
   map_file_name: Scalars['String']['output'];
   map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
+  preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
 };
@@ -2005,7 +2009,7 @@ export type GetAllMapsListQueryVariables = Exact<{
 }>;
 
 
-export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'GetAllMapsListOutput', allMapsList: Array<{ __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
+export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'GetAllMapsListOutput', allMapsList: Array<{ __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
 export type GetTranslatedMapContentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3563,6 +3567,7 @@ export const GetAllMapsListDocument = gql`
       created_at
       created_by
       map_file_name_with_langs
+      preview_file_url
     }
   }
 }

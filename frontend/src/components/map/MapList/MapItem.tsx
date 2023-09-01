@@ -99,27 +99,34 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
   return (
     <IonItem {...rest} routerLink={routerLink}>
       <StItem>
-        <FileName>
-          {mapItem.is_original
-            ? mapItem.map_file_name
-            : mapItem.map_file_name_with_langs}
-        </FileName>
         <div>
-          {mapItem.is_original ? (
-            <OrigBadge>Original</OrigBadge>
-          ) : (
-            <IonBadge>
-              {langInfo2String(langInfo) +
-                ` [${mapItem.translated_percent || ''}%]`}
-            </IonBadge>
-          )}
-          <IonIcon
-            icon={downloadOutline}
-            onClick={handleDownloadSvg}
-            size="large"
-            color="primary"
-            className="clickable theme-icon"
-          />
+          <FileName>
+            {mapItem.is_original
+              ? mapItem.map_file_name
+              : mapItem.map_file_name_with_langs}
+          </FileName>
+          <div>
+            {mapItem.is_original ? (
+              <OrigBadge>Original</OrigBadge>
+            ) : (
+              <IonBadge>
+                {langInfo2String(langInfo) +
+                  ` [${mapItem.translated_percent || ''}%]`}
+              </IonBadge>
+            )}
+            <IonIcon
+              icon={downloadOutline}
+              onClick={handleDownloadSvg}
+              size="large"
+              color="primary"
+              className="clickable theme-icon"
+            />
+          </div>
+        </div>
+        <div>
+          {mapItem.preview_file_url ? (
+            <img src={mapItem.preview_file_url} />
+          ) : null}
         </div>
       </StItem>
     </IonItem>

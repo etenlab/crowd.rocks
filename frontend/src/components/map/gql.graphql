@@ -104,6 +104,7 @@ query GetAllMapsList($lang: LanguageInput) {
       created_at
       created_by
       map_file_name_with_langs
+      preview_file_url
     }
   }
 }

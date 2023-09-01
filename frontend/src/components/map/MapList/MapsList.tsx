@@ -85,7 +85,7 @@ export const MapList: React.FC = () => {
         const thumbnailFile = (await makeMapThumbnail(await file.text(), {
           toWidth: 100,
           toHeight: 100,
-          asFile: `map-${file.name}-thumb`,
+          asFile: `${file.name}-thmb`,
         })) as File;
 
         const uploadPreviewResult = await uploadFile({

@@ -1,9 +1,9 @@
 create
 or replace procedure file_create(
-  in p_file_name varchar(64),
+  in p_file_name varchar(128),
   in p_file_size bigint,
   in p_file_type varchar(16),
-  in p_file_url varchar(128),
+  in p_file_url varchar(255),
   in p_file_hash varchar(255),
   in p_token varchar(512),
   inout p_file_id bigint,
