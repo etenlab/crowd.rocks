@@ -145,15 +145,6 @@ export const MapList: React.FC = () => {
           }}
           onClearClick={() => setTargetLanguage(null)}
         />
-        <Input
-          type="text"
-          label={tr('Search')}
-          labelPlacement="floating"
-          fill="outline"
-          debounce={300}
-          value={filter}
-          onIonInput={handleFilterChange}
-        />
       </FilterContainer>
       <MapTools
         onTranslationsClick={() => {
@@ -162,6 +153,15 @@ export const MapList: React.FC = () => {
         onAddClick={
           isAdminRes?.loggedInIsAdmin.isAdmin ? handleAddMap : undefined
         }
+      />
+      <Input
+        type="text"
+        label={tr('Search')}
+        labelPlacement="floating"
+        fill="outline"
+        debounce={300}
+        value={filter}
+        onIonInput={handleFilterChange}
       />
       <IonList lines="none">
         {allMapsQuery?.getAllMapsList.allMapsList?.length ? (

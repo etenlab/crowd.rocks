@@ -100,52 +100,52 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
     <IonItem {...rest} routerLink={routerLink}>
       <StItem>
         <div>
-          <FileName>
-            {mapItem.is_original
-              ? mapItem.map_file_name
-              : mapItem.map_file_name_with_langs}
-          </FileName>
-          <div>
-            {mapItem.is_original ? (
-              <OrigBadge>Original</OrigBadge>
-            ) : (
-              <IonBadge>
-                {langInfo2String(langInfo) +
-                  ` [${mapItem.translated_percent || ''}%]`}
-              </IonBadge>
-            )}
-            <IonIcon
-              icon={downloadOutline}
-              onClick={handleDownloadSvg}
-              size="large"
-              color="primary"
-              className="clickable theme-icon"
-            />
-          </div>
-        </div>
-        <div>
           {mapItem.preview_file_url ? (
             <img src={mapItem.preview_file_url} />
           ) : null}
         </div>
+        <FileName>
+          {mapItem.is_original
+            ? mapItem.map_file_name.replace('.cf.svg', '')
+            : mapItem.map_file_name_with_langs.replace('.cf.svg', '')}
+        </FileName>
+        <IconRow>
+          {mapItem.is_original ? (
+            <OrigBadge>Original</OrigBadge>
+          ) : (
+            <IonBadge>
+              {langInfo2String(langInfo) +
+                ` [${mapItem.translated_percent || ''}%]`}
+            </IonBadge>
+          )}
+          <IonIcon
+            icon={downloadOutline}
+            onClick={handleDownloadSvg}
+            size="large"
+            color="primary"
+            className="clickable theme-icon"
+          />
+        </IconRow>
       </StItem>
     </IonItem>
   );
 };
 
 export const MapItem = styled(NotStyledMapItem)(() => ({
-  border: 'solid 1px #cfcfcf',
+  padding: '0px',
   marginTop: '20px',
+  display: 'flex',
+  alignItems: 'center',
+  float: 'left',
 }));
 
-const FileName = styled.div`
-  margin-top: 7px;
-`;
+const FileName = styled.div``;
 
-const StItem = styled.div`
+const StItem = styled.div``;
+
+const IconRow = styled.div`
   display: flex;
-  justify-content: space-between;
-  width: 100%;
+  align-items: center;
 `;
 
 const OrigBadge = styled(IonBadge)(() => ({
