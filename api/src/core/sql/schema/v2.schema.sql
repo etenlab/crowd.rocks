@@ -9,3 +9,7 @@ create table flags(
 
 ALTER TABLE public.files ALTER COLUMN file_name TYPE varchar(128) USING file_name::varchar;
 ALTER TABLE public.files ALTER COLUMN file_url TYPE varchar(255) USING file_url::varchar;
+
+ALTER TABLE public.translated_maps DROP CONSTRAINT translated_maps_preview_file_id_fkey;
+ALTER TABLE public.translated_maps DROP COLUMN preview_file_id;
+
