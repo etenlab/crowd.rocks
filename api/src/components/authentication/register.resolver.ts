@@ -42,7 +42,7 @@ export class RegisterResolver {
   ): Promise<RegisterOutput> {
     console.log('register resolver');
     try {
-      const bearer = getBearer(req);
+      getBearer(req);
 
       if (!validateEmail(input.email)) {
         return {
@@ -112,8 +112,8 @@ export class RegisterResolver {
         };
       }
 
-      const email_token = createToken();
-      const reject_token = createToken();
+      createToken();
+      createToken();
 
       // send email using SES, comment out to skip for local deving
       // const email_res = await this.send_registration_email(

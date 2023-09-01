@@ -1,15 +1,7 @@
-import {
-  Args,
-  Context,
-  GqlContextType,
-  Mutation,
-  Query,
-  Resolver,
-} from '@nestjs/graphql';
-import { ApolloError } from 'apollo-server-express';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import {
   createToken,
-  getBearer,
+  // getBearer,
   get_avatar_image_url,
   validateEmail,
 } from 'src/common/utility';
@@ -22,13 +14,10 @@ export class LoginResolver {
   constructor(private pg: PostgresService) {}
 
   @Mutation(() => LoginOutput)
-  async login(
-    @Args('input') input: LoginInput,
-    @Context() req: any,
-  ): Promise<LoginOutput> {
+  async login(@Args('input') input: LoginInput): Promise<LoginOutput> {
     console.log('login resolver');
     try {
-      const bearer = getBearer(req);
+      // const bearer = getBearer(req);
 
       if (!validateEmail(input.email)) {
         return {
