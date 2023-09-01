@@ -104,6 +104,7 @@ query GetAllMapsList($lang: LanguageInput) {
       created_at
       created_by
       map_file_name_with_langs
+      preview_file_url
     }
   }
 }
@@ -142,12 +143,21 @@ query GetOrigMapContent($id: ID!) {
   }
 }
 
-mutation MapUpload($file: Upload!) {
-  mapUpload(file: $file) {
+mutation MapUpload($file: Upload!, $previewFileId: String) {
+  mapUpload(file: $file, previewFileId: $previewFileId) {
     error
     mapFileOutput {
       original_map_id
       map_file_name
+    }
+  }
+}
+
+mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
+  uploadFile(file: $file, file_size: $file_size, file_type: $file_type) {
+    error
+    file {
+      id
     }
   }
 }

@@ -91,7 +91,16 @@ export function WordListPage({ match }: WordListPageProps) {
         `/${match.params.nation_id}/${match.params.language_id}/1/dictionary-detail/${wordId}`,
       );
     },
-    [match, router],
+    [match.params.language_id, match.params.nation_id, router],
+  );
+
+  const handleGoToChat = useCallback(
+    (wordId: string, word: string) => {
+      router.push(
+        `/${match.params.nation_id}/${match.params.language_id}/1/discussion/words/${wordId}/Dictionary: ${word}`,
+      );
+    },
+    [match.params.language_id, match.params.nation_id, router],
   );
 
   const handleFilterChange = (
@@ -196,12 +205,21 @@ export function WordListPage({ match }: WordListPageProps) {
                 });
               },
             }}
+            discussion={{
+              onChatClick: () => handleGoToChat(word.word_id, word.word),
+            }}
             voteFor="content"
             onClick={() => handleGoToDefinitionDetail(word.word_id)}
           />
         </CardContainer>
       ));
-  }, [error, handleGoToDefinitionDetail, toggleWordVoteStatus, wordsData]);
+  }, [
+    error,
+    handleGoToChat,
+    handleGoToDefinitionDetail,
+    toggleWordVoteStatus,
+    wordsData,
+  ]);
 
   return (
     <PageLayout>

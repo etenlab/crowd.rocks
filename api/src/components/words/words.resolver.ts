@@ -98,7 +98,7 @@ export class WordsResolver {
   @Query(() => WordWithVoteListConnection)
   async getWordsByLanguage(
     @Args('input', { type: () => LanguageInput }) input: LanguageInput,
-    @Args('first', { type: () => Int }) first: number,
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
   ): Promise<WordWithVoteListConnection> {
     console.log(

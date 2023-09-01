@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -15,6 +15,8 @@ import { TranslationsModule } from './components/translations/translations.modul
 import { DefinitionsModule } from './components/definitions/definitions.module';
 import { PhraseModule } from './components/phrases/phrases.module';
 import { SiteTextsModule } from './components/site-text/site-texts.module';
+import { HttpLoggerMiddleware } from './core/middleware/http-logger.middleware';
+import { MiddlewareModule } from './core/middleware/middleware.module';
 
 @Module({
   imports: [
@@ -36,8 +38,14 @@ import { SiteTextsModule } from './components/site-text/site-texts.module';
     DefinitionsModule,
     PhraseModule,
     SiteTextsModule,
+    MiddlewareModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+// export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+  }
+}

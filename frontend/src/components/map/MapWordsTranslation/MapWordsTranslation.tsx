@@ -15,12 +15,14 @@ import {
   WordOrPhraseWithValueAndTranslations,
   useMapTranslationTools,
 } from '../hooks/useMapTranslationTools';
+import { useIonRouter } from '@ionic/react';
 
 interface MapWordsTranslationProps extends RouteComponentProps {}
 export type TWordOrPhraseId = { word_id: string } | { phrase_id: string };
 
 export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   const { tr } = useTr();
+  const router = useIonRouter();
 
   const {
     states: {
@@ -98,6 +100,8 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
     }
     return res;
   }, [selectedId, wordsAndPhrases]);
+  const nation = router.routeInfo.pathname.split('/')[1];
+  const language_id = router.routeInfo.pathname.split('/')[2];
 
   return (
     <>
@@ -138,6 +142,8 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
         <TranslationsCom
           tLangInfo={targetLang}
           wordOrPhraseWithTranslations={selected}
+          nation_id={nation}
+          language_id={language_id}
           onBackClick={() => {
             setSelectedId(undefined);
           }}

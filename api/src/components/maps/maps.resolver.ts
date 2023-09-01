@@ -22,6 +22,7 @@ import {
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { ErrorType } from 'src/common/types';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 @Resolver(Map)
@@ -29,34 +30,43 @@ export class MapsResolver {
   constructor(
     private mapService: MapsService,
     private authenticationService: AuthenticationService,
+    private fileService: FileService,
   ) {}
 
   @Mutation(() => MapUploadOutput)
   async mapUpload(
     @Args({ name: 'file', type: () => GraphQLUpload })
     { createReadStream, filename: map_file_name }: FileUpload,
+    @Args({ name: 'previewFileId', type: () => String, nullable: true })
+    previewFileId: string | undefined | null,
     @Context() req: any,
   ): Promise<MapUploadOutput> {
     const bearer = getBearer(req);
-    console.log(`bearer: ${bearer}`);
+    let fileBody: string;
+    for await (const chunk of createReadStream()) {
+      if (!fileBody) {
+        fileBody = chunk;
+      } else {
+        fileBody += chunk;
+      }
+    }
 
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       bearer,
     );
-
     const admin_id = await this.authenticationService.get_admin_id();
-    console.log(`user_id ${user_id}`);
-    console.log(`admin_id ${admin_id}`);
-
     if (admin_id !== user_id) {
-      throw new Error(`${ErrorType.Unauthorized}`);
+      return {
+        error: ErrorType.Unauthorized,
+        mapFileOutput: null,
+      };
     }
-
     const userToken = await this.authenticationService.getAdminToken();
     try {
       const map = await this.mapService.parseAndSaveNewMap({
-        readStream: createReadStream(),
+        fileBody,
         mapFileName: map_file_name,
+        previewFileId,
         token: userToken,
       });
       return {
@@ -65,7 +75,7 @@ export class MapsResolver {
       };
     } catch (error) {
       return {
-        error,
+        error: error,
         mapFileOutput: null,
       };
     }

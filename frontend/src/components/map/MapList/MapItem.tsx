@@ -99,12 +99,17 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
   return (
     <IonItem {...rest} routerLink={routerLink}>
       <StItem>
+        <div>
+          {mapItem.preview_file_url ? (
+            <img src={mapItem.preview_file_url} />
+          ) : null}
+        </div>
         <FileName>
           {mapItem.is_original
-            ? mapItem.map_file_name
-            : mapItem.map_file_name_with_langs}
+            ? mapItem.map_file_name.replace('.cf.svg', '')
+            : mapItem.map_file_name_with_langs.replace('.cf.svg', '')}
         </FileName>
-        <div>
+        <IconRow>
           {mapItem.is_original ? (
             <OrigBadge>Original</OrigBadge>
           ) : (
@@ -120,25 +125,27 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
             color="primary"
             className="clickable theme-icon"
           />
-        </div>
+        </IconRow>
       </StItem>
     </IonItem>
   );
 };
 
 export const MapItem = styled(NotStyledMapItem)(() => ({
-  border: 'solid 1px #cfcfcf',
+  padding: '0px',
   marginTop: '20px',
+  display: 'flex',
+  alignItems: 'center',
+  float: 'left',
 }));
 
-const FileName = styled.div`
-  margin-top: 7px;
-`;
+const FileName = styled.div``;
 
-const StItem = styled.div`
+const StItem = styled.div``;
+
+const IconRow = styled.div`
   display: flex;
-  justify-content: space-between;
-  width: 100%;
+  align-items: center;
 `;
 
 const OrigBadge = styled(IonBadge)(() => ({

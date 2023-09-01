@@ -73,6 +73,8 @@ export enum ErrorType {
   EmailTooLong = 'EmailTooLong',
   EmailTooShort = 'EmailTooShort',
   EmailUnavailable = 'EmailUnavailable',
+  FileSaveFailed = 'FileSaveFailed',
+  FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
   InvalidInputs = 'InvalidInputs',
   LimitInvalid = 'LimitInvalid',
@@ -95,6 +97,7 @@ export enum ErrorType {
   PrefixInvalid = 'PrefixInvalid',
   PrefixTooLong = 'PrefixTooLong',
   PrefixTooShort = 'PrefixTooShort',
+  ProvidedIdIsMalformed = 'ProvidedIdIsMalformed',
   RankInvalid = 'RankInvalid',
   RankUnchanged = 'RankUnchanged',
   SiteTextPhraseDefinitionAlreadyExists = 'SiteTextPhraseDefinitionAlreadyExists',
@@ -163,6 +166,7 @@ export type GetOrigMapContentOutput = {
   map_file_name: Scalars['String']['output'];
   map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
+  preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
 };
@@ -220,8 +224,25 @@ export type GetTranslatedMapContentOutput = {
   map_file_name: Scalars['String']['output'];
   map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
+  preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
+};
+
+export type IFile = {
+  __typename?: 'IFile';
+  fileHash: Scalars['String']['output'];
+  fileName: Scalars['String']['output'];
+  fileSize: Scalars['Int']['output'];
+  fileType: Scalars['String']['output'];
+  fileUrl: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+};
+
+export type IFileOutput = {
+  __typename?: 'IFileOutput';
+  error: ErrorType;
+  file?: Maybe<IFile>;
 };
 
 export type IsAdminIdInput = {
@@ -233,11 +254,23 @@ export type IsAdminIdOutput = {
   isAdmin: Scalars['Boolean']['output'];
 };
 
+export type LanguageForGoogleTranslate = {
+  __typename?: 'LanguageForGoogleTranslate';
+  code: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type LanguageInput = {
   dialect_code?: InputMaybe<Scalars['String']['input']>;
   filter?: InputMaybe<Scalars['String']['input']>;
   geo_code?: InputMaybe<Scalars['String']['input']>;
   language_code: Scalars['String']['input'];
+};
+
+export type LanguageListForGoogleTranslateOutput = {
+  __typename?: 'LanguageListForGoogleTranslateOutput';
+  error: ErrorType;
+  languages?: Maybe<Array<LanguageForGoogleTranslate>>;
 };
 
 export type LanguageOutput = {
@@ -276,6 +309,7 @@ export type MapFileOutput = {
   map_file_name: Scalars['String']['output'];
   map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
+  preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
 };
@@ -309,7 +343,7 @@ export type MapPhraseWithVotes = {
 export type MapUploadOutput = {
   __typename?: 'MapUploadOutput';
   error: ErrorType;
-  mapFileOutput: MapFileOutput;
+  mapFileOutput?: Maybe<MapFileOutput>;
 };
 
 export type MapWordOrPhraseTranslationWithVotes = MapPhraseWithVotes | MapWordWithVotes;
@@ -368,7 +402,10 @@ export type Mutation = {
   toggleWordDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   toggleWordToPhraseTrVoteStatus: WordToPhraseTranslationVoteStatusOutputRow;
   toggleWordVoteStatus: WordVoteStatusOutputRow;
+  translateAllWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByGoogleOutput;
   updateDefinition: PhraseDefinitionUpsertOutput;
+  updateFile: IFileOutput;
+  uploadFile: IFileOutput;
   upsertFromTranslationlikeString: TranslationUpsertOutput;
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString: PhraseDefinitionUpsertOutput;
   upsertSiteTextTranslation: TranslationUpsertOutput;
@@ -406,6 +443,7 @@ export type MutationLogoutArgs = {
 
 export type MutationMapUploadArgs = {
   file: Scalars['Upload']['input'];
+  previewFileId?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -530,8 +568,29 @@ export type MutationToggleWordVoteStatusArgs = {
 };
 
 
+export type MutationTranslateAllWordsAndPhrasesByGoogleArgs = {
+  from_language: LanguageInput;
+  to_language: LanguageInput;
+};
+
+
 export type MutationUpdateDefinitionArgs = {
   input: DefinitionUpdateaInput;
+};
+
+
+export type MutationUpdateFileArgs = {
+  file?: InputMaybe<Scalars['Upload']['input']>;
+  file_size?: InputMaybe<Scalars['Int']['input']>;
+  file_type?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationUploadFileArgs = {
+  file: Scalars['Upload']['input'];
+  file_size: Scalars['Int']['input'];
+  file_type: Scalars['String']['input'];
 };
 
 
@@ -899,6 +958,8 @@ export type PostsByParentOutput = {
 
 export type Query = {
   __typename?: 'Query';
+  file: IFileOutput;
+  fileList: Array<IFile>;
   fileUploadUrlRequest: FileUploadUrlResponse;
   getAllMapsList: GetAllMapsListOutput;
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput;
@@ -935,6 +996,7 @@ export type Query = {
   getWordVoteStatus: WordVoteStatusOutputRow;
   getWordWithVoteById: WordWithVoteOutput;
   getWordsByLanguage: WordWithVoteListConnection;
+  languagesForGoogleTranslate: LanguageListForGoogleTranslateOutput;
   loggedInIsAdmin: IsAdminIdOutput;
   phraseDefinitionRead: PhraseDefinitionReadOutput;
   phraseRead: PhraseReadOutput;
@@ -951,6 +1013,11 @@ export type Query = {
   wordToPhraseTranslationRead: WordToPhraseTranslationReadOutput;
   wordToWordTranslationRead: WordToWordTranslationReadOutput;
   wordVoteRead: WordVoteOutput;
+};
+
+
+export type QueryFileArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -1054,7 +1121,7 @@ export type QueryGetPhraseWithVoteByIdArgs = {
 
 export type QueryGetPhrasesByLanguageArgs = {
   after?: InputMaybe<Scalars['ID']['input']>;
-  first: Scalars['Int']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
   input: LanguageInput;
 };
 
@@ -1143,7 +1210,7 @@ export type QueryGetWordWithVoteByIdArgs = {
 
 export type QueryGetWordsByLanguageArgs = {
   after?: InputMaybe<Scalars['ID']['input']>;
-  first: Scalars['Int']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
   input: LanguageInput;
 };
 
@@ -1447,6 +1514,21 @@ export type ToDefinitionInput = {
   is_type_word: Scalars['Boolean']['input'];
   language_code: Scalars['String']['input'];
   word_or_phrase: Scalars['String']['input'];
+};
+
+export type TranslateAllWordsAndPhrasesByGoogleOutput = {
+  __typename?: 'TranslateAllWordsAndPhrasesByGoogleOutput';
+  error: ErrorType;
+  result?: Maybe<TranslateAllWordsAndPhrasesByGoogleResult>;
+};
+
+export type TranslateAllWordsAndPhrasesByGoogleResult = {
+  __typename?: 'TranslateAllWordsAndPhrasesByGoogleResult';
+  requestedCharactors: Scalars['Int']['output'];
+  totalPhraseCount: Scalars['Int']['output'];
+  totalWordCount: Scalars['Int']['output'];
+  translatedPhraseCount: Scalars['Int']['output'];
+  translatedWordCount: Scalars['Int']['output'];
 };
 
 export type Translation = PhraseToPhraseTranslation | PhraseToWordTranslation | WordToPhraseTranslation | WordToWordTranslation;
@@ -1962,7 +2044,7 @@ export type GetAllMapsListQueryVariables = Exact<{
 }>;
 
 
-export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'GetAllMapsListOutput', allMapsList: Array<{ __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
+export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'GetAllMapsListOutput', allMapsList: Array<{ __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
 export type GetTranslatedMapContentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1987,10 +2069,20 @@ export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: 
 
 export type MapUploadMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
+  previewFileId?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typename?: 'MapUploadOutput', error: ErrorType, mapFileOutput: { __typename?: 'MapFileOutput', original_map_id: string, map_file_name: string } } };
+export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typename?: 'MapUploadOutput', error: ErrorType, mapFileOutput?: { __typename?: 'MapFileOutput', original_map_id: string, map_file_name: string } | null } };
+
+export type UploadFileMutationVariables = Exact<{
+  file: Scalars['Upload']['input'];
+  file_size: Scalars['Int']['input'];
+  file_type: Scalars['String']['input'];
+}>;
+
+
+export type UploadFileMutation = { __typename?: 'Mutation', uploadFile: { __typename?: 'IFileOutput', error: ErrorType, file?: { __typename?: 'IFile', id: number } | null } };
 
 export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
@@ -2250,6 +2342,23 @@ export type GetRecommendedTranslationFromDefinitionIdQueryVariables = Exact<{
 
 
 export type GetRecommendedTranslationFromDefinitionIdQuery = { __typename?: 'Query', getRecommendedTranslationFromDefinitionID: { __typename?: 'TranslationWithVoteOutput', error: ErrorType, translation_with_vote?: { __typename?: 'PhraseToPhraseTranslationWithVote', phrase_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | { __typename?: 'PhraseToWordTranslationWithVote', phrase_to_word_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | { __typename?: 'WordToPhraseTranslationWithVote', word_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | { __typename?: 'WordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } } | null } };
+
+export type LanguagesForGoogleTranslateQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LanguagesForGoogleTranslateQuery = { __typename?: 'Query', languagesForGoogleTranslate: { __typename?: 'LanguageListForGoogleTranslateOutput', error: ErrorType, languages?: Array<{ __typename?: 'LanguageForGoogleTranslate', code: string, name: string }> | null } };
+
+export type TranslateAllWordsAndPhrasesByGoogleMutationVariables = Exact<{
+  from_language_code: Scalars['String']['input'];
+  from_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  from_geo_code?: InputMaybe<Scalars['String']['input']>;
+  to_language_code: Scalars['String']['input'];
+  to_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  to_geo_code?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type TranslateAllWordsAndPhrasesByGoogleMutation = { __typename?: 'Mutation', translateAllWordsAndPhrasesByGoogle: { __typename?: 'TranslateAllWordsAndPhrasesByGoogleOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByGoogleResult', requestedCharactors: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
 
 export type ToggleTranslationVoteStatusMutationVariables = Exact<{
   translation_id: Scalars['ID']['input'];
@@ -3510,6 +3619,7 @@ export const GetAllMapsListDocument = gql`
       created_at
       created_by
       map_file_name_with_langs
+      preview_file_url
     }
   }
 }
@@ -3664,8 +3774,8 @@ export type GetOrigMapContentQueryHookResult = ReturnType<typeof useGetOrigMapCo
 export type GetOrigMapContentLazyQueryHookResult = ReturnType<typeof useGetOrigMapContentLazyQuery>;
 export type GetOrigMapContentQueryResult = Apollo.QueryResult<GetOrigMapContentQuery, GetOrigMapContentQueryVariables>;
 export const MapUploadDocument = gql`
-    mutation MapUpload($file: Upload!) {
-  mapUpload(file: $file) {
+    mutation MapUpload($file: Upload!, $previewFileId: String) {
+  mapUpload(file: $file, previewFileId: $previewFileId) {
     error
     mapFileOutput {
       original_map_id
@@ -3690,6 +3800,7 @@ export type MapUploadMutationFn = Apollo.MutationFunction<MapUploadMutation, Map
  * const [mapUploadMutation, { data, loading, error }] = useMapUploadMutation({
  *   variables: {
  *      file: // value for 'file'
+ *      previewFileId: // value for 'previewFileId'
  *   },
  * });
  */
@@ -3700,6 +3811,44 @@ export function useMapUploadMutation(baseOptions?: Apollo.MutationHookOptions<Ma
 export type MapUploadMutationHookResult = ReturnType<typeof useMapUploadMutation>;
 export type MapUploadMutationResult = Apollo.MutationResult<MapUploadMutation>;
 export type MapUploadMutationOptions = Apollo.BaseMutationOptions<MapUploadMutation, MapUploadMutationVariables>;
+export const UploadFileDocument = gql`
+    mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
+  uploadFile(file: $file, file_size: $file_size, file_type: $file_type) {
+    error
+    file {
+      id
+    }
+  }
+}
+    `;
+export type UploadFileMutationFn = Apollo.MutationFunction<UploadFileMutation, UploadFileMutationVariables>;
+
+/**
+ * __useUploadFileMutation__
+ *
+ * To run a mutation, you first call `useUploadFileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUploadFileMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [uploadFileMutation, { data, loading, error }] = useUploadFileMutation({
+ *   variables: {
+ *      file: // value for 'file'
+ *      file_size: // value for 'file_size'
+ *      file_type: // value for 'file_type'
+ *   },
+ * });
+ */
+export function useUploadFileMutation(baseOptions?: Apollo.MutationHookOptions<UploadFileMutation, UploadFileMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UploadFileMutation, UploadFileMutationVariables>(UploadFileDocument, options);
+      }
+export type UploadFileMutationHookResult = ReturnType<typeof useUploadFileMutation>;
+export type UploadFileMutationResult = Apollo.MutationResult<UploadFileMutation>;
+export type UploadFileMutationOptions = Apollo.BaseMutationOptions<UploadFileMutation, UploadFileMutationVariables>;
 export const PhraseDefinitionReadDocument = gql`
     query PhraseDefinitionRead($id: ID!) {
   phraseDefinitionRead(id: $id) {
@@ -4682,6 +4831,92 @@ export function useGetRecommendedTranslationFromDefinitionIdLazyQuery(baseOption
 export type GetRecommendedTranslationFromDefinitionIdQueryHookResult = ReturnType<typeof useGetRecommendedTranslationFromDefinitionIdQuery>;
 export type GetRecommendedTranslationFromDefinitionIdLazyQueryHookResult = ReturnType<typeof useGetRecommendedTranslationFromDefinitionIdLazyQuery>;
 export type GetRecommendedTranslationFromDefinitionIdQueryResult = Apollo.QueryResult<GetRecommendedTranslationFromDefinitionIdQuery, GetRecommendedTranslationFromDefinitionIdQueryVariables>;
+export const LanguagesForGoogleTranslateDocument = gql`
+    query LanguagesForGoogleTranslate {
+  languagesForGoogleTranslate {
+    error
+    languages {
+      code
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useLanguagesForGoogleTranslateQuery__
+ *
+ * To run a query within a React component, call `useLanguagesForGoogleTranslateQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLanguagesForGoogleTranslateQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLanguagesForGoogleTranslateQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useLanguagesForGoogleTranslateQuery(baseOptions?: Apollo.QueryHookOptions<LanguagesForGoogleTranslateQuery, LanguagesForGoogleTranslateQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LanguagesForGoogleTranslateQuery, LanguagesForGoogleTranslateQueryVariables>(LanguagesForGoogleTranslateDocument, options);
+      }
+export function useLanguagesForGoogleTranslateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LanguagesForGoogleTranslateQuery, LanguagesForGoogleTranslateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LanguagesForGoogleTranslateQuery, LanguagesForGoogleTranslateQueryVariables>(LanguagesForGoogleTranslateDocument, options);
+        }
+export type LanguagesForGoogleTranslateQueryHookResult = ReturnType<typeof useLanguagesForGoogleTranslateQuery>;
+export type LanguagesForGoogleTranslateLazyQueryHookResult = ReturnType<typeof useLanguagesForGoogleTranslateLazyQuery>;
+export type LanguagesForGoogleTranslateQueryResult = Apollo.QueryResult<LanguagesForGoogleTranslateQuery, LanguagesForGoogleTranslateQueryVariables>;
+export const TranslateAllWordsAndPhrasesByGoogleDocument = gql`
+    mutation TranslateAllWordsAndPhrasesByGoogle($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String, $to_language_code: String!, $to_dialect_code: String, $to_geo_code: String) {
+  translateAllWordsAndPhrasesByGoogle(
+    from_language: {language_code: $from_language_code, dialect_code: $from_dialect_code, geo_code: $from_geo_code}
+    to_language: {language_code: $to_language_code, dialect_code: $to_dialect_code, geo_code: $to_geo_code}
+  ) {
+    error
+    result {
+      requestedCharactors
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+    `;
+export type TranslateAllWordsAndPhrasesByGoogleMutationFn = Apollo.MutationFunction<TranslateAllWordsAndPhrasesByGoogleMutation, TranslateAllWordsAndPhrasesByGoogleMutationVariables>;
+
+/**
+ * __useTranslateAllWordsAndPhrasesByGoogleMutation__
+ *
+ * To run a mutation, you first call `useTranslateAllWordsAndPhrasesByGoogleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTranslateAllWordsAndPhrasesByGoogleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [translateAllWordsAndPhrasesByGoogleMutation, { data, loading, error }] = useTranslateAllWordsAndPhrasesByGoogleMutation({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      from_dialect_code: // value for 'from_dialect_code'
+ *      from_geo_code: // value for 'from_geo_code'
+ *      to_language_code: // value for 'to_language_code'
+ *      to_dialect_code: // value for 'to_dialect_code'
+ *      to_geo_code: // value for 'to_geo_code'
+ *   },
+ * });
+ */
+export function useTranslateAllWordsAndPhrasesByGoogleMutation(baseOptions?: Apollo.MutationHookOptions<TranslateAllWordsAndPhrasesByGoogleMutation, TranslateAllWordsAndPhrasesByGoogleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TranslateAllWordsAndPhrasesByGoogleMutation, TranslateAllWordsAndPhrasesByGoogleMutationVariables>(TranslateAllWordsAndPhrasesByGoogleDocument, options);
+      }
+export type TranslateAllWordsAndPhrasesByGoogleMutationHookResult = ReturnType<typeof useTranslateAllWordsAndPhrasesByGoogleMutation>;
+export type TranslateAllWordsAndPhrasesByGoogleMutationResult = Apollo.MutationResult<TranslateAllWordsAndPhrasesByGoogleMutation>;
+export type TranslateAllWordsAndPhrasesByGoogleMutationOptions = Apollo.BaseMutationOptions<TranslateAllWordsAndPhrasesByGoogleMutation, TranslateAllWordsAndPhrasesByGoogleMutationVariables>;
 export const ToggleTranslationVoteStatusDocument = gql`
     mutation ToggleTranslationVoteStatus($translation_id: ID!, $vote: Boolean!, $from_definition_type_is_word: Boolean!, $to_definition_type_is_word: Boolean!) {
   toggleTranslationVoteStatus(
@@ -5106,6 +5341,7 @@ export const namedOperations = {
     GetAllRecommendedSiteTextTranslationList: 'GetAllRecommendedSiteTextTranslationList',
     GetTranslationsByFromDefinitionId: 'GetTranslationsByFromDefinitionId',
     GetRecommendedTranslationFromDefinitionID: 'GetRecommendedTranslationFromDefinitionID',
+    LanguagesForGoogleTranslate: 'LanguagesForGoogleTranslate',
     UserRead: 'UserRead',
     GetFileUploadUrl: 'GetFileUploadUrl'
   },
@@ -5122,6 +5358,7 @@ export const namedOperations = {
     WordUpsert: 'WordUpsert',
     EmailResponse: 'EmailResponse',
     MapUpload: 'MapUpload',
+    UploadFile: 'UploadFile',
     PhraseDefinitionUpsert: 'PhraseDefinitionUpsert',
     TogglePhraseDefinitionVoteStatus: 'TogglePhraseDefinitionVoteStatus',
     TogglePhraseVoteStatus: 'TogglePhraseVoteStatus',
@@ -5130,6 +5367,7 @@ export const namedOperations = {
     UpsertSiteTextTranslation: 'UpsertSiteTextTranslation',
     ToggleSiteTextTranslationVoteStatus: 'ToggleSiteTextTranslationVoteStatus',
     SiteTextUpsert: 'SiteTextUpsert',
+    TranslateAllWordsAndPhrasesByGoogle: 'TranslateAllWordsAndPhrasesByGoogle',
     ToggleTranslationVoteStatus: 'ToggleTranslationVoteStatus',
     UpsertTranslation: 'UpsertTranslation',
     UpsertTranslationFromWordAndDefinitionlikeString: 'UpsertTranslationFromWordAndDefinitionlikeString',

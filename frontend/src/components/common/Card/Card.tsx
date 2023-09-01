@@ -37,11 +37,31 @@ export function Card({
   discussion,
 }: CardProps) {
   const voteButtonCom = vote ? <VoteButtonsHerizontal {...vote} /> : null;
-  const chatButton = discussion ? (
-    <StChatIcon
-      icon={chatbubbleEllipsesSharp}
-      onClick={() => discussion.onChatClick && discussion.onChatClick()}
-    />
+
+  // the chat icon should be grouped with the vote buttons
+  const reactionCom = discussion ? (
+    vote ? (
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+        {voteButtonCom}
+        <StChatIcon
+          icon={chatbubbleEllipsesSharp}
+          onClick={(e) => {
+            e.stopPropagation();
+            discussion.onChatClick && discussion.onChatClick();
+          }}
+        />
+      </div>
+    ) : (
+      <StChatIcon
+        icon={chatbubbleEllipsesSharp}
+        onClick={(e) => {
+          e.stopPropagation();
+          discussion.onChatClick && discussion.onChatClick();
+        }}
+      />
+    )
+  ) : vote ? (
+    voteButtonCom
   ) : null;
 
   return (
@@ -54,7 +74,7 @@ export function Card({
         <CustomCardHeader>
           <CustomCardTitle>
             {content || ''}
-            {voteFor === 'content' ? voteButtonCom : null}
+            {voteFor === 'content' ? reactionCom : null}
           </CustomCardTitle>
         </CustomCardHeader>
       ) : null}
@@ -62,10 +82,7 @@ export function Card({
       {description ? (
         <CustomCardContent>
           {description}
-          <div style={{ display: 'flex' }}>
-            {voteFor === 'description' ? voteButtonCom : null}
-            {chatButton}
-          </div>
+          {voteFor === 'description' ? reactionCom : null}
         </CustomCardContent>
       ) : null}
     </CustomCard>
