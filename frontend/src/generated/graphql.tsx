@@ -75,6 +75,8 @@ export enum ErrorType {
   EmailUnavailable = 'EmailUnavailable',
   FileSaveFailed = 'FileSaveFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
+  ForumDeleteFailed = 'ForumDeleteFailed',
+  ForumUpsertFailed = 'ForumUpsertFailed',
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
   InvalidInputs = 'InvalidInputs',
   LimitInvalid = 'LimitInvalid',
@@ -125,6 +127,49 @@ export type FileUploadUrlResponse = {
   avatar_image_url: Scalars['String']['output'];
   error: ErrorType;
   url: Scalars['String']['output'];
+};
+
+export type Forum = {
+  __typename?: 'Forum';
+  forum_id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type ForumDeleteInput = {
+  forum_id: Scalars['ID']['input'];
+};
+
+export type ForumDeleteOutput = {
+  __typename?: 'ForumDeleteOutput';
+  error: ErrorType;
+  forum_id: Scalars['ID']['output'];
+};
+
+export type ForumListOutput = {
+  __typename?: 'ForumListOutput';
+  error: ErrorType;
+  forums: Array<Forum>;
+};
+
+export type ForumReadInput = {
+  forum_id: Scalars['ID']['input'];
+};
+
+export type ForumReadOutput = {
+  __typename?: 'ForumReadOutput';
+  error: ErrorType;
+  forum?: Maybe<Forum>;
+};
+
+export type ForumUpsertInput = {
+  forum_id?: InputMaybe<Scalars['ID']['input']>;
+  name: Scalars['String']['input'];
+};
+
+export type ForumUpsertOutput = {
+  __typename?: 'ForumUpsertOutput';
+  error: ErrorType;
+  forum?: Maybe<Forum>;
 };
 
 export type FromPhraseAndDefintionlikeStringUpsertInput = {
@@ -378,6 +423,8 @@ export type Mutation = {
   __typename?: 'Mutation';
   avatarUpdateResolver: AvatarUpdateOutput;
   emailResponseResolver: EmailResponseOutput;
+  forumDelete: ForumDeleteOutput;
+  forumUpsert: ForumUpsertOutput;
   login: LoginOutput;
   logout: LogoutOutput;
   mapUpload: MapUploadOutput;
@@ -428,6 +475,16 @@ export type MutationAvatarUpdateResolverArgs = {
 
 export type MutationEmailResponseResolverArgs = {
   input: EmailResponseInput;
+};
+
+
+export type MutationForumDeleteArgs = {
+  input: ForumDeleteInput;
+};
+
+
+export type MutationForumUpsertArgs = {
+  input: ForumUpsertInput;
 };
 
 
@@ -961,6 +1018,8 @@ export type Query = {
   file: IFileOutput;
   fileList: Array<IFile>;
   fileUploadUrlRequest: FileUploadUrlResponse;
+  forumRead: ForumReadOutput;
+  forums: ForumListOutput;
   getAllMapsList: GetAllMapsListOutput;
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput;
   getAllRecommendedSiteTextTranslationListByLanguage: SiteTextTranslationWithVoteListByLanguageOutput;
@@ -1023,6 +1082,11 @@ export type QueryFileArgs = {
 
 export type QueryFileUploadUrlRequestArgs = {
   input: FileUploadUrlRequest;
+};
+
+
+export type QueryForumReadArgs = {
+  input: ForumReadInput;
 };
 
 
@@ -2013,6 +2077,42 @@ export type EmailResponseMutationVariables = Exact<{
 
 export type EmailResponseMutation = { __typename?: 'Mutation', emailResponseResolver: { __typename?: 'EmailResponseOutput', error: ErrorType } };
 
+export type ForumFragmentFragment = { __typename?: 'Forum', forum_id: string, name: string };
+
+export type CreateForumMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+
+export type CreateForumMutation = { __typename?: 'Mutation', forumUpsert: { __typename?: 'ForumUpsertOutput', error: ErrorType, forum?: { __typename?: 'Forum', forum_id: string, name: string } | null } };
+
+export type GetForumByIdQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetForumByIdQuery = { __typename?: 'Query', forumRead: { __typename?: 'ForumReadOutput', error: ErrorType, forum?: { __typename?: 'Forum', forum_id: string, name: string } | null } };
+
+export type GetForumsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetForumsQuery = { __typename?: 'Query', forums: { __typename?: 'ForumListOutput', error: ErrorType, forums: Array<{ __typename?: 'Forum', forum_id: string, name: string }> } };
+
+export type UpdateForumMutationVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name: Scalars['String']['input'];
+}>;
+
+
+export type UpdateForumMutation = { __typename?: 'Mutation', forumUpsert: { __typename?: 'ForumUpsertOutput', error: ErrorType, forum?: { __typename?: 'Forum', forum_id: string, name: string } | null } };
+
+export type DeleteForumMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteForumMutation = { __typename?: 'Mutation', forumDelete: { __typename?: 'ForumDeleteOutput', error: ErrorType, forum_id: string } };
+
 export type MapPhraseWithVotesFragmentFragment = { __typename?: 'MapPhraseWithVotes', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string };
 
 export type WordWithVotesFragmentFragment = { __typename?: 'MapWordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string };
@@ -2545,6 +2645,12 @@ export const PageInfoFragmentFragmentDoc = gql`
   hasNextPage
   hasPreviousPage
   startCursor
+}
+    `;
+export const ForumFragmentFragmentDoc = gql`
+    fragment ForumFragment on Forum {
+  forum_id
+  name
 }
     `;
 export const MapPhraseWithVotesFragmentFragmentDoc = gql`
@@ -3494,6 +3600,188 @@ export function useEmailResponseMutation(baseOptions?: Apollo.MutationHookOption
 export type EmailResponseMutationHookResult = ReturnType<typeof useEmailResponseMutation>;
 export type EmailResponseMutationResult = Apollo.MutationResult<EmailResponseMutation>;
 export type EmailResponseMutationOptions = Apollo.BaseMutationOptions<EmailResponseMutation, EmailResponseMutationVariables>;
+export const CreateForumDocument = gql`
+    mutation CreateForum($name: String!) {
+  forumUpsert(input: {name: $name}) {
+    error
+    forum {
+      ...ForumFragment
+    }
+  }
+}
+    ${ForumFragmentFragmentDoc}`;
+export type CreateForumMutationFn = Apollo.MutationFunction<CreateForumMutation, CreateForumMutationVariables>;
+
+/**
+ * __useCreateForumMutation__
+ *
+ * To run a mutation, you first call `useCreateForumMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateForumMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createForumMutation, { data, loading, error }] = useCreateForumMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useCreateForumMutation(baseOptions?: Apollo.MutationHookOptions<CreateForumMutation, CreateForumMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateForumMutation, CreateForumMutationVariables>(CreateForumDocument, options);
+      }
+export type CreateForumMutationHookResult = ReturnType<typeof useCreateForumMutation>;
+export type CreateForumMutationResult = Apollo.MutationResult<CreateForumMutation>;
+export type CreateForumMutationOptions = Apollo.BaseMutationOptions<CreateForumMutation, CreateForumMutationVariables>;
+export const GetForumByIdDocument = gql`
+    query GetForumById($id: ID!) {
+  forumRead(input: {forum_id: $id}) {
+    error
+    forum {
+      ...ForumFragment
+    }
+  }
+}
+    ${ForumFragmentFragmentDoc}`;
+
+/**
+ * __useGetForumByIdQuery__
+ *
+ * To run a query within a React component, call `useGetForumByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetForumByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetForumByIdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetForumByIdQuery(baseOptions: Apollo.QueryHookOptions<GetForumByIdQuery, GetForumByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetForumByIdQuery, GetForumByIdQueryVariables>(GetForumByIdDocument, options);
+      }
+export function useGetForumByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetForumByIdQuery, GetForumByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetForumByIdQuery, GetForumByIdQueryVariables>(GetForumByIdDocument, options);
+        }
+export type GetForumByIdQueryHookResult = ReturnType<typeof useGetForumByIdQuery>;
+export type GetForumByIdLazyQueryHookResult = ReturnType<typeof useGetForumByIdLazyQuery>;
+export type GetForumByIdQueryResult = Apollo.QueryResult<GetForumByIdQuery, GetForumByIdQueryVariables>;
+export const GetForumsDocument = gql`
+    query GetForums {
+  forums {
+    error
+    forums {
+      ...ForumFragment
+    }
+  }
+}
+    ${ForumFragmentFragmentDoc}`;
+
+/**
+ * __useGetForumsQuery__
+ *
+ * To run a query within a React component, call `useGetForumsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetForumsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetForumsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetForumsQuery(baseOptions?: Apollo.QueryHookOptions<GetForumsQuery, GetForumsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetForumsQuery, GetForumsQueryVariables>(GetForumsDocument, options);
+      }
+export function useGetForumsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetForumsQuery, GetForumsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetForumsQuery, GetForumsQueryVariables>(GetForumsDocument, options);
+        }
+export type GetForumsQueryHookResult = ReturnType<typeof useGetForumsQuery>;
+export type GetForumsLazyQueryHookResult = ReturnType<typeof useGetForumsLazyQuery>;
+export type GetForumsQueryResult = Apollo.QueryResult<GetForumsQuery, GetForumsQueryVariables>;
+export const UpdateForumDocument = gql`
+    mutation UpdateForum($id: ID, $name: String!) {
+  forumUpsert(input: {forum_id: $id, name: $name}) {
+    error
+    forum {
+      ...ForumFragment
+    }
+  }
+}
+    ${ForumFragmentFragmentDoc}`;
+export type UpdateForumMutationFn = Apollo.MutationFunction<UpdateForumMutation, UpdateForumMutationVariables>;
+
+/**
+ * __useUpdateForumMutation__
+ *
+ * To run a mutation, you first call `useUpdateForumMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateForumMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateForumMutation, { data, loading, error }] = useUpdateForumMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useUpdateForumMutation(baseOptions?: Apollo.MutationHookOptions<UpdateForumMutation, UpdateForumMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateForumMutation, UpdateForumMutationVariables>(UpdateForumDocument, options);
+      }
+export type UpdateForumMutationHookResult = ReturnType<typeof useUpdateForumMutation>;
+export type UpdateForumMutationResult = Apollo.MutationResult<UpdateForumMutation>;
+export type UpdateForumMutationOptions = Apollo.BaseMutationOptions<UpdateForumMutation, UpdateForumMutationVariables>;
+export const DeleteForumDocument = gql`
+    mutation DeleteForum($id: ID!) {
+  forumDelete(input: {forum_id: $id}) {
+    error
+    forum_id
+  }
+}
+    `;
+export type DeleteForumMutationFn = Apollo.MutationFunction<DeleteForumMutation, DeleteForumMutationVariables>;
+
+/**
+ * __useDeleteForumMutation__
+ *
+ * To run a mutation, you first call `useDeleteForumMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteForumMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteForumMutation, { data, loading, error }] = useDeleteForumMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteForumMutation(baseOptions?: Apollo.MutationHookOptions<DeleteForumMutation, DeleteForumMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteForumMutation, DeleteForumMutationVariables>(DeleteForumDocument, options);
+      }
+export type DeleteForumMutationHookResult = ReturnType<typeof useDeleteForumMutation>;
+export type DeleteForumMutationResult = Apollo.MutationResult<DeleteForumMutation>;
+export type DeleteForumMutationOptions = Apollo.BaseMutationOptions<DeleteForumMutation, DeleteForumMutationVariables>;
 export const GetOrigMapWordsDocument = gql`
     query GetOrigMapWords($original_map_id: ID, $o_language_code: String, $t_language_code: String, $t_dialect_code: String, $t_geo_code: String) {
   getOrigMapWords(
@@ -5320,6 +5608,8 @@ export const namedOperations = {
     GetWordsByLanguage: 'GetWordsByLanguage',
     GetWordDefinitionsByWordId: 'GetWordDefinitionsByWordId',
     GetWordWithVoteById: 'GetWordWithVoteById',
+    GetForumById: 'GetForumById',
+    GetForums: 'GetForums',
     GetOrigMapWords: 'GetOrigMapWords',
     GetOrigMapPhrases: 'GetOrigMapPhrases',
     GetAllMapsList: 'GetAllMapsList',
@@ -5357,6 +5647,9 @@ export const namedOperations = {
     ToggleWordVoteStatus: 'ToggleWordVoteStatus',
     WordUpsert: 'WordUpsert',
     EmailResponse: 'EmailResponse',
+    CreateForum: 'CreateForum',
+    UpdateForum: 'UpdateForum',
+    DeleteForum: 'DeleteForum',
     MapUpload: 'MapUpload',
     UploadFile: 'UploadFile',
     PhraseDefinitionUpsert: 'PhraseDefinitionUpsert',
@@ -5388,6 +5681,7 @@ export const namedOperations = {
     WordVoteStatusFragment: 'WordVoteStatusFragment',
     WordWithVoteListEdgeFragment: 'WordWithVoteListEdgeFragment',
     PageInfoFragment: 'PageInfoFragment',
+    ForumFragment: 'ForumFragment',
     MapPhraseWithVotesFragment: 'MapPhraseWithVotesFragment',
     WordWithVotesFragment: 'WordWithVotesFragment',
     PhraseFragment: 'PhraseFragment',

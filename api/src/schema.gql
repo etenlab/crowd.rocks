@@ -57,6 +57,8 @@ enum ErrorType {
   EmailUnavailable
   FileSaveFailed
   FileWithFilenameAlreadyExists
+  ForumDeleteFailed
+  ForumUpsertFailed
   InvalidEmailOrPassword
   InvalidInputs
   LimitInvalid
@@ -106,6 +108,44 @@ type FileUploadUrlResponse {
   avatar_image_url: String!
   error: ErrorType!
   url: String!
+}
+
+type Forum {
+  forum_id: ID!
+  name: String!
+}
+
+input ForumDeleteInput {
+  forum_id: ID!
+}
+
+type ForumDeleteOutput {
+  error: ErrorType!
+  forum_id: ID!
+}
+
+type ForumListOutput {
+  error: ErrorType!
+  forums: [Forum!]!
+}
+
+input ForumReadInput {
+  forum_id: ID!
+}
+
+type ForumReadOutput {
+  error: ErrorType!
+  forum: Forum
+}
+
+input ForumUpsertInput {
+  forum_id: ID
+  name: String!
+}
+
+type ForumUpsertOutput {
+  error: ErrorType!
+  forum: Forum
 }
 
 input FromPhraseAndDefintionlikeStringUpsertInput {
@@ -338,6 +378,8 @@ type MapWordWithVotes {
 type Mutation {
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
+  forumDelete(input: ForumDeleteInput!): ForumDeleteOutput!
+  forumUpsert(input: ForumUpsertInput!): ForumUpsertOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
   mapUpload(file: Upload!, previewFileId: String): MapUploadOutput!
@@ -646,6 +688,8 @@ type Query {
   file(id: Int!): IFileOutput!
   fileList: [IFile!]!
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
+  forumRead(input: ForumReadInput!): ForumReadOutput!
+  forums: ForumListOutput!
   getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput!
   getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): SiteTextTranslationWithVoteListByLanguageOutput!

@@ -23,6 +23,9 @@ export enum ErrorType {
   EmailIsBlocked = 'EmailIsBlocked',
   EmailUnavailable = 'EmailUnavailable',
 
+  ForumUpsertFailed = 'ForumUpsertFailed',
+  ForumDeleteFailed = 'ForumDeleteFailed',
+
   FileSaveFailed = 'FileSaveFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
 

@@ -10,6 +10,7 @@ export class Forum {
 @InputType()
 export class ForumUpsertInput {
   @Field(() => String) name: string;
+  @Field(() => ID, { nullable: true }) forum_id?: number;
 }
 
 @ObjectType()
@@ -25,4 +26,19 @@ export class ForumReadInput {
 @ObjectType()
 export class ForumReadOutput extends GenericOutput {
   @Field(() => Forum, { nullable: true }) forum: Forum | null;
+}
+
+@InputType()
+export class ForumDeleteInput {
+  @Field(() => ID) forum_id: string;
+}
+
+@ObjectType()
+export class ForumDeleteOutput extends GenericOutput {
+  @Field(() => ID) forum_id: string;
+}
+
+@ObjectType()
+export class ForumListOutput extends GenericOutput {
+  @Field(() => [Forum]) forums: Forum[];
 }

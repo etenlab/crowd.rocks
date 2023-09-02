@@ -1,17 +1,14 @@
-create or replace procedure word_upsert(
-  in p_wordlike_string varchar(64),
-  in p_language_code varchar(32),
-  in p_dialect_code varchar(32),
-  in p_geo_code varchar(32),
+create or replace procedure forum_upsert(
+  in p_name varchar(128),
   in p_token varchar(512),
-  inout p_word_id bigint,
+  inout p_forum_id bigint,
   inout p_error_type varchar(32)
 )
 language plpgsql
 as $$
 declare
   v_user_id bigint;
-  v_current_wordlike_string_id bigint;
+  v_forum_name varchar(128);
 begin
   p_error_type := 'UnknownError';
 
@@ -26,88 +23,40 @@ begin
     return;
   end if;
 
-  -- check for string existence
-  select wordlike_string_id
-  from wordlike_strings
-  where wordlike_string = p_wordlike_string
-  into v_current_wordlike_string_id;
 
-  -- create wordlike string if needed
-  if v_current_wordlike_string_id is null then
-    insert into wordlike_strings (wordlike_string, created_by)
-    values (p_wordlike_string, v_user_id)
-    on conflict do nothing
-    returning wordlike_string_id
-    into v_current_wordlike_string_id;
+  -- update forum if needed
+  if p_forum_id is not null then
+    update forums 
+    set name = p_name
+    where forum_id = p_forum_id;
 
-    if v_current_wordlike_string_id is null then
-      select wordlike_string_id
-      from wordlike_strings
-      where wordlike_string = p_wordlike_string
-      into v_current_wordlike_string_id;
+    select name
+    from forums
+    into v_forum_name
+    where forum_id = p_forum_id;
+
+    if v_forum_name != p_name then
+      p_error_type := 'ForumUpsertFailed';
+      return;
     end if;
   end if;
 
-  if v_current_wordlike_string_id is null then
-    p_error_type := 'WordLikeStringInsertFailed';
-    return;
-  end if;
-
-  -- check for word existence
-  if p_dialect_code is null and p_geo_code is null then
-    select word_id
-    from words
-    where wordlike_string_id = v_current_wordlike_string_id
-      and language_code = p_language_code
-    into p_word_id;
-  elsif p_dialect_code is not null and p_geo_code is null then
-    select word_id
-    from words
-    where wordlike_string_id = v_current_wordlike_string_id
-      and language_code = p_language_code
-      and dialect_code = p_dialect_code
-      and geo_code is null
-    into p_word_id;
-  elsif p_dialect_code is null and p_geo_code is not null then
-    select word_id
-    from words
-    where wordlike_string_id = v_current_wordlike_string_id
-      and language_code = p_language_code
-      and dialect_code is null
-      and geo_code = p_geo_code
-    into p_word_id;
-  elsif p_dialect_code is not null and p_geo_code is not null then
-    select word_id
-    from words
-    where wordlike_string_id = v_current_wordlike_string_id
-      and language_code = p_language_code
-      and dialect_code = p_dialect_code
-      and geo_code = p_geo_code
-    into p_word_id;
-  end if;
-
   -- create word if needed
-  if p_word_id is null then
-    insert into words(
-      wordlike_string_id, 
-      language_code, 
-      dialect_code, 
-      geo_code, 
+  if p_forum_id is null then
+    insert into forums(
+      name, 
       created_by
     ) values (
-      v_current_wordlike_string_id,
-      p_language_code,
-      p_dialect_code,
-      p_geo_code,
+      p_name,
       v_user_id
     )
     on conflict do nothing
-    returning word_id
-    into p_word_id;
+    returning forum_id
+    into p_forum_id;
   end if;
 
-  if p_word_id is null then
-    p_error_type := 'WordInsertFailed';
+  if p_forum_id is null then
+    p_error_type := 'ForumUpsertFailed';
     return;
   end if;
 

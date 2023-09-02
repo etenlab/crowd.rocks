@@ -205,6 +205,10 @@ export class DatabaseVersionControlService {
     // file
     await this.runSqlFile('./src/core/sql/file/file_create.sql');
 
+    // forum
+    await this.runSqlFile('./src/core/sql/forums/forum_upsert.sql');
+    await this.runSqlFile('./src/core/sql/forums/forum_delete.sql');
+
     await this.setVersionNumber(2);
   }
 
