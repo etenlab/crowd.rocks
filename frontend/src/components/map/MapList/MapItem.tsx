@@ -1,6 +1,6 @@
 import { MouseEventHandler, useRef } from 'react';
 import { IonBadge, IonItem, IonIcon } from '@ionic/react';
-import { downloadOutline } from 'ionicons/icons';
+import { downloadOutline, trashBin } from 'ionicons/icons';
 import { styled } from 'styled-components';
 
 import {
@@ -65,6 +65,26 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
     e.stopPropagation();
   };
 
+  const handleDeleteMap: MouseEventHandler<HTMLIonIconElement> = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (
+      !confirm(
+        `Delete map ${
+          mapItem.is_original
+            ? mapItem.map_file_name
+            : mapItem.map_file_name_with_langs
+        }? It is ${
+          mapItem.is_original
+            ? 'original map. All related data (translated maps) will be also deleted permanently.'
+            : 'translated map. It will be re-created on any translation action performend by sombody with original map.'
+        }`,
+      )
+    ) {
+      return;
+    }
+  };
+
   if (
     origMapContent.data &&
     !origMapContent.error &&
@@ -99,11 +119,19 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
   return (
     <IonItem {...rest} routerLink={routerLink}>
       <StItem>
-        <div>
+        <PreviewBlock>
           {mapItem.preview_file_url ? (
             <img src={mapItem.preview_file_url} />
           ) : null}
-        </div>
+          <TrashIcon
+            icon={trashBin}
+            onClick={handleDeleteMap}
+            size="large"
+            color="danger"
+            className="clickable theme-icon"
+          />
+        </PreviewBlock>
+
         <FileName>
           {mapItem.is_original
             ? mapItem.map_file_name.replace('.cf.svg', '')
@@ -118,7 +146,7 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
                 ` [${mapItem.translated_percent || ''}%]`}
             </IonBadge>
           )}
-          <IonIcon
+          <DownloadIcon
             icon={downloadOutline}
             onClick={handleDownloadSvg}
             size="large"
@@ -139,6 +167,11 @@ export const MapItem = styled(NotStyledMapItem)(() => ({
   float: 'left',
 }));
 
+const PreviewBlock = styled.div`
+  display: flex;
+  align-items: start;
+`;
+
 const FileName = styled.div``;
 
 const StItem = styled.div``;
@@ -151,3 +184,20 @@ const IconRow = styled.div`
 const OrigBadge = styled(IonBadge)(() => ({
   background: 'purple',
 }));
+
+const TrashIcon = styled(IonIcon)`
+  padding: 3px;
+  margin: 2px;
+  &:hover {
+    box-shadow: 0px 0px 4px 1px gray;
+    border-radius: 50%;
+  }
+`;
+const DownloadIcon = styled(IonIcon)`
+  padding: 3px;
+  margin: 2px;
+  &:hover {
+    box-shadow: 0px 0px 4px 1px gray;
+    border-radius: 50%;
+  }
+`;

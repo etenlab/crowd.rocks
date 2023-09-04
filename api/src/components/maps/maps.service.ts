@@ -642,6 +642,15 @@ export class MapsService {
     return { translatedMap, translations };
   }
 
+  async deleteMap(mapId: string, token): Promise<string> {
+    const mapInfo = await this.mapsRepository.getMapInfo(mapId);
+    if (mapInfo.is_original) {
+      return this.mapsRepository.deleteOriginalMap(mapId, token);
+    } else {
+      return this.mapsRepository.deleteTranslatedMap(mapId, token);
+    }
+  }
+
   /**
    * Mutetes INode sturcture - replaces subnodes' values using provided valuesToReplace
    * @param iNodeStructure INode structure to replace values inside it.

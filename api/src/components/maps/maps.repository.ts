@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
@@ -1041,5 +1041,53 @@ export class MapsRepository {
 
     const resQ = await this.pg.pool.query(sqlStr, params);
     return resQ.rows[0].translated_map_word_id;
+  }
+
+  async deleteTranslatedMap(mapId: string, token: string) {
+    const params = [mapId];
+    const sqlStr = `
+      delete
+      from
+        public.translated_maps
+      where
+        translated_map_id = $1
+      returning translated_map_id
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    if (resQ.rows.length > 1) {
+      Logger.error(
+        `Something wrong, deleted several translated maps:` +
+        JSON.stringify(resQ.rows),
+      );
+      throw new Error(ErrorType.MapDeletionError);
+    }
+    if (!resQ.rows || resQ.rows.length < 1) {
+      throw new Error(ErrorType.MapNotFound);
+    }
+    return resQ.rows[0].translated_map_id;
+  }
+
+  async deleteOriginalMap(mapId: string, token: string) {
+    const params = [mapId];
+    const sqlStr = `
+      delete
+      from
+        public.original_maps
+      where
+        original_map_id = $1
+      returning original_map_id
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    if (resQ.rows.length > 1) {
+      Logger.error(
+        `Something wrong, deleted several original maps:` +
+        JSON.stringify(resQ.rows),
+      );
+      throw new Error(ErrorType.MapDeletionError);
+    }
+    if (!resQ.rows || resQ.rows.length < 1) {
+      throw new Error(ErrorType.MapNotFound);
+    }
+    return resQ.rows[0].original_map_id;
   }
 }

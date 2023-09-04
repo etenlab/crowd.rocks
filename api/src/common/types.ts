@@ -71,6 +71,8 @@ export enum ErrorType {
 
   MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
   MapInsertFailed = 'MapInsertFailed',
+  MapDeletionError = 'MapDeletionError',
+  MapNotFound = 'MapNotFound',
 
   PostNotFound = 'PostNotFound',
 

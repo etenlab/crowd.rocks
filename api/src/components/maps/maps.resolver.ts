@@ -17,6 +17,8 @@ import {
   GetOrigMapWordsOutput,
   GetTranslatedMapContentInput,
   GetTranslatedMapContentOutput,
+  MapDeleteInput,
+  MapDeleteOutput,
   MapUploadOutput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
@@ -61,13 +63,12 @@ export class MapsResolver {
         mapFileOutput: null,
       };
     }
-    const userToken = await this.authenticationService.getAdminToken();
     try {
       const map = await this.mapService.parseAndSaveNewMap({
         fileBody,
         mapFileName: map_file_name,
         previewFileId,
-        token: userToken,
+        token: bearer,
       });
       return {
         error: ErrorType.NoError,
@@ -77,6 +78,35 @@ export class MapsResolver {
       return {
         error: error,
         mapFileOutput: null,
+      };
+    }
+  }
+
+  @Mutation(() => MapDeleteOutput)
+  async mapDelete(
+    @Args('input') input: MapDeleteInput,
+    @Context() req: any,
+  ): Promise<MapDeleteOutput> {
+    const userToken = getBearer(req);
+    const user_id = await this.authenticationService.get_user_id_from_bearer(
+      userToken,
+    );
+    const admin_id = await this.authenticationService.get_admin_id();
+    if (admin_id !== user_id) {
+      return {
+        deletedMapId: null,
+        error: ErrorType.Unauthorized,
+      };
+    }
+    try {
+      return {
+        deletedMapId: await this.mapService.deleteMap(input.mapId, userToken),
+        error: ErrorType.NoError,
+      };
+    } catch (error) {
+      return {
+        deletedMapId: null,
+        error: error,
       };
     }
   }

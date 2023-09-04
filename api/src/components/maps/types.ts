@@ -32,6 +32,15 @@ export class MapUploadOutput extends GenericOutput {
   @Field(() => MapFileOutput, { nullable: true })
   mapFileOutput?: MapFileOutput | null | undefined;
 }
+@InputType()
+export class MapDeleteInput {
+  @Field(() => String, { nullable: true }) mapId: string;
+}
+@ObjectType()
+export class MapDeleteOutput extends GenericOutput {
+  @Field(() => String, { nullable: true })
+  deletedMapId?: string | null | undefined;
+}
 
 @ObjectType()
 export class GetOrigMapsListOutput {
