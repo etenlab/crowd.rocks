@@ -94,6 +94,15 @@ const apiServiceStack = new ApiServiceStack(
         AWS_REGION: config.awsRegion,
       },
       {
+        AWS_S3_REGION: config.awsRegion,
+      },
+      {
+        AWS_S3_BUCKET_NAME: config.publicFilesBucketName
+      },
+      {
+        HTTP_LOGGING: 'false'
+      },
+      {
         REACT_APP_SERVER_URL: `https://${apiService.rootdomain}`,
       },
       {
