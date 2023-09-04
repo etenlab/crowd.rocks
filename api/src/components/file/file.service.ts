@@ -52,13 +52,13 @@ export class FileService {
       const creds = AWS_ENVIRONMENTS.includes(process.env.NODE_ENV)
         ? {
             region,
+          }
+        : {
+            region,
             credentials: {
               accessKeyId,
               secretAccessKey,
             },
-          }
-        : {
-            region,
           };
       const s3Client = new S3Client(creds);
 
