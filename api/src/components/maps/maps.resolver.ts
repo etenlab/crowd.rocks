@@ -69,6 +69,10 @@ export class MapsResolver {
         previewFileId,
         token: userToken,
       });
+      await this.mapService.translateOrigMapsByIds(
+        [map.original_map_id],
+        userToken,
+      );
       return {
         error: ErrorType.NoError,
         mapFileOutput: map,
