@@ -27,6 +27,7 @@ export enum ErrorType {
   ForumDeleteFailed = 'ForumDeleteFailed',
 
   FileSaveFailed = 'FileSaveFailed',
+  FileDeleteFailed = 'FileDeleteFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
   FolderIdNotDefined = 'FolderIdNotDefined',
   FolderForThreadNotExists = 'FolderForThreadNotExists',
@@ -81,6 +82,8 @@ export enum ErrorType {
 
   MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
   MapInsertFailed = 'MapInsertFailed',
+  MapDeletionError = 'MapDeletionError',
+  MapNotFound = 'MapNotFound',
 
   PostNotFound = 'PostNotFound',
 

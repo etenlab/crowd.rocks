@@ -27,6 +27,10 @@ export class IFileOutput {
   @Field(() => IFile, { nullable: true }) file: IFile | null;
   @Field(() => ErrorType) error: ErrorType;
 }
+export class IFileDeleteOutput {
+  @Field(() => String, { nullable: true }) deletedId: string | null;
+  @Field(() => ErrorType) error: ErrorType;
+}
 
 @ObjectType()
 export class GetFileListOutput {

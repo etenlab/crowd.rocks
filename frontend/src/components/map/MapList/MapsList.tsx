@@ -1,18 +1,27 @@
 import {
   InputChangeEventDetail,
   InputCustomEvent,
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
   IonList,
+  IonModal,
+  IonTitle,
+  IonToolbar,
   useIonRouter,
   useIonToast,
 } from '@ionic/react';
 import { MapItem } from './MapItem';
 import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ErrorType,
+  MapFileOutput,
   useGetAllMapsListLazyQuery,
   useIsAdminLoggedInLazyQuery,
+  useMapDeleteMutation,
   useMapUploadMutation,
   useUploadFileMutation,
 } from '../../../generated/graphql';
@@ -43,11 +52,15 @@ export const MapList: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sendMapFile] = useMapUploadMutation();
   const [uploadFile] = useUploadFileMutation();
+  const [mapDelete] = useMapDeleteMutation();
+
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
   });
 
   const { makeMapThumbnail } = useMapTranslationTools();
+  const [isMapDeleteModalOpen, setIsMapDeleteModalOpen] = useState(false);
+  const candidateForDeletion = useRef<MapFileOutput | undefined>();
 
   useEffect(() => {
     const user_id = globals.get_user_id();
@@ -131,6 +144,25 @@ export const MapList: React.FC = () => {
     [makeMapThumbnail, uploadFile, sendMapFile, present],
   );
 
+  const handleDeleteMap = (mapItem: MapFileOutput) => {
+    const mapId = mapItem.is_original
+      ? mapItem.original_map_id
+      : mapItem.translated_map_id;
+    if (!mapId) {
+      console.error(
+        `Error: original_map_id or translated_map_id isn't specified`,
+      );
+      return;
+    }
+    mapDelete({
+      variables: {
+        mapId,
+        is_original: mapItem.is_original,
+      },
+      refetchQueries: ['GetAllMapsList'],
+    });
+  };
+
   return (
     <>
       <Caption>{tr('Maps')}</Caption>
@@ -176,11 +208,77 @@ export const MapList: React.FC = () => {
                 m2.map_file_name_with_langs,
               ),
             )
-            .map((m, i) => <MapItem mapItem={m} key={i} />)
+            .map((m, i) => (
+              <MapItem
+                mapItem={m}
+                key={i}
+                candidateForDeletionRef={candidateForDeletion}
+                setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
+                showDelete={!!isAdminRes?.loggedInIsAdmin.isAdmin}
+              />
+            ))
         ) : (
           <div> {tr('No maps found')} </div>
         )}
       </IonList>
+      <IonModal isOpen={isMapDeleteModalOpen}>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('Delete map ?')}</IonTitle>
+            <IonButtons slot="start">
+              <IonButton
+                fill="solid"
+                onClick={() => {
+                  setIsMapDeleteModalOpen(false);
+                }}
+              >
+                {tr('Cancel')}
+              </IonButton>
+            </IonButtons>
+            <IonButtons slot="end">
+              <IonButton
+                fill="solid"
+                color={'danger'}
+                onClick={() => {
+                  candidateForDeletion.current &&
+                    handleDeleteMap(candidateForDeletion.current);
+                  setIsMapDeleteModalOpen(false);
+                }}
+              >
+                {tr('Confirm')}
+              </IonButton>
+            </IonButtons>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {candidateForDeletion.current && (
+            <>
+              {candidateForDeletion.current.is_original ? (
+                <>
+                  {tr(`You are about to delete original map`)}{' '}
+                  {candidateForDeletion.current.map_file_name}
+                  <p>
+                    {tr(
+                      `All related data (translated maps) will be also deleted permanently`,
+                    )}
+                    .
+                  </p>
+                </>
+              ) : (
+                <>
+                  {tr(`You are about to delete translated map`)}{' '}
+                  {candidateForDeletion.current.map_file_name_with_langs}
+                  <p>
+                    {tr(`It will be deleted after confirmation. Note that it will
+                  be re-created on any translation action performed by any user
+                  with original map.`)}
+                  </p>
+                </>
+              )}
+            </>
+          )}
+        </IonContent>
+      </IonModal>
     </>
   );
 };

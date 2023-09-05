@@ -22,6 +22,7 @@ export class MapFileOutput {
   @Field(() => ID) created_by: string;
   @Field(() => ID, { nullable: true }) translated_map_id?: string;
   @Field(() => ID, { nullable: true }) preview_file_url?: string;
+  @Field(() => ID, { nullable: true }) preview_file_id?: string;
 }
 @InputType()
 export class GetOrigMapListInput {
@@ -31,6 +32,16 @@ export class GetOrigMapListInput {
 export class MapUploadOutput extends GenericOutput {
   @Field(() => MapFileOutput, { nullable: true })
   mapFileOutput?: MapFileOutput | null | undefined;
+}
+@InputType()
+export class MapDeleteInput {
+  @Field(() => String) mapId: string;
+  @Field(() => Boolean) is_original: boolean;
+}
+@ObjectType()
+export class MapDeleteOutput extends GenericOutput {
+  @Field(() => String, { nullable: true })
+  deletedMapId?: string | null | undefined;
 }
 
 @ObjectType()

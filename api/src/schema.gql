@@ -55,6 +55,7 @@ enum ErrorType {
   EmailTooLong
   EmailTooShort
   EmailUnavailable
+  FileDeleteFailed
   FileSaveFailed
   FileWithFilenameAlreadyExists
   FolderForThreadNotExists
@@ -67,8 +68,10 @@ enum ErrorType {
   InvalidEmailOrPassword
   InvalidInputs
   LimitInvalid
+  MapDeletionError
   MapFilenameAlreadyExists
   MapInsertFailed
+  MapNotFound
   NoError
   OffsetInvalid
   ParentElectionNotFound
@@ -234,6 +237,7 @@ type GetOrigMapContentOutput {
   map_file_name: String!
   map_file_name_with_langs: String!
   original_map_id: ID!
+  preview_file_id: ID
   preview_file_url: ID
   translated_map_id: ID
   translated_percent: String
@@ -288,6 +292,7 @@ type GetTranslatedMapContentOutput {
   map_file_name: String!
   map_file_name_with_langs: String!
   original_map_id: ID!
+  preview_file_id: ID
   preview_file_url: ID
   translated_map_id: ID
   translated_percent: String
@@ -356,6 +361,16 @@ type LogoutOutput {
   error: ErrorType!
 }
 
+input MapDeleteInput {
+  is_original: Boolean!
+  mapId: String!
+}
+
+type MapDeleteOutput {
+  deletedMapId: String
+  error: ErrorType!
+}
+
 type MapFileOutput {
   created_at: String!
   created_by: ID!
@@ -364,6 +379,7 @@ type MapFileOutput {
   map_file_name: String!
   map_file_name_with_langs: String!
   original_map_id: ID!
+  preview_file_id: ID
   preview_file_url: ID
   translated_map_id: ID
   translated_percent: String
@@ -433,6 +449,7 @@ type Mutation {
   forumUpsert(input: ForumUpsertInput!): ForumUpsertOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
+  mapDelete(input: MapDeleteInput!): MapDeleteOutput!
   mapUpload(file: Upload!, previewFileId: String): MapUploadOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!

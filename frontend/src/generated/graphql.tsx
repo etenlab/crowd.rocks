@@ -85,8 +85,10 @@ export enum ErrorType {
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
   InvalidInputs = 'InvalidInputs',
   LimitInvalid = 'LimitInvalid',
+  MapDeletionError = 'MapDeletionError',
   MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
   MapInsertFailed = 'MapInsertFailed',
+  MapNotFound = 'MapNotFound',
   NoError = 'NoError',
   OffsetInvalid = 'OffsetInvalid',
   ParentElectionNotFound = 'ParentElectionNotFound',
@@ -399,6 +401,17 @@ export type LogoutOutput = {
   error: ErrorType;
 };
 
+export type MapDeleteInput = {
+  is_original: Scalars['Boolean']['input'];
+  mapId: Scalars['String']['input'];
+};
+
+export type MapDeleteOutput = {
+  __typename?: 'MapDeleteOutput';
+  deletedMapId?: Maybe<Scalars['String']['output']>;
+  error: ErrorType;
+};
+
 export type MapFileOutput = {
   __typename?: 'MapFileOutput';
   created_at: Scalars['String']['output'];
@@ -483,6 +496,7 @@ export type Mutation = {
   forumUpsert: ForumUpsertOutput;
   login: LoginOutput;
   logout: LogoutOutput;
+  mapDelete: MapDeleteOutput;
   mapUpload: MapUploadOutput;
   passwordResetFormResolver: LoginOutput;
   phraseDefinitionUpsert: PhraseDefinitionUpsertOutput;
@@ -563,6 +577,11 @@ export type MutationLoginArgs = {
 
 export type MutationLogoutArgs = {
   input: LogoutInput;
+};
+
+
+export type MutationMapDeleteArgs = {
+  input: MapDeleteInput;
 };
 
 
@@ -2402,6 +2421,14 @@ export type MapUploadMutationVariables = Exact<{
 
 
 export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typename?: 'MapUploadOutput', error: ErrorType, mapFileOutput?: { __typename?: 'MapFileOutput', original_map_id: string, map_file_name: string } | null } };
+
+export type MapDeleteMutationVariables = Exact<{
+  mapId: Scalars['String']['input'];
+  is_original: Scalars['Boolean']['input'];
+}>;
+
+
+export type MapDeleteMutation = { __typename?: 'Mutation', mapDelete: { __typename?: 'MapDeleteOutput', error: ErrorType, deletedMapId?: string | null } };
 
 export type UploadFileMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
@@ -4708,6 +4735,41 @@ export function useMapUploadMutation(baseOptions?: Apollo.MutationHookOptions<Ma
 export type MapUploadMutationHookResult = ReturnType<typeof useMapUploadMutation>;
 export type MapUploadMutationResult = Apollo.MutationResult<MapUploadMutation>;
 export type MapUploadMutationOptions = Apollo.BaseMutationOptions<MapUploadMutation, MapUploadMutationVariables>;
+export const MapDeleteDocument = gql`
+    mutation MapDelete($mapId: String!, $is_original: Boolean!) {
+  mapDelete(input: {mapId: $mapId, is_original: $is_original}) {
+    error
+    deletedMapId
+  }
+}
+    `;
+export type MapDeleteMutationFn = Apollo.MutationFunction<MapDeleteMutation, MapDeleteMutationVariables>;
+
+/**
+ * __useMapDeleteMutation__
+ *
+ * To run a mutation, you first call `useMapDeleteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMapDeleteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mapDeleteMutation, { data, loading, error }] = useMapDeleteMutation({
+ *   variables: {
+ *      mapId: // value for 'mapId'
+ *      is_original: // value for 'is_original'
+ *   },
+ * });
+ */
+export function useMapDeleteMutation(baseOptions?: Apollo.MutationHookOptions<MapDeleteMutation, MapDeleteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MapDeleteMutation, MapDeleteMutationVariables>(MapDeleteDocument, options);
+      }
+export type MapDeleteMutationHookResult = ReturnType<typeof useMapDeleteMutation>;
+export type MapDeleteMutationResult = Apollo.MutationResult<MapDeleteMutation>;
+export type MapDeleteMutationOptions = Apollo.BaseMutationOptions<MapDeleteMutation, MapDeleteMutationVariables>;
 export const UploadFileDocument = gql`
     mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
   uploadFile(file: $file, file_size: $file_size, file_type: $file_type) {
@@ -6270,6 +6332,7 @@ export const namedOperations = {
     UpdateForum: 'UpdateForum',
     DeleteForum: 'DeleteForum',
     MapUpload: 'MapUpload',
+    MapDelete: 'MapDelete',
     UploadFile: 'UploadFile',
     PhraseDefinitionUpsert: 'PhraseDefinitionUpsert',
     TogglePhraseDefinitionVoteStatus: 'TogglePhraseDefinitionVoteStatus',

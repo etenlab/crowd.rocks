@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
@@ -307,7 +307,7 @@ export class MapsRepository {
     return { origMapList };
   }
 
-  async getMapInfo(id: string): Promise<MapFileOutput> {
+  async getOrigMapInfo(id: string): Promise<MapFileOutput> {
     const params = [id];
     const sqlStr = `
         select
@@ -318,6 +318,7 @@ export class MapsRepository {
           om.language_code,
           om.dialect_code,
           om.geo_code,
+          f.file_id as preview_file_id,
           f.file_url as preview_file_url
         from
           original_maps om
@@ -337,6 +338,7 @@ export class MapsRepository {
         language_code,
         dialect_code,
         geo_code,
+        preview_file_id,
         preview_file_url,
       }) => ({
         original_map_id,
@@ -350,6 +352,7 @@ export class MapsRepository {
         created_by,
         is_original: true,
         language: { language_code, dialect_code, geo_code },
+        preview_file_id,
         preview_file_url,
       }),
     );
@@ -1041,5 +1044,53 @@ export class MapsRepository {
 
     const resQ = await this.pg.pool.query(sqlStr, params);
     return resQ.rows[0].translated_map_word_id;
+  }
+
+  async deleteTranslatedMap(mapId: string) {
+    const params = [mapId];
+    const sqlStr = `
+      delete
+      from
+        translated_maps
+      where
+        translated_map_id = $1
+      returning translated_map_id
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    if (resQ.rows.length > 1) {
+      Logger.error(
+        `Something wrong, deleted several translated maps instead of single one` +
+        JSON.stringify(resQ.rows),
+      );
+      throw new Error(ErrorType.MapDeletionError);
+    }
+    if (!resQ.rows || resQ.rows.length < 1) {
+      throw new Error(ErrorType.MapNotFound);
+    }
+    return resQ.rows[0].translated_map_id;
+  }
+
+  async deleteOriginalMap(mapId: string) {
+    const params = [mapId];
+    const sqlStr = `
+      delete
+      from
+        public.original_maps
+      where
+        original_map_id = $1
+      returning original_map_id
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    if (resQ.rows.length > 1) {
+      Logger.error(
+        `Something wrong, deleted several original maps instead of single one:` +
+        JSON.stringify(resQ.rows),
+      );
+      throw new Error(ErrorType.MapDeletionError);
+    }
+    if (!resQ.rows || resQ.rows.length < 1) {
+      throw new Error(ErrorType.MapNotFound);
+    }
+    return resQ.rows[0].original_map_id;
   }
 }
