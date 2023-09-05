@@ -23,7 +23,7 @@ import {
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
-import { ErrorType } from 'src/common/types';
+import { ErrorType, GenericOutput } from 'src/common/types';
 import { FileService } from '../file/file.service';
 
 @Injectable()
@@ -112,6 +112,30 @@ export class MapsResolver {
     } catch (error) {
       return {
         deletedMapId: null,
+        error: error,
+      };
+    }
+  }
+
+  @Mutation(() => GenericOutput)
+  async mapsTranslationsReset(@Context() req: any): Promise<GenericOutput> {
+    const userToken = getBearer(req);
+    const user_id = await this.authenticationService.get_user_id_from_bearer(
+      userToken,
+    );
+    const admin_id = await this.authenticationService.get_admin_id();
+    if (admin_id !== user_id) {
+      return {
+        error: ErrorType.Unauthorized,
+      };
+    }
+    try {
+      await this.mapService.translationsReset();
+      return {
+        error: ErrorType.NoError,
+      };
+    } catch (error) {
+      return {
         error: error,
       };
     }

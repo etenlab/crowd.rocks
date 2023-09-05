@@ -38,6 +38,7 @@ export class MapDeleteInput {
   @Field(() => String) mapId: string;
   @Field(() => Boolean) is_original: boolean;
 }
+
 @ObjectType()
 export class MapDeleteOutput extends GenericOutput {
   @Field(() => String, { nullable: true })

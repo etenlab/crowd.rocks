@@ -127,6 +127,10 @@ input FromWordAndDefintionlikeStringUpsertInput {
   wordlike_string: String!
 }
 
+type GenericOutput {
+  error: ErrorType!
+}
+
 input GetAllMapsListInput {
   lang: LanguageInput
 }
@@ -358,6 +362,7 @@ type Mutation {
   logout(input: LogoutInput!): LogoutOutput!
   mapDelete(input: MapDeleteInput!): MapDeleteOutput!
   mapUpload(file: Upload!, previewFileId: String): MapUploadOutput!
+  mapsTranslationsReset: GenericOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationUpsertOutput!

@@ -60,6 +60,7 @@ export const MapList: React.FC = () => {
 
   const { makeMapThumbnail } = useMapTranslationTools();
   const [isMapDeleteModalOpen, setIsMapDeleteModalOpen] = useState(false);
+  const [isMapResetModalOpen, setIsMapResetModalOpen] = useState(false);
   const candidateForDeletion = useRef<MapFileOutput | undefined>();
 
   useEffect(() => {
@@ -171,7 +172,9 @@ export const MapList: React.FC = () => {
     });
   };
 
-  const resetTranslatedMaps = () => {};
+  const resetTranslatedMaps = () => {
+    alert('boom');
+  };
 
   return (
     <>
@@ -194,7 +197,11 @@ export const MapList: React.FC = () => {
         }}
         onAddClick={isAdminRes?.loggedInIsAdmin.isAdmin ? addMap : undefined}
         onResetClick={
-          isAdminRes?.loggedInIsAdmin.isAdmin ? resetTranslatedMaps : undefined
+          isAdminRes?.loggedInIsAdmin.isAdmin
+            ? () => {
+                setIsMapResetModalOpen(true);
+              }
+            : undefined
         }
       />
       <Input
@@ -232,6 +239,7 @@ export const MapList: React.FC = () => {
           <div> {tr('No maps found')} </div>
         )}
       </IonList>
+
       <IonModal isOpen={isMapDeleteModalOpen}>
         <IonHeader>
           <IonToolbar>
@@ -287,6 +295,43 @@ export const MapList: React.FC = () => {
                 </>
               )}
             </>
+          )}
+        </IonContent>
+      </IonModal>
+
+      <IonModal isOpen={isMapResetModalOpen}>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('Reset map data ?')}</IonTitle>
+            <IonButtons slot="start">
+              <IonButton
+                fill="solid"
+                onClick={() => {
+                  setIsMapResetModalOpen(false);
+                }}
+              >
+                {tr('Cancel')}
+              </IonButton>
+            </IonButtons>
+            <IonButtons slot="end">
+              <IonButton
+                fill="solid"
+                color={'danger'}
+                onClick={() => {
+                  resetTranslatedMaps();
+                  setIsMapResetModalOpen(false);
+                }}
+              >
+                {tr('Confirm')}
+              </IonButton>
+            </IonButtons>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {tr(
+            `You are about to reset map translation data. All original_map_words and translated_maps
+            will be deleted and then they will be recreated by reprocessing every map original map,
+            like each one of them was uploaded.`,
           )}
         </IonContent>
       </IonModal>

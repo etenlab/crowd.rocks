@@ -655,6 +655,13 @@ export class MapsService {
     }
   }
 
+  async translationsReset(
+    mapId?: string,
+    is_original?: boolean,
+  ): Promise<void> {
+
+  }
+
   /**
    * Mutetes INode sturcture - replaces subnodes' values using provided valuesToReplace
    * @param iNodeStructure INode structure to replace values inside it.
