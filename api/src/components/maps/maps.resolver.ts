@@ -37,7 +37,7 @@ export class MapsResolver {
     { createReadStream, filename: map_file_name }: FileUpload,
     @Context() req: any,
   ): Promise<MapUploadOutput> {
-    const bearer = getBearer(req);
+    const bearer = getBearer(req) || '';
     console.log(`bearer: ${bearer}`);
 
     const user_id = await this.authenticationService.get_user_id_from_bearer(
@@ -52,7 +52,7 @@ export class MapsResolver {
       throw new Error(`${ErrorType.Unauthorized}`);
     }
 
-    const userToken = await this.authenticationService.getAdminToken();
+    const userToken = (await this.authenticationService.getAdminToken()) || '';
     try {
       const map = await this.mapService.parseAndSaveNewMap({
         readStream: createReadStream(),
@@ -111,7 +111,7 @@ export class MapsResolver {
   async getOrigMapWords(
     @Args('input', { nullable: true }) input?: GetOrigMapWordsInput,
   ): Promise<GetOrigMapWordsOutput> {
-    const words = await this.mapService.getOrigMapWords(input);
+    const words = await this.mapService.getOrigMapWords(input!);
 
     return words;
   }
@@ -121,7 +121,7 @@ export class MapsResolver {
     @Args('input', { nullable: true }) input?: GetOrigMapPhrasesInput,
   ): Promise<GetOrigMapPhrasesOutput> {
     const origMapPhraseTranslations = await this.mapService.getOrigMapPhrases(
-      input,
+      input!,
     );
     return origMapPhraseTranslations;
   }

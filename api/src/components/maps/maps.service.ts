@@ -30,7 +30,7 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
-import { DefinitionsService } from '../definitions/definitions.service';
+
 import { putLangCodesToFileName } from '../../common/utility';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
@@ -39,7 +39,6 @@ const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes'
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
 const DEFAULT_MAP_WORD_DEFINITION = 'A geographical place';
 const DEFAULT_MAP_PHRASE_DEFINITION = 'A geographical place phrase';
-const WORDS_SEPARATOR = ' ';
 
 export type MapTranslationResult = {
   translatedMap: string;
@@ -70,9 +69,9 @@ export class MapsService {
     mapLanguage = DEFAULT_NEW_MAP_LANGUAGE,
     token,
   }: parseAndSaveNewMapParams): Promise<MapFileOutput> {
-    let fileBody: string;
+    let fileBody = '';
     for await (const chunk of readStream) {
-      if (!fileBody) {
+      if (!fileBody.length) {
         fileBody = chunk;
       } else {
         fileBody += chunk;
@@ -83,7 +82,7 @@ export class MapsService {
     const geo_code = mapLanguage.region?.tag;
 
     const { transformedSvgINode, foundWords, foundPhrases } =
-      this.parseSvgMapString(fileBody);
+      this.parseSvgMapString(fileBody || '');
 
     const dbPoolClient = await this.pg.pool.connect();
     try {
@@ -98,8 +97,8 @@ export class MapsService {
           token,
           dbPoolClient,
           language_code,
-          dialect_code,
-          geo_code,
+          dialect_code: dialect_code || undefined,
+          geo_code: geo_code || undefined,
         });
 
       //--save found words with definitions and original map boundng
@@ -108,8 +107,8 @@ export class MapsService {
         const wordInput: WordUpsertInput = {
           wordlike_string: word,
           language_code,
-          dialect_code,
-          geo_code,
+          dialect_code: dialect_code || null,
+          geo_code: geo_code || null,
         };
         await this.saveOriginalMapWord(wordInput, map_id, token, dbPoolClient);
       }
@@ -120,8 +119,8 @@ export class MapsService {
         const phraseInput: PhraseUpsertInput = {
           phraselike_string: phrase,
           language_code,
-          dialect_code,
-          geo_code,
+          dialect_code: dialect_code || null,
+          geo_code: geo_code || null,
         };
         await this.saveOriginalMapPhrase(
           phraseInput,
@@ -146,8 +145,8 @@ export class MapsService {
         is_original: true,
         language: {
           language_code,
-          dialect_code,
-          geo_code,
+          dialect_code: dialect_code || null,
+          geo_code: geo_code || null,
         },
       };
     } catch (error) {
@@ -289,11 +288,11 @@ export class MapsService {
       mapFileInfo.original_map_id,
       {
         o_language_code,
-        o_dialect_code,
-        o_geo_code,
+        o_dialect_code: o_dialect_code || undefined,
+        o_geo_code: o_dialect_code || undefined,
         t_language_code,
-        t_dialect_code,
-        t_geo_code,
+        t_dialect_code: t_dialect_code || undefined,
+        t_geo_code: t_geo_code || undefined,
       },
     );
     const transaltedWordsCount = originalWords.origMapWords.reduce(
@@ -310,11 +309,11 @@ export class MapsService {
       mapFileInfo.original_map_id,
       {
         o_language_code,
-        o_dialect_code,
-        o_geo_code,
+        o_dialect_code: o_dialect_code || undefined,
+        o_geo_code: o_geo_code || undefined,
         t_language_code,
-        t_dialect_code,
-        t_geo_code,
+        t_dialect_code: t_dialect_code || undefined,
+        t_geo_code: t_geo_code || undefined,
       },
     );
     const transaltedPhrasesCount = originalPhrases.origMapPhrases.reduce(
@@ -384,7 +383,7 @@ export class MapsService {
               },
             ]; // mutate svgAsINode, if node is final texty and has children nodes, assign to its text value concatanated value from children's values
           } else {
-            currNodeAllText = null; // if possible texty inode has inner texty nodes, do nothing here and dive deeper to inspect these inner nodes.
+            currNodeAllText = ''; // if possible texty inode has inner texty nodes, do nothing here and dive deeper to inspect these inner nodes.
           }
         }
 
@@ -425,7 +424,7 @@ export class MapsService {
   ): Promise<GetOrigMapWordsOutput> {
     const { original_map_id, ...langRestrictions } = input;
     return this.mapsRepository.getOrigMapWords(
-      original_map_id,
+      original_map_id || '',
       langRestrictions,
     );
   }
@@ -435,7 +434,7 @@ export class MapsService {
   ): Promise<GetOrigMapPhrasesOutput> {
     const { original_map_id, ...langRestrictions } = input;
     const origMapPhrases = await this.mapsRepository.getOrigMapPhrases(
-      original_map_id,
+      original_map_id || '',
       langRestrictions,
     );
     if (!this.checkForLanguageCodePresence(origMapPhrases.origMapPhrases)) {
@@ -457,7 +456,7 @@ export class MapsService {
         );
         return false;
       }
-      wordOrPhrase.translations.forEach((tr) => {
+      wordOrPhrase!.translations!.forEach((tr) => {
         if (!tr.language_code) {
           console.log(
             `Translation ${JSON.stringify(tr)} doesn't have language tag `,
@@ -514,7 +513,7 @@ export class MapsService {
     from_definition_type_is_word: boolean;
     token: string;
   }): Promise<Array<string>> {
-    let origMapIds = [];
+    let origMapIds: string[] = [];
     if (from_definition_type_is_word) {
       origMapIds = await this.mapsRepository.getOrigMapsIdsByWordDefinition(
         from_definition_id,
@@ -553,8 +552,8 @@ export class MapsService {
       targetLanguagesFullTags = [
         subTags2Tag({
           lang: toLang.language_code,
-          dialect: toLang.dialect_code,
-          region: toLang.geo_code,
+          dialect: toLang.dialect_code || undefined,
+          region: toLang.geo_code || undefined,
         }),
       ];
     } else {
@@ -564,9 +563,9 @@ export class MapsService {
     for (const languageFullTag of targetLanguagesFullTags) {
       const language_code: string = tag2langInfo(languageFullTag).lang.tag;
       const dialect_code: string | undefined =
-        tag2langInfo(languageFullTag)?.dialect?.tag;
+        tag2langInfo(languageFullTag)?.dialect?.tag || undefined;
       const geo_code: string | undefined =
-        tag2langInfo(languageFullTag)?.region?.tag;
+        tag2langInfo(languageFullTag)?.region?.tag || undefined;
 
       const translations: Array<{
         source: string;
@@ -576,11 +575,15 @@ export class MapsService {
         const origWordOrPhraseTranslated =
           this.wordToWordTranslationsService.chooseBestTranslation(
             origMapWordOrPhrase,
-            { language_code, dialect_code, geo_code },
+            {
+              language_code,
+              dialect_code: dialect_code || null,
+              geo_code: geo_code || null,
+            },
           );
         if ('word' in origMapWordOrPhrase) {
           if (
-            'word' in origWordOrPhraseTranslated &&
+            'word' in origWordOrPhraseTranslated! &&
             origWordOrPhraseTranslated.word.length > 0
           ) {
             translations.push({
@@ -588,7 +591,7 @@ export class MapsService {
               translation: origWordOrPhraseTranslated.word,
             });
           } else if (
-            'phrase' in origWordOrPhraseTranslated &&
+            'phrase' in origWordOrPhraseTranslated! &&
             origWordOrPhraseTranslated.phrase.length > 0
           ) {
             translations.push({
@@ -598,7 +601,7 @@ export class MapsService {
           }
         } else {
           if (
-            'word' in origWordOrPhraseTranslated &&
+            'word' in origWordOrPhraseTranslated! &&
             origWordOrPhraseTranslated.word.length > 0
           ) {
             translations.push({
@@ -606,7 +609,7 @@ export class MapsService {
               translation: origWordOrPhraseTranslated.word,
             });
           } else if (
-            'phrase' in origWordOrPhraseTranslated &&
+            'phrase' in origWordOrPhraseTranslated! &&
             origWordOrPhraseTranslated.phrase.length > 0
           ) {
             translations.push({
@@ -620,17 +623,18 @@ export class MapsService {
       const { translatedMap } = await this.translateMapString(
         origMapContentStr,
         translations,
-      );
+      )!;
 
-      const { map_id } = await this.mapsRepository.saveTranslatedMap({
+      const data = await this.mapsRepository.saveTranslatedMap({
         original_map_id: origMapId,
         fileBody: translatedMap,
         token,
         t_language_code: language_code,
         t_dialect_code: dialect_code,
         t_geo_code: geo_code,
-      });
-      translatedMapIds.push(map_id);
+        dbPoolClient: null,
+      })!;
+      translatedMapIds.push(data!.map_id);
     }
 
     return translatedMapIds;
@@ -684,7 +688,7 @@ export class MapsService {
   ): Array<string> {
     const foundLangs: Array<string> = [];
     wordsOrPhrases.forEach((wordOrPhrase) => {
-      wordOrPhrase.translations.forEach((tr) => {
+      wordOrPhrase.translations!.forEach((tr) => {
         if (!tr.language_code)
           throw new Error(
             `word or phrase translation id ${JSON.stringify(
@@ -693,8 +697,8 @@ export class MapsService {
           );
         const currTag = subTags2Tag({
           lang: tr.language_code,
-          region: tr.geo_code,
-          dialect: tr.dialect_code,
+          region: tr.geo_code || undefined,
+          dialect: tr.dialect_code || undefined,
         });
         if (foundLangs.findIndex((fl) => fl === currTag) < 0) {
           foundLangs.push(currTag);
