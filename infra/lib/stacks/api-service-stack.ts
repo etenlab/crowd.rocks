@@ -163,7 +163,7 @@ export class ApiServiceStack extends cdk.Stack {
 
     /** Configure service environment variables */
     const environment: Record<string, string> = {
-      NODE_ENV: props.envName,
+      ENV: props.envName,
       SERVICE: props.serviceName,
     };
 
