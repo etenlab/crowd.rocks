@@ -10,6 +10,7 @@ import { Upload } from '@aws-sdk/lib-storage';
 import * as dotenv from 'dotenv';
 import { FileRepository } from './file.repository';
 import { IFileDeleteOutput, IFileOutput } from './types';
+const AWS_ENVIRONMENTS = ['dev', 'prod'];
 import { ErrorType } from '../../common/types';
 
 dotenv.config();
@@ -49,13 +50,18 @@ export class FileService {
 
       readStream.pipe(calcHashTr);
 
-      const s3Client = new S3Client({
-        region,
-        credentials: {
-          accessKeyId,
-          secretAccessKey,
-        },
-      });
+      const creds = AWS_ENVIRONMENTS.includes(process.env.NODE_ENV)
+        ? {
+            region,
+          }
+        : {
+            region,
+            credentials: {
+              accessKeyId,
+              secretAccessKey,
+            },
+          };
+      const s3Client = new S3Client(creds);
 
       const uploadParams = {
         Bucket: bucketName,
