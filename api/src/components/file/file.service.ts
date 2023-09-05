@@ -10,8 +10,8 @@ import { Upload } from '@aws-sdk/lib-storage';
 import * as dotenv from 'dotenv';
 import { FileRepository } from './file.repository';
 import { IFileDeleteOutput, IFileOutput } from './types';
-const AWS_ENVIRONMENTS = ['dev', 'prod'];
 import { ErrorType } from '../../common/types';
+const AWS_ENVIRONMENTS = ['dev', 'prod'];
 
 dotenv.config();
 

@@ -7,7 +7,6 @@ import {
   MapFileOutput,
   useGetOrigMapContentLazyQuery,
   useGetTranslatedMapContentLazyQuery,
-  useMapDeleteMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
@@ -16,9 +15,18 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
   mapItem: MapFileOutput;
+  candidateForDeletionRef: React.MutableRefObject<MapFileOutput | undefined>;
+  setIsMapDeleteModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  showDelete: boolean;
 };
 
-const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
+const NotStyledMapItem = ({
+  mapItem,
+  setIsMapDeleteModalOpen,
+  candidateForDeletionRef,
+  showDelete,
+  ...rest
+}: TMapItemProps) => {
   const {
     states: {
       global: {
@@ -33,8 +41,6 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
   });
   const [getTranslatedMapContent, translatedMapContent] =
     useGetTranslatedMapContentLazyQuery({ fetchPolicy: 'no-cache' });
-
-  const [mapDelete] = useMapDeleteMutation();
 
   const routerLink =
     mapItem.is_original || !mapItem.translated_map_id
@@ -66,43 +72,6 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
 
     e.preventDefault();
     e.stopPropagation();
-  };
-
-  const handleDeleteMap: MouseEventHandler<HTMLIonIconElement> = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (
-      !confirm(
-        `Delete map ${
-          mapItem.is_original
-            ? mapItem.map_file_name
-            : mapItem.map_file_name_with_langs
-        }? It is ${
-          mapItem.is_original
-            ? 'original map. All related data (translated maps) will be also deleted permanently.'
-            : 'translated map. It will be re-created on any translation action performend by sombody with original map.'
-        }`,
-      )
-    ) {
-      return;
-    }
-    const mapId = mapItem.is_original
-      ? mapItem.original_map_id
-      : mapItem.translated_map_id;
-    if (!mapId) {
-      console.error(
-        `Error: original_map_id or translated_map_id isn't specified`,
-      );
-      return;
-    }
-
-    mapDelete({
-      variables: {
-        mapId,
-        is_original: mapItem.is_original,
-      },
-      refetchQueries: ['GetAllMapsList'],
-    });
   };
 
   if (
@@ -143,13 +112,20 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
           {mapItem.preview_file_url ? (
             <img src={mapItem.preview_file_url} />
           ) : null}
-          <TrashIcon
-            icon={trashBin}
-            onClick={handleDeleteMap}
-            size="large"
-            color="danger"
-            className="clickable theme-icon"
-          />
+          {showDelete ? (
+            <TrashIcon
+              icon={trashBin}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                candidateForDeletionRef.current = mapItem;
+                setIsMapDeleteModalOpen(true);
+              }}
+              size="large"
+              color="danger"
+              className="clickable theme-icon"
+            />
+          ) : null}
         </PreviewBlock>
 
         <FileName>

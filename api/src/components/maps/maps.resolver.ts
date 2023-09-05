@@ -72,7 +72,7 @@ export class MapsResolver {
       });
       await this.mapService.translateOrigMapsByIds(
         [map.original_map_id],
-        userToken,
+        bearer,
       );
       return {
         error: ErrorType.NoError,
