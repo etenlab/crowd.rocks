@@ -115,7 +115,7 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
           ) : (
             <IonBadge>
               {langInfo2String(langInfo) +
-                ` [${mapItem.translated_percent || ''}%]`}
+                ` ${mapItem.translated_percent || ''}%`}
             </IonBadge>
           )}
           <IonIcon
