@@ -7,6 +7,7 @@ import {
   MapFileOutput,
   useGetOrigMapContentLazyQuery,
   useGetTranslatedMapContentLazyQuery,
+  useMapDeleteMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
@@ -32,6 +33,8 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
   });
   const [getTranslatedMapContent, translatedMapContent] =
     useGetTranslatedMapContentLazyQuery({ fetchPolicy: 'no-cache' });
+
+  const [mapDelete] = useMapDeleteMutation();
 
   const routerLink =
     mapItem.is_original || !mapItem.translated_map_id
@@ -83,6 +86,23 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
     ) {
       return;
     }
+    const mapId = mapItem.is_original
+      ? mapItem.original_map_id
+      : mapItem.translated_map_id;
+    if (!mapId) {
+      console.error(
+        `Error: original_map_id or translated_map_id isn't specified`,
+      );
+      return;
+    }
+
+    mapDelete({
+      variables: {
+        mapId,
+        is_original: mapItem.is_original,
+      },
+      refetchQueries: ['GetAllMapsList'],
+    });
   };
 
   if (

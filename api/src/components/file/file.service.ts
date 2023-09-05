@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 // import 'react-native-get-random-values';
 // import 'react-native-url-polyfill/auto';
@@ -9,7 +9,8 @@ import { nanoid } from 'nanoid';
 import { Upload } from '@aws-sdk/lib-storage';
 import * as dotenv from 'dotenv';
 import { FileRepository } from './file.repository';
-import { IFileOutput } from './types';
+import { IFileDeleteOutput, IFileOutput } from './types';
+import { ErrorType } from '../../common/types';
 
 dotenv.config();
 
@@ -189,6 +190,45 @@ export class FileService {
       return await this.fileRepository.save(updatedFileEntity);
     } catch (err) {
       console.log('File update failed', err);
+    }
+  }
+
+  async deleteFile(id: string): Promise<IFileDeleteOutput> {
+    try {
+      if (!id) {
+        Logger.error(`fileService#deleteFile error: no file id specified`);
+        throw new Error(ErrorType.FileDeleteFailed);
+      }
+      const oldFileEntity = await this.fileRepository.find({
+        where: { file_id: Number(id) },
+      });
+      if (!oldFileEntity) throw new Error(`Not found file with id=${id}`);
+
+      const bucketName = process.env.AWS_S3_BUCKET_NAME;
+      const region = process.env.AWS_S3_REGION;
+
+      const s3Client = new S3Client({
+        region,
+      });
+
+      const deleteParams = {
+        Bucket: bucketName,
+        Key: oldFileEntity.file.fileUrl.split('/').at(-1),
+      };
+      const deleteCommand = new DeleteObjectCommand(deleteParams);
+      await s3Client.send(deleteCommand);
+
+      const deletedId = await this.fileRepository.delete(id);
+      return {
+        deletedId,
+        error: ErrorType.NoError,
+      };
+    } catch (err) {
+      Logger.error('File deletion failed', err);
+      return {
+        deletedId: null,
+        error: ErrorType.FileDeleteFailed,
+      };
     }
   }
 

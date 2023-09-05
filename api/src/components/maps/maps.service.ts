@@ -31,6 +31,7 @@ import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
 import { putLangCodesToFileName } from '../../common/utility';
+import { FileService } from '../file/file.service';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
@@ -61,6 +62,7 @@ export class MapsService {
     private phraseDefinitionsService: PhraseDefinitionsService,
     private wordDefinitionsService: WordDefinitionsService,
     private wordToWordTranslationsService: WordToWordTranslationsService,
+    private fileService: FileService,
   ) {}
 
   async parseAndSaveNewMap({
@@ -265,7 +267,7 @@ export class MapsService {
         'It is possible to get translated % only for transalted (not original) map.',
       );
 
-    const originalMap = await this.mapsRepository.getMapInfo(
+    const originalMap = await this.mapsRepository.getOrigMapInfo(
       mapFileInfo.original_map_id,
     );
     const {
@@ -642,12 +644,14 @@ export class MapsService {
     return { translatedMap, translations };
   }
 
-  async deleteMap(mapId: string, token): Promise<string> {
-    const mapInfo = await this.mapsRepository.getMapInfo(mapId);
-    if (mapInfo.is_original) {
-      return this.mapsRepository.deleteOriginalMap(mapId, token);
+  async deleteMap(mapId: string, is_original: boolean): Promise<string> {
+    if (is_original) {
+      const mapInfo = await this.mapsRepository.getOrigMapInfo(mapId);
+      const deletedMapId = await this.mapsRepository.deleteOriginalMap(mapId);
+      await this.fileService.deleteFile(mapInfo.preview_file_id);
+      return deletedMapId;
     } else {
-      return this.mapsRepository.deleteTranslatedMap(mapId, token);
+      return this.mapsRepository.deleteTranslatedMap(mapId);
     }
   }
 

@@ -55,6 +55,7 @@ enum ErrorType {
   EmailTooLong
   EmailTooShort
   EmailUnavailable
+  FileDeleteFailed
   FileSaveFailed
   FileWithFilenameAlreadyExists
   InvalidEmailOrPassword
@@ -147,6 +148,7 @@ type GetOrigMapContentOutput {
   map_file_name: String!
   map_file_name_with_langs: String!
   original_map_id: ID!
+  preview_file_id: ID
   preview_file_url: ID
   translated_map_id: ID
   translated_percent: String
@@ -201,6 +203,7 @@ type GetTranslatedMapContentOutput {
   map_file_name: String!
   map_file_name_with_langs: String!
   original_map_id: ID!
+  preview_file_id: ID
   preview_file_url: ID
   translated_map_id: ID
   translated_percent: String
@@ -270,7 +273,8 @@ type LogoutOutput {
 }
 
 input MapDeleteInput {
-  mapId: String
+  is_original: Boolean!
+  mapId: String!
 }
 
 type MapDeleteOutput {
@@ -286,6 +290,7 @@ type MapFileOutput {
   map_file_name: String!
   map_file_name_with_langs: String!
   original_map_id: ID!
+  preview_file_id: ID
   preview_file_url: ID
   translated_map_id: ID
   translated_percent: String

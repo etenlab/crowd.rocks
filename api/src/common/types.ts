@@ -24,6 +24,7 @@ export enum ErrorType {
   EmailUnavailable = 'EmailUnavailable',
 
   FileSaveFailed = 'FileSaveFailed',
+  FileDeleteFailed = 'FileDeleteFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
 
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',

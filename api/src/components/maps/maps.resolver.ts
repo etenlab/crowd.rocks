@@ -84,7 +84,7 @@ export class MapsResolver {
 
   @Mutation(() => MapDeleteOutput)
   async mapDelete(
-    @Args('input') input: MapDeleteInput,
+    @Args('input') { mapId, is_original }: MapDeleteInput,
     @Context() req: any,
   ): Promise<MapDeleteOutput> {
     const userToken = getBearer(req);
@@ -99,8 +99,10 @@ export class MapsResolver {
       };
     }
     try {
+      const deletedMapId = await this.mapService.deleteMap(mapId, is_original);
+
       return {
-        deletedMapId: await this.mapService.deleteMap(input.mapId, userToken),
+        deletedMapId,
         error: ErrorType.NoError,
       };
     } catch (error) {

@@ -303,7 +303,8 @@ export type LogoutOutput = {
 };
 
 export type MapDeleteInput = {
-  mapId?: InputMaybe<Scalars['String']['input']>;
+  is_original: Scalars['Boolean']['input'];
+  mapId: Scalars['String']['input'];
 };
 
 export type MapDeleteOutput = {
@@ -2095,6 +2096,7 @@ export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typena
 
 export type MapDeleteMutationVariables = Exact<{
   mapId: Scalars['String']['input'];
+  is_original: Scalars['Boolean']['input'];
 }>;
 
 
@@ -3837,8 +3839,8 @@ export type MapUploadMutationHookResult = ReturnType<typeof useMapUploadMutation
 export type MapUploadMutationResult = Apollo.MutationResult<MapUploadMutation>;
 export type MapUploadMutationOptions = Apollo.BaseMutationOptions<MapUploadMutation, MapUploadMutationVariables>;
 export const MapDeleteDocument = gql`
-    mutation MapDelete($mapId: String!) {
-  mapDelete(input: {mapId: $mapId}) {
+    mutation MapDelete($mapId: String!, $is_original: Boolean!) {
+  mapDelete(input: {mapId: $mapId, is_original: $is_original}) {
     error
     deletedMapId
   }
@@ -3860,6 +3862,7 @@ export type MapDeleteMutationFn = Apollo.MutationFunction<MapDeleteMutation, Map
  * const [mapDeleteMutation, { data, loading, error }] = useMapDeleteMutation({
  *   variables: {
  *      mapId: // value for 'mapId'
+ *      is_original: // value for 'is_original'
  *   },
  * });
  */
