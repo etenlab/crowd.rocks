@@ -16,9 +16,7 @@ create extension pg_trgm;
 create index idx__wordlike_string_gin__wordlike_strings on wordlike_strings using gin(wordlike_string gin_trgm_ops);
 
 create index idx__wordlike_string_id__words on words (wordlike_string_id);
-create index idx__language_code__words on words (language_code);
-create index idx__dialect_code__words on words (dialect_code);
-create index idx__geo_code__words on words (geo_code);
+create index idx__language_codes__words on words (language_code, dialect_code, geo_code);
 
 create index idx__word_id__word_definitions on word_definitions (word_id);
 create index idx__definition__word_definitions on word_definitions (definition);
@@ -63,16 +61,12 @@ create index idx__file_url__files on files (file_url);
 create index idx__file_hash__files on files (file_hash);
 
 create index idx__file_id__documents on documents (file_id);
-create index idx__language_code__documents on documents (language_code);
-create index idx__dialect_code__documents on documents (dialect_code);
-create index idx__geo_code__documents on documents (geo_code);
+create index idx__language_codes__documents on documents (language_code, dialect_code, geo_code);
 
 create index idx__translation_id__site_text_translation_votes on site_text_translation_votes (translation_id);
 
 create index idx__map_file_name__original_maps on original_maps (map_file_name);
-create index idx__language_code__original_maps on original_maps (language_code);
-create index idx__dialect_code__original_maps on original_maps (dialect_code);
-create index idx__geo_code__original_maps on original_maps (geo_code);
+create index idx__language_codes__original_maps on original_maps (language_code, dialect_code, geo_code);
 create index idx__preview_file_id__original_maps on original_maps (preview_file_id);
 
 create index idx__original_map_id__original_map_words on original_map_words (original_map_id);
