@@ -8,7 +8,7 @@ dotenv.config();
 export class ConfigService {
   public readonly CR_DB = process.env.CR_DB;
   public readonly CR_DB_URL = process.env.CR_DB_URL;
-  public readonly CR_DB_PORT = +process.env.CR_DB_PORT;
+  public readonly CR_DB_PORT = +(process.env.CR_DB_PORT || 5432);
   public readonly CR_DB_USER = process.env.CR_DB_USER;
   public readonly CR_DB_PASSWORD = process.env.CR_DB_PASSWORD;
 

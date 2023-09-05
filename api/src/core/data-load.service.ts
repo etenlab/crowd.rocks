@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { PoolClient } from 'pg';
+
+import { pgClientOrPool } from 'src/common/utility';
 
 import { PostgresService } from './postgres.service';
 
@@ -8,7 +11,7 @@ import { SiteTextTranslationsService } from 'src/components/site-text/site-text-
 
 import { siteText } from './data/lang_sample_1';
 
-import { getAdminTokenSQL } from './sql-string';
+import { getAdminTokenSQL, GetAdminTokenSQL } from './sql-string';
 import {
   SiteTextPhraseDefinition,
   SiteTextWordDefinition,
@@ -27,7 +30,7 @@ export class DataLoadService {
   async loadSiteTextData() {
     console.log('loading site text data');
 
-    const token = await this.getAdminToken();
+    const token = await this.getAdminToken(null);
 
     if (token == null) {
       console.error("Admin user hasn't been created yet");
@@ -48,6 +51,7 @@ export class DataLoadService {
           geo_code: null,
         },
         token,
+        null,
       );
 
       if (error !== ErrorType.NoError) {
@@ -91,6 +95,7 @@ export class DataLoadService {
               geo_code: null,
             },
             token,
+            null,
           );
 
         if (error !== ErrorType.NoError) {
@@ -103,13 +108,18 @@ export class DataLoadService {
     }
   }
 
-  async getAdminToken(): Promise<string | null> {
+  async getAdminToken(pgClient: PoolClient | null): Promise<string | null> {
     try {
-      const res = await this.pg.pool.query(...getAdminTokenSQL());
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetAdminTokenSQL>(...getAdminTokenSQL());
 
       return res.rows[0].token;
     } catch (e) {
       console.error(e);
     }
+
+    return null;
   }
 }

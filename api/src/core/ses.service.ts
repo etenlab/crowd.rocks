@@ -8,8 +8,8 @@ export class SesService {
 
   public client = new SESv2Client({
     credentials: {
-      accessKeyId: this.config.AWS_ACCESS_KEY_ID,
-      secretAccessKey: this.config.AWS_SECRET_ACCESS_KEY,
+      accessKeyId: this.config.AWS_ACCESS_KEY_ID || '',
+      secretAccessKey: this.config.AWS_SECRET_ACCESS_KEY || '',
     },
     region: this.config.AWS_REGION,
   });
