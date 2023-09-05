@@ -91,7 +91,7 @@ export const MapList: React.FC = () => {
     setFilter(event.detail.value!);
   };
 
-  const handleAddMap = useCallback(
+  const addMap = useCallback(
     async (file: File) => {
       if (!file) return;
       try {
@@ -144,7 +144,15 @@ export const MapList: React.FC = () => {
     [makeMapThumbnail, uploadFile, sendMapFile, present],
   );
 
-  const handleDeleteMap = (mapItem: MapFileOutput) => {
+  const deleteMap = <
+    T extends {
+      is_original: boolean;
+      original_map_id?: string | null;
+      translated_map_id?: string | null;
+    },
+  >(
+    mapItem: T,
+  ) => {
     const mapId = mapItem.is_original
       ? mapItem.original_map_id
       : mapItem.translated_map_id;
@@ -162,6 +170,8 @@ export const MapList: React.FC = () => {
       refetchQueries: ['GetAllMapsList'],
     });
   };
+
+  const resetTranslatedMaps = () => {};
 
   return (
     <>
@@ -182,8 +192,9 @@ export const MapList: React.FC = () => {
         onTranslationsClick={() => {
           router.push(`/US/${appLanguage.lang.tag}/1/maps/translation`);
         }}
-        onAddClick={
-          isAdminRes?.loggedInIsAdmin.isAdmin ? handleAddMap : undefined
+        onAddClick={isAdminRes?.loggedInIsAdmin.isAdmin ? addMap : undefined}
+        onResetClick={
+          isAdminRes?.loggedInIsAdmin.isAdmin ? resetTranslatedMaps : undefined
         }
       />
       <Input
@@ -241,7 +252,7 @@ export const MapList: React.FC = () => {
                 color={'danger'}
                 onClick={() => {
                   candidateForDeletion.current &&
-                    handleDeleteMap(candidateForDeletion.current);
+                    deleteMap(candidateForDeletion.current);
                   setIsMapDeleteModalOpen(false);
                 }}
               >
