@@ -15,14 +15,11 @@ import { PhraseToPhraseTranslationsService } from './phrase-to-phrase-translatio
 import { TranslationsService } from './translations.service';
 
 import {
-  WordToWordTranslationReadOutput,
+  WordToWordTranslationOutput,
   WordToWordTranslationUpsertInput,
-  WordToWordTranslationUpsertOutput,
-  WordToPhraseTranslationReadOutput,
-  WordToPhraseTranslationUpsertOutput,
+  WordToPhraseTranslationOutput,
   WordToPhraseTranslationUpsertInput,
-  PhraseToPhraseTranslationReadOutput,
-  PhraseToPhraseTranslationUpsertOutput,
+  PhraseToPhraseTranslationOutput,
   PhraseToPhraseTranslationUpsertInput,
   WordTrVoteStatusOutputRow,
   WordToPhraseTranslationVoteStatusOutputRow,
@@ -34,7 +31,7 @@ import {
   PhraseToPhraseTranslationWithVoteListOutput,
   TranslationWithVoteListOutput,
   TranslationVoteStatusOutputRow,
-  TranslationUpsertOutput,
+  TranslationOutput,
   ToDefinitionInput,
   TranslationWithVoteOutput,
   LanguageListForGoogleTranslateOutput,
@@ -55,23 +52,23 @@ export class TranslationsResolver {
     private mapsService: MapsService,
   ) {}
 
-  @Query(() => WordToWordTranslationReadOutput)
+  @Query(() => WordToWordTranslationOutput)
   async wordToWordTranslationRead(
     @Args('id', { type: () => ID }) id: string,
-  ): Promise<WordToWordTranslationReadOutput> {
+  ): Promise<WordToWordTranslationOutput> {
     console.log(
       'word-to-word-translation read resolver, word_to_word_translation_id:',
       id,
     );
 
-    return this.wordToWordTranslationService.read(+id);
+    return this.wordToWordTranslationService.read(+id, null);
   }
 
-  @Mutation(() => WordToWordTranslationUpsertOutput)
+  @Mutation(() => WordToWordTranslationOutput)
   async wordToWordTranslationUpsert(
     @Args('input') input: WordToWordTranslationUpsertInput,
     @Context() req: any,
-  ): Promise<WordToWordTranslationUpsertOutput> {
+  ): Promise<WordToWordTranslationOutput> {
     console.log(
       `word-to-word-translation upsert resolver, from_word_definition_id: ${input.from_word_definition_id}, to_word_definition_id: ${input.to_word_definition_id}`,
     );
@@ -79,27 +76,28 @@ export class TranslationsResolver {
     return this.wordToWordTranslationService.upsert(
       +input.from_word_definition_id,
       +input.to_word_definition_id,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
   }
 
-  @Query(() => WordToPhraseTranslationReadOutput)
+  @Query(() => WordToPhraseTranslationOutput)
   async wordToPhraseTranslationRead(
     @Args('id', { type: () => ID }) id: string,
-  ): Promise<WordToPhraseTranslationReadOutput> {
+  ): Promise<WordToPhraseTranslationOutput> {
     console.log(
       'word-to-phrase-translation read resolver, word_to_phrase_translation_id:',
       id,
     );
 
-    return this.wordToPhraseTranslationService.read(+id);
+    return this.wordToPhraseTranslationService.read(+id, null);
   }
 
-  @Mutation(() => WordToPhraseTranslationUpsertOutput)
+  @Mutation(() => WordToPhraseTranslationOutput)
   async wordToPhraseTranslationUpsert(
     @Args('input') input: WordToPhraseTranslationUpsertInput,
     @Context() req: any,
-  ): Promise<WordToPhraseTranslationUpsertOutput> {
+  ): Promise<WordToPhraseTranslationOutput> {
     console.log(
       `word-to-phrase-translation upsert resolver, from_word_definition_id: ${input.from_word_definition_id}, to_phrase_definition_id: ${input.to_phrase_definition_id}`,
     );
@@ -107,27 +105,28 @@ export class TranslationsResolver {
     return this.wordToPhraseTranslationService.upsert(
       +input.from_word_definition_id,
       +input.to_phrase_definition_id,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
   }
 
-  @Query(() => PhraseToPhraseTranslationReadOutput)
+  @Query(() => PhraseToPhraseTranslationOutput)
   async phraseToPhraseTranslationRead(
     @Args('id', { type: () => ID }) id: string,
-  ): Promise<PhraseToPhraseTranslationReadOutput> {
+  ): Promise<PhraseToPhraseTranslationOutput> {
     console.log(
       'phrase-to-phrase-translation read resolver, phrase_to_phrase_translation_id:',
       id,
     );
 
-    return this.phraseToPhraseTranslationService.read(+id);
+    return this.phraseToPhraseTranslationService.read(+id, null);
   }
 
-  @Mutation(() => PhraseToPhraseTranslationUpsertOutput)
+  @Mutation(() => PhraseToPhraseTranslationOutput)
   async phraseToPhraseTranslationUpsert(
     @Args('input') input: PhraseToPhraseTranslationUpsertInput,
     @Context() req: any,
-  ): Promise<PhraseToPhraseTranslationUpsertOutput> {
+  ): Promise<PhraseToPhraseTranslationOutput> {
     console.log(
       `phrase-to-phrase-translation upsert resolver, from_phrase_definition_id: ${input.from_phrase_definition_id}, to_phrase_definition_id: ${input.to_phrase_definition_id}`,
     );
@@ -135,7 +134,8 @@ export class TranslationsResolver {
     return this.phraseToPhraseTranslationService.upsert(
       +input.from_phrase_definition_id,
       +input.to_phrase_definition_id,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
   }
 
@@ -151,6 +151,7 @@ export class TranslationsResolver {
 
     return this.wordToWordTranslationService.getVoteStatus(
       +word_to_word_translation_id,
+      null,
     );
   }
 
@@ -166,6 +167,7 @@ export class TranslationsResolver {
 
     return this.wordToPhraseTranslationService.getVoteStatus(
       +word_to_phrase_translation_id,
+      null,
     );
   }
 
@@ -181,7 +183,8 @@ export class TranslationsResolver {
     return this.wordToPhraseTranslationService.toggleVoteStatus(
       +word_to_phrase_translation_id,
       vote,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
   }
 
@@ -197,6 +200,7 @@ export class TranslationsResolver {
 
     return this.phraseToWordTranslationService.getVoteStatus(
       +phrase_to_word_translation_id,
+      null,
     );
   }
 
@@ -212,7 +216,8 @@ export class TranslationsResolver {
     return this.phraseToWordTranslationService.toggleVoteStatus(
       +phrase_to_word_translation_id,
       vote,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
   }
 
@@ -228,6 +233,7 @@ export class TranslationsResolver {
 
     return this.phraseToPhraseTranslationService.getVoteStatus(
       +phrase_to_phrase_translation_id,
+      null,
     );
   }
 
@@ -243,7 +249,8 @@ export class TranslationsResolver {
     return this.phraseToPhraseTranslationService.toggleVoteStatus(
       +phrase_to_phrase_translation_id,
       vote,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
   }
 
@@ -262,6 +269,7 @@ export class TranslationsResolver {
     return this.wordToWordTranslationService.getTranslationsByFromWordDefinitionId(
       +from_word_definition_id,
       langInfo,
+      null,
     );
   }
 
@@ -280,6 +288,7 @@ export class TranslationsResolver {
     return this.wordToPhraseTranslationService.getTranslationsByFromWordDefinitionId(
       +from_word_definition_id,
       langInfo,
+      null,
     );
   }
 
@@ -298,6 +307,7 @@ export class TranslationsResolver {
     return this.phraseToWordTranslationService.getTranslationsByFromPhraseDefinitionId(
       +from_phrase_definition_id,
       langInfo,
+      null,
     );
   }
 
@@ -316,6 +326,7 @@ export class TranslationsResolver {
     return this.phraseToPhraseTranslationService.getTranslationsByFromPhraseDefinitionId(
       +from_phrase_definition_id,
       langInfo,
+      null,
     );
   }
 
@@ -338,6 +349,7 @@ export class TranslationsResolver {
       +definition_id,
       from_definition_type_is_word,
       langInfo,
+      null,
     );
   }
 
@@ -362,6 +374,7 @@ export class TranslationsResolver {
       langInfo.language_code,
       langInfo.dialect_code,
       langInfo.geo_code,
+      null,
     );
   }
 
@@ -391,7 +404,8 @@ export class TranslationsResolver {
     return this.translationService.translateAllWordsAndPhrasesByGoogle(
       from_language,
       to_language,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
   }
 
@@ -414,7 +428,8 @@ export class TranslationsResolver {
       from_definition_type_is_word,
       to_definition_type_is_word,
       vote,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
 
     if (res.error === ErrorType.NoError) {
@@ -422,14 +437,14 @@ export class TranslationsResolver {
         translation_id: String(translation_id),
         from_definition_type_is_word,
         to_definition_type_is_word,
-        token: getBearer(req),
+        token: getBearer(req) || '',
       });
     }
 
     return res;
   }
 
-  @Mutation(() => TranslationUpsertOutput)
+  @Mutation(() => TranslationOutput)
   async upsertTranslation(
     @Args('from_definition_id', { type: () => ID }) from_definition_id: string,
     @Args('from_definition_type_is_word', { type: () => Boolean })
@@ -439,7 +454,7 @@ export class TranslationsResolver {
     @Args('to_definition_type_is_word', { type: () => Boolean })
     to_definition_type_is_word: boolean,
     @Context() req: any,
-  ): Promise<TranslationUpsertOutput> {
+  ): Promise<TranslationOutput> {
     console.log('upsertTranslation');
 
     const res = await this.translationService.upsertTranslation(
@@ -447,20 +462,21 @@ export class TranslationsResolver {
       from_definition_type_is_word,
       +to_definition_id,
       to_definition_type_is_word,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
 
     if (res.error === ErrorType.NoError) {
       this.mapsService.translateMapsWithDefinitionId({
         from_definition_id,
         from_definition_type_is_word,
-        token: getBearer(req),
+        token: getBearer(req) || '',
       });
     }
     return res;
   }
 
-  @Mutation(() => TranslationUpsertOutput)
+  @Mutation(() => TranslationOutput)
   async upsertTranslationFromWordAndDefinitionlikeString(
     @Args('from_definition_id', { type: () => ID }) from_definition_id: string,
     @Args('from_definition_type_is_word', { type: () => Boolean })
@@ -468,7 +484,7 @@ export class TranslationsResolver {
     @Args('to_definition_input', { type: () => ToDefinitionInput })
     to_definition_input: ToDefinitionInput,
     @Context() req: any,
-  ): Promise<TranslationUpsertOutput> {
+  ): Promise<TranslationOutput> {
     console.log('upsertTranslationFromWordAndDefinitionlikeString');
 
     const res =
@@ -476,14 +492,15 @@ export class TranslationsResolver {
         +from_definition_id,
         from_definition_type_is_word,
         to_definition_input,
-        getBearer(req),
+        getBearer(req) || '',
+        null,
       );
 
     if (res.error === ErrorType.NoError) {
       this.mapsService.translateMapsWithDefinitionId({
         from_definition_id,
         from_definition_type_is_word,
-        token: getBearer(req),
+        token: getBearer(req) || '',
       });
     }
     return res;

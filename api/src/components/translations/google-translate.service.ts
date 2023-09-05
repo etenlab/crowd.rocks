@@ -39,9 +39,13 @@ export class GoogleTranslateService {
     to: LanguageInput,
   ): Promise<string[]> {
     try {
+      if (!this.gcpTranslateClient) {
+        throw new Error('no translation client');
+      }
+
       texts.forEach((text) => {
         if (text.length >= LIMITS) {
-          throw 'Input text too long';
+          throw new Error('Input text too long');
         }
       });
 
@@ -49,7 +53,7 @@ export class GoogleTranslateService {
         this.availableCharactors = LIMITS;
       }
 
-      let chunks = [];
+      let chunks: string[] = [];
       let translationTexts: string[] = [];
 
       const processApiCall = async () => {
@@ -58,9 +62,10 @@ export class GoogleTranslateService {
           this.availableCharactors < 1
         ) {
           await delay(60 * 1000);
+          this.availableCharactors = LIMITS;
         }
 
-        const [translations] = await this.gcpTranslateClient.translate(
+        const [translations] = await this.gcpTranslateClient!.translate(
           chunks.join('\n'),
           {
             from: from.language_code,
@@ -72,7 +77,6 @@ export class GoogleTranslateService {
 
         chunks = [];
         this.lastOperateTime = Date.now();
-        this.availableCharactors = LIMITS;
       };
 
       for (const text of texts) {
@@ -97,7 +101,11 @@ export class GoogleTranslateService {
   }
 
   async getLanguages() {
-    const [languages] = await this.gcpTranslateClient.getLanguages();
+    if (!this.gcpTranslateClient) {
+      throw new Error('no translate client');
+    }
+
+    const [languages] = await this.gcpTranslateClient!.getLanguages();
 
     return languages;
   }
