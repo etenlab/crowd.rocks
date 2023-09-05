@@ -57,7 +57,12 @@ enum ErrorType {
   EmailUnavailable
   FileSaveFailed
   FileWithFilenameAlreadyExists
+  FolderForThreadNotExists
+  FolderIdNotDefined
   ForumDeleteFailed
+  ForumFolderDeleteFailed
+  ForumFolderUpsertFailed
+  ForumForFolderNotExists
   ForumUpsertFailed
   InvalidEmailOrPassword
   InvalidInputs
@@ -88,6 +93,7 @@ enum ErrorType {
   SiteTextPhraseDefinitionNotFound
   SiteTextWordDefinitionAlreadyExists
   SiteTextWordDefinitionNotFound
+  ThreadUpsertFailed
   TokenInvalid
   Unauthorized
   UnknownError
@@ -122,6 +128,49 @@ input ForumDeleteInput {
 type ForumDeleteOutput {
   error: ErrorType!
   forum_id: ID!
+}
+
+type ForumFolder {
+  folder_id: ID!
+  name: String!
+}
+
+input ForumFolderDeleteInput {
+  folder_id: ID!
+}
+
+type ForumFolderDeleteOutput {
+  error: ErrorType!
+  folder_id: ID!
+}
+
+input ForumFolderListInput {
+  forum_id: ID!
+}
+
+type ForumFolderListOutput {
+  error: ErrorType!
+  folders: [ForumFolder!]!
+}
+
+input ForumFolderReadInput {
+  folder_id: ID!
+}
+
+type ForumFolderReadOutput {
+  error: ErrorType!
+  folder: ForumFolder
+}
+
+input ForumFolderUpsertInput {
+  folder_id: ID
+  forum_id: ID!
+  name: String!
+}
+
+type ForumFolderUpsertOutput {
+  error: ErrorType!
+  folder: ForumFolder
 }
 
 type ForumListOutput {
@@ -379,6 +428,8 @@ type Mutation {
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   forumDelete(input: ForumDeleteInput!): ForumDeleteOutput!
+  forumFolderDelete(input: ForumFolderDeleteInput!): ForumFolderDeleteOutput!
+  forumFolderUpsert(input: ForumFolderUpsertInput!): ForumFolderUpsertOutput!
   forumUpsert(input: ForumUpsertInput!): ForumUpsertOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
@@ -395,6 +446,8 @@ type Mutation {
   siteTextTranslationVoteUpsert(from_type_is_word: Boolean!, to_type_is_word: Boolean!, translation_id: ID!, vote: Boolean!): SiteTextTranslationVoteOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextDefinitionOutput!
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
+  threadDelete(input: ThreadDeleteInput!): ThreadDeleteOutput!
+  threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
   togglePhraseDefinitionVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
   togglePhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!, vote: Boolean!): PhraseToPhraseTranslationVoteStatusOutputRow!
   togglePhraseToWordTrVoteStatus(phrase_to_word_translation_id: ID!, vote: Boolean!): PhraseToWordTranslationVoteStatusOutputRow!
@@ -688,6 +741,8 @@ type Query {
   file(id: Int!): IFileOutput!
   fileList: [IFile!]!
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
+  forumFolderRead(input: ForumFolderReadInput!): ForumFolderReadOutput!
+  forumFolders(input: ForumFolderListInput!): ForumFolderListOutput!
   forumRead(input: ForumReadInput!): ForumReadOutput!
   forums: ForumListOutput!
   getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
@@ -736,6 +791,8 @@ type Query {
   siteTextPhraseDefinitionRead(id: String!): SiteTextPhraseDefinitionOutput!
   siteTextTranslationVoteRead(id: String!): SiteTextTranslationVoteOutput!
   siteTextWordDefinitionRead(id: String!): SiteTextWordDefinitionOutput!
+  threadRead(input: ThreadReadInput!): ThreadReadOutput!
+  threads(input: ThreadListInput!): ThreadListOutput!
   userReadResolver(input: UserReadInput!): UserReadOutput!
   wordDefinitionRead(id: ID!): WordDefinitionReadOutput!
   wordRead(input: WordReadInput!): WordReadOutput!
@@ -931,6 +988,49 @@ type SiteTextWordToWordTranslationWithVote {
   to_word_definition: WordDefinition!
   upvotes: Int!
   word_to_word_translation_id: ID!
+}
+
+type Thread {
+  name: String!
+  thread_id: ID!
+}
+
+input ThreadDeleteInput {
+  thread_id: ID!
+}
+
+type ThreadDeleteOutput {
+  error: ErrorType!
+  thread_id: ID!
+}
+
+input ThreadListInput {
+  folder_id: ID!
+}
+
+type ThreadListOutput {
+  error: ErrorType!
+  threads: [Thread!]!
+}
+
+input ThreadReadInput {
+  thread_id: ID!
+}
+
+type ThreadReadOutput {
+  error: ErrorType!
+  thread: Thread
+}
+
+input ThreadUpsertInput {
+  folder_id: ID!
+  name: String!
+  thread_id: ID
+}
+
+type ThreadUpsertOutput {
+  error: ErrorType!
+  thread: Thread
 }
 
 input ToDefinitionInput {
