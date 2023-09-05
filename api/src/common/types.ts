@@ -24,6 +24,7 @@ export enum ErrorType {
   EmailUnavailable = 'EmailUnavailable',
 
   FileSaveFailed = 'FileSaveFailed',
+  FileDeleteFailed = 'FileDeleteFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
 
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
@@ -71,6 +72,8 @@ export enum ErrorType {
 
   MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
   MapInsertFailed = 'MapInsertFailed',
+  MapDeletionError = 'MapDeletionError',
+  MapNotFound = 'MapNotFound',
 
   PostNotFound = 'PostNotFound',
 

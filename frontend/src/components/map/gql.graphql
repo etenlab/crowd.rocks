@@ -153,6 +153,13 @@ mutation MapUpload($file: Upload!, $previewFileId: String) {
   }
 }
 
+mutation MapDelete($mapId: String!, $is_original: Boolean!) {
+  mapDelete(input: { mapId: $mapId, is_original: $is_original }) {
+    error
+    deletedMapId
+  }
+}
+
 mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
   uploadFile(file: $file, file_size: $file_size, file_type: $file_type) {
     error

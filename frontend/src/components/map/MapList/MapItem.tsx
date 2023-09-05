@@ -1,6 +1,6 @@
 import { MouseEventHandler, useRef } from 'react';
 import { IonBadge, IonItem, IonIcon } from '@ionic/react';
-import { downloadOutline } from 'ionicons/icons';
+import { downloadOutline, trashBin } from 'ionicons/icons';
 import { styled } from 'styled-components';
 
 import {
@@ -15,9 +15,18 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
   mapItem: MapFileOutput;
+  candidateForDeletionRef: React.MutableRefObject<MapFileOutput | undefined>;
+  setIsMapDeleteModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  showDelete: boolean;
 };
 
-const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
+const NotStyledMapItem = ({
+  mapItem,
+  setIsMapDeleteModalOpen,
+  candidateForDeletionRef,
+  showDelete,
+  ...rest
+}: TMapItemProps) => {
   const {
     states: {
       global: {
@@ -99,11 +108,26 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
   return (
     <IonItem {...rest} routerLink={routerLink}>
       <StItem>
-        <div>
+        <PreviewBlock>
           {mapItem.preview_file_url ? (
             <img src={mapItem.preview_file_url} />
           ) : null}
-        </div>
+          {showDelete ? (
+            <TrashIcon
+              icon={trashBin}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                candidateForDeletionRef.current = mapItem;
+                setIsMapDeleteModalOpen(true);
+              }}
+              size="large"
+              color="danger"
+              className="clickable theme-icon"
+            />
+          ) : null}
+        </PreviewBlock>
+
         <FileName>
           {mapItem.is_original
             ? mapItem.map_file_name.replace('.cf.svg', '')
@@ -118,7 +142,7 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
                 ` ${mapItem.translated_percent || ''}%`}
             </IonBadge>
           )}
-          <IonIcon
+          <DownloadIcon
             icon={downloadOutline}
             onClick={handleDownloadSvg}
             size="large"
@@ -139,6 +163,11 @@ export const MapItem = styled(NotStyledMapItem)(() => ({
   float: 'left',
 }));
 
+const PreviewBlock = styled.div`
+  display: flex;
+  align-items: start;
+`;
+
 const FileName = styled.div``;
 
 const StItem = styled.div``;
@@ -151,3 +180,20 @@ const IconRow = styled.div`
 const OrigBadge = styled(IonBadge)(() => ({
   background: 'purple',
 }));
+
+const TrashIcon = styled(IonIcon)`
+  padding: 3px;
+  margin: 2px;
+  &:hover {
+    box-shadow: 0px 0px 4px 1px gray;
+    border-radius: 50%;
+  }
+`;
+const DownloadIcon = styled(IonIcon)`
+  padding: 3px;
+  margin: 2px;
+  &:hover {
+    box-shadow: 0px 0px 4px 1px gray;
+    border-radius: 50%;
+  }
+`;
