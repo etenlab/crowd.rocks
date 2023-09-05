@@ -10,12 +10,10 @@ import { WordDefinitionVotesService } from './word-definition-votes.service';
 import { PhraseDefinitionVotesService } from './phrase-definition-votes.service';
 
 import {
-  WordDefinitionReadOutput,
+  WordDefinitionOutput,
   WordDefinitionUpsertInput,
-  WordDefinitionUpsertOutput,
-  PhraseDefinitionReadOutput,
+  PhraseDefinitionOutput,
   PhraseDefinitionUpsertInput,
-  PhraseDefinitionUpsertOutput,
   FromWordAndDefintionlikeStringUpsertInput,
   FromPhraseAndDefintionlikeStringUpsertInput,
   DefinitionUpdateaInput,
@@ -37,86 +35,100 @@ export class DefinitionsResolver {
     private phraseDefinitionVoteService: PhraseDefinitionVotesService,
   ) {}
 
-  @Query(() => WordDefinitionReadOutput)
+  @Query(() => WordDefinitionOutput)
   async wordDefinitionRead(
     @Args('id', { type: () => ID }) id: string,
-  ): Promise<WordDefinitionReadOutput> {
+  ): Promise<WordDefinitionOutput> {
     console.log('word definition read resolver, word_id:', id);
 
-    return this.wordDefinitionsService.read(+id);
+    return this.wordDefinitionsService.read(+id, null);
   }
 
-  @Mutation(() => WordDefinitionUpsertOutput)
+  @Mutation(() => WordDefinitionOutput)
   async wordDefinitionUpsert(
     @Args('input') input: WordDefinitionUpsertInput,
     @Context() req: any,
-  ): Promise<WordDefinitionUpsertOutput> {
+  ): Promise<WordDefinitionOutput> {
     console.log(
       `word definition upsert resolver, string: word_id: ${input.word_id}, definition: ${input.definition} `,
     );
 
-    return this.wordDefinitionsService.upsert(input, getBearer(req));
+    return this.wordDefinitionsService.upsert(
+      input,
+      getBearer(req) || '',
+      null,
+    );
   }
 
-  @Query(() => PhraseDefinitionReadOutput)
+  @Query(() => PhraseDefinitionOutput)
   async phraseDefinitionRead(
     @Args('id', { type: () => ID }) id: string,
-  ): Promise<PhraseDefinitionReadOutput> {
+  ): Promise<PhraseDefinitionOutput> {
     console.log('phrase definition read resolver, phrase_id:', id);
 
-    return this.phraseDefinitionsService.read(+id);
+    return this.phraseDefinitionsService.read(+id, null);
   }
 
-  @Mutation(() => PhraseDefinitionUpsertOutput)
+  @Mutation(() => PhraseDefinitionOutput)
   async phraseDefinitionUpsert(
     @Args('input') input: PhraseDefinitionUpsertInput,
     @Context() req: any,
-  ): Promise<PhraseDefinitionUpsertOutput> {
+  ): Promise<PhraseDefinitionOutput> {
     console.log(
       `phrase definition upsert resolver, string: phrase_id: ${input.phrase_id}, definition: ${input.definition} `,
     );
 
-    return this.phraseDefinitionsService.upsert(input, getBearer(req));
+    return this.phraseDefinitionsService.upsert(
+      input,
+      getBearer(req) || '',
+      null,
+    );
   }
 
-  @Mutation(() => WordDefinitionUpsertOutput)
+  @Mutation(() => WordDefinitionOutput)
   async upsertWordDefinitionFromWordAndDefinitionlikeString(
     @Args('input') input: FromWordAndDefintionlikeStringUpsertInput,
     @Context() req: any,
-  ): Promise<WordDefinitionUpsertOutput> {
+  ): Promise<WordDefinitionOutput> {
     console.log(
       `upsert word definition from word and definition like string resolver, string: wordlike_string: ${input.wordlike_string}, definitionlike_string: ${input.definitionlike_string} `,
     );
 
     return this.definitionService.upsertFromWordAndDefinitionlikeString(
       input,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
   }
 
-  @Mutation(() => PhraseDefinitionUpsertOutput)
+  @Mutation(() => PhraseDefinitionOutput)
   async upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(
     @Args('input') input: FromPhraseAndDefintionlikeStringUpsertInput,
     @Context() req: any,
-  ): Promise<PhraseDefinitionUpsertOutput> {
+  ): Promise<PhraseDefinitionOutput> {
     console.log(
       `upsert phrase definition from phrase and definition like string resolver, string: phraselike_string: ${input.phraselike_string}, definitionlike_string: ${input.definitionlike_string} `,
     );
 
     return this.definitionService.upsertFromPhraseAndDefinitionlikeString(
       input,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
   }
 
-  @Mutation(() => PhraseDefinitionUpsertOutput)
+  @Mutation(() => PhraseDefinitionOutput)
   async updateDefinition(
     @Args('input') input: DefinitionUpdateaInput,
     @Context() req: any,
   ): Promise<DefinitionUpdateOutput> {
     console.log(`update definition`);
 
-    return this.definitionService.updateDefinition(input, getBearer(req));
+    return this.definitionService.updateDefinition(
+      input,
+      getBearer(req) || '',
+      null,
+    );
   }
 
   @Query(() => WordDefinitionWithVoteListOutput)
@@ -128,7 +140,10 @@ export class DefinitionsResolver {
       JSON.stringify(input, null, 2),
     );
 
-    return this.wordDefinitionsService.getWordDefinitionsByLanguage(input);
+    return this.wordDefinitionsService.getWordDefinitionsByLanguage(
+      input,
+      null,
+    );
   }
 
   @Query(() => WordDefinitionWithVoteListOutput)
@@ -137,7 +152,10 @@ export class DefinitionsResolver {
   ): Promise<WordDefinitionWithVoteListOutput> {
     console.log('getWordDefinitionsByLanguage resolver');
 
-    return this.wordDefinitionsService.getWordDefinitionsByWordId(+word_id);
+    return this.wordDefinitionsService.getWordDefinitionsByWordId(
+      +word_id,
+      null,
+    );
   }
 
   @Query(() => PhraseDefinitionWithVoteListOutput)
@@ -149,7 +167,10 @@ export class DefinitionsResolver {
       JSON.stringify(input, null, 2),
     );
 
-    return this.phraseDefinitionsService.getPhraseDefinitionsByLanguage(input);
+    return this.phraseDefinitionsService.getPhraseDefinitionsByLanguage(
+      input,
+      null,
+    );
   }
 
   @Query(() => PhraseDefinitionWithVoteListOutput)
@@ -160,6 +181,7 @@ export class DefinitionsResolver {
 
     return this.phraseDefinitionsService.getPhraseDefinitionsByPhraseId(
       +phrase_id,
+      null,
     );
   }
 
@@ -169,7 +191,10 @@ export class DefinitionsResolver {
   ): Promise<DefinitionVoteStatusOutputRow> {
     console.log('getWordDefinitionVoteStatus resolver', word_definition_id);
 
-    return this.wordDefinitionVoteService.getVoteStatus(+word_definition_id);
+    return this.wordDefinitionVoteService.getVoteStatus(
+      +word_definition_id,
+      null,
+    );
   }
 
   @Query(() => DefinitionVoteStatusOutputRow)
@@ -181,6 +206,7 @@ export class DefinitionsResolver {
 
     return this.phraseDefinitionVoteService.getVoteStatus(
       +phrase_definition_id,
+      null,
     );
   }
 
@@ -195,7 +221,8 @@ export class DefinitionsResolver {
     return this.wordDefinitionVoteService.toggleVoteStatus(
       +word_definition_id,
       vote,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
   }
 
@@ -211,7 +238,8 @@ export class DefinitionsResolver {
     return this.phraseDefinitionVoteService.toggleVoteStatus(
       +phrase_definition_id,
       vote,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
   }
 }

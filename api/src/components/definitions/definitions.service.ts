@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 
 import { ErrorType } from 'src/common/types';
 
+import { getPgClient } from 'src/common/utility';
+
 import { PostgresService } from 'src/core/postgres.service';
 import { WordsService } from 'src/components/words/words.service';
 import { PhrasesService } from 'src/components/phrases/phrases.service';
@@ -12,11 +14,12 @@ import { PhraseDefinitionsService } from './phrase-definitions.service';
 import {
   FromWordAndDefintionlikeStringUpsertInput,
   FromPhraseAndDefintionlikeStringUpsertInput,
-  PhraseDefinitionUpsertOutput,
-  WordDefinitionUpsertOutput,
+  PhraseDefinitionOutput,
+  WordDefinitionOutput,
   DefinitionUpdateaInput,
   DefinitionUpdateOutput,
 } from './types';
+import { PoolClient } from 'pg';
 
 @Injectable()
 export class DefinitionsService {
@@ -31,8 +34,21 @@ export class DefinitionsService {
   async upsertFromWordAndDefinitionlikeString(
     input: FromWordAndDefintionlikeStringUpsertInput,
     token: string,
-  ): Promise<WordDefinitionUpsertOutput> {
+    poolClient: PoolClient | null,
+  ): Promise<WordDefinitionOutput> {
+    const {
+      client: pgClient,
+      beginTransaction,
+      commitTransaction,
+      rollbackTransaction,
+    } = await getPgClient({
+      client: poolClient,
+      pool: this.pg.pool,
+    });
+
     try {
+      await beginTransaction();
+
       const wordOuptut = await this.wordService.upsert(
         {
           wordlike_string: input.wordlike_string,
@@ -41,23 +57,31 @@ export class DefinitionsService {
           geo_code: input.geo_code,
         },
         token,
+        pgClient,
       );
 
-      if (wordOuptut.error !== ErrorType.NoError) {
+      if (wordOuptut.error !== ErrorType.NoError || !wordOuptut.word) {
+        await rollbackTransaction();
         return {
           error: wordOuptut.error,
           word_definition: null,
         };
       }
 
-      return this.wordDefinitionService.upsert(
+      const result = this.wordDefinitionService.upsert(
         {
           word_id: wordOuptut.word.word_id,
           definition: input.definitionlike_string,
         },
         token,
+        pgClient,
       );
+
+      await commitTransaction();
+
+      return result;
     } catch (e) {
+      await rollbackTransaction();
       console.error(e);
     }
 
@@ -70,8 +94,21 @@ export class DefinitionsService {
   async upsertFromPhraseAndDefinitionlikeString(
     input: FromPhraseAndDefintionlikeStringUpsertInput,
     token: string,
-  ): Promise<PhraseDefinitionUpsertOutput> {
+    poolClient: PoolClient | null,
+  ): Promise<PhraseDefinitionOutput> {
+    const {
+      client: pgClient,
+      beginTransaction,
+      commitTransaction,
+      rollbackTransaction,
+    } = await getPgClient({
+      client: poolClient,
+      pool: this.pg.pool,
+    });
+
     try {
+      await beginTransaction();
+
       const phraseOuptut = await this.phraseService.upsert(
         {
           phraselike_string: input.phraselike_string,
@@ -80,24 +117,33 @@ export class DefinitionsService {
           geo_code: input.geo_code,
         },
         token,
+        pgClient,
       );
 
-      if (phraseOuptut.error !== ErrorType.NoError) {
+      if (phraseOuptut.error !== ErrorType.NoError || !phraseOuptut.phrase) {
+        await rollbackTransaction();
+
         return {
           error: phraseOuptut.error,
           phrase_definition: null,
         };
       }
 
-      return this.phraseDefinitionService.upsert(
+      const result = await this.phraseDefinitionService.upsert(
         {
           phrase_id: phraseOuptut.phrase.phrase_id,
           definition: input.definitionlike_string,
         },
         token,
+        pgClient,
       );
+
+      await commitTransaction();
+
+      return result;
     } catch (e) {
       console.error(e);
+      await rollbackTransaction();
     }
 
     return {
@@ -109,8 +155,21 @@ export class DefinitionsService {
   async updateDefinition(
     input: DefinitionUpdateaInput,
     token: string,
+    poolClient: PoolClient | null,
   ): Promise<DefinitionUpdateOutput> {
+    const {
+      client: pgClient,
+      beginTransaction,
+      commitTransaction,
+      rollbackTransaction,
+    } = await getPgClient({
+      client: poolClient,
+      pool: this.pg.pool,
+    });
+
     try {
+      await beginTransaction();
+
       if (input.definition_type_is_word) {
         const { error, word_definition } =
           await this.wordDefinitionService.update(
@@ -119,7 +178,20 @@ export class DefinitionsService {
               definitionlike_string: input.definitionlike_string,
             },
             token,
+            pgClient,
           );
+
+        if (error !== ErrorType.NoError) {
+          await rollbackTransaction();
+
+          return {
+            error,
+            word_definition: null,
+            phrase_definition: null,
+          };
+        }
+
+        await commitTransaction();
 
         return {
           error: error,
@@ -134,7 +206,20 @@ export class DefinitionsService {
               definitionlike_string: input.definitionlike_string,
             },
             token,
+            pgClient,
           );
+
+        if (error !== ErrorType.NoError) {
+          await rollbackTransaction();
+
+          return {
+            error,
+            word_definition: null,
+            phrase_definition: null,
+          };
+        }
+
+        await commitTransaction();
 
         return {
           error: error,

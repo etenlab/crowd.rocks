@@ -1,27 +1,29 @@
 import { ErrorType } from 'src/common/types';
 
 export type GetWordDefinitionObjectById = {
-  word_definition_id?: number;
-  word_id: number;
+  word_definition_id: string;
+  word_id: string;
   definition: string;
+  created_at: string;
 };
 
-export function getWordDefinitionObjById(id: number): [string, [number]] {
+export function getWordDefinitionObjByIds(ids: number[]): [string, [number[]]] {
   return [
     `
       select distinct
         word_definition_id,
         word_id,
-        definition
+        definition,
+        created_at
       from word_definitions
-      where word_definitions.word_definition_id = $1
+      where word_definitions.word_definition_id = any($1)
     `,
-    [id],
+    [ids],
   ];
 }
 
 export type WordDefinitionUpsertProcedureOutputRow = {
-  p_word_definition_id: number;
+  p_word_definition_id: string;
   p_error_type: ErrorType;
 };
 
@@ -43,27 +45,31 @@ export function callWordDefinitionUpsertProcedure({
 }
 
 export type GetPhraseDefinitionObjectById = {
-  phrase_definition_id?: number;
-  phrase_id: number;
+  phrase_definition_id: string;
+  phrase_id: string;
   definition: string;
+  created_at: string;
 };
 
-export function getPhraseDefinitionObjById(id: number): [string, [number]] {
+export function getPhraseDefinitionObjByIds(
+  ids: number[],
+): [string, [number[]]] {
   return [
     `
       select distinct 
         phrase_definition_id,
         phrase_id,
-        definition
+        definition,
+        created_at
       from phrase_definitions
-      where phrase_definitions.phrase_definition_id = $1
+      where phrase_definitions.phrase_definition_id = any($1)
     `,
-    [id],
+    [ids],
   ];
 }
 
 export type PhraseDefinitionUpsertProcedureOutputRow = {
-  p_phrase_definition_id: number;
+  p_phrase_definition_id: string;
   p_error_type: ErrorType;
 };
 
@@ -127,7 +133,7 @@ export function callPhraseDefinitionUpdateProcedure({
 }
 
 export type GetWordDefinitionListByLang = {
-  word_definition_id: number;
+  word_definition_id: string;
   created_at: string;
 };
 
@@ -137,8 +143,8 @@ export function getWordDefinitionListByLang({
   geo_code,
 }: {
   language_code: string;
-  dialect_code?: string;
-  geo_code?: string;
+  dialect_code: string | null;
+  geo_code: string | null;
 }): [string, [string] | [string, string] | [string, string, string]] {
   let wherePlsStr = '';
   let returnArr: [string, string, string] | [string, string] | [string] = [
@@ -185,27 +191,27 @@ export function getWordDefinitionListByLang({
 }
 
 export type GetWordDefinitionListByWordId = {
-  word_definition_id: number;
+  word_definition_id: string;
   created_at: string;
 };
 
-export function getWordDefinitionListByWordId(
-  word_id: number,
-): [string, [number]] {
+export function getWordDefinitionListByWordIds(
+  wordIds: number[],
+): [string, [number[]]] {
   return [
     `
       select distinct 
         word_definition_id,
         created_at
       from word_definitions
-      where word_id = $1
+      where word_id = any($1);
     `,
-    [word_id],
+    [wordIds],
   ];
 }
 
 export type GetPhraseDefinitionListByLang = {
-  phrase_definition_id: number;
+  phrase_definition_id: string;
   created_at: string;
 };
 
@@ -215,8 +221,8 @@ export function getPhraseDefinitionListByLang({
   geo_code,
 }: {
   language_code: string;
-  dialect_code?: string;
-  geo_code?: string;
+  dialect_code: string | null;
+  geo_code: string | null;
 }): [string, [string] | [string, string] | [string, string, string]] {
   let wherePlsStr = '';
   let returnArr: [string, string, string] | [string, string] | [string] = [
@@ -265,29 +271,29 @@ export function getPhraseDefinitionListByLang({
 }
 
 export type GetPhraseDefinitionListByPhraseId = {
-  phrase_definition_id: number;
+  phrase_definition_id: string;
   created_at: string;
 };
 
-export function getPhraseDefinitionListByPhraseId(
-  phrase_id: number,
-): [string, [number]] {
+export function getPhraseDefinitionListByPhraseIds(
+  phraseIds: number[],
+): [string, [number[]]] {
   return [
     `
       select distinct 
         phrase_definition_id,
         created_at
       from phrase_definitions
-      where phrase_id = $1
+      where phrase_id = any($1)
     `,
-    [phrase_id],
+    [phraseIds],
   ];
 }
 
 export type GetWordDefinitionVoteObjectById = {
-  word_definitions_vote_id: number;
-  word_definition_id: number;
-  user_id: number;
+  word_definitions_vote_id: string;
+  word_definition_id: string;
+  user_id: string;
   vote: boolean;
   last_updated_at: string;
 };
@@ -309,7 +315,7 @@ export function getWordDefinitionVoteObjById(id: number): [string, [number]] {
 }
 
 export type WordDefinitionVoteUpsertProcedureOutputRow = {
-  p_word_definitions_vote_id: number;
+  p_word_definitions_vote_id: string;
   p_error_type: ErrorType;
 };
 
@@ -331,14 +337,14 @@ export function callWordDefinitionVoteUpsertProcedure({
 }
 
 export type GetWordDefinitionVoteStatus = {
-  word_definition_id: number;
+  word_definition_id: string;
   upvotes: number;
   downvotes: number;
 };
 
-export function getWordDefinitionVoteStatus(
-  word_definition_id: number,
-): [string, [number]] {
+export function getWordDefinitionVoteStatusFromIds(
+  word_definition_ids: number[],
+): [string, [number[]]] {
   return [
     `
       select 
@@ -352,7 +358,7 @@ export function getWordDefinitionVoteStatus(
       from 
         word_definitions_votes AS v 
       where 
-        v.word_definition_id = $1
+        v.word_definition_id = any($1)
       group BY 
         v.word_definition_id 
       order by 
@@ -360,12 +366,12 @@ export function getWordDefinitionVoteStatus(
           case when v.vote = true then 1 when v.vote = false then 0 else null end
         ) desc;
     `,
-    [word_definition_id],
+    [word_definition_ids],
   ];
 }
 
 export type ToggleWordDefinitionVoteStatus = {
-  p_word_definitions_vote_id: number;
+  p_word_definitions_vote_id: string;
   p_error_type: ErrorType;
 };
 
@@ -387,9 +393,9 @@ export function toggleWordDefinitionVoteStatus({
 }
 
 export type GetPhraseDefinitionVoteObjectById = {
-  phrase_definitions_vote_id: number;
-  phrase_definition_id: number;
-  user_id: number;
+  phrase_definitions_vote_id: string;
+  phrase_definition_id: string;
+  user_id: string;
   vote: boolean;
   last_updated_at: string;
 };
@@ -411,7 +417,7 @@ export function getPhraseDefinitionVoteObjById(id: number): [string, [number]] {
 }
 
 export type PhraseDefinitionVoteUpsertProcedureOutputRow = {
-  p_phrase_definitions_vote_id: number;
+  p_phrase_definitions_vote_id: string;
   p_error_type: ErrorType;
 };
 
@@ -433,14 +439,14 @@ export function callPhraseDefinitionVoteUpsertProcedure({
 }
 
 export type GetPhraseDefinitionVoteStatus = {
-  phrase_definition_id: number;
+  phrase_definition_id: string;
   upvotes: number;
   downvotes: number;
 };
 
-export function getPhraseDefinitionVoteStatus(
-  phrase_definition_id: number,
-): [string, [number]] {
+export function getPhraseDefinitionVoteStatusFromIds(
+  phrase_definition_ids: number[],
+): [string, [number[]]] {
   return [
     `
       select 
@@ -454,7 +460,7 @@ export function getPhraseDefinitionVoteStatus(
       from 
         phrase_definitions_votes AS v 
       where 
-        v.phrase_definition_id = $1
+        v.phrase_definition_id = any($1)
       group BY 
         v.phrase_definition_id 
       order by 
@@ -462,12 +468,12 @@ export function getPhraseDefinitionVoteStatus(
           case when v.vote = true then 1 when v.vote = false then 0 else null end
         ) desc;
     `,
-    [phrase_definition_id],
+    [phrase_definition_ids],
   ];
 }
 
 export type TogglePhraseDefinitionVoteStatus = {
-  p_phrase_definitions_vote_id: number;
+  p_phrase_definitions_vote_id: string;
   p_error_type: ErrorType;
 };
 
