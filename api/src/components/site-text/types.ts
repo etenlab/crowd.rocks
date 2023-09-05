@@ -52,9 +52,21 @@ export class SiteTextWordDefinitionOutput extends GenericOutput {
 }
 
 @ObjectType()
+export class SiteTextWordDefinitionsOutput extends GenericOutput {
+  @Field(() => [SiteTextWordDefinition], { nullable: 'items' })
+  site_text_word_definitions: (SiteTextWordDefinition | null)[];
+}
+
+@ObjectType()
 export class SiteTextPhraseDefinitionOutput extends GenericOutput {
   @Field(() => SiteTextPhraseDefinition, { nullable: true })
   site_text_phrase_definition: SiteTextPhraseDefinition | null;
+}
+
+@ObjectType()
+export class SiteTextPhraseDefinitionsOutput extends GenericOutput {
+  @Field(() => [SiteTextPhraseDefinition], { nullable: 'items' })
+  site_text_phrase_definitions: (SiteTextPhraseDefinition | null)[];
 }
 
 @InputType()
@@ -122,6 +134,12 @@ export class SiteTextTranslationVoteStatusOutputRow extends GenericOutput {
   vote_status: SiteTextTranslationVoteStatus | null;
 }
 
+@ObjectType()
+export class SiteTextTranslationVoteStatusOutput extends GenericOutput {
+  @Field(() => [SiteTextTranslationVoteStatus])
+  vote_status_list: SiteTextTranslationVoteStatus[];
+}
+
 @InputType()
 export class SiteTextPhraseDefinitionUpdateInput {
   @Field(() => ID) phrase_definition_id: string;
@@ -136,22 +154,21 @@ export class SiteTextWordDefinitionUpdateInput {
 
 @ObjectType()
 export class SiteTextPhraseDefinitionListOutput extends GenericOutput {
-  @Field(() => [SiteTextPhraseDefinition], { nullable: true })
-  site_text_phrase_definition_list: SiteTextPhraseDefinition[] | null;
+  @Field(() => [SiteTextPhraseDefinition], { nullable: 'items' })
+  site_text_phrase_definition_list: SiteTextPhraseDefinition[];
 }
 
 @ObjectType()
 export class SiteTextWordDefinitionListOutput extends GenericOutput {
-  @Field(() => [SiteTextWordDefinition], { nullable: true })
-  site_text_word_definition_list: SiteTextWordDefinition[] | null;
+  @Field(() => [SiteTextWordDefinition])
+  site_text_word_definition_list: SiteTextWordDefinition[];
 }
 
 @ObjectType()
 export class SiteTextDefinitionListOutput extends GenericOutput {
-  @Field(() => [SiteTextDefinition], { nullable: true })
+  @Field(() => [SiteTextDefinition], { nullable: 'items' })
   site_text_definition_list:
-    | (SiteTextWordDefinition | SiteTextPhraseDefinition)[]
-    | null;
+    | (SiteTextWordDefinition | SiteTextPhraseDefinition | null)[];
 }
 
 @InputType()
@@ -241,28 +258,41 @@ export class SiteTextTranslationWithVoteOutput extends GenericOutput {
 
 @ObjectType()
 export class SiteTextTranslationWithVoteListOutput extends GenericOutput {
-  @Field(() => [SiteTextTranslationWithVote], { nullable: true })
+  @Field(() => [SiteTextTranslationWithVote], { nullable: 'items' })
   site_text_translation_with_vote_list:
     | (
         | SiteTextWordToWordTranslationWithVote
         | SiteTextWordToPhraseTranslationWithVote
         | SiteTextPhraseToWordTranslationWithVote
         | SiteTextPhraseToPhraseTranslationWithVote
-      )[]
-    | null;
+        | null
+      )[];
+}
+
+@ObjectType()
+export class SiteTextTranslationWithVoteListFromIdsOutput extends GenericOutput {
+  @Field(() => [[SiteTextTranslationWithVote]])
+  site_text_translation_with_vote_list:
+    | (
+        | SiteTextWordToWordTranslationWithVote
+        | SiteTextWordToPhraseTranslationWithVote
+        | SiteTextPhraseToWordTranslationWithVote
+        | SiteTextPhraseToPhraseTranslationWithVote
+        | null
+      )[][];
 }
 
 @ObjectType()
 export class SiteTextTranslationWithVoteListByLanguage {
-  @Field(() => [SiteTextTranslationWithVote], { nullable: true })
+  @Field(() => [SiteTextTranslationWithVote], { nullable: 'items' })
   site_text_translation_with_vote_list:
     | (
         | SiteTextWordToWordTranslationWithVote
         | SiteTextWordToPhraseTranslationWithVote
         | SiteTextPhraseToWordTranslationWithVote
         | SiteTextPhraseToPhraseTranslationWithVote
-      )[]
-    | null;
+        | null
+      )[];
   @Field(() => String) language_code: string;
   @Field(() => String, { nullable: true }) dialect_code: string | null;
   @Field(() => String, { nullable: true }) geo_code: string | null;
