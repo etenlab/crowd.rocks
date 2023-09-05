@@ -26,7 +26,7 @@ export class RegisterResolver {
   async loggedInIsAdmin(
     @Args('input') input: IsAdminIdInput,
   ): Promise<IsAdminIdOutput> {
-    const adminId = await this.authenticationService.get_admin_id();
+    const adminId = (await this.authenticationService!.get_admin_id()) || '';
     console.log(`userId: ${input.user_id}`);
     console.log(`adminId: ${adminId}`);
     if (adminId == input.user_id) {
