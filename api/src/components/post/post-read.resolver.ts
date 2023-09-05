@@ -83,7 +83,7 @@ export class PostReadResolver {
             post: {
               post_id: res1.rows[0].post_id,
               created_at: res1.rows[0].created_at,
-              created_by_user: createdBy,
+              created_by_user: createdBy!,
               content: res1.rows[0].content,
             },
           };
@@ -128,19 +128,18 @@ export class PostReadResolver {
       );
 
       const posts = await Promise.all(
-        res1.rows.map<Promise<Post>>(
-          async ({ post_id, created_at, created_by, content }) => {
-            const user = (
-              await this.userRead.userReadResolver({ user_id: created_by }, req)
-            ).user;
-            return {
-              post_id,
-              created_at,
-              created_by_user: user,
-              content,
-            };
-          },
-        ),
+        res1.rows.map<Promise<Post>>(async (data: any) => {
+          const { post_id, created_at, created_by, content } = data;
+          const user = (
+            await this.userRead.userReadResolver({ user_id: created_by }, req)
+          ).user;
+          return {
+            post_id,
+            created_at,
+            created_by_user: user!,
+            content,
+          };
+        }),
       );
 
       return {
