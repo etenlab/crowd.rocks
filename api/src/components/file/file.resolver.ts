@@ -49,7 +49,7 @@ export class FileResolver {
       file_type,
       file_size,
     );
-    return file;
+    return file!;
   }
 
   @Mutation(() => FileDecoratorsGQL)
@@ -67,7 +67,7 @@ export class FileResolver {
       file_type,
       file_size,
     );
-    return file;
+    return file!;
   }
 
   @Query(() => [FileDecoratorsGQL], { name: 'fileList' })

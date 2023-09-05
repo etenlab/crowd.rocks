@@ -1,4 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { PoolClient } from 'pg';
+
+import { pgClientOrPool } from 'src/common/utility';
+
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 import { GetFileListOutput, IFile } from './types';
@@ -13,7 +17,7 @@ interface FileFindParams {
   };
 }
 
-interface FileSaveParams {
+export interface FileSaveParams {
   file_name: string;
   file_type: string;
   file_size: number;
@@ -25,12 +29,12 @@ interface FileSaveParams {
 export class FileRepository {
   constructor(private pg: PostgresService) {}
 
-  async find(input?: FileFindParams): Promise<IFile> {
-    const params = [];
+  async find(input?: FileFindParams): Promise<IFile | null> {
+    const params: (string | number)[] = [];
     let fileClause = '';
 
-    if (input.where) {
-      for (const [key, value] of Object.entries(input.where)) {
+    if (input!.where) {
+      for (const [key, value] of Object.entries(input!.where)) {
         if (value) {
           params.push(value);
           fileClause += ` and ${key} = $${params.length}`;
@@ -52,7 +56,10 @@ export class FileRepository {
             ${fileClause}
         `;
 
-    const resQ = await this.pg.pool.query(sqlStr, params);
+    const resQ = await pgClientOrPool({
+      client: null,
+      pool: this.pg.pool,
+    }).query(sqlStr, params);
     if (resQ.rowCount === 0) return null;
 
     return {
@@ -65,7 +72,7 @@ export class FileRepository {
     };
   }
 
-  async list(): Promise<GetFileListOutput> {
+  async list(pgClient: PoolClient | null): Promise<GetFileListOutput> {
     const sqlStr = `
             select 
                 file_id,
@@ -78,7 +85,10 @@ export class FileRepository {
                 files
         `;
 
-    const resQ = await this.pg.pool.query(sqlStr);
+    const resQ = await pgClientOrPool({
+      client: pgClient,
+      pool: this.pg.pool,
+    }).query(sqlStr);
 
     const fileList = resQ.rows.map<IFile>(
       ({ file_id, file_name, file_size, file_type, file_url, file_hash }) => ({
@@ -101,7 +111,10 @@ export class FileRepository {
     file_url,
     file_hash,
   }: FileSaveParams): Promise<IFile> {
-    const res = await this.pg.pool.query(
+    const res = await pgClientOrPool({
+      client: null,
+      pool: this.pg.pool,
+    }).query(
       `
             call file_create($1,$2,$3,$4,$5, null,null,null,null)
             `,
