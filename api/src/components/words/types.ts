@@ -16,13 +16,8 @@ export class Word {
 export class WordUpsertInput {
   @Field(() => String) wordlike_string: string;
   @Field(() => String) language_code: string;
-  @Field(() => String, { nullable: true }) dialect_code?: string | null;
-  @Field(() => String, { nullable: true }) geo_code?: string | null;
-}
-
-@ObjectType()
-export class WordUpsertOutput extends GenericOutput {
-  @Field(() => Word, { nullable: true }) word: Word | null;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
 }
 
 @InputType()
@@ -31,8 +26,13 @@ export class WordReadInput {
 }
 
 @ObjectType()
-export class WordReadOutput extends GenericOutput {
+export class WordOutput extends GenericOutput {
   @Field(() => Word, { nullable: true }) word: Word | null;
+}
+
+@ObjectType()
+export class WordsOutput extends GenericOutput {
+  @Field(() => [Word], { nullable: 'items' }) words: (Word | null)[];
 }
 
 @ObjectType()
@@ -70,6 +70,12 @@ export class WordVoteStatusOutputRow extends GenericOutput {
 }
 
 @ObjectType()
+export class WordVoteStatusOutput extends GenericOutput {
+  @Field(() => [WordVoteStatus])
+  vote_status_list: WordVoteStatus[];
+}
+
+@ObjectType()
 export class WordWithVote extends Word {
   @Field(() => Int) upvotes: number;
   @Field(() => Int) downvotes: number;
@@ -91,6 +97,12 @@ export class WordWithVoteListEdge {
 export class WordWithVoteListConnection extends GenericOutput {
   @Field(() => [WordWithVoteListEdge]) edges: WordWithVoteListEdge[];
   @Field(() => PageInfo) pageInfo: PageInfo;
+}
+
+@ObjectType()
+export class WordWithVoteListOutput extends GenericOutput {
+  @Field(() => [WordWithVote], { nullable: 'items' })
+  word_with_vote_list: (WordWithVote | null)[];
 }
 
 @ObjectType()
