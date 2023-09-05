@@ -470,6 +470,12 @@
             "deprecationReason": null
           },
           {
+            "name": "PhraseDefinitionVoteNotFound",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "PhraseNotFound",
             "description": null,
             "isDeprecated": false,
@@ -483,6 +489,12 @@
           },
           {
             "name": "PhraseToWordTranslationNotFound",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PhraseVoteNotFound",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -590,6 +602,12 @@
             "deprecationReason": null
           },
           {
+            "name": "WordDefinitionVoteNotFound",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "WordInsertFailed",
             "description": null,
             "isDeprecated": false,
@@ -615,6 +633,12 @@
           },
           {
             "name": "WordToWordTranslationNotFound",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "WordVoteNotFound",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -2499,13 +2523,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "MapFileOutput",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "MapFileOutput",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -3048,7 +3068,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PhraseDefinitionUpsertOutput",
+                "name": "PhraseDefinitionOutput",
                 "ofType": null
               }
             },
@@ -3081,7 +3101,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PhraseToPhraseTranslationUpsertOutput",
+                "name": "PhraseToPhraseTranslationOutput",
                 "ofType": null
               }
             },
@@ -3114,7 +3134,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PhraseUpsertOutput",
+                "name": "PhraseOutput",
                 "ofType": null
               }
             },
@@ -4013,7 +4033,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PhraseDefinitionUpsertOutput",
+                "name": "PhraseDefinitionOutput",
                 "ofType": null
               }
             },
@@ -4062,7 +4082,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "TranslationUpsertOutput",
+                "name": "TranslationOutput",
                 "ofType": null
               }
             },
@@ -4095,7 +4115,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PhraseDefinitionUpsertOutput",
+                "name": "PhraseDefinitionOutput",
                 "ofType": null
               }
             },
@@ -4128,7 +4148,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "TranslationUpsertOutput",
+                "name": "TranslationOutput",
                 "ofType": null
               }
             },
@@ -4209,7 +4229,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "TranslationUpsertOutput",
+                "name": "TranslationOutput",
                 "ofType": null
               }
             },
@@ -4274,7 +4294,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "TranslationUpsertOutput",
+                "name": "TranslationOutput",
                 "ofType": null
               }
             },
@@ -4307,7 +4327,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "WordDefinitionUpsertOutput",
+                "name": "WordDefinitionOutput",
                 "ofType": null
               }
             },
@@ -4373,7 +4393,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "WordDefinitionUpsertOutput",
+                "name": "WordDefinitionOutput",
                 "ofType": null
               }
             },
@@ -4406,7 +4426,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "WordToPhraseTranslationUpsertOutput",
+                "name": "WordToPhraseTranslationOutput",
                 "ofType": null
               }
             },
@@ -4439,7 +4459,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "WordToWordTranslationUpsertOutput",
+                "name": "WordToWordTranslationOutput",
                 "ofType": null
               }
             },
@@ -4472,7 +4492,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "WordUpsertOutput",
+                "name": "WordOutput",
                 "ofType": null
               }
             },
@@ -4717,6 +4737,22 @@
         "description": null,
         "fields": [
           {
+            "name": "created_at",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "definition",
             "description": null,
             "args": [],
@@ -4772,7 +4808,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PhraseDefinitionReadOutput",
+        "name": "PhraseDefinitionOutput",
         "description": null,
         "fields": [
           {
@@ -4849,45 +4885,6 @@
           }
         ],
         "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "PhraseDefinitionUpsertOutput",
-        "description": null,
-        "fields": [
-          {
-            "name": "error",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "ErrorType",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "phrase_definition",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "PhraseDefinition",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -5137,35 +5134,8 @@
         "possibleTypes": null
       },
       {
-        "kind": "INPUT_OBJECT",
-        "name": "PhraseReadInput",
-        "description": null,
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "phrase_id",
-            "description": null,
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "OBJECT",
-        "name": "PhraseReadOutput",
+        "name": "PhraseOutput",
         "description": null,
         "fields": [
           {
@@ -5199,6 +5169,33 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "PhraseReadInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "phrase_id",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -5263,7 +5260,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PhraseToPhraseTranslationReadOutput",
+        "name": "PhraseToPhraseTranslationOutput",
         "description": null,
         "fields": [
           {
@@ -5340,45 +5337,6 @@
           }
         ],
         "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "PhraseToPhraseTranslationUpsertOutput",
-        "description": null,
-        "fields": [
-          {
-            "name": "error",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "ErrorType",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "phrase_to_phrase_translation",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "PhraseToPhraseTranslation",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -5597,10 +5555,10 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "NON_NULL",
+                "kind": "LIST",
                 "name": null,
                 "ofType": {
                   "kind": "OBJECT",
@@ -5892,10 +5850,10 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "NON_NULL",
+                "kind": "LIST",
                 "name": null,
                 "ofType": {
                   "kind": "OBJECT",
@@ -5977,45 +5935,6 @@
           }
         ],
         "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "PhraseUpsertOutput",
-        "description": null,
-        "fields": [
-          {
-            "name": "error",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "ErrorType",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "phrase",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "Phrase",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -8584,7 +8503,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PhraseDefinitionReadOutput",
+                "name": "PhraseDefinitionOutput",
                 "ofType": null
               }
             },
@@ -8617,7 +8536,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PhraseReadOutput",
+                "name": "PhraseOutput",
                 "ofType": null
               }
             },
@@ -8650,7 +8569,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PhraseToPhraseTranslationReadOutput",
+                "name": "PhraseToPhraseTranslationOutput",
                 "ofType": null
               }
             },
@@ -8914,7 +8833,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "WordDefinitionReadOutput",
+                "name": "WordDefinitionOutput",
                 "ofType": null
               }
             },
@@ -8947,7 +8866,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "WordReadOutput",
+                "name": "WordOutput",
                 "ofType": null
               }
             },
@@ -8980,7 +8899,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "WordToPhraseTranslationReadOutput",
+                "name": "WordToPhraseTranslationOutput",
                 "ofType": null
               }
             },
@@ -9013,7 +8932,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "WordToWordTranslationReadOutput",
+                "name": "WordToWordTranslationOutput",
                 "ofType": null
               }
             },
@@ -9329,10 +9248,10 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "NON_NULL",
+                "kind": "LIST",
                 "name": null,
                 "ofType": {
                   "kind": "UNION",
@@ -10239,10 +10158,10 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "NON_NULL",
+                "kind": "LIST",
                 "name": null,
                 "ofType": {
                   "kind": "UNION",
@@ -10376,10 +10295,10 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "NON_NULL",
+                "kind": "LIST",
                 "name": null,
                 "ofType": {
                   "kind": "UNION",
@@ -11181,7 +11100,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TranslationUpsertOutput",
+        "name": "TranslationOutput",
         "description": null,
         "fields": [
           {
@@ -11345,10 +11264,10 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "NON_NULL",
+                "kind": "LIST",
                 "name": null,
                 "ofType": {
                   "kind": "UNION",
@@ -11814,6 +11733,22 @@
         "description": null,
         "fields": [
           {
+            "name": "created_at",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "definition",
             "description": null,
             "args": [],
@@ -11869,7 +11804,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "WordDefinitionReadOutput",
+        "name": "WordDefinitionOutput",
         "description": null,
         "fields": [
           {
@@ -11946,45 +11881,6 @@
           }
         ],
         "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "WordDefinitionUpsertOutput",
-        "description": null,
-        "fields": [
-          {
-            "name": "error",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "ErrorType",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "word_definition",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "WordDefinition",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -12234,35 +12130,8 @@
         "possibleTypes": null
       },
       {
-        "kind": "INPUT_OBJECT",
-        "name": "WordReadInput",
-        "description": null,
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "word_id",
-            "description": null,
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "OBJECT",
-        "name": "WordReadOutput",
+        "name": "WordOutput",
         "description": null,
         "fields": [
           {
@@ -12296,6 +12165,33 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "WordReadInput",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "word_id",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -12360,7 +12256,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "WordToPhraseTranslationReadOutput",
+        "name": "WordToPhraseTranslationOutput",
         "description": null,
         "fields": [
           {
@@ -12437,45 +12333,6 @@
           }
         ],
         "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "WordToPhraseTranslationUpsertOutput",
-        "description": null,
-        "fields": [
-          {
-            "name": "error",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "ErrorType",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "word_to_phrase_translation",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "WordToPhraseTranslation",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -12694,10 +12551,10 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "NON_NULL",
+                "kind": "LIST",
                 "name": null,
                 "ofType": {
                   "kind": "OBJECT",
@@ -12776,7 +12633,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "WordToWordTranslationReadOutput",
+        "name": "WordToWordTranslationOutput",
         "description": null,
         "fields": [
           {
@@ -12853,45 +12710,6 @@
           }
         ],
         "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "WordToWordTranslationUpsertOutput",
-        "description": null,
-        "fields": [
-          {
-            "name": "error",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "ErrorType",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "word_to_word_translation",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "WordToWordTranslation",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -13012,10 +12830,10 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
+              "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "NON_NULL",
+                "kind": "LIST",
                 "name": null,
                 "ofType": {
                   "kind": "OBJECT",
@@ -13195,45 +13013,6 @@
           }
         ],
         "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "WordUpsertOutput",
-        "description": null,
-        "fields": [
-          {
-            "name": "error",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "ErrorType",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "word",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "Word",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },

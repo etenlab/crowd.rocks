@@ -5,6 +5,8 @@ import { langInfo2String } from '../common/langUtils';
 
 import { useSiteTextUpsertMutation } from '../generated/graphql';
 
+import { globals } from '../services/globals';
+
 export function useTr() {
   const {
     states: {
@@ -27,7 +29,8 @@ export function useTr() {
 
       if (
         originalMap[siteText.trim()] === undefined &&
-        newSiteTextsRef.current[siteText.trim()] === undefined
+        newSiteTextsRef.current[siteText.trim()] === undefined &&
+        globals.get_user_id() !== null
       ) {
         newSiteTextsRef.current[siteText.trim()] = siteText.trim();
         siteTextUpsert({
