@@ -56,6 +56,9 @@ import { useTr } from './hooks/useTr';
 
 import AppTypeahead from './components/common/LangSelector/TypeAhead';
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
+import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
+import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
+import { ForumFolderDetailPage } from './components/forums/ForumFolderDetailPage/FolderDetailPage';
 
 const Body: React.FC = () => {
   const {
@@ -386,6 +389,21 @@ const Body: React.FC = () => {
             exact
             path="/:nation_id/:language_id/:cluster_id/translation"
             component={TranslationPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/forums"
+            component={ForumListPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/forums/:forum_id/:forum_name"
+            component={ForumDetailPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/folders/:forum_folder_id/:forum_folder_name"
+            component={ForumFolderDetailPage}
           />
           <Route
             exact
