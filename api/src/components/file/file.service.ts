@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import 'react-native-get-random-values';
-import 'react-native-url-polyfill/auto';
+// import 'react-native-get-random-values';
+// import 'react-native-url-polyfill/auto';
 import { ReadStream } from 'fs';
 import { Transform } from 'stream';
 import { createHash } from 'crypto';
@@ -9,7 +9,9 @@ import { nanoid } from 'nanoid';
 import { Upload } from '@aws-sdk/lib-storage';
 import * as dotenv from 'dotenv';
 import { FileRepository } from './file.repository';
-import { IFile } from './types';
+import { IFileDeleteOutput, IFileOutput } from './types';
+import { ErrorType } from '../../common/types';
+const AWS_ENVIRONMENTS = ['dev', 'prod'];
 
 dotenv.config();
 
@@ -22,13 +24,14 @@ export class FileService {
     fileName: string,
     fileType: string,
     fileSize: number,
-  ): Promise<IFile | void> {
+    token: string,
+  ): Promise<IFileOutput | undefined> {
     try {
       const accessKeyId = process.env.AWS_ACCESS_KEY_ID || '';
       const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || '';
-      const bucketName = process.env.AWS_S3_BUCKET_NAME || '';
-      const region = process.env.AWS_REGION || '';
-      const fileKey = `${nanoid()}-${fileName}` || '';
+      const bucketName = process.env.AWS_S3_BUCKET_NAME;
+      const region = process.env.AWS_S3_REGION || '';
+      const fileKey = `${nanoid()}-${fileName}`;
 
       const hash = createHash('sha256');
       let hashValue: string | null = null;
@@ -47,19 +50,27 @@ export class FileService {
 
       readStream.pipe(calcHashTr);
 
-      const s3Client = new S3Client({
-        region,
-        credentials: {
-          accessKeyId,
-          secretAccessKey,
-        },
-      });
+      const creds = AWS_ENVIRONMENTS.includes(process.env.NODE_ENV || '')
+        ? {
+            region,
+          }
+        : {
+            region,
+            credentials: {
+              accessKeyId,
+              secretAccessKey,
+            },
+          };
+      const s3Client = new S3Client(creds);
 
       const uploadParams = {
         Bucket: bucketName,
         Key: fileKey,
         Body: calcHashTr,
       };
+
+      // TODO validate the user's token before doing any uploading
+      // of any kind.
 
       const parallelUploads3 = new Upload({
         client: s3Client,
@@ -93,12 +104,13 @@ export class FileService {
         return fileEntity;
       }
 
-      return this.fileRepository.save({
+      return await this.fileRepository.save({
         file_name: fileName,
         file_type: fileType,
         file_size: fileSize,
         file_url: `https://${bucketName}.s3.${region}.amazonaws.com/${fileKey}`, //TODO: it'd be cool to generate differently for local environments
-        file_hash: hashValue!,
+        file_hash: hashValue || '',
+        token,
       });
     } catch (err) {
       console.log('File upload failed', err);
@@ -111,7 +123,8 @@ export class FileService {
     fileName: string,
     fileType: string,
     fileSize: number,
-  ): Promise<IFile | void> {
+    token: string,
+  ): Promise<IFileOutput | undefined> {
     try {
       const oldFileEntity = await this.fileRepository.find({
         where: { file_id: id },
@@ -139,7 +152,6 @@ export class FileService {
           callback();
         },
       });
-
       readStream.pipe(calcHashTr);
 
       const s3Client = new S3Client({
@@ -168,16 +180,18 @@ export class FileService {
 
       const deleteParams = {
         Bucket: bucketName,
-        Key: oldFileEntity.fileUrl.split('/').at(-1),
+        Key: oldFileEntity.file!.fileUrl.split('/').at(-1),
       };
       const deleteCommand = new DeleteObjectCommand(deleteParams);
       await s3Client.send(deleteCommand);
+
       const updatedFileEntity = Object.assign(oldFileEntity, {
         file_name: fileName,
         file_type: fileType,
         file_size: fileSize,
         file_url: `https://${bucketName}.s3.${region}.amazonaws.com/${newFileKey}`,
         file_hash: hashValue || '',
+        token,
       });
       return await this.fileRepository.save(updatedFileEntity);
     } catch (err) {
@@ -185,11 +199,50 @@ export class FileService {
     }
   }
 
-  async getAll() {
-    return await this.fileRepository.find();
+  async deleteFile(id: string): Promise<IFileDeleteOutput> {
+    try {
+      if (!id) {
+        Logger.error(`fileService#deleteFile error: no file id specified`);
+        throw new Error(ErrorType.FileDeleteFailed);
+      }
+      const oldFileEntity = await this.fileRepository.find({
+        where: { file_id: Number(id) },
+      });
+      if (!oldFileEntity) throw new Error(`Not found file with id=${id}`);
+
+      const bucketName = process.env.AWS_S3_BUCKET_NAME;
+      const region = process.env.AWS_S3_REGION;
+
+      const s3Client = new S3Client({
+        region,
+      });
+
+      const deleteParams = {
+        Bucket: bucketName,
+        Key: oldFileEntity.file!.fileUrl.split('/').at(-1),
+      };
+      const deleteCommand = new DeleteObjectCommand(deleteParams);
+      await s3Client.send(deleteCommand);
+
+      const deletedId = await this.fileRepository.delete(id);
+      return {
+        deletedId,
+        error: ErrorType.NoError,
+      };
+    } catch (err) {
+      Logger.error('File deletion failed', err);
+      return {
+        deletedId: null,
+        error: ErrorType.FileDeleteFailed,
+      };
+    }
   }
 
-  async findOne(id: number) {
+  async getAll() {
+    return await this.fileRepository.list();
+  }
+
+  async findOne(id: number): Promise<IFileOutput | null> {
     return await this.fileRepository.find({
       where: { file_id: id },
     });

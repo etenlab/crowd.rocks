@@ -73,11 +73,16 @@ export enum ErrorType {
   EmailTooLong = 'EmailTooLong',
   EmailTooShort = 'EmailTooShort',
   EmailUnavailable = 'EmailUnavailable',
+  FileDeleteFailed = 'FileDeleteFailed',
+  FileSaveFailed = 'FileSaveFailed',
+  FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
   InvalidInputs = 'InvalidInputs',
   LimitInvalid = 'LimitInvalid',
+  MapDeletionError = 'MapDeletionError',
   MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
   MapInsertFailed = 'MapInsertFailed',
+  MapNotFound = 'MapNotFound',
   NoError = 'NoError',
   OffsetInvalid = 'OffsetInvalid',
   ParentElectionNotFound = 'ParentElectionNotFound',
@@ -97,6 +102,7 @@ export enum ErrorType {
   PrefixInvalid = 'PrefixInvalid',
   PrefixTooLong = 'PrefixTooLong',
   PrefixTooShort = 'PrefixTooShort',
+  ProvidedIdIsMalformed = 'ProvidedIdIsMalformed',
   RankInvalid = 'RankInvalid',
   RankUnchanged = 'RankUnchanged',
   SiteTextPhraseDefinitionAlreadyExists = 'SiteTextPhraseDefinitionAlreadyExists',
@@ -167,6 +173,8 @@ export type GetOrigMapContentOutput = {
   map_file_name: Scalars['String']['output'];
   map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
+  preview_file_id?: Maybe<Scalars['ID']['output']>;
+  preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
 };
@@ -224,8 +232,26 @@ export type GetTranslatedMapContentOutput = {
   map_file_name: Scalars['String']['output'];
   map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
+  preview_file_id?: Maybe<Scalars['ID']['output']>;
+  preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
+};
+
+export type IFile = {
+  __typename?: 'IFile';
+  fileHash: Scalars['String']['output'];
+  fileName: Scalars['String']['output'];
+  fileSize: Scalars['Int']['output'];
+  fileType: Scalars['String']['output'];
+  fileUrl: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+};
+
+export type IFileOutput = {
+  __typename?: 'IFileOutput';
+  error: ErrorType;
+  file?: Maybe<IFile>;
 };
 
 export type IsAdminIdInput = {
@@ -283,6 +309,17 @@ export type LogoutOutput = {
   error: ErrorType;
 };
 
+export type MapDeleteInput = {
+  is_original: Scalars['Boolean']['input'];
+  mapId: Scalars['String']['input'];
+};
+
+export type MapDeleteOutput = {
+  __typename?: 'MapDeleteOutput';
+  deletedMapId?: Maybe<Scalars['String']['output']>;
+  error: ErrorType;
+};
+
 export type MapFileOutput = {
   __typename?: 'MapFileOutput';
   created_at: Scalars['String']['output'];
@@ -292,6 +329,8 @@ export type MapFileOutput = {
   map_file_name: Scalars['String']['output'];
   map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
+  preview_file_id?: Maybe<Scalars['ID']['output']>;
+  preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
 };
@@ -362,6 +401,7 @@ export type Mutation = {
   emailResponseResolver: EmailResponseOutput;
   login: LoginOutput;
   logout: LogoutOutput;
+  mapDelete: MapDeleteOutput;
   mapUpload: MapUploadOutput;
   passwordResetFormResolver: LoginOutput;
   phraseDefinitionUpsert: PhraseDefinitionOutput;
@@ -386,6 +426,8 @@ export type Mutation = {
   toggleWordVoteStatus: WordVoteStatusOutputRow;
   translateAllWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByGoogleOutput;
   updateDefinition: PhraseDefinitionOutput;
+  updateFile: IFileOutput;
+  uploadFile: IFileOutput;
   upsertFromTranslationlikeString: TranslationOutput;
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString: PhraseDefinitionOutput;
   upsertSiteTextTranslation: TranslationOutput;
@@ -421,8 +463,14 @@ export type MutationLogoutArgs = {
 };
 
 
+export type MutationMapDeleteArgs = {
+  input: MapDeleteInput;
+};
+
+
 export type MutationMapUploadArgs = {
   file: Scalars['Upload']['input'];
+  previewFileId?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -555,6 +603,21 @@ export type MutationTranslateAllWordsAndPhrasesByGoogleArgs = {
 
 export type MutationUpdateDefinitionArgs = {
   input: DefinitionUpdateaInput;
+};
+
+
+export type MutationUpdateFileArgs = {
+  file?: InputMaybe<Scalars['Upload']['input']>;
+  file_size?: InputMaybe<Scalars['Int']['input']>;
+  file_type?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationUploadFileArgs = {
+  file: Scalars['Upload']['input'];
+  file_size: Scalars['Int']['input'];
+  file_type: Scalars['String']['input'];
 };
 
 
@@ -905,6 +968,8 @@ export type PostsByParentOutput = {
 
 export type Query = {
   __typename?: 'Query';
+  file: IFileOutput;
+  fileList: Array<IFile>;
   fileUploadUrlRequest: FileUploadUrlResponse;
   getAllMapsList: GetAllMapsListOutput;
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput;
@@ -958,6 +1023,11 @@ export type Query = {
   wordToPhraseTranslationRead: WordToPhraseTranslationOutput;
   wordToWordTranslationRead: WordToWordTranslationOutput;
   wordVoteRead: WordVoteOutput;
+};
+
+
+export type QueryFileArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -1961,7 +2031,7 @@ export type GetAllMapsListQueryVariables = Exact<{
 }>;
 
 
-export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'GetAllMapsListOutput', allMapsList: Array<{ __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
+export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'GetAllMapsListOutput', allMapsList: Array<{ __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
 export type GetTranslatedMapContentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1986,10 +2056,28 @@ export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: 
 
 export type MapUploadMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
+  previewFileId?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
 export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typename?: 'MapUploadOutput', error: ErrorType, mapFileOutput?: { __typename?: 'MapFileOutput', original_map_id: string, map_file_name: string } | null } };
+
+export type MapDeleteMutationVariables = Exact<{
+  mapId: Scalars['String']['input'];
+  is_original: Scalars['Boolean']['input'];
+}>;
+
+
+export type MapDeleteMutation = { __typename?: 'Mutation', mapDelete: { __typename?: 'MapDeleteOutput', error: ErrorType, deletedMapId?: string | null } };
+
+export type UploadFileMutationVariables = Exact<{
+  file: Scalars['Upload']['input'];
+  file_size: Scalars['Int']['input'];
+  file_type: Scalars['String']['input'];
+}>;
+
+
+export type UploadFileMutation = { __typename?: 'Mutation', uploadFile: { __typename?: 'IFileOutput', error: ErrorType, file?: { __typename?: 'IFile', id: number } | null } };
 
 export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
@@ -3526,6 +3614,7 @@ export const GetAllMapsListDocument = gql`
       created_at
       created_by
       map_file_name_with_langs
+      preview_file_url
     }
   }
 }
@@ -3680,8 +3769,8 @@ export type GetOrigMapContentQueryHookResult = ReturnType<typeof useGetOrigMapCo
 export type GetOrigMapContentLazyQueryHookResult = ReturnType<typeof useGetOrigMapContentLazyQuery>;
 export type GetOrigMapContentQueryResult = Apollo.QueryResult<GetOrigMapContentQuery, GetOrigMapContentQueryVariables>;
 export const MapUploadDocument = gql`
-    mutation MapUpload($file: Upload!) {
-  mapUpload(file: $file) {
+    mutation MapUpload($file: Upload!, $previewFileId: String) {
+  mapUpload(file: $file, previewFileId: $previewFileId) {
     error
     mapFileOutput {
       original_map_id
@@ -3706,6 +3795,7 @@ export type MapUploadMutationFn = Apollo.MutationFunction<MapUploadMutation, Map
  * const [mapUploadMutation, { data, loading, error }] = useMapUploadMutation({
  *   variables: {
  *      file: // value for 'file'
+ *      previewFileId: // value for 'previewFileId'
  *   },
  * });
  */
@@ -3716,6 +3806,79 @@ export function useMapUploadMutation(baseOptions?: Apollo.MutationHookOptions<Ma
 export type MapUploadMutationHookResult = ReturnType<typeof useMapUploadMutation>;
 export type MapUploadMutationResult = Apollo.MutationResult<MapUploadMutation>;
 export type MapUploadMutationOptions = Apollo.BaseMutationOptions<MapUploadMutation, MapUploadMutationVariables>;
+export const MapDeleteDocument = gql`
+    mutation MapDelete($mapId: String!, $is_original: Boolean!) {
+  mapDelete(input: {mapId: $mapId, is_original: $is_original}) {
+    error
+    deletedMapId
+  }
+}
+    `;
+export type MapDeleteMutationFn = Apollo.MutationFunction<MapDeleteMutation, MapDeleteMutationVariables>;
+
+/**
+ * __useMapDeleteMutation__
+ *
+ * To run a mutation, you first call `useMapDeleteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMapDeleteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mapDeleteMutation, { data, loading, error }] = useMapDeleteMutation({
+ *   variables: {
+ *      mapId: // value for 'mapId'
+ *      is_original: // value for 'is_original'
+ *   },
+ * });
+ */
+export function useMapDeleteMutation(baseOptions?: Apollo.MutationHookOptions<MapDeleteMutation, MapDeleteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MapDeleteMutation, MapDeleteMutationVariables>(MapDeleteDocument, options);
+      }
+export type MapDeleteMutationHookResult = ReturnType<typeof useMapDeleteMutation>;
+export type MapDeleteMutationResult = Apollo.MutationResult<MapDeleteMutation>;
+export type MapDeleteMutationOptions = Apollo.BaseMutationOptions<MapDeleteMutation, MapDeleteMutationVariables>;
+export const UploadFileDocument = gql`
+    mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
+  uploadFile(file: $file, file_size: $file_size, file_type: $file_type) {
+    error
+    file {
+      id
+    }
+  }
+}
+    `;
+export type UploadFileMutationFn = Apollo.MutationFunction<UploadFileMutation, UploadFileMutationVariables>;
+
+/**
+ * __useUploadFileMutation__
+ *
+ * To run a mutation, you first call `useUploadFileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUploadFileMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [uploadFileMutation, { data, loading, error }] = useUploadFileMutation({
+ *   variables: {
+ *      file: // value for 'file'
+ *      file_size: // value for 'file_size'
+ *      file_type: // value for 'file_type'
+ *   },
+ * });
+ */
+export function useUploadFileMutation(baseOptions?: Apollo.MutationHookOptions<UploadFileMutation, UploadFileMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UploadFileMutation, UploadFileMutationVariables>(UploadFileDocument, options);
+      }
+export type UploadFileMutationHookResult = ReturnType<typeof useUploadFileMutation>;
+export type UploadFileMutationResult = Apollo.MutationResult<UploadFileMutation>;
+export type UploadFileMutationOptions = Apollo.BaseMutationOptions<UploadFileMutation, UploadFileMutationVariables>;
 export const PhraseDefinitionReadDocument = gql`
     query PhraseDefinitionRead($id: ID!) {
   phraseDefinitionRead(id: $id) {
@@ -5225,6 +5388,8 @@ export const namedOperations = {
     WordUpsert: 'WordUpsert',
     EmailResponse: 'EmailResponse',
     MapUpload: 'MapUpload',
+    MapDelete: 'MapDelete',
+    UploadFile: 'UploadFile',
     PhraseDefinitionUpsert: 'PhraseDefinitionUpsert',
     TogglePhraseDefinitionVoteStatus: 'TogglePhraseDefinitionVoteStatus',
     TogglePhraseVoteStatus: 'TogglePhraseVoteStatus',

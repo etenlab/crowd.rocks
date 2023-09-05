@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
@@ -22,6 +22,7 @@ import { putLangCodesToFileName } from '../../common/utility';
 interface ISaveMapParams {
   mapFileName: string;
   fileBody: string;
+  previewFileId: string;
   token: string;
   language_code: string;
   dialect_code?: string;
@@ -70,21 +71,34 @@ export class MapsRepository {
   async saveOriginalMap({
     mapFileName,
     fileBody,
+    previewFileId,
     token,
     dbPoolClient,
     language_code,
     dialect_code,
     geo_code,
   }: ISaveMapParams): Promise<ISaveMapRes> {
+    const previewFileIdN = Number(previewFileId);
+    if (isNaN(previewFileIdN)) {
+      throw new Error(ErrorType.ProvidedIdIsMalformed);
+    }
     const poolClient = dbPoolClient
       ? dbPoolClient // use given pool client
       : this.pg.pool; //some `random` client from pool will be used
 
     const res = await poolClient.query(
       `
-          call original_map_create($1,$2,$3,$4,$5,$6, null,null,null,null)
+          call original_map_create($1,$2,$3,$4,$5,$6,$7, null,null,null,null)
         `,
-      [mapFileName, fileBody, token, language_code, dialect_code, geo_code],
+      [
+        mapFileName,
+        fileBody,
+        token,
+        language_code,
+        dialect_code,
+        geo_code,
+        previewFileIdN,
+      ],
     );
 
     if (!res.rows[0].p_map_id) {
@@ -176,15 +190,18 @@ export class MapsRepository {
     }
     const sqlStr = `
         select
-          original_map_id,
+          om.original_map_id,
           map_file_name,
-          created_at,
-          created_by,
-          language_code,
-          dialect_code,
-          geo_code
+          om.created_at,
+          om.created_by,
+          om.language_code,
+          om.dialect_code,
+          om.geo_code,
+          f.file_url as preview_file_url
         from
-          original_maps
+          original_maps om
+        left join files f on
+          om.preview_file_id = f.file_id
         where true
         ${languageClause}
       `;
@@ -199,6 +216,7 @@ export class MapsRepository {
         language_code,
         dialect_code,
         geo_code,
+        preview_file_url,
       }) => ({
         original_map_id,
         map_file_name,
@@ -211,6 +229,7 @@ export class MapsRepository {
         created_by,
         is_original: true,
         language: { language_code, dialect_code, geo_code },
+        preview_file_url,
       }),
     );
 
@@ -243,11 +262,14 @@ export class MapsRepository {
         tm.created_by,
         tm.language_code ,
         tm.dialect_code ,
-        tm.geo_code
+        tm.geo_code,
+        f.file_url as preview_file_url
       from
         translated_maps tm
       left join original_maps om
         on tm.original_map_id = om.original_map_id
+      left join files f on
+        om.preview_file_id = f.file_id
       where
         true
         ${languageClause}
@@ -264,6 +286,7 @@ export class MapsRepository {
         language_code,
         dialect_code,
         geo_code,
+        preview_file_url,
       }) => ({
         translated_map_id,
         original_map_id,
@@ -277,25 +300,30 @@ export class MapsRepository {
         created_by,
         is_original: false,
         language: { language_code, dialect_code, geo_code },
+        preview_file_url,
       }),
     );
 
     return { origMapList };
   }
 
-  async getMapInfo(id: string): Promise<MapFileOutput> {
+  async getOrigMapInfo(id: string): Promise<MapFileOutput> {
     const params = [id];
     const sqlStr = `
         select
-          original_map_id,
-          map_file_name,
-          created_at,
-          created_by,
-          language_code,
-          dialect_code,
-          geo_code
+          om.original_map_id,
+          om.map_file_name,
+          om.created_at,
+          om.created_by,
+          om.language_code,
+          om.dialect_code,
+          om.geo_code,
+          f.file_id as preview_file_id,
+          f.file_url as preview_file_url
         from
-          original_maps
+          original_maps om
+        left join files f on
+          om.preview_file_id = f.file_id
         where original_map_id = $1
       `;
 
@@ -310,6 +338,8 @@ export class MapsRepository {
         language_code,
         dialect_code,
         geo_code,
+        preview_file_id,
+        preview_file_url,
       }) => ({
         original_map_id,
         map_file_name,
@@ -322,6 +352,8 @@ export class MapsRepository {
         created_by,
         is_original: true,
         language: { language_code, dialect_code, geo_code },
+        preview_file_id,
+        preview_file_url,
       }),
     );
 
@@ -332,15 +364,19 @@ export class MapsRepository {
     const resQ = await this.pg.pool.query(
       `
         select 
-          original_map_id,
-          content, 
-          map_file_name, 
-          created_at, 
-          created_by, 
-          language_code,	
-          dialect_code,	
-          geo_code
-        from original_maps where original_map_id = $1
+          om.original_map_id,
+          om.content, 
+          om.map_file_name, 
+          om.created_at, 
+          om.created_by, 
+          om.language_code,	
+          om.dialect_code,	
+          om.geo_code,
+          f.file_url as preview_file_url
+        from original_maps om 
+        left join files f on
+          om.preview_file_id = f.file_id
+        where original_map_id = $1
       `,
       [id],
     );
@@ -353,6 +389,7 @@ export class MapsRepository {
       language_code,
       dialect_code,
       geo_code,
+      preview_file_url,
     } = resQ.rows[0];
 
     return {
@@ -368,6 +405,7 @@ export class MapsRepository {
       content: resQ.rows[0].content,
       is_original: true,
       language: { language_code, dialect_code, geo_code },
+      preview_file_url,
     };
   }
 
@@ -385,11 +423,14 @@ export class MapsRepository {
         tm.language_code ,
         tm.dialect_code ,
         tm.geo_code,
-        tm.content
+        tm.content,
+        f.file_url as preview_file_url
       from
         translated_maps tm
       left join original_maps om
         on tm.original_map_id = om.original_map_id
+      left join files f on
+        om.preview_file_id = f.file_id
       where
         translated_map_id = $1
       `,
@@ -406,6 +447,7 @@ export class MapsRepository {
       language_code,
       dialect_code,
       geo_code,
+      preview_file_url,
     } = resQ.rows[0];
 
     return {
@@ -422,6 +464,7 @@ export class MapsRepository {
         dialect_code,
         geo_code,
       }),
+      preview_file_url,
     };
   }
 
@@ -1001,5 +1044,53 @@ export class MapsRepository {
 
     const resQ = await this.pg.pool.query(sqlStr, params);
     return resQ.rows[0].translated_map_word_id;
+  }
+
+  async deleteTranslatedMap(mapId: string) {
+    const params = [mapId];
+    const sqlStr = `
+      delete
+      from
+        translated_maps
+      where
+        translated_map_id = $1
+      returning translated_map_id
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    if (resQ.rows.length > 1) {
+      Logger.error(
+        `Something wrong, deleted several translated maps instead of single one` +
+        JSON.stringify(resQ.rows),
+      );
+      throw new Error(ErrorType.MapDeletionError);
+    }
+    if (!resQ.rows || resQ.rows.length < 1) {
+      throw new Error(ErrorType.MapNotFound);
+    }
+    return resQ.rows[0].translated_map_id;
+  }
+
+  async deleteOriginalMap(mapId: string) {
+    const params = [mapId];
+    const sqlStr = `
+      delete
+      from
+        public.original_maps
+      where
+        original_map_id = $1
+      returning original_map_id
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    if (resQ.rows.length > 1) {
+      Logger.error(
+        `Something wrong, deleted several original maps instead of single one:` +
+        JSON.stringify(resQ.rows),
+      );
+      throw new Error(ErrorType.MapDeletionError);
+    }
+    if (!resQ.rows || resQ.rows.length < 1) {
+      throw new Error(ErrorType.MapNotFound);
+    }
+    return resQ.rows[0].original_map_id;
   }
 }

@@ -98,6 +98,7 @@ export class StorageStack extends cdk.Stack {
         writer: rds.ClusterInstance.serverlessV2('writer', {
           publiclyAccessible: props.isPubliclyAccessible,
         }),
+        monitoringInterval: cdk.Duration.seconds(30),
       },
     );
 

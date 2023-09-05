@@ -1,6 +1,6 @@
 import { MouseEventHandler, useRef } from 'react';
 import { IonBadge, IonItem, IonIcon } from '@ionic/react';
-import { downloadOutline } from 'ionicons/icons';
+import { downloadOutline, trashBin } from 'ionicons/icons';
 import { styled } from 'styled-components';
 
 import {
@@ -15,9 +15,18 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
   mapItem: MapFileOutput;
+  candidateForDeletionRef: React.MutableRefObject<MapFileOutput | undefined>;
+  setIsMapDeleteModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  showDelete: boolean;
 };
 
-const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
+const NotStyledMapItem = ({
+  mapItem,
+  setIsMapDeleteModalOpen,
+  candidateForDeletionRef,
+  showDelete,
+  ...rest
+}: TMapItemProps) => {
   const {
     states: {
       global: {
@@ -99,48 +108,92 @@ const NotStyledMapItem = ({ mapItem, ...rest }: TMapItemProps) => {
   return (
     <IonItem {...rest} routerLink={routerLink}>
       <StItem>
+        <PreviewBlock>
+          {mapItem.preview_file_url ? (
+            <img src={mapItem.preview_file_url} />
+          ) : null}
+          {showDelete ? (
+            <TrashIcon
+              icon={trashBin}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                candidateForDeletionRef.current = mapItem;
+                setIsMapDeleteModalOpen(true);
+              }}
+              size="large"
+              color="danger"
+              className="clickable theme-icon"
+            />
+          ) : null}
+        </PreviewBlock>
+
         <FileName>
           {mapItem.is_original
-            ? mapItem.map_file_name
-            : mapItem.map_file_name_with_langs}
+            ? mapItem.map_file_name.replace('.cf.svg', '')
+            : mapItem.map_file_name_with_langs.replace('.cf.svg', '')}
         </FileName>
-        <div>
+        <IconRow>
           {mapItem.is_original ? (
             <OrigBadge>Original</OrigBadge>
           ) : (
             <IonBadge>
               {langInfo2String(langInfo) +
-                ` [${mapItem.translated_percent || ''}%]`}
+                ` ${mapItem.translated_percent || ''}%`}
             </IonBadge>
           )}
-          <IonIcon
+          <DownloadIcon
             icon={downloadOutline}
             onClick={handleDownloadSvg}
             size="large"
             color="primary"
             className="clickable theme-icon"
           />
-        </div>
+        </IconRow>
       </StItem>
     </IonItem>
   );
 };
 
 export const MapItem = styled(NotStyledMapItem)(() => ({
-  border: 'solid 1px #cfcfcf',
+  padding: '0px',
   marginTop: '20px',
+  display: 'flex',
+  alignItems: 'center',
+  float: 'left',
 }));
 
-const FileName = styled.div`
-  margin-top: 7px;
+const PreviewBlock = styled.div`
+  display: flex;
+  align-items: start;
 `;
 
-const StItem = styled.div`
+const FileName = styled.div``;
+
+const StItem = styled.div``;
+
+const IconRow = styled.div`
   display: flex;
-  justify-content: space-between;
-  width: 100%;
+  align-items: center;
 `;
 
 const OrigBadge = styled(IonBadge)(() => ({
   background: 'purple',
 }));
+
+const TrashIcon = styled(IonIcon)`
+  padding: 3px;
+  margin: 2px;
+  &:hover {
+    box-shadow: 0px 0px 4px 1px gray;
+    border-radius: 50%;
+  }
+`;
+const DownloadIcon = styled(IonIcon)`
+  padding: 3px;
+  margin: 2px;
+  &:hover {
+    box-shadow: 0px 0px 4px 1px gray;
+    border-radius: 50%;
+  }
+`;

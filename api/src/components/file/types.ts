@@ -1,4 +1,5 @@
 import { Field, ObjectType, Int } from '@nestjs/graphql';
+import { ErrorType } from 'src/common/types';
 
 @ObjectType()
 export class IFile {
@@ -19,6 +20,16 @@ export class IFile {
 
   @Field()
   fileHash: string;
+}
+
+@ObjectType()
+export class IFileOutput {
+  @Field(() => IFile, { nullable: true }) file: IFile | null;
+  @Field(() => ErrorType) error: ErrorType;
+}
+export class IFileDeleteOutput {
+  @Field(() => String, { nullable: true }) deletedId: string | null;
+  @Field(() => ErrorType) error: ErrorType;
 }
 
 @ObjectType()

@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ReadStream } from 'fs';
 
 import {
   GetAllMapsListOutput,
@@ -30,8 +29,8 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
-
 import { putLangCodesToFileName } from '../../common/utility';
+import { FileService } from '../file/file.service';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
@@ -46,8 +45,9 @@ export type MapTranslationResult = {
 };
 
 interface parseAndSaveNewMapParams {
-  readStream: ReadStream;
+  fileBody: string;
   mapFileName: string;
+  previewFileId?: string;
   mapLanguage?: LanguageInfo;
   token: string;
 }
@@ -61,22 +61,16 @@ export class MapsService {
     private phraseDefinitionsService: PhraseDefinitionsService,
     private wordDefinitionsService: WordDefinitionsService,
     private wordToWordTranslationsService: WordToWordTranslationsService,
+    private fileService: FileService,
   ) {}
 
   async parseAndSaveNewMap({
-    readStream,
+    fileBody,
     mapFileName,
+    previewFileId,
     mapLanguage = DEFAULT_NEW_MAP_LANGUAGE,
     token,
   }: parseAndSaveNewMapParams): Promise<MapFileOutput> {
-    let fileBody = '';
-    for await (const chunk of readStream) {
-      if (!fileBody.length) {
-        fileBody = chunk;
-      } else {
-        fileBody += chunk;
-      }
-    }
     const language_code = mapLanguage.lang.tag;
     const dialect_code = mapLanguage.dialect?.tag;
     const geo_code = mapLanguage.region?.tag;
@@ -94,6 +88,7 @@ export class MapsService {
         await this.mapsRepository.saveOriginalMap({
           mapFileName,
           fileBody,
+          previewFileId: previewFileId!,
           token,
           dbPoolClient,
           language_code,
@@ -271,7 +266,7 @@ export class MapsService {
         'It is possible to get translated % only for transalted (not original) map.',
       );
 
-    const originalMap = await this.mapsRepository.getMapInfo(
+    const originalMap = await this.mapsRepository.getOrigMapInfo(
       mapFileInfo.original_map_id,
     );
     const {
@@ -651,6 +646,17 @@ export class MapsService {
     this.replaceINodeTagValues(transformedSvgINode, translations);
     const translatedMap = stringify(transformedSvgINode);
     return { translatedMap, translations };
+  }
+
+  async deleteMap(mapId: string, is_original: boolean): Promise<string> {
+    if (is_original) {
+      const mapInfo = await this.mapsRepository.getOrigMapInfo(mapId);
+      const deletedMapId = await this.mapsRepository.deleteOriginalMap(mapId);
+      await this.fileService.deleteFile(mapInfo.preview_file_id!);
+      return deletedMapId;
+    } else {
+      return this.mapsRepository.deleteTranslatedMap(mapId);
+    }
   }
 
   /**

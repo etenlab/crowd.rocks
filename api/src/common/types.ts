@@ -23,6 +23,10 @@ export enum ErrorType {
   EmailIsBlocked = 'EmailIsBlocked',
   EmailUnavailable = 'EmailUnavailable',
 
+  FileSaveFailed = 'FileSaveFailed',
+  FileDeleteFailed = 'FileDeleteFailed',
+  FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
+
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
   InvalidInputs = 'InvalidInputs',
   LimitInvalid = 'LimitInvalid',
@@ -76,11 +80,14 @@ export enum ErrorType {
 
   MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
   MapInsertFailed = 'MapInsertFailed',
+  MapDeletionError = 'MapDeletionError',
+  MapNotFound = 'MapNotFound',
 
   PostNotFound = 'PostNotFound',
 
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
+  ProvidedIdIsMalformed = 'ProvidedIdIsMalformed',
 }
 
 registerEnumType(ErrorType, {

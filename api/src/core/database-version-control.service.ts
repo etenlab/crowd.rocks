@@ -202,6 +202,9 @@ export class DatabaseVersionControlService {
     // post
     await this.runSqlFile('./src/core/sql/post/post_create.v2.sql');
 
+    // file
+    await this.runSqlFile('./src/core/sql/file/file_create.sql');
+
     await this.setVersionNumber(2);
   }
 

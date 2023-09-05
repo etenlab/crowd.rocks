@@ -6,6 +6,7 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
+  useIonRouter,
   // useIonToast,
 } from '@ionic/react';
 
@@ -25,6 +26,7 @@ import {
   CaptionContainer,
   CardListContainer,
   CardContainer,
+  StChatIcon,
 } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
@@ -35,6 +37,7 @@ import { VoteButtonsHerizontal } from '../../common/VoteButtonsHerizontal';
 import { PageLayout } from '../../common/PageLayout';
 
 import { NewPhraseDefinitionForm } from '../NewPhraseDefinitionForm';
+import { chatbubbleEllipsesSharp } from 'ionicons/icons';
 
 interface PhraseDetailPageProps
   extends RouteComponentProps<{
@@ -46,7 +49,7 @@ interface PhraseDetailPageProps
 export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
   // const [present] = useIonToast();
   const { tr } = useTr();
-
+  const router = useIonRouter();
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
 
   const { data: definitionData, error: definitionError } =
@@ -129,10 +132,25 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
             },
           }}
           voteFor="description"
+          discussion={{
+            onChatClick: () =>
+              router.push(
+                // TODO: maybe can extract the sender from the router in discussion page
+                `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrase_definitions/${definition.phrase_definition_id}/Phrase Book: ${phraseData?.getPhraseWithVoteById.phrase_with_vote?.phrase} - ${definition.definition}`,
+              ),
+          }}
         />
       </CardContainer>
     ));
-  }, [definitionData, definitionError, togglePhraseDefinitionVoteStatus]);
+  }, [
+    definitionData,
+    definitionError,
+    match.params.language_id,
+    match.params.nation_id,
+    phraseData?.getPhraseWithVoteById.phrase_with_vote?.phrase,
+    router,
+    togglePhraseDefinitionVoteStatus,
+  ]);
 
   const phraseCom = useMemo(() => {
     if (phraseError) {
@@ -175,9 +193,24 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
             })
           }
         />
+        <StChatIcon
+          icon={chatbubbleEllipsesSharp}
+          onClick={() =>
+            router.push(
+              `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrases/${phraseWithVote.phrase_id}/Phrase Book: ${phraseWithVote.phrase}`,
+            )
+          }
+        />
       </div>
     );
-  }, [phraseData, phraseError, togglePhraseVoteStatus]);
+  }, [
+    match.params.language_id,
+    match.params.nation_id,
+    phraseData,
+    phraseError,
+    router,
+    togglePhraseVoteStatus,
+  ]);
 
   return (
     <PageLayout>

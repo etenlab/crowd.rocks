@@ -1,11 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { PoolClient } from 'pg';
-
-import { pgClientOrPool } from 'src/common/utility';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
-import { GetFileListOutput, IFile } from './types';
+import { IFile, IFileOutput } from './types';
 
 interface FileFindParams {
   where?: {
@@ -23,18 +20,27 @@ export interface FileSaveParams {
   file_size: number;
   file_url: string;
   file_hash: string;
+  token: string;
 }
 
 @Injectable()
 export class FileRepository {
   constructor(private pg: PostgresService) {}
 
-  async find(input?: FileFindParams): Promise<IFile | null> {
+  async find(input?: FileFindParams): Promise<IFileOutput | null> {
+    if (input) {
+      if (Object.keys(input.where!).length < 1) {
+        Logger.error(
+          `Specify at least one condition at input<FileFindParams> `,
+        );
+        throw new Error(ErrorType.FileDeleteFailed);
+      }
+    }
     const params: (string | number)[] = [];
     let fileClause = '';
 
-    if (input!.where) {
-      for (const [key, value] of Object.entries(input!.where)) {
+    if (input && input.where) {
+      for (const [key, value] of Object.entries(input.where)) {
         if (value) {
           params.push(value);
           fileClause += ` and ${key} = $${params.length}`;
@@ -56,23 +62,23 @@ export class FileRepository {
             ${fileClause}
         `;
 
-    const resQ = await pgClientOrPool({
-      client: null,
-      pool: this.pg.pool,
-    }).query(sqlStr, params);
+    const resQ = await this.pg.pool.query(sqlStr, params);
     if (resQ.rowCount === 0) return null;
 
     return {
-      id: resQ.rows[0].file_id,
-      fileName: resQ.rows[0].file_name,
-      fileSize: resQ.rows[0].file_size,
-      fileType: resQ.rows[0].file_type,
-      fileUrl: resQ.rows[0].file_url,
-      fileHash: resQ.rows[0].file_hash,
+      file: {
+        id: resQ.rows[0].file_id,
+        fileName: resQ.rows[0].file_name,
+        fileSize: resQ.rows[0].file_size,
+        fileType: resQ.rows[0].file_type,
+        fileUrl: resQ.rows[0].file_url,
+        fileHash: resQ.rows[0].file_hash,
+      },
+      error: ErrorType.NoError,
     };
   }
 
-  async list(pgClient: PoolClient | null): Promise<GetFileListOutput> {
+  async list(): Promise<IFile[]> {
     const sqlStr = `
             select 
                 file_id,
@@ -85,10 +91,7 @@ export class FileRepository {
                 files
         `;
 
-    const resQ = await pgClientOrPool({
-      client: pgClient,
-      pool: this.pg.pool,
-    }).query(sqlStr);
+    const resQ = await this.pg.pool.query(sqlStr);
 
     const fileList = resQ.rows.map<IFile>(
       ({ file_id, file_name, file_size, file_type, file_url, file_hash }) => ({
@@ -101,7 +104,7 @@ export class FileRepository {
       }),
     );
 
-    return { fileList };
+    return fileList;
   }
 
   async save({
@@ -110,27 +113,53 @@ export class FileRepository {
     file_size,
     file_url,
     file_hash,
-  }: FileSaveParams): Promise<IFile> {
-    const res = await pgClientOrPool({
-      client: null,
-      pool: this.pg.pool,
-    }).query(
+    token,
+  }: FileSaveParams): Promise<IFileOutput> {
+    const res = await this.pg.pool.query(
       `
-            call file_create($1,$2,$3,$4,$5, null,null,null,null)
+            call file_create($1,$2,$3,$4,$5,$6, null,null,null,null)
             `,
-      [file_name, file_size, file_type, file_url, file_hash],
+      [file_name, file_size, file_type, file_url, file_hash, token],
     );
 
-    if (res.rows[0].p_error_type !== ErrorType.NoError) {
-      throw new Error(res.rows[0].p_error_type);
+    const error = res.rows[0].p_error_type;
+    if (error !== ErrorType.NoError) {
+      return { file: null, error };
     }
     return {
-      id: res.rows[0].p_file_id,
-      fileName: res.rows[0].file_name,
-      fileSize: res.rows[0].file_size,
-      fileType: res.rows[0].file_type,
-      fileUrl: res.rows[0].file_url,
-      fileHash: res.rows[0].file_hash,
+      file: {
+        id: res.rows[0].p_file_id,
+        fileName: file_name,
+        fileSize: file_size,
+        fileType: file_type,
+        fileUrl: file_url,
+        fileHash: file_hash,
+      },
+      error,
     };
+  }
+
+  async delete(fileId: string): Promise<string> {
+    const params = [fileId];
+    const sqlStr = `
+      delete
+      from
+        files
+      where
+        file_id = $1
+      returning file_id
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    if (resQ.rows.length > 1) {
+      Logger.error(
+        `Something wrong, deleted several files instead of single one:` +
+          JSON.stringify(resQ.rows),
+      );
+      throw new Error(ErrorType.MapDeletionError);
+    }
+    if (!resQ.rows || resQ.rows.length < 1) {
+      throw new Error(ErrorType.MapNotFound);
+    }
+    return resQ.rows[0].file_id;
   }
 }

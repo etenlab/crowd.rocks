@@ -16,13 +16,16 @@ export interface ITranslationsVotes {
 export type WordOrPhraseWithVotesAndValue =
   | (MapWordWithVotes & {
       value?: string | null | undefined;
+      id: string;
     })
   | (MapPhraseWithVotes & {
       value?: string | null | undefined;
+      id: string;
     });
 
 export type WordOrPhraseWithValueAndTranslations = {
   value?: string | null | undefined;
+  id: string;
   translations: Array<WordOrPhraseWithVotesAndValue>;
 } & (MapWordTranslations | MapPhraseTranslations);
 
@@ -59,22 +62,33 @@ export function useMapTranslationTools() {
       const res: WordOrPhraseWithValueAndTranslations[] = [];
       wordOrPhrases?.forEach((wordOrPhrase) => {
         let mainValue = '';
+        let id = '';
         if (wordOrPhrase.__typename === 'MapWordTranslations') {
           mainValue = wordOrPhrase.word;
+          id = wordOrPhrase.word_id;
         } else if (wordOrPhrase.__typename === 'MapPhraseTranslations') {
           mainValue = wordOrPhrase.phrase;
+          id = wordOrPhrase.phrase_id;
         }
 
         if (wordOrPhrase?.translations) {
           wordOrPhrase?.translations.forEach((tr, i) => {
             if (tr.__typename === 'MapWordWithVotes') {
-              wordOrPhrase.translations[i] = { ...tr, value: tr.word || '' };
+              wordOrPhrase.translations[i] = {
+                ...tr,
+                value: tr.word || '',
+                id: tr.word_id,
+              };
             } else if (tr.__typename === 'MapPhraseWithVotes') {
-              wordOrPhrase.translations[i] = { ...tr, value: tr.phrase || '' };
+              wordOrPhrase.translations[i] = {
+                ...tr,
+                value: tr.phrase || '',
+                id: tr.phrase_id,
+              };
             }
           });
         }
-        res.push({ ...wordOrPhrase, value: mainValue });
+        res.push({ ...wordOrPhrase, value: mainValue, id });
       });
 
       return res;
@@ -82,8 +96,69 @@ export function useMapTranslationTools() {
     [],
   );
 
+  const makeMapThumbnail = async (
+    content: string,
+    {
+      toWidth,
+      toHeight,
+      asFile,
+    }: { toWidth: number; toHeight: number; asFile?: string },
+  ): Promise<HTMLCanvasElement | File> => {
+    const scaleToFit = (
+      img: HTMLImageElement,
+      ctx: CanvasRenderingContext2D,
+    ): void => {
+      // get the scale
+      const scale = Math.min(
+        canvas.width / img.width,
+        canvas.height / img.height,
+      );
+      // get the top left position of the image
+      const x = canvas.width / 2 - (img.width / 2) * scale;
+      const y = canvas.height / 2 - (img.height / 2) * scale;
+      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+    };
+
+    const canvas = document.createElement('canvas');
+    canvas.id = 'mapThumbnail';
+    Object.assign(canvas.style, {
+      height: `${toHeight}px`,
+      'background-color': 'white',
+      width: `${toWidth}px`,
+      color: 'black',
+      border: '1px solid black',
+      position: 'absolute',
+    });
+    canvas.width = toWidth;
+    canvas.height = toHeight;
+
+    const img = new Image();
+    img.src = `data:image/svg+xml;utf8,${encodeURIComponent(content)}`;
+    const ctx = canvas.getContext('2d');
+    return new Promise((resolve) => {
+      img.onload = () => {
+        scaleToFit(img, ctx!);
+        if (asFile) {
+          canvas.toBlob((thumbnailBlob) => {
+            // thumbnailBlob is .png by default
+            if (!thumbnailBlob) {
+              throw new Error(`Can not convert canvas into BLOB`);
+            }
+            const file = new File([thumbnailBlob], `${asFile}.png`, {
+              type: 'image/png',
+            });
+            resolve(file);
+          });
+        } else {
+          resolve(canvas);
+        }
+      };
+    });
+  };
+
   return {
     chooseBestTranslation,
     addValueToWordsOrPhrases,
+    makeMapThumbnail,
   };
 }
