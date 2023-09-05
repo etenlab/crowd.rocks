@@ -1,4 +1,7 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { PoolClient } from 'pg';
+
+import { pgClientOrPool } from 'src/common/utility';
 
 import { ErrorType, GenericOutput } from 'src/common/types';
 
@@ -8,25 +11,28 @@ import { PhraseVotesService } from './phrase-votes.service';
 import { PhraseDefinitionsService } from 'src/components/definitions/phrase-definitions.service';
 
 import {
+  PhraseWithVote,
   PhraseReadInput,
-  PhraseReadOutput,
+  PhraseOutput,
+  PhrasesOutput,
   PhraseUpsertInput,
-  PhraseWithVoteListEdge,
+  PhraseWithVoteListOutput,
   PhraseWithVoteListConnection,
   PhraseWithVoteOutput,
+  Phrase,
 } from './types';
 import { WordUpsertInput } from 'src/components/words/types';
 import { LanguageInput } from 'src/components/common/types';
+import { PhraseDefinition } from 'src/components/definitions/types';
 
 import {
   GetPhraseObjByIdResultRow,
-  getPhraseObjById,
+  getPhraseObjByIds,
   callPhraseUpsertProcedure,
   PhraseUpsertProcedureOutputRow,
   GetPhraseListByLang,
   getPhraseListByLang,
 } from './sql-string';
-import { PoolClient } from 'pg';
 
 @Injectable()
 export class PhrasesService {
@@ -38,23 +44,34 @@ export class PhrasesService {
     private phraseDefinitionService: PhraseDefinitionsService,
   ) {}
 
-  async read(input: PhraseReadInput): Promise<PhraseReadOutput> {
+  async read(
+    input: PhraseReadInput,
+    pgClient: PoolClient | null,
+  ): Promise<PhraseOutput> {
     try {
-      const res1 = await this.pg.pool.query<GetPhraseObjByIdResultRow>(
-        ...getPhraseObjById(+input.phrase_id),
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetPhraseObjByIdResultRow>(
+        ...getPhraseObjByIds([+input.phrase_id]),
       );
 
-      if (res1.rowCount === 0) {
+      if (res.rowCount === 0) {
         console.error(`no phrase for id: ${input.phrase_id}`);
+
+        return {
+          error: ErrorType.PhraseNotFound,
+          phrase: null,
+        };
       } else {
         return {
           error: ErrorType.NoError,
           phrase: {
             phrase_id: input.phrase_id,
-            phrase: res1.rows[0].phrase,
-            language_code: res1.rows[0].language_code,
-            dialect_code: res1.rows[0].dialect_code,
-            geo_code: res1.rows[0].geo_code,
+            phrase: res.rows[0].phrase,
+            language_code: res.rows[0].language_code,
+            dialect_code: res.rows[0].dialect_code,
+            geo_code: res.rows[0].geo_code,
           },
         };
       }
@@ -68,14 +85,56 @@ export class PhrasesService {
     };
   }
 
+  async reads(
+    ids: number[],
+    pgClient: PoolClient | null,
+  ): Promise<PhrasesOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetPhraseObjByIdResultRow>(...getPhraseObjByIds(ids));
+
+      const phrasesMap = new Map<string, Phrase>();
+
+      res.rows.forEach((row) =>
+        phrasesMap.set(row.phrase_id, {
+          phrase_id: row.phrase_id,
+          phrase: row.phrase,
+          language_code: row.language_code,
+          dialect_code: row.dialect_code,
+          geo_code: row.geo_code,
+        }),
+      );
+
+      return {
+        error: ErrorType.NoError,
+        phrases: ids.map((id) => {
+          const phrase = phrasesMap.get(id + '');
+
+          return phrase ? phrase : null;
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      phrases: [],
+    };
+  }
+
   async upsert(
     input: PhraseUpsertInput,
     token: string,
-  ): Promise<PhraseReadOutput> {
+    pgClient: PoolClient | null,
+  ): Promise<PhraseOutput> {
     try {
       const wordlikeStrings = input.phraselike_string
         .split(' ')
         .filter((w) => w !== '');
+
       const wordIds: number[] = [];
 
       for (const wordlikeStr of wordlikeStrings) {
@@ -87,9 +146,10 @@ export class PhrasesService {
             geo_code: input.geo_code,
           } as WordUpsertInput,
           token,
+          pgClient,
         );
 
-        if (res.error !== ErrorType.NoError) {
+        if (res.error !== ErrorType.NoError || !res.word) {
           return {
             error: res.error,
             phrase: null,
@@ -99,7 +159,10 @@ export class PhrasesService {
         wordIds.push(+res.word.word_id);
       }
 
-      const res = await this.pg.pool.query<PhraseUpsertProcedureOutputRow>(
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<PhraseUpsertProcedureOutputRow>(
         ...callPhraseUpsertProcedure({
           phraselike_string: input.phraselike_string,
           wordIds: wordIds,
@@ -118,7 +181,7 @@ export class PhrasesService {
       }
 
       const phrase = await (
-        await this.read({ phrase_id: phrase_id + '' })
+        await this.read({ phrase_id: phrase_id + '' }, pgClient)
       ).phrase;
 
       return {
@@ -189,12 +252,12 @@ export class PhrasesService {
         return {
           error,
           phrase_id: null,
-          word_ids: null,
+          word_ids: [],
         };
       }
       return {
         error,
-        phrase_id: phrase_id,
+        phrase_id: +phrase_id,
         word_ids,
       };
     } catch (e) {
@@ -204,30 +267,35 @@ export class PhrasesService {
     return {
       error: ErrorType.UnknownError,
       phrase_id: null,
-      word_ids: null,
+      word_ids: [],
     };
   }
 
   async getPhraseWithVoteById(
     phrase_id: number,
+    pgClient: PoolClient | null,
   ): Promise<PhraseWithVoteOutput> {
     try {
       const { error, vote_status } = await this.phraseVoteService.getVoteStatus(
         phrase_id,
+        pgClient,
       );
 
-      if (error !== ErrorType.NoError) {
+      if (error !== ErrorType.NoError || !vote_status) {
         return {
           error,
           phrase_with_vote: null,
         };
       }
 
-      const { error: readError, phrase } = await this.read({
-        phrase_id: phrase_id + '',
-      });
+      const { error: readError, phrase } = await this.read(
+        {
+          phrase_id: phrase_id + '',
+        },
+        pgClient,
+      );
 
-      if (readError !== ErrorType.NoError) {
+      if (readError !== ErrorType.NoError || !phrase) {
         return {
           error: readError,
           phrase_with_vote: null,
@@ -252,27 +320,85 @@ export class PhrasesService {
     };
   }
 
+  async getPhraseWithVoteByIds(
+    phraseIds: number[],
+    pgClient: PoolClient | null,
+  ): Promise<PhraseWithVoteListOutput> {
+    try {
+      const { error, vote_status_list } =
+        await this.phraseVoteService.getVoteStatusFromIds(phraseIds, pgClient);
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error,
+          phrase_with_vote_list: [],
+        };
+      }
+
+      const { error: readError, phrases } = await this.reads(
+        phraseIds,
+        pgClient,
+      );
+
+      if (readError !== ErrorType.NoError) {
+        return {
+          error: readError,
+          phrase_with_vote_list: [],
+        };
+      }
+
+      return {
+        error,
+        phrase_with_vote_list: phraseIds.map((_phraseId, index) => {
+          const vote_status = vote_status_list[index];
+          const phrase = phrases[index];
+
+          if (!vote_status || !phrase) {
+            return null;
+          }
+
+          return {
+            ...phrase,
+            upvotes: vote_status.upvotes,
+            downvotes: vote_status.downvotes,
+          };
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      phrase_with_vote_list: [],
+    };
+  }
+
   async getPhrasesByLanguage(
     input: LanguageInput,
     first: number | null,
     after: string | null,
+    pgClient: PoolClient | null,
   ): Promise<PhraseWithVoteListConnection> {
     try {
-      const res1 = await this.pg.pool.query<GetPhraseListByLang>(
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetPhraseListByLang>(
         ...getPhraseListByLang({
           ...input,
         }),
       );
-
-      const phraseWithVoteListEdge: PhraseWithVoteListEdge[] = [];
 
       let offset: number | null = null;
       let hasNextPage = false;
       let startCursor: string | null = null;
       let endCursor: string | null = null;
 
-      for (let i = 0; i < res1.rowCount; i++) {
-        const { phrase_id } = res1.rows[i];
+      const phraseIds: number[] = [];
+
+      for (let i = 0; i < res.rowCount; i++) {
+        const { phrase_id } = res.rows[i];
 
         if (after === null && offset === null) {
           offset = 0;
@@ -291,79 +417,86 @@ export class PhrasesService {
           startCursor = phrase_id;
         }
 
-        if (first !== null && offset >= first) {
+        if (first !== null && offset! >= first) {
           hasNextPage = true;
           break;
         }
 
-        const { error, vote_status } =
-          await this.phraseVoteService.getVoteStatus(+phrase_id);
-
-        if (error !== ErrorType.NoError) {
-          return {
-            error,
-            edges: [],
-            pageInfo: {
-              hasNextPage: false,
-              hasPreviousPage: false,
-              startCursor: null,
-              endCursor: null,
-            },
-          };
-        }
-
-        const { error: definitionError, definitions } =
-          await this.phraseDefinitionService.getDefinitionsByPhraseId(
-            +phrase_id,
-          );
-
-        if (error !== ErrorType.NoError) {
-          return {
-            error: definitionError,
-            edges: [],
-            pageInfo: {
-              hasNextPage: false,
-              hasPreviousPage: false,
-              startCursor: null,
-              endCursor: null,
-            },
-          };
-        }
-
-        const { error: readError, phrase } = await this.read({
-          phrase_id,
-        });
-
-        if (readError !== ErrorType.NoError) {
-          return {
-            error: readError,
-            edges: [],
-            pageInfo: {
-              hasNextPage: false,
-              hasPreviousPage: false,
-              startCursor: null,
-              endCursor: null,
-            },
-          };
-        }
-
-        phraseWithVoteListEdge.push({
-          cursor: phrase_id,
-          node: {
-            ...phrase,
-            upvotes: vote_status.upvotes,
-            downvotes: vote_status.downvotes,
-            definitions,
-          },
-        });
+        phraseIds.push(+phrase_id);
 
         endCursor = phrase_id;
-        offset++;
+        offset!++;
       }
+
+      const { error, phrase_with_vote_list } =
+        await this.getPhraseWithVoteByIds(phraseIds, pgClient);
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error,
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+          },
+        };
+      }
+
+      const { error: definitionError, phrase_definition_list } =
+        await this.phraseDefinitionService.getPhraseDefinitionsByPhraseIds(
+          phraseIds,
+          pgClient,
+        );
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error: definitionError,
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+          },
+        };
+      }
+
+      const phraseDefinitionMap = new Map<string, PhraseDefinition[]>();
+
+      phrase_definition_list.forEach((phrase_definition) => {
+        if (!phrase_definition) {
+          return;
+        }
+
+        const phrase_id = phrase_definition.phrase.phrase_id;
+        const phraseDefinitions = phraseDefinitionMap.get(phrase_id);
+
+        if (phraseDefinitions === undefined) {
+          phraseDefinitionMap.set(phrase_id, [phrase_definition]);
+        } else {
+          phraseDefinitions.push(phrase_definition);
+        }
+      });
 
       return {
         error: ErrorType.NoError,
-        edges: phraseWithVoteListEdge,
+        edges: phrase_with_vote_list
+          .filter((phraseWithVote) => phraseWithVote)
+          .map((phraseWithVote: PhraseWithVote) => {
+            const phraseDefinition = phraseDefinitionMap.get(
+              phraseWithVote.phrase_id,
+            );
+
+            return {
+              cursor: phraseWithVote.phrase_id,
+              node: {
+                ...phraseWithVote,
+                definitions: phraseDefinition || [],
+              },
+            };
+          }),
         pageInfo: {
           hasNextPage,
           hasPreviousPage: false,
