@@ -73,6 +73,7 @@ export enum ErrorType {
   EmailTooLong = 'EmailTooLong',
   EmailTooShort = 'EmailTooShort',
   EmailUnavailable = 'EmailUnavailable',
+  FileDeleteFailed = 'FileDeleteFailed',
   FileSaveFailed = 'FileSaveFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
   FolderForThreadNotExists = 'FolderForThreadNotExists',
@@ -267,6 +268,7 @@ export type GetOrigMapContentOutput = {
   map_file_name: Scalars['String']['output'];
   map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
+  preview_file_id?: Maybe<Scalars['ID']['output']>;
   preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
@@ -325,6 +327,7 @@ export type GetTranslatedMapContentOutput = {
   map_file_name: Scalars['String']['output'];
   map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
+  preview_file_id?: Maybe<Scalars['ID']['output']>;
   preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
@@ -421,6 +424,7 @@ export type MapFileOutput = {
   map_file_name: Scalars['String']['output'];
   map_file_name_with_langs: Scalars['String']['output'];
   original_map_id: Scalars['ID']['output'];
+  preview_file_id?: Maybe<Scalars['ID']['output']>;
   preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
