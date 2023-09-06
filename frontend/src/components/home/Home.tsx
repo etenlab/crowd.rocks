@@ -17,6 +17,7 @@ import {
   languageOutline,
   codeWorkingOutline,
   mapOutline,
+  sendOutline,
 } from 'ionicons/icons';
 import { RouteComponentProps } from 'react-router';
 import './Home.css';
@@ -55,6 +56,12 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           icon: mapOutline,
           title: tr('Maps'),
           description: tr('Translate maps into any language'),
+        },
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/forums`,
+          icon: sendOutline,
+          title: tr('Community'),
+          description: tr('Hold discussions with other members'),
         },
       ],
     },

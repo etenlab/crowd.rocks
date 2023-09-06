@@ -11,7 +11,7 @@ import { chatbubbleEllipsesSharp } from 'ionicons/icons';
 import { StChatIcon } from '../styled';
 
 type CardProps = {
-  content?: string;
+  content?: string | ReactNode;
   description?: ReactNode;
   voteFor?: 'content' | 'description';
   vote?: {
