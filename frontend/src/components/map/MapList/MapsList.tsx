@@ -23,6 +23,7 @@ import {
   useIsAdminLoggedInLazyQuery,
   useMapDeleteMutation,
   useMapUploadMutation,
+  useMapsTranslationsResetMutation,
   useUploadFileMutation,
 } from '../../../generated/graphql';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -53,6 +54,7 @@ export const MapList: React.FC = () => {
   const [sendMapFile] = useMapUploadMutation();
   const [uploadFile] = useUploadFileMutation();
   const [mapDelete] = useMapDeleteMutation();
+  const [mapTranslationReset] = useMapsTranslationsResetMutation();
 
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
@@ -173,7 +175,8 @@ export const MapList: React.FC = () => {
   };
 
   const resetTranslatedMaps = () => {
-    alert('boom');
+    mapTranslationReset();
+    // alert('boom');
   };
 
   return (

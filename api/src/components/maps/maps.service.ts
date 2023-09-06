@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ReadStream } from 'fs';
 
 import {
@@ -45,12 +45,17 @@ export type MapTranslationResult = {
   translations: Array<{ source: string; translation: string }>;
 };
 
-interface parseAndSaveNewMapParams {
+interface IParseAndSaveNewMapParams {
   fileBody: string;
   mapFileName: string;
   previewFileId?: string;
   mapLanguage?: LanguageInfo;
   token: string;
+}
+interface IParseOrigMapParams {
+  map_id: string;
+  token: string;
+  dbPoolClient: PoolClient;
 }
 @Injectable()
 export class MapsService {
@@ -65,92 +70,108 @@ export class MapsService {
     private fileService: FileService,
   ) {}
 
-  async parseAndSaveNewMap({
+  async saveAndParseNewMap({
     fileBody,
     mapFileName,
     previewFileId,
     mapLanguage = DEFAULT_NEW_MAP_LANGUAGE,
     token,
-  }: parseAndSaveNewMapParams): Promise<MapFileOutput> {
+  }: IParseAndSaveNewMapParams) {
     const language_code = mapLanguage.lang.tag;
     const dialect_code = mapLanguage.dialect?.tag;
     const geo_code = mapLanguage.region?.tag;
 
-    const { transformedSvgINode, foundWords, foundPhrases } =
-      this.parseSvgMapString(fileBody);
-
     const dbPoolClient = await this.pg.pool.connect();
     try {
-      dbPoolClient.query('BEGIN');
-
       //-- Save map
-
-      const { map_file_name, map_id, created_at, created_by } =
-        await this.mapsRepository.saveOriginalMap({
-          mapFileName,
-          fileBody,
-          previewFileId,
-          token,
-          dbPoolClient,
-          language_code,
-          dialect_code,
-          geo_code,
-        });
-
-      //--save found words with definitions and original map boundng
-
-      for (const word of foundWords) {
-        const wordInput: WordUpsertInput = {
-          wordlike_string: word,
-          language_code,
-          dialect_code,
-          geo_code,
-        };
-        await this.saveOriginalMapWord(wordInput, map_id, token, dbPoolClient);
-      }
-
-      //--save found phrases and  bound them to original map
-
-      for (const phrase of foundPhrases) {
-        const phraseInput: PhraseUpsertInput = {
-          phraselike_string: phrase,
-          language_code,
-          dialect_code,
-          geo_code,
-        };
-        await this.saveOriginalMapPhrase(
-          phraseInput,
-          map_id,
-          token,
-          dbPoolClient,
-        );
-      }
-
-      await dbPoolClient.query('COMMIT');
-
-      return {
-        map_file_name,
-        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
-          language_code,
-          dialect_code,
-          geo_code,
-        }),
-        original_map_id: map_id,
-        created_at,
-        created_by,
-        is_original: true,
-        language: {
-          language_code,
-          dialect_code,
-          geo_code,
-        },
-      };
+      dbPoolClient.query('BEGIN');
+      const { map_id } = await this.mapsRepository.saveOriginalMapTrn({
+        mapFileName,
+        fileBody,
+        previewFileId,
+        token,
+        dbPoolClient,
+        language_code,
+        dialect_code,
+        geo_code,
+      });
+      dbPoolClient.query('COMMIT');
+      // parsing depends on results of saveOriginalMapTrn so we must commit and start a new transaction
+      dbPoolClient.query('BEGIN');
+      const res = await this.parseOrigMapTrn({
+        map_id,
+        dbPoolClient,
+        token,
+      });
+      dbPoolClient.query('COMMIT');
+      return res;
     } catch (error) {
-      await dbPoolClient.query('ROLLBACK');
+      dbPoolClient.query('ROLLBACK');
       throw error;
     } finally {
       dbPoolClient.release();
     }
+  }
+
+  async parseOrigMapTrn({
+    map_id,
+    dbPoolClient,
+    token,
+  }: IParseOrigMapParams): Promise<MapFileOutput> {
+    const { language, content, map_file_name, created_at, created_by } =
+      await this.mapsRepository.getOrigMapContent(map_id);
+    const { language_code, dialect_code, geo_code } = language;
+    const { transformedSvgINode, foundWords, foundPhrases } =
+      this.parseSvgMapString(content);
+
+    //--save found words with definitions and original map boundng
+
+    for (const word of foundWords) {
+      const wordInput: WordUpsertInput = {
+        wordlike_string: word,
+        language_code,
+        dialect_code,
+        geo_code,
+      };
+      await this.saveOriginalMapWord(wordInput, map_id, token, dbPoolClient);
+    }
+
+    //--save found phrases and  bound them to original map
+
+    for (const phrase of foundPhrases) {
+      const phraseInput: PhraseUpsertInput = {
+        phraselike_string: phrase,
+        language_code,
+        dialect_code,
+        geo_code,
+      };
+      await this.saveOriginalMapPhrase(
+        phraseInput,
+        map_id,
+        token,
+        dbPoolClient,
+      );
+    }
+
+    await dbPoolClient.query('COMMIT');
+
+    return {
+      map_file_name,
+      map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+        language_code,
+        dialect_code,
+        geo_code,
+      }),
+      original_map_id: map_id,
+      created_at,
+      created_by,
+      is_original: true,
+      language: {
+        language_code,
+        dialect_code,
+        geo_code,
+      },
+    };
   }
 
   async saveOriginalMapWord(
@@ -490,14 +511,24 @@ export class MapsService {
     token: string,
   ): Promise<Array<string>> {
     const translatedMapsIds: string[] = [];
-    for (const origMapId of origMapIds) {
-      const translatedToSomeLanguages = await this.translateMapAndSave(
-        origMapId,
-        token,
-      );
-      translatedMapsIds.push(...translatedToSomeLanguages);
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      for (const origMapId of origMapIds) {
+        const translatedToSomeLanguages =
+          await this.translateMapAndSaveTranslatedTrn(
+            origMapId,
+            token,
+            dbPoolClient,
+          );
+        translatedMapsIds.push(...translatedToSomeLanguages);
+      }
+    } catch (error) {
+      Logger.error(error);
+      throw error;
+    } finally {
+      dbPoolClient.release();
+      return translatedMapsIds;
     }
-    return translatedMapsIds;
   }
 
   async translateMapsWithDefinitionId({
@@ -522,9 +553,10 @@ export class MapsService {
     return this.translateOrigMapsByIds(origMapIds, token);
   }
 
-  async translateMapAndSave(
+  async translateMapAndSaveTranslatedTrn(
     origMapId,
     token,
+    dbPoolClient: PoolClient,
     toLang?: LanguageInput,
   ): Promise<Array<string>> {
     const translatedMapIds: Array<string> = [];
@@ -617,13 +649,14 @@ export class MapsService {
         translations,
       );
 
-      const { map_id } = await this.mapsRepository.saveTranslatedMap({
+      const { map_id } = await this.mapsRepository.saveTranslatedMapTrn({
         original_map_id: origMapId,
         fileBody: translatedMap,
         token,
         t_language_code: language_code,
         t_dialect_code: dialect_code,
         t_geo_code: geo_code,
+        dbPoolClient,
       });
       translatedMapIds.push(map_id);
     }
@@ -655,11 +688,35 @@ export class MapsService {
     }
   }
 
-  async translationsReset(
-    mapId?: string,
-    is_original?: boolean,
-  ): Promise<void> {
-
+  async translationsReset(token): Promise<void> {
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      dbPoolClient.query('BEGIN');
+      await this.mapsRepository.deleteAllOriginalMapWordsTrn(dbPoolClient);
+      await this.mapsRepository.deleteAllOriginalMapPhrasesTrn(dbPoolClient);
+      await this.mapsRepository.deleteAllTranslatedMapsTrn(dbPoolClient);
+      await dbPoolClient.query('COMMIT');
+      const allOriginalMaps = await this.mapsRepository.getOrigMaps();
+      for (const origMap of allOriginalMaps.origMapList) {
+        dbPoolClient.query('BEGIN');
+        await this.parseOrigMapTrn({
+          map_id: origMap.original_map_id,
+          token,
+          dbPoolClient,
+        });
+        await this.translateMapAndSaveTranslatedTrn(
+          origMap.original_map_id,
+          token,
+          dbPoolClient,
+        );
+        await dbPoolClient.query('COMMIT');
+      }
+    } catch (error) {
+      await dbPoolClient.query('ROLLBACK');
+      throw error;
+    } finally {
+      dbPoolClient.release();
+    }
   }
 
   /**

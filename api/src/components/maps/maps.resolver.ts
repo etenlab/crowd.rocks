@@ -64,7 +64,7 @@ export class MapsResolver {
       };
     }
     try {
-      const map = await this.mapService.parseAndSaveNewMap({
+      const map = await this.mapService.saveAndParseNewMap({
         fileBody,
         mapFileName: map_file_name,
         previewFileId,
@@ -130,7 +130,7 @@ export class MapsResolver {
       };
     }
     try {
-      await this.mapService.translationsReset();
+      await this.mapService.translationsReset(userToken);
       return {
         error: ErrorType.NoError,
       };
