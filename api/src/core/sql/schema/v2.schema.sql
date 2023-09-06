@@ -77,9 +77,8 @@ create index idx__phrase_id__original_map_phrases on original_map_phrases (phras
 
 create index idx__original_map_id__translated_maps on translated_maps (original_map_id);
 create index idx__preview_file_id__translated_maps on translated_maps (preview_file_id);
-create index idx__language_code__translated_maps on translated_maps (language_code);
-create index idx__dialect_code__translated_maps on translated_maps (dialect_code);
-create index idx__geo_code__translated_maps on translated_maps (geo_code);
+create index idx__language_codes__translated_maps on translated_maps (language_code, dialect_code, geo_code);
+
 ALTER TABLE public.files ALTER COLUMN file_name TYPE varchar(128) USING file_name::varchar;
 ALTER TABLE public.files ALTER COLUMN file_url TYPE varchar(255) USING file_url::varchar;
 
