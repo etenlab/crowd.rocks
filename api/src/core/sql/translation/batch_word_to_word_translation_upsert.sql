@@ -23,6 +23,11 @@ begin
     p_to_word_definition_ids::bigint[], 1
   );
 
+  if v_from_word_definition_ids_length != v_to_word_definition_ids_length then
+    p_error_type := "InvalidInputs";
+    return;
+  end if;
+
   p_word_to_word_translation_ids := array[]::bigint[];
   p_error_types := array[]::varchar(32)[];
 

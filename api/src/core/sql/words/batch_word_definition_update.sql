@@ -21,6 +21,7 @@ begin
 
   if v_word_definition_ids_length != v_definitions_length then
     p_error_type := "InvalidInputs";
+    return;
   end if;
 
   p_error_types := array[]::varchar(32)[];

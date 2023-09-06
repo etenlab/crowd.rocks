@@ -23,6 +23,11 @@ begin
     p_to_phrase_definition_ids::bigint[], 1
   );
 
+  if v_from_word_definition_ids_length != v_to_phrase_definition_ids_length then
+    p_error_type := "InvalidInputs";
+    return;
+  end if;
+
   p_word_to_phrase_translation_ids := array[]::bigint[];
   p_error_types := array[]::varchar(32)[];
 
@@ -30,9 +35,9 @@ begin
     v_temp_word_to_phrase_translation_id := 0;
     v_temp_error_type := 'NoError';
 
-    call word_to_word_translation_upsert(
+    call word_to_phrase_translation_upsert(
       p_from_word_definition_ids[i],
-      p_to_word_definition_ids[i],
+      p_to_phrase_definition_ids[i],
       p_token,
       v_temp_word_to_phrase_translation_id,
       v_temp_error_type

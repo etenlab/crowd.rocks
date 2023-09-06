@@ -30,8 +30,9 @@ begin
     v_wordlike_strings_length != v_p_geo_codes_length
   then
     p_error_type := "InvalidInputs";
+    return;
   end if;
-
+  
   p_word_ids := array[]::bigint[];
   p_error_types := array[]::varchar(32)[];
 
