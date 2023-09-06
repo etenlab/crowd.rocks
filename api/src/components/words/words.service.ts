@@ -27,6 +27,8 @@ import {
   GetWordObjectById,
   callWordUpsertProcedure,
   WordUpsertProcedureOutputRow,
+  callWordUpsertsProcedure,
+  WordUpsertsProcedureOutput,
   GetWordListByLang,
   getWordListByLang,
 } from './sql-string';
@@ -167,6 +169,85 @@ export class WordsService {
     return {
       error: ErrorType.UnknownError,
       word: null,
+    };
+  }
+
+  async upserts(
+    input: {
+      wordlike_string: string;
+      language_code: string;
+      dialect_code: string | null;
+      geo_code: string | null;
+    }[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<WordsOutput> {
+    if (input.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        words: [],
+      };
+    }
+
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<WordUpsertsProcedureOutput>(
+        ...callWordUpsertsProcedure({
+          wordlike_strings: input.map((item) => item.wordlike_string),
+          language_codes: input.map((item) => item.language_code),
+          dialect_codes: input.map((item) => item.dialect_code),
+          geo_codes: input.map((item) => item.geo_code),
+          token,
+        }),
+      );
+
+      const creatingErrors = res.rows[0].p_error_types;
+      const creatingError = res.rows[0].p_error_type;
+      const word_ids = res.rows[0].p_word_ids;
+
+      if (creatingError !== ErrorType.NoError) {
+        return {
+          error: creatingError,
+          words: [],
+        };
+      }
+
+      const ids: { word_id: string; error: ErrorType }[] = [];
+
+      for (let i = 0; i < word_ids.length; i++) {
+        ids.push({ word_id: word_ids[i], error: creatingErrors[i] });
+      }
+
+      const { error: readingError, words } = await this.reads(
+        ids
+          .filter((id) => id.error === ErrorType.NoError)
+          .map((id) => +id.word_id),
+        pgClient,
+      );
+
+      const wordsMap = new Map<string, Word>();
+
+      words.forEach((word) => (word ? wordsMap.set(word.word_id, word) : null));
+
+      return {
+        error: readingError,
+        words: ids.map((id) => {
+          if (id.error !== ErrorType.NoError) {
+            return null;
+          }
+
+          return wordsMap.get(id.word_id) || null;
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      words: [],
     };
   }
 

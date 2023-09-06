@@ -52,6 +52,36 @@ export function callWordUpsertProcedure({
   ];
 }
 
+export type WordUpsertsProcedureOutput = {
+  p_word_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callWordUpsertsProcedure({
+  wordlike_strings,
+  language_codes,
+  dialect_codes,
+  geo_codes,
+  token,
+}: {
+  wordlike_strings: string[];
+  language_codes: string[];
+  dialect_codes: (string | null)[];
+  geo_codes: (string | null)[];
+  token: string;
+}): [
+  string,
+  [string[], string[], (string | null)[], (string | null)[], string],
+] {
+  return [
+    `
+      call batch_word_upsert($1::text[], $2::text[], $3::text[], $4::text[], $5, null, null, '');
+    `,
+    [wordlike_strings, language_codes, dialect_codes, geo_codes, token],
+  ];
+}
+
 export type GetWordVoteObjectById = {
   words_vote_id: string;
   word_id: string;
