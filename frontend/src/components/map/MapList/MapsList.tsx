@@ -90,6 +90,7 @@ export const MapList: React.FC = () => {
         color: 'danger',
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataMapReset, dataMapReset?.mapsTranslationsReset.error, present]);
 
   useEffect(() => {

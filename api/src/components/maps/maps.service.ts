@@ -95,7 +95,7 @@ export class MapsService {
         dialect_code,
         geo_code,
       });
-      dbPoolClient.query('COMMIT');
+      await dbPoolClient.query('COMMIT');
       // parsing depends on results of saveOriginalMapTrn so we must commit and start a new transaction
       dbPoolClient.query('BEGIN');
       const res = await this.parseOrigMapTrn({
