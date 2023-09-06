@@ -112,20 +112,6 @@ const NotStyledMapItem = ({
           {mapItem.preview_file_url ? (
             <img src={mapItem.preview_file_url} />
           ) : null}
-          {showDelete ? (
-            <TrashIcon
-              icon={trashBin}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                candidateForDeletionRef.current = mapItem;
-                setIsMapDeleteModalOpen(true);
-              }}
-              size="large"
-              color="danger"
-              className="clickable theme-icon"
-            />
-          ) : null}
         </PreviewBlock>
 
         <FileName>
@@ -149,6 +135,20 @@ const NotStyledMapItem = ({
             color="primary"
             className="clickable theme-icon"
           />
+          {showDelete ? (
+            <TrashIcon
+              icon={trashBin}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                candidateForDeletionRef.current = mapItem;
+                setIsMapDeleteModalOpen(true);
+              }}
+              size="large"
+              color="danger"
+              className="clickable theme-icon"
+            />
+          ) : null}
         </IconRow>
       </StItem>
     </IonItem>
