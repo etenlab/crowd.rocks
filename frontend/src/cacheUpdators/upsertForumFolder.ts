@@ -5,8 +5,42 @@ import {
   GetForumFoldersDocument,
   GetForumFoldersQuery,
 } from '../generated/graphql';
+export function updateCacheWithUpdateForumFolder(
+  cache: ApolloCache<unknown>,
+  updatedForumFolder: ForumFolder,
+  forum_id: string,
+) {
+  cache.updateQuery<GetForumFoldersQuery>(
+    {
+      query: GetForumFoldersDocument,
+      variables: {
+        forum_id: forum_id,
+      },
+    },
+    (data) => {
+      if (data) {
+        const updatedFolders = data.forumFolders.folders.map((folder) => {
+          if (folder.folder_id != updatedForumFolder.folder_id) return folder;
+          return {
+            ...updatedForumFolder,
+          };
+        });
 
-export function updateCacheWithUpsertForumFolder(
+        return {
+          ...data,
+          forumFolders: {
+            ...data.forumFolders,
+            folders: [...updatedFolders],
+          },
+        };
+      } else {
+        return data;
+      }
+    },
+  );
+}
+
+export function updateCacheWithCreateForumFolder(
   cache: ApolloCache<unknown>,
   newForumFolder: ForumFolder,
   forum_id: string,

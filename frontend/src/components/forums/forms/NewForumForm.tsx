@@ -9,7 +9,7 @@ import { ErrorType } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
 
 import { ConfirmButtons } from '../../common/ConfirmButtons';
-import { useForumUpsertMutation } from '../../../hooks/useForumUpsertMutation';
+import { useForumCreateMutation } from '../../../hooks/useForumUpsertMutation';
 
 type NewForumFormProps = {
   onCreated(): void;
@@ -24,7 +24,7 @@ export function NewForumForm({ onCreated, onCancel }: NewForumFormProps) {
   const textarea = useRef<HTMLIonTextareaElement>(null);
 
   const [upsertForum, { data, loading, error, called }] =
-    useForumUpsertMutation();
+    useForumCreateMutation();
 
   useEffect(() => {
     if (error) {

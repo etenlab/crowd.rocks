@@ -9,6 +9,7 @@ language plpgsql
 as $$
 declare
   v_user_id bigint;
+  v_created_by_id bigint;
   v_thread_name varchar(128);
   v_forum_folder_id bigint;
 begin
@@ -21,6 +22,16 @@ begin
   where token = p_token;
 
   if v_user_id is null then
+    p_error_type := 'Unauthorized';
+    return;
+  end if;
+
+  select created_by
+  from threads
+  into v_created_by_id
+  where thread_id = p_thread_id;
+
+  if v_created_by_id != v_user_id then
     p_error_type := 'Unauthorized';
     return;
   end if;

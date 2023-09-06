@@ -8,6 +8,7 @@ language plpgsql
 as $$
 declare
   v_user_id bigint;
+  v_created_by_id bigint;
   v_forum_name varchar(128);
 begin
   p_error_type := 'UnknownError';
@@ -19,6 +20,16 @@ begin
   where token = p_token;
 
   if v_user_id is null then
+    p_error_type := 'Unauthorized';
+    return;
+  end if;
+
+  select created_by
+  from forums
+  into v_created_by_id
+  where forum_id = p_forum_id;
+
+  if v_created_by_id != v_user_id then
     p_error_type := 'Unauthorized';
     return;
   end if;

@@ -3,7 +3,6 @@ import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
   IonHeader,
-  IonIcon,
   IonModal,
   IonTitle,
   IonToolbar,
@@ -29,6 +28,7 @@ import { useTr } from '../../../hooks/useTr';
 import { AddListHeader } from '../../common/ListHeader';
 import { NewFolderForm } from '../forms/NewFolderForm';
 import { folderOutline } from 'ionicons/icons';
+import { useForumFolderUpdateMutation } from '../../../hooks/useFolderUpsertMutation';
 
 interface ForumDetailPageProps
   extends RouteComponentProps<{
@@ -50,6 +50,8 @@ export function ForumDetailPage({ match }: ForumDetailPageProps) {
   const [getFolders, { data: foldersData, error }] =
     useGetForumFoldersLazyQuery();
 
+  const [upsertFolder] = useForumFolderUpdateMutation(match.params.forum_id);
+
   useEffect(() => {
     getFolders({
       variables: {
@@ -67,6 +69,18 @@ export function ForumDetailPage({ match }: ForumDetailPageProps) {
     [match.params.language_id, match.params.nation_id, router],
   );
 
+  const handleEdit = useCallback(
+    (folder_id: string, newValue: string) => {
+      upsertFolder({
+        variables: {
+          id: folder_id,
+          name: newValue,
+          forum_id: match.params.forum_id,
+        },
+      });
+    },
+    [match.params.forum_id, upsertFolder],
+  );
   const cardListComs = useMemo(() => {
     if (error) {
       return null;
@@ -75,25 +89,20 @@ export function ForumDetailPage({ match }: ForumDetailPageProps) {
     if (!foldersData || foldersData.forumFolders.error !== ErrorType.NoError) {
       return null;
     }
-    // TODO: make a cool generic function sort<T>() that can sort on any keyof T
-    // we already have another sort function for sitetext that essentially does the
-    // same thing as this, just with a different key.
+
     return foldersData.forumFolders.folders.map((folder) => (
       <CardContainer key={folder.folder_id}>
         <Card
           key={folder.folder_id}
-          content={
-            <div>
-              <IonIcon icon={folderOutline} style={{ paddingRight: '15px' }} />
-              {folder.name}
-            </div>
-          }
+          content={folder.name}
+          contentIcon={folderOutline}
           //TODO: description=....
           onClick={() => handleGoToFolderDetail(folder.folder_id, folder.name)}
+          onContentEdit={(newValue) => handleEdit(folder.folder_id, newValue)}
         />
       </CardContainer>
     ));
-  }, [error, foldersData, handleGoToFolderDetail]);
+  }, [error, foldersData, handleEdit, handleGoToFolderDetail]);
 
   return (
     <PageLayout>

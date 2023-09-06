@@ -6,7 +6,43 @@ import {
   GetThreadsQuery,
 } from '../generated/graphql';
 
-export function updateCacheWithUpsertThread(
+export function updateCacheWithUpdateThread(
+  cache: ApolloCache<unknown>,
+  updatedThread: Thread,
+  folder_id: string,
+) {
+  cache.updateQuery<GetThreadsQuery>(
+    {
+      query: GetThreadsDocument,
+      variables: {
+        folder_id: folder_id,
+      },
+    },
+    (data) => {
+      if (data) {
+        const updatedThreads = data.threads.threads.map((thread) => {
+          if (thread.thread_id != updatedThread.thread_id) return thread;
+          return {
+            ...updatedThread,
+            __typename: 'Thread' as typeof thread.__typename,
+          };
+        });
+
+        return {
+          ...data,
+          threads: {
+            ...data.threads,
+            threads: [...updatedThreads],
+          },
+        };
+      } else {
+        return data;
+      }
+    },
+  );
+}
+
+export function updateCacheWithCreateThread(
   cache: ApolloCache<unknown>,
   newThread: Thread,
   folder_id: string,
