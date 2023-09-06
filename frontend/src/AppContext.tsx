@@ -225,6 +225,10 @@ export function AppContextProvider({ children }: AppProviderProps) {
       const originalMap: Record<string, string> = {};
 
       for (const siteTextDefinition of siteTextDefinitionList) {
+        if (!siteTextDefinition) {
+          continue;
+        }
+
         switch (siteTextDefinition.__typename) {
           case 'SiteTextWordDefinition': {
             const word = siteTextDefinition.word_definition.word.word;
