@@ -23,6 +23,7 @@ import {
   useIsAdminLoggedInLazyQuery,
   useMapDeleteMutation,
   useMapUploadMutation,
+  useMapsTranslationsResetMutation,
   useUploadFileMutation,
 } from '../../../generated/graphql';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -53,6 +54,14 @@ export const MapList: React.FC = () => {
   const [sendMapFile] = useMapUploadMutation();
   const [uploadFile] = useUploadFileMutation();
   const [mapDelete] = useMapDeleteMutation();
+  const [
+    mapTranslationReset,
+    {
+      loading: loadingMapReset,
+      data: dataMapReset,
+      called: dataMapResetCalled,
+    },
+  ] = useMapsTranslationsResetMutation();
 
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
@@ -60,7 +69,29 @@ export const MapList: React.FC = () => {
 
   const { makeMapThumbnail } = useMapTranslationTools();
   const [isMapDeleteModalOpen, setIsMapDeleteModalOpen] = useState(false);
+  const [isMapResetModalOpen, setIsMapResetModalOpen] = useState(false);
   const candidateForDeletion = useRef<MapFileOutput | undefined>();
+
+  useEffect(() => {
+    console.log(dataMapReset);
+    if (!dataMapResetCalled || loadingMapReset) return;
+    if (dataMapReset?.mapsTranslationsReset.error === ErrorType.NoError) {
+      present({
+        message: `Maps translations data reset completed`,
+        duration: 1500,
+        position: 'top',
+        color: 'primary',
+      });
+    } else {
+      present({
+        message: `Maps translations data reset error: ${dataMapReset?.mapsTranslationsReset.error}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataMapReset, dataMapReset?.mapsTranslationsReset.error, present]);
 
   useEffect(() => {
     const user_id = globals.get_user_id();
@@ -91,7 +122,7 @@ export const MapList: React.FC = () => {
     setFilter(event.detail.value!);
   };
 
-  const handleAddMap = useCallback(
+  const addMap = useCallback(
     async (file: File) => {
       if (!file) return;
       try {
@@ -144,7 +175,15 @@ export const MapList: React.FC = () => {
     [makeMapThumbnail, uploadFile, sendMapFile, present],
   );
 
-  const handleDeleteMap = (mapItem: MapFileOutput) => {
+  const deleteMap = <
+    T extends {
+      is_original: boolean;
+      original_map_id?: string | null;
+      translated_map_id?: string | null;
+    },
+  >(
+    mapItem: T,
+  ) => {
     const mapId = mapItem.is_original
       ? mapItem.original_map_id
       : mapItem.translated_map_id;
@@ -159,6 +198,12 @@ export const MapList: React.FC = () => {
         mapId,
         is_original: mapItem.is_original,
       },
+      refetchQueries: ['GetAllMapsList'],
+    });
+  };
+
+  const resetTranslatedMaps = () => {
+    mapTranslationReset({
       refetchQueries: ['GetAllMapsList'],
     });
   };
@@ -182,8 +227,13 @@ export const MapList: React.FC = () => {
         onTranslationsClick={() => {
           router.push(`/US/${appLanguage.lang.tag}/1/maps/translation`);
         }}
-        onAddClick={
-          isAdminRes?.loggedInIsAdmin.isAdmin ? handleAddMap : undefined
+        onAddClick={isAdminRes?.loggedInIsAdmin.isAdmin ? addMap : undefined}
+        onResetClick={
+          isAdminRes?.loggedInIsAdmin.isAdmin
+            ? () => {
+                setIsMapResetModalOpen(true);
+              }
+            : undefined
         }
       />
       <Input
@@ -195,32 +245,37 @@ export const MapList: React.FC = () => {
         value={filter}
         onIonInput={handleFilterChange}
       />
-      <IonList lines="none">
-        {allMapsQuery?.getAllMapsList.allMapsList?.length ? (
-          allMapsQuery?.getAllMapsList.allMapsList
-            ?.filter((m) => {
-              return m.map_file_name_with_langs
-                .toLowerCase()
-                .includes(filter.toLowerCase());
-            })
-            .sort((m1, m2) =>
-              m1.map_file_name_with_langs.localeCompare(
-                m2.map_file_name_with_langs,
-              ),
-            )
-            .map((m, i) => (
-              <MapItem
-                mapItem={m}
-                key={i}
-                candidateForDeletionRef={candidateForDeletion}
-                setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
-                showDelete={!!isAdminRes?.loggedInIsAdmin.isAdmin}
-              />
-            ))
-        ) : (
-          <div> {tr('No maps found')} </div>
-        )}
-      </IonList>
+      {loadingMapReset ? (
+        <div>Resetting map data...</div>
+      ) : (
+        <IonList lines="none">
+          {allMapsQuery?.getAllMapsList.allMapsList?.length ? (
+            allMapsQuery?.getAllMapsList.allMapsList
+              ?.filter((m) => {
+                return m.map_file_name_with_langs
+                  .toLowerCase()
+                  .includes(filter.toLowerCase());
+              })
+              .sort((m1, m2) =>
+                m1.map_file_name_with_langs.localeCompare(
+                  m2.map_file_name_with_langs,
+                ),
+              )
+              .map((m, i) => (
+                <MapItem
+                  mapItem={m}
+                  key={i}
+                  candidateForDeletionRef={candidateForDeletion}
+                  setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
+                  showDelete={!!isAdminRes?.loggedInIsAdmin.isAdmin}
+                />
+              ))
+          ) : (
+            <div> {tr('No maps found')} </div>
+          )}
+        </IonList>
+      )}
+
       <IonModal isOpen={isMapDeleteModalOpen}>
         <IonHeader>
           <IonToolbar>
@@ -241,7 +296,7 @@ export const MapList: React.FC = () => {
                 color={'danger'}
                 onClick={() => {
                   candidateForDeletion.current &&
-                    handleDeleteMap(candidateForDeletion.current);
+                    deleteMap(candidateForDeletion.current);
                   setIsMapDeleteModalOpen(false);
                 }}
               >
@@ -276,6 +331,43 @@ export const MapList: React.FC = () => {
                 </>
               )}
             </>
+          )}
+        </IonContent>
+      </IonModal>
+
+      <IonModal isOpen={isMapResetModalOpen}>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('Reset map data ?')}</IonTitle>
+            <IonButtons slot="start">
+              <IonButton
+                fill="solid"
+                onClick={() => {
+                  setIsMapResetModalOpen(false);
+                }}
+              >
+                {tr('Cancel')}
+              </IonButton>
+            </IonButtons>
+            <IonButtons slot="end">
+              <IonButton
+                fill="solid"
+                color={'danger'}
+                onClick={() => {
+                  resetTranslatedMaps();
+                  setIsMapResetModalOpen(false);
+                }}
+              >
+                {tr('Confirm')}
+              </IonButton>
+            </IonButtons>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {tr(
+            `You are about to reset map translation data. All original_map_words and translated_maps
+            will be deleted and then they will be recreated by reprocessing every map original map,
+            like each one of them was uploaded.`,
           )}
         </IonContent>
       </IonModal>

@@ -68,7 +68,7 @@ export class MapsRepository {
    * dbPoolClient is optional. If providerd, then it will be used to run query (useful for SQL transactions)
    * if not - then new client will be get from pg.pool
    */
-  async saveOriginalMap({
+  async saveOriginalMapTrn({
     mapFileName,
     fileBody,
     previewFileId,
@@ -117,7 +117,7 @@ export class MapsRepository {
    * dbPoolClient is optional. If providerd, then it will be used to run query (useful for SQL transactions)
    * if not - then new client will be get from pg.pool
    */
-  async saveTranslatedMap({
+  async saveTranslatedMapTrn({
     original_map_id,
     fileBody,
     dbPoolClient,
@@ -1092,5 +1092,34 @@ export class MapsRepository {
       throw new Error(ErrorType.MapNotFound);
     }
     return resQ.rows[0].original_map_id;
+  }
+
+  async deleteAllOriginalMapWordsTrn(dbPoolClient: PoolClient): Promise<void> {
+    const sqlStr = `
+      delete
+      from
+        original_map_words
+    `;
+    await dbPoolClient.query(sqlStr);
+  }
+
+  async deleteAllOriginalMapPhrasesTrn(
+    dbPoolClient: PoolClient,
+  ): Promise<void> {
+    const sqlStr = `
+      delete
+      from
+        original_map_phrases
+    `;
+    await dbPoolClient.query(sqlStr);
+  }
+
+  async deleteAllTranslatedMapsTrn(dbPoolClient: PoolClient): Promise<void> {
+    const sqlStr = `
+      delete
+      from
+        translated_maps
+    `;
+    await dbPoolClient.query(sqlStr);
   }
 }
