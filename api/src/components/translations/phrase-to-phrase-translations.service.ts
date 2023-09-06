@@ -26,6 +26,8 @@ import {
   getPhraseToPhraseTranslationObjByIds,
   callPhraseToPhraseTranslationUpsertProcedure,
   PhraseToPhraseTranslationUpsertProcedureOutputRow,
+  callPhraseToPhraseTranslationUpsertsProcedure,
+  PhraseToPhraseTranslationUpsertsProcedureOutput,
   GetPhraseToPhraseTranslationVoteStatus,
   getPhraseToPhraseTranslationVoteStatusFromIds,
   TogglePhraseToPhraseTranslationVoteStatus,
@@ -234,6 +236,98 @@ export class PhraseToPhraseTranslationsService {
       phrase_to_phrase_translation: null,
     };
   }
+
+  async upserts(
+    input: {
+      from_phrase_definition_id: number;
+      to_phrase_definition_id: number;
+    }[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<PhraseToPhraseTranslationsOutput> {
+    if (input.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        phrase_to_phrase_translations: [],
+      };
+    }
+
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<PhraseToPhraseTranslationUpsertsProcedureOutput>(
+        ...callPhraseToPhraseTranslationUpsertsProcedure({
+          fromPhraseDefinitionIds: input.map(
+            (item) => item.from_phrase_definition_id,
+          ),
+          toPhraseDefinitionIds: input.map(
+            (item) => item.to_phrase_definition_id,
+          ),
+          token,
+        }),
+      );
+
+      const error = res.rows[0].p_error_type;
+      const errors = res.rows[0].p_error_types;
+      const phrase_to_phrase_translation_ids =
+        res.rows[0].p_phrase_to_phrase_translation_ids;
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error: error,
+          phrase_to_phrase_translations: [],
+        };
+      }
+
+      const ids: {
+        phrase_to_phrase_translation_id: string;
+        error: ErrorType;
+      }[] = [];
+
+      for (let i = 0; i < phrase_to_phrase_translation_ids.length; i++) {
+        ids.push({
+          phrase_to_phrase_translation_id: phrase_to_phrase_translation_ids[i],
+          error: errors[i],
+        });
+      }
+
+      const { error: readingError, phrase_to_phrase_translations } =
+        await this.reads(
+          ids
+            .filter((id) => id.error === ErrorType.NoError)
+            .map((id) => +id.phrase_to_phrase_translation_id),
+          pgClient,
+        );
+
+      const p2pTrsMap = new Map<string, PhraseToPhraseTranslation>();
+
+      phrase_to_phrase_translations.forEach((p2pTr) =>
+        p2pTr
+          ? p2pTrsMap.set(p2pTr.phrase_to_phrase_translation_id, p2pTr)
+          : null,
+      );
+
+      return {
+        error: readingError,
+        phrase_to_phrase_translations: ids.map((id) => {
+          if (id.error !== ErrorType.NoError) {
+            return null;
+          }
+
+          return p2pTrsMap.get(id.phrase_to_phrase_translation_id) || null;
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      phrase_to_phrase_translations: [],
+    };
+  }
+
   async getVoteStatus(
     phrase_to_phrase_translation_id: number,
     pgClient: PoolClient | null,

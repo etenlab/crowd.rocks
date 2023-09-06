@@ -28,8 +28,14 @@ import {
   PhraseToPhraseTranslationWithVote,
   LanguageListForGoogleTranslateOutput,
   TranslateAllWordsAndPhrasesByGoogleOutput,
+  WordToWordTranslation,
+  WordToPhraseTranslation,
+  PhraseToWordTranslation,
+  PhraseToPhraseTranslation,
+  TranslationsOutput,
 } from './types';
 import { PoolClient } from 'pg';
+import { PhraseDefinition, WordDefinition } from '../definitions/types';
 
 export function makeStr(
   word_definition_id: number,
@@ -37,6 +43,17 @@ export function makeStr(
 ) {
   return `${word_definition_id}-${is_word_definition ? 'true' : 'false'}`;
 }
+
+const makeKey = (
+  fromId: number,
+  toId: number,
+  isfromWord: boolean,
+  isToWord: boolean,
+) => {
+  return `${fromId}-${toId}-${isfromWord ? 'true' : 'false'}-${
+    isToWord ? 'true' : 'false'
+  }`;
+};
 
 @Injectable()
 export class TranslationsService {
@@ -534,6 +551,406 @@ export class TranslationsService {
     };
   }
 
+  async batchUpsertTranslation(
+    input: {
+      from_definition_id: number;
+      from_definition_type_is_word: boolean;
+      to_definition_id: number;
+      to_definition_type_is_word: boolean;
+    }[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslationsOutput> {
+    if (input.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        translations: [],
+      };
+    }
+
+    try {
+      const w2wInput = input
+        .filter(
+          (item) =>
+            item.from_definition_type_is_word &&
+            item.to_definition_type_is_word,
+        )
+        .map((item) => ({
+          from_word_definition_id: item.from_definition_id,
+          to_word_definition_id: item.to_definition_id,
+        }));
+
+      const w2pInput = input
+        .filter(
+          (item) =>
+            item.from_definition_type_is_word &&
+            !item.to_definition_type_is_word,
+        )
+        .map((item) => ({
+          from_word_definition_id: item.from_definition_id,
+          to_phrase_definition_id: item.to_definition_id,
+        }));
+
+      const p2wInput = input
+        .filter(
+          (item) =>
+            !item.from_definition_type_is_word &&
+            item.to_definition_type_is_word,
+        )
+        .map((item) => ({
+          from_phrase_definition_id: item.from_definition_id,
+          to_word_definition_id: item.to_definition_id,
+        }));
+
+      const p2pInput = input
+        .filter(
+          (item) =>
+            !item.from_definition_type_is_word &&
+            !item.to_definition_type_is_word,
+        )
+        .map((item) => ({
+          from_phrase_definition_id: item.from_definition_id,
+          to_phrase_definition_id: item.to_definition_id,
+        }));
+
+      const translationsMap = new Map<
+        string,
+        | WordToWordTranslation
+        | WordToPhraseTranslation
+        | PhraseToWordTranslation
+        | PhraseToPhraseTranslation
+      >();
+
+      const { error: w2wError, word_to_word_translations } =
+        await this.wordToWordTrService.upserts(w2wInput, token, pgClient);
+
+      if (w2wError !== ErrorType.NoError) {
+        return {
+          error: w2wError,
+          translations: [],
+        };
+      }
+
+      word_to_word_translations.forEach((w2wTr) =>
+        w2wTr
+          ? translationsMap.set(
+              makeKey(
+                +w2wTr.from_word_definition.word_definition_id,
+                +w2wTr.to_word_definition.word_definition_id,
+                true,
+                true,
+              ),
+              w2wTr,
+            )
+          : null,
+      );
+
+      const { error: w2pError, word_to_phrase_translations } =
+        await this.wordToPhraseTrService.upserts(w2pInput, token, pgClient);
+
+      if (w2pError !== ErrorType.NoError) {
+        return {
+          error: w2pError,
+          translations: [],
+        };
+      }
+
+      word_to_phrase_translations.forEach((w2pTr) =>
+        w2pTr
+          ? translationsMap.set(
+              makeKey(
+                +w2pTr.from_word_definition.word_definition_id,
+                +w2pTr.to_phrase_definition.phrase_definition_id,
+                true,
+                false,
+              ),
+              w2pTr,
+            )
+          : null,
+      );
+
+      const { error: p2wError, phrase_to_word_translations } =
+        await this.phraseToWordTrService.upserts(p2wInput, token, pgClient);
+
+      if (p2wError !== ErrorType.NoError) {
+        return {
+          error: p2wError,
+          translations: [],
+        };
+      }
+
+      phrase_to_word_translations.forEach((p2wTr) =>
+        p2wTr
+          ? translationsMap.set(
+              makeKey(
+                +p2wTr.from_phrase_definition.phrase_definition_id,
+                +p2wTr.to_word_definition.word_definition_id,
+                true,
+                false,
+              ),
+              p2wTr,
+            )
+          : null,
+      );
+
+      const { error: p2pError, phrase_to_phrase_translations } =
+        await this.phraseToPhraseTrService.upserts(p2pInput, token, pgClient);
+
+      if (p2pError !== ErrorType.NoError) {
+        return {
+          error: p2pError,
+          translations: [],
+        };
+      }
+
+      phrase_to_phrase_translations.forEach((p2pTr) =>
+        p2pTr
+          ? translationsMap.set(
+              makeKey(
+                +p2pTr.from_phrase_definition.phrase_definition_id,
+                +p2pTr.to_phrase_definition.phrase_definition_id,
+                true,
+                false,
+              ),
+              p2pTr,
+            )
+          : null,
+      );
+
+      return {
+        error: ErrorType.NoError,
+        translations: input.map(
+          (item) =>
+            translationsMap.get(
+              makeKey(
+                item.from_definition_id,
+                item.to_definition_id,
+                item.from_definition_type_is_word,
+                item.to_definition_type_is_word,
+              ),
+            ) || null,
+        ),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      translations: [],
+    };
+  }
+
+  async batchUpsertTranslationFromWordAndDefinitionlikeString(
+    input: {
+      from_definition_id: number;
+      from_definition_type_is_word: boolean;
+      to_definition_input: ToDefinitionInput;
+    }[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslationsOutput> {
+    if (input.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        translations: [],
+      };
+    }
+
+    try {
+      const wordDefinitionInput = input
+        .map((item) => item.to_definition_input)
+        .filter((item) => item.is_type_word)
+        .map((item) => ({
+          wordlike_string: item.word_or_phrase,
+          definitionlike_string: item.definition,
+          language_code: item.language_code,
+          dialect_code: item.dialect_code,
+          geo_code: item.geo_code,
+        }));
+
+      const phraseDefinitionInput = input
+        .map((item) => item.to_definition_input)
+        .filter((item) => !item.is_type_word)
+        .map((item) => ({
+          phraselike_string: item.word_or_phrase,
+          definitionlike_string: item.definition,
+          language_code: item.language_code,
+          dialect_code: item.dialect_code,
+          geo_code: item.geo_code,
+        }));
+
+      const { error: wordError, word_definitions } =
+        await this.definitionService.batchUpsertFromWordAndDefinitionlikeString(
+          wordDefinitionInput,
+          token,
+          pgClient,
+        );
+
+      if (wordError !== ErrorType.NoError) {
+        return {
+          error: wordError,
+          translations: [],
+        };
+      }
+
+      const wordDefinitionsMap = new Map<string, WordDefinition>();
+
+      word_definitions.forEach((word_definition) =>
+        word_definition
+          ? wordDefinitionsMap.set(
+              `${word_definition.word.word}-${word_definition.definition}`,
+              word_definition,
+            )
+          : null,
+      );
+
+      const { error: phraseError, phrase_definitions } =
+        await this.definitionService.batchUpsertFromPhraseAndDefinitionlikeString(
+          phraseDefinitionInput,
+          token,
+          pgClient,
+        );
+
+      if (phraseError !== ErrorType.NoError) {
+        return {
+          error: wordError,
+          translations: [],
+        };
+      }
+
+      const phraseDefinitionsMap = new Map<string, PhraseDefinition>();
+
+      phrase_definitions.forEach((phrase_definition) =>
+        phrase_definition
+          ? phraseDefinitionsMap.set(
+              `${phrase_definition.phrase.phrase}-${phrase_definition.definition}`,
+              phrase_definition,
+            )
+          : null,
+      );
+
+      const upsertInput: {
+        from_definition_id: number;
+        from_definition_type_is_word: boolean;
+        to_definition_id: number;
+        to_definition_type_is_word: boolean;
+        valid: boolean;
+      }[] = [];
+
+      for (let i = 0; i < input.length; i++) {
+        let to_definition_id;
+        let to_definition_type_is_word;
+
+        if (input[i].to_definition_input.is_type_word) {
+          to_definition_type_is_word = true;
+
+          const definition = wordDefinitionsMap.get(
+            `${input[i].to_definition_input.word_or_phrase}-${input[i].to_definition_input.definition}`,
+          );
+
+          if (!definition) {
+            upsertInput.push({
+              from_definition_id: 0,
+              from_definition_type_is_word: true,
+              to_definition_id: 0,
+              to_definition_type_is_word: true,
+              valid: false,
+            });
+            continue;
+          }
+
+          to_definition_id = definition.word_definition_id;
+        } else {
+          to_definition_type_is_word = false;
+
+          const definition = phraseDefinitionsMap.get(
+            `${input[i].to_definition_input.word_or_phrase}-${input[i].to_definition_input.definition}`,
+          );
+
+          if (!definition) {
+            upsertInput.push({
+              from_definition_id: 0,
+              from_definition_type_is_word: true,
+              to_definition_id: 0,
+              to_definition_type_is_word: true,
+              valid: false,
+            });
+            continue;
+          }
+
+          to_definition_id = definition.phrase_definition_id;
+        }
+
+        upsertInput.push({
+          from_definition_id: input[i].from_definition_id,
+          from_definition_type_is_word: input[i].from_definition_type_is_word,
+          to_definition_id,
+          to_definition_type_is_word,
+          valid: true,
+        });
+      }
+
+      const translationsMap = new Map<
+        string,
+        | WordToWordTranslation
+        | WordToPhraseTranslation
+        | PhraseToWordTranslation
+        | PhraseToPhraseTranslation
+        | null
+      >();
+
+      const { error: upsertError, translations } =
+        await this.batchUpsertTranslation(
+          upsertInput.filter((item) => item.valid),
+          token,
+          pgClient,
+        );
+
+      for (let i = 0; i < upsertInput.length; i++) {
+        if (!translations[i]) {
+          continue;
+        }
+        translationsMap.set(
+          makeKey(
+            upsertInput[i].from_definition_id,
+            upsertInput[i].to_definition_id,
+            upsertInput[i].from_definition_type_is_word,
+            upsertInput[i].to_definition_type_is_word,
+          ),
+          translations[i],
+        );
+      }
+
+      return {
+        error: upsertError,
+        translations: upsertInput.map((item) => {
+          if (!item.valid) {
+            return null;
+          }
+
+          return (
+            translationsMap.get(
+              makeKey(
+                item.from_definition_id,
+                item.to_definition_id,
+                item.from_definition_type_is_word,
+                item.to_definition_type_is_word,
+              ),
+            ) || null
+          );
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      translations: [],
+    };
+  }
+
   async upsertTranslationFromWordAndDefinitionlikeString(
     from_definition_id: number,
     from_definition_type_is_word: boolean,
@@ -693,6 +1110,18 @@ export class TranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+    if (
+      from_language.language_code === to_language.language_code &&
+      (from_language.dialect_code || null) ===
+        (to_language.dialect_code || null) &&
+      (from_language.geo_code || null) === (to_language.geo_code || null)
+    ) {
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
+
     try {
       const originalTextsObjMap = new Map<
         string,
@@ -779,6 +1208,12 @@ export class TranslationsService {
       let translatedWordCount = 0;
       let translatedPhraseCount = 0;
 
+      const upsertInputs: {
+        from_definition_id: number;
+        from_definition_type_is_word: boolean;
+        to_definition_input: ToDefinitionInput;
+      }[] = [];
+
       if (wordsConnection.error === ErrorType.NoError) {
         for (const edge of wordsConnection.edges) {
           const { node } = edge;
@@ -804,10 +1239,10 @@ export class TranslationsService {
 
             const translatedDefinition = translationTexts[obj.id];
 
-            await this.upsertTranslationFromWordAndDefinitionlikeString(
-              +definition.word_definition_id,
-              true,
-              {
+            upsertInputs.push({
+              from_definition_id: +definition.word_definition_id,
+              from_definition_type_is_word: true,
+              to_definition_input: {
                 word_or_phrase: translatedWord,
                 is_type_word,
                 definition: translatedDefinition,
@@ -815,9 +1250,7 @@ export class TranslationsService {
                 dialect_code: to_language.dialect_code,
                 geo_code: to_language.geo_code,
               },
-              token,
-              pgClient,
-            );
+            });
 
             translatedWordCount++;
           }
@@ -850,10 +1283,10 @@ export class TranslationsService {
 
             const translatedDefinition = translationTexts[obj.id];
 
-            await this.upsertTranslationFromWordAndDefinitionlikeString(
-              +definition.phrase_definition_id,
-              false,
-              {
+            upsertInputs.push({
+              from_definition_id: +definition.phrase_definition_id,
+              from_definition_type_is_word: false,
+              to_definition_input: {
                 word_or_phrase: translatedPhrase,
                 is_type_word,
                 definition: translatedDefinition,
@@ -861,17 +1294,22 @@ export class TranslationsService {
                 dialect_code: to_language.dialect_code,
                 geo_code: to_language.geo_code,
               },
-              token,
-              pgClient,
-            );
+            });
 
             translatedPhraseCount++;
           }
         }
       }
 
+      const { error } =
+        await this.batchUpsertTranslationFromWordAndDefinitionlikeString(
+          upsertInputs,
+          token,
+          pgClient,
+        );
+
       return {
-        error: ErrorType.UnknownError,
+        error,
         result: {
           requestedCharactors,
           totalWordCount: wordsConnection.edges.length,

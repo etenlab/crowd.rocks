@@ -30,6 +30,8 @@ import {
   getPhraseToWordTranslationObjByIds,
   callPhraseToWordTranslationUpsertProcedure,
   PhraseToWordTranslationUpsertProcedureOutputRow,
+  callPhraseToWordTranslationUpsertsProcedure,
+  PhraseToWordTranslationUpsertsProcedureOutput,
   GetPhraseToWordTranslationVoteStatus,
   getPhraseToWordTranslationVoteStatusFromIds,
   TogglePhraseToWordTranslationVoteStatus,
@@ -267,6 +269,95 @@ export class PhraseToWordTranslationsService {
     return {
       error: ErrorType.UnknownError,
       phrase_to_word_translation: null,
+    };
+  }
+
+  async upserts(
+    input: {
+      from_phrase_definition_id: number;
+      to_word_definition_id: number;
+    }[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<PhraseToWordTranslationsOutput> {
+    if (input.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        phrase_to_word_translations: [],
+      };
+    }
+
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<PhraseToWordTranslationUpsertsProcedureOutput>(
+        ...callPhraseToWordTranslationUpsertsProcedure({
+          fromPhraseDefinitionIds: input.map(
+            (item) => item.from_phrase_definition_id,
+          ),
+          toWordDefinitionIds: input.map((item) => item.to_word_definition_id),
+          token,
+        }),
+      );
+
+      const error = res.rows[0].p_error_type;
+      const errors = res.rows[0].p_error_types;
+      const phrase_to_word_translation_ids =
+        res.rows[0].p_phrase_to_word_translation_ids;
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error: error,
+          phrase_to_word_translations: [],
+        };
+      }
+
+      const ids: {
+        phrase_to_word_translation_id: string;
+        error: ErrorType;
+      }[] = [];
+
+      for (let i = 0; i < phrase_to_word_translation_ids.length; i++) {
+        ids.push({
+          phrase_to_word_translation_id: phrase_to_word_translation_ids[i],
+          error: errors[i],
+        });
+      }
+
+      const { error: readingError, phrase_to_word_translations } =
+        await this.reads(
+          ids
+            .filter((id) => id.error === ErrorType.NoError)
+            .map((id) => +id.phrase_to_word_translation_id),
+          pgClient,
+        );
+
+      const p2wTrsMap = new Map<string, PhraseToWordTranslation>();
+
+      phrase_to_word_translations.forEach((p2wTr) =>
+        p2wTr
+          ? p2wTrsMap.set(p2wTr.phrase_to_word_translation_id, p2wTr)
+          : null,
+      );
+
+      return {
+        error: readingError,
+        phrase_to_word_translations: ids.map((id) => {
+          if (id.error !== ErrorType.NoError) {
+            return null;
+          }
+
+          return p2wTrsMap.get(id.phrase_to_word_translation_id) || null;
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      phrase_to_word_translations: [],
     };
   }
 

@@ -44,6 +44,29 @@ export function callWordToWordTranslationUpsertProcedure({
   ];
 }
 
+export type WordToWordTranslationUpsertsProcedureOutput = {
+  p_word_to_word_translation_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callWordToWordTranslationUpsertsProcedure({
+  fromWordDefinitionIds,
+  toWordDefinitionIds,
+  token,
+}: {
+  fromWordDefinitionIds: number[];
+  toWordDefinitionIds: number[];
+  token: string;
+}): [string, [number[], number[], string]] {
+  return [
+    `
+      call batch_word_to_word_translation_upsert($1::bigint[], $2::bigint[], $3, null, null, '');
+    `,
+    [fromWordDefinitionIds, toWordDefinitionIds, token],
+  ];
+}
+
 export type GetWordToPhraseTranslationObjectByIdRow = {
   word_to_phrase_translation_id: string;
   from_word_definition_id: string;
@@ -85,6 +108,29 @@ export function callWordToPhraseTranslationUpsertProcedure({
       call word_to_phrase_translation_upsert($1, $2, $3, 0, '');
     `,
     [fromWordDefinitionId, toPhraseDefinitionId, token],
+  ];
+}
+
+export type WordToPhraseTranslationUpsertsProcedureOutput = {
+  p_word_to_phrase_translation_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callWordToPhraseTranslationUpsertsProcedure({
+  fromWordDefinitionIds,
+  toPhraseDefinitionIds,
+  token,
+}: {
+  fromWordDefinitionIds: number[];
+  toPhraseDefinitionIds: number[];
+  token: string;
+}): [string, [number[], number[], string]] {
+  return [
+    `
+      call batch_word_to_phrase_translation_upsert($1::bigint[], $2::bigint[], $3, null, null, '');
+    `,
+    [fromWordDefinitionIds, toPhraseDefinitionIds, token],
   ];
 }
 
@@ -132,6 +178,29 @@ export function callPhraseToWordTranslationUpsertProcedure({
   ];
 }
 
+export type PhraseToWordTranslationUpsertsProcedureOutput = {
+  p_phrase_to_word_translation_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callPhraseToWordTranslationUpsertsProcedure({
+  fromPhraseDefinitionIds,
+  toWordDefinitionIds,
+  token,
+}: {
+  fromPhraseDefinitionIds: number[];
+  toWordDefinitionIds: number[];
+  token: string;
+}): [string, [number[], number[], string]] {
+  return [
+    `
+      call batch_phrase_to_word_translation_upsert($1::bigint[], $2::bigint[], $3, null, null, '');
+    `,
+    [fromPhraseDefinitionIds, toWordDefinitionIds, token],
+  ];
+}
+
 export type GetPhraseToPhraseTranslationObjectByIdRow = {
   phrase_to_phrase_translation_id: string;
   from_phrase_definition_id: string;
@@ -173,6 +242,29 @@ export function callPhraseToPhraseTranslationUpsertProcedure({
       call phrase_to_phrase_translation_upsert($1, $2, $3, 0, '');
     `,
     [fromPhraseDefinitionId, toPhraseDefinitionId, token],
+  ];
+}
+
+export type PhraseToPhraseTranslationUpsertsProcedureOutput = {
+  p_phrase_to_phrase_translation_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callPhraseToPhraseTranslationUpsertsProcedure({
+  fromPhraseDefinitionIds,
+  toPhraseDefinitionIds,
+  token,
+}: {
+  fromPhraseDefinitionIds: number[];
+  toPhraseDefinitionIds: number[];
+  token: string;
+}): [string, [number[], number[], string]] {
+  return [
+    `
+      call batch_phrase_to_phrase_translation_upsert($1::bigint[], $2::bigint[], $3, null, null, '');
+    `,
+    [fromPhraseDefinitionIds, toPhraseDefinitionIds, token],
   ];
 }
 

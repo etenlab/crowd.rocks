@@ -438,6 +438,18 @@ export class TranslationOutput extends GenericOutput {
 }
 
 @ObjectType()
+export class TranslationsOutput extends GenericOutput {
+  @Field(() => [Translation], { nullable: 'items' })
+  translations: (
+    | WordToWordTranslation
+    | WordToPhraseTranslation
+    | PhraseToWordTranslation
+    | PhraseToPhraseTranslation
+    | null
+  )[];
+}
+
+@ObjectType()
 export class LanguageForGoogleTranslate {
   @Field(() => String) code: string;
   @Field(() => String) name: string;
