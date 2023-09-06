@@ -3,7 +3,6 @@ import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
   IonHeader,
-  IonIcon,
   IonModal,
   IonTitle,
   IonToolbar,
@@ -27,6 +26,7 @@ import { useTr } from '../../../hooks/useTr';
 import { AddListHeader } from '../../common/ListHeader';
 import { NewThreadForm } from '../forms/NewThreadForm';
 import { chatbubblesOutline } from 'ionicons/icons';
+import { useThreadUpdateMutation } from '../../../hooks/useThreadUpsertMutation';
 
 interface ForumFolderDetailPageProps
   extends RouteComponentProps<{
@@ -47,6 +47,8 @@ export function ForumFolderDetailPage({ match }: ForumFolderDetailPageProps) {
 
   const [getThreads, { data: threadsData, error }] = useGetThreadsLazyQuery();
 
+  const [upsertThread] = useThreadUpdateMutation(match.params.forum_folder_id);
+
   useEffect(() => {
     getThreads({ variables: { folder_id: match.params.forum_folder_id } });
   }, [getThreads, match.params.forum_folder_id]);
@@ -58,6 +60,19 @@ export function ForumFolderDetailPage({ match }: ForumFolderDetailPageProps) {
       );
     },
     [match.params.language_id, match.params.nation_id, router],
+  );
+
+  const handleEdit = useCallback(
+    (thread_id: string, newValue: string) => {
+      upsertThread({
+        variables: {
+          thread_id: thread_id,
+          name: newValue,
+          folder_id: match.params.forum_folder_id,
+        },
+      });
+    },
+    [match.params.forum_folder_id, upsertThread],
   );
 
   const cardListComs = useMemo(() => {
@@ -75,21 +90,15 @@ export function ForumFolderDetailPage({ match }: ForumFolderDetailPageProps) {
       <CardContainer key={thread.thread_id}>
         <Card
           key={thread.thread_id}
-          content={
-            <div>
-              <IonIcon
-                icon={chatbubblesOutline}
-                style={{ paddingRight: '15px' }}
-              />
-              {thread.name}
-            </div>
-          }
+          content={thread.name}
+          contentIcon={chatbubblesOutline}
           //TODO: description=....
           onClick={() => handleGoToThreadDetail(thread.thread_id, thread.name)}
+          onContentEdit={(newValue) => handleEdit(thread.thread_id, newValue)}
         />
       </CardContainer>
     ));
-  }, [error, threadsData, handleGoToThreadDetail]);
+  }, [error, threadsData, handleGoToThreadDetail, handleEdit]);
 
   return (
     <PageLayout>

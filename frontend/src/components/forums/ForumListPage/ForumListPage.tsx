@@ -27,6 +27,7 @@ import {
 import { useTr } from '../../../hooks/useTr';
 import { AddListHeader } from '../../common/ListHeader';
 import { NewForumForm } from '../forms/NewForumForm';
+import { useForumUpdateMutation } from '../../../hooks/useForumUpsertMutation';
 
 interface ForumListPageProps
   extends RouteComponentProps<{
@@ -45,6 +46,8 @@ export function ForumListPage({ match }: ForumListPageProps) {
 
   const [getForums, { data: forumsData, error }] = useGetForumsLazyQuery();
 
+  const [upsertForum] = useForumUpdateMutation();
+
   useEffect(() => {
     getForums();
   }, [getForums]);
@@ -58,6 +61,14 @@ export function ForumListPage({ match }: ForumListPageProps) {
     [match.params.language_id, match.params.nation_id, router],
   );
 
+  const handleEdit = useCallback(
+    (forum_id: string, newValue: string) => {
+      console.log(`'handle edit' ${newValue}`);
+      upsertForum({ variables: { id: forum_id, name: newValue } });
+    },
+    [upsertForum],
+  );
+
   const cardListComs = useMemo(() => {
     if (error) {
       return null;
@@ -66,9 +77,7 @@ export function ForumListPage({ match }: ForumListPageProps) {
     if (!forumsData || forumsData.forums.error !== ErrorType.NoError) {
       return null;
     }
-    // TODO: make a cool generic function sort<T>() that can sort on any keyof T
-    // we already have another sort function for sitetext that essentially does the
-    // same thing as this, just with a different key.
+
     return forumsData.forums.forums.map((forum) => (
       <CardContainer key={forum.forum_id}>
         <Card
@@ -76,10 +85,11 @@ export function ForumListPage({ match }: ForumListPageProps) {
           content={forum.name}
           //TODO: description=....
           onClick={() => handleGoToForumDetail(forum.forum_id, forum.name)}
+          onContentEdit={(newValue) => handleEdit(forum.forum_id, newValue)}
         />
       </CardContainer>
     ));
-  }, [error, forumsData, handleGoToForumDetail]);
+  }, [error, forumsData, handleEdit, handleGoToForumDetail]);
 
   return (
     <PageLayout>

@@ -2,7 +2,38 @@ import { ApolloCache } from '@apollo/client';
 
 import { Forum, GetForumsDocument, GetForumsQuery } from '../generated/graphql';
 
-export function updateCacheWithUpsertForum(
+export function updateCacheWithUpdateForum(
+  cache: ApolloCache<unknown>,
+  updatedForum: Forum,
+) {
+  cache.updateQuery<GetForumsQuery>(
+    {
+      query: GetForumsDocument,
+    },
+    (data) => {
+      if (data) {
+        const updatedForums = data.forums.forums.map((forum) => {
+          if (forum.forum_id != updatedForum.forum_id) return forum;
+          return {
+            ...updatedForum,
+          };
+        });
+
+        return {
+          ...data,
+          forums: {
+            ...data.forums,
+            forums: [...updatedForums],
+          },
+        };
+      } else {
+        return data;
+      }
+    },
+  );
+}
+
+export function updateCacheWithCreateForum(
   cache: ApolloCache<unknown>,
   newForum: Forum,
 ) {

@@ -9,7 +9,7 @@ import { ErrorType } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
 
 import { ConfirmButtons } from '../../common/ConfirmButtons';
-import { useThreadUpsertMutation } from '../../../hooks/useThreadUpsertMutation';
+import { useThreadCreateMutation } from '../../../hooks/useThreadUpsertMutation';
 
 type NewForumFormProps = {
   onCreated(): void;
@@ -29,7 +29,7 @@ export function NewThreadForm({
   const textarea = useRef<HTMLIonTextareaElement>(null);
 
   const [upsertThread, { data, loading, error, called }] =
-    useThreadUpsertMutation(folder_id);
+    useThreadCreateMutation(folder_id);
 
   useEffect(() => {
     if (error) {
@@ -91,7 +91,7 @@ export function NewThreadForm({
         ref={textarea}
         labelPlacement="floating"
         fill="solid"
-        label={tr('Input New Folder Name')}
+        label={tr('Input New Thread Name')}
       />
       <ConfirmButtons onCancel={handleCancel} onSave={handleSave} />
     </Container>
