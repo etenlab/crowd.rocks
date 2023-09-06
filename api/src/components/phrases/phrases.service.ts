@@ -30,6 +30,8 @@ import {
   getPhraseObjByIds,
   callPhraseUpsertProcedure,
   PhraseUpsertProcedureOutputRow,
+  callPhraseUpsertsProcedure,
+  PhraseUpsertsProcedureOutput,
   GetPhraseListByLang,
   getPhraseListByLang,
 } from './sql-string';
@@ -195,6 +197,149 @@ export class PhrasesService {
     return {
       error: ErrorType.UnknownError,
       phrase: null,
+    };
+  }
+
+  async upserts(
+    input: {
+      phraselike_string: string;
+      language_code: string;
+      dialect_code: string | null;
+      geo_code: string | null;
+    }[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<PhrasesOutput> {
+    if (input.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        phrases: [],
+      };
+    }
+
+    try {
+      const wordlikeStrings_list = input
+        .map((item) => item.phraselike_string)
+        .map((phraselike_string) => {
+          return phraselike_string.split(' ').filter((w) => w !== '');
+        });
+
+      const wordUpserInput: {
+        wordlike_string: string;
+        language_code: string;
+        dialect_code: string | null;
+        geo_code: string | null;
+      }[] = [];
+
+      for (let i = 0; i < input.length; i++) {
+        wordUpserInput.push(
+          ...wordlikeStrings_list[i].map((wordlikeString) => ({
+            wordlike_string: wordlikeString,
+            language_code: input[i].language_code,
+            dialect_code: input[i].dialect_code,
+            geo_code: input[i].geo_code,
+          })),
+        );
+      }
+
+      const { error: wordsError, words } = await this.wordService.upserts(
+        wordUpserInput,
+        token,
+        pgClient,
+      );
+
+      if (wordsError !== ErrorType.NoError) {
+        return {
+          error: wordsError,
+          phrases: [],
+        };
+      }
+
+      const wordsMap = new Map<string, number>();
+
+      words.forEach((word) =>
+        word ? wordsMap.set(word.word, +word.word_id) : null,
+      );
+
+      const phraseUpsertsInput: {
+        phraselike_string: string;
+        word_ids: (number | null)[];
+        language_code: string;
+        dialect_code: string | null;
+        geo_code: string | null;
+      }[] = [];
+
+      for (let i = 0; i < input.length; i++) {
+        phraseUpsertsInput.push({
+          phraselike_string: input[i].phraselike_string,
+          word_ids: input[i].phraselike_string
+            .split(' ')
+            .filter((w) => w !== '')
+            .map((wordlikeString) => wordsMap.get(wordlikeString) || null),
+          language_code: input[i].language_code,
+          dialect_code: input[i].dialect_code,
+          geo_code: input[i].geo_code,
+        });
+      }
+
+      const validInputs = phraseUpsertsInput.filter(
+        (item) => !item.word_ids.find((word_id) => word_id === null),
+      );
+
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<PhraseUpsertsProcedureOutput>(
+        ...callPhraseUpsertsProcedure({
+          phraselike_strings: validInputs.map((item) => item.phraselike_string),
+          wordIds_list: validInputs.map((item) => item.word_ids as number[]),
+          token: token,
+        }),
+      );
+
+      const error = res.rows[0].p_error_type;
+      const errors = res.rows[0].p_error_types;
+      const phrase_ids = res.rows[0].p_phrase_ids;
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error,
+          phrases: [],
+        };
+      }
+
+      const ids: { phrase_id: string; error: ErrorType }[] = [];
+
+      for (let i = 0; i < phrase_ids.length; i++) {
+        ids.push({ phrase_id: phrase_ids[i], error: errors[i] });
+      }
+
+      const { error: readingError, phrases } = await this.reads(
+        ids
+          .filter((id) => id.error === ErrorType.NoError)
+          .map((id) => +id.phrase_id),
+        pgClient,
+      );
+
+      const phrasesMap = new Map<string, Phrase>();
+
+      phrases.forEach((phrase) =>
+        phrase ? phrasesMap.set(phrase.phrase, phrase) : null,
+      );
+
+      return {
+        error: readingError,
+        phrases: input.map(
+          (item) => phrasesMap.get(item.phraselike_string) || null,
+        ),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      phrases: [],
     };
   }
 

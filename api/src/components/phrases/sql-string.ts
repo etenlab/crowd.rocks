@@ -37,14 +37,47 @@ export function callPhraseUpsertProcedure({
   token,
 }: {
   phraselike_string: string;
-  wordIds: number[];
+  wordIds: (number | null)[];
   token: string;
-}): [string, [string, number[], string]] {
+}): [string, [string, (number | null)[], string]] {
   return [
     `
       call phrase_upsert($1, $2, $3, 0, '');
     `,
     [phraselike_string, wordIds, token],
+  ];
+}
+
+export type PhraseUpsertsProcedureOutput = {
+  p_phrase_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callPhraseUpsertsProcedure({
+  phraselike_strings,
+  wordIds_list,
+  token,
+}: {
+  phraselike_strings: string[];
+  wordIds_list: number[][];
+  token: string;
+}): [string, [string[], string[], string]] {
+  return [
+    `
+      call batch_phrase_upsert($1::text[], $2::jsonb[], $3, null, null, '');
+    `,
+    [
+      phraselike_strings,
+      wordIds_list.map((wordIds) =>
+        JSON.stringify(
+          wordIds.map((id) => ({
+            id,
+          })),
+        ),
+      ),
+      token,
+    ],
   ];
 }
 
