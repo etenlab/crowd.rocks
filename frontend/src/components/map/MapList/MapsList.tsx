@@ -54,7 +54,14 @@ export const MapList: React.FC = () => {
   const [sendMapFile] = useMapUploadMutation();
   const [uploadFile] = useUploadFileMutation();
   const [mapDelete] = useMapDeleteMutation();
-  const [mapTranslationReset] = useMapsTranslationsResetMutation();
+  const [
+    mapTranslationReset,
+    {
+      loading: loadingMapReset,
+      data: dataMapReset,
+      called: dataMapResetCalled,
+    },
+  ] = useMapsTranslationsResetMutation();
 
   const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
     fetchPolicy: 'no-cache',
@@ -64,6 +71,26 @@ export const MapList: React.FC = () => {
   const [isMapDeleteModalOpen, setIsMapDeleteModalOpen] = useState(false);
   const [isMapResetModalOpen, setIsMapResetModalOpen] = useState(false);
   const candidateForDeletion = useRef<MapFileOutput | undefined>();
+
+  useEffect(() => {
+    console.log(dataMapReset);
+    if (!dataMapResetCalled || loadingMapReset) return;
+    if (dataMapReset?.mapsTranslationsReset.error === ErrorType.NoError) {
+      present({
+        message: `Maps translations data reset completed`,
+        duration: 1500,
+        position: 'top',
+        color: 'primary',
+      });
+    } else {
+      present({
+        message: `Maps translations data reset error: ${dataMapReset?.mapsTranslationsReset.error}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+  }, [dataMapReset, dataMapReset?.mapsTranslationsReset.error, present]);
 
   useEffect(() => {
     const user_id = globals.get_user_id();
@@ -175,8 +202,9 @@ export const MapList: React.FC = () => {
   };
 
   const resetTranslatedMaps = () => {
-    mapTranslationReset();
-    // alert('boom');
+    mapTranslationReset({
+      refetchQueries: ['GetAllMapsList'],
+    });
   };
 
   return (
@@ -216,32 +244,36 @@ export const MapList: React.FC = () => {
         value={filter}
         onIonInput={handleFilterChange}
       />
-      <IonList lines="none">
-        {allMapsQuery?.getAllMapsList.allMapsList?.length ? (
-          allMapsQuery?.getAllMapsList.allMapsList
-            ?.filter((m) => {
-              return m.map_file_name_with_langs
-                .toLowerCase()
-                .includes(filter.toLowerCase());
-            })
-            .sort((m1, m2) =>
-              m1.map_file_name_with_langs.localeCompare(
-                m2.map_file_name_with_langs,
-              ),
-            )
-            .map((m, i) => (
-              <MapItem
-                mapItem={m}
-                key={i}
-                candidateForDeletionRef={candidateForDeletion}
-                setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
-                showDelete={!!isAdminRes?.loggedInIsAdmin.isAdmin}
-              />
-            ))
-        ) : (
-          <div> {tr('No maps found')} </div>
-        )}
-      </IonList>
+      {loadingMapReset ? (
+        <div>Resetting map data...</div>
+      ) : (
+        <IonList lines="none">
+          {allMapsQuery?.getAllMapsList.allMapsList?.length ? (
+            allMapsQuery?.getAllMapsList.allMapsList
+              ?.filter((m) => {
+                return m.map_file_name_with_langs
+                  .toLowerCase()
+                  .includes(filter.toLowerCase());
+              })
+              .sort((m1, m2) =>
+                m1.map_file_name_with_langs.localeCompare(
+                  m2.map_file_name_with_langs,
+                ),
+              )
+              .map((m, i) => (
+                <MapItem
+                  mapItem={m}
+                  key={i}
+                  candidateForDeletionRef={candidateForDeletion}
+                  setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
+                  showDelete={!!isAdminRes?.loggedInIsAdmin.isAdmin}
+                />
+              ))
+          ) : (
+            <div> {tr('No maps found')} </div>
+          )}
+        </IonList>
+      )}
 
       <IonModal isOpen={isMapDeleteModalOpen}>
         <IonHeader>
