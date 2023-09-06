@@ -245,6 +245,11 @@ export type FromWordAndDefintionlikeStringUpsertInput = {
   wordlike_string: Scalars['String']['input'];
 };
 
+export type GenericOutput = {
+  __typename?: 'GenericOutput';
+  error: ErrorType;
+};
+
 export type GetAllMapsListInput = {
   lang?: InputMaybe<LanguageInput>;
 };
@@ -502,6 +507,7 @@ export type Mutation = {
   logout: LogoutOutput;
   mapDelete: MapDeleteOutput;
   mapUpload: MapUploadOutput;
+  mapsTranslationsReset: GenericOutput;
   passwordResetFormResolver: LoginOutput;
   phraseDefinitionUpsert: PhraseDefinitionUpsertOutput;
   phraseToPhraseTranslationUpsert: PhraseToPhraseTranslationUpsertOutput;
@@ -2442,6 +2448,11 @@ export type UploadFileMutationVariables = Exact<{
 
 
 export type UploadFileMutation = { __typename?: 'Mutation', uploadFile: { __typename?: 'IFileOutput', error: ErrorType, file?: { __typename?: 'IFile', id: number } | null } };
+
+export type MapsTranslationsResetMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MapsTranslationsResetMutation = { __typename?: 'Mutation', mapsTranslationsReset: { __typename?: 'GenericOutput', error: ErrorType } };
 
 export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
@@ -4812,6 +4823,38 @@ export function useUploadFileMutation(baseOptions?: Apollo.MutationHookOptions<U
 export type UploadFileMutationHookResult = ReturnType<typeof useUploadFileMutation>;
 export type UploadFileMutationResult = Apollo.MutationResult<UploadFileMutation>;
 export type UploadFileMutationOptions = Apollo.BaseMutationOptions<UploadFileMutation, UploadFileMutationVariables>;
+export const MapsTranslationsResetDocument = gql`
+    mutation MapsTranslationsReset {
+  mapsTranslationsReset {
+    error
+  }
+}
+    `;
+export type MapsTranslationsResetMutationFn = Apollo.MutationFunction<MapsTranslationsResetMutation, MapsTranslationsResetMutationVariables>;
+
+/**
+ * __useMapsTranslationsResetMutation__
+ *
+ * To run a mutation, you first call `useMapsTranslationsResetMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMapsTranslationsResetMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mapsTranslationsResetMutation, { data, loading, error }] = useMapsTranslationsResetMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMapsTranslationsResetMutation(baseOptions?: Apollo.MutationHookOptions<MapsTranslationsResetMutation, MapsTranslationsResetMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MapsTranslationsResetMutation, MapsTranslationsResetMutationVariables>(MapsTranslationsResetDocument, options);
+      }
+export type MapsTranslationsResetMutationHookResult = ReturnType<typeof useMapsTranslationsResetMutation>;
+export type MapsTranslationsResetMutationResult = Apollo.MutationResult<MapsTranslationsResetMutation>;
+export type MapsTranslationsResetMutationOptions = Apollo.BaseMutationOptions<MapsTranslationsResetMutation, MapsTranslationsResetMutationVariables>;
 export const PhraseDefinitionReadDocument = gql`
     query PhraseDefinitionRead($id: ID!) {
   phraseDefinitionRead(id: $id) {
@@ -6338,6 +6381,7 @@ export const namedOperations = {
     MapUpload: 'MapUpload',
     MapDelete: 'MapDelete',
     UploadFile: 'UploadFile',
+    MapsTranslationsReset: 'MapsTranslationsReset',
     PhraseDefinitionUpsert: 'PhraseDefinitionUpsert',
     TogglePhraseDefinitionVoteStatus: 'TogglePhraseDefinitionVoteStatus',
     TogglePhraseVoteStatus: 'TogglePhraseVoteStatus',
