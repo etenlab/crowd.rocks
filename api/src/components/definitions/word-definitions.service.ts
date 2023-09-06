@@ -28,6 +28,8 @@ import {
   WordDefinitionUpsertProcedureOutputRow,
   WordDefinitionUpdateProcedureOutputRow,
   callWordDefinitionUpdateProcedure,
+  WordDefinitionUpsertsProcedureOutput,
+  callWordDefinitionUpsertsProcedure,
   GetWordDefinitionListByLang,
   getWordDefinitionListByLang,
   GetWordDefinitionListByWordId,
@@ -195,6 +197,91 @@ export class WordDefinitionsService {
     return {
       error: ErrorType.UnknownError,
       word_definition: null,
+    };
+  }
+
+  async upserts(
+    input: {
+      word_id: number;
+      definition: string;
+    }[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<WordDefinitionsOutput> {
+    if (input.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        word_definitions: [],
+      };
+    }
+
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<WordDefinitionUpsertsProcedureOutput>(
+        ...callWordDefinitionUpsertsProcedure({
+          word_ids: input.map((item) => item.word_id),
+          definitions: input.map((item) => item.definition),
+          token: token,
+        }),
+      );
+
+      const creatingError = res.rows[0].p_error_type;
+      const creatingErrors = res.rows[0].p_error_types;
+      const word_definition_ids = res.rows[0].p_word_definition_ids;
+
+      if (creatingError !== ErrorType.NoError) {
+        return {
+          error: creatingError,
+          word_definitions: [],
+        };
+      }
+
+      const ids: { word_definition_id: string; error: ErrorType }[] = [];
+
+      for (let i = 0; i < word_definition_ids.length; i++) {
+        ids.push({
+          word_definition_id: word_definition_ids[i],
+          error: creatingErrors[i],
+        });
+      }
+
+      const { error: readingError, word_definitions } = await this.reads(
+        ids
+          .filter((id) => id.error === ErrorType.NoError)
+          .map((id) => +id.word_definition_id),
+        pgClient,
+      );
+
+      const wordDefinitionsMap = new Map<string, WordDefinition>();
+
+      word_definitions.forEach((word_definition) =>
+        word_definition
+          ? wordDefinitionsMap.set(
+              word_definition.word_definition_id,
+              word_definition,
+            )
+          : null,
+      );
+
+      return {
+        error: readingError,
+        word_definitions: ids.map((id) => {
+          if (id.error !== ErrorType.NoError) {
+            return null;
+          }
+
+          return wordDefinitionsMap.get(id.word_definition_id) || null;
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_definitions: [],
     };
   }
 

@@ -44,6 +44,29 @@ export function callWordDefinitionUpsertProcedure({
   ];
 }
 
+export type WordDefinitionUpsertsProcedureOutput = {
+  p_word_definition_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callWordDefinitionUpsertsProcedure({
+  word_ids,
+  definitions,
+  token,
+}: {
+  word_ids: number[];
+  definitions: string[];
+  token: string;
+}): [string, [number[], string[], string | null]] {
+  return [
+    `
+      call batch_word_definition_upsert($1::bigint[], $2::text[], $3, null, null, '');
+    `,
+    [word_ids, definitions, token],
+  ];
+}
+
 export type GetPhraseDefinitionObjectById = {
   phrase_definition_id: string;
   phrase_id: string;
@@ -87,6 +110,29 @@ export function callPhraseDefinitionUpsertProcedure({
       call phrase_definition_upsert($1, $2, $3, 0, '');
     `,
     [phrase_id, definition, token],
+  ];
+}
+
+export type PhraseDefinitionUpsertsProcedureOutput = {
+  p_phrase_definition_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callPhraseDefinitionUpsertsProcedure({
+  phrase_ids,
+  definitions,
+  token,
+}: {
+  phrase_ids: number[];
+  definitions: string[];
+  token: string;
+}): [string, [number[], string[], string]] {
+  return [
+    `
+      call batch_phrase_definition_upsert($1::bigint[], $2::text[], $3, null, null, '');
+    `,
+    [phrase_ids, definitions, token],
   ];
 }
 

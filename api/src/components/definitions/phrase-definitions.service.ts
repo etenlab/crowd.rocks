@@ -26,6 +26,8 @@ import {
   GetPhraseDefinitionObjectById,
   callPhraseDefinitionUpsertProcedure,
   PhraseDefinitionUpsertProcedureOutputRow,
+  callPhraseDefinitionUpsertsProcedure,
+  PhraseDefinitionUpsertsProcedureOutput,
   PhraseDefinitionUpdateProcedureOutputRow,
   callPhraseDefinitionUpdateProcedure,
   GetPhraseDefinitionListByLang,
@@ -202,6 +204,91 @@ export class PhraseDefinitionsService {
     return {
       error: ErrorType.UnknownError,
       phrase_definition: null,
+    };
+  }
+
+  async upserts(
+    input: {
+      phrase_id: number;
+      definition: string;
+    }[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<PhraseDefinitionsOutput> {
+    if (input.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        phrase_definitions: [],
+      };
+    }
+
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<PhraseDefinitionUpsertsProcedureOutput>(
+        ...callPhraseDefinitionUpsertsProcedure({
+          phrase_ids: input.map((item) => item.phrase_id),
+          definitions: input.map((item) => item.definition),
+          token: token,
+        }),
+      );
+
+      const creatingError = res.rows[0].p_error_type;
+      const creatingErrors = res.rows[0].p_error_types;
+      const phrase_definition_ids = res.rows[0].p_phrase_definition_ids;
+
+      if (creatingError !== ErrorType.NoError) {
+        return {
+          error: creatingError,
+          phrase_definitions: [],
+        };
+      }
+
+      const ids: { phrase_definition_id: string; error: ErrorType }[] = [];
+
+      for (let i = 0; i < phrase_definition_ids.length; i++) {
+        ids.push({
+          phrase_definition_id: phrase_definition_ids[i],
+          error: creatingErrors[i],
+        });
+      }
+
+      const { error: readingError, phrase_definitions } = await this.reads(
+        ids
+          .filter((id) => id.error === ErrorType.NoError)
+          .map((id) => +id.phrase_definition_id),
+        pgClient,
+      );
+
+      const phraseDefinitionsMap = new Map<string, PhraseDefinition>();
+
+      phrase_definitions.forEach((phrase_definition) =>
+        phrase_definition
+          ? phraseDefinitionsMap.set(
+              phrase_definition.phrase_definition_id,
+              phrase_definition,
+            )
+          : null,
+      );
+
+      return {
+        error: readingError,
+        phrase_definitions: ids.map((id) => {
+          if (id.error !== ErrorType.NoError) {
+            return null;
+          }
+
+          return phraseDefinitionsMap.get(id.phrase_definition_id) || null;
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      phrase_definitions: [],
     };
   }
 

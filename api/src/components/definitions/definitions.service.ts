@@ -18,6 +18,10 @@ import {
   WordDefinitionOutput,
   DefinitionUpdateaInput,
   DefinitionUpdateOutput,
+  WordDefinitionsOutput,
+  PhraseDefinitionsOutput,
+  WordDefinition,
+  PhraseDefinition,
 } from './types';
 import { PoolClient } from 'pg';
 
@@ -91,6 +95,99 @@ export class DefinitionsService {
     };
   }
 
+  async batchUpsertFromWordAndDefinitionlikeString(
+    input: FromWordAndDefintionlikeStringUpsertInput[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<WordDefinitionsOutput> {
+    if (input.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        word_definitions: [],
+      };
+    }
+
+    try {
+      const { error: wordError, words } = await this.wordService.upserts(
+        input.map((item) => ({
+          wordlike_string: item.wordlike_string,
+          language_code: item.language_code,
+          dialect_code: item.dialect_code,
+          geo_code: item.geo_code,
+        })),
+        token,
+        pgClient,
+      );
+
+      if (wordError !== ErrorType.NoError) {
+        return {
+          error: wordError,
+          word_definitions: [],
+        };
+      }
+
+      const wordsMap = new Map<string, number>();
+
+      words.forEach((word) =>
+        word ? wordsMap.set(word.word, +word.word_id) : null,
+      );
+
+      const definitionUpsertsInput: {
+        word_id: number;
+        definition: string;
+      }[] = [];
+
+      for (let i = 0; i < input.length; i++) {
+        const word_id = wordsMap.get(input[i].wordlike_string) || null;
+        const definition = input[i].definitionlike_string;
+
+        if (word_id === null) {
+          continue;
+        }
+
+        definitionUpsertsInput.push({
+          word_id,
+          definition,
+        });
+      }
+
+      const { error, word_definitions } =
+        await this.wordDefinitionService.upserts(
+          definitionUpsertsInput,
+          token,
+          pgClient,
+        );
+
+      const wordDefinitionsMap = new Map<string, WordDefinition>();
+
+      word_definitions.forEach((word_definition) =>
+        word_definition
+          ? wordDefinitionsMap.set(
+              `${word_definition.word.word}-${word_definition.definition}`,
+              word_definition,
+            )
+          : null,
+      );
+
+      return {
+        error,
+        word_definitions: input.map(
+          (item) =>
+            wordDefinitionsMap.get(
+              `${item.wordlike_string}-${item.definitionlike_string}`,
+            ) || null,
+        ),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_definitions: [],
+    };
+  }
+
   async upsertFromPhraseAndDefinitionlikeString(
     input: FromPhraseAndDefintionlikeStringUpsertInput,
     token: string,
@@ -149,6 +246,99 @@ export class DefinitionsService {
     return {
       error: ErrorType.UnknownError,
       phrase_definition: null,
+    };
+  }
+
+  async batchUpsertFromPhraseAndDefinitionlikeString(
+    input: FromPhraseAndDefintionlikeStringUpsertInput[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<PhraseDefinitionsOutput> {
+    if (input.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        phrase_definitions: [],
+      };
+    }
+
+    try {
+      const { error: phraseError, phrases } = await this.phraseService.upserts(
+        input.map((item) => ({
+          phraselike_string: item.phraselike_string,
+          language_code: item.language_code,
+          dialect_code: item.dialect_code,
+          geo_code: item.geo_code,
+        })),
+        token,
+        pgClient,
+      );
+
+      if (phraseError !== ErrorType.NoError) {
+        return {
+          error: phraseError,
+          phrase_definitions: [],
+        };
+      }
+
+      const phrasesMap = new Map<string, number>();
+
+      phrases.forEach((phrase) =>
+        phrase ? phrasesMap.set(phrase.phrase, +phrase.phrase_id) : null,
+      );
+
+      const definitionUpsertsInput: {
+        phrase_id: number;
+        definition: string;
+      }[] = [];
+
+      for (let i = 0; i < input.length; i++) {
+        const phrase_id = phrasesMap.get(input[i].phraselike_string) || null;
+        const definition = input[i].definitionlike_string;
+
+        if (phrase_id === null) {
+          continue;
+        }
+
+        definitionUpsertsInput.push({
+          phrase_id,
+          definition,
+        });
+      }
+
+      const { error, phrase_definitions } =
+        await this.phraseDefinitionService.upserts(
+          definitionUpsertsInput,
+          token,
+          pgClient,
+        );
+
+      const phraseDefinitionsMap = new Map<string, PhraseDefinition>();
+
+      phrase_definitions.forEach((phrase_definition) =>
+        phrase_definition
+          ? phraseDefinitionsMap.set(
+              `${phrase_definition.phrase.phrase}-${phrase_definition.definition}`,
+              phrase_definition,
+            )
+          : null,
+      );
+
+      return {
+        error,
+        phrase_definitions: input.map(
+          (item) =>
+            phraseDefinitionsMap.get(
+              `${item.phraselike_string}-${item.definitionlike_string}`,
+            ) || null,
+        ),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      phrase_definitions: [],
     };
   }
 
