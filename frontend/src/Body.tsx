@@ -72,6 +72,7 @@ import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
 import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
 import { ForumFolderDetailPage } from './components/forums/ForumFolderDetailPage/FolderDetailPage';
 import { NotificationPage } from './components/notifications/NotificationPage';
+import { SettingsPage } from './components/settings/SettingsPage';
 
 const Body: React.FC = () => {
   const {
@@ -155,6 +156,11 @@ const Body: React.FC = () => {
   const click_profile = () => {
     toggleMenu();
     router.push(`/US/${appLanguage.lang.tag}/1/profile`);
+  };
+
+  const click_settings = () => {
+    toggleMenu();
+    router.push(`/US/${appLanguage.lang.tag}/1/settings`);
   };
 
   const click_register = () => {
@@ -315,6 +321,14 @@ const Body: React.FC = () => {
             <div className="header-menu">
               {show_menu && (
                 <div className="accordion-group">
+                  <div slot="content" className="header-menu-item-holder">
+                    <div
+                      className="clickable ion-text-end"
+                      onClick={click_settings}
+                    >
+                      Settings
+                    </div>
+                  </div>
                   {is_logged_in && (
                     <div slot="content" className="header-menu-item-holder">
                       <div
@@ -463,6 +477,11 @@ const Body: React.FC = () => {
             exact
             path="/:nation_id/:language_id/:cluster_id/google-translate"
             component={GoogleTranslationPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/settings"
+            component={SettingsPage}
           />
           <Route exact path="/">
             <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />
