@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 import { IFile, IFileOutput } from './types';
@@ -13,7 +14,7 @@ interface FileFindParams {
   };
 }
 
-interface FileSaveParams {
+export interface FileSaveParams {
   file_name: string;
   file_type: string;
   file_size: number;
@@ -26,16 +27,16 @@ interface FileSaveParams {
 export class FileRepository {
   constructor(private pg: PostgresService) {}
 
-  async find(input?: FileFindParams): Promise<IFileOutput> {
+  async find(input?: FileFindParams): Promise<IFileOutput | null> {
     if (input) {
-      if (Object.keys(input.where).length < 1) {
+      if (Object.keys(input.where!).length < 1) {
         Logger.error(
           `Specify at least one condition at input<FileFindParams> `,
         );
         throw new Error(ErrorType.FileDeleteFailed);
       }
     }
-    const params = [];
+    const params: (string | number)[] = [];
     let fileClause = '';
 
     if (input && input.where) {
@@ -152,7 +153,7 @@ export class FileRepository {
     if (resQ.rows.length > 1) {
       Logger.error(
         `Something wrong, deleted several files instead of single one:` +
-        JSON.stringify(resQ.rows),
+          JSON.stringify(resQ.rows),
       );
       throw new Error(ErrorType.MapDeletionError);
     }

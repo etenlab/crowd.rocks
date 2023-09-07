@@ -1,14 +1,14 @@
 import { ErrorType } from 'src/common/types';
 
 export type GetWordToWordTranslationObjectByIdRow = {
-  word_to_word_translation_id: number;
-  from_word_definition_id: number;
-  to_word_definition_id: number;
+  word_to_word_translation_id: string;
+  from_word_definition_id: string;
+  to_word_definition_id: string;
 };
 
-export function getWordToWordTranslationObjById(
-  id: number,
-): [string, [number]] {
+export function getWordToWordTranslationObjByIds(
+  ids: number[],
+): [string, [number[]]] {
   return [
     `
       select 
@@ -16,14 +16,14 @@ export function getWordToWordTranslationObjById(
         from_word_definition_id,
         to_word_definition_id
       from word_to_word_translations
-      where word_to_word_translation_id = $1
+      where word_to_word_translation_id = any($1);
     `,
-    [id],
+    [ids],
   ];
 }
 
 export type WordToWordTranslationUpsertProcedureOutputRow = {
-  p_word_to_word_translation_id: number;
+  p_word_to_word_translation_id: string;
   p_error_type: ErrorType;
 };
 
@@ -44,15 +44,38 @@ export function callWordToWordTranslationUpsertProcedure({
   ];
 }
 
-export type GetWordToPhraseTranslationObjectByIdRow = {
-  word_to_phrase_translation_id: number;
-  from_word_definition_id: number;
-  to_phrase_definition_id: number;
+export type WordToWordTranslationUpsertsProcedureOutput = {
+  p_word_to_word_translation_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
 };
 
-export function getWordToPhraseTranslationObjById(
-  id: number,
-): [string, [number]] {
+export function callWordToWordTranslationUpsertsProcedure({
+  fromWordDefinitionIds,
+  toWordDefinitionIds,
+  token,
+}: {
+  fromWordDefinitionIds: number[];
+  toWordDefinitionIds: number[];
+  token: string;
+}): [string, [number[], number[], string]] {
+  return [
+    `
+      call batch_word_to_word_translation_upsert($1::bigint[], $2::bigint[], $3, null, null, '');
+    `,
+    [fromWordDefinitionIds, toWordDefinitionIds, token],
+  ];
+}
+
+export type GetWordToPhraseTranslationObjectByIdRow = {
+  word_to_phrase_translation_id: string;
+  from_word_definition_id: string;
+  to_phrase_definition_id: string;
+};
+
+export function getWordToPhraseTranslationObjByIds(
+  ids: number[],
+): [string, [number[]]] {
   return [
     `
       select 
@@ -60,14 +83,14 @@ export function getWordToPhraseTranslationObjById(
         from_word_definition_id,
         to_phrase_definition_id
       from word_to_phrase_translations
-      where word_to_phrase_translation_id = $1
+      where word_to_phrase_translation_id = any($1)
     `,
-    [id],
+    [ids],
   ];
 }
 
 export type WordToPhraseTranslationUpsertProcedureOutputRow = {
-  p_word_to_phrase_translation_id: number;
+  p_word_to_phrase_translation_id: string;
   p_error_type: ErrorType;
 };
 
@@ -88,15 +111,38 @@ export function callWordToPhraseTranslationUpsertProcedure({
   ];
 }
 
-export type GetPhraseToWordTranslationObjectByIdRow = {
-  phrase_to_word_translation_id: number;
-  from_phrase_definition_id: number;
-  to_word_definition_id: number;
+export type WordToPhraseTranslationUpsertsProcedureOutput = {
+  p_word_to_phrase_translation_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
 };
 
-export function getPhraseToWordTranslationObjById(
-  id: number,
-): [string, [number]] {
+export function callWordToPhraseTranslationUpsertsProcedure({
+  fromWordDefinitionIds,
+  toPhraseDefinitionIds,
+  token,
+}: {
+  fromWordDefinitionIds: number[];
+  toPhraseDefinitionIds: number[];
+  token: string;
+}): [string, [number[], number[], string]] {
+  return [
+    `
+      call batch_word_to_phrase_translation_upsert($1::bigint[], $2::bigint[], $3, null, null, '');
+    `,
+    [fromWordDefinitionIds, toPhraseDefinitionIds, token],
+  ];
+}
+
+export type GetPhraseToWordTranslationObjectByIdRow = {
+  phrase_to_word_translation_id: string;
+  from_phrase_definition_id: string;
+  to_word_definition_id: string;
+};
+
+export function getPhraseToWordTranslationObjByIds(
+  ids: number[],
+): [string, [number[]]] {
   return [
     `
       select 
@@ -104,14 +150,14 @@ export function getPhraseToWordTranslationObjById(
         from_phrase_definition_id,
         to_word_definition_id
       from phrase_to_word_translations
-      where phrase_to_word_translation_id = $1
+      where phrase_to_word_translation_id = any($1)
     `,
-    [id],
+    [ids],
   ];
 }
 
 export type PhraseToWordTranslationUpsertProcedureOutputRow = {
-  p_phrase_to_word_translation_id: number;
+  p_phrase_to_word_translation_id: string;
   p_error_type: ErrorType;
 };
 
@@ -132,15 +178,38 @@ export function callPhraseToWordTranslationUpsertProcedure({
   ];
 }
 
-export type GetPhraseToPhraseTranslationObjectByIdRow = {
-  phrase_to_phrase_translation_id: number;
-  from_phrase_definition_id: number;
-  to_phrase_definition_id: number;
+export type PhraseToWordTranslationUpsertsProcedureOutput = {
+  p_phrase_to_word_translation_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
 };
 
-export function getPhraseToPhraseTranslationObjById(
-  id: number,
-): [string, [number]] {
+export function callPhraseToWordTranslationUpsertsProcedure({
+  fromPhraseDefinitionIds,
+  toWordDefinitionIds,
+  token,
+}: {
+  fromPhraseDefinitionIds: number[];
+  toWordDefinitionIds: number[];
+  token: string;
+}): [string, [number[], number[], string]] {
+  return [
+    `
+      call batch_phrase_to_word_translation_upsert($1::bigint[], $2::bigint[], $3, null, null, '');
+    `,
+    [fromPhraseDefinitionIds, toWordDefinitionIds, token],
+  ];
+}
+
+export type GetPhraseToPhraseTranslationObjectByIdRow = {
+  phrase_to_phrase_translation_id: string;
+  from_phrase_definition_id: string;
+  to_phrase_definition_id: string;
+};
+
+export function getPhraseToPhraseTranslationObjByIds(
+  ids: number[],
+): [string, [number[]]] {
   return [
     `
       select 
@@ -148,14 +217,14 @@ export function getPhraseToPhraseTranslationObjById(
         from_phrase_definition_id,
         to_phrase_definition_id
       from phrase_to_phrase_translations
-      where phrase_to_phrase_translation_id = $1
+      where phrase_to_phrase_translation_id = any($1);
     `,
-    [id],
+    [ids],
   ];
 }
 
 export type PhraseToPhraseTranslationUpsertProcedureOutputRow = {
-  p_phrase_to_phrase_translation_id: number;
+  p_phrase_to_phrase_translation_id: string;
   p_error_type: ErrorType;
 };
 
@@ -176,15 +245,38 @@ export function callPhraseToPhraseTranslationUpsertProcedure({
   ];
 }
 
+export type PhraseToPhraseTranslationUpsertsProcedureOutput = {
+  p_phrase_to_phrase_translation_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callPhraseToPhraseTranslationUpsertsProcedure({
+  fromPhraseDefinitionIds,
+  toPhraseDefinitionIds,
+  token,
+}: {
+  fromPhraseDefinitionIds: number[];
+  toPhraseDefinitionIds: number[];
+  token: string;
+}): [string, [number[], number[], string]] {
+  return [
+    `
+      call batch_phrase_to_phrase_translation_upsert($1::bigint[], $2::bigint[], $3, null, null, '');
+    `,
+    [fromPhraseDefinitionIds, toPhraseDefinitionIds, token],
+  ];
+}
+
 export type GetWordToWordTranslationVoteStatus = {
-  word_to_word_translation_id: number;
+  word_to_word_translation_id: string;
   upvotes: number;
   downvotes: number;
 };
 
-export function getWordToWordTranslationVoteStatus(
-  word_to_word_translation_id: number,
-): [string, [number]] {
+export function getWordToWordTranslationVoteStatusFromIds(
+  word_to_word_translation_ids: number[],
+): [string, [number[]]] {
   return [
     `
       select 
@@ -198,7 +290,7 @@ export function getWordToWordTranslationVoteStatus(
       from 
         word_to_word_translations_votes AS v 
       where 
-        v.word_to_word_translation_id = $1
+        v.word_to_word_translation_id = any($1)
       group BY 
         v.word_to_word_translation_id 
       order by 
@@ -206,19 +298,19 @@ export function getWordToWordTranslationVoteStatus(
           case when v.vote = true then 1 when v.vote = false then 0 else null end
         ) desc;
     `,
-    [word_to_word_translation_id],
+    [word_to_word_translation_ids],
   ];
 }
 
 export type GetWordToPhraseTranslationVoteStatus = {
-  word_to_phrase_translation_id: number;
+  word_to_phrase_translation_id: string;
   upvotes: number;
   downvotes: number;
 };
 
-export function getWordToPhraseTranslationVoteStatus(
-  word_to_phrase_translation_id: number,
-): [string, [number]] {
+export function getWordToPhraseTranslationVoteStatusFromIds(
+  word_to_phrase_translation_ids: number[],
+): [string, [number[]]] {
   return [
     `
       select 
@@ -232,7 +324,7 @@ export function getWordToPhraseTranslationVoteStatus(
       from 
         word_to_phrase_translations_votes AS v 
       where 
-        v.word_to_phrase_translation_id = $1
+        v.word_to_phrase_translation_id = any($1)
       group BY 
         v.word_to_phrase_translation_id 
       order by 
@@ -240,12 +332,12 @@ export function getWordToPhraseTranslationVoteStatus(
           case when v.vote = true then 1 when v.vote = false then 0 else null end
         ) desc;
     `,
-    [word_to_phrase_translation_id],
+    [word_to_phrase_translation_ids],
   ];
 }
 
 export type ToggleWordToPhraseTranslationVoteStatus = {
-  p_word_to_phrase_translations_vote_id: number;
+  p_word_to_phrase_translations_vote_id: string;
   p_error_type: ErrorType;
 };
 
@@ -267,14 +359,14 @@ export function toggleWordToPhraseTranslationVoteStatus({
 }
 
 export type GetPhraseToWordTranslationVoteStatus = {
-  phrase_to_word_translation_id: number;
+  phrase_to_word_translation_id: string;
   upvotes: number;
   downvotes: number;
 };
 
-export function getPhraseToWordTranslationVoteStatus(
-  phrase_to_word_translation_id: number,
-): [string, [number]] {
+export function getPhraseToWordTranslationVoteStatusFromIds(
+  phrase_to_word_translation_ids: number[],
+): [string, [number[]]] {
   return [
     `
       select 
@@ -288,7 +380,7 @@ export function getPhraseToWordTranslationVoteStatus(
       from 
         phrase_to_word_translations_votes AS v 
       where 
-        v.phrase_to_word_translation_id = $1
+        v.phrase_to_word_translation_id = any($1)
       group BY 
         v.phrase_to_word_translation_id 
       order by 
@@ -296,12 +388,12 @@ export function getPhraseToWordTranslationVoteStatus(
           case when v.vote = true then 1 when v.vote = false then 0 else null end
         ) desc;
     `,
-    [phrase_to_word_translation_id],
+    [phrase_to_word_translation_ids],
   ];
 }
 
 export type TogglePhraseToWordTranslationVoteStatus = {
-  p_phrase_to_word_translations_vote_id: number;
+  p_phrase_to_word_translations_vote_id: string;
   p_error_type: ErrorType;
 };
 
@@ -323,14 +415,14 @@ export function togglePhraseToWordTranslationVoteStatus({
 }
 
 export type GetPhraseToPhraseTranslationVoteStatus = {
-  phrase_to_phrase_translation_id: number;
+  phrase_to_phrase_translation_id: string;
   upvotes: number;
   downvotes: number;
 };
 
-export function getPhraseToPhraseTranslationVoteStatus(
-  phrase_to_phrase_translation_id: number,
-): [string, [number]] {
+export function getPhraseToPhraseTranslationVoteStatusFromIds(
+  ids: number[],
+): [string, [number[]]] {
   return [
     `
       select 
@@ -344,7 +436,7 @@ export function getPhraseToPhraseTranslationVoteStatus(
       from 
         phrase_to_phrase_translations_votes AS v 
       where 
-        v.phrase_to_phrase_translation_id = $1
+        v.phrase_to_phrase_translation_id = any($1)
       group BY 
         v.phrase_to_phrase_translation_id 
       order by 
@@ -352,12 +444,12 @@ export function getPhraseToPhraseTranslationVoteStatus(
           case when v.vote = true then 1 when v.vote = false then 0 else null end
         ) desc;
     `,
-    [phrase_to_phrase_translation_id],
+    [ids],
   ];
 }
 
 export type TogglePhraseToPhraseTranslationVoteStatus = {
-  p_phrase_to_phrase_translations_vote_id: number;
+  p_phrase_to_phrase_translations_vote_id: string;
   p_error_type: ErrorType;
 };
 
@@ -379,33 +471,35 @@ export function togglePhraseToPhraseTranslationVoteStatus({
 }
 
 export type GetWordToWordTranslationListByFromWordDefinitionId = {
-  word_to_word_translation_id: number;
+  word_to_word_translation_id: string;
+  from_word_definition_id: string;
+  to_word_definition_id: string;
   created_at: string;
 };
 
-export function getWordToWordTranslationListByFromWordDefinitionId({
-  from_word_definition_id,
+export function getWordToWordTranslationListByFromWordDefinitionIds({
+  from_word_definition_ids,
   language_code,
   dialect_code,
   geo_code,
 }: {
-  from_word_definition_id: number;
+  from_word_definition_ids: number[];
   language_code: string;
   dialect_code: string | null;
   geo_code: string | null;
 }): [
   string,
   (
-    | [number, string, string, string]
-    | [number, string, string]
-    | [number, string]
+    | [number[], string, string, string]
+    | [number[], string, string]
+    | [number[], string]
   ),
 ] {
   let wherePlsStr = '';
   let returnArr:
-    | [number, string, string, string]
-    | [number, string, string]
-    | [number, string] = [from_word_definition_id, language_code];
+    | [number[], string, string, string]
+    | [number[], string, string]
+    | [number[], string] = [from_word_definition_ids, language_code];
 
   if (dialect_code && geo_code) {
     wherePlsStr = `
@@ -432,6 +526,8 @@ export function getWordToWordTranslationListByFromWordDefinitionId({
     `
       select distinct 
         wtwts.word_to_word_translation_id,
+        wtwts.from_word_definition_id,
+        wtwts.to_word_definition_id,
         wtwts.created_at
       from word_to_word_translations as wtwts
       join (
@@ -446,40 +542,42 @@ export function getWordToWordTranslationListByFromWordDefinitionId({
         on ws.word_id = word_definitions.word_id
       ) as wds
       on wds.word_definition_id = wtwts.to_word_definition_id
-      where wtwts.from_word_definition_id = $1;
+      where wtwts.from_word_definition_id = any($1);
     `,
     returnArr,
   ];
 }
 
 export type GetWordToPhraseTranslationListByFromWordDefinitionId = {
-  word_to_phrase_translation_id: number;
+  word_to_phrase_translation_id: string;
+  from_word_definition_id: string;
+  to_phrase_definition_id: string;
   created_at: string;
 };
 
-export function getWordToPhraseTranslationListByFromWordDefinitionId({
-  from_word_definition_id,
+export function getWordToPhraseTranslationListByFromWordDefinitionIds({
+  from_word_definition_ids,
   language_code,
   dialect_code,
   geo_code,
 }: {
-  from_word_definition_id: number;
+  from_word_definition_ids: number[];
   language_code: string;
   dialect_code: string | null;
   geo_code: string | null;
 }): [
   string,
   (
-    | [number, string, string, string]
-    | [number, string, string]
-    | [number, string]
+    | [number[], string, string, string]
+    | [number[], string, string]
+    | [number[], string]
   ),
 ] {
   let wherePlsStr = '';
   let returnArr:
-    | [number, string, string, string]
-    | [number, string, string]
-    | [number, string] = [from_word_definition_id, language_code];
+    | [number[], string, string, string]
+    | [number[], string, string]
+    | [number[], string] = [from_word_definition_ids, language_code];
 
   if (dialect_code && geo_code) {
     wherePlsStr = `
@@ -506,6 +604,8 @@ export function getWordToPhraseTranslationListByFromWordDefinitionId({
     `
       select distinct 
         wtpts.word_to_phrase_translation_id,
+        wtpts.from_word_definition_id,
+        wtpts.to_phrase_definition_id,
         wtpts.created_at
       from word_to_phrase_translations as wtpts
       join (
@@ -522,40 +622,42 @@ export function getWordToPhraseTranslationListByFromWordDefinitionId({
         on ps.phrase_id = phrase_definitions.phrase_id
       ) as pds
       on pds.phrase_definition_id = wtpts.to_phrase_definition_id
-      where wtpts.from_word_definition_id = $1
+      where wtpts.from_word_definition_id = any($1)
     `,
     returnArr,
   ];
 }
 
 export type GetPhraseToWordTranslationListByFromPhraseDefinitionId = {
-  phrase_to_word_translation_id: number;
+  phrase_to_word_translation_id: string;
+  from_phrase_definition_id: string;
+  to_word_definition_id: string;
   created_at: string;
 };
 
-export function getPhraseToWordTranslationListByFromPhraseDefinitionId({
-  from_phrase_definition_id,
+export function getPhraseToWordTranslationListByFromPhraseDefinitionIds({
+  from_phrase_definition_ids,
   language_code,
   dialect_code,
   geo_code,
 }: {
-  from_phrase_definition_id: number;
+  from_phrase_definition_ids: number[];
   language_code: string;
   dialect_code: string | null;
   geo_code: string | null;
 }): [
   string,
   (
-    | [number, string, string, string]
-    | [number, string, string]
-    | [number, string]
+    | [number[], string, string, string]
+    | [number[], string, string]
+    | [number[], string]
   ),
 ] {
   let wherePlsStr = '';
   let returnArr:
-    | [number, string, string, string]
-    | [number, string, string]
-    | [number, string] = [from_phrase_definition_id, language_code];
+    | [number[], string, string, string]
+    | [number[], string, string]
+    | [number[], string] = [from_phrase_definition_ids, language_code];
 
   if (dialect_code && geo_code) {
     wherePlsStr = `
@@ -582,6 +684,8 @@ export function getPhraseToWordTranslationListByFromPhraseDefinitionId({
     `
       select distinct 
         ptwts.phrase_to_word_translation_id,
+        ptwts.from_phrase_definition_id,
+        ptwts.to_word_definition_id,
         ptwts.created_at
       from phrase_to_word_translations as ptwts
       join (
@@ -596,40 +700,42 @@ export function getPhraseToWordTranslationListByFromPhraseDefinitionId({
         on ws.word_id = word_definitions.word_id
       ) as wds
       on wds.word_definition_id = ptwts.to_word_definition_id
-      where ptwts.from_phrase_definition_id = $1
+      where ptwts.from_phrase_definition_id = any($1)
     `,
     returnArr,
   ];
 }
 
 export type GetPhraseToPhraseTranslationListByFromPhraseDefinitionId = {
-  phrase_to_phrase_translation_id: number;
+  phrase_to_phrase_translation_id: string;
+  from_phrase_definition_id: string;
+  to_phrase_definition_id: string;
   created_at: string;
 };
 
-export function getPhraseToPhraseTranslationListByFromPhraseDefinitionId({
-  from_phrase_definition_id,
+export function getPhraseToPhraseTranslationListByFromPhraseDefinitionIds({
+  from_phrase_definition_ids,
   language_code,
   dialect_code,
   geo_code,
 }: {
-  from_phrase_definition_id: number;
+  from_phrase_definition_ids: number[];
   language_code: string;
   dialect_code: string | null;
   geo_code: string | null;
 }): [
   string,
   (
-    | [number, string, string, string]
-    | [number, string, string]
-    | [number, string]
+    | [number[], string, string, string]
+    | [number[], string, string]
+    | [number[], string]
   ),
 ] {
   let wherePlsStr = '';
   let returnArr:
-    | [number, string, string, string]
-    | [number, string, string]
-    | [number, string] = [from_phrase_definition_id, language_code];
+    | [number[], string, string, string]
+    | [number[], string, string]
+    | [number[], string] = [from_phrase_definition_ids, language_code];
 
   if (dialect_code && geo_code) {
     wherePlsStr = `
@@ -656,6 +762,8 @@ export function getPhraseToPhraseTranslationListByFromPhraseDefinitionId({
     `
       select distinct 
         ptpts.phrase_to_phrase_translation_id,
+        ptpts.from_phrase_definition_id,
+        ptpts.to_phrase_definition_id,
         ptpts.created_at
       from phrase_to_phrase_translations as ptpts
       join (
@@ -672,7 +780,7 @@ export function getPhraseToPhraseTranslationListByFromPhraseDefinitionId({
         on ps.phrase_id = phrase_definitions.phrase_id
       ) as pds
       on pds.phrase_definition_id = ptpts.to_phrase_definition_id
-      where ptpts.from_phrase_definition_id = $1
+      where ptpts.from_phrase_definition_id = any($1)
     `,
     returnArr,
   ];

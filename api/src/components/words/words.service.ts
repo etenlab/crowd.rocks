@@ -1,6 +1,8 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
+import { pgClientOrPool } from 'src/common/utility';
+
 import { ErrorType, GenericOutput } from 'src/common/types';
 
 import { PostgresService } from 'src/core/postgres.service';
@@ -9,23 +11,28 @@ import { WordDefinitionsService } from 'src/components/definitions/word-definiti
 
 import {
   Word,
+  WordWithVote,
   WordReadInput,
-  WordReadOutput,
+  WordOutput,
+  WordsOutput,
   WordUpsertInput,
-  WordWithVoteListEdge,
+  WordWithVoteListOutput,
   WordWithVoteListConnection,
   WordWithVoteOutput,
 } from './types';
 import { LanguageInput } from 'src/components/common/types';
 
 import {
-  getWordObjById,
+  getWordObjByIds,
   GetWordObjectById,
   callWordUpsertProcedure,
   WordUpsertProcedureOutputRow,
+  callWordUpsertsProcedure,
+  WordUpsertsProcedureOutput,
   GetWordListByLang,
   getWordListByLang,
 } from './sql-string';
+import { WordDefinition } from '../definitions/types';
 
 @Injectable()
 export class WordsService {
@@ -36,23 +43,32 @@ export class WordsService {
     private wordDefinitionService: WordDefinitionsService,
   ) {}
 
-  async read(input: WordReadInput): Promise<WordReadOutput> {
+  async read(
+    input: WordReadInput,
+    pgClient: PoolClient | null,
+  ): Promise<WordOutput> {
     try {
-      const res1 = await this.pg.pool.query<GetWordObjectById>(
-        ...getWordObjById(+input.word_id),
-      );
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetWordObjectById>(...getWordObjByIds([+input.word_id]));
 
-      if (res1.rowCount !== 1) {
+      if (res.rowCount !== 1) {
         console.error(`no word for id: ${input.word_id}`);
+
+        return {
+          error: ErrorType.WordNotFound,
+          word: null,
+        };
       } else {
         return {
           error: ErrorType.NoError,
           word: {
             word_id: input.word_id,
-            word: res1.rows[0].word,
-            language_code: res1.rows[0].language_code,
-            dialect_code: res1.rows[0].dialect_code,
-            geo_code: res1.rows[0].geo_code,
+            word: res.rows[0].word,
+            language_code: res.rows[0].language_code,
+            dialect_code: res.rows[0].dialect_code,
+            geo_code: res.rows[0].geo_code,
           },
         };
       }
@@ -66,9 +82,56 @@ export class WordsService {
     };
   }
 
-  async upsert(input: WordUpsertInput, token: string): Promise<WordReadOutput> {
+  async reads(
+    ids: number[],
+    pgClient: PoolClient | null,
+  ): Promise<WordsOutput> {
     try {
-      const res = await this.pg.pool.query<WordUpsertProcedureOutputRow>(
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetWordObjectById>(...getWordObjByIds(ids));
+
+      const wordsMap = new Map<string, Word>();
+
+      res.rows.forEach((row) =>
+        wordsMap.set(row.word_id, {
+          word_id: row.word_id,
+          word: row.word,
+          language_code: row.language_code,
+          dialect_code: row.dialect_code,
+          geo_code: row.geo_code,
+        }),
+      );
+
+      return {
+        error: ErrorType.NoError,
+        words: ids.map((id) => {
+          const word = wordsMap.get(id + '');
+
+          return word ? word : null;
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      words: [],
+    };
+  }
+
+  async upsert(
+    input: WordUpsertInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<WordOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<WordUpsertProcedureOutputRow>(
         ...callWordUpsertProcedure({
           wordlike_string: input.wordlike_string,
           language_code: input.language_code,
@@ -88,9 +151,12 @@ export class WordsService {
         };
       }
 
-      const { error: readingError, word } = await this.read({
-        word_id: word_id + '',
-      });
+      const { error: readingError, word } = await this.read(
+        {
+          word_id: word_id + '',
+        },
+        pgClient,
+      );
 
       return {
         error: readingError,
@@ -103,6 +169,85 @@ export class WordsService {
     return {
       error: ErrorType.UnknownError,
       word: null,
+    };
+  }
+
+  async upserts(
+    input: {
+      wordlike_string: string;
+      language_code: string;
+      dialect_code: string | null;
+      geo_code: string | null;
+    }[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<WordsOutput> {
+    if (input.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        words: [],
+      };
+    }
+
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<WordUpsertsProcedureOutput>(
+        ...callWordUpsertsProcedure({
+          wordlike_strings: input.map((item) => item.wordlike_string),
+          language_codes: input.map((item) => item.language_code),
+          dialect_codes: input.map((item) => item.dialect_code),
+          geo_codes: input.map((item) => item.geo_code),
+          token,
+        }),
+      );
+
+      const creatingErrors = res.rows[0].p_error_types;
+      const creatingError = res.rows[0].p_error_type;
+      const word_ids = res.rows[0].p_word_ids;
+
+      if (creatingError !== ErrorType.NoError) {
+        return {
+          error: creatingError,
+          words: [],
+        };
+      }
+
+      const ids: { word_id: string; error: ErrorType }[] = [];
+
+      for (let i = 0; i < word_ids.length; i++) {
+        ids.push({ word_id: word_ids[i], error: creatingErrors[i] });
+      }
+
+      const { error: readingError, words } = await this.reads(
+        ids
+          .filter((id) => id.error === ErrorType.NoError)
+          .map((id) => +id.word_id),
+        pgClient,
+      );
+
+      const wordsMap = new Map<string, Word>();
+
+      words.forEach((word) => (word ? wordsMap.set(word.word_id, word) : null));
+
+      return {
+        error: readingError,
+        words: ids.map((id) => {
+          if (id.error !== ErrorType.NoError) {
+            return null;
+          }
+
+          return wordsMap.get(id.word_id) || null;
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      words: [],
     };
   }
 
@@ -147,24 +292,31 @@ export class WordsService {
     };
   }
 
-  async getWordWithVoteById(word_id: number): Promise<WordWithVoteOutput> {
+  async getWordWithVoteById(
+    word_id: number,
+    pgClient: PoolClient | null,
+  ): Promise<WordWithVoteOutput> {
     try {
       const { error, vote_status } = await this.wordVoteService.getVoteStatus(
         word_id,
+        pgClient,
       );
 
-      if (error !== ErrorType.NoError) {
+      if (error !== ErrorType.NoError || vote_status === null) {
         return {
           error,
           word_with_vote: null,
         };
       }
 
-      const { error: readError, word } = await this.read({
-        word_id: word_id + '',
-      });
+      const { error: readError, word } = await this.read(
+        {
+          word_id: word_id + '',
+        },
+        pgClient,
+      );
 
-      if (readError !== ErrorType.NoError) {
+      if (readError !== ErrorType.NoError || word === null) {
         return {
           error: readError,
           word_with_vote: null,
@@ -189,27 +341,82 @@ export class WordsService {
     };
   }
 
+  async getWordWithVoteByIds(
+    wordIds: number[],
+    pgClient: PoolClient | null,
+  ): Promise<WordWithVoteListOutput> {
+    try {
+      const { error, vote_status_list } =
+        await this.wordVoteService.getVoteStatusFromIds(wordIds, pgClient);
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error,
+          word_with_vote_list: [],
+        };
+      }
+
+      const { error: readError, words } = await this.reads(wordIds, pgClient);
+
+      if (readError !== ErrorType.NoError) {
+        return {
+          error: readError,
+          word_with_vote_list: [],
+        };
+      }
+
+      return {
+        error,
+        word_with_vote_list: wordIds.map((_wordId, index) => {
+          const vote_status = vote_status_list[index];
+          const word = words[index];
+
+          if (!word || !vote_status) {
+            return null;
+          }
+
+          return {
+            ...word,
+            upvotes: vote_status.upvotes,
+            downvotes: vote_status.downvotes,
+          };
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_with_vote_list: [],
+    };
+  }
+
   async getWordsByLanguage(
     input: LanguageInput,
     first: number | null,
     after: string | null,
+    pgClient: PoolClient | null,
   ): Promise<WordWithVoteListConnection> {
     try {
-      const res1 = await this.pg.pool.query<GetWordListByLang>(
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetWordListByLang>(
         ...getWordListByLang({
           ...input,
         }),
       );
-
-      const wordWithVoteListEdge: WordWithVoteListEdge[] = [];
 
       let offset: number | null = null;
       let hasNextPage = false;
       let startCursor: string | null = null;
       let endCursor: string | null = null;
 
-      for (let i = 0; i < res1.rowCount; i++) {
-        const { word_id } = res1.rows[i];
+      const wordIds: number[] = [];
+
+      for (let i = 0; i < res.rowCount; i++) {
+        const { word_id } = res.rows[i];
 
         if (after === null && offset === null) {
           offset = 0;
@@ -228,78 +435,86 @@ export class WordsService {
           startCursor = word_id;
         }
 
-        if (first !== null && offset >= first) {
+        if (first !== null && offset! >= first) {
           hasNextPage = true;
           break;
         }
 
-        const { error, vote_status } = await this.wordVoteService.getVoteStatus(
-          +word_id,
-        );
-
-        if (error !== ErrorType.NoError) {
-          return {
-            error,
-            edges: [],
-            pageInfo: {
-              hasNextPage: false,
-              hasPreviousPage: false,
-              startCursor: null,
-              endCursor: null,
-            },
-          };
-        }
-
-        const { error: definitionError, definitions } =
-          await this.wordDefinitionService.getDefinitionsByWordId(+word_id);
-
-        if (definitionError !== ErrorType.NoError) {
-          return {
-            error: definitionError,
-            edges: [],
-            pageInfo: {
-              hasNextPage: false,
-              hasPreviousPage: false,
-              startCursor: null,
-              endCursor: null,
-            },
-          };
-        }
-
-        const { error: readError, word } = await this.read({
-          word_id: word_id,
-        });
-
-        if (readError !== ErrorType.NoError) {
-          return {
-            error: readError,
-            edges: [],
-            pageInfo: {
-              hasNextPage: false,
-              hasPreviousPage: false,
-              startCursor: null,
-              endCursor: null,
-            },
-          };
-        }
-
-        wordWithVoteListEdge.push({
-          cursor: word_id,
-          node: {
-            ...word,
-            upvotes: vote_status.upvotes,
-            downvotes: vote_status.downvotes,
-            definitions,
-          },
-        });
+        wordIds.push(+word_id);
 
         endCursor = word_id;
-        offset++;
+        offset!++;
       }
+
+      const { error, word_with_vote_list } = await this.getWordWithVoteByIds(
+        wordIds,
+        pgClient,
+      );
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error,
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+          },
+        };
+      }
+
+      const { error: definitionError, word_definition_list } =
+        await this.wordDefinitionService.getWordDefinitionsByWordIds(
+          wordIds,
+          pgClient,
+        );
+
+      if (definitionError !== ErrorType.NoError) {
+        return {
+          error: definitionError,
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+          },
+        };
+      }
+
+      const wordDefinitionMap = new Map<string, WordDefinition[]>();
+
+      word_definition_list.forEach((word_definition) => {
+        if (!word_definition) {
+          return;
+        }
+
+        const word_id = word_definition.word.word_id;
+        const wordDefinitions = wordDefinitionMap.get(word_id);
+
+        if (wordDefinitions) {
+          wordDefinitions.push(word_definition);
+        } else {
+          wordDefinitionMap.set(word_id, [word_definition]);
+        }
+      });
 
       return {
         error: ErrorType.NoError,
-        edges: wordWithVoteListEdge,
+        edges: word_with_vote_list
+          .filter((wordWitVote) => wordWitVote)
+          .map((wordWithVote: WordWithVote) => {
+            const wordDefinition = wordDefinitionMap.get(wordWithVote.word_id);
+
+            return {
+              cursor: wordWithVote.word_id,
+              node: {
+                ...wordWithVote,
+                definitions: wordDefinition || [],
+              },
+            };
+          }),
         pageInfo: {
           hasNextPage,
           hasPreviousPage: false,
@@ -327,8 +542,14 @@ export class WordsService {
    * @warning
    * Sync style with other methods
    */
-  async getWordByDefinitionId(definitionId: string): Promise<Word> {
-    const res = this.pg.pool.query(
+  async getWordByDefinitionId(
+    definitionId: string,
+    pgClient: PoolClient | null,
+  ): Promise<Word> {
+    const res = await pgClientOrPool({
+      client: pgClient,
+      pool: this.pg.pool,
+    }).query(
       `
       select
         w.word_id ,

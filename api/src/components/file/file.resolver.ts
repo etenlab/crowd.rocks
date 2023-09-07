@@ -46,7 +46,7 @@ export class FileResolver {
     @Args({ name: 'file_size', type: () => Int }) file_size: number,
     @Context() req: any,
   ): Promise<IFileOutput> {
-    const bearer = getBearer(req);
+    const bearer = getBearer(req) || '';
     const file = await this.fileService.uploadFile(
       createReadStream(),
       file_name,
@@ -55,7 +55,7 @@ export class FileResolver {
       bearer,
     );
     console.log('[file]:', JSON.stringify(file));
-    return file;
+    return file!;
   }
 
   @Mutation(() => IFileOutput)
@@ -69,7 +69,7 @@ export class FileResolver {
     file_size: number,
     @Context() req: any,
   ): Promise<IFileOutput> {
-    const bearer = getBearer(req);
+    const bearer = getBearer(req) || '';
     const file = await this.fileService.updateFile(
       createReadStream(),
       id,
@@ -78,7 +78,7 @@ export class FileResolver {
       file_size,
       bearer,
     );
-    return file;
+    return file!;
   }
 
   @Query(() => [IFile], { name: 'fileList' })

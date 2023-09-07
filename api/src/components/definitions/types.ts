@@ -17,6 +17,7 @@ export class WordDefinition {
   @Field(() => ID) word_definition_id: string;
   @Field(() => String) definition: string;
   @Field(() => Word) word: Word;
+  @Field(() => String) created_at: string;
 }
 
 @ObjectType()
@@ -24,6 +25,7 @@ export class PhraseDefinition {
   @Field(() => ID) phrase_definition_id: string;
   @Field(() => String) definition: string;
   @Field(() => Phrase) phrase: Phrase;
+  @Field(() => String) created_at: string;
 }
 
 export const Definition = createUnionType({
@@ -53,27 +55,27 @@ export class PhraseDefinitionUpsertInput {
 }
 
 @ObjectType()
-export class WordDefinitionUpsertOutput extends GenericOutput {
+export class WordDefinitionOutput extends GenericOutput {
   @Field(() => WordDefinition, { nullable: true })
   word_definition: WordDefinition | null;
 }
 
 @ObjectType()
-export class PhraseDefinitionUpsertOutput extends GenericOutput {
+export class WordDefinitionsOutput extends GenericOutput {
+  @Field(() => [WordDefinition], { nullable: 'items' })
+  word_definitions: (WordDefinition | null)[];
+}
+
+@ObjectType()
+export class PhraseDefinitionOutput extends GenericOutput {
   @Field(() => PhraseDefinition, { nullable: true })
   phrase_definition: PhraseDefinition | null;
 }
 
 @ObjectType()
-export class WordDefinitionReadOutput extends GenericOutput {
-  @Field(() => WordDefinition, { nullable: true })
-  word_definition: WordDefinition | null;
-}
-
-@ObjectType()
-export class PhraseDefinitionReadOutput extends GenericOutput {
-  @Field(() => PhraseDefinition, { nullable: true })
-  phrase_definition: PhraseDefinition | null;
+export class PhraseDefinitionsOutput extends GenericOutput {
+  @Field(() => [PhraseDefinition], { nullable: 'items' })
+  phrase_definitions: (PhraseDefinition | null)[];
 }
 
 @InputType()
@@ -138,13 +140,13 @@ export class PhraseDefinitionWithVote extends PhraseDefinition {
 @ObjectType()
 export class WordDefinitionWithVoteListOutput extends GenericOutput {
   @Field(() => [WordDefinitionWithVote], { nullable: 'items' })
-  word_definition_list: WordDefinitionWithVote[];
+  word_definition_list: (WordDefinitionWithVote | null)[];
 }
 
 @ObjectType()
 export class PhraseDefinitionWithVoteListOutput extends GenericOutput {
   @Field(() => [PhraseDefinitionWithVote], { nullable: 'items' })
-  phrase_definition_list: PhraseDefinitionWithVote[];
+  phrase_definition_list: (PhraseDefinitionWithVote | null)[];
 }
 
 @ObjectType()
@@ -194,6 +196,12 @@ export class DefinitionVoteStatus {
 export class DefinitionVoteStatusOutputRow extends GenericOutput {
   @Field(() => DefinitionVoteStatus, { nullable: true })
   vote_status: DefinitionVoteStatus | null;
+}
+
+@ObjectType()
+export class DefinitionVoteStatusOutput extends GenericOutput {
+  @Field(() => [DefinitionVoteStatus])
+  vote_status_list: DefinitionVoteStatus[];
 }
 
 @ObjectType()

@@ -25,12 +25,12 @@ export class FileService {
     fileType: string,
     fileSize: number,
     token: string,
-  ): Promise<IFileOutput> {
+  ): Promise<IFileOutput | undefined> {
     try {
-      const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
-      const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+      const accessKeyId = process.env.AWS_ACCESS_KEY_ID || '';
+      const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || '';
       const bucketName = process.env.AWS_S3_BUCKET_NAME;
-      const region = process.env.AWS_S3_REGION;
+      const region = process.env.AWS_S3_REGION || '';
       const fileKey = `${nanoid()}-${fileName}`;
 
       const hash = createHash('sha256');
@@ -50,7 +50,7 @@ export class FileService {
 
       readStream.pipe(calcHashTr);
 
-      const creds = AWS_ENVIRONMENTS.includes(process.env.NODE_ENV)
+      const creds = AWS_ENVIRONMENTS.includes(process.env.NODE_ENV || '')
         ? {
             region,
           }
@@ -87,7 +87,7 @@ export class FileService {
           file_name: fileName,
           file_type: fileType,
           file_size: fileSize,
-          file_hash: hashValue,
+          file_hash: hashValue!,
         },
       });
 
@@ -109,7 +109,7 @@ export class FileService {
         file_type: fileType,
         file_size: fileSize,
         file_url: `https://${bucketName}.s3.${region}.amazonaws.com/${fileKey}`, //TODO: it'd be cool to generate differently for local environments
-        file_hash: hashValue,
+        file_hash: hashValue || '',
         token,
       });
     } catch (err) {
@@ -124,17 +124,17 @@ export class FileService {
     fileType: string,
     fileSize: number,
     token: string,
-  ): Promise<IFileOutput> {
+  ): Promise<IFileOutput | undefined> {
     try {
       const oldFileEntity = await this.fileRepository.find({
         where: { file_id: id },
       });
       if (!oldFileEntity) throw new Error(`Not found file with id=${id}`);
 
-      const accessKeyId = process.env.AWS_S3_ACCESS_ID;
-      const secretAccessKey = process.env.AWS_S3_SECRET_KEY;
-      const bucketName = process.env.AWS_S3_BUCKET_NAME;
-      const region = process.env.AWS_S3_REGION;
+      const accessKeyId = process.env.AWS_S3_ACCESS_ID || '';
+      const secretAccessKey = process.env.AWS_S3_SECRET_KEY || '';
+      const bucketName = process.env.AWS_S3_BUCKET_NAME || '';
+      const region = process.env.AWS_S3_REGION || '';
 
       const newFileKey = `${nanoid()}-${fileName}`;
 
@@ -180,7 +180,7 @@ export class FileService {
 
       const deleteParams = {
         Bucket: bucketName,
-        Key: oldFileEntity.file.fileUrl.split('/').at(-1),
+        Key: oldFileEntity.file!.fileUrl.split('/').at(-1),
       };
       const deleteCommand = new DeleteObjectCommand(deleteParams);
       await s3Client.send(deleteCommand);
@@ -190,7 +190,7 @@ export class FileService {
         file_type: fileType,
         file_size: fileSize,
         file_url: `https://${bucketName}.s3.${region}.amazonaws.com/${newFileKey}`,
-        file_hash: hashValue,
+        file_hash: hashValue || '',
         token,
       });
       return await this.fileRepository.save(updatedFileEntity);
@@ -219,7 +219,7 @@ export class FileService {
 
       const deleteParams = {
         Bucket: bucketName,
-        Key: oldFileEntity.file.fileUrl.split('/').at(-1),
+        Key: oldFileEntity.file!.fileUrl.split('/').at(-1),
       };
       const deleteCommand = new DeleteObjectCommand(deleteParams);
       await s3Client.send(deleteCommand);
@@ -242,7 +242,7 @@ export class FileService {
     return await this.fileRepository.list();
   }
 
-  async findOne(id: number): Promise<IFileOutput> {
+  async findOne(id: number): Promise<IFileOutput | null> {
     return await this.fileRepository.find({
       where: { file_id: id },
     });

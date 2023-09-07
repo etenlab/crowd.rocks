@@ -68,11 +68,19 @@ export enum ErrorType {
   WordLikeStringInsertFailed = 'WordLikeStringInsertFailed',
 
   WordNotFound = 'WordNotFound',
+
+  WordVoteNotFound = 'WordVoteNotFound',
+
   WordDefinitionNotFound = 'WordDefinitionNotFound',
   WordDefinitionAlreadyExists = 'WordDefinitionAlreadyExists',
+  WordDefinitionVoteNotFound = 'WordDefinitionVoteNotFound',
+
   PhraseDefinitionNotFound = 'PhraseDefinitionNotFound',
   PhraseDefinitionAlreadyExists = 'PhraseDefinitionAlreadyExists',
+  PhraseDefinitionVoteNotFound = 'PhraseDefinitionVoteNotFound',
+
   PhraseNotFound = 'PhraseNotFound',
+  PhraseVoteNotFound = 'PhraseVoteNotFound',
 
   PhraseToPhraseTranslationNotFound = 'PhraseToPhraseTranslationNotFound',
   WordToWordTranslationNotFound = 'WordToWordTranslationNotFound',

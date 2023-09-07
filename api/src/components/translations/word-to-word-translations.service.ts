@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { PoolClient } from 'pg';
+
+import { pgClientOrPool } from 'src/common/utility';
 
 import { ErrorType, GenericOutput } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
@@ -6,26 +9,31 @@ import { WordDefinitionsService } from 'src/components/definitions/word-definiti
 
 import {
   AddWordAsTranslationForWordOutput,
-  WordToWordTranslationReadOutput,
-  WordToWordTranslationUpsertOutput,
+  WordToWordTranslationOutput,
+  WordToWordTranslationsOutput,
   WordTrVoteStatusOutputRow,
-  WordToWordTranslationWithVote,
+  WordTrVoteStatusOutput,
   WordToWordTranslationWithVoteListOutput,
+  WordToWordTranslationWithVoteListFromIdsOutput,
+  WordTrVoteStatus,
+  WordToWordTranslation,
 } from './types';
+import { WordDefinition } from 'src/components/definitions/types';
 
 import {
   GetWordToWordTranslationObjectByIdRow,
-  getWordToWordTranslationObjById,
+  getWordToWordTranslationObjByIds,
   callWordToWordTranslationUpsertProcedure,
   WordToWordTranslationUpsertProcedureOutputRow,
+  callWordToWordTranslationUpsertsProcedure,
+  WordToWordTranslationUpsertsProcedureOutput,
   GetWordToWordTranslationVoteStatus,
-  getWordToWordTranslationVoteStatus,
+  getWordToWordTranslationVoteStatusFromIds,
   GetWordToWordTranslationListByFromWordDefinitionId,
-  getWordToWordTranslationListByFromWordDefinitionId,
+  getWordToWordTranslationListByFromWordDefinitionIds,
 } from './sql-string';
 import { WordsService } from '../words/words.service';
 import { WordUpsertInput } from '../words/types';
-import { PoolClient } from 'pg';
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 import { LanguageInput } from 'src/components/common/types';
 import {
@@ -44,34 +52,38 @@ export class WordToWordTranslationsService {
     private wordToWordTranslationRepository: WordToWordTranslationRepository,
   ) {}
 
-  async read(id: number): Promise<WordToWordTranslationReadOutput> {
+  async read(
+    id: number,
+    pgClient: PoolClient | null,
+  ): Promise<WordToWordTranslationOutput> {
     try {
-      const res1 =
-        await this.pg.pool.query<GetWordToWordTranslationObjectByIdRow>(
-          ...getWordToWordTranslationObjById(id),
-        );
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetWordToWordTranslationObjectByIdRow>(
+        ...getWordToWordTranslationObjByIds([id]),
+      );
 
-      if (res1.rowCount !== 1) {
+      if (res.rowCount !== 1) {
         console.error(`no word-to-word-translation for id: ${id}`);
+
+        return {
+          error: ErrorType.WordToWordTranslationNotFound,
+          word_to_word_translation: null,
+        };
       } else {
-        const fromWordDefinitionOutput = await this.wordDefinitionService.read(
-          res1.rows[0].from_word_definition_id,
-        );
+        const { error, word_definitions } =
+          await this.wordDefinitionService.reads(
+            [
+              +res.rows[0].from_word_definition_id,
+              +res.rows[0].to_word_definition_id,
+            ],
+            pgClient,
+          );
 
-        const toWordDefinitionOuput = await this.wordDefinitionService.read(
-          res1.rows[0].to_word_definition_id,
-        );
-
-        if (fromWordDefinitionOutput.error !== ErrorType.NoError) {
+        if (error !== ErrorType.NoError && word_definitions.length < 2) {
           return {
-            error: fromWordDefinitionOutput.error,
-            word_to_word_translation: null,
-          };
-        }
-
-        if (toWordDefinitionOuput.error !== ErrorType.NoError) {
-          return {
-            error: toWordDefinitionOuput.error,
+            error: error,
             word_to_word_translation: null,
           };
         }
@@ -80,8 +92,8 @@ export class WordToWordTranslationsService {
           error: ErrorType.NoError,
           word_to_word_translation: {
             word_to_word_translation_id: id + '',
-            from_word_definition: fromWordDefinitionOutput.word_definition,
-            to_word_definition: toWordDefinitionOuput.word_definition,
+            from_word_definition: word_definitions[0]!,
+            to_word_definition: word_definitions[1]!,
           },
         };
       }
@@ -95,20 +107,109 @@ export class WordToWordTranslationsService {
     };
   }
 
+  async reads(
+    ids: number[],
+    pgClient: PoolClient | null,
+  ): Promise<WordToWordTranslationsOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetWordToWordTranslationObjectByIdRow>(
+        ...getWordToWordTranslationObjByIds(ids),
+      );
+
+      const wordToWordTranslationsMap = new Map<
+        string,
+        GetWordToWordTranslationObjectByIdRow
+      >();
+
+      res.rows.map((row) =>
+        wordToWordTranslationsMap.set(row.word_to_word_translation_id, row),
+      );
+
+      const definitionIds = res.rows
+        .map((row) => [
+          +row.from_word_definition_id,
+          +row.to_word_definition_id,
+        ])
+        .reduce((sumOfArr, row) => [...sumOfArr, ...row], []);
+
+      const { error, word_definitions } =
+        await this.wordDefinitionService.reads(definitionIds, pgClient);
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error: error,
+          word_to_word_translations: [],
+        };
+      }
+
+      const wordDefinitionsMap = new Map<string, WordDefinition>();
+
+      word_definitions.forEach((wordDefinition) =>
+        wordDefinition
+          ? wordDefinitionsMap.set(
+              wordDefinition.word_definition_id,
+              wordDefinition,
+            )
+          : null,
+      );
+
+      return {
+        error: ErrorType.NoError,
+        word_to_word_translations: ids.map((id) => {
+          const row = wordToWordTranslationsMap.get(id + '');
+
+          if (!row) {
+            return null;
+          }
+
+          const fromDefinition = wordDefinitionsMap.get(
+            row.from_word_definition_id,
+          );
+          const toDefinition = wordDefinitionsMap.get(
+            row.to_word_definition_id,
+          );
+
+          if (!fromDefinition || !toDefinition) {
+            return null;
+          }
+
+          return {
+            word_to_word_translation_id: row.word_to_word_translation_id,
+            from_word_definition: fromDefinition,
+            to_word_definition: toDefinition,
+          };
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_to_word_translations: [],
+    };
+  }
+
   async upsert(
     fromWordDefinitionId: number,
     toWordDefinitionId: number,
     token: string,
-  ): Promise<WordToWordTranslationUpsertOutput> {
+    pgClient: PoolClient | null,
+  ): Promise<WordToWordTranslationOutput> {
     try {
-      const res =
-        await this.pg.pool.query<WordToWordTranslationUpsertProcedureOutputRow>(
-          ...callWordToWordTranslationUpsertProcedure({
-            fromWordDefinitionId,
-            toWordDefinitionId,
-            token,
-          }),
-        );
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<WordToWordTranslationUpsertProcedureOutputRow>(
+        ...callWordToWordTranslationUpsertProcedure({
+          fromWordDefinitionId,
+          toWordDefinitionId,
+          token,
+        }),
+      );
 
       const error = res.rows[0].p_error_type;
       const word_to_word_translation_id =
@@ -122,7 +223,8 @@ export class WordToWordTranslationsService {
       }
 
       const wordToWordTranslationReadOutput = await this.read(
-        word_to_word_translation_id,
+        +word_to_word_translation_id,
+        pgClient,
       );
 
       return {
@@ -137,6 +239,91 @@ export class WordToWordTranslationsService {
     return {
       error: ErrorType.UnknownError,
       word_to_word_translation: null,
+    };
+  }
+
+  async upserts(
+    input: {
+      from_word_definition_id: number;
+      to_word_definition_id: number;
+    }[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<WordToWordTranslationsOutput> {
+    if (input.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        word_to_word_translations: [],
+      };
+    }
+
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<WordToWordTranslationUpsertsProcedureOutput>(
+        ...callWordToWordTranslationUpsertsProcedure({
+          fromWordDefinitionIds: input.map(
+            (item) => item.from_word_definition_id,
+          ),
+          toWordDefinitionIds: input.map((item) => item.to_word_definition_id),
+          token,
+        }),
+      );
+
+      const error = res.rows[0].p_error_type;
+      const errors = res.rows[0].p_error_types;
+      const word_to_word_translation_ids =
+        res.rows[0].p_word_to_word_translation_ids;
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error: error,
+          word_to_word_translations: [],
+        };
+      }
+
+      const ids: { word_to_word_translation_id: string; error: ErrorType }[] =
+        [];
+
+      for (let i = 0; i < word_to_word_translation_ids.length; i++) {
+        ids.push({
+          word_to_word_translation_id: word_to_word_translation_ids[i],
+          error: errors[i],
+        });
+      }
+
+      const { error: readingError, word_to_word_translations } =
+        await this.reads(
+          ids
+            .filter((id) => id.error === ErrorType.NoError)
+            .map((id) => +id.word_to_word_translation_id),
+          pgClient,
+        );
+
+      const w2wTrsMap = new Map<string, WordToWordTranslation>();
+
+      word_to_word_translations.forEach((w2wTr) =>
+        w2wTr ? w2wTrsMap.set(w2wTr.word_to_word_translation_id, w2wTr) : null,
+      );
+
+      return {
+        error: readingError,
+        word_to_word_translations: ids.map((id) => {
+          if (id.error !== ErrorType.NoError) {
+            return null;
+          }
+
+          return w2wTrsMap.get(id.word_to_word_translation_id) || null;
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_to_word_translations: [],
     };
   }
 
@@ -197,15 +384,23 @@ export class WordToWordTranslationsService {
         dbPoolClient,
       );
 
+      if (wordErr !== ErrorType.NoError || !word_id) {
+        throw new Error('Error with adding translation');
+      }
+
       const { word_definition_id, error: definitionErr } =
         await this.wordDefinitionService.upsertInTrn(
           {
-            word_id,
+            word_id: word_id,
             definition: tDefinitionText,
           },
           token,
           dbPoolClient,
         );
+
+      if (definitionErr !== ErrorType.NoError || !word_definition_id) {
+        throw new Error('Error with adding translation');
+      }
 
       const { error: translationErr } = await this.upsertInTrn(
         Number(originalDefinitionId),
@@ -214,11 +409,7 @@ export class WordToWordTranslationsService {
         dbPoolClient,
       );
 
-      if (
-        wordErr !== ErrorType.NoError ||
-        definitionErr !== ErrorType.NoError ||
-        translationErr !== ErrorType.NoError
-      ) {
+      if (translationErr !== ErrorType.NoError) {
         throw new Error('Error with adding translation');
       }
 
@@ -235,13 +426,19 @@ export class WordToWordTranslationsService {
 
   async getVoteStatus(
     word_to_word_translation_id: number,
+    pgClient: PoolClient | null,
   ): Promise<WordTrVoteStatusOutputRow> {
     try {
-      const res1 = await this.pg.pool.query<GetWordToWordTranslationVoteStatus>(
-        ...getWordToWordTranslationVoteStatus(word_to_word_translation_id),
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetWordToWordTranslationVoteStatus>(
+        ...getWordToWordTranslationVoteStatusFromIds([
+          word_to_word_translation_id,
+        ]),
       );
 
-      if (res1.rowCount !== 1) {
+      if (res.rowCount !== 1) {
         return {
           error: ErrorType.NoError,
           vote_status: {
@@ -255,9 +452,9 @@ export class WordToWordTranslationsService {
           error: ErrorType.NoError,
           vote_status: {
             word_to_word_translation_id:
-              res1.rows[0].word_to_word_translation_id + '',
-            upvotes: res1.rows[0].upvotes,
-            downvotes: res1.rows[0].downvotes,
+              res.rows[0].word_to_word_translation_id,
+            upvotes: res.rows[0].upvotes,
+            downvotes: res.rows[0].downvotes,
           },
         };
       }
@@ -271,16 +468,64 @@ export class WordToWordTranslationsService {
     };
   }
 
+  async getVoteStatusFromIds(
+    ids: number[],
+    pgClient: PoolClient | null,
+  ): Promise<WordTrVoteStatusOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetWordToWordTranslationVoteStatus>(
+        ...getWordToWordTranslationVoteStatusFromIds(ids),
+      );
+
+      const voteStatusMap = new Map<string, WordTrVoteStatus>();
+
+      res.rows.forEach((row) =>
+        voteStatusMap.set(row.word_to_word_translation_id, {
+          word_to_word_translation_id: row.word_to_word_translation_id,
+          upvotes: row.upvotes,
+          downvotes: row.downvotes,
+        }),
+      );
+
+      return {
+        error: ErrorType.NoError,
+        vote_status_list: ids.map((id) => {
+          const voteStatus = voteStatusMap.get(id + '');
+
+          return voteStatus
+            ? voteStatus
+            : {
+                word_to_word_translation_id: id + '',
+                upvotes: 0,
+                downvotes: 0,
+              };
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      vote_status_list: [],
+    };
+  }
+
   async toggleVoteStatus(
     word_to_word_translation_id: string,
     vote: boolean,
     token: string,
+    pgClient: PoolClient | null,
   ): Promise<WordTrVoteStatusOutputRow> {
     const { word_to_word_translation_vote_id, error: error } =
       await this.wordToWordTranslationRepository.toggleVoteStatus({
         word_to_word_translation_id,
         vote,
         token,
+        dbpoolClient: pgClient,
       });
     if (error !== ErrorType.NoError || !word_to_word_translation_vote_id) {
       return {
@@ -291,7 +536,15 @@ export class WordToWordTranslationsService {
 
     const res = await this.wordToWordTranslationRepository.getVotesStatus(
       word_to_word_translation_id,
+      pgClient,
     );
+
+    if (res.error !== ErrorType.NoError || !res.vote_status) {
+      return {
+        error,
+        vote_status: null,
+      };
+    }
 
     return {
       vote_status: {
@@ -307,7 +560,7 @@ export class WordToWordTranslationsService {
   chooseBestTranslation(
     wordOrPhraseTranslated: MapWordTranslations | MapPhraseTranslations,
     langRestrictions?: LanguageInput,
-  ): MapWordWithVotes | MapPhraseWithVotes {
+  ): MapWordWithVotes | MapPhraseWithVotes | undefined {
     const res = wordOrPhraseTranslated?.translations?.reduce(
       (bestTr, currTr) => {
         if (
@@ -346,66 +599,195 @@ export class WordToWordTranslationsService {
       },
       {} as MapWordWithVotes | MapPhraseWithVotes,
     );
+
     return res;
   }
 
-  async getDefinitionsIds(word_to_word_translation_id: string) {
+  async getDefinitionsIds(
+    word_to_word_translation_id: string,
+    pgClient: PoolClient | null,
+  ) {
     return this.wordToWordTranslationRepository.getDefinitionsIds(
       word_to_word_translation_id,
+      pgClient,
     );
   }
 
   async getTranslationsByFromWordDefinitionId(
     from_word_definition_id: number,
     langInfo: LanguageInput,
+    pgClient: PoolClient | null,
   ): Promise<WordToWordTranslationWithVoteListOutput> {
     try {
-      const res =
-        await this.pg.pool.query<GetWordToWordTranslationListByFromWordDefinitionId>(
-          ...getWordToWordTranslationListByFromWordDefinitionId({
-            from_word_definition_id,
-            language_code: langInfo.language_code,
-            dialect_code: langInfo.dialect_code,
-            geo_code: langInfo.geo_code,
-          }),
-        );
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetWordToWordTranslationListByFromWordDefinitionId>(
+        ...getWordToWordTranslationListByFromWordDefinitionIds({
+          from_word_definition_ids: [from_word_definition_id],
+          language_code: langInfo.language_code,
+          dialect_code: langInfo.dialect_code,
+          geo_code: langInfo.geo_code,
+        }),
+      );
 
-      const wordToWordTrWithVoteList: WordToWordTranslationWithVote[] = [];
+      const w2wTrIds = res.rows.map((row) => +row.word_to_word_translation_id);
 
-      for (let i = 0; i < res.rowCount; i++) {
-        const { word_to_word_translation_id } = res.rows[i];
-        const { error, word_to_word_translation } = await this.read(
-          word_to_word_translation_id,
-        );
+      const { error: trError, word_to_word_translations } = await this.reads(
+        w2wTrIds,
+        pgClient,
+      );
 
-        if (error !== ErrorType.NoError) {
-          return {
-            error,
-            word_to_word_tr_with_vote_list: [],
-          };
-        }
+      if (trError !== ErrorType.NoError) {
+        return {
+          error: trError,
+          word_to_word_tr_with_vote_list: [],
+        };
+      }
 
-        const { error: voteError, vote_status } = await this.getVoteStatus(
-          word_to_word_translation_id,
-        );
+      const { error: voteError, vote_status_list } =
+        await this.getVoteStatusFromIds(w2wTrIds, pgClient);
 
-        if (voteError !== ErrorType.NoError) {
-          return {
-            error: voteError,
-            word_to_word_tr_with_vote_list: [],
-          };
-        }
-
-        wordToWordTrWithVoteList.push({
-          ...word_to_word_translation,
-          upvotes: vote_status.upvotes,
-          downvotes: vote_status.downvotes,
-        });
+      if (voteError !== ErrorType.NoError) {
+        return {
+          error: voteError,
+          word_to_word_tr_with_vote_list: [],
+        };
       }
 
       return {
         error: ErrorType.NoError,
-        word_to_word_tr_with_vote_list: wordToWordTrWithVoteList,
+        word_to_word_tr_with_vote_list: w2wTrIds.map((id, index) => {
+          const vote_status = vote_status_list[index];
+          const w2wTr = word_to_word_translations[index];
+
+          if (!vote_status || !w2wTr) {
+            return null;
+          }
+
+          if (
+            id !== +vote_status.word_to_word_translation_id ||
+            id !== +w2wTr.word_to_word_translation_id
+          ) {
+            return null;
+          }
+
+          return {
+            ...w2wTr,
+            upvotes: vote_status.upvotes,
+            downvotes: vote_status.downvotes,
+          };
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_to_word_tr_with_vote_list: [],
+    };
+  }
+
+  async getTranslationsByFromWordDefinitionIds(
+    from_word_definition_ids: number[],
+    langInfo: LanguageInput,
+    pgClient: PoolClient | null,
+  ): Promise<WordToWordTranslationWithVoteListFromIdsOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetWordToWordTranslationListByFromWordDefinitionId>(
+        ...getWordToWordTranslationListByFromWordDefinitionIds({
+          from_word_definition_ids,
+          language_code: langInfo.language_code,
+          dialect_code: langInfo.dialect_code,
+          geo_code: langInfo.geo_code,
+        }),
+      );
+
+      const w2wTrIdsMap = new Map<string, number[]>();
+      const voteStatusMap = new Map<string, WordTrVoteStatus>();
+      const w2wTrMap = new Map<string, WordToWordTranslation>();
+
+      res.rows.forEach((row) => {
+        const w2wTrIds = w2wTrIdsMap.get(row.from_word_definition_id);
+
+        if (w2wTrIds) {
+          w2wTrIds.push(+row.word_to_word_translation_id);
+        } else {
+          w2wTrIdsMap.set(row.from_word_definition_id, [
+            +row.word_to_word_translation_id,
+          ]);
+        }
+      });
+
+      const w2wTrIds: number[] = [];
+
+      for (const ids of w2wTrIdsMap.values()) {
+        w2wTrIds.push(...ids);
+      }
+
+      const { error: trError, word_to_word_translations } = await this.reads(
+        w2wTrIds,
+        pgClient,
+      );
+
+      if (trError !== ErrorType.NoError) {
+        return {
+          error: trError,
+          word_to_word_tr_with_vote_list: [],
+        };
+      }
+
+      const { error: voteError, vote_status_list } =
+        await this.getVoteStatusFromIds(w2wTrIds, pgClient);
+
+      if (voteError !== ErrorType.NoError) {
+        return {
+          error: voteError,
+          word_to_word_tr_with_vote_list: [],
+        };
+      }
+
+      vote_status_list.forEach((voteStatus) =>
+        voteStatus
+          ? voteStatusMap.set(
+              voteStatus.word_to_word_translation_id,
+              voteStatus,
+            )
+          : null,
+      );
+
+      word_to_word_translations.forEach((w2wTr) =>
+        w2wTr ? w2wTrMap.set(w2wTr.word_to_word_translation_id, w2wTr) : null,
+      );
+
+      return {
+        error: ErrorType.NoError,
+        word_to_word_tr_with_vote_list: from_word_definition_ids
+          .map((from_word_definition_id) => {
+            const ids = w2wTrIdsMap.get(from_word_definition_id + '');
+
+            return ids ? ids : [];
+          })
+          .map((ids) => {
+            return ids.map((id) => {
+              const vote_status = voteStatusMap.get(id + '');
+              const w2wTr = w2wTrMap.get(id + '');
+
+              if (!vote_status || !w2wTr) {
+                return null;
+              }
+
+              return {
+                ...w2wTr,
+                upvotes: vote_status.upvotes,
+                downvotes: vote_status.downvotes,
+              };
+            });
+          }),
       };
     } catch (e) {
       console.error(e);

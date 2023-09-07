@@ -1,3 +1,4 @@
+import { PoolClient, Pool } from 'pg';
 import { TLangCodes } from './types';
 const N_PLACEHOLDER = '-n-Qh_Q1A-';
 
@@ -77,6 +78,68 @@ export const putLangCodesToFileName = (
   fname += '.' + suffixes.join('.');
   return fname;
 };
+
+export function pgClientOrPool({
+  client,
+  pool,
+}: {
+  client: PoolClient | null;
+  pool: Pool;
+}): PoolClient | Pool {
+  if (client) {
+    return client;
+  } else {
+    return pool;
+  }
+}
+
+export async function getPgClient({
+  client,
+  pool,
+}: {
+  client: PoolClient | null;
+  pool: Pool;
+}): Promise<{
+  client: PoolClient;
+  rollbackTransaction: () => void;
+  beginTransaction: () => void;
+  commitTransaction: () => void;
+}> {
+  if (client) {
+    return {
+      client,
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      rollbackTransaction: () => {},
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      beginTransaction: () => {},
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      commitTransaction: () => {},
+    };
+  }
+
+  const pgClient = await pool.connect();
+
+  const rollbackTransaction = async () => {
+    await pgClient.query('ROLLBACK');
+    pgClient.release();
+  };
+
+  const beginTransaction = async () => {
+    await pgClient.query('BEGIN');
+  };
+
+  const commitTransaction = async () => {
+    await pgClient.query('COMMIT');
+    pgClient.release();
+  };
+
+  return {
+    client: pgClient,
+    rollbackTransaction,
+    beginTransaction,
+    commitTransaction,
+  };
+}
 
 export function substituteN<T extends string | Array<string>>(inStr: T): T {
   if (Array.isArray(inStr)) {

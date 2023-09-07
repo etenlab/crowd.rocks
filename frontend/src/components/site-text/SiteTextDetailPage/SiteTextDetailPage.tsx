@@ -191,6 +191,10 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
     }
 
     for (const translationWithVote of translationWithVoteList) {
+      if (!translationWithVote) {
+        continue;
+      }
+
       switch (translationWithVote.__typename) {
         case 'SiteTextWordToWordTranslationWithVote': {
           tempTranslations.push({

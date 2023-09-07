@@ -27,7 +27,7 @@ interface ISaveMapParams {
   language_code: string;
   dialect_code?: string;
   geo_code?: string;
-  dbPoolClient?: PoolClient;
+  dbPoolClient: PoolClient | null;
 }
 export interface ISaveTranslatedMapParams {
   original_map_id: string;
@@ -36,7 +36,7 @@ export interface ISaveTranslatedMapParams {
   t_language_code: string;
   t_dialect_code?: string;
   t_geo_code?: string;
-  dbPoolClient?: PoolClient;
+  dbPoolClient: PoolClient | null;
 }
 
 interface ISaveMapRes {
@@ -174,7 +174,7 @@ export class MapsRepository {
   }
 
   async getOrigMaps(lang?: LanguageInput): Promise<GetOrigMapsListOutput> {
-    const params = [];
+    const params: string[] = [];
     let languageClause = '';
     if (lang?.language_code) {
       params.push(lang?.language_code);
@@ -239,7 +239,7 @@ export class MapsRepository {
   async getTranslatedMaps(
     lang?: LanguageInput,
   ): Promise<GetOrigMapsListOutput> {
-    const params = [];
+    const params: string[] = [];
     let languageClause = '';
     if (lang?.language_code) {
       params.push(lang?.language_code);
@@ -521,7 +521,7 @@ export class MapsRepository {
       t_geo_code,
     }: ILangsRestrictions,
   ): Promise<GetOrigMapWordsOutput> {
-    const params = [];
+    const params: string[] = [];
     let tLanguageRestrictionClause = '';
     if (t_language_code) {
       params.push(t_language_code);
@@ -669,7 +669,7 @@ export class MapsRepository {
 
       if (existingWordIdx >= 0) {
         currTranslation.language_code &&
-          words[existingWordIdx].translations.push(currTranslation);
+          words[existingWordIdx]!.translations!.push(currTranslation);
       } else {
         words.push({
           word_id: r.word_id,
@@ -704,7 +704,7 @@ export class MapsRepository {
 
       if (existingWordIdx >= 0) {
         currTranslation.language_code &&
-          words[existingWordIdx].translations.push(currTranslation);
+          words[existingWordIdx]!.translations!.push(currTranslation);
       } else {
         words.push({
           word_id: r.word_id,
@@ -735,7 +735,7 @@ export class MapsRepository {
       t_geo_code,
     }: ILangsRestrictions,
   ): Promise<GetOrigMapPhrasesOutput> {
-    const params = [];
+    const params: string[] = [];
     let tLanguageRestrictionClause = '';
     if (t_language_code) {
       params.push(t_language_code);
@@ -877,7 +877,7 @@ export class MapsRepository {
       );
       if (existingPhraseIdx >= 0) {
         currTranslation.language_code &&
-          phrases[existingPhraseIdx].translations.push(currTranslation);
+          phrases[existingPhraseIdx]!.translations!.push(currTranslation);
       } else {
         phrases.push({
           phrase_id: r.phrase_id,
@@ -912,7 +912,7 @@ export class MapsRepository {
       );
       if (existingPhraseIdx >= 0) {
         currTranslation.language_code &&
-          phrases[existingPhraseIdx].translations.push(currTranslation);
+          phrases[existingPhraseIdx]!.translations!.push(currTranslation);
       } else {
         phrases.push({
           phrase_id: r.phrase_id,
@@ -1060,7 +1060,7 @@ export class MapsRepository {
     if (resQ.rows.length > 1) {
       Logger.error(
         `Something wrong, deleted several translated maps instead of single one` +
-        JSON.stringify(resQ.rows),
+          JSON.stringify(resQ.rows),
       );
       throw new Error(ErrorType.MapDeletionError);
     }
@@ -1084,7 +1084,7 @@ export class MapsRepository {
     if (resQ.rows.length > 1) {
       Logger.error(
         `Something wrong, deleted several original maps instead of single one:` +
-        JSON.stringify(resQ.rows),
+          JSON.stringify(resQ.rows),
       );
       throw new Error(ErrorType.MapDeletionError);
     }

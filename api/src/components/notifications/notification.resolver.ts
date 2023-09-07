@@ -27,7 +27,7 @@ export class NotificationResolver {
   @Query(() => NotificationListOutput)
   async notifications(@Context() req: any): Promise<NotificationListOutput> {
     console.log('notification list resolver');
-    const bearer = getBearer(req);
+    const bearer = getBearer(req) || '';
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       bearer,
     );
@@ -47,7 +47,7 @@ export class NotificationResolver {
   ): Promise<AddNotificationOutput> {
     console.log('add notification resolver, text: ', input.text);
 
-    return this.notificationService.insert(input, getBearer(req));
+    return this.notificationService.insert(input, getBearer(req) || '');
   }
 
   @Mutation(() => MarkNotificationReadOutput)
@@ -60,7 +60,7 @@ export class NotificationResolver {
       input.notification_id,
     );
 
-    return this.notificationService.markAsRead(input, getBearer(req));
+    return this.notificationService.markAsRead(input, getBearer(req) || '');
   }
 
   @Mutation(() => NotificationDeleteOutput)
@@ -72,6 +72,6 @@ export class NotificationResolver {
       'notification delete resolver, notification_id: ',
       input.notification_id,
     );
-    return this.notificationService.delete(input, getBearer(req));
+    return this.notificationService.delete(input, getBearer(req) || '');
   }
 }

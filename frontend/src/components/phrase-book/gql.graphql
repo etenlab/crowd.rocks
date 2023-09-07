@@ -12,6 +12,7 @@ fragment PhraseDefinitionFragment on PhraseDefinition {
   phrase {
     ...PhraseFragment
   }
+  created_at
 }
 
 fragment PhraseWithDefinitionsFragment on PhraseWithDefinitions {

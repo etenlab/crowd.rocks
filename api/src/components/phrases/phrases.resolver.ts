@@ -17,8 +17,7 @@ import { PhraseVotesService } from './phrase-votes.service';
 import {
   Phrase,
   PhraseReadInput,
-  PhraseReadOutput,
-  PhraseUpsertOutput,
+  PhraseOutput,
   PhraseUpsertInput,
   PhraseVoteOutput,
   PhraseVoteUpsertInput,
@@ -37,23 +36,23 @@ export class PhrasesResolver {
     private phraseVoteService: PhraseVotesService,
   ) {}
 
-  @Query(() => PhraseReadOutput)
+  @Query(() => PhraseOutput)
   async phraseRead(
     @Args('input') input: PhraseReadInput,
-  ): Promise<PhraseReadOutput> {
+  ): Promise<PhraseOutput> {
     console.log('phrase read resolver, phrase_id:', input.phrase_id);
 
-    return this.phraseService.read(input);
+    return this.phraseService.read(input, null);
   }
 
-  @Mutation(() => PhraseUpsertOutput)
+  @Mutation(() => PhraseOutput)
   async phraseUpsert(
     @Args('input') input: PhraseUpsertInput,
     @Context() req: any,
-  ): Promise<PhraseUpsertOutput> {
+  ): Promise<PhraseOutput> {
     console.log('phrase upsert resolver, string: ', input.phraselike_string);
 
-    return this.phraseService.upsert(input, getBearer(req));
+    return this.phraseService.upsert(input, getBearer(req) || '', null);
   }
 
   @Query(() => PhraseVoteOutput)
@@ -62,7 +61,7 @@ export class PhrasesResolver {
   ): Promise<PhraseVoteOutput> {
     console.log('phrase vote read resolver, words_vote_id:', id);
 
-    return this.phraseVoteService.read(+id);
+    return this.phraseVoteService.read(+id, null);
   }
 
   @Mutation(() => PhraseVoteOutput)
@@ -75,7 +74,7 @@ export class PhrasesResolver {
       JSON.stringify(input, null, 2),
     );
 
-    return this.phraseVoteService.upsert(input, getBearer(req));
+    return this.phraseVoteService.upsert(input, getBearer(req) || '', null);
   }
 
   @Query(() => PhraseVoteStatusOutputRow)
@@ -84,7 +83,7 @@ export class PhrasesResolver {
   ): Promise<PhraseVoteStatusOutputRow> {
     console.log('get phrase vote status resolver, word_id:', phrase_id);
 
-    return this.phraseVoteService.getVoteStatus(+phrase_id);
+    return this.phraseVoteService.getVoteStatus(+phrase_id, null);
   }
 
   @Mutation(() => PhraseVoteStatusOutputRow)
@@ -100,7 +99,8 @@ export class PhrasesResolver {
     return this.phraseVoteService.toggleVoteStatus(
       +phrase_id,
       vote,
-      getBearer(req),
+      getBearer(req) || '',
+      null,
     );
   }
 
@@ -115,7 +115,7 @@ export class PhrasesResolver {
       JSON.stringify(input, null, 2),
     );
 
-    return this.phraseService.getPhrasesByLanguage(input, first, after);
+    return this.phraseService.getPhrasesByLanguage(input, first, after, null);
   }
 
   @Query(() => PhraseWithVoteOutput)
@@ -124,6 +124,6 @@ export class PhrasesResolver {
   ): Promise<PhraseWithVoteOutput> {
     console.log('getPhraseWithVoteById resolver', phrase_id);
 
-    return this.phraseService.getPhraseWithVoteById(+phrase_id);
+    return this.phraseService.getPhraseWithVoteById(+phrase_id, null);
   }
 }

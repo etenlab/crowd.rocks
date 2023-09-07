@@ -33,5 +33,5 @@ export const CustomChatIcon = styled(IonIcon)(() => ({
 export const Layout = styled.div`
   display: flex;
   justify-content: space-between;
-  alignitems: center;
+  align-items: center;
 `;

@@ -255,6 +255,10 @@ export function TranslationWordOrPhraseList({
                   | undefined = undefined;
 
                 translationWithVoteList.forEach((translationWithVote) => {
+                  if (!translationWithVote) {
+                    return;
+                  }
+
                   switch (translationWithVote.__typename) {
                     case 'WordToWordTranslationWithVote': {
                       if (
@@ -289,8 +293,6 @@ export function TranslationWordOrPhraseList({
                       break;
                     }
                   }
-
-                  return false;
                 });
 
                 return {
@@ -334,6 +336,10 @@ export function TranslationWordOrPhraseList({
                   | undefined = undefined;
 
                 translationWithVoteList.forEach((translationWithVote) => {
+                  if (!translationWithVote) {
+                    return;
+                  }
+
                   switch (translationWithVote.__typename) {
                     case 'WordToPhraseTranslationWithVote': {
                       if (
@@ -370,8 +376,6 @@ export function TranslationWordOrPhraseList({
                       break;
                     }
                   }
-
-                  return false;
                 });
 
                 return {

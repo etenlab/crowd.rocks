@@ -15,6 +15,8 @@ export class AuthenticationService {
     } catch (e) {
       console.error(e);
     }
+
+    return null;
   }
 
   async get_user_id_from_bearer(token: string): Promise<number | null> {

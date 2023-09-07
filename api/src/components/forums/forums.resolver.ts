@@ -42,7 +42,7 @@ export class ForumsResolver {
   ): Promise<ForumUpsertOutput> {
     console.log('forum upsert resolver, name: ', input.name);
 
-    return this.forumsService.upsert(input, getBearer(req));
+    return this.forumsService.upsert(input, getBearer(req) || '');
   }
 
   @Mutation(() => ForumDeleteOutput)
@@ -51,6 +51,6 @@ export class ForumsResolver {
     @Context() req: any,
   ): Promise<ForumDeleteOutput> {
     console.log('forum delete resolver, forum_id: ', input.forum_id);
-    return this.forumsService.delete(input, getBearer(req));
+    return this.forumsService.delete(input, getBearer(req) || '');
   }
 }

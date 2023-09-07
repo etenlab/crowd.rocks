@@ -162,13 +162,11 @@ export const getLangsRegistry = async (
       { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
     ];
 
-    const strEnabledTags = enabledTags ? enabledTags.join(',') : null;
+    // const strEnabledTags = enabledTags ? enabledTags.join(',') : null;
+    // console.log(allTags[0].format());
 
     for (const currTag of allTags) {
-      if (
-        strEnabledTags !== null &&
-        !strEnabledTags.includes(currTag.format())
-      ) {
+      if (enabledTags && !enabledTags.includes(currTag.format())) {
         continue;
       }
 

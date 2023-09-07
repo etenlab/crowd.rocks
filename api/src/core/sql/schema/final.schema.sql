@@ -15,6 +15,8 @@ begin
 END;
 $$ language 'plpgsql' STRICT;
 
+create extension pg_trgm;
+
 -- VERSION CONTROL ---------------------------------------------------
 
 -- reference table
@@ -236,6 +238,7 @@ create table wordlike_strings (
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__wordlike_string_gin__wordlike_strings on wordlike_strings using gin(wordlike_string gin_trgm_ops);
 
 create table words(
   word_id bigserial primary key,
@@ -247,6 +250,8 @@ create table words(
   created_by bigint not null references users(user_id),
   unique nulls not distinct (wordlike_string_id, language_code, dialect_code, geo_code)
 );
+create index idx__wordlike_string_id__words on words (wordlike_string_id);
+create index idx__language_codes__words on words (language_code, dialect_code, geo_code);
 
 create table word_definitions(
   word_definition_id bigserial primary key,
@@ -256,6 +261,9 @@ create table word_definitions(
   created_by bigint not null references users(user_id),
   unique (word_id, definition)
 );
+create index idx__word_id__word_definitions on word_definitions (word_id);
+create index idx__definition__word_definitions on word_definitions (definition);
+create index idx__definition_gin__word_definitions on word_definitions using gin(definition gin_trgm_ops);
 
 -- tags
 create table word_definition_tags (
@@ -283,6 +291,7 @@ create table word_definitions_votes(
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, word_definition_id)
 );
+create index idx__word_definition_id__word_definitions_votes on word_definitions_votes (word_definition_id);
 
 create table words_votes(
   words_vote_id bigserial primary key,
@@ -292,6 +301,7 @@ create table words_votes(
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, word_id)
 );
+create index idx__word_id__words_votes on words_votes (word_id);
 
 create table word_definition_tags_votes(
   word_definition_tags_vote_id bigserial primary key,
@@ -321,6 +331,8 @@ create table phrases(
   created_by bigint not null references users(user_id),
   unique (phraselike_string, words)
 );
+create index idx__words__phrases on phrases using gin (words);
+create index idx__phraselike_string__phrases on phrases using gin (phraselike_string gin_trgm_ops);
 
 create table phrase_definitions(
   phrase_definition_id bigserial primary key,
@@ -330,6 +342,9 @@ create table phrase_definitions(
   created_by bigint not null references users(user_id),
   unique (phrase_id, definition)
 );
+create index idx__phrase_id__phrase_definitions on phrase_definitions (phrase_id);
+create index idx__definition__phrase_definitions on phrase_definitions using gin (definition gin_trgm_ops);
+
 
 -- tags
 create table phrase_definition_tags (
@@ -357,6 +372,7 @@ create table phrase_definitions_votes(
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, phrase_definition_id)
 );
+create index idx__phrase_definition_id__phrase_definitions_votes on phrase_definitions_votes (phrase_definition_id);
 
 create table phrase_votes(
   phrase_vote_id bigserial primary key,
@@ -366,6 +382,7 @@ create table phrase_votes(
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, phrase_id)
 );
+create index idx__phrase_id__phrase_votes on phrase_votes (phrase_id);
 
 create table phrase_definition_tags_votes(
   phrase_definition_tags_vote_id bigserial primary key,
@@ -395,6 +412,8 @@ create table word_to_word_translations(
   created_by bigint not null references users(user_id),
   unique (from_word_definition_id, to_word_definition_id)
 );
+create index idx__from_word_definition_id__word_to_word_translations on word_to_word_translations (from_word_definition_id);
+create index idx__to_word_definition_id__word_to_word_translations on word_to_word_translations (to_word_definition_id);
 
 create table word_to_phrase_translations(
   word_to_phrase_translation_id bigserial primary key,
@@ -404,6 +423,8 @@ create table word_to_phrase_translations(
   created_by bigint not null references users(user_id),
   unique (from_word_definition_id, to_phrase_definition_id)
 );
+create index idx__from_word_definition_id__word_to_phrase_translations on word_to_phrase_translations (from_word_definition_id);
+create index idx__to_phrase_definition_id__word_to_phrase_translations on word_to_phrase_translations (to_phrase_definition_id);
 
 create table phrase_to_word_translations(
   phrase_to_word_translation_id bigserial primary key,
@@ -413,6 +434,8 @@ create table phrase_to_word_translations(
   created_by bigint not null references users(user_id),
   unique (from_phrase_definition_id, to_word_definition_id)
 );
+create index idx__from_phrase_definition_id__phrase_to_word_translations on phrase_to_word_translations (from_phrase_definition_id);
+create index idx__to_word_definition_id__phrase_to_word_translations on phrase_to_word_translations (to_word_definition_id);
 
 create table phrase_to_phrase_translations(
   phrase_to_phrase_translation_id bigserial primary key,
@@ -422,6 +445,8 @@ create table phrase_to_phrase_translations(
   created_by bigint not null references users(user_id),
   unique (from_phrase_definition_id, to_phrase_definition_id)
 );
+create index idx__from_phrase_definition_id__phrase_to_phrase_translations on phrase_to_phrase_translations (from_phrase_definition_id);
+create index idx__to_phrase_definition_id__phrase_to_phrase_translations on phrase_to_phrase_translations (to_phrase_definition_id);
 
 -- votes
 create table word_to_word_translations_votes(
@@ -432,6 +457,7 @@ create table word_to_word_translations_votes(
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, word_to_word_translation_id)
 );
+create index idx__word_to_word_translation_id__word_to_word_translations_votes on word_to_word_translations_votes (word_to_word_translation_id);
 
 create table word_to_phrase_translations_votes(
   word_to_phrase_translations_vote_id bigserial primary key,
@@ -441,6 +467,7 @@ create table word_to_phrase_translations_votes(
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, word_to_phrase_translation_id)
 );
+create index idx__word_to_phrase_translation_id__phrase_to_word_translations_votes on word_to_phrase_translations_votes (word_to_phrase_translation_id);
 
 create table phrase_to_word_translations_votes(
   phrase_to_word_translations_vote_id bigserial primary key,
@@ -450,6 +477,7 @@ create table phrase_to_word_translations_votes(
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, phrase_to_word_translation_id)
 );
+create index idx__phrase_to_word_translation_id__phrase_to_word_translations_votes on phrase_to_word_translations_votes (phrase_to_word_translation_id);
 
 create table phrase_to_phrase_translations_votes(
   phrase_to_phrase_translations_vote_id bigserial primary key,
@@ -459,6 +487,7 @@ create table phrase_to_phrase_translations_votes(
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, phrase_to_phrase_translation_id)
 );
+create index idx__phrase_to_phrase_translation_id__phrase_to_phrase_translations_votes on phrase_to_phrase_translations_votes (phrase_to_phrase_translation_id);
 
 -- FILES -------------------------------------------------------------
 
@@ -472,6 +501,10 @@ create table files (
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__file_name__files on files (file_name);
+create index idx__file_url__files on files (file_url);
+create index idx__file_hash__files on files (file_hash);
+
 
 -- DOCUMENTS -------------------------------------------------------------
 
@@ -482,8 +515,11 @@ create table documents(
   dialect_code varchar(32),
   geo_code varchar(32),
   created_at timestamp not null default CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (file_id, language_code, dialect_code, geo_code)
 );
+create index idx__file_id__documents on documents (file_id);
+create index idx__language_codes__documents on documents (language_code, dialect_code, geo_code);
 
 create table document_word_entries(
   document_word_entry_id bigserial primary key,
@@ -592,6 +628,18 @@ create table site_text_translation_votes(
   last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   unique (user_id, translation_id, from_type_is_word, to_type_is_word)
 );
+create index idx__translation_id__site_text_translation_votes on site_text_translation_votes (translation_id);
+
+create table site_text_translation_counts(
+  site_text_translation_count_id bigserial primary key,
+  site_text_id bigint not null,
+  is_word_definition bool not null,
+  language_code varchar(32) not null,
+  dialect_code varchar(32),
+  geo_code varchar(32),
+  count bigint not null default 0,
+  unique (site_text_id, is_word_definition, language_code, dialect_code, geo_code)
+);
 
 -- MAPS -------------------------------------------------------------
 
@@ -606,6 +654,9 @@ create table original_maps(
   created_by bigint not null references users(user_id),
   content text not null
 );
+create index idx__map_file_name__original_maps on original_maps (map_file_name);
+create index idx__language_codes__original_maps on original_maps (language_code, dialect_code, geo_code);
+create index idx__preview_file_id__original_maps on original_maps (preview_file_id);
 
 create table original_map_words(
   original_map_word_id bigserial primary key,
@@ -614,6 +665,8 @@ create table original_map_words(
   updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   unique (word_id, original_map_id)
 );
+create index idx__original_map_id__original_map_words on original_map_words (original_map_id);
+create index idx__word_id__original_map_words on original_map_words (word_id);
 
 create table original_map_phrases(
   original_map_phrase_id bigserial primary key,
@@ -622,6 +675,8 @@ create table original_map_phrases(
   updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   unique (phrase_id, original_map_id)
 );
+create index idx__original_map_id__original_map_phrases on original_map_phrases (original_map_id);
+create index idx__phrase_id__original_map_phrases on original_map_phrases (phrase_id);
 
 create table translated_maps(
   translated_map_id bigserial primary key,
@@ -635,3 +690,6 @@ create table translated_maps(
   content text not null,
   unique nulls not distinct (original_map_id, language_code, dialect_code, geo_code)
 );
+create index idx__original_map_id__translated_maps on translated_maps (original_map_id);
+create index idx__preview_file_id__translated_maps on translated_maps (preview_file_id);
+create index idx__language_codes__translated_maps on translated_maps (language_code, dialect_code, geo_code);

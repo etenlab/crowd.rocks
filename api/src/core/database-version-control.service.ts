@@ -185,10 +185,23 @@ export class DatabaseVersionControlService {
     // schema
     await this.runSqlFile('./src/core/sql/schema/v2.schema.sql');
 
-    // translation
+    // word
+    await this.runSqlFile('./src/core/sql/words/batch_word_upsert.sql');
+    await this.runSqlFile('./src/core/sql/words/batch_phrase_upsert.sql');
     await this.runSqlFile(
-      './src/core/sql/translation/word_to_phrase_translation_votes_count.sql',
+      './src/core/sql/words/batch_word_definition_upsert.sql',
     );
+    await this.runSqlFile(
+      './src/core/sql/words/batch_phrase_definition_upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/words/batch_word_definition_update.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/words/batch_phrase_definition_update.sql',
+    );
+
+    // translation
     await this.runSqlFile(
       './src/core/sql/translation/word_to_phrase_translation_votes_count.sql',
     );
@@ -197,6 +210,35 @@ export class DatabaseVersionControlService {
     );
     await this.runSqlFile(
       './src/core/sql/translation/phrase_to_phrase_translation_votes_count.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/batch_word_to_word_translation_upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/batch_word_to_phrase_translation_upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/batch_phrase_to_word_translation_upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/batch_phrase_to_phrase_translation_upsert.sql',
+    );
+
+    // data
+    await this.runSqlFile(
+      './src/core/sql/data/batch-site-text-word-definition-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/data/batch-site-text-phrase-definition-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/data/site-text-definition-translation-counts-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/data/batch-site-text-definition-translation-counts-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/data/site-text-definition-translation-counts-trigger.sql',
     );
 
     // post

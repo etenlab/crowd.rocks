@@ -46,7 +46,7 @@ export class ThreadResolver {
     console.log('thread upsert resolver, name: ', input.name);
     console.log('thread_id', input.thread_id);
 
-    return this.threadService.upsert(input, getBearer(req));
+    return this.threadService.upsert(input, getBearer(req) || '');
   }
 
   @Mutation(() => ThreadDeleteOutput)
@@ -55,6 +55,6 @@ export class ThreadResolver {
     @Context() req: any,
   ): Promise<ThreadDeleteOutput> {
     console.log('thread delete resolver, thread_id: ', input.thread_id);
-    return this.threadService.delete(input, getBearer(req));
+    return this.threadService.delete(input, getBearer(req) || '');
   }
 }

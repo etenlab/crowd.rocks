@@ -12,6 +12,7 @@ fragment WordDefinitionFragment on WordDefinition {
     ...WordFragment
   }
   definition
+  created_at
 }
 
 fragment WordWithDefinitionsFragment on WordWithDefinitions {

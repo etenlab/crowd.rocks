@@ -41,8 +41,8 @@ export class MapsResolver {
     previewFileId: string | undefined | null,
     @Context() req: any,
   ): Promise<MapUploadOutput> {
-    const bearer = getBearer(req);
-    let fileBody: string;
+    const bearer = getBearer(req) || '';
+    let fileBody = '';
     for await (const chunk of createReadStream()) {
       if (!fileBody) {
         fileBody = chunk;
@@ -65,7 +65,7 @@ export class MapsResolver {
       const map = await this.mapService.saveAndParseNewMap({
         fileBody,
         mapFileName: map_file_name,
-        previewFileId,
+        previewFileId: previewFileId!,
         token: bearer,
       });
       await this.mapService.translateOrigMapsByIds(
@@ -89,7 +89,7 @@ export class MapsResolver {
     @Args('input') { mapId, is_original }: MapDeleteInput,
     @Context() req: any,
   ): Promise<MapDeleteOutput> {
-    const userToken = getBearer(req);
+    const userToken = getBearer(req) || '';
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       userToken,
     );
@@ -119,7 +119,7 @@ export class MapsResolver {
   async mapsTranslationsReset(@Context() req: any): Promise<GenericOutput> {
     const userToken = getBearer(req);
     const user_id = await this.authenticationService.get_user_id_from_bearer(
-      userToken,
+      userToken || '',
     );
     const admin_id = await this.authenticationService.get_admin_id();
     if (admin_id !== user_id) {
@@ -145,7 +145,7 @@ export class MapsResolver {
     @Args({ name: 'forLangTag', type: () => String, nullable: true })
     forLangTag?: string,
   ): Promise<GenericOutput> {
-    const userToken = getBearer(req);
+    const userToken = getBearer(req) || '';
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       userToken,
     );
@@ -156,7 +156,7 @@ export class MapsResolver {
       };
     }
     try {
-      await this.mapService.reTranslate(userToken, forLangTag);
+      await this.mapService.reTranslate(userToken, forLangTag!);
       return {
         error: ErrorType.NoError,
       };
@@ -207,7 +207,7 @@ export class MapsResolver {
   async getOrigMapWords(
     @Args('input', { nullable: true }) input?: GetOrigMapWordsInput,
   ): Promise<GetOrigMapWordsOutput> {
-    const words = await this.mapService.getOrigMapWords(input);
+    const words = await this.mapService.getOrigMapWords(input!);
 
     return words;
   }
@@ -217,7 +217,7 @@ export class MapsResolver {
     @Args('input', { nullable: true }) input?: GetOrigMapPhrasesInput,
   ): Promise<GetOrigMapPhrasesOutput> {
     const origMapPhraseTranslations = await this.mapService.getOrigMapPhrases(
-      input,
+      input!,
     );
     return origMapPhraseTranslations;
   }

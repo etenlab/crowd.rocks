@@ -159,6 +159,7 @@ export function GoogleTranslationPage() {
     batchTranslatingRef.current = true;
 
     const { langs } = await getLangsRegistry(enabledTags);
+
     let completed = 0;
     const sumOfResult: TranslateAllWordsAndPhrasesByGoogleResult = {
       __typename: 'TranslateAllWordsAndPhrasesByGoogleResult',

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { hash } from 'argon2';
 import { ErrorType } from 'src/common/types';
-import { createToken, getBearer } from 'src/common/utility';
+import { createToken } from 'src/common/utility';
 import { ConfigService } from 'src/core/config.service';
 import { PostgresService } from 'src/core/postgres.service';
 import { SesService } from 'src/core/ses.service';
@@ -10,7 +10,6 @@ import { User } from '../user/types';
 import {
   LoginOutput,
   PasswordResetFormInput,
-  PasswordResetFormOutput,
   ResetEmailRequestInput,
   ResetEmailRequestOutput,
 } from './types';
@@ -151,7 +150,7 @@ export class PasswordResetResolver {
 
         if (error == ErrorType.NoError) {
           const avatar = res1.rows[0].p_avatar;
-          const email = res1.rows[0].p_email;
+          res1.rows[0].p_email;
           const user_id = res1.rows[0].p_user_id;
           const url = res1.rows[0].p_url;
 

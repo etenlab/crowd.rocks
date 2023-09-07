@@ -10,9 +10,10 @@ import { useGlobal } from './hooks/useGlobal';
 import { subTags2LangInfo } from './common/langUtils';
 
 import {
-  useGetAllRecommendedSiteTextTranslationListLazyQuery,
+  useGetAllRecommendedSiteTextTranslationListByLanguageLazyQuery,
   useGetAllSiteTextDefinitionsLazyQuery,
-  SiteTextLanguage,
+  useGetAllSiteTextLanguageListWithRateLazyQuery,
+  SiteTextLanguageWithTranslationInfo,
   ErrorType,
 } from './generated/graphql';
 
@@ -21,7 +22,9 @@ export interface ContextType {
     global: GlobalStateType;
   };
   actions: {
-    setSiteTextLanguageList: (languages: SiteTextLanguage[]) => void;
+    setSiteTextLanguageList: (
+      languages: SiteTextLanguageWithTranslationInfo[],
+    ) => void;
     setOriginalSiteTextMap: (originalMap: Record<string, string>) => void;
     setTranslationSiteTextMap: (
       langInfo: LanguageInfo,
@@ -47,13 +50,17 @@ export function AppContextProvider({ children }: AppProviderProps) {
   const [toastPresent] = useIonToast();
 
   const [
-    getAllRecommendedSiteTextTranslationList,
+    getAllRecommendedSiteTextTranslationListByLanguage,
     { data, loading, error, called },
-  ] = useGetAllRecommendedSiteTextTranslationListLazyQuery();
+  ] = useGetAllRecommendedSiteTextTranslationListByLanguageLazyQuery();
   const [
     getAllSiteTextDefinitions,
     { data: stData, error: stError, loading: stLoading, called: stCalled },
   ] = useGetAllSiteTextDefinitionsLazyQuery();
+  const [
+    getAllSiteTextLanguageListWithRate,
+    { data: langData, error: langError, loading: langLoading },
+  ] = useGetAllSiteTextLanguageListWithRateLazyQuery();
 
   const {
     setSiteTextLanguageList,
@@ -68,15 +75,19 @@ export function AppContextProvider({ children }: AppProviderProps) {
   });
 
   useEffect(() => {
-    getAllRecommendedSiteTextTranslationList({
-      variables: {},
+    getAllRecommendedSiteTextTranslationListByLanguage({
+      variables: {
+        language_code: state.global.langauges.appLanguage.lang.tag,
+        dialect_code: state.global.langauges.appLanguage.dialect?.tag || null,
+        geo_code: state.global.langauges.appLanguage.region?.tag || null,
+      },
     });
-    getAllSiteTextDefinitions({
-      variables: {},
-    });
+    getAllSiteTextDefinitions();
+    getAllSiteTextLanguageListWithRate();
   }, [
-    getAllRecommendedSiteTextTranslationList,
+    getAllRecommendedSiteTextTranslationListByLanguage,
     getAllSiteTextDefinitions,
+    getAllSiteTextLanguageListWithRate,
     state.global.langauges.appLanguage,
   ]);
 
@@ -92,12 +103,15 @@ export function AppContextProvider({ children }: AppProviderProps) {
 
     if (data) {
       if (
-        data.getAllRecommendedSiteTextTranslationList.error !==
+        data.getAllRecommendedSiteTextTranslationListByLanguage.error !==
         ErrorType.NoError
       ) {
-        console.log(data.getAllRecommendedSiteTextTranslationList.error);
+        console.log(
+          data.getAllRecommendedSiteTextTranslationListByLanguage.error,
+        );
         toastPresent({
-          message: data.getAllRecommendedSiteTextTranslationList.error,
+          message:
+            data.getAllRecommendedSiteTextTranslationListByLanguage.error,
           duration: 1500,
           position: 'top',
           color: 'danger',
@@ -106,81 +120,65 @@ export function AppContextProvider({ children }: AppProviderProps) {
         return;
       }
 
-      const siteTextTranslationListByLanguageList =
-        data.getAllRecommendedSiteTextTranslationList
-          .site_text_translation_with_vote_list_by_language_list;
+      const siteTextTranslationListByLanguage =
+        data.getAllRecommendedSiteTextTranslationListByLanguage
+          .site_text_translation_with_vote_list_by_language;
 
-      if (!siteTextTranslationListByLanguageList) {
-        return;
-      }
+      const langInfo = subTags2LangInfo({
+        lang: siteTextTranslationListByLanguage.language_code,
+        dialect: siteTextTranslationListByLanguage.dialect_code as
+          | string
+          | undefined,
+        region: siteTextTranslationListByLanguage.geo_code as
+          | string
+          | undefined,
+      });
 
-      const siteTextLanguageList: SiteTextLanguage[] = [];
+      const translationMap: Record<string, string> = {};
 
-      for (const siteTextTranslationListByLanguage of siteTextTranslationListByLanguageList) {
-        siteTextLanguageList.push({
-          language_code: siteTextTranslationListByLanguage.language_code,
-          dialect_code: siteTextTranslationListByLanguage.dialect_code,
-          geo_code: siteTextTranslationListByLanguage.geo_code,
-        });
+      if (
+        siteTextTranslationListByLanguage.site_text_translation_with_vote_list
+      ) {
+        for (const translation of siteTextTranslationListByLanguage.site_text_translation_with_vote_list) {
+          if (!translation) {
+            continue;
+          }
 
-        const langInfo = subTags2LangInfo({
-          lang: siteTextTranslationListByLanguage.language_code,
-          dialect: siteTextTranslationListByLanguage.dialect_code as
-            | string
-            | undefined,
-          region: siteTextTranslationListByLanguage.geo_code as
-            | string
-            | undefined,
-        });
+          let siteText: string;
+          let translatedText: string;
 
-        const translationMap: Record<string, string> = {};
-
-        if (
-          siteTextTranslationListByLanguage.site_text_translation_with_vote_list
-        ) {
-          for (const translation of siteTextTranslationListByLanguage.site_text_translation_with_vote_list) {
-            if (!translation) {
-              continue;
+          switch (translation.__typename) {
+            case 'SiteTextWordToWordTranslationWithVote': {
+              siteText = translation.from_word_definition.word.word;
+              translatedText = translation.to_word_definition.word.word;
+              break;
             }
-
-            let siteText: string;
-            let translatedText: string;
-
-            switch (translation.__typename) {
-              case 'SiteTextWordToWordTranslationWithVote': {
-                siteText = translation.from_word_definition.word.word;
-                translatedText = translation.to_word_definition.word.word;
-                break;
-              }
-              case 'SiteTextWordToPhraseTranslationWithVote': {
-                siteText = translation.from_word_definition.word.word;
-                translatedText = translation.to_phrase_definition.phrase.phrase;
-                break;
-              }
-              case 'SiteTextPhraseToWordTranslationWithVote': {
-                siteText = translation.from_phrase_definition.phrase.phrase;
-                translatedText = translation.to_word_definition.word.word;
-                break;
-              }
-              case 'SiteTextPhraseToPhraseTranslationWithVote': {
-                siteText = translation.from_phrase_definition.phrase.phrase;
-                translatedText = translation.to_phrase_definition.phrase.phrase;
-                break;
-              }
+            case 'SiteTextWordToPhraseTranslationWithVote': {
+              siteText = translation.from_word_definition.word.word;
+              translatedText = translation.to_phrase_definition.phrase.phrase;
+              break;
             }
-
-            if (langInfo.lang.tag === 'en') {
-              translationMap[siteText!] = siteText!;
-            } else {
-              translationMap[siteText!] = translatedText!;
+            case 'SiteTextPhraseToWordTranslationWithVote': {
+              siteText = translation.from_phrase_definition.phrase.phrase;
+              translatedText = translation.to_word_definition.word.word;
+              break;
+            }
+            case 'SiteTextPhraseToPhraseTranslationWithVote': {
+              siteText = translation.from_phrase_definition.phrase.phrase;
+              translatedText = translation.to_phrase_definition.phrase.phrase;
+              break;
             }
           }
-        }
 
-        setTranslationSiteTextMap(langInfo, translationMap);
+          if (langInfo.lang.tag === 'en') {
+            translationMap[siteText!] = siteText!;
+          } else {
+            translationMap[siteText!] = translatedText!;
+          }
+        }
       }
 
-      setSiteTextLanguageList(siteTextLanguageList);
+      setTranslationSiteTextMap(langInfo, translationMap);
     }
   }, [
     data,
@@ -225,6 +223,10 @@ export function AppContextProvider({ children }: AppProviderProps) {
       const originalMap: Record<string, string> = {};
 
       for (const siteTextDefinition of siteTextDefinitionList) {
+        if (!siteTextDefinition) {
+          continue;
+        }
+
         switch (siteTextDefinition.__typename) {
           case 'SiteTextWordDefinition': {
             const word = siteTextDefinition.word_definition.word.word;
@@ -249,6 +251,59 @@ export function AppContextProvider({ children }: AppProviderProps) {
     toastPresent,
     setOriginalSiteTextMap,
   ]);
+
+  useEffect(() => {
+    if (langLoading) {
+      return;
+    }
+
+    if (langError) {
+      console.log(langError);
+      return;
+    }
+
+    if (langData) {
+      if (
+        langData.getAllSiteTextLanguageListWithRate.error !== ErrorType.NoError
+      ) {
+        console.log(langData.getAllSiteTextLanguageListWithRate.error);
+        toastPresent({
+          message: langData.getAllSiteTextLanguageListWithRate.error,
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+
+        return;
+      }
+
+      const siteTextLanguageList: SiteTextLanguageWithTranslationInfo[] = [];
+
+      const allSiteTextLanguageList =
+        langData.getAllSiteTextLanguageListWithRate
+          .site_text_language_with_translation_info_list;
+
+      if (!allSiteTextLanguageList) {
+        return;
+      }
+
+      for (const language of allSiteTextLanguageList) {
+        if (!language) {
+          continue;
+        }
+
+        siteTextLanguageList.push({
+          language_code: language.language_code,
+          dialect_code: language.dialect_code,
+          geo_code: language.geo_code,
+          total_count: language.total_count,
+          translated_count: language.translated_count,
+        });
+
+        setSiteTextLanguageList(siteTextLanguageList);
+      }
+    }
+  }, [toastPresent, langLoading, langError, langData, setSiteTextLanguageList]);
 
   const value = {
     states: {

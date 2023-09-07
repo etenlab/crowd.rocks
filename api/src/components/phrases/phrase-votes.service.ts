@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { PoolClient } from 'pg';
+
+import { pgClientOrPool } from 'src/common/utility';
 
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
@@ -6,7 +9,9 @@ import { PostgresService } from 'src/core/postgres.service';
 import {
   PhraseVoteUpsertInput,
   PhraseVoteOutput,
+  PhraseVoteStatusOutput,
   PhraseVoteStatusOutputRow,
+  PhraseVoteStatus,
 } from './types';
 
 import {
@@ -15,7 +20,7 @@ import {
   GetPhraseVoteObjectById,
   getPhraseVoteObjById,
   GetPhraseVoteStatus,
-  getPhraseVoteStatus,
+  getPhraseVoteStatusFromPhraseIds,
   TogglePhraseVoteStatus,
   togglePhraseVoteStatus,
 } from './sql-string';
@@ -24,23 +29,32 @@ import {
 export class PhraseVotesService {
   constructor(private pg: PostgresService) {}
 
-  async read(id: number): Promise<PhraseVoteOutput> {
+  async read(
+    id: number,
+    pgClient: PoolClient | null,
+  ): Promise<PhraseVoteOutput> {
     try {
-      const res1 = await this.pg.pool.query<GetPhraseVoteObjectById>(
-        ...getPhraseVoteObjById(id),
-      );
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetPhraseVoteObjectById>(...getPhraseVoteObjById(id));
 
-      if (res1.rowCount !== 1) {
+      if (res.rowCount !== 1) {
         console.error(`no word-votes for id: ${id}`);
+
+        return {
+          error: ErrorType.PhraseVoteNotFound,
+          phrase_vote: null,
+        };
       } else {
         return {
           error: ErrorType.NoError,
           phrase_vote: {
             phrase_vote_id: id + '',
-            phrase_id: res1.rows[0].phrase_id + '',
-            user_id: res1.rows[0].user_id + '',
-            vote: res1.rows[0].vote,
-            last_updated_at: new Date(res1.rows[0].last_updated_at),
+            phrase_id: res.rows[0].phrase_id + '',
+            user_id: res.rows[0].user_id + '',
+            vote: res.rows[0].vote,
+            last_updated_at: new Date(res.rows[0].last_updated_at),
           },
         };
       }
@@ -57,9 +71,13 @@ export class PhraseVotesService {
   async upsert(
     input: PhraseVoteUpsertInput,
     token: string,
+    pgClient: PoolClient | null,
   ): Promise<PhraseVoteOutput> {
     try {
-      const res = await this.pg.pool.query<PhraseVoteUpsertProcedureOutputRow>(
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<PhraseVoteUpsertProcedureOutputRow>(
         ...callPhraseVoteUpsertProcedure({
           phrase_id: +input.phrase_id,
           vote: input.vote,
@@ -77,7 +95,7 @@ export class PhraseVotesService {
         };
       }
 
-      return this.read(phrase_vote_id);
+      return this.read(+phrase_vote_id, pgClient);
     } catch (e) {
       console.error(e);
     }
@@ -88,13 +106,19 @@ export class PhraseVotesService {
     };
   }
 
-  async getVoteStatus(phrase_id: number): Promise<PhraseVoteStatusOutputRow> {
+  async getVoteStatus(
+    phrase_id: number,
+    pgClient: PoolClient | null,
+  ): Promise<PhraseVoteStatusOutputRow> {
     try {
-      const res1 = await this.pg.pool.query<GetPhraseVoteStatus>(
-        ...getPhraseVoteStatus(phrase_id),
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetPhraseVoteStatus>(
+        ...getPhraseVoteStatusFromPhraseIds([phrase_id]),
       );
 
-      if (res1.rowCount !== 1) {
+      if (res.rowCount !== 1) {
         return {
           error: ErrorType.NoError,
           vote_status: {
@@ -107,9 +131,9 @@ export class PhraseVotesService {
         return {
           error: ErrorType.NoError,
           vote_status: {
-            phrase_id: res1.rows[0].phrase_id + '',
-            upvotes: res1.rows[0].upvotes,
-            downvotes: res1.rows[0].downvotes,
+            phrase_id: res.rows[0].phrase_id + '',
+            upvotes: res.rows[0].upvotes,
+            downvotes: res.rows[0].downvotes,
           },
         };
       }
@@ -123,13 +147,63 @@ export class PhraseVotesService {
     };
   }
 
+  async getVoteStatusFromIds(
+    phraseIds: number[],
+    pgClient: PoolClient | null,
+  ): Promise<PhraseVoteStatusOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetPhraseVoteStatus>(
+        ...getPhraseVoteStatusFromPhraseIds(phraseIds),
+      );
+
+      const voteStatusMap = new Map<string, PhraseVoteStatus>();
+
+      res.rows.forEach((row) =>
+        voteStatusMap.set(row.phrase_id, {
+          phrase_id: row.phrase_id + '',
+          upvotes: row.upvotes,
+          downvotes: row.downvotes,
+        }),
+      );
+
+      return {
+        error: ErrorType.NoError,
+        vote_status_list: phraseIds.map((phraseId) => {
+          const voteStatus = voteStatusMap.get(phraseId + '');
+
+          return voteStatus
+            ? voteStatus
+            : {
+                phrase_id: phraseId + '',
+                upvotes: 0,
+                downvotes: 0,
+              };
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      vote_status_list: [],
+    };
+  }
+
   async toggleVoteStatus(
     phrase_id: number,
     vote: boolean,
     token: string,
+    pgClient: PoolClient | null,
   ): Promise<PhraseVoteStatusOutputRow> {
     try {
-      const res1 = await this.pg.pool.query<TogglePhraseVoteStatus>(
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<TogglePhraseVoteStatus>(
         ...togglePhraseVoteStatus({
           phrase_id,
           vote,
@@ -137,8 +211,8 @@ export class PhraseVotesService {
         }),
       );
 
-      const creatingError = res1.rows[0].p_error_type;
-      const phrase_vote_id = res1.rows[0].p_phrase_vote_id;
+      const creatingError = res.rows[0].p_error_type;
+      const phrase_vote_id = res.rows[0].p_phrase_vote_id;
 
       if (creatingError !== ErrorType.NoError || !phrase_vote_id) {
         return {
@@ -147,7 +221,7 @@ export class PhraseVotesService {
         };
       }
 
-      return this.getVoteStatus(phrase_id);
+      return this.getVoteStatus(phrase_id, pgClient);
     } catch (e) {
       console.error(e);
     }

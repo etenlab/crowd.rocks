@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { PoolClient } from 'pg';
+
+import { pgClientOrPool } from 'src/common/utility';
 
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
@@ -16,9 +19,20 @@ import {
   SiteTextDefinitionOutput,
   SiteTextDefinitionListOutput,
   SiteTextLanguageListOutput,
+  SiteTextLanguageWithTranslationInfoListOutput,
+  SiteTextLanguageWithTranslationInfo,
 } from './types';
 
-import { GetSiteTextLanguageList, getSiteTextLanguageList } from './sql-string';
+import {
+  GetSiteTextLanguageList,
+  getSiteTextLanguageList,
+  SiteTextTranslationCountRow,
+  getSiteTextTranslationCount,
+  GetAllSiteTextWordDefinition,
+  getAllSiteTextWordDefinition,
+  GetAllSiteTextPhraseDefinition,
+  getAllSiteTextPhraseDefinition,
+} from './sql-string';
 
 @Injectable()
 export class SiteTextsService {
@@ -35,6 +49,7 @@ export class SiteTextsService {
   async upsert(
     input: SiteTextUpsertInput,
     token: string,
+    pgClient: PoolClient | null,
   ): Promise<SiteTextDefinitionOutput> {
     if (input.siteTextlike_string.trim() === '') {
       return {
@@ -58,6 +73,7 @@ export class SiteTextsService {
             geo_code: input.geo_code,
           },
           token,
+          pgClient,
         );
 
         if (phraseOuptut.error !== ErrorType.NoError || !phraseOuptut.phrase) {
@@ -70,6 +86,7 @@ export class SiteTextsService {
         let phrase_definition_id =
           await this.siteTextPhraseDefinitionService.getDefinitionIdFromWordId(
             +phraseOuptut.phrase.phrase_id,
+            pgClient,
           );
 
         if (!phrase_definition_id) {
@@ -80,6 +97,7 @@ export class SiteTextsService {
                 definition: input.definitionlike_string,
               },
               token,
+              pgClient,
             );
 
           if (
@@ -102,6 +120,7 @@ export class SiteTextsService {
         } = await this.siteTextPhraseDefinitionService.upsert(
           phrase_definition_id,
           token,
+          pgClient,
         );
 
         return {
@@ -117,6 +136,7 @@ export class SiteTextsService {
             geo_code: input.geo_code,
           },
           token,
+          pgClient,
         );
 
         if (wordOutput.error !== ErrorType.NoError || !wordOutput.word) {
@@ -129,6 +149,7 @@ export class SiteTextsService {
         let word_definition_id =
           await this.siteTextWordDefinitionService.getDefinitionIdFromWordId(
             +wordOutput.word.word_id,
+            pgClient,
           );
 
         if (!word_definition_id) {
@@ -138,6 +159,7 @@ export class SiteTextsService {
               definition: input.definitionlike_string,
             },
             token,
+            pgClient,
           );
 
           if (
@@ -160,6 +182,7 @@ export class SiteTextsService {
         } = await this.siteTextWordDefinitionService.upsert(
           word_definition_id,
           token,
+          pgClient,
         );
 
         return {
@@ -177,31 +200,39 @@ export class SiteTextsService {
     };
   }
 
-  async getAllSiteTextDefinitions(
-    filter?: string,
-  ): Promise<SiteTextDefinitionListOutput> {
+  async getAllSiteTextDefinitions({
+    filter,
+    pgClient,
+  }: {
+    filter?: string;
+    pgClient: PoolClient | null;
+  }): Promise<SiteTextDefinitionListOutput> {
     try {
       const { error: wordError, site_text_word_definition_list } =
-        await this.siteTextWordDefinitionService.getAllSiteTextWordDefinitions(
+        await this.siteTextWordDefinitionService.getAllSiteTextWordDefinitions({
           filter,
-        );
+          pgClient,
+        });
 
       if (wordError !== ErrorType.NoError) {
         return {
           error: wordError,
-          site_text_definition_list: null,
+          site_text_definition_list: [],
         };
       }
 
       const { error: phraseError, site_text_phrase_definition_list } =
         await this.siteTextPhraseDefinitionService.getAllSiteTextPhraseDefinitions(
-          filter,
+          {
+            filter,
+            pgClient,
+          },
         );
 
       if (phraseError !== ErrorType.NoError) {
         return {
           error: phraseError,
-          site_text_definition_list: null,
+          site_text_definition_list: [],
         };
       }
 
@@ -218,22 +249,29 @@ export class SiteTextsService {
 
     return {
       error: ErrorType.UnknownError,
-      site_text_definition_list: null,
+      site_text_definition_list: [],
     };
   }
 
-  async getAllSiteTextLanguageList(): Promise<SiteTextLanguageListOutput> {
+  async getAllSiteTextLanguageList(
+    pgClient: PoolClient | null,
+  ): Promise<SiteTextLanguageListOutput> {
     try {
-      const res1 = await this.pg.pool.query<GetSiteTextLanguageList>(
-        ...getSiteTextLanguageList(),
-      );
-      const siteTextLanguageList = [];
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetSiteTextLanguageList>(...getSiteTextLanguageList());
+      const siteTextLanguageList: {
+        language_code: string;
+        dialect_code: string | null;
+        geo_code: string | null;
+      }[] = [];
 
-      for (let i = 0; i < res1.rowCount; i++) {
+      for (let i = 0; i < res.rowCount; i++) {
         siteTextLanguageList.push({
-          language_code: res1.rows[i].language_code,
-          dialect_code: res1.rows[i].dialect_code,
-          geo_code: res1.rows[i].geo_code,
+          language_code: res.rows[i].language_code,
+          dialect_code: res.rows[i].dialect_code,
+          geo_code: res.rows[i].geo_code,
         });
       }
 
@@ -248,6 +286,133 @@ export class SiteTextsService {
     return {
       error: ErrorType.UnknownError,
       site_text_language_list: [],
+    };
+  }
+
+  async getAllSiteTextLanguageListWithRate(
+    pgClient: PoolClient | null,
+  ): Promise<SiteTextLanguageWithTranslationInfoListOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<SiteTextTranslationCountRow>(...getSiteTextTranslationCount());
+
+      const languagesMap = new Map<
+        string,
+        {
+          language_code: string;
+          dialect_code: string | null;
+          geo_code: string | null;
+        }
+      >();
+      const siteTextTrCountMap = new Map<string, number>();
+
+      const makeKey = (
+        language_code: string,
+        dialect_code: string | null,
+        geo_code: string | null,
+      ) => {
+        return `${language_code}-${dialect_code ? dialect_code : 'null'}-${
+          geo_code ? geo_code : 'null'
+        }`;
+      };
+
+      for (let i = 0; i < res.rowCount; i++) {
+        const language = {
+          language_code: res.rows[i].language_code,
+          dialect_code: res.rows[i].dialect_code,
+          geo_code: res.rows[i].geo_code,
+        };
+
+        languagesMap.set(
+          makeKey(
+            language.language_code,
+            language.dialect_code,
+            language.geo_code,
+          ),
+          language,
+        );
+
+        const count = res.rows[i].count;
+
+        if (+count === 0) {
+          continue;
+        }
+
+        const mapCount = siteTextTrCountMap.get(
+          makeKey(
+            language.language_code,
+            language.dialect_code,
+            language.geo_code,
+          ),
+        );
+
+        if (mapCount === undefined) {
+          siteTextTrCountMap.set(
+            makeKey(
+              language.language_code,
+              language.dialect_code,
+              language.geo_code,
+            ),
+            1,
+          );
+        } else {
+          siteTextTrCountMap.set(
+            makeKey(
+              language.language_code,
+              language.dialect_code,
+              language.geo_code,
+            ),
+            mapCount + 1,
+          );
+        }
+      }
+
+      const res2 = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetAllSiteTextWordDefinition>(...getAllSiteTextWordDefinition());
+
+      const res3 = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetAllSiteTextPhraseDefinition>(
+        ...getAllSiteTextPhraseDefinition(),
+      );
+
+      const total_count = res2.rowCount + res3.rowCount;
+
+      const result: SiteTextLanguageWithTranslationInfo[] = [];
+
+      for (const language of languagesMap.values()) {
+        result.push({
+          language_code: language.language_code,
+          dialect_code: language.dialect_code,
+          geo_code: language.geo_code,
+          total_count,
+          translated_count:
+            siteTextTrCountMap.get(
+              makeKey(
+                language.language_code,
+                language.dialect_code,
+                language.geo_code,
+              ),
+            ) || 0,
+        });
+      }
+
+      return {
+        error: ErrorType.NoError,
+        site_text_language_with_translation_info_list: result,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      site_text_language_with_translation_info_list: [],
     };
   }
 }

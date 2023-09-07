@@ -46,7 +46,7 @@ export class ForumFolderResolver {
     console.log('forum upsert resolver, name: ', input.name);
     console.log('forum_id', input.forum_id);
 
-    return this.folderService.upsert(input, getBearer(req));
+    return this.folderService.upsert(input, getBearer(req) || '');
   }
 
   @Mutation(() => ForumFolderDeleteOutput)
@@ -55,6 +55,6 @@ export class ForumFolderResolver {
     @Context() req: any,
   ): Promise<ForumFolderDeleteOutput> {
     console.log('forum delete resolver, forum_id: ', input.folder_id);
-    return this.folderService.delete(input, getBearer(req));
+    return this.folderService.delete(input, getBearer(req) || '');
   }
 }

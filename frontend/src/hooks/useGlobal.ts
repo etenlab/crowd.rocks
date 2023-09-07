@@ -12,9 +12,7 @@ import {
 
 import { type ActionType } from '../reducers/index';
 
-import { langInfo2String } from '../common/langUtils';
-
-import { SiteTextLanguage } from '../generated/graphql';
+import { SiteTextLanguageWithTranslationInfo } from '../generated/graphql';
 
 interface UseGlobalProps {
   dispatch: Dispatch<ActionType<unknown>>;
@@ -26,7 +24,7 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
   });
 
   const setSiteTextLanguageList = useCallback(
-    (languages: SiteTextLanguage[]) => {
+    (languages: SiteTextLanguageWithTranslationInfo[]) => {
       dispatchRef.current.dispatch(setSiteTextLanguageListAction(languages));
     },
     [],
@@ -42,10 +40,7 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
   const setTranslationSiteTextMap = useCallback(
     (langInfo: LanguageInfo, translationMapMap: Record<string, string>) => {
       dispatchRef.current.dispatch(
-        setTranslationSiteTextMapAction(
-          langInfo2String(langInfo),
-          translationMapMap,
-        ),
+        setTranslationSiteTextMapAction(translationMapMap),
       );
     },
     [],

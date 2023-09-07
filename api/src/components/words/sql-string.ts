@@ -1,16 +1,18 @@
 import { ErrorType } from 'src/common/types';
 
 export type GetWordObjectById = {
+  word_id: string;
   word: string;
   language_code: string;
-  dialect_code?: string;
-  geo_code?: string;
+  dialect_code: string | null;
+  geo_code: string | null;
 };
 
-export function getWordObjById(id: number): [string, [number]] {
+export function getWordObjByIds(ids: number[]): [string, [number[]]] {
   return [
     `
       select 
+        words.word_id as word_id,
         wordlike_string as word,
         language_code,
         dialect_code, 
@@ -18,14 +20,14 @@ export function getWordObjById(id: number): [string, [number]] {
       from words
       inner join wordlike_strings
         on wordlike_strings.wordlike_string_id = words.wordlike_string_id
-      where words.word_id = $1
+      where words.word_id = any($1)
     `,
-    [id],
+    [ids],
   ];
 }
 
 export type WordUpsertProcedureOutputRow = {
-  p_word_id: number;
+  p_word_id: string;
   p_error_type: ErrorType;
 };
 
@@ -38,8 +40,8 @@ export function callWordUpsertProcedure({
 }: {
   wordlike_string: string;
   language_code: string;
-  dialect_code?: string;
-  geo_code?: string;
+  dialect_code: string | null;
+  geo_code: string | null;
   token: string;
 }): [string, [string, string, string | null, string | null, string]] {
   return [
@@ -50,10 +52,40 @@ export function callWordUpsertProcedure({
   ];
 }
 
+export type WordUpsertsProcedureOutput = {
+  p_word_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callWordUpsertsProcedure({
+  wordlike_strings,
+  language_codes,
+  dialect_codes,
+  geo_codes,
+  token,
+}: {
+  wordlike_strings: string[];
+  language_codes: string[];
+  dialect_codes: (string | null)[];
+  geo_codes: (string | null)[];
+  token: string;
+}): [
+  string,
+  [string[], string[], (string | null)[], (string | null)[], string],
+] {
+  return [
+    `
+      call batch_word_upsert($1::text[], $2::text[], $3::text[], $4::text[], $5, null, null, '');
+    `,
+    [wordlike_strings, language_codes, dialect_codes, geo_codes, token],
+  ];
+}
+
 export type GetWordVoteObjectById = {
-  words_vote_id: number;
-  word_id: number;
-  user_id: number;
+  words_vote_id: string;
+  word_id: string;
+  user_id: string;
   vote: boolean;
   last_updated_at: string;
 };
@@ -75,7 +107,7 @@ export function getWordVoteObjById(id: number): [string, [number]] {
 }
 
 export type WordVoteUpsertProcedureOutputRow = {
-  p_words_vote_id: number;
+  p_words_vote_id: string;
   p_error_type: ErrorType;
 };
 
@@ -97,12 +129,14 @@ export function callWordVoteUpsertProcedure({
 }
 
 export type GetWordVoteStatus = {
-  word_id: number;
+  word_id: string;
   upvotes: number;
   downvotes: number;
 };
 
-export function getWordVoteStatus(word_id: number): [string, [number]] {
+export function getWordVoteStatusFromWordIds(
+  wordIds: number[],
+): [string, [number[]]] {
   return [
     `
       select 
@@ -116,7 +150,7 @@ export function getWordVoteStatus(word_id: number): [string, [number]] {
       from 
         words_votes AS v 
       where 
-        v.word_id = $1
+        v.word_id = any($1)
       group BY 
         v.word_id 
       order by 
@@ -124,12 +158,12 @@ export function getWordVoteStatus(word_id: number): [string, [number]] {
           case when v.vote = true then 1 when v.vote = false then 0 else null end
         ) desc;
     `,
-    [word_id],
+    [wordIds],
   ];
 }
 
 export type ToggleWordVoteStatus = {
-  p_words_vote_id: number;
+  p_words_vote_id: string;
   p_error_type: ErrorType;
 };
 

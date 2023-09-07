@@ -93,51 +93,51 @@ export class PhraseToPhraseTranslationUpsertInput {
 }
 
 @ObjectType()
-export class WordToWordTranslationUpsertOutput extends GenericOutput {
+export class WordToWordTranslationOutput extends GenericOutput {
   @Field(() => WordToWordTranslation, { nullable: true })
   word_to_word_translation: WordToWordTranslation | null;
 }
 
 @ObjectType()
-export class WordToPhraseTranslationUpsertOutput extends GenericOutput {
+export class WordToWordTranslationsOutput extends GenericOutput {
+  @Field(() => [WordToWordTranslation], { nullable: 'items' })
+  word_to_word_translations: (WordToWordTranslation | null)[];
+}
+
+@ObjectType()
+export class WordToPhraseTranslationOutput extends GenericOutput {
   @Field(() => WordToPhraseTranslation, { nullable: true })
   word_to_phrase_translation: WordToPhraseTranslation | null;
 }
 
 @ObjectType()
-export class PhraseToWordTranslationUpsertOutput extends GenericOutput {
+export class WordToPhraseTranslationsOutput extends GenericOutput {
+  @Field(() => [WordToPhraseTranslation], { nullable: 'items' })
+  word_to_phrase_translations: (WordToPhraseTranslation | null)[];
+}
+
+@ObjectType()
+export class PhraseToWordTranslationOutput extends GenericOutput {
   @Field(() => PhraseToWordTranslation, { nullable: true })
   phrase_to_word_translation: PhraseToWordTranslation | null;
 }
 
 @ObjectType()
-export class PhraseToPhraseTranslationUpsertOutput extends GenericOutput {
+export class PhraseToWordTranslationsOutput extends GenericOutput {
+  @Field(() => [PhraseToWordTranslation], { nullable: 'items' })
+  phrase_to_word_translations: (PhraseToWordTranslation | null)[];
+}
+
+@ObjectType()
+export class PhraseToPhraseTranslationOutput extends GenericOutput {
   @Field(() => PhraseToPhraseTranslation, { nullable: true })
   phrase_to_phrase_translation: PhraseToPhraseTranslation | null;
 }
 
 @ObjectType()
-export class WordToWordTranslationReadOutput extends GenericOutput {
-  @Field(() => WordToWordTranslation, { nullable: true })
-  word_to_word_translation: WordToWordTranslation | null;
-}
-
-@ObjectType()
-export class WordToPhraseTranslationReadOutput extends GenericOutput {
-  @Field(() => WordToPhraseTranslation, { nullable: true })
-  word_to_phrase_translation: WordToPhraseTranslation | null;
-}
-
-@ObjectType()
-export class PhraseToWordTranslationReadOutput extends GenericOutput {
-  @Field(() => PhraseToWordTranslation, { nullable: true })
-  phrase_to_word_translation: PhraseToWordTranslation | null;
-}
-
-@ObjectType()
-export class PhraseToPhraseTranslationReadOutput extends GenericOutput {
-  @Field(() => PhraseToPhraseTranslation, { nullable: true })
-  phrase_to_phrase_translation: PhraseToPhraseTranslation | null;
+export class PhraseToPhraseTranslationsOutput extends GenericOutput {
+  @Field(() => [PhraseToPhraseTranslation], { nullable: 'items' })
+  phrase_to_phrase_translations: (PhraseToPhraseTranslation | null)[];
 }
 
 @InputType()
@@ -149,7 +149,7 @@ export class AddWordAsTranslationForWordInput {
 
 @ObjectType()
 export class AddWordAsTranslationForWordOutput extends GenericOutput {
-  @Field(() => String) wordTranslationId: string;
+  @Field(() => String, { nullable: true }) wordTranslationId: string | null;
 }
 
 @ObjectType()
@@ -210,6 +210,12 @@ export class WordTrVoteStatusOutputRow extends GenericOutput {
   vote_status: WordTrVoteStatus | null;
 }
 
+@ObjectType()
+export class WordTrVoteStatusOutput extends GenericOutput {
+  @Field(() => [WordTrVoteStatus], { nullable: 'items' })
+  vote_status_list: (WordTrVoteStatus | null)[];
+}
+
 @InputType()
 export class WordToPhraseTranslationVoteStatusInput {
   @Field(() => ID) word_to_phrase_translation_id: string;
@@ -220,6 +226,12 @@ export class WordToPhraseTranslationVoteStatusInput {
 export class WordToPhraseTranslationVoteStatusOutputRow extends GenericOutput {
   @Field(() => WordToPhraseTranslationVoteStatus, { nullable: true })
   vote_status: WordToPhraseTranslationVoteStatus | null;
+}
+
+@ObjectType()
+export class WordToPhraseTranslationVoteStatusOutput extends GenericOutput {
+  @Field(() => [WordToPhraseTranslationVoteStatus], { nullable: 'items' })
+  vote_status_list: (WordToPhraseTranslationVoteStatus | null)[];
 }
 
 @InputType()
@@ -234,6 +246,12 @@ export class PhraseToWordTranslationVoteStatusOutputRow extends GenericOutput {
   vote_status: PhraseToWordTranslationVoteStatus | null;
 }
 
+@ObjectType()
+export class PhraseToWordTranslationVoteStatusOutput extends GenericOutput {
+  @Field(() => [PhraseToWordTranslationVoteStatus], { nullable: 'items' })
+  vote_status_list: (PhraseToWordTranslationVoteStatus | null)[];
+}
+
 @InputType()
 export class PhraseToPhraseTranslationVoteStatusInput {
   @Field(() => ID) phrase_to_phrase_translation_id: string;
@@ -244,6 +262,12 @@ export class PhraseToPhraseTranslationVoteStatusInput {
 export class PhraseToPhraseTranslationVoteStatusOutputRow extends GenericOutput {
   @Field(() => PhraseToPhraseTranslationVoteStatus, { nullable: true })
   vote_status: PhraseToPhraseTranslationVoteStatus | null;
+}
+
+@ObjectType()
+export class PhraseToPhraseTranslationVoteStatusOutput extends GenericOutput {
+  @Field(() => [PhraseToPhraseTranslationVoteStatus], { nullable: 'items' })
+  vote_status_list: (PhraseToPhraseTranslationVoteStatus | null)[];
 }
 
 @ObjectType()
@@ -320,41 +344,76 @@ export class TranslationWithVoteOutput extends GenericOutput {
 
 @ObjectType()
 export class WordToWordTranslationWithVoteListOutput extends GenericOutput {
-  @Field(() => [WordToWordTranslationWithVote], { nullable: true })
-  word_to_word_tr_with_vote_list: WordToWordTranslationWithVote[] | null;
+  @Field(() => [WordToWordTranslationWithVote], { nullable: 'items' })
+  word_to_word_tr_with_vote_list: (WordToWordTranslationWithVote | null)[];
+}
+
+@ObjectType()
+export class WordToWordTranslationWithVoteListFromIdsOutput extends GenericOutput {
+  @Field(() => [[WordToWordTranslationWithVote]], { nullable: 'items' })
+  word_to_word_tr_with_vote_list: (WordToWordTranslationWithVote | null)[][];
 }
 
 @ObjectType()
 export class WordToPhraseTranslationWithVoteListOutput extends GenericOutput {
-  @Field(() => [WordToPhraseTranslationWithVote], { nullable: true })
-  word_to_phrase_tr_with_vote_list: WordToPhraseTranslationWithVote[] | null;
+  @Field(() => [WordToPhraseTranslationWithVote], { nullable: 'items' })
+  word_to_phrase_tr_with_vote_list: (WordToPhraseTranslationWithVote | null)[];
+}
+
+@ObjectType()
+export class WordToPhraseTranslationWithVoteListFromIdsOutput extends GenericOutput {
+  @Field(() => [[WordToPhraseTranslationWithVote]], { nullable: 'items' })
+  word_to_phrase_tr_with_vote_list: (WordToPhraseTranslationWithVote | null)[][];
 }
 
 @ObjectType()
 export class PhraseToWordTranslationWithVoteListOutput extends GenericOutput {
-  @Field(() => [PhraseToWordTranslationWithVote], { nullable: true })
-  phrase_to_word_tr_with_vote_list: PhraseToWordTranslationWithVote[] | null;
+  @Field(() => [PhraseToWordTranslationWithVote], { nullable: 'items' })
+  phrase_to_word_tr_with_vote_list: (PhraseToWordTranslationWithVote | null)[];
+}
+
+@ObjectType()
+export class PhraseToWordTranslationWithVoteListFromIdsOutput extends GenericOutput {
+  @Field(() => [[PhraseToWordTranslationWithVote]], { nullable: 'items' })
+  phrase_to_word_tr_with_vote_list: (PhraseToWordTranslationWithVote | null)[][];
 }
 
 @ObjectType()
 export class PhraseToPhraseTranslationWithVoteListOutput extends GenericOutput {
-  @Field(() => [PhraseToPhraseTranslationWithVote], { nullable: true })
-  phrase_to_phrase_tr_with_vote_list:
-    | PhraseToPhraseTranslationWithVote[]
-    | null;
+  @Field(() => [PhraseToPhraseTranslationWithVote], { nullable: 'items' })
+  phrase_to_phrase_tr_with_vote_list: (PhraseToPhraseTranslationWithVote | null)[];
+}
+
+@ObjectType()
+export class PhraseToPhraseTranslationWithVoteListFromIdsOutput extends GenericOutput {
+  @Field(() => [[PhraseToPhraseTranslationWithVote]], { nullable: 'items' })
+  phrase_to_phrase_tr_with_vote_list: (PhraseToPhraseTranslationWithVote | null)[][];
 }
 
 @ObjectType()
 export class TranslationWithVoteListOutput extends GenericOutput {
-  @Field(() => [TranslationWithVote], { nullable: true })
+  @Field(() => [TranslationWithVote], { nullable: 'items' })
   translation_with_vote_list:
     | (
         | WordToWordTranslationWithVote
         | WordToPhraseTranslationWithVote
         | PhraseToWordTranslationWithVote
         | PhraseToPhraseTranslationWithVote
-      )[]
-    | null;
+        | null
+      )[];
+}
+
+@ObjectType()
+export class TranslationWithVoteListFromIdsOutput extends GenericOutput {
+  @Field(() => [[TranslationWithVote]], { nullable: true })
+  translation_with_vote_list:
+    | (
+        | WordToWordTranslationWithVote
+        | WordToPhraseTranslationWithVote
+        | PhraseToWordTranslationWithVote
+        | PhraseToPhraseTranslationWithVote
+        | null
+      )[][];
 }
 
 @InputType()
@@ -368,7 +427,7 @@ export class ToDefinitionInput {
 }
 
 @ObjectType()
-export class TranslationUpsertOutput extends GenericOutput {
+export class TranslationOutput extends GenericOutput {
   @Field(() => Translation, { nullable: true })
   translation:
     | WordToWordTranslation
@@ -376,6 +435,18 @@ export class TranslationUpsertOutput extends GenericOutput {
     | PhraseToWordTranslation
     | PhraseToPhraseTranslation
     | null;
+}
+
+@ObjectType()
+export class TranslationsOutput extends GenericOutput {
+  @Field(() => [Translation], { nullable: 'items' })
+  translations: (
+    | WordToWordTranslation
+    | WordToPhraseTranslation
+    | PhraseToWordTranslation
+    | PhraseToPhraseTranslation
+    | null
+  )[];
 }
 
 @ObjectType()
@@ -402,5 +473,5 @@ export class TranslateAllWordsAndPhrasesByGoogleResult {
 @ObjectType()
 export class TranslateAllWordsAndPhrasesByGoogleOutput extends GenericOutput {
   @Field(() => TranslateAllWordsAndPhrasesByGoogleResult, { nullable: true })
-  result: TranslateAllWordsAndPhrasesByGoogleResult;
+  result: TranslateAllWordsAndPhrasesByGoogleResult | null;
 }

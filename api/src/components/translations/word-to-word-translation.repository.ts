@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PoolClient } from 'pg';
+
+import { pgClientOrPool } from 'src/common/utility';
+
 import { ErrorType } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
 import { WordTrVoteStatusOutputRow } from './types';
@@ -8,7 +11,7 @@ interface IToggleVoteStatusParams {
   word_to_word_translation_id: string;
   vote: boolean;
   token: string;
-  dbPoolClient?: PoolClient;
+  dbpoolClient: PoolClient | null;
 }
 
 export interface IToggleVoteStatusRes {
@@ -24,9 +27,12 @@ export class WordToWordTranslationRepository {
     word_to_word_translation_id,
     vote,
     token,
-    dbPoolClient,
+    dbpoolClient,
   }: IToggleVoteStatusParams): Promise<IToggleVoteStatusRes> {
-    const poolClient = dbPoolClient ? dbPoolClient : this.pg.pool;
+    const poolClient = await pgClientOrPool({
+      client: dbpoolClient,
+      pool: this.pg.pool,
+    });
 
     try {
       const res1 = await poolClient.query(
@@ -56,9 +62,13 @@ export class WordToWordTranslationRepository {
 
   async getVotesStatus(
     word_to_word_translation_id: string,
+    pgClient: PoolClient | null,
   ): Promise<WordTrVoteStatusOutputRow> {
     try {
-      const res = await this.pg.pool.query(
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query(
         `
         select
           wtwt.word_to_word_translation_id,
@@ -89,14 +99,20 @@ export class WordToWordTranslationRepository {
         error,
       );
       return {
-        vote_status: undefined,
+        vote_status: null,
         error: ErrorType.UnknownError,
       };
     }
   }
 
-  async getDefinitionsIds(word_to_word_translation_id: string) {
-    const resQ = await this.pg.pool.query(
+  async getDefinitionsIds(
+    word_to_word_translation_id: string,
+    pgClient: PoolClient | null,
+  ) {
+    const resQ = await pgClientOrPool({
+      client: pgClient,
+      pool: this.pg.pool,
+    }).query(
       `
       select
         from_word_definition_id ,

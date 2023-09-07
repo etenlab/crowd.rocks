@@ -144,6 +144,10 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
     }
 
     for (const siteTextDefinition of allSiteTextDefinitions) {
+      if (!siteTextDefinition) {
+        continue;
+      }
+
       switch (siteTextDefinition.__typename) {
         case 'SiteTextWordDefinition': {
           tempDefinitions.push({
