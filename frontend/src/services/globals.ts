@@ -1,3 +1,10 @@
+export interface ISettings {
+  isBetaTools: boolean;
+}
+const DEFAULT_SETTINGS: ISettings = {
+  isBetaTools: false,
+};
+
 export class Globals {
   clear() {
     localStorage.removeItem('token');
@@ -40,6 +47,21 @@ export class Globals {
   }
   set_profile_url(profile_url: string) {
     localStorage.setItem('profile_url', profile_url);
+  }
+
+  //settings
+  get_settings(): ISettings {
+    const userSettings: ISettings = JSON.parse(
+      localStorage.getItem('settings') || '{}',
+    ) as ISettings;
+    return {
+      ...DEFAULT_SETTINGS,
+      ...userSettings,
+    };
+  }
+
+  set_settings(settings: ISettings): void {
+    localStorage.setItem('settings', JSON.stringify(settings));
   }
 }
 
