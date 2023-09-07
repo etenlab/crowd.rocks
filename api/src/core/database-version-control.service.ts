@@ -228,6 +228,9 @@ export class DatabaseVersionControlService {
     await this.runSqlFile(
       './src/core/sql/notifications/notification_insert.sql',
     );
+    await this.runSqlFile(
+      './src/core/sql/notifications/mark_notification_as_read.sql',
+    );
 
     await this.setVersionNumber(2);
   }
