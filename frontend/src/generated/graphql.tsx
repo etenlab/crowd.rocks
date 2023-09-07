@@ -531,6 +531,7 @@ export type Mutation = {
   logout: LogoutOutput;
   mapDelete: MapDeleteOutput;
   mapUpload: MapUploadOutput;
+  mapsReTranslate: GenericOutput;
   mapsTranslationsReset: GenericOutput;
   markNotificationAsRead: MarkNotificationReadOutput;
   notificationDelete: NotificationDeleteOutput;
@@ -629,6 +630,11 @@ export type MutationMapDeleteArgs = {
 export type MutationMapUploadArgs = {
   file: Scalars['Upload']['input'];
   previewFileId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationMapsReTranslateArgs = {
+  forLangTag?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -2518,6 +2524,13 @@ export type MapsTranslationsResetMutationVariables = Exact<{ [key: string]: neve
 
 
 export type MapsTranslationsResetMutation = { __typename?: 'Mutation', mapsTranslationsReset: { __typename?: 'GenericOutput', error: ErrorType } };
+
+export type MapsReTranslateMutationVariables = Exact<{
+  forLangTag?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type MapsReTranslateMutation = { __typename?: 'Mutation', mapsReTranslate: { __typename?: 'GenericOutput', error: ErrorType } };
 
 export type AddNotificationMutationVariables = Exact<{
   text: Scalars['String']['input'];
@@ -4947,6 +4960,39 @@ export function useMapsTranslationsResetMutation(baseOptions?: Apollo.MutationHo
 export type MapsTranslationsResetMutationHookResult = ReturnType<typeof useMapsTranslationsResetMutation>;
 export type MapsTranslationsResetMutationResult = Apollo.MutationResult<MapsTranslationsResetMutation>;
 export type MapsTranslationsResetMutationOptions = Apollo.BaseMutationOptions<MapsTranslationsResetMutation, MapsTranslationsResetMutationVariables>;
+export const MapsReTranslateDocument = gql`
+    mutation MapsReTranslate($forLangTag: String) {
+  mapsReTranslate(forLangTag: $forLangTag) {
+    error
+  }
+}
+    `;
+export type MapsReTranslateMutationFn = Apollo.MutationFunction<MapsReTranslateMutation, MapsReTranslateMutationVariables>;
+
+/**
+ * __useMapsReTranslateMutation__
+ *
+ * To run a mutation, you first call `useMapsReTranslateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMapsReTranslateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mapsReTranslateMutation, { data, loading, error }] = useMapsReTranslateMutation({
+ *   variables: {
+ *      forLangTag: // value for 'forLangTag'
+ *   },
+ * });
+ */
+export function useMapsReTranslateMutation(baseOptions?: Apollo.MutationHookOptions<MapsReTranslateMutation, MapsReTranslateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MapsReTranslateMutation, MapsReTranslateMutationVariables>(MapsReTranslateDocument, options);
+      }
+export type MapsReTranslateMutationHookResult = ReturnType<typeof useMapsReTranslateMutation>;
+export type MapsReTranslateMutationResult = Apollo.MutationResult<MapsReTranslateMutation>;
+export type MapsReTranslateMutationOptions = Apollo.BaseMutationOptions<MapsReTranslateMutation, MapsReTranslateMutationVariables>;
 export const AddNotificationDocument = gql`
     mutation AddNotification($text: String!, $user_id: ID!) {
   addNotification(input: {text: $text, user_id: $user_id}) {
@@ -6621,6 +6667,7 @@ export const namedOperations = {
     MapDelete: 'MapDelete',
     UploadFile: 'UploadFile',
     MapsTranslationsReset: 'MapsTranslationsReset',
+    MapsReTranslate: 'MapsReTranslate',
     AddNotification: 'AddNotification',
     DeleteNotification: 'DeleteNotification',
     MarkNotificationRead: 'MarkNotificationRead',

@@ -24,7 +24,6 @@ import {
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { ErrorType, GenericOutput } from 'src/common/types';
-import { FileService } from '../file/file.service';
 
 @Injectable()
 @Resolver(Map)
@@ -32,7 +31,6 @@ export class MapsResolver {
   constructor(
     private mapService: MapsService,
     private authenticationService: AuthenticationService,
-    private fileService: FileService,
   ) {}
 
   @Mutation(() => MapUploadOutput)
@@ -131,6 +129,34 @@ export class MapsResolver {
     }
     try {
       await this.mapService.translationsReset(userToken);
+      return {
+        error: ErrorType.NoError,
+      };
+    } catch (error) {
+      return {
+        error: error,
+      };
+    }
+  }
+
+  @Mutation(() => GenericOutput)
+  async mapsReTranslate(
+    @Context() req: any,
+    @Args({ name: 'forLangTag', type: () => String, nullable: true })
+    forLangTag?: string,
+  ): Promise<GenericOutput> {
+    const userToken = getBearer(req);
+    const user_id = await this.authenticationService.get_user_id_from_bearer(
+      userToken,
+    );
+    const admin_id = await this.authenticationService.get_admin_id();
+    if (admin_id !== user_id) {
+      return {
+        error: ErrorType.Unauthorized,
+      };
+    }
+    try {
+      await this.mapService.reTranslate(userToken, forLangTag);
       return {
         error: ErrorType.NoError,
       };

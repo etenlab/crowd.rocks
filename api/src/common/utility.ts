@@ -1,4 +1,5 @@
 import { TLangCodes } from './types';
+const N_PLACEHOLDER = '-n-Qh_Q1A-';
 
 export function createToken(length = 64): string {
   let result = '';
@@ -76,3 +77,18 @@ export const putLangCodesToFileName = (
   fname += '.' + suffixes.join('.');
   return fname;
 };
+
+export function substituteN<T extends string | Array<string>>(inStr: T): T {
+  if (Array.isArray(inStr)) {
+    return inStr.map((chunk) => chunk.replaceAll('\n', N_PLACEHOLDER)) as T;
+  } else {
+    return inStr.replaceAll('\n', N_PLACEHOLDER) as T;
+  }
+}
+export function unSubstituteN<T extends string | Array<string>>(inStr: T): T {
+  if (Array.isArray(inStr)) {
+    return inStr.map((chunk) => chunk.replaceAll(N_PLACEHOLDER, '\n')) as T;
+  } else {
+    return inStr.replaceAll(N_PLACEHOLDER, '\n') as T;
+  }
+}
