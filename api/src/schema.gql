@@ -472,6 +472,7 @@ type Mutation {
   logout(input: LogoutInput!): LogoutOutput!
   mapDelete(input: MapDeleteInput!): MapDeleteOutput!
   mapUpload(file: Upload!, previewFileId: String): MapUploadOutput!
+  mapsReTranslate(forLangTag: String): GenericOutput!
   mapsTranslationsReset: GenericOutput!
   markNotificationAsRead(input: MarkNotificationReadInput!): GenericOutput!
   notificationDelete(input: NotificationDeleteInput!): NotificationDeleteOutput!
