@@ -98,3 +98,14 @@ ALTER TABLE public.original_map_phrases ADD CONSTRAINT original_map_phrases_phra
 
 ALTER TABLE public.translated_maps DROP CONSTRAINT translated_maps_original_map_id_fkey;
 ALTER TABLE public.translated_maps ADD CONSTRAINT translated_maps_original_map_id_fkey FOREIGN KEY (original_map_id) REFERENCES public.original_maps(original_map_id) ON DELETE CASCADE;
+
+create table site_text_translation_counts(
+  site_text_translation_count_id bigserial primary key,
+  site_text_id bigint not null,
+  is_word_definition bool not null,
+  language_code varchar(32) not null,
+  dialect_code varchar(32),
+  geo_code varchar(32),
+  count bigint not null default 0,
+  unique (site_text_id, is_word_definition, language_code, dialect_code, geo_code)
+);

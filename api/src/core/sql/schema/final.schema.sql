@@ -630,6 +630,17 @@ create table site_text_translation_votes(
 );
 create index idx__translation_id__site_text_translation_votes on site_text_translation_votes (translation_id);
 
+create table site_text_translation_counts(
+  site_text_translation_count_id bigserial primary key,
+  site_text_id bigint not null,
+  is_word_definition bool not null,
+  language_code varchar(32) not null,
+  dialect_code varchar(32),
+  geo_code varchar(32),
+  count bigint not null default 0,
+  unique (site_text_id, is_word_definition, language_code, dialect_code, geo_code)
+);
+
 -- MAPS -------------------------------------------------------------
 
 create table original_maps(

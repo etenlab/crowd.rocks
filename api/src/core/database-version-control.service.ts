@@ -231,6 +231,15 @@ export class DatabaseVersionControlService {
     await this.runSqlFile(
       './src/core/sql/data/batch-site-text-phrase-definition-upsert.sql',
     );
+    await this.runSqlFile(
+      './src/core/sql/data/site-text-definition-translation-counts-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/data/batch-site-text-definition-translation-counts-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/data/site-text-definition-translation-counts-trigger.sql',
+    );
 
     // post
     await this.runSqlFile('./src/core/sql/post/post_create.v2.sql');
