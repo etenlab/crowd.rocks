@@ -174,3 +174,9 @@ mutation MapsTranslationsReset {
     error
   }
 }
+
+mutation MapsReTranslate($forLangTag: String) {
+  mapsReTranslate(forLangTag: $forLangTag) {
+    error
+  }
+}

@@ -221,6 +221,17 @@ export class DatabaseVersionControlService {
     await this.runSqlFile('./src/core/sql/threads/thread_delete.sql');
     await this.runSqlFile('./src/core/sql/threads/thread_upsert.sql');
 
+    // notifications
+    await this.runSqlFile(
+      './src/core/sql/notification/notification_delete.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/notification/notification_insert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/notification/mark_notification_as_read.sql',
+    );
+
     await this.setVersionNumber(2);
   }
 

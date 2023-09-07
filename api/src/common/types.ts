@@ -40,6 +40,10 @@ export enum ErrorType {
   LimitInvalid = 'LimitInvalid',
   NoError = 'NoError',
   OffsetInvalid = 'OffsetInvalid',
+
+  NotificationDeleteFailed = 'NotificationDeleteFailed',
+  NotificationInsertFailed = 'NotificationInsertFailed',
+
   ParentElectionNotFound = 'ParentElectionNotFound',
 
   PasswordTooLong = 'PasswordTooLong',
