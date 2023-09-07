@@ -45,6 +45,24 @@ ion-card {
   color: black
 }
 
+.notification{
+  top: 0px;
+  margin: -7px -7px;
+  --padding-start: 0px;
+  --padding-end: 0px;
+  --background-activated: var(--ca-menu-background-color);
+  --ripple-color: var(--ca-menu-background-color);
+}
+
+.notification-badge {
+  position: absolute;
+  top: 0px;
+  right: -1px;
+  font-size: 0.6em;
+  --padding-start: 4px;
+  --padding-end: 4px;
+}
+
 hr {
   margin-top: 1rem;
   margin-bottom: 1rem;
