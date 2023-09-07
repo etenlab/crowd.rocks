@@ -223,13 +223,13 @@ export class DatabaseVersionControlService {
 
     // notifications
     await this.runSqlFile(
-      './src/core/sql/notifications/notification_delete.sql',
+      './src/core/sql/notification/notification_delete.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/notifications/notification_insert.sql',
+      './src/core/sql/notification/notification_insert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/notifications/mark_notification_as_read.sql',
+      './src/core/sql/notification/mark_notification_as_read.sql',
     );
 
     await this.setVersionNumber(2);
