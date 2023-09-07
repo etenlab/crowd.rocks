@@ -2,6 +2,16 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddNotificationInput {
+  text: String!
+  user_id: ID!
+}
+
+type AddNotificationOutput {
+  error: ErrorType!
+  notification: Notification
+}
+
 input AvatarUpdateInput {
   avatar: String!
 }
@@ -73,6 +83,8 @@ enum ErrorType {
   MapInsertFailed
   MapNotFound
   NoError
+  NotificationDeleteFailed
+  NotificationInsertFailed
   OffsetInvalid
   ParentElectionNotFound
   PasswordInvalid
@@ -444,7 +456,12 @@ type MapWordWithVotes {
   word_id: ID!
 }
 
+input MarkNotificationReadInput {
+  notification_id: ID!
+}
+
 type Mutation {
+  addNotification(input: AddNotificationInput!): AddNotificationOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   forumDelete(input: ForumDeleteInput!): ForumDeleteOutput!
@@ -456,6 +473,8 @@ type Mutation {
   mapDelete(input: MapDeleteInput!): MapDeleteOutput!
   mapUpload(file: Upload!, previewFileId: String): MapUploadOutput!
   mapsTranslationsReset: GenericOutput!
+  markNotificationAsRead(input: MarkNotificationReadInput!): GenericOutput!
+  notificationDelete(input: NotificationDeleteInput!): NotificationDeleteOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionUpsertOutput!
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationUpsertOutput!
@@ -495,6 +514,26 @@ type Mutation {
   wordToWordTranslationUpsert(input: WordToWordTranslationUpsertInput!): WordToWordTranslationUpsertOutput!
   wordUpsert(input: WordUpsertInput!): WordUpsertOutput!
   wordVoteUpsert(input: WordVoteUpsertInput!): WordVoteOutput!
+}
+
+type Notification {
+  id: ID!
+  isNotified: Boolean!
+  text: String!
+}
+
+input NotificationDeleteInput {
+  notification_id: ID!
+}
+
+type NotificationDeleteOutput {
+  error: ErrorType!
+  notification_id: ID!
+}
+
+type NotificationListOutput {
+  error: ErrorType!
+  notifications: [Notification!]!
 }
 
 type PageInfo {
@@ -804,6 +843,7 @@ type Query {
   getWordsByLanguage(after: ID, first: Int, input: LanguageInput!): WordWithVoteListConnection!
   languagesForGoogleTranslate: LanguageListForGoogleTranslateOutput!
   loggedInIsAdmin(input: IsAdminIdInput!): IsAdminIdOutput!
+  notifications: NotificationListOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionReadOutput!
   phraseRead(input: PhraseReadInput!): PhraseReadOutput!
   phraseToPhraseTranslationRead(id: ID!): PhraseToPhraseTranslationReadOutput!
@@ -815,6 +855,7 @@ type Query {
   siteTextWordDefinitionRead(id: String!): SiteTextWordDefinitionOutput!
   threadRead(input: ThreadReadInput!): ThreadReadOutput!
   threads(input: ThreadListInput!): ThreadListOutput!
+  unreadNotificationsCount: UnreadCountOutput!
   userReadResolver(input: UserReadInput!): UserReadOutput!
   wordDefinitionRead(id: ID!): WordDefinitionReadOutput!
   wordRead(input: WordReadInput!): WordReadOutput!
@@ -1101,6 +1142,10 @@ type TranslationWithVoteListOutput {
 type TranslationWithVoteOutput {
   error: ErrorType!
   translation_with_vote: TranslationWithVote
+}
+
+type UnreadCountOutput {
+  count: Float!
 }
 
 """The `Upload` scalar type represents a file upload."""
