@@ -19,11 +19,6 @@ export class NotificationReadOutput extends GenericOutput {
   notification: Notification | null;
 }
 
-@ObjectType()
-export class UnreadCountOutput {
-  @Field(() => Number) count: number;
-}
-
 @InputType()
 export class AddNotificationInput {
   @Field(() => String) text: string;
@@ -32,6 +27,11 @@ export class AddNotificationInput {
 
 @InputType()
 export class MarkNotificationReadInput {
+  @Field(() => ID) notification_id: string;
+}
+
+@ObjectType()
+export class MarkNotificationReadOutput extends GenericOutput {
   @Field(() => ID) notification_id: string;
 }
 

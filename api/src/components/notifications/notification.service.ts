@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ErrorType, GenericOutput } from 'src/common/types';
+import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 import {
   callNotificationDeleteProcedure,
@@ -18,8 +18,8 @@ import {
   NotificationReadInput,
   NotificationReadOutput,
   AddNotificationInput,
-  UnreadCountOutput,
   MarkNotificationReadInput,
+  MarkNotificationReadOutput,
 } from './types';
 
 @Injectable()
@@ -77,27 +77,10 @@ export class NotificationService {
     };
   }
 
-  async listUnread(user_id: string): Promise<UnreadCountOutput> {
-    const res1 = await this.pg.pool.query(
-      `
-        select
-          notification_id,
-          is_notified,
-          text
-        from 
-          notifications
-        where user_id = $1 and is_notified = false
-      `,
-      [user_id],
-    );
-
-    return { count: res1.rowCount };
-  }
-
   async markAsRead(
     input: MarkNotificationReadInput,
     token: string,
-  ): Promise<GenericOutput> {
+  ): Promise<MarkNotificationReadOutput> {
     const res1 = await this.pg.pool.query(
       ...callMarkNotificationAsReadProcedure({
         notification_id: +input.notification_id,
@@ -105,7 +88,10 @@ export class NotificationService {
       }),
     );
 
-    return { error: res1.rows[0].p_error_type };
+    return {
+      notification_id: input.notification_id,
+      error: res1.rows[0].p_error_type,
+    };
   }
 
   async insert(

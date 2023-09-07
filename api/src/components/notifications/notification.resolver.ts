@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Args, Query, Resolver, Mutation, Context } from '@nestjs/graphql';
-import { ErrorType, GenericOutput } from 'src/common/types';
+import { ErrorType } from 'src/common/types';
 
 import { getBearer } from 'src/common/utility';
 import { AuthenticationService } from '../authentication/authentication.service';
@@ -9,11 +9,11 @@ import {
   AddNotificationInput,
   AddNotificationOutput,
   MarkNotificationReadInput,
+  MarkNotificationReadOutput,
   Notification,
   NotificationDeleteInput,
   NotificationDeleteOutput,
   NotificationListOutput,
-  UnreadCountOutput,
 } from './types';
 
 @Injectable()
@@ -40,21 +40,6 @@ export class NotificationResolver {
     return this.notificationService.list(user_id + '');
   }
 
-  @Query(() => UnreadCountOutput)
-  async unreadNotificationsCount(
-    @Context() req: any,
-  ): Promise<UnreadCountOutput> {
-    console.log('notification count resolver');
-    const bearer = getBearer(req);
-    const user_id = await this.authenticationService.get_user_id_from_bearer(
-      bearer,
-    );
-    if (!user_id) {
-      return { count: 0 };
-    }
-    return this.notificationService.listUnread(user_id + '');
-  }
-
   @Mutation(() => AddNotificationOutput)
   async addNotification(
     @Args('input') input: AddNotificationInput,
@@ -65,11 +50,11 @@ export class NotificationResolver {
     return this.notificationService.insert(input, getBearer(req));
   }
 
-  @Mutation(() => GenericOutput)
+  @Mutation(() => MarkNotificationReadOutput)
   async markNotificationAsRead(
     @Args('input') input: MarkNotificationReadInput,
     @Context() req: any,
-  ): Promise<GenericOutput> {
+  ): Promise<MarkNotificationReadOutput> {
     console.log(
       'mark as read notification resolver, notification id: ',
       input.notification_id,
