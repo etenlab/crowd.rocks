@@ -10,7 +10,7 @@ export const actions = {
   SET_TRANSLATION_SITE_TEXT_MAP: 'SET_TRANSLATION_SITE_TEXT_MAP',
 };
 
-import { SiteTextLanguage } from '../generated/graphql';
+import { SiteTextLanguageWithTranslationInfo } from '../generated/graphql';
 
 export function setOriginalSiteTextMap(originalMap: Record<string, string>) {
   return {
@@ -20,19 +20,19 @@ export function setOriginalSiteTextMap(originalMap: Record<string, string>) {
 }
 
 export function setTranslationSiteTextMap(
-  languageKey: string,
   translationMap: Record<string, string>,
 ) {
   return {
     type: actions.SET_TRANSLATION_SITE_TEXT_MAP,
     payload: {
-      languageKey,
       translationMap,
     },
   };
 }
 
-export function setSiteTextLanguageList(languages: SiteTextLanguage[]) {
+export function setSiteTextLanguageList(
+  languages: SiteTextLanguageWithTranslationInfo[],
+) {
   return {
     type: actions.SET_SITE_TEXT_LANGUAGE_LIST,
     payload: languages,

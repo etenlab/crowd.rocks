@@ -86,6 +86,14 @@ fragment SiteTextTranslationWithVoteListByLanguageFragment on SiteTextTranslatio
   }
 }
 
+fragment SiteTextLanguageWithTranslationInfoFragment on SiteTextLanguageWithTranslationInfo {
+  language_code
+  dialect_code
+  geo_code
+  total_count
+  translated_count
+}
+
 query GetAllSiteTextDefinitions($filter: String) {
   getAllSiteTextDefinitions(filter: $filter) {
     error
@@ -242,6 +250,15 @@ query GetAllRecommendedSiteTextTranslationList {
     error
     site_text_translation_with_vote_list_by_language_list {
       ...SiteTextTranslationWithVoteListByLanguageFragment
+    }
+  }
+}
+
+query GetAllSiteTextLanguageListWithRate {
+  getAllSiteTextLanguageListWithRate {
+    error
+    site_text_language_with_translation_info_list {
+      ...SiteTextLanguageWithTranslationInfoFragment
     }
   }
 }

@@ -62,7 +62,7 @@ const Body: React.FC = () => {
     states: {
       global: {
         langauges: { appLanguage },
-        siteTexts: { languages, originalMap, translationMap },
+        siteTexts: { languages, originalMap },
       },
     },
     actions: { changeAppLanguage },
@@ -200,13 +200,9 @@ const Body: React.FC = () => {
         region: language.geo_code as string | undefined,
       });
 
-      const langInfoStr = langInfo2String(langInfo);
-
       const originalCnt = Object.keys(originalMap).length;
       const translationCnt =
-        langInfo.lang.tag !== 'en'
-          ? Object.keys(translationMap[langInfoStr]).length
-          : originalCnt;
+        langInfo.lang.tag !== 'en' ? language.translated_count : originalCnt;
 
       const percent =
         originalCnt > 0 ? (translationCnt / originalCnt) * 100 : 100;
@@ -222,7 +218,7 @@ const Body: React.FC = () => {
         },
       };
     });
-  }, [languages, originalMap, translationMap]);
+  }, [languages, originalMap]);
 
   return (
     <IonPage>

@@ -1,7 +1,7 @@
 import { actions } from './global.actions';
 import { type ActionType } from '.';
 
-import { SiteTextLanguage } from '../generated/graphql';
+import { SiteTextLanguageWithTranslationInfo } from '../generated/graphql';
 
 export interface StateType {
   langauges: {
@@ -14,8 +14,8 @@ export interface StateType {
   };
   siteTexts: {
     originalMap: Record<string, string>;
-    translationMap: Record<string, Record<string, string>>;
-    languages: SiteTextLanguage[];
+    translationMap: Record<string, string>;
+    languages: SiteTextLanguageWithTranslationInfo[];
   };
 }
 
@@ -62,7 +62,7 @@ export function reducer(
         ...prevState,
         siteTexts: {
           ...prevState.siteTexts,
-          languages: action.payload as SiteTextLanguage[],
+          languages: action.payload as SiteTextLanguageWithTranslationInfo[],
         },
       };
     }
@@ -76,21 +76,15 @@ export function reducer(
       };
     }
     case actions.SET_TRANSLATION_SITE_TEXT_MAP: {
-      const prevTranslationMap = prevState.siteTexts.translationMap;
-      const { languageKey, translationMap } = action.payload as {
-        languageKey: string;
+      const { translationMap } = action.payload as {
         translationMap: Record<string, string>;
       };
-
-      prevTranslationMap[languageKey] = translationMap;
 
       return {
         ...prevState,
         siteTexts: {
           ...prevState.siteTexts,
-          translationMap: {
-            ...prevTranslationMap,
-          },
+          translationMap: translationMap,
         },
       };
     }

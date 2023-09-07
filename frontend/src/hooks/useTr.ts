@@ -1,7 +1,6 @@
 import { useCallback, useRef } from 'react';
 
 import { useAppContext } from './useAppContext';
-import { langInfo2String } from '../common/langUtils';
 
 import { useSiteTextUpsertMutation } from '../generated/graphql';
 
@@ -12,7 +11,6 @@ export function useTr() {
     states: {
       global: {
         siteTexts: { originalMap, translationMap },
-        langauges: { appLanguage },
       },
     },
   } = useAppContext();
@@ -44,16 +42,13 @@ export function useTr() {
         });
       }
 
-      if (
-        translationMap[langInfo2String(appLanguage)] &&
-        translationMap[langInfo2String(appLanguage)][siteText.trim()]
-      ) {
-        return translationMap[langInfo2String(appLanguage)][siteText.trim()];
+      if (translationMap[siteText.trim()]) {
+        return translationMap[siteText.trim()];
       }
 
       return siteText.trim();
     },
-    [translationMap, originalMap, appLanguage, siteTextUpsert],
+    [translationMap, originalMap, siteTextUpsert],
   );
 
   return {
