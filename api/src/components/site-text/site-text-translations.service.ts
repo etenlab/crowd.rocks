@@ -3,7 +3,7 @@ import { PoolClient } from 'pg';
 
 import { pgClientOrPool } from 'src/common/utility';
 
-import { ErrorType } from 'src/common/types';
+import { ErrorType, GenericOutput } from 'src/common/types';
 import { calc_vote_weight } from 'src/common/utility';
 
 import { PostgresService } from 'src/core/postgres.service';
@@ -48,6 +48,8 @@ import {
   getAllSiteTextWordDefinition,
   GetDefinitionIdBySiteTextId,
   getDefinitionIdBySiteTextId,
+  SiteTextDefinitionTranslationCountUpsertsProcedureOutput,
+  callSiteTextDefinitionTranslationCountUpsertsProcedure,
 } from './sql-string';
 
 import { makeStr } from 'src/components/translations/translations.service';
@@ -63,7 +65,12 @@ export class SiteTextTranslationsService {
     private siteTextWordDefinitionService: SiteTextWordDefinitionsService,
     private siteTextPhraseDefinitionService: SiteTextPhraseDefinitionsService,
     private siteTextTranslationVoteService: SiteTextTranslationVotesService,
-  ) {}
+  ) {
+    // update site_text_definition_translation_counts table after 5 mins
+    setTimeout(() => {
+      this.updateSiteTextTranslatedInfo(null);
+    }, 300000);
+  }
 
   async upsertFromTranslationlikeString(
     fromInput: SiteTextTranslationsFromInput,
@@ -940,6 +947,111 @@ export class SiteTextTranslationsService {
     return {
       error: ErrorType.UnknownError,
       site_text_translation_with_vote_list_by_language_list: null,
+    };
+  }
+
+  async updateSiteTextTranslatedInfo(
+    pgClient: PoolClient | null,
+  ): Promise<GenericOutput> {
+    try {
+      const { error: languageError, site_text_language_list } =
+        await this.siteTextService.getAllSiteTextLanguageList(pgClient);
+
+      if (languageError !== ErrorType.NoError || !site_text_language_list) {
+        return {
+          error: languageError,
+        };
+      }
+
+      for (const language of site_text_language_list) {
+        const upsertInput: {
+          site_text_id: number;
+          is_word_definition: boolean;
+          language_code: string;
+          dialect_code: string | null;
+          geo_code: string | null;
+          count: number;
+        }[] = [];
+
+        const res = await pgClientOrPool({
+          client: pgClient,
+          pool: this.pg.pool,
+        }).query<GetAllSiteTextWordDefinition>(
+          ...getAllSiteTextWordDefinition(),
+        );
+
+        const siteTextWordDefinitionIds = res.rows.map((row) => ({
+          site_text_id: +row.site_text_id,
+          site_text_type_is_word: true,
+        }));
+
+        const res2 = await pgClientOrPool({
+          client: pgClient,
+          pool: this.pg.pool,
+        }).query<GetAllSiteTextPhraseDefinition>(
+          ...getAllSiteTextPhraseDefinition(),
+        );
+
+        const siteTextPhraseDefinitionIds = res2.rows.map((row) => ({
+          site_text_id: +row.site_text_id,
+          site_text_type_is_word: false,
+        }));
+
+        const siteTextIds = [
+          ...siteTextWordDefinitionIds,
+          ...siteTextPhraseDefinitionIds,
+        ];
+
+        const { site_text_translation_with_vote_list } =
+          await this.getAllTranslationFromSiteTextDefinitionIDs(
+            siteTextIds,
+            language.language_code,
+            language.dialect_code,
+            language.geo_code,
+            pgClient,
+          );
+
+        for (let i = 0; i < siteTextIds.length; i++) {
+          if (!site_text_translation_with_vote_list[i]) {
+            continue;
+          }
+
+          upsertInput.push({
+            site_text_id: siteTextIds[i].site_text_id,
+            is_word_definition: siteTextIds[i].site_text_type_is_word,
+            language_code: language.language_code,
+            dialect_code: language.dialect_code,
+            geo_code: language.geo_code,
+            count: site_text_translation_with_vote_list[i].length,
+          });
+        }
+
+        await pgClientOrPool({
+          client: pgClient,
+          pool: this.pg.pool,
+        }).query<SiteTextDefinitionTranslationCountUpsertsProcedureOutput>(
+          ...callSiteTextDefinitionTranslationCountUpsertsProcedure({
+            site_text_ids: upsertInput.map((item) => item.site_text_id),
+            is_word_definitions: upsertInput.map(
+              (item) => item.is_word_definition,
+            ),
+            language_codes: upsertInput.map((item) => item.language_code),
+            dialect_codes: upsertInput.map((item) => item.dialect_code),
+            geo_codes: upsertInput.map((item) => item.geo_code),
+            counts: upsertInput.map((item) => item.count),
+          }),
+        );
+      }
+
+      return {
+        error: ErrorType.NoError,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
     };
   }
 }
