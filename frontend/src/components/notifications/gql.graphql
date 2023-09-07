@@ -1,0 +1,37 @@
+mutation AddNotification($text: String!, $user_id: ID!) {
+    addNotification(input: {text: $text, user_id: $user_id}) {
+      error
+      notification {
+        id
+        text
+        isNotified
+      }
+    } 
+}
+
+query ListNotifications {
+    notifications {
+        error
+        notifications {
+            text
+            id
+        isNotified
+        }
+    }
+}
+
+mutation DeleteNotification($id: ID!) {
+  notificationDelete(input: {notification_id: $id}) {
+    error
+    notification_id
+  }
+}
+
+mutation MarkNotificationRead($id: ID!){
+  markNotificationAsRead(input: {notification_id: $id}) {
+    error
+    notification_id
+  }
+}
+
+

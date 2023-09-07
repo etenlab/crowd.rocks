@@ -21,6 +21,17 @@ export type Scalars = {
   Upload: { input: any; output: any; }
 };
 
+export type AddNotificationInput = {
+  text: Scalars['String']['input'];
+  user_id: Scalars['ID']['input'];
+};
+
+export type AddNotificationOutput = {
+  __typename?: 'AddNotificationOutput';
+  error: ErrorType;
+  notification?: Maybe<Notification>;
+};
+
 export type AvatarUpdateInput = {
   avatar: Scalars['String']['input'];
 };
@@ -91,6 +102,8 @@ export enum ErrorType {
   MapInsertFailed = 'MapInsertFailed',
   MapNotFound = 'MapNotFound',
   NoError = 'NoError',
+  NotificationDeleteFailed = 'NotificationDeleteFailed',
+  NotificationInsertFailed = 'NotificationInsertFailed',
   OffsetInvalid = 'OffsetInvalid',
   ParentElectionNotFound = 'ParentElectionNotFound',
   PasswordInvalid = 'PasswordInvalid',
@@ -495,8 +508,19 @@ export type MapWordWithVotes = {
   word_id: Scalars['ID']['output'];
 };
 
+export type MarkNotificationReadInput = {
+  notification_id: Scalars['ID']['input'];
+};
+
+export type MarkNotificationReadOutput = {
+  __typename?: 'MarkNotificationReadOutput';
+  error: ErrorType;
+  notification_id: Scalars['ID']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
+  addNotification: AddNotificationOutput;
   avatarUpdateResolver: AvatarUpdateOutput;
   emailResponseResolver: EmailResponseOutput;
   forumDelete: ForumDeleteOutput;
@@ -509,6 +533,8 @@ export type Mutation = {
   mapUpload: MapUploadOutput;
   mapsReTranslate: GenericOutput;
   mapsTranslationsReset: GenericOutput;
+  markNotificationAsRead: MarkNotificationReadOutput;
+  notificationDelete: NotificationDeleteOutput;
   passwordResetFormResolver: LoginOutput;
   phraseDefinitionUpsert: PhraseDefinitionUpsertOutput;
   phraseToPhraseTranslationUpsert: PhraseToPhraseTranslationUpsertOutput;
@@ -548,6 +574,11 @@ export type Mutation = {
   wordToWordTranslationUpsert: WordToWordTranslationUpsertOutput;
   wordUpsert: WordUpsertOutput;
   wordVoteUpsert: WordVoteOutput;
+};
+
+
+export type MutationAddNotificationArgs = {
+  input: AddNotificationInput;
 };
 
 
@@ -604,6 +635,16 @@ export type MutationMapUploadArgs = {
 
 export type MutationMapsReTranslateArgs = {
   forLangTag?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationMarkNotificationAsReadArgs = {
+  input: MarkNotificationReadInput;
+};
+
+
+export type MutationNotificationDeleteArgs = {
+  input: NotificationDeleteInput;
 };
 
 
@@ -827,6 +868,29 @@ export type MutationWordUpsertArgs = {
 
 export type MutationWordVoteUpsertArgs = {
   input: WordVoteUpsertInput;
+};
+
+export type Notification = {
+  __typename?: 'Notification';
+  id: Scalars['ID']['output'];
+  isNotified: Scalars['Boolean']['output'];
+  text: Scalars['String']['output'];
+};
+
+export type NotificationDeleteInput = {
+  notification_id: Scalars['ID']['input'];
+};
+
+export type NotificationDeleteOutput = {
+  __typename?: 'NotificationDeleteOutput';
+  error: ErrorType;
+  notification_id: Scalars['ID']['output'];
+};
+
+export type NotificationListOutput = {
+  __typename?: 'NotificationListOutput';
+  error: ErrorType;
+  notifications: Array<Notification>;
 };
 
 export type PageInfo = {
@@ -1172,6 +1236,7 @@ export type Query = {
   getWordsByLanguage: WordWithVoteListConnection;
   languagesForGoogleTranslate: LanguageListForGoogleTranslateOutput;
   loggedInIsAdmin: IsAdminIdOutput;
+  notifications: NotificationListOutput;
   phraseDefinitionRead: PhraseDefinitionReadOutput;
   phraseRead: PhraseReadOutput;
   phraseToPhraseTranslationRead: PhraseToPhraseTranslationReadOutput;
@@ -2466,6 +2531,33 @@ export type MapsReTranslateMutationVariables = Exact<{
 
 
 export type MapsReTranslateMutation = { __typename?: 'Mutation', mapsReTranslate: { __typename?: 'GenericOutput', error: ErrorType } };
+
+export type AddNotificationMutationVariables = Exact<{
+  text: Scalars['String']['input'];
+  user_id: Scalars['ID']['input'];
+}>;
+
+
+export type AddNotificationMutation = { __typename?: 'Mutation', addNotification: { __typename?: 'AddNotificationOutput', error: ErrorType, notification?: { __typename?: 'Notification', id: string, text: string, isNotified: boolean } | null } };
+
+export type ListNotificationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ListNotificationsQuery = { __typename?: 'Query', notifications: { __typename?: 'NotificationListOutput', error: ErrorType, notifications: Array<{ __typename?: 'Notification', text: string, id: string, isNotified: boolean }> } };
+
+export type DeleteNotificationMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteNotificationMutation = { __typename?: 'Mutation', notificationDelete: { __typename?: 'NotificationDeleteOutput', error: ErrorType, notification_id: string } };
+
+export type MarkNotificationReadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type MarkNotificationReadMutation = { __typename?: 'Mutation', markNotificationAsRead: { __typename?: 'MarkNotificationReadOutput', error: ErrorType, notification_id: string } };
 
 export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
@@ -4901,6 +4993,152 @@ export function useMapsReTranslateMutation(baseOptions?: Apollo.MutationHookOpti
 export type MapsReTranslateMutationHookResult = ReturnType<typeof useMapsReTranslateMutation>;
 export type MapsReTranslateMutationResult = Apollo.MutationResult<MapsReTranslateMutation>;
 export type MapsReTranslateMutationOptions = Apollo.BaseMutationOptions<MapsReTranslateMutation, MapsReTranslateMutationVariables>;
+export const AddNotificationDocument = gql`
+    mutation AddNotification($text: String!, $user_id: ID!) {
+  addNotification(input: {text: $text, user_id: $user_id}) {
+    error
+    notification {
+      id
+      text
+      isNotified
+    }
+  }
+}
+    `;
+export type AddNotificationMutationFn = Apollo.MutationFunction<AddNotificationMutation, AddNotificationMutationVariables>;
+
+/**
+ * __useAddNotificationMutation__
+ *
+ * To run a mutation, you first call `useAddNotificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddNotificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addNotificationMutation, { data, loading, error }] = useAddNotificationMutation({
+ *   variables: {
+ *      text: // value for 'text'
+ *      user_id: // value for 'user_id'
+ *   },
+ * });
+ */
+export function useAddNotificationMutation(baseOptions?: Apollo.MutationHookOptions<AddNotificationMutation, AddNotificationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddNotificationMutation, AddNotificationMutationVariables>(AddNotificationDocument, options);
+      }
+export type AddNotificationMutationHookResult = ReturnType<typeof useAddNotificationMutation>;
+export type AddNotificationMutationResult = Apollo.MutationResult<AddNotificationMutation>;
+export type AddNotificationMutationOptions = Apollo.BaseMutationOptions<AddNotificationMutation, AddNotificationMutationVariables>;
+export const ListNotificationsDocument = gql`
+    query ListNotifications {
+  notifications {
+    error
+    notifications {
+      text
+      id
+      isNotified
+    }
+  }
+}
+    `;
+
+/**
+ * __useListNotificationsQuery__
+ *
+ * To run a query within a React component, call `useListNotificationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useListNotificationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useListNotificationsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useListNotificationsQuery(baseOptions?: Apollo.QueryHookOptions<ListNotificationsQuery, ListNotificationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ListNotificationsQuery, ListNotificationsQueryVariables>(ListNotificationsDocument, options);
+      }
+export function useListNotificationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ListNotificationsQuery, ListNotificationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ListNotificationsQuery, ListNotificationsQueryVariables>(ListNotificationsDocument, options);
+        }
+export type ListNotificationsQueryHookResult = ReturnType<typeof useListNotificationsQuery>;
+export type ListNotificationsLazyQueryHookResult = ReturnType<typeof useListNotificationsLazyQuery>;
+export type ListNotificationsQueryResult = Apollo.QueryResult<ListNotificationsQuery, ListNotificationsQueryVariables>;
+export const DeleteNotificationDocument = gql`
+    mutation DeleteNotification($id: ID!) {
+  notificationDelete(input: {notification_id: $id}) {
+    error
+    notification_id
+  }
+}
+    `;
+export type DeleteNotificationMutationFn = Apollo.MutationFunction<DeleteNotificationMutation, DeleteNotificationMutationVariables>;
+
+/**
+ * __useDeleteNotificationMutation__
+ *
+ * To run a mutation, you first call `useDeleteNotificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteNotificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteNotificationMutation, { data, loading, error }] = useDeleteNotificationMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteNotificationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteNotificationMutation, DeleteNotificationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteNotificationMutation, DeleteNotificationMutationVariables>(DeleteNotificationDocument, options);
+      }
+export type DeleteNotificationMutationHookResult = ReturnType<typeof useDeleteNotificationMutation>;
+export type DeleteNotificationMutationResult = Apollo.MutationResult<DeleteNotificationMutation>;
+export type DeleteNotificationMutationOptions = Apollo.BaseMutationOptions<DeleteNotificationMutation, DeleteNotificationMutationVariables>;
+export const MarkNotificationReadDocument = gql`
+    mutation MarkNotificationRead($id: ID!) {
+  markNotificationAsRead(input: {notification_id: $id}) {
+    error
+    notification_id
+  }
+}
+    `;
+export type MarkNotificationReadMutationFn = Apollo.MutationFunction<MarkNotificationReadMutation, MarkNotificationReadMutationVariables>;
+
+/**
+ * __useMarkNotificationReadMutation__
+ *
+ * To run a mutation, you first call `useMarkNotificationReadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkNotificationReadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markNotificationReadMutation, { data, loading, error }] = useMarkNotificationReadMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useMarkNotificationReadMutation(baseOptions?: Apollo.MutationHookOptions<MarkNotificationReadMutation, MarkNotificationReadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MarkNotificationReadMutation, MarkNotificationReadMutationVariables>(MarkNotificationReadDocument, options);
+      }
+export type MarkNotificationReadMutationHookResult = ReturnType<typeof useMarkNotificationReadMutation>;
+export type MarkNotificationReadMutationResult = Apollo.MutationResult<MarkNotificationReadMutation>;
+export type MarkNotificationReadMutationOptions = Apollo.BaseMutationOptions<MarkNotificationReadMutation, MarkNotificationReadMutationVariables>;
 export const PhraseDefinitionReadDocument = gql`
     query PhraseDefinitionRead($id: ID!) {
   phraseDefinitionRead(id: $id) {
@@ -6384,6 +6622,7 @@ export const namedOperations = {
     GetTranslatedMapContent: 'GetTranslatedMapContent',
     IsAdminLoggedIn: 'IsAdminLoggedIn',
     GetOrigMapContent: 'GetOrigMapContent',
+    ListNotifications: 'ListNotifications',
     PhraseDefinitionRead: 'PhraseDefinitionRead',
     GetPhrasesByLanguage: 'GetPhrasesByLanguage',
     GetPhraseDefinitionsByPhraseId: 'GetPhraseDefinitionsByPhraseId',
@@ -6429,6 +6668,9 @@ export const namedOperations = {
     UploadFile: 'UploadFile',
     MapsTranslationsReset: 'MapsTranslationsReset',
     MapsReTranslate: 'MapsReTranslate',
+    AddNotification: 'AddNotification',
+    DeleteNotification: 'DeleteNotification',
+    MarkNotificationRead: 'MarkNotificationRead',
     PhraseDefinitionUpsert: 'PhraseDefinitionUpsert',
     TogglePhraseDefinitionVoteStatus: 'TogglePhraseDefinitionVoteStatus',
     TogglePhraseVoteStatus: 'TogglePhraseVoteStatus',
