@@ -4,6 +4,7 @@ import { v2 } from '@google-cloud/translate';
 import { LanguageInput } from '../common/types';
 
 import { ConfigService } from 'src/core/config.service';
+import { substituteN, unSubstituteN } from '../../common/utility';
 
 const LIMITS = 6000000 - 1000000;
 
@@ -64,16 +65,18 @@ export class GoogleTranslateService {
           await delay(60 * 1000);
           this.availableCharactors = LIMITS;
         }
-
         const [translations] = await this.gcpTranslateClient!.translate(
-          chunks.join('\n'),
+          substituteN(chunks).join('\n'),
           {
             from: from.language_code,
             to: to.language_code,
           },
         );
 
-        translationTexts = [...translationTexts, ...translations.split('\n')];
+        translationTexts = [
+          ...translationTexts,
+          ...unSubstituteN(translations.split('\n')),
+        ];
 
         chunks = [];
         this.lastOperateTime = Date.now();

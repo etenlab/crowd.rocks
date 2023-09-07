@@ -17,6 +17,10 @@ import { PhraseModule } from './components/phrases/phrases.module';
 import { SiteTextsModule } from './components/site-text/site-texts.module';
 import { HttpLoggerMiddleware } from './core/middleware/http-logger.middleware';
 import { MiddlewareModule } from './core/middleware/middleware.module';
+import { ForumsModule } from './components/forums/forums.module';
+import { ForumFoldersModule } from './components/forum-folders/folders.module';
+import { ThreadModule } from './components/threads/threads.module';
+import { NotificationModule } from './components/notifications/notification.module';
 
 @Module({
   imports: [
@@ -35,10 +39,14 @@ import { MiddlewareModule } from './core/middleware/middleware.module';
     EmailModule,
     WordsModule,
     MapsModule,
+    ForumsModule,
+    ForumFoldersModule,
+    ThreadModule,
     DefinitionsModule,
     PhraseModule,
     SiteTextsModule,
     MiddlewareModule,
+    NotificationModule,
   ],
   controllers: [],
   providers: [],

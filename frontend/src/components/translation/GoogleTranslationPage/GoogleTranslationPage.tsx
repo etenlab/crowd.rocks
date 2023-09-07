@@ -25,12 +25,14 @@ import {
   useLanguagesForGoogleTranslateQuery,
   useTranslateAllWordsAndPhrasesByGoogleMutation,
   TranslateAllWordsAndPhrasesByGoogleResult,
+  useMapsReTranslateMutation,
 } from '../../../generated/graphql';
 
 import {
   langInfo2String,
   subTags2LangInfo,
   getLangsRegistry,
+  langInfo2tag,
 } from '../../../common/langUtils';
 
 function messageHTML({
@@ -76,6 +78,8 @@ export function GoogleTranslationPage() {
   } = useLanguagesForGoogleTranslateQuery();
   const [translateAllWordsAndPhrasesByGoogleMutation] =
     useTranslateAllWordsAndPhrasesByGoogleMutation();
+
+  const [mapsReTranslate] = useMapsReTranslateMutation();
 
   const batchTranslatingRef = useRef<boolean>(false);
   const [batchTranslating, setBatchTranslating] = useState<boolean>(false);
@@ -131,11 +135,13 @@ export function GoogleTranslationPage() {
     });
 
     dismiss();
-    setResult(
-      data && data.translateAllWordsAndPhrasesByGoogle.result
-        ? data.translateAllWordsAndPhrasesByGoogle.result
-        : null,
-    );
+
+    if (data && data.translateAllWordsAndPhrasesByGoogle.result) {
+      setResult(data.translateAllWordsAndPhrasesByGoogle.result);
+      mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
   };
 
   const handleTranslateAll = async () => {
@@ -197,6 +203,9 @@ export function GoogleTranslationPage() {
         sumOfResult.totalPhraseCount += t.totalPhraseCount;
         sumOfResult.translatedPhraseCount += t.translatedPhraseCount;
         sumOfResult.translatedWordCount += t.translatedWordCount;
+        mapsReTranslate({
+          variables: { forLangTag: lang.tag },
+        });
       }
 
       completed++;

@@ -17,6 +17,7 @@ import {
   languageOutline,
   codeWorkingOutline,
   mapOutline,
+  sendOutline,
 } from 'ionicons/icons';
 import { RouteComponentProps } from 'react-router';
 import './Home.css';
@@ -28,11 +29,28 @@ import {
 } from './styled';
 import { useTr } from '../../hooks/useTr';
 import { PageLayout } from '../common/PageLayout';
+import { ISettings, globals } from '../../services/globals';
 
 interface HomePageProps
   extends RouteComponentProps<{
     nation_id: string;
     language_id: string;
+  }> {}
+
+interface ISubMenu
+  extends Array<{
+    isShown: () => boolean;
+    link: string;
+    icon: string;
+    title: string;
+    description: string;
+  }> {}
+
+interface IMenu
+  extends Array<{
+    isShown: () => boolean;
+    group: string;
+    subMenu: ISubMenu;
   }> {}
 
 const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
@@ -42,30 +60,43 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [show_legal_menu, set_show_legal_menu] = useState(false);
 
+  const settings: ISettings = globals.get_settings();
+
   useIonViewWillEnter(() => {
     document.title = tr('Home');
   });
 
-  const menu = [
+  const menu: IMenu = [
     {
       group: tr('Media'),
+      isShown: () => true,
       subMenu: [
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/maps`,
           icon: mapOutline,
           title: tr('Maps'),
           description: tr('Translate maps into any language'),
+          isShown: () => true,
+        },
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/forums`,
+          icon: sendOutline,
+          title: tr('Community'),
+          description: tr('Hold discussions with other members'),
+          isShown: () => true,
         },
       ],
     },
     {
       group: tr('Language'),
+      isShown: () => true,
       subMenu: [
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/dictionary-list`,
           icon: bookOutline,
           title: tr('Dictionary'),
           description: tr('Manage the words and definitions in a language'),
+          isShown: () => !!settings?.isBetaTools,
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/phrase-book-list`,
@@ -74,23 +105,27 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           description: tr(
             'Manage the phrases and phrase definitions in a language',
           ),
+          isShown: () => !!settings?.isBetaTools,
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/translation`,
           icon: languageOutline,
           title: tr('Translation'),
           description: tr('Translate words and phrases into any language'),
+          isShown: () => !!settings?.isBetaTools,
         },
       ],
     },
     {
       group: tr('User Interface'),
+      isShown: () => true,
       subMenu: [
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/site-text-list`,
           icon: codeWorkingOutline,
           title: tr('Site Text Strings'),
           description: tr('Help us translate this app into more languages'),
+          isShown: () => true,
         },
       ],
     },
@@ -98,40 +133,46 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
 
   return (
     <PageLayout>
-      {menu.map((group) => (
-        <CustomGroup key={group.group}>
-          <CustomIonLabel>
-            <IonLabel>{group.group}</IonLabel>
-          </CustomIonLabel>
-          <hr style={{ marginTop: '7px', marginBottom: '0px' }} />
-          {group.subMenu.map((item) => (
-            <IonItem lines="none" key={item.title}>
-              <CustomIonCard
-                onClick={() => {
-                  router.push(item.link);
-                }}
-                style={{ cursor: 'pointer', padding: '0px' }}
-              >
-                <IonCardHeader>
-                  <StIonCardTitleContainer>
-                    <IonCardTitle>
-                      <div className="home-card-title">
-                        <IonIcon icon={item.icon}></IonIcon>
-                        <div className="home-card-title-text">
-                          <IonText>{item.title}</IonText>
-                        </div>
-                      </div>
-                    </IonCardTitle>
-                  </StIonCardTitleContainer>
-                </IonCardHeader>
-                <IonCardContent>
-                  <IonCardSubtitle>{item.description}</IonCardSubtitle>
-                </IonCardContent>
-              </CustomIonCard>
-            </IonItem>
-          ))}
-        </CustomGroup>
-      ))}
+      {menu.map(
+        (group) =>
+          group.isShown() && (
+            <CustomGroup key={group.group}>
+              <CustomIonLabel>
+                <IonLabel>{group.group}</IonLabel>
+              </CustomIonLabel>
+              <hr style={{ marginTop: '7px', marginBottom: '0px' }} />
+              {group.subMenu.map(
+                (item) =>
+                  item.isShown() && (
+                    <IonItem lines="none" key={item.title}>
+                      <CustomIonCard
+                        onClick={() => {
+                          router.push(item.link);
+                        }}
+                        style={{ cursor: 'pointer', padding: '0px' }}
+                      >
+                        <IonCardHeader>
+                          <StIonCardTitleContainer>
+                            <IonCardTitle>
+                              <div className="home-card-title">
+                                <IonIcon icon={item.icon}></IonIcon>
+                                <div className="home-card-title-text">
+                                  <IonText>{item.title}</IonText>
+                                </div>
+                              </div>
+                            </IonCardTitle>
+                          </StIonCardTitleContainer>
+                        </IonCardHeader>
+                        <IonCardContent>
+                          <IonCardSubtitle>{item.description}</IonCardSubtitle>
+                        </IonCardContent>
+                      </CustomIonCard>
+                    </IonItem>
+                  ),
+              )}
+            </CustomGroup>
+          ),
+      )}
 
       <div className="home-footer">
         <div className="ion-text-end">

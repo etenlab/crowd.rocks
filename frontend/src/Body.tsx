@@ -1,6 +1,8 @@
-import { useState, useRef, useMemo, useCallback } from 'react';
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { Redirect, Route } from 'react-router';
 import {
+  IonBadge,
+  IonButton,
   IonContent,
   IonHeader,
   IonIcon,
@@ -11,12 +13,22 @@ import {
   useIonViewWillEnter,
   useIonViewWillLeave,
 } from '@ionic/react';
-import { menu, moon, sunny, languageOutline } from 'ionicons/icons';
+import {
+  menu,
+  moon,
+  sunny,
+  languageOutline,
+  notificationsOutline,
+} from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 
 import './Body.css';
 
-import { ErrorType, useLogoutMutation } from './generated/graphql';
+import {
+  ErrorType,
+  useListNotificationsLazyQuery,
+  useLogoutMutation,
+} from './generated/graphql';
 
 import { globals } from './services/globals';
 import { login_change } from './services/subscriptions';
@@ -56,6 +68,11 @@ import { useTr } from './hooks/useTr';
 
 import AppTypeahead from './components/common/LangSelector/TypeAhead';
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
+import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
+import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
+import { ForumFolderDetailPage } from './components/forums/ForumFolderDetailPage/FolderDetailPage';
+import { NotificationPage } from './components/notifications/NotificationPage';
+import { SettingsPage } from './components/settings/SettingsPage';
 
 const Body: React.FC = () => {
   const {
@@ -79,6 +96,23 @@ const Body: React.FC = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [logoutMutation, { data, loading, error }] = useLogoutMutation();
+
+  const [getNotifications, { data: nData, error: nError }] =
+    useListNotificationsLazyQuery();
+  const [unreadNotificationCount, setUnreadCount] = useState<
+    number | undefined
+  >(undefined);
+
+  useEffect(() => {
+    getNotifications();
+    let count = undefined;
+    if (!nError && nData && nData.notifications.error === ErrorType.NoError) {
+      count = nData.notifications.notifications.filter(
+        (n) => !n.isNotified,
+      ).length;
+      setUnreadCount(count);
+    }
+  }, [getNotifications, nData, nError]);
 
   let sub: Subscription;
 
@@ -124,6 +158,11 @@ const Body: React.FC = () => {
     router.push(`/US/${appLanguage.lang.tag}/1/profile`);
   };
 
+  const click_settings = () => {
+    toggleMenu();
+    router.push(`/US/${appLanguage.lang.tag}/1/settings`);
+  };
+
   const click_register = () => {
     toggleMenu();
     router.push(`/US/${appLanguage.lang.tag}/1/register`);
@@ -159,6 +198,10 @@ const Body: React.FC = () => {
     await apollo_client.resetStore();
 
     router.push(`/US/${appLanguage.lang.tag}/1/home`);
+  };
+
+  const click_notifications = () => {
+    router.push(`/US/${appLanguage.lang.tag}/1/notifications`);
   };
 
   const toggle_theme = () => {
@@ -249,6 +292,21 @@ const Body: React.FC = () => {
                     className="clickable theme-icon"
                   />
                 )}
+                <IonButton
+                  size="small"
+                  fill="clear"
+                  buttonType="string"
+                  className="notification"
+                  onClick={click_notifications}
+                >
+                  <IonIcon icon={notificationsOutline} className="theme-icon" />
+                  <IonBadge className="notification-badge">
+                    {unreadNotificationCount === 0
+                      ? undefined
+                      : unreadNotificationCount}
+                  </IonBadge>
+                </IonButton>
+
                 <IonIcon
                   icon={menu}
                   onClick={toggleMenu}
@@ -259,6 +317,14 @@ const Body: React.FC = () => {
             <div className="header-menu">
               {show_menu && (
                 <div className="accordion-group">
+                  <div slot="content" className="header-menu-item-holder">
+                    <div
+                      className="clickable ion-text-end"
+                      onClick={click_settings}
+                    >
+                      Settings
+                    </div>
+                  </div>
                   {is_logged_in && (
                     <div slot="content" className="header-menu-item-holder">
                       <div
@@ -385,8 +451,33 @@ const Body: React.FC = () => {
           />
           <Route
             exact
+            path="/:nation_id/:language_id/:cluster_id/forums"
+            component={ForumListPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/forums/:forum_id/:forum_name"
+            component={ForumDetailPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/folders/:forum_folder_id/:forum_folder_name"
+            component={ForumFolderDetailPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/notifications"
+            component={NotificationPage}
+          />
+          <Route
+            exact
             path="/:nation_id/:language_id/:cluster_id/google-translate"
             component={GoogleTranslationPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/settings"
+            component={SettingsPage}
           />
           <Route exact path="/">
             <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />

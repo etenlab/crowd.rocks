@@ -168,3 +168,15 @@ mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
     }
   }
 }
+
+mutation MapsTranslationsReset {
+  mapsTranslationsReset {
+    error
+  }
+}
+
+mutation MapsReTranslate($forLangTag: String) {
+  mapsReTranslate(forLangTag: $forLangTag) {
+    error
+  }
+}

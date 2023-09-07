@@ -23,15 +23,27 @@ export enum ErrorType {
   EmailIsBlocked = 'EmailIsBlocked',
   EmailUnavailable = 'EmailUnavailable',
 
+  ForumUpsertFailed = 'ForumUpsertFailed',
+  ForumDeleteFailed = 'ForumDeleteFailed',
+
   FileSaveFailed = 'FileSaveFailed',
   FileDeleteFailed = 'FileDeleteFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
+  FolderIdNotDefined = 'FolderIdNotDefined',
+  FolderForThreadNotExists = 'FolderForThreadNotExists',
+  ForumForFolderNotExists = 'ForumForFolderNotExists',
+  ForumFolderUpsertFailed = 'ForumFolderUpsertFailed',
+  ForumFolderDeleteFailed = 'ForumFolderDeleteFailed',
 
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
   InvalidInputs = 'InvalidInputs',
   LimitInvalid = 'LimitInvalid',
   NoError = 'NoError',
   OffsetInvalid = 'OffsetInvalid',
+
+  NotificationDeleteFailed = 'NotificationDeleteFailed',
+  NotificationInsertFailed = 'NotificationInsertFailed',
+
   ParentElectionNotFound = 'ParentElectionNotFound',
 
   PasswordTooLong = 'PasswordTooLong',
@@ -47,6 +59,8 @@ export enum ErrorType {
 
   RankInvalid = 'RankInvalid',
   RankUnchanged = 'RankUnchanged',
+
+  ThreadUpsertFailed = 'ThreadUpsertFailed',
 
   TokenInvalid = 'TokenInvalid',
 

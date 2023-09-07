@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useCallback, useState } from 'react';
 import {
   CustomCard,
   CustomCardTitle,
@@ -7,11 +7,13 @@ import {
 } from './styled';
 
 import { VoteButtonsHerizontal } from '../VoteButtonsHerizontal';
-import { chatbubbleEllipsesSharp } from 'ionicons/icons';
+import { chatbubbleEllipsesSharp, checkmark, pencil } from 'ionicons/icons';
 import { StChatIcon } from '../styled';
+import { IonIcon, IonInput } from '@ionic/react';
 
 type CardProps = {
   content?: string;
+  contentIcon?: string;
   description?: ReactNode;
   voteFor?: 'content' | 'description';
   vote?: {
@@ -25,18 +27,23 @@ type CardProps = {
   };
   onClick?: () => void;
   routerLink?: string;
+  onContentEdit?: (newValue: string) => void;
 };
 
 export function Card({
   content,
+  contentIcon,
   description,
   voteFor = 'content',
   onClick,
   routerLink,
   vote,
   discussion,
+  onContentEdit,
 }: CardProps) {
   const voteButtonCom = vote ? <VoteButtonsHerizontal {...vote} /> : null;
+  const [editing, setEditing] = useState(false);
+  const [newContentVal, setNewContentVal] = useState(content);
 
   // the chat icon should be grouped with the vote buttons
   const reactionCom = discussion ? (
@@ -64,6 +71,39 @@ export function Card({
     voteButtonCom
   ) : null;
 
+  const handleSave = useCallback(() => {
+    setEditing(false);
+    if (content != newContentVal && newContentVal != '')
+      onContentEdit && onContentEdit(newContentVal!);
+  }, [content, newContentVal, onContentEdit]);
+
+  const editableContentComp = (
+    <div>
+      {editing ? (
+        <IonInput
+          value={content}
+          fill="outline"
+          onClick={(e) => e.stopPropagation()}
+          onIonChange={(e) => {
+            setNewContentVal(e.detail.value!);
+          }}
+        />
+      ) : (
+        content
+      )}
+    </div>
+  );
+
+  const editableIconComp = (
+    <IonIcon
+      icon={editing ? checkmark : pencil}
+      onClick={(e) => {
+        e.stopPropagation();
+        editing ? handleSave() : setEditing(true);
+      }}
+    />
+  );
+
   return (
     <CustomCard
       onClick={() => onClick && onClick()}
@@ -73,7 +113,17 @@ export function Card({
       {content ? (
         <CustomCardHeader>
           <CustomCardTitle>
-            {content || ''}
+            <div style={{ display: 'flex' }}>
+              {contentIcon && (
+                <IonIcon
+                  icon={contentIcon}
+                  style={{ paddingRight: '15px', marginTop: '2px' }}
+                />
+              )}
+              {(!onContentEdit && content) || ''}
+              {onContentEdit && editableContentComp}
+            </div>
+            {onContentEdit && editableIconComp}
             {voteFor === 'content' ? reactionCom : null}
           </CustomCardTitle>
         </CustomCardHeader>

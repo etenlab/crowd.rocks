@@ -247,6 +247,33 @@ export class DatabaseVersionControlService {
     // file
     await this.runSqlFile('./src/core/sql/file/file_create.sql');
 
+    // forum
+    await this.runSqlFile('./src/core/sql/forums/forum_upsert.sql');
+    await this.runSqlFile('./src/core/sql/forums/forum_delete.sql');
+
+    // forum folder
+    await this.runSqlFile(
+      './src/core/sql/forum_folders/forum_folder_delete.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/forum_folders/forum_folder_upsert.sql',
+    );
+
+    // threads
+    await this.runSqlFile('./src/core/sql/threads/thread_delete.sql');
+    await this.runSqlFile('./src/core/sql/threads/thread_upsert.sql');
+
+    // notifications
+    await this.runSqlFile(
+      './src/core/sql/notification/notification_delete.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/notification/notification_insert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/notification/mark_notification_as_read.sql',
+    );
+
     await this.setVersionNumber(2);
   }
 

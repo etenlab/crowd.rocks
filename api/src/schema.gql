@@ -2,6 +2,16 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddNotificationInput {
+  text: String!
+  user_id: ID!
+}
+
+type AddNotificationOutput {
+  error: ErrorType!
+  notification: Notification
+}
+
 input AvatarUpdateInput {
   avatar: String!
 }
@@ -58,6 +68,13 @@ enum ErrorType {
   FileDeleteFailed
   FileSaveFailed
   FileWithFilenameAlreadyExists
+  FolderForThreadNotExists
+  FolderIdNotDefined
+  ForumDeleteFailed
+  ForumFolderDeleteFailed
+  ForumFolderUpsertFailed
+  ForumForFolderNotExists
+  ForumUpsertFailed
   InvalidEmailOrPassword
   InvalidInputs
   LimitInvalid
@@ -66,6 +83,8 @@ enum ErrorType {
   MapInsertFailed
   MapNotFound
   NoError
+  NotificationDeleteFailed
+  NotificationInsertFailed
   OffsetInvalid
   ParentElectionNotFound
   PasswordInvalid
@@ -91,6 +110,7 @@ enum ErrorType {
   SiteTextPhraseDefinitionNotFound
   SiteTextWordDefinitionAlreadyExists
   SiteTextWordDefinitionNotFound
+  ThreadUpsertFailed
   TokenInvalid
   Unauthorized
   UnknownError
@@ -115,6 +135,87 @@ type FileUploadUrlResponse {
   url: String!
 }
 
+type Forum {
+  forum_id: ID!
+  name: String!
+}
+
+input ForumDeleteInput {
+  forum_id: ID!
+}
+
+type ForumDeleteOutput {
+  error: ErrorType!
+  forum_id: ID!
+}
+
+type ForumFolder {
+  folder_id: ID!
+  name: String!
+}
+
+input ForumFolderDeleteInput {
+  folder_id: ID!
+}
+
+type ForumFolderDeleteOutput {
+  error: ErrorType!
+  folder_id: ID!
+}
+
+input ForumFolderListInput {
+  forum_id: ID!
+}
+
+type ForumFolderListOutput {
+  error: ErrorType!
+  folders: [ForumFolder!]!
+}
+
+input ForumFolderReadInput {
+  folder_id: ID!
+}
+
+type ForumFolderReadOutput {
+  error: ErrorType!
+  folder: ForumFolder
+}
+
+input ForumFolderUpsertInput {
+  folder_id: ID
+  forum_id: ID!
+  name: String!
+}
+
+type ForumFolderUpsertOutput {
+  error: ErrorType!
+  folder: ForumFolder
+}
+
+type ForumListOutput {
+  error: ErrorType!
+  forums: [Forum!]!
+}
+
+input ForumReadInput {
+  forum_id: ID!
+}
+
+type ForumReadOutput {
+  error: ErrorType!
+  forum: Forum
+}
+
+input ForumUpsertInput {
+  forum_id: ID
+  name: String!
+}
+
+type ForumUpsertOutput {
+  error: ErrorType!
+  forum: Forum
+}
+
 input FromPhraseAndDefintionlikeStringUpsertInput {
   definitionlike_string: String!
   dialect_code: String
@@ -129,6 +230,10 @@ input FromWordAndDefintionlikeStringUpsertInput {
   geo_code: String
   language_code: String!
   wordlike_string: String!
+}
+
+type GenericOutput {
+  error: ErrorType!
 }
 
 input GetAllMapsListInput {
@@ -355,13 +460,31 @@ type MapWordWithVotes {
   word_id: ID!
 }
 
+input MarkNotificationReadInput {
+  notification_id: ID!
+}
+
+type MarkNotificationReadOutput {
+  error: ErrorType!
+  notification_id: ID!
+}
+
 type Mutation {
+  addNotification(input: AddNotificationInput!): AddNotificationOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
+  forumDelete(input: ForumDeleteInput!): ForumDeleteOutput!
+  forumFolderDelete(input: ForumFolderDeleteInput!): ForumFolderDeleteOutput!
+  forumFolderUpsert(input: ForumFolderUpsertInput!): ForumFolderUpsertOutput!
+  forumUpsert(input: ForumUpsertInput!): ForumUpsertOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
   mapDelete(input: MapDeleteInput!): MapDeleteOutput!
   mapUpload(file: Upload!, previewFileId: String): MapUploadOutput!
+  mapsReTranslate(forLangTag: String): GenericOutput!
+  mapsTranslationsReset: GenericOutput!
+  markNotificationAsRead(input: MarkNotificationReadInput!): MarkNotificationReadOutput!
+  notificationDelete(input: NotificationDeleteInput!): NotificationDeleteOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionOutput!
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationOutput!
@@ -374,6 +497,8 @@ type Mutation {
   siteTextTranslationVoteUpsert(from_type_is_word: Boolean!, to_type_is_word: Boolean!, translation_id: ID!, vote: Boolean!): SiteTextTranslationVoteOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextDefinitionOutput!
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
+  threadDelete(input: ThreadDeleteInput!): ThreadDeleteOutput!
+  threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
   togglePhraseDefinitionVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
   togglePhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!, vote: Boolean!): PhraseToPhraseTranslationVoteStatusOutputRow!
   togglePhraseToWordTrVoteStatus(phrase_to_word_translation_id: ID!, vote: Boolean!): PhraseToWordTranslationVoteStatusOutputRow!
@@ -399,6 +524,26 @@ type Mutation {
   wordToWordTranslationUpsert(input: WordToWordTranslationUpsertInput!): WordToWordTranslationOutput!
   wordUpsert(input: WordUpsertInput!): WordOutput!
   wordVoteUpsert(input: WordVoteUpsertInput!): WordVoteOutput!
+}
+
+type Notification {
+  id: ID!
+  isNotified: Boolean!
+  text: String!
+}
+
+input NotificationDeleteInput {
+  notification_id: ID!
+}
+
+type NotificationDeleteOutput {
+  error: ErrorType!
+  notification_id: ID!
+}
+
+type NotificationListOutput {
+  error: ErrorType!
+  notifications: [Notification!]!
 }
 
 type PageInfo {
@@ -653,6 +798,10 @@ type Query {
   file(id: Int!): IFileOutput!
   fileList: [IFile!]!
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
+  forumFolderRead(input: ForumFolderReadInput!): ForumFolderReadOutput!
+  forumFolders(input: ForumFolderListInput!): ForumFolderListOutput!
+  forumRead(input: ForumReadInput!): ForumReadOutput!
+  forums: ForumListOutput!
   getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput!
   getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): SiteTextTranslationWithVoteListByLanguageOutput!
@@ -691,6 +840,7 @@ type Query {
   getWordsByLanguage(after: ID, first: Int, input: LanguageInput!): WordWithVoteListConnection!
   languagesForGoogleTranslate: LanguageListForGoogleTranslateOutput!
   loggedInIsAdmin(input: IsAdminIdInput!): IsAdminIdOutput!
+  notifications: NotificationListOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionOutput!
   phraseRead(input: PhraseReadInput!): PhraseOutput!
   phraseToPhraseTranslationRead(id: ID!): PhraseToPhraseTranslationOutput!
@@ -700,6 +850,8 @@ type Query {
   siteTextPhraseDefinitionRead(id: String!): SiteTextPhraseDefinitionOutput!
   siteTextTranslationVoteRead(id: String!): SiteTextTranslationVoteOutput!
   siteTextWordDefinitionRead(id: String!): SiteTextWordDefinitionOutput!
+  threadRead(input: ThreadReadInput!): ThreadReadOutput!
+  threads(input: ThreadListInput!): ThreadListOutput!
   userReadResolver(input: UserReadInput!): UserReadOutput!
   wordDefinitionRead(id: ID!): WordDefinitionOutput!
   wordRead(input: WordReadInput!): WordOutput!
@@ -908,6 +1060,49 @@ type SiteTextWordToWordTranslationWithVote {
   to_word_definition: WordDefinition!
   upvotes: Int!
   word_to_word_translation_id: ID!
+}
+
+type Thread {
+  name: String!
+  thread_id: ID!
+}
+
+input ThreadDeleteInput {
+  thread_id: ID!
+}
+
+type ThreadDeleteOutput {
+  error: ErrorType!
+  thread_id: ID!
+}
+
+input ThreadListInput {
+  folder_id: ID!
+}
+
+type ThreadListOutput {
+  error: ErrorType!
+  threads: [Thread!]!
+}
+
+input ThreadReadInput {
+  thread_id: ID!
+}
+
+type ThreadReadOutput {
+  error: ErrorType!
+  thread: Thread
+}
+
+input ThreadUpsertInput {
+  folder_id: ID!
+  name: String!
+  thread_id: ID
+}
+
+type ThreadUpsertOutput {
+  error: ErrorType!
+  thread: Thread
 }
 
 input ToDefinitionInput {
