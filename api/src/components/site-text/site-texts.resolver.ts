@@ -26,6 +26,7 @@ import {
   SiteTextTranslationWithVoteOutput,
   SiteTextTranslationWithVoteListByLanguageOutput,
   SiteTextTranslationWithVoteListByLanguageListOutput,
+  SiteTextLanguageWithTranslationInfoListOutput,
 } from './types';
 
 import { SiteTextTranslationVotesService } from './site-text-translation-votes.service';
@@ -334,5 +335,12 @@ export class SiteTextsResolver {
     console.log('site text getAllSiteTextLanguageList resolver');
 
     return this.siteTextService.getAllSiteTextLanguageList(null);
+  }
+
+  @Query(() => SiteTextLanguageWithTranslationInfoListOutput)
+  async getAllSiteTextLanguageListWithRate(): Promise<SiteTextLanguageWithTranslationInfoListOutput> {
+    console.log('site text getAllSiteTextLanguageListWithRate resolver');
+
+    return this.siteTextService.getAllSiteTextLanguageListWithRate(null);
   }
 }

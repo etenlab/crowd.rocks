@@ -19,9 +19,20 @@ import {
   SiteTextDefinitionOutput,
   SiteTextDefinitionListOutput,
   SiteTextLanguageListOutput,
+  SiteTextLanguageWithTranslationInfoListOutput,
+  SiteTextLanguageWithTranslationInfo,
 } from './types';
 
-import { GetSiteTextLanguageList, getSiteTextLanguageList } from './sql-string';
+import {
+  GetSiteTextLanguageList,
+  getSiteTextLanguageList,
+  SiteTextTranslationCountRow,
+  getSiteTextTranslationCount,
+  GetAllSiteTextWordDefinition,
+  getAllSiteTextWordDefinition,
+  GetAllSiteTextPhraseDefinition,
+  getAllSiteTextPhraseDefinition,
+} from './sql-string';
 
 @Injectable()
 export class SiteTextsService {
@@ -275,6 +286,133 @@ export class SiteTextsService {
     return {
       error: ErrorType.UnknownError,
       site_text_language_list: [],
+    };
+  }
+
+  async getAllSiteTextLanguageListWithRate(
+    pgClient: PoolClient | null,
+  ): Promise<SiteTextLanguageWithTranslationInfoListOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<SiteTextTranslationCountRow>(...getSiteTextTranslationCount());
+
+      const languagesMap = new Map<
+        string,
+        {
+          language_code: string;
+          dialect_code: string | null;
+          geo_code: string | null;
+        }
+      >();
+      const siteTextTrCountMap = new Map<string, number>();
+
+      const makeKey = (
+        language_code: string,
+        dialect_code: string | null,
+        geo_code: string | null,
+      ) => {
+        return `${language_code}-${dialect_code ? dialect_code : 'null'}-${
+          geo_code ? geo_code : 'null'
+        }`;
+      };
+
+      for (let i = 0; i < res.rowCount; i++) {
+        const language = {
+          language_code: res.rows[i].language_code,
+          dialect_code: res.rows[i].dialect_code,
+          geo_code: res.rows[i].geo_code,
+        };
+
+        languagesMap.set(
+          makeKey(
+            language.language_code,
+            language.dialect_code,
+            language.geo_code,
+          ),
+          language,
+        );
+
+        const count = res.rows[i].count;
+
+        if (+count === 0) {
+          continue;
+        }
+
+        const mapCount = siteTextTrCountMap.get(
+          makeKey(
+            language.language_code,
+            language.dialect_code,
+            language.geo_code,
+          ),
+        );
+
+        if (mapCount === undefined) {
+          siteTextTrCountMap.set(
+            makeKey(
+              language.language_code,
+              language.dialect_code,
+              language.geo_code,
+            ),
+            1,
+          );
+        } else {
+          siteTextTrCountMap.set(
+            makeKey(
+              language.language_code,
+              language.dialect_code,
+              language.geo_code,
+            ),
+            mapCount + 1,
+          );
+        }
+      }
+
+      const res2 = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetAllSiteTextWordDefinition>(...getAllSiteTextWordDefinition());
+
+      const res3 = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetAllSiteTextPhraseDefinition>(
+        ...getAllSiteTextPhraseDefinition(),
+      );
+
+      const total_count = res2.rowCount + res3.rowCount;
+
+      const result: SiteTextLanguageWithTranslationInfo[] = [];
+
+      for (const language of languagesMap.values()) {
+        result.push({
+          language_code: language.language_code,
+          dialect_code: language.dialect_code,
+          geo_code: language.geo_code,
+          total_count,
+          translated_count:
+            siteTextTrCountMap.get(
+              makeKey(
+                language.language_code,
+                language.dialect_code,
+                language.geo_code,
+              ),
+            ) || 0,
+        });
+      }
+
+      return {
+        error: ErrorType.NoError,
+        site_text_language_with_translation_info_list: result,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      site_text_language_with_translation_info_list: [],
     };
   }
 }

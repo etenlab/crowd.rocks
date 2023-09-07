@@ -433,3 +433,97 @@ export function getDefinitionIdFromPhraseId(
     [phrase_id],
   ];
 }
+
+export type SiteTextDefinitionTranslationCountUpsertsProcedureOutput = {
+  p_site_text_translation_count_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callSiteTextDefinitionTranslationCountUpsertsProcedure({
+  site_text_ids,
+  is_word_definitions,
+  language_codes,
+  dialect_codes,
+  geo_codes,
+  counts,
+}: {
+  site_text_ids: number[];
+  is_word_definitions: boolean[];
+  language_codes: string[];
+  dialect_codes: (string | null)[];
+  geo_codes: (string | null)[];
+  counts: number[];
+}): [
+  string,
+  [
+    number[],
+    boolean[],
+    string[],
+    (string | null)[],
+    (string | null)[],
+    number[],
+  ],
+] {
+  return [
+    `
+      call batch_site_text_translation_count_upsert($1::bigint[], $2::bool[], $3::text[], $4::text[], $5::text[], $6::int[], null, null, '');
+    `,
+    [
+      site_text_ids,
+      is_word_definitions,
+      language_codes,
+      dialect_codes,
+      geo_codes,
+      counts,
+    ],
+  ];
+}
+
+export type GetSiteTextLanguageListV2 = {
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+};
+
+export function getSiteTextLanguageListV2(): [string, []] {
+  return [
+    `
+      select 
+        language_code,
+        dialect_code,
+        geo_code
+      from site_text_translation_counts
+      group by language_code, dialect_code, geo_code;
+    `,
+    [],
+  ];
+}
+
+export type SiteTextTranslationCountRow = {
+  site_text_translation_count_id: string;
+  site_text_id: string;
+  is_word_definition: boolean;
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+  count: number;
+};
+
+export function getSiteTextTranslationCount(): [string, []] {
+  return [
+    `
+      select 
+        site_text_translation_count_id,
+        site_text_id,
+        is_word_definition,
+        language_code,
+        dialect_code,
+        geo_code,
+        count
+      from site_text_translation_counts
+      order by language_code, dialect_code, geo_code;
+    `,
+    [],
+  ];
+}

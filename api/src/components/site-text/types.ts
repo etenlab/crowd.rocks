@@ -196,6 +196,18 @@ export class SiteTextLanguageListOutput extends GenericOutput {
 }
 
 @ObjectType()
+export class SiteTextLanguageWithTranslationInfo extends SiteTextLanguage {
+  @Field(() => Int) total_count: number;
+  @Field(() => Int) translated_count: number;
+}
+
+@ObjectType()
+export class SiteTextLanguageWithTranslationInfoListOutput extends GenericOutput {
+  @Field(() => [SiteTextLanguageWithTranslationInfo], { nullable: 'items' })
+  site_text_language_with_translation_info_list: (SiteTextLanguageWithTranslationInfo | null)[];
+}
+
+@ObjectType()
 export class SiteTextWordToWordTranslationWithVote extends WordToWordTranslation {
   @Field(() => Int) upvotes: number;
   @Field(() => Int) downvotes: number;
