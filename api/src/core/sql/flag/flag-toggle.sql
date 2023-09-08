@@ -11,7 +11,6 @@ as $$
 declare
   v_flag_id bigint;
   v_user_id bigint;
-  v_flag_id bigint;
 begin
   p_error_type := 'UnknownError';
 

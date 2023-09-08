@@ -21,6 +21,7 @@ import { ForumsModule } from './components/forums/forums.module';
 import { ForumFoldersModule } from './components/forum-folders/folders.module';
 import { ThreadModule } from './components/threads/threads.module';
 import { NotificationModule } from './components/notifications/notification.module';
+import { FlagsModule } from './components/flag/flags.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { NotificationModule } from './components/notifications/notification.modu
     SiteTextsModule,
     MiddlewareModule,
     NotificationModule,
+    FlagsModule,
   ],
   controllers: [],
   providers: [],

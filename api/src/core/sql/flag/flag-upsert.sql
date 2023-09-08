@@ -10,7 +10,6 @@ language plpgsql
 as $$
 declare
   v_user_id bigint;
-  v_flag_id bigint;
 begin
   p_error_type := 'UnknownError';
 
