@@ -109,3 +109,6 @@ create table site_text_translation_counts(
   count bigint not null default 0,
   unique (site_text_id, is_word_definition, language_code, dialect_code, geo_code)
 );
+
+alter table wordlike_strings
+alter column wordlike_string type varchar;
