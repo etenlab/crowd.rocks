@@ -70,7 +70,6 @@ import AppTypeahead from './components/common/LangSelector/TypeAhead';
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
 import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
 import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
-import { ForumFolder } from './components/forums/ForumFolderDetail/FolderDetail';
 import { NotificationPage } from './components/notifications/NotificationPage';
 import { SettingsPage } from './components/settings/SettingsPage';
 
@@ -458,11 +457,6 @@ const Body: React.FC = () => {
             exact
             path="/:nation_id/:language_id/:cluster_id/forums/:forum_id/:forum_name"
             component={ForumDetailPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/folders/:forum_folder_id/:forum_folder_name"
-            component={ForumFolder}
           />
           <Route
             exact

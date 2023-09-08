@@ -21,6 +21,24 @@ export const SettingsPage: React.FC = () => {
     });
   }, []);
 
+  const toggleIsOral = useCallback(() => {
+    if (!settings.current) return;
+    settings.current.isOral = !settings.current.isOral;
+    globals.set_settings({
+      ...settings.current,
+      isOral: settings.current!.isOral,
+    });
+  }, []);
+
+  const toggleIsSign = useCallback(() => {
+    if (!settings.current) return;
+    settings.current.isSign = !settings.current.isSign;
+    globals.set_settings({
+      ...settings.current,
+      isSign: settings.current!.isSign,
+    });
+  }, []);
+
   return (
     <PageLayout>
       <h1>{tr('Settings')}</h1>
@@ -31,6 +49,22 @@ export const SettingsPage: React.FC = () => {
           onIonChange={() => toggleIsBetaTools()}
         >
           {tr('Beta Tools')}
+        </IonToggle>
+      </IonItem>
+      <IonItem>
+        <IonToggle
+          checked={settings.current?.isOral}
+          onIonChange={() => toggleIsOral()}
+        >
+          {tr('Oral')}
+        </IonToggle>
+      </IonItem>
+      <IonItem>
+        <IonToggle
+          checked={settings.current?.isSign}
+          onIonChange={() => toggleIsSign()}
+        >
+          {tr('Sign')}
         </IonToggle>
       </IonItem>
     </PageLayout>
