@@ -67,7 +67,7 @@ export class GoogleTranslateService {
         }
 
         const [translations] = await this.gcpTranslateClient!.translate(
-          substituteN(chunks).join('</br>'),
+          substituteN(chunks).join('<br/>'),
           {
             from: from.language_code,
             to: to.language_code,
@@ -77,7 +77,7 @@ export class GoogleTranslateService {
 
         translationTexts = [
           ...translationTexts,
-          ...unSubstituteN(translations.split('</br>')),
+          ...unSubstituteN(translations.split('<br/>')),
         ];
 
         chunks = [];
