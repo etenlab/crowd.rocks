@@ -65,17 +65,19 @@ export class GoogleTranslateService {
           await delay(60 * 1000);
           this.availableCharactors = LIMITS;
         }
+
         const [translations] = await this.gcpTranslateClient!.translate(
-          substituteN(chunks).join('\n'),
+          substituteN(chunks).join('<br/>'),
           {
             from: from.language_code,
             to: to.language_code,
+            format: 'html',
           },
         );
 
         translationTexts = [
           ...translationTexts,
-          ...unSubstituteN(translations.split('\n')),
+          ...unSubstituteN(translations.split('<br/>')),
         ];
 
         chunks = [];

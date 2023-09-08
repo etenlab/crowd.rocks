@@ -3,16 +3,14 @@ import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
   IonHeader,
+  IonIcon,
   IonModal,
   IonTitle,
   IonToolbar,
-  useIonRouter,
 } from '@ionic/react';
-import { useIonToast } from '@ionic/react';
 
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
-import { Card } from '../../common/Card';
 
 import { useGetForumFoldersLazyQuery } from '../../../generated/graphql';
 
@@ -27,8 +25,10 @@ import {
 import { useTr } from '../../../hooks/useTr';
 import { AddListHeader } from '../../common/ListHeader';
 import { NewFolderForm } from '../forms/NewFolderForm';
-import { folderOutline } from 'ionicons/icons';
 import { useForumFolderUpdateMutation } from '../../../hooks/useFolderUpsertMutation';
+import { ForumFolder } from '../ForumFolderDetail/FolderDetail';
+import { folderOutline } from 'ionicons/icons';
+import { EditableText } from '../../common/EditableText/EditableText';
 
 interface ForumDetailPageProps
   extends RouteComponentProps<{
@@ -39,11 +39,7 @@ interface ForumDetailPageProps
   }> {}
 
 export function ForumDetailPage({ match }: ForumDetailPageProps) {
-  const router = useIonRouter();
   const { tr } = useTr();
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [present] = useIonToast();
 
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
 
@@ -60,15 +56,6 @@ export function ForumDetailPage({ match }: ForumDetailPageProps) {
     });
   }, [getFolders, match.params.forum_id]);
 
-  const handleGoToFolderDetail = useCallback(
-    (folderId: string, folder_name: string) => {
-      router.push(
-        `/${match.params.nation_id}/${match.params.language_id}/1/folders/${folderId}/${folder_name}`,
-      );
-    },
-    [match.params.language_id, match.params.nation_id, router],
-  );
-
   const handleEdit = useCallback(
     (folder_id: string, newValue: string) => {
       upsertFolder({
@@ -81,6 +68,8 @@ export function ForumDetailPage({ match }: ForumDetailPageProps) {
     },
     [match.params.forum_id, upsertFolder],
   );
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const cardListComs = useMemo(() => {
     if (error) {
       return null;
@@ -92,17 +81,35 @@ export function ForumDetailPage({ match }: ForumDetailPageProps) {
 
     return foldersData.forumFolders.folders.map((folder) => (
       <CardContainer key={folder.folder_id}>
-        <Card
+        <IonTitle>
+          <div style={{ display: 'flex' }}>
+            <IonIcon
+              icon={folderOutline}
+              style={{ marginRight: '15px', marginBottom: '-3px' }}
+            />
+            <EditableText
+              text={folder.name}
+              onTextEdit={(newVal) => handleEdit(folder.folder_id, newVal)}
+            />
+          </div>
+        </IonTitle>
+
+        <hr />
+        <ForumFolder
           key={folder.folder_id}
-          content={folder.name}
-          contentIcon={folderOutline}
-          //TODO: description=....
-          onClick={() => handleGoToFolderDetail(folder.folder_id, folder.name)}
-          onContentEdit={(newValue) => handleEdit(folder.folder_id, newValue)}
+          nation_id={match.params.nation_id}
+          language_id={match.params.language_id}
+          forum_folder_id={folder.folder_id}
         />
       </CardContainer>
     ));
-  }, [error, foldersData, handleEdit, handleGoToFolderDetail]);
+  }, [
+    error,
+    foldersData,
+    handleEdit,
+    match.params.language_id,
+    match.params.nation_id,
+  ]);
 
   return (
     <PageLayout>
@@ -111,7 +118,8 @@ export function ForumDetailPage({ match }: ForumDetailPageProps) {
       </CaptionContainer>
 
       <AddListHeader
-        title={tr(`${match.params.forum_name ?? ''} Folders`)}
+        baseIcon={folderOutline}
+        title={tr(`${match.params.forum_name ?? ''}`)}
         onClick={() => {
           setIsOpenModal(true);
         }}
