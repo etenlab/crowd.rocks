@@ -1,13 +1,15 @@
-import { IonButton, IonIcon } from '@ionic/react';
+import { IonBadge, IonButton, IonIcon } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { ListHeader } from './styled';
+import './styled.css';
 
 interface AddFabProps {
   onClick: () => void;
   title: string;
+  baseIcon?: string;
 }
 
-export function AddListHeader({ onClick, title }: AddFabProps) {
+export function AddListHeader({ onClick, title, baseIcon }: AddFabProps) {
   return (
     <ListHeader>
       <h3>{title}</h3>
@@ -17,7 +19,14 @@ export function AddListHeader({ onClick, title }: AddFabProps) {
         shape="round"
         onClick={() => onClick && onClick()}
       >
-        <IonIcon slot="icon-only" icon={addOutline}></IonIcon>
+        {baseIcon ? (
+          <>
+            <IonIcon icon={baseIcon}></IonIcon>
+            <IonBadge className="add-badge">+</IonBadge>
+          </>
+        ) : (
+          <IonIcon slot="icon-only" icon={addOutline} />
+        )}
       </IonButton>
     </ListHeader>
   );
