@@ -43,7 +43,6 @@ begin
     where parent_table = p_parent_table
       and parent_id = p_parent_id
       and name = p_name
-      and created_by = v_user_id;
     into p_flag_id;
   end if;
   

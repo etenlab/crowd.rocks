@@ -40,8 +40,7 @@ begin
   from flags
   where parent_table = p_parent_table
     and parent_id = p_parent_id
-    and name = p_name
-    and created_by = v_user_id;
+    and name = p_name;
   
   if v_flag_id is not null then
     delete 

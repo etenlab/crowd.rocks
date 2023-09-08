@@ -5,7 +5,7 @@ create table flags(
   name varchar(64) not null,
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique (parent_table, parent_id, name, created_by)
+  unique (parent_table, parent_id, name)
 );
 
 alter table documents
