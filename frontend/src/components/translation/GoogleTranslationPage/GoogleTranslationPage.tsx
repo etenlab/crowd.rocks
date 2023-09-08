@@ -138,7 +138,7 @@ export function GoogleTranslationPage() {
 
     if (data && data.translateAllWordsAndPhrasesByGoogle.result) {
       setResult(data.translateAllWordsAndPhrasesByGoogle.result);
-      mapsReTranslate({
+      await mapsReTranslate({
         variables: { forLangTag: langInfo2tag(target) },
       });
     }
@@ -203,7 +203,7 @@ export function GoogleTranslationPage() {
         sumOfResult.totalPhraseCount += t.totalPhraseCount;
         sumOfResult.translatedPhraseCount += t.translatedPhraseCount;
         sumOfResult.translatedWordCount += t.translatedWordCount;
-        mapsReTranslate({
+        await mapsReTranslate({
           variables: { forLangTag: lang.tag },
         });
       }
