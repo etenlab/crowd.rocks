@@ -43,6 +43,15 @@ type DefinitionVoteStatusOutputRow {
   vote_status: DefinitionVoteStatus
 }
 
+input DocumentUploadInput {
+  document: TextyDocument!
+}
+
+type DocumentUploadOutput {
+  document_id: String
+  error: ErrorType!
+}
+
 input EmailResponseInput {
   token: String!
 }
@@ -472,6 +481,7 @@ type MarkNotificationReadOutput {
 type Mutation {
   addNotification(input: AddNotificationInput!): AddNotificationOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
+  documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   forumDelete(input: ForumDeleteInput!): ForumDeleteOutput!
   forumFolderDelete(input: ForumFolderDeleteInput!): ForumFolderDeleteOutput!
@@ -1060,6 +1070,15 @@ type SiteTextWordToWordTranslationWithVote {
   to_word_definition: WordDefinition!
   upvotes: Int!
   word_to_word_translation_id: ID!
+}
+
+input TextyDocument {
+  created_by: String
+  dialect_code: String
+  document_id: ID
+  file_id: String!
+  geo_code: String
+  language_code: String!
 }
 
 type Thread {

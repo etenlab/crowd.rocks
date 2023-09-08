@@ -160,15 +160,6 @@ mutation MapDelete($mapId: String!, $is_original: Boolean!) {
   }
 }
 
-mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
-  uploadFile(file: $file, file_size: $file_size, file_type: $file_type) {
-    error
-    file {
-      id
-    }
-  }
-}
-
 mutation MapsTranslationsReset {
   mapsTranslationsReset {
     error

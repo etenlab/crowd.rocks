@@ -1,0 +1,6 @@
+mutation DocumentUpload($document: TextyDocument!) {
+  documentUpload(input: { document: $document }) {
+    error
+    document_id
+  }
+}

@@ -122,6 +122,9 @@ export class DatabaseVersionControlService {
     // map
     await this.runSqlFile('./src/core/sql/map/original_map_create.sql');
 
+    // document
+    await this.runSqlFile('./src/core/sql/map/document_create.sql');
+
     // translation
     await this.runSqlFile(
       './src/core/sql/translation/word_to_word_translation_upsert.sql',
