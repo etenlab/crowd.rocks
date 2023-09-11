@@ -664,4 +664,13 @@ export class PhrasesService {
       },
     };
   }
+
+  getDiscussionTitle = async (id: string): Promise<string> => {
+    const phrase = await this.getPhraseWithVoteById(Number(id), null);
+    if (phrase.error !== ErrorType.NoError || phrase.phrase_with_vote == null) {
+      console.error(phrase.error);
+      return 'Phrase Book: ';
+    }
+    return `Phrase Book : ${phrase.phrase_with_vote.phrase}`;
+  };
 }

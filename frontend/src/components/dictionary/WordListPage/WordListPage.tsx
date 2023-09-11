@@ -95,9 +95,9 @@ export function WordListPage({ match }: WordListPageProps) {
   );
 
   const handleGoToChat = useCallback(
-    (wordId: string, word: string) => {
+    (wordId: string) => {
       router.push(
-        `/${match.params.nation_id}/${match.params.language_id}/1/discussion/words/${wordId}/Dictionary: ${word}`,
+        `/${match.params.nation_id}/${match.params.language_id}/1/discussion/words/${wordId}`,
       );
     },
     [match.params.language_id, match.params.nation_id, router],
@@ -206,7 +206,7 @@ export function WordListPage({ match }: WordListPageProps) {
               },
             }}
             discussion={{
-              onChatClick: () => handleGoToChat(word.word_id, word.word),
+              onChatClick: () => handleGoToChat(word.word_id),
             }}
             voteFor="content"
             onClick={() => handleGoToDefinitionDetail(word.word_id)}
