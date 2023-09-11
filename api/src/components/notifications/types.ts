@@ -26,6 +26,12 @@ export class AddNotificationInput {
 }
 
 @InputType()
+export class NotifyUsersInput {
+  @Field(() => String) text: string;
+  @Field(() => [ID]) user_ids: string[];
+}
+
+@InputType()
 export class MarkNotificationReadInput {
   @Field(() => ID) notification_id: string;
 }

@@ -155,4 +155,69 @@ export class PostReadResolver {
       posts: [],
     };
   }
+
+  @Query(() => PostReadOutput)
+  async latestPostByParent(
+    @Args('input') input: PostsByParentInput,
+    @Context() req: any,
+  ): Promise<PostReadOutput> {
+    console.log('post read resolver, parent_id:', input.parent_id);
+    console.log('post read resolver, parent_table:', input.parent_name);
+    try {
+      const res1 = await this.pg.pool.query(
+        `
+          select
+            p.post_id,
+            p.created_at,
+            p.created_by,
+            v.content
+          from 
+            posts p
+          join versions v
+            on p.post_id = v.post_id
+          where
+            true
+            and p.parent_table = $1
+            and p.parent_id = $2
+          order by p.created_at DESC
+          limit 1
+        `,
+        [input.parent_name, input.parent_id],
+      );
+
+      if (res1.rowCount !== 1) {
+        console.error(
+          `no post for parent id: '${input.parent_id}' and table '${input.parent_name}'`,
+        );
+        return {
+          error: ErrorType.PostNotFound,
+          post: null,
+        };
+      } else {
+        const createdBy = (
+          await this.userRead.userReadResolver(
+            { user_id: res1.rows[0].created_by },
+            req,
+          )
+        ).user;
+        const post = {
+          error: ErrorType.NoError,
+          post: {
+            post_id: res1.rows[0].post_id,
+            created_at: res1.rows[0].created_at,
+            created_by_user: createdBy!,
+            content: res1.rows[0].content,
+          },
+        };
+        return post;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      post: null,
+    };
+  }
 }
