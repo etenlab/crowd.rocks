@@ -41,9 +41,9 @@ export function ForumFolder({
   }, [getThreads, forum_folder_id]);
 
   const handleGoToThreadDetail = useCallback(
-    (threadId: string, threadName: string) => {
+    (threadId: string) => {
       router.push(
-        `/${nation_id}/${language_id}/1/discussion/threads/${threadId}/${threadName}`,
+        `/${nation_id}/${language_id}/1/discussion/threads/${threadId}`,
       );
     },
     [language_id, nation_id, router],
@@ -76,7 +76,7 @@ export function ForumFolder({
           key={thread.thread_id}
           content={thread.name}
           contentIcon={chatbubblesOutline}
-          onClick={() => handleGoToThreadDetail(thread.thread_id, thread.name)}
+          onClick={() => handleGoToThreadDetail(thread.thread_id)}
           onContentEdit={(newValue) => handleEdit(thread.thread_id, newValue)}
         />
       </CardContainer>

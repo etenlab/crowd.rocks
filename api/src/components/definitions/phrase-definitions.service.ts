@@ -507,4 +507,17 @@ export class PhraseDefinitionsService {
       phrase_definition_list: [],
     };
   }
+
+  getDiscussionTitle = async (id: string): Promise<string> => {
+    const phrase_def = await this.read(Number(id), null);
+    if (
+      phrase_def.error !== ErrorType.NoError ||
+      phrase_def.phrase_definition == null
+    ) {
+      console.error(phrase_def.error);
+      return 'Phrase Book: ';
+    }
+
+    return `Phrase Book: ${phrase_def.phrase_definition.phrase.phrase} - ${phrase_def.phrase_definition.definition}`;
+  };
 }

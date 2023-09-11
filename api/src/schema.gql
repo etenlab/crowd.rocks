@@ -817,6 +817,7 @@ input PostsByParentInput {
 type PostsByParentOutput {
   error: ErrorType!
   posts: [Post!]
+  title: String!
 }
 
 type Query {
@@ -865,7 +866,6 @@ type Query {
   getWordWithVoteById(word_id: ID!): WordWithVoteOutput!
   getWordsByLanguage(after: ID, first: Int, input: LanguageInput!): WordWithVoteListConnection!
   languagesForGoogleTranslate: LanguageListForGoogleTranslateOutput!
-  latestPostByParent(input: PostsByParentInput!): PostReadOutput!
   loggedInIsAdmin(input: IsAdminIdInput!): IsAdminIdOutput!
   notifications: NotificationListOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionOutput!
