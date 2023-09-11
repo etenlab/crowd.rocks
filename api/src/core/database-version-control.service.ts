@@ -123,7 +123,7 @@ export class DatabaseVersionControlService {
     await this.runSqlFile('./src/core/sql/map/original_map_create.sql');
 
     // document
-    await this.runSqlFile('./src/core/sql/map/document_create.sql');
+    await this.runSqlFile('./src/core/sql/document/document_create.sql');
 
     // translation
     await this.runSqlFile(

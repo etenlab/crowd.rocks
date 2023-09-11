@@ -3,10 +3,10 @@ or replace procedure document_create(
 
   in p_file_id bigint,
   in p_token varchar(512),
-  in p_language_code
-  in p_dialect_code
-  in p_geo_code
-  inout p_document_id
+  in p_language_code varchar(32),
+  in p_dialect_code varchar(32),
+  in p_geo_code varchar(32),
+  inout p_document_id bigint,
   inout p_created_at varchar(32),
   inout p_created_by varchar(32),
   inout p_error_type varchar(32)
@@ -34,28 +34,26 @@ end if;
 -- create document
 insert into
   documents(
-    p_file_id,
-    p_token,
-    p_language_code,
-    p_dialect_code,
-    p_geo_code,
+    file_id,
+    language_code,
+    dialect_code,
+    geo_code,
     created_by
   )
 values
   (
     p_file_id,
-    p_token,
     p_language_code,
     p_dialect_code,
     p_geo_code,
     v_user_id
   ) 
 returning 
-  p_document_id 
+  document_id 
 into 
-  p_map_id, p_created_by, p_created_at;
+  p_document_id;
 
-if p_map_id is null then p_error_type := 'MapInsertFailed';
+if p_document_id is null then p_error_type := 'MapInsertFailed';
 
 return;
 

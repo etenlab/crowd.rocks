@@ -23,7 +23,7 @@ export class DocumentsRepository {
       [file_id, token, language_code, dialect_code, geo_code],
     );
 
-    if (!res.rows[0].document_id) {
+    if (!res.rows[0].p_document_id) {
       throw new Error(res.rows[0].p_error_type);
     }
 
