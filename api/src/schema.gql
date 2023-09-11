@@ -485,6 +485,7 @@ type Mutation {
   mapsTranslationsReset: GenericOutput!
   markNotificationAsRead(input: MarkNotificationReadInput!): MarkNotificationReadOutput!
   notificationDelete(input: NotificationDeleteInput!): NotificationDeleteOutput!
+  notifyUsers(input: NotifyUsersInput!): AddNotificationOutput!
   passwordResetFormResolver(input: PasswordResetFormInput!): LoginOutput!
   phraseDefinitionUpsert(input: PhraseDefinitionUpsertInput!): PhraseDefinitionOutput!
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationOutput!
@@ -544,6 +545,11 @@ type NotificationDeleteOutput {
 type NotificationListOutput {
   error: ErrorType!
   notifications: [Notification!]!
+}
+
+input NotifyUsersInput {
+  text: String!
+  user_ids: [ID!]!
 }
 
 type PageInfo {
@@ -839,6 +845,7 @@ type Query {
   getWordWithVoteById(word_id: ID!): WordWithVoteOutput!
   getWordsByLanguage(after: ID, first: Int, input: LanguageInput!): WordWithVoteListConnection!
   languagesForGoogleTranslate: LanguageListForGoogleTranslateOutput!
+  latestPostByParent(input: PostsByParentInput!): PostReadOutput!
   loggedInIsAdmin(input: IsAdminIdInput!): IsAdminIdOutput!
   notifications: NotificationListOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionOutput!
