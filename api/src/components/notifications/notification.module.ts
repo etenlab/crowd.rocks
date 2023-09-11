@@ -11,6 +11,6 @@ import { NotificationService } from './notification.service';
     forwardRef(() => AuthenticationModule),
   ],
   providers: [NotificationService, NotificationResolver, NotificationModule],
-  exports: [NotificationService],
+  exports: [NotificationService, NotificationResolver],
 })
 export class NotificationModule {}

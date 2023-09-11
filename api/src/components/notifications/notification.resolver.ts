@@ -14,6 +14,7 @@ import {
   NotificationDeleteInput,
   NotificationDeleteOutput,
   NotificationListOutput,
+  NotifyUsersInput,
 } from './types';
 
 @Injectable()
@@ -48,6 +49,32 @@ export class NotificationResolver {
     console.log('add notification resolver, text: ', input.text);
 
     return this.notificationService.insert(input, getBearer(req) || '');
+  }
+
+  @Mutation(() => AddNotificationOutput)
+  async notifyUsers(
+    @Args('input') input: NotifyUsersInput,
+    @Context() req: any,
+  ): Promise<AddNotificationOutput> {
+    const users: AddNotificationInput[] = [];
+    const bearer = getBearer(req) || '';
+    const curr_user_id =
+      (await this.authenticationService.get_user_id_from_bearer(bearer)) + '';
+    input.user_ids.map((id) => {
+      if (id != curr_user_id) users.push({ text: input.text, user_id: id });
+    });
+    let output: AddNotificationOutput = {
+      error: ErrorType.UnknownError,
+      notification: null,
+    };
+    for (const u of users) {
+      const uOutput = await this.notificationService.insert(
+        u,
+        getBearer(req) || '',
+      );
+      if (!output) output = await uOutput;
+    }
+    return output;
   }
 
   @Mutation(() => MarkNotificationReadOutput)
