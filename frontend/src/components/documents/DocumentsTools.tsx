@@ -1,15 +1,14 @@
 import { IonButton, IonIcon } from '@ionic/react';
-import { funnelOutline } from 'ionicons/icons';
+import { add, funnelOutline } from 'ionicons/icons';
 import React from 'react';
 import { styled } from 'styled-components';
 import { useTr } from '../../hooks/useTr';
-import { FileUploadBtn } from '../common/FileUploadBtn/FileUploadBtn';
 
 type TDocumentsToolsParams = {
   onFilterClick?: () => void;
   onTranslationsClick?: () => void;
   onResetClick?: () => void;
-  onAddClick?: (file: File) => void;
+  onAddClick?: () => void;
 };
 
 export const DocumentsTools: React.FC<TDocumentsToolsParams> = ({
@@ -37,7 +36,12 @@ export const DocumentsTools: React.FC<TDocumentsToolsParams> = ({
         </StIonButton>
       ) : null}
       {onAddClick ? (
-        <FileUploadBtn accept=".*" onSelect={onAddClick} />
+        <StIonIcon
+          icon={add}
+          onClick={() => {
+            onAddClick();
+          }}
+        />
       ) : (
         <div> </div>
       )}

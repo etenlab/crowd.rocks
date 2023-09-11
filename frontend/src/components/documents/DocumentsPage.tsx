@@ -5,12 +5,24 @@ import { useTr } from '../../hooks/useTr';
 import { FilterContainer } from '../common/styled';
 import { LangSelector } from '../common/LangSelector/LangSelector';
 import { useAppContext } from '../../hooks/useAppContext';
-import { DocumentsTools } from './DocumentsTools';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
+  GetAllDocumentsDocument,
   useDocumentUploadMutation,
+  useGetAllDocumentsQuery,
   useUploadFileMutation,
 } from '../../generated/graphql';
+import { DocumentsList } from './DocumentsList';
+import {
+  IonContent,
+  IonHeader,
+  IonModal,
+  IonTitle,
+  IonToolbar,
+  useIonToast,
+} from '@ionic/react';
+import { NewDocumentForm } from './NewDocumentForm';
+import { DocumentsTools } from './DocumentsTools';
 
 interface DocumentsPageProps
   extends RouteComponentProps<{
@@ -31,19 +43,50 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = () => {
 
   const [uploadFile] = useUploadFileMutation();
   const [documentUpload] = useDocumentUploadMutation();
+  const [isOpenModal, setIsOpenModal] = useState(false);
+
+  const [present] = useIonToast();
+
+  const { data: allDocuments } = useGetAllDocumentsQuery({
+    variables: {
+      languageInput: sourceLang
+        ? {
+            language_code: sourceLang?.lang.tag,
+            dialect_code: sourceLang?.dialect?.tag,
+            geo_code: sourceLang?.region?.tag,
+          }
+        : undefined,
+    },
+  });
 
   const handleAddDocument = useCallback(
-    async (file: File) => {
+    async (file: File | undefined) => {
       if (!sourceLang?.lang) {
-        console.log(`no lang!`);
+        present({
+          message: tr('Please select language first.'),
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
         return;
       }
+      if (!file) {
+        present({
+          message: tr('Please choose file first.'),
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+        return;
+      }
+
       const uploadResult = await uploadFile({
         variables: {
           file: file,
           file_size: file.size,
           file_type: file.type,
         },
+        refetchQueries: [GetAllDocumentsDocument],
       });
       if (!uploadResult.data?.uploadFile.file?.id) {
         console.log(`S3 upload error `, uploadResult.data?.uploadFile.error);
@@ -61,13 +104,15 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = () => {
         },
       });
       console.log(`uploaded: `, res);
+      setIsOpenModal(false);
     },
-
     [
       documentUpload,
+      present,
       sourceLang?.dialect?.tag,
       sourceLang?.lang,
       sourceLang?.region?.tag,
+      tr,
       uploadFile,
     ],
   );
@@ -86,12 +131,23 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = () => {
           onClearClick={() => setSourceLanguage(null)}
         />
       </FilterContainer>
-      <DocumentsTools
-        onAddClick={(file) => {
-          console.log(file);
-          handleAddDocument(file);
-        }}
-      />
+      <DocumentsTools onAddClick={() => setIsOpenModal(true)} />
+      <DocumentsList allDocuments={allDocuments?.getAllDocuments.documents} />
+      <IonModal isOpen={isOpenModal}>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('New Document')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <NewDocumentForm
+            onSave={handleAddDocument}
+            onCancel={() => {
+              setIsOpenModal(false);
+            }}
+          />
+        </IonContent>
+      </IonModal>
     </PageLayout>
   );
 };

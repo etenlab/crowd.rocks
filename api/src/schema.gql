@@ -44,7 +44,7 @@ type DefinitionVoteStatusOutputRow {
 }
 
 input DocumentUploadInput {
-  document: TextyDocument!
+  document: TextyDocumentInput!
 }
 
 type DocumentUploadOutput {
@@ -243,6 +243,14 @@ input FromWordAndDefintionlikeStringUpsertInput {
 
 type GenericOutput {
   error: ErrorType!
+}
+
+input GetAllDocumentsInput {
+  lang: LanguageInput
+}
+
+type GetAllDocumentsOutput {
+  documents: [TextyDocumentOutput!]!
 }
 
 input GetAllMapsListInput {
@@ -812,6 +820,7 @@ type Query {
   forumFolders(input: ForumFolderListInput!): ForumFolderListOutput!
   forumRead(input: ForumReadInput!): ForumReadOutput!
   forums: ForumListOutput!
+  getAllDocuments(input: GetAllDocumentsInput!): GetAllDocumentsOutput!
   getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput!
   getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): SiteTextTranslationWithVoteListByLanguageOutput!
@@ -1072,11 +1081,19 @@ type SiteTextWordToWordTranslationWithVote {
   word_to_word_translation_id: ID!
 }
 
-input TextyDocument {
-  created_by: String
+input TextyDocumentInput {
   dialect_code: String
-  document_id: ID
   file_id: String!
+  geo_code: String
+  language_code: String!
+}
+
+type TextyDocumentOutput {
+  dialect_code: String
+  document_id: ID!
+  file_id: String!
+  file_name: String!
+  file_url: String!
   geo_code: String
   language_code: String!
 }

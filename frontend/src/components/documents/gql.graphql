@@ -1,6 +1,20 @@
-mutation DocumentUpload($document: TextyDocument!) {
+mutation DocumentUpload($document: TextyDocumentInput!) {
   documentUpload(input: { document: $document }) {
     error
     document_id
+  }
+}
+
+query GetAllDocuments($languageInput: LanguageInput) {
+  getAllDocuments(input: { lang: $languageInput }) {
+    documents {
+      document_id
+      file_id
+      file_name
+      file_url
+      language_code
+      dialect_code
+      geo_code
+    }
   }
 }

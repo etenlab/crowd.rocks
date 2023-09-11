@@ -1,14 +1,23 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from '../../common/types';
+import { LanguageInput } from '../common/types';
 
+@ObjectType()
+export class TextyDocumentOutput {
+  @Field(() => ID) document_id: string;
+  @Field(() => String) file_id: string;
+  @Field(() => String) file_name: string;
+  @Field(() => String) file_url: string;
+  @Field(() => String) language_code: string;
+  @Field(() => String, { nullable: true }) dialect_code?: string;
+  @Field(() => String, { nullable: true }) geo_code?: string;
+}
 @InputType()
-export class TextyDocument {
-  @Field(() => ID, { nullable: true }) document_id?: string;
+export class TextyDocumentInput {
   @Field(() => String) file_id: string;
   @Field(() => String) language_code: string;
   @Field(() => String, { nullable: true }) dialect_code?: string;
   @Field(() => String, { nullable: true }) geo_code?: string;
-  @Field(() => String, { nullable: true }) created_by?: string;
 }
 
 @ObjectType()
@@ -19,5 +28,15 @@ export class DocumentUploadOutput extends GenericOutput {
 
 @InputType()
 export class DocumentUploadInput {
-  @Field(() => TextyDocument) document: TextyDocument;
+  @Field(() => TextyDocumentInput) document: TextyDocumentInput;
+}
+
+@InputType()
+export class GetAllDocumentsInput {
+  @Field(() => LanguageInput, { nullable: true }) lang?: LanguageInput;
+}
+
+@ObjectType()
+export class GetAllDocumentsOutput {
+  @Field(() => [TextyDocumentOutput]) documents: TextyDocumentOutput[];
 }

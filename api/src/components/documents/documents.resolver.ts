@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ErrorType } from '../../common/types';
 import { getBearer } from '../../common/utility';
 import { AuthenticationService } from '../authentication/authentication.service';
@@ -7,11 +7,12 @@ import { DocumentsService } from './documents.service';
 import {
   DocumentUploadInput,
   DocumentUploadOutput,
-  TextyDocument,
+  GetAllDocumentsInput,
+  GetAllDocumentsOutput,
 } from './types';
 
 @Injectable()
-@Resolver(TextyDocument)
+  @Resolver()
 export class DocumentsResolver {
   constructor(
     private authenticationService: AuthenticationService,
@@ -38,5 +39,13 @@ export class DocumentsResolver {
       error: ErrorType.NoError,
       document_id,
     };
+  }
+
+  @Query(() => GetAllDocumentsOutput)
+  async getAllDocuments(
+    @Args('input') input: GetAllDocumentsInput,
+  ): Promise<GetAllDocumentsOutput> {
+    const res = await this.documentsSevice.getAllDocuments(input.lang);
+    return res;
   }
 }
