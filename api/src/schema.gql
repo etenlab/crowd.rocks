@@ -140,7 +140,7 @@ type Flag {
   created_by: ID!
   flag_id: ID!
   name: FlagType!
-  parent_id: String!
+  parent_id: ID!
   parent_table: String!
 }
 
@@ -517,7 +517,7 @@ type Mutation {
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
   threadDelete(input: ThreadDeleteInput!): ThreadDeleteOutput!
   threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
-  toggleFlagWithRef(name: String!, parent_id: String!, parent_table: String!): FlagsOutput!
+  toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   togglePhraseDefinitionVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
   togglePhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!, vote: Boolean!): PhraseToPhraseTranslationVoteStatusOutputRow!
   togglePhraseToWordTrVoteStatus(phrase_to_word_translation_id: ID!, vote: Boolean!): PhraseToWordTranslationVoteStatusOutputRow!
@@ -590,6 +590,17 @@ type PhraseDefinition {
   definition: String!
   phrase: Phrase!
   phrase_definition_id: ID!
+}
+
+type PhraseDefinitionListConnection {
+  edges: [PhraseDefinitionListEdge!]!
+  error: ErrorType!
+  pageInfo: PageInfo!
+}
+
+type PhraseDefinitionListEdge {
+  cursor: ID!
+  node: PhraseDefinition!
 }
 
 type PhraseDefinitionOutput {
@@ -828,12 +839,13 @@ type Query {
   getAllSiteTextLanguageList: SiteTextLanguageListOutput!
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput!
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
-  getFlagsFromRef(parent_id: String!, parent_table: String!): FlagsOutput!
+  getFlagsFromRef(parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   getOrigMapContent(input: GetOrigMapContentInput!): GetOrigMapContentOutput!
   getOrigMapPhrases(input: GetOrigMapPhrasesInput): GetOrigMapPhrasesOutput!
   getOrigMapWords(input: GetOrigMapWordsInput): GetOrigMapWordsOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!
+  getPhraseDefinitionsByFlag(after: ID, first: Int, flag_name: FlagType!): PhraseDefinitionListConnection!
   getPhraseDefinitionsByLanguage(input: LanguageInput!): PhraseDefinitionWithVoteListOutput!
   getPhraseDefinitionsByPhraseId(phrase_id: ID!): PhraseDefinitionWithVoteListOutput!
   getPhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!): PhraseToPhraseTranslationVoteStatusOutputRow!
@@ -849,6 +861,7 @@ type Query {
   getTranslatedMapContent(input: GetTranslatedMapContentInput!): GetTranslatedMapContentOutput!
   getTranslationsByFromDefinitionId(definition_id: ID!, from_definition_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteListOutput!
   getWordDefinitionVoteStatus(word_definition_id: ID!): DefinitionVoteStatusOutputRow!
+  getWordDefinitionsByFlag(after: ID, first: Int, flag_name: FlagType!): WordDefinitionListConnection!
   getWordDefinitionsByLanguage(input: LanguageInput!): WordDefinitionWithVoteListOutput!
   getWordDefinitionsByWordId(word_id: ID!): WordDefinitionWithVoteListOutput!
   getWordToPhraseTrVoteStatus(word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
@@ -1082,6 +1095,11 @@ type SiteTextWordToWordTranslationWithVote {
   word_to_word_translation_id: ID!
 }
 
+enum TableNameType {
+  phrase_definitions
+  word_definitions
+}
+
 type Thread {
   name: String!
   thread_id: ID!
@@ -1223,6 +1241,17 @@ type WordDefinition {
   definition: String!
   word: Word!
   word_definition_id: ID!
+}
+
+type WordDefinitionListConnection {
+  edges: [WordDefinitionListEdge!]!
+  error: ErrorType!
+  pageInfo: PageInfo!
+}
+
+type WordDefinitionListEdge {
+  cursor: ID!
+  node: WordDefinition!
 }
 
 type WordDefinitionOutput {
