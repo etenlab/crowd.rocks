@@ -1274,7 +1274,6 @@ export type Query = {
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
   getDocument: GetDocumentOutput;
   getFlagsFromRef: FlagsOutput;
-  getFlagsFromRef: FlagsOutput;
   getOrigMapContent: GetOrigMapContentOutput;
   getOrigMapPhrases: GetOrigMapPhrasesOutput;
   getOrigMapWords: GetOrigMapWordsOutput;
@@ -1385,12 +1384,6 @@ export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
 
 export type QueryGetDocumentArgs = {
   input: GetDocumentInput;
-};
-
-
-export type QueryGetFlagsFromRefArgs = {
-  parent_id: Scalars['String']['input'];
-  parent_table: Scalars['String']['input'];
 };
 
 
