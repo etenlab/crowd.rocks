@@ -4,7 +4,8 @@ create table flags(
   parent_id bigint not null,
   name varchar(64) not null,
   created_at timestamp not null default CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (parent_table, parent_id, name)
 );
 
 alter table documents
@@ -109,3 +110,6 @@ create table site_text_translation_counts(
   count bigint not null default 0,
   unique (site_text_id, is_word_definition, language_code, dialect_code, geo_code)
 );
+
+alter table wordlike_strings
+alter column wordlike_string type varchar;

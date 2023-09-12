@@ -3,10 +3,21 @@ import { CoreModule } from 'src/core/core.module';
 import { AvatarUpdateResolver } from './avatar-update.resolver';
 import { PasswordResetResolver } from '../authentication/password-reset.resolver';
 import { UserReadResolver } from './user-read.resolver';
+import { UserService } from './user.service';
 
 @Module({
   imports: [CoreModule],
-  providers: [UserReadResolver, AvatarUpdateResolver, PasswordResetResolver],
-  exports: [UserReadResolver, AvatarUpdateResolver, PasswordResetResolver],
+  providers: [
+    UserReadResolver,
+    AvatarUpdateResolver,
+    PasswordResetResolver,
+    UserService,
+  ],
+  exports: [
+    UserReadResolver,
+    AvatarUpdateResolver,
+    PasswordResetResolver,
+    UserService,
+  ],
 })
 export class UserModule {}

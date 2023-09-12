@@ -197,7 +197,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
             discussion={{
               onChatClick: () =>
                 router.push(
-                  `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrases/${phrase.phrase_id}/Phrase Book: ${phrase.phrase}`,
+                  `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrases/${phrase.phrase_id}`,
                 ),
             }}
             voteFor="content"

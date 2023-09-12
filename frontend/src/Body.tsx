@@ -70,7 +70,7 @@ import AppTypeahead from './components/common/LangSelector/TypeAhead';
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
 import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
 import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
-import { ForumFolderDetailPage } from './components/forums/ForumFolderDetailPage/FolderDetailPage';
+import { ForumFolder } from './components/forums/ForumFolderDetail/FolderDetail';
 import { NotificationPage } from './components/notifications/NotificationPage';
 import { SettingsPage } from './components/settings/SettingsPage';
 import { DocumentsPage } from './components/documents/DocumentsPage';
@@ -112,8 +112,8 @@ const Body: React.FC = () => {
       count = nData.notifications.notifications.filter(
         (n) => !n.isNotified,
       ).length;
-      setUnreadCount(count);
     }
+    setUnreadCount(count);
   }, [getNotifications, nData, nError]);
 
   let sub: Subscription;
@@ -428,7 +428,7 @@ const Body: React.FC = () => {
           />
           <Route
             exact
-            path="/:nation_id/:language_id/:cluster_id/discussion/:parent/:parent_id/:page_title"
+            path="/:nation_id/:language_id/:cluster_id/discussion/:parent/:parent_id"
             component={DiscussionPage}
           />
           <Route
@@ -464,7 +464,7 @@ const Body: React.FC = () => {
           <Route
             exact
             path="/:nation_id/:language_id/:cluster_id/folders/:forum_folder_id/:forum_folder_name"
-            component={ForumFolderDetailPage}
+            component={ForumFolder}
           />
           <Route
             exact

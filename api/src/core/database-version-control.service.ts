@@ -244,6 +244,10 @@ export class DatabaseVersionControlService {
       './src/core/sql/data/site-text-definition-translation-counts-trigger.sql',
     );
 
+    // flags
+    await this.runSqlFile('./src/core/sql/flag/flag-upsert.sql');
+    await this.runSqlFile('./src/core/sql/flag/flag-toggle.sql');
+
     // post
     await this.runSqlFile('./src/core/sql/post/post_create.v2.sql');
 

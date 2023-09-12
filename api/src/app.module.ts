@@ -22,6 +22,7 @@ import { ForumFoldersModule } from './components/forum-folders/folders.module';
 import { ThreadModule } from './components/threads/threads.module';
 import { NotificationModule } from './components/notifications/notification.module';
 import { DocumentsModule } from './components/documents/documents.module';
+import { FlagsModule } from './components/flag/flags.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { DocumentsModule } from './components/documents/documents.module';
     MiddlewareModule,
     NotificationModule,
     DocumentsModule,
+    FlagsModule,
   ],
   controllers: [],
   providers: [],

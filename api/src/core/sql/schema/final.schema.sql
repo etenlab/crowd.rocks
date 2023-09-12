@@ -171,7 +171,8 @@ create table flags(
   parent_id bigint not null,
   name varchar(64) not null,
   created_at timestamp not null default CURRENT_TIMESTAMP,
-  created_by bigint not null references users(user_id)
+  created_by bigint not null references users(user_id),
+  unique (parent_table, parent_id, name)
 );
 
 -- FORUMS --------------------------------------------------------------
@@ -234,7 +235,7 @@ create table posts_votes(
 
 create table wordlike_strings (
   wordlike_string_id bigserial primary key,
-  wordlike_string varchar(64) unique not null,
+  wordlike_string varchar unique not null,
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );

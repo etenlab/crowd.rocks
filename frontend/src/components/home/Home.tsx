@@ -78,10 +78,16 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           description: tr('Translate maps into any language'),
           isShown: () => true,
         },
+      ],
+    },
+    {
+      group: tr('Community'),
+      isShown: () => true,
+      subMenu: [
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/forums`,
           icon: sendOutline,
-          title: tr('Community'),
+          title: tr('Forums'),
           description: tr('Hold discussions with other members'),
           isShown: () => true,
         },

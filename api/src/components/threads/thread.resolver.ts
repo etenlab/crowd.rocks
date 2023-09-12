@@ -27,7 +27,7 @@ export class ThreadResolver {
   ): Promise<ThreadReadOutput> {
     console.log('thread read resolver, thread_id:', input.thread_id);
 
-    return this.threadService.read(input);
+    return this.threadService.getThread(input);
   }
 
   @Query(() => ThreadListOutput)

@@ -21,6 +21,22 @@ export class AuthenticationService {
 
     return null;
   }
+
+  async get_avatar_from_bearer(token: string): Promise<string | null> {
+    const res1 = await this.pg.pool.query(
+      `
+        select a.avatar 
+        from avatars a
+        join tokens t on t.user_id = a.user_id
+        where t.token = $1;
+      `,
+      [token],
+    );
+    if (res1.rowCount == 1) {
+      return res1.rows[0].avatar;
+    }
+    return null;
+  }
   async get_admin_id(): Promise<number | null> {
     const res1 = await this.pg.pool.query(
       `

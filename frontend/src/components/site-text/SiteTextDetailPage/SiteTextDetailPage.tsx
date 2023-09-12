@@ -304,9 +304,7 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
                   match.params.language_id
                 }/1/discussion/${
                   translation.to_type_is_word ? 'words' : 'phrases'
-                }/${translation.to_word_or_phrase_id}/${
-                  // eslint-disable-next-line prettier/prettier
-                translation.to_type_is_word ? 'Dictionary' : 'Phrase Book'}: ${translation.siteTextlikeString}`,
+                }/${translation.to_word_or_phrase_id}`,
               ),
           }}
         />

@@ -111,6 +111,14 @@ registerEnumType(ErrorType, {
   name: 'ErrorType',
 });
 
+export enum FlagType {
+  FastTranslation = 'FastTranslation',
+}
+
+registerEnumType(FlagType, {
+  name: 'FlagType',
+});
+
 export interface ITagInfo {
   tag: string | null;
   descriptions?: Array<string>;

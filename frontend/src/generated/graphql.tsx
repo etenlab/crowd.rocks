@@ -167,6 +167,26 @@ export type FileUploadUrlResponse = {
   url: Scalars['String']['output'];
 };
 
+export type Flag = {
+  __typename?: 'Flag';
+  created_at: Scalars['String']['output'];
+  created_by: Scalars['ID']['output'];
+  flag_id: Scalars['ID']['output'];
+  name: FlagType;
+  parent_id: Scalars['String']['output'];
+  parent_table: Scalars['String']['output'];
+};
+
+export enum FlagType {
+  FastTranslation = 'FastTranslation'
+}
+
+export type FlagsOutput = {
+  __typename?: 'FlagsOutput';
+  error: ErrorType;
+  flags: Array<Flag>;
+};
+
 export type Forum = {
   __typename?: 'Forum';
   forum_id: Scalars['ID']['output'];
@@ -572,6 +592,7 @@ export type Mutation = {
   mapsTranslationsReset: GenericOutput;
   markNotificationAsRead: MarkNotificationReadOutput;
   notificationDelete: NotificationDeleteOutput;
+  notifyUsers: AddNotificationOutput;
   passwordResetFormResolver: LoginOutput;
   phraseDefinitionUpsert: PhraseDefinitionOutput;
   phraseToPhraseTranslationUpsert: PhraseToPhraseTranslationOutput;
@@ -586,6 +607,7 @@ export type Mutation = {
   siteTextWordDefinitionUpsert: SiteTextWordDefinitionOutput;
   threadDelete: ThreadDeleteOutput;
   threadUpsert: ThreadUpsertOutput;
+  toggleFlagWithRef: FlagsOutput;
   togglePhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   togglePhraseToPhraseTrVoteStatus: PhraseToPhraseTranslationVoteStatusOutputRow;
   togglePhraseToWordTrVoteStatus: PhraseToWordTranslationVoteStatusOutputRow;
@@ -690,6 +712,11 @@ export type MutationNotificationDeleteArgs = {
 };
 
 
+export type MutationNotifyUsersArgs = {
+  input: NotifyUsersInput;
+};
+
+
 export type MutationPasswordResetFormResolverArgs = {
   input: PasswordResetFormInput;
 };
@@ -760,6 +787,13 @@ export type MutationThreadDeleteArgs = {
 
 export type MutationThreadUpsertArgs = {
   input: ThreadUpsertInput;
+};
+
+
+export type MutationToggleFlagWithRefArgs = {
+  name: Scalars['String']['input'];
+  parent_id: Scalars['String']['input'];
+  parent_table: Scalars['String']['input'];
 };
 
 
@@ -933,6 +967,11 @@ export type NotificationListOutput = {
   __typename?: 'NotificationListOutput';
   error: ErrorType;
   notifications: Array<Notification>;
+};
+
+export type NotifyUsersInput = {
+  text: Scalars['String']['input'];
+  user_ids: Array<Scalars['ID']['input']>;
 };
 
 export type PageInfo = {
@@ -1213,6 +1252,7 @@ export type PostsByParentOutput = {
   __typename?: 'PostsByParentOutput';
   error: ErrorType;
   posts?: Maybe<Array<Post>>;
+  title: Scalars['String']['output'];
 };
 
 export type Query = {
@@ -1233,6 +1273,7 @@ export type Query = {
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput;
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
   getDocument: GetDocumentOutput;
+  getFlagsFromRef: FlagsOutput;
   getOrigMapContent: GetOrigMapContentOutput;
   getOrigMapPhrases: GetOrigMapPhrasesOutput;
   getOrigMapWords: GetOrigMapWordsOutput;
@@ -1343,6 +1384,12 @@ export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
 
 export type QueryGetDocumentArgs = {
   input: GetDocumentInput;
+};
+
+
+export type QueryGetFlagsFromRefArgs = {
+  parent_id: Scalars['String']['input'];
+  parent_table: Scalars['String']['input'];
 };
 
 
@@ -2231,7 +2278,7 @@ export type PostsByParentQueryVariables = Exact<{
 }>;
 
 
-export type PostsByParentQuery = { __typename?: 'Query', postsByParent: { __typename?: 'PostsByParentOutput', error: ErrorType, posts?: Array<{ __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } }> | null } };
+export type PostsByParentQuery = { __typename?: 'Query', postsByParent: { __typename?: 'PostsByParentOutput', error: ErrorType, title: string, posts?: Array<{ __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } }> | null } };
 
 export type PostCreateMutationVariables = Exact<{
   content: Scalars['String']['input'];
@@ -3475,6 +3522,7 @@ export const PostsByParentDocument = gql`
     query PostsByParent($parent_id: ID!, $parent_name: String!) {
   postsByParent(input: {parent_id: $parent_id, parent_name: $parent_name}) {
     error
+    title
     posts {
       ...PostFields
     }
