@@ -18,11 +18,10 @@ export const DocumentsList: React.FC<TDocumentListProps> = ({
 
   return (
     <IonList lines="inset">
-      {allDocuments
-        .sort((d1, d2) => d1.file_name.localeCompare(d2.file_name))
-        .map((d) => (
-          <DocumentItem document={d} key={d.document_id} />
-        ))}
+      {allDocuments?.length > 0 &&
+        allDocuments
+          // .sort((d1, d2) => d1.file_name.localeCompare(d2.file_name))
+          .map((d) => <DocumentItem document={d} key={d.document_id} />)}
     </IonList>
   );
 };
