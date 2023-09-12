@@ -155,6 +155,26 @@ export type FileUploadUrlResponse = {
   url: Scalars['String']['output'];
 };
 
+export type Flag = {
+  __typename?: 'Flag';
+  created_at: Scalars['String']['output'];
+  created_by: Scalars['ID']['output'];
+  flag_id: Scalars['ID']['output'];
+  name: FlagType;
+  parent_id: Scalars['ID']['output'];
+  parent_table: Scalars['String']['output'];
+};
+
+export enum FlagType {
+  FastTranslation = 'FastTranslation'
+}
+
+export type FlagsOutput = {
+  __typename?: 'FlagsOutput';
+  error: ErrorType;
+  flags: Array<Flag>;
+};
+
 export type Forum = {
   __typename?: 'Forum';
   forum_id: Scalars['ID']['output'];
@@ -553,6 +573,7 @@ export type Mutation = {
   siteTextWordDefinitionUpsert: SiteTextWordDefinitionOutput;
   threadDelete: ThreadDeleteOutput;
   threadUpsert: ThreadUpsertOutput;
+  toggleFlagWithRef: FlagsOutput;
   togglePhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   togglePhraseToPhraseTrVoteStatus: PhraseToPhraseTranslationVoteStatusOutputRow;
   togglePhraseToWordTrVoteStatus: PhraseToWordTranslationVoteStatusOutputRow;
@@ -722,6 +743,13 @@ export type MutationThreadDeleteArgs = {
 
 export type MutationThreadUpsertArgs = {
   input: ThreadUpsertInput;
+};
+
+
+export type MutationToggleFlagWithRefArgs = {
+  name: Scalars['String']['input'];
+  parent_id: Scalars['String']['input'];
+  parent_table: TableNameType;
 };
 
 
@@ -925,6 +953,19 @@ export type PhraseDefinition = {
   definition: Scalars['String']['output'];
   phrase: Phrase;
   phrase_definition_id: Scalars['ID']['output'];
+};
+
+export type PhraseDefinitionListConnection = {
+  __typename?: 'PhraseDefinitionListConnection';
+  edges: Array<PhraseDefinitionListEdge>;
+  error: ErrorType;
+  pageInfo: PageInfo;
+};
+
+export type PhraseDefinitionListEdge = {
+  __typename?: 'PhraseDefinitionListEdge';
+  cursor: Scalars['ID']['output'];
+  node: PhraseDefinition;
 };
 
 export type PhraseDefinitionOutput = {
@@ -1193,11 +1234,13 @@ export type Query = {
   getAllSiteTextLanguageList: SiteTextLanguageListOutput;
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput;
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
+  getFlagsFromRef: FlagsOutput;
   getOrigMapContent: GetOrigMapContentOutput;
   getOrigMapPhrases: GetOrigMapPhrasesOutput;
   getOrigMapWords: GetOrigMapWordsOutput;
   getOrigMapsList: GetOrigMapsListOutput;
   getPhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
+  getPhraseDefinitionsByFlag: PhraseDefinitionListConnection;
   getPhraseDefinitionsByLanguage: PhraseDefinitionWithVoteListOutput;
   getPhraseDefinitionsByPhraseId: PhraseDefinitionWithVoteListOutput;
   getPhraseToPhraseTrVoteStatus: PhraseToPhraseTranslationVoteStatusOutputRow;
@@ -1213,6 +1256,7 @@ export type Query = {
   getTranslatedMapContent: GetTranslatedMapContentOutput;
   getTranslationsByFromDefinitionId: TranslationWithVoteListOutput;
   getWordDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
+  getWordDefinitionsByFlag: WordDefinitionListConnection;
   getWordDefinitionsByLanguage: WordDefinitionWithVoteListOutput;
   getWordDefinitionsByWordId: WordDefinitionWithVoteListOutput;
   getWordToPhraseTrVoteStatus: WordToPhraseTranslationVoteStatusOutputRow;
@@ -1296,6 +1340,12 @@ export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
 };
 
 
+export type QueryGetFlagsFromRefArgs = {
+  parent_id: Scalars['String']['input'];
+  parent_table: TableNameType;
+};
+
+
 export type QueryGetOrigMapContentArgs = {
   input: GetOrigMapContentInput;
 };
@@ -1318,6 +1368,13 @@ export type QueryGetOrigMapsListArgs = {
 
 export type QueryGetPhraseDefinitionVoteStatusArgs = {
   phrase_definition_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetPhraseDefinitionsByFlagArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  flag_name: FlagType;
 };
 
 
@@ -1407,6 +1464,13 @@ export type QueryGetTranslationsByFromDefinitionIdArgs = {
 
 export type QueryGetWordDefinitionVoteStatusArgs = {
   word_definition_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetWordDefinitionsByFlagArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  flag_name: FlagType;
 };
 
 
@@ -1776,6 +1840,11 @@ export type SiteTextWordToWordTranslationWithVote = {
   word_to_word_translation_id: Scalars['ID']['output'];
 };
 
+export enum TableNameType {
+  PhraseDefinitions = 'phrase_definitions',
+  WordDefinitions = 'word_definitions'
+}
+
 export type Thread = {
   __typename?: 'Thread';
   name: Scalars['String']['output'];
@@ -1931,6 +2000,19 @@ export type WordDefinition = {
   definition: Scalars['String']['output'];
   word: Word;
   word_definition_id: Scalars['ID']['output'];
+};
+
+export type WordDefinitionListConnection = {
+  __typename?: 'WordDefinitionListConnection';
+  edges: Array<WordDefinitionListEdge>;
+  error: ErrorType;
+  pageInfo: PageInfo;
+};
+
+export type WordDefinitionListEdge = {
+  __typename?: 'WordDefinitionListEdge';
+  cursor: Scalars['ID']['output'];
+  node: WordDefinition;
 };
 
 export type WordDefinitionOutput = {
@@ -2306,6 +2388,47 @@ export type EmailResponseMutationVariables = Exact<{
 
 
 export type EmailResponseMutation = { __typename?: 'Mutation', emailResponseResolver: { __typename?: 'EmailResponseOutput', error: ErrorType } };
+
+export type FlagFragmentFragment = { __typename?: 'Flag', flag_id: string, parent_table: string, parent_id: string, name: FlagType, created_at: string, created_by: string };
+
+export type WordDefinitionListEdgeFragmentFragment = { __typename?: 'WordDefinitionListEdge', cursor: string, node: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+
+export type PhraseDefinitionListEdgeFragmentFragment = { __typename?: 'PhraseDefinitionListEdge', cursor: string, node: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+
+export type GetFlagsFromRefQueryVariables = Exact<{
+  parent_table: TableNameType;
+  parent_id: Scalars['String']['input'];
+}>;
+
+
+export type GetFlagsFromRefQuery = { __typename?: 'Query', getFlagsFromRef: { __typename?: 'FlagsOutput', error: ErrorType, flags: Array<{ __typename?: 'Flag', flag_id: string, parent_table: string, parent_id: string, name: FlagType, created_at: string, created_by: string }> } };
+
+export type GetWordDefinitionsByFlagQueryVariables = Exact<{
+  flag_name: FlagType;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type GetWordDefinitionsByFlagQuery = { __typename?: 'Query', getWordDefinitionsByFlag: { __typename?: 'WordDefinitionListConnection', error: ErrorType, edges: Array<{ __typename?: 'WordDefinitionListEdge', cursor: string, node: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+
+export type GetPhraseDefinitionsByFlagQueryVariables = Exact<{
+  flag_name: FlagType;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type GetPhraseDefinitionsByFlagQuery = { __typename?: 'Query', getPhraseDefinitionsByFlag: { __typename?: 'PhraseDefinitionListConnection', error: ErrorType, edges: Array<{ __typename?: 'PhraseDefinitionListEdge', cursor: string, node: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+
+export type ToggleFlagWithRefMutationVariables = Exact<{
+  parent_table: TableNameType;
+  parent_id: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type ToggleFlagWithRefMutation = { __typename?: 'Mutation', toggleFlagWithRef: { __typename?: 'FlagsOutput', error: ErrorType, flags: Array<{ __typename?: 'Flag', flag_id: string, parent_table: string, parent_id: string, name: FlagType, created_at: string, created_by: string }> } };
 
 export type CreateThreadMutationVariables = Exact<{
   name: Scalars['String']['input'];
@@ -3010,6 +3133,51 @@ export const PageInfoFragmentFragmentDoc = gql`
   startCursor
 }
     `;
+export const FlagFragmentFragmentDoc = gql`
+    fragment FlagFragment on Flag {
+  flag_id
+  parent_table
+  parent_id
+  name
+  created_at
+  created_by
+}
+    `;
+export const WordDefinitionListEdgeFragmentFragmentDoc = gql`
+    fragment WordDefinitionListEdgeFragment on WordDefinitionListEdge {
+  cursor
+  node {
+    ...WordDefinitionFragment
+  }
+}
+    ${WordDefinitionFragmentFragmentDoc}`;
+export const PhraseFragmentFragmentDoc = gql`
+    fragment PhraseFragment on Phrase {
+  phrase_id
+  phrase
+  language_code
+  dialect_code
+  geo_code
+}
+    `;
+export const PhraseDefinitionFragmentFragmentDoc = gql`
+    fragment PhraseDefinitionFragment on PhraseDefinition {
+  phrase_definition_id
+  definition
+  phrase {
+    ...PhraseFragment
+  }
+  created_at
+}
+    ${PhraseFragmentFragmentDoc}`;
+export const PhraseDefinitionListEdgeFragmentFragmentDoc = gql`
+    fragment PhraseDefinitionListEdgeFragment on PhraseDefinitionListEdge {
+  cursor
+  node {
+    ...PhraseDefinitionFragment
+  }
+}
+    ${PhraseDefinitionFragmentFragmentDoc}`;
 export const ForumFolderFragmentFragmentDoc = gql`
     fragment ForumFolderFragment on ForumFolder {
   folder_id
@@ -3050,15 +3218,6 @@ export const WordWithVotesFragmentFragmentDoc = gql`
   translation_id
 }
     `;
-export const PhraseFragmentFragmentDoc = gql`
-    fragment PhraseFragment on Phrase {
-  phrase_id
-  phrase
-  language_code
-  dialect_code
-  geo_code
-}
-    `;
 export const PhraseDefinitionWithVoteFragmentFragmentDoc = gql`
     fragment PhraseDefinitionWithVoteFragment on PhraseDefinitionWithVote {
   phrase_definition_id
@@ -3089,16 +3248,6 @@ export const PhraseVoteStatusFragmentFragmentDoc = gql`
   upvotes
 }
     `;
-export const PhraseDefinitionFragmentFragmentDoc = gql`
-    fragment PhraseDefinitionFragment on PhraseDefinition {
-  phrase_definition_id
-  definition
-  phrase {
-    ...PhraseFragment
-  }
-  created_at
-}
-    ${PhraseFragmentFragmentDoc}`;
 export const PhraseWithDefinitionsFragmentFragmentDoc = gql`
     fragment PhraseWithDefinitionsFragment on PhraseWithDefinitions {
   phrase_id
@@ -3979,6 +4128,175 @@ export function useEmailResponseMutation(baseOptions?: Apollo.MutationHookOption
 export type EmailResponseMutationHookResult = ReturnType<typeof useEmailResponseMutation>;
 export type EmailResponseMutationResult = Apollo.MutationResult<EmailResponseMutation>;
 export type EmailResponseMutationOptions = Apollo.BaseMutationOptions<EmailResponseMutation, EmailResponseMutationVariables>;
+export const GetFlagsFromRefDocument = gql`
+    query GetFlagsFromRef($parent_table: TableNameType!, $parent_id: String!) {
+  getFlagsFromRef(parent_table: $parent_table, parent_id: $parent_id) {
+    error
+    flags {
+      ...FlagFragment
+    }
+  }
+}
+    ${FlagFragmentFragmentDoc}`;
+
+/**
+ * __useGetFlagsFromRefQuery__
+ *
+ * To run a query within a React component, call `useGetFlagsFromRefQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetFlagsFromRefQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetFlagsFromRefQuery({
+ *   variables: {
+ *      parent_table: // value for 'parent_table'
+ *      parent_id: // value for 'parent_id'
+ *   },
+ * });
+ */
+export function useGetFlagsFromRefQuery(baseOptions: Apollo.QueryHookOptions<GetFlagsFromRefQuery, GetFlagsFromRefQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetFlagsFromRefQuery, GetFlagsFromRefQueryVariables>(GetFlagsFromRefDocument, options);
+      }
+export function useGetFlagsFromRefLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetFlagsFromRefQuery, GetFlagsFromRefQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetFlagsFromRefQuery, GetFlagsFromRefQueryVariables>(GetFlagsFromRefDocument, options);
+        }
+export type GetFlagsFromRefQueryHookResult = ReturnType<typeof useGetFlagsFromRefQuery>;
+export type GetFlagsFromRefLazyQueryHookResult = ReturnType<typeof useGetFlagsFromRefLazyQuery>;
+export type GetFlagsFromRefQueryResult = Apollo.QueryResult<GetFlagsFromRefQuery, GetFlagsFromRefQueryVariables>;
+export const GetWordDefinitionsByFlagDocument = gql`
+    query GetWordDefinitionsByFlag($flag_name: FlagType!, $first: Int, $after: ID) {
+  getWordDefinitionsByFlag(flag_name: $flag_name, first: $first, after: $after) {
+    error
+    edges {
+      ...WordDefinitionListEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+    ${WordDefinitionListEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
+
+/**
+ * __useGetWordDefinitionsByFlagQuery__
+ *
+ * To run a query within a React component, call `useGetWordDefinitionsByFlagQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetWordDefinitionsByFlagQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetWordDefinitionsByFlagQuery({
+ *   variables: {
+ *      flag_name: // value for 'flag_name'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useGetWordDefinitionsByFlagQuery(baseOptions: Apollo.QueryHookOptions<GetWordDefinitionsByFlagQuery, GetWordDefinitionsByFlagQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetWordDefinitionsByFlagQuery, GetWordDefinitionsByFlagQueryVariables>(GetWordDefinitionsByFlagDocument, options);
+      }
+export function useGetWordDefinitionsByFlagLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetWordDefinitionsByFlagQuery, GetWordDefinitionsByFlagQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetWordDefinitionsByFlagQuery, GetWordDefinitionsByFlagQueryVariables>(GetWordDefinitionsByFlagDocument, options);
+        }
+export type GetWordDefinitionsByFlagQueryHookResult = ReturnType<typeof useGetWordDefinitionsByFlagQuery>;
+export type GetWordDefinitionsByFlagLazyQueryHookResult = ReturnType<typeof useGetWordDefinitionsByFlagLazyQuery>;
+export type GetWordDefinitionsByFlagQueryResult = Apollo.QueryResult<GetWordDefinitionsByFlagQuery, GetWordDefinitionsByFlagQueryVariables>;
+export const GetPhraseDefinitionsByFlagDocument = gql`
+    query GetPhraseDefinitionsByFlag($flag_name: FlagType!, $first: Int, $after: ID) {
+  getPhraseDefinitionsByFlag(flag_name: $flag_name, first: $first, after: $after) {
+    error
+    edges {
+      ...PhraseDefinitionListEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+    ${PhraseDefinitionListEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
+
+/**
+ * __useGetPhraseDefinitionsByFlagQuery__
+ *
+ * To run a query within a React component, call `useGetPhraseDefinitionsByFlagQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPhraseDefinitionsByFlagQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPhraseDefinitionsByFlagQuery({
+ *   variables: {
+ *      flag_name: // value for 'flag_name'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useGetPhraseDefinitionsByFlagQuery(baseOptions: Apollo.QueryHookOptions<GetPhraseDefinitionsByFlagQuery, GetPhraseDefinitionsByFlagQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPhraseDefinitionsByFlagQuery, GetPhraseDefinitionsByFlagQueryVariables>(GetPhraseDefinitionsByFlagDocument, options);
+      }
+export function useGetPhraseDefinitionsByFlagLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPhraseDefinitionsByFlagQuery, GetPhraseDefinitionsByFlagQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPhraseDefinitionsByFlagQuery, GetPhraseDefinitionsByFlagQueryVariables>(GetPhraseDefinitionsByFlagDocument, options);
+        }
+export type GetPhraseDefinitionsByFlagQueryHookResult = ReturnType<typeof useGetPhraseDefinitionsByFlagQuery>;
+export type GetPhraseDefinitionsByFlagLazyQueryHookResult = ReturnType<typeof useGetPhraseDefinitionsByFlagLazyQuery>;
+export type GetPhraseDefinitionsByFlagQueryResult = Apollo.QueryResult<GetPhraseDefinitionsByFlagQuery, GetPhraseDefinitionsByFlagQueryVariables>;
+export const ToggleFlagWithRefDocument = gql`
+    mutation ToggleFlagWithRef($parent_table: TableNameType!, $parent_id: String!, $name: String!) {
+  toggleFlagWithRef(
+    parent_table: $parent_table
+    parent_id: $parent_id
+    name: $name
+  ) {
+    error
+    flags {
+      ...FlagFragment
+    }
+  }
+}
+    ${FlagFragmentFragmentDoc}`;
+export type ToggleFlagWithRefMutationFn = Apollo.MutationFunction<ToggleFlagWithRefMutation, ToggleFlagWithRefMutationVariables>;
+
+/**
+ * __useToggleFlagWithRefMutation__
+ *
+ * To run a mutation, you first call `useToggleFlagWithRefMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useToggleFlagWithRefMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [toggleFlagWithRefMutation, { data, loading, error }] = useToggleFlagWithRefMutation({
+ *   variables: {
+ *      parent_table: // value for 'parent_table'
+ *      parent_id: // value for 'parent_id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useToggleFlagWithRefMutation(baseOptions?: Apollo.MutationHookOptions<ToggleFlagWithRefMutation, ToggleFlagWithRefMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ToggleFlagWithRefMutation, ToggleFlagWithRefMutationVariables>(ToggleFlagWithRefDocument, options);
+      }
+export type ToggleFlagWithRefMutationHookResult = ReturnType<typeof useToggleFlagWithRefMutation>;
+export type ToggleFlagWithRefMutationResult = Apollo.MutationResult<ToggleFlagWithRefMutation>;
+export type ToggleFlagWithRefMutationOptions = Apollo.BaseMutationOptions<ToggleFlagWithRefMutation, ToggleFlagWithRefMutationVariables>;
 export const CreateThreadDocument = gql`
     mutation CreateThread($name: String!, $folder_id: ID!) {
   threadUpsert(input: {name: $name, folder_id: $folder_id}) {
@@ -6645,6 +6963,9 @@ export const namedOperations = {
     GetWordsByLanguage: 'GetWordsByLanguage',
     GetWordDefinitionsByWordId: 'GetWordDefinitionsByWordId',
     GetWordWithVoteById: 'GetWordWithVoteById',
+    GetFlagsFromRef: 'GetFlagsFromRef',
+    GetWordDefinitionsByFlag: 'GetWordDefinitionsByFlag',
+    GetPhraseDefinitionsByFlag: 'GetPhraseDefinitionsByFlag',
     GetThreadById: 'GetThreadById',
     GetThreads: 'GetThreads',
     GetForumFolderById: 'GetForumFolderById',
@@ -6690,6 +7011,7 @@ export const namedOperations = {
     ToggleWordVoteStatus: 'ToggleWordVoteStatus',
     WordUpsert: 'WordUpsert',
     EmailResponse: 'EmailResponse',
+    ToggleFlagWithRef: 'ToggleFlagWithRef',
     CreateThread: 'CreateThread',
     UpdateThread: 'UpdateThread',
     DeleteThread: 'DeleteThread',
@@ -6736,6 +7058,9 @@ export const namedOperations = {
     WordVoteStatusFragment: 'WordVoteStatusFragment',
     WordWithVoteListEdgeFragment: 'WordWithVoteListEdgeFragment',
     PageInfoFragment: 'PageInfoFragment',
+    FlagFragment: 'FlagFragment',
+    WordDefinitionListEdgeFragment: 'WordDefinitionListEdgeFragment',
+    PhraseDefinitionListEdgeFragment: 'PhraseDefinitionListEdgeFragment',
     ForumFolderFragment: 'ForumFolderFragment',
     ForumFragment: 'ForumFragment',
     MapPhraseWithVotesFragment: 'MapPhraseWithVotesFragment',
