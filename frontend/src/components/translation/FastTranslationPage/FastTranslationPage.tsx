@@ -1,5 +1,4 @@
 import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
-// import { RouteComponentProps } from 'react-router';
 import {
   IonAccordion,
   IonAccordionGroup,
@@ -12,10 +11,15 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   AccordionGroupChangeEventDetail,
 } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
-import { IonAccordionGroupCustomEvent } from '@ionic/core/components';
+import {
+  IonAccordionGroupCustomEvent,
+  IonInfiniteScrollCustomEvent,
+} from '@ionic/core/components';
 
 import { subTags2LangInfo, compareLangInfo } from '../../../common/langUtils';
 
@@ -54,18 +58,22 @@ import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 import { NewWordOrPhraseWithDefinitionForm } from '../NewWordOrPhraseWithDefinitionForm';
 
-// interface FastTranslationPageProps
-//   extends RouteComponentProps<{
-//     nation_id: string;
-//     language_id: string;
-//   }> {}
-
 export function FastTranslationPage() {
   const { tr } = useTr();
-  // const router = useIonRouter();
-  // const [present] = useIonToast();
 
   const modalRef = useRef<HTMLIonModalElement>(null);
+  const tempMapRef = useRef(
+    new Map<
+      string,
+      {
+        id: string;
+        wordOrPhraseLikeString: string;
+        type: TableNameType.PhraseDefinitions | TableNameType.WordDefinitions;
+        definition_id: string;
+        definition: string;
+      }[]
+    >(),
+  );
 
   const [isOpenModal, setIsOpenModal] = useState<{
     is_word_type: boolean;
@@ -99,12 +107,14 @@ export function FastTranslationPage() {
     >(),
   );
 
-  // fetchMore: wordDefinitionFetchMore;
-  const [getWordDefinitionsByFlag, { data: wordDefinitionsData }] =
-    useGetWordDefinitionsByFlagLazyQuery();
-  // fetchMore: phraseDefinitionFetchMore;
-  const [getPhraseDefinitionsByFlag, { data: phraseDefinitionsData }] =
-    useGetPhraseDefinitionsByFlagLazyQuery();
+  const [
+    getWordDefinitionsByFlag,
+    { data: wordDefinitionsData, fetchMore: wordDefinitionFetchMore },
+  ] = useGetWordDefinitionsByFlagLazyQuery();
+  const [
+    getPhraseDefinitionsByFlag,
+    { data: phraseDefinitionsData, fetchMore: phraseDefinitionFetchMore },
+  ] = useGetPhraseDefinitionsByFlagLazyQuery();
   const [getTranslationsByFromDefinitionId, { data: translationData }] =
     useGetTranslationsByFromDefinitionIdLazyQuery();
   const [upsertTranslation] = useUpsertTranslationMutation();
@@ -126,35 +136,41 @@ export function FastTranslationPage() {
     });
   }, [getWordDefinitionsByFlag, getPhraseDefinitionsByFlag]);
 
-  // const handleFetchMore = useCallback(() => {
-  //   if (wordDefinitionsData?.getWordDefinitionsByFlag.pageInfo.hasNextPage) {
-  //     wordDefinitionFetchMore({
-  //       variables: {
-  //         first: PAGE_SIZE,
-  //         after:
-  //           wordDefinitionsData.getWordDefinitionsByFlag.pageInfo.endCursor,
-  //         flag_name: FlagType.FastTranslation,
-  //       },
-  //     });
-  //   }
-  //   if (
-  //     phraseDefinitionsData?.getPhraseDefinitionsByFlag.pageInfo.hasNextPage
-  //   ) {
-  //     phraseDefinitionFetchMore({
-  //       variables: {
-  //         first: PAGE_SIZE,
-  //         after:
-  //           phraseDefinitionsData.getPhraseDefinitionsByFlag.pageInfo.endCursor,
-  //         flag_name: FlagType.FastTranslation,
-  //       },
-  //     });
-  //   }
-  // }, [
-  //   phraseDefinitionFetchMore,
-  //   phraseDefinitionsData,
-  //   wordDefinitionFetchMore,
-  //   wordDefinitionsData,
-  // ]);
+  const handleInfinite = useCallback(
+    async (ev: IonInfiniteScrollCustomEvent<void>) => {
+      if (wordDefinitionsData?.getWordDefinitionsByFlag.pageInfo.hasNextPage) {
+        await wordDefinitionFetchMore({
+          variables: {
+            first: PAGE_SIZE,
+            after:
+              wordDefinitionsData.getWordDefinitionsByFlag.pageInfo.endCursor,
+            flag_name: FlagType.FastTranslation,
+          },
+        });
+      }
+      if (
+        phraseDefinitionsData?.getPhraseDefinitionsByFlag.pageInfo.hasNextPage
+      ) {
+        await phraseDefinitionFetchMore({
+          variables: {
+            first: PAGE_SIZE,
+            after:
+              phraseDefinitionsData.getPhraseDefinitionsByFlag.pageInfo
+                .endCursor,
+            flag_name: FlagType.FastTranslation,
+          },
+        });
+      }
+
+      setTimeout(() => ev.target.complete(), 500);
+    },
+    [
+      phraseDefinitionFetchMore,
+      phraseDefinitionsData,
+      wordDefinitionFetchMore,
+      wordDefinitionsData,
+    ],
+  );
 
   const handleChangeAccordionValue = useCallback(
     (
@@ -217,16 +233,7 @@ export function FastTranslationPage() {
       }[];
     }[] = [];
 
-    const tempMap = new Map<
-      string,
-      {
-        id: string;
-        wordOrPhraseLikeString: string;
-        type: TableNameType.PhraseDefinitions | TableNameType.WordDefinitions;
-        definition_id: string;
-        definition: string;
-      }[]
-    >();
+    const tempMap = tempMapRef.current;
 
     if (!source) {
       return null;
@@ -373,7 +380,13 @@ export function FastTranslationPage() {
         };
 
         if (arr) {
-          arr.push(item);
+          const exists = arr.find(
+            (data) => data.definition_id === item.definition_id,
+          );
+
+          if (!exists) {
+            arr.push(item);
+          }
         } else {
           tempMap.set(keyStr, [item]);
         }
@@ -407,7 +420,13 @@ export function FastTranslationPage() {
         };
 
         if (arr) {
-          arr.push(item);
+          const exists = arr.find(
+            (data) => data.definition_id === item.definition_id,
+          );
+
+          if (!exists) {
+            arr.push(item);
+          }
         } else {
           tempMap.set(keyStr, [item]);
         }
@@ -605,6 +624,13 @@ export function FastTranslationPage() {
         </LanguageSelectorContainer>
       </FilterContainer>
       <CardListContainer>{cardListCom}</CardListContainer>
+
+      <IonInfiniteScroll onIonInfinite={handleInfinite}>
+        <IonInfiniteScrollContent
+          loadingText={`${tr('Loading')}...`}
+          loadingSpinner="bubbles"
+        />
+      </IonInfiniteScroll>
 
       <IonModal
         isOpen={!!isOpenModal}
