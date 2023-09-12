@@ -1,11 +1,11 @@
 import { IonList } from '@ionic/react';
-import { TextyDocumentOutput } from '../../generated/graphql';
+import { TextyDocument } from '../../generated/graphql';
 import { useTr } from '../../hooks/useTr';
 import { DocumentItem } from './DocumentItem';
 import { match } from 'react-router';
 
 type TDocumentListProps = {
-  allDocuments?: TextyDocumentOutput[];
+  allDocuments?: TextyDocument[];
   match: match<{ nation_id: string; language_id: string; cluster_id: string }>;
 };
 

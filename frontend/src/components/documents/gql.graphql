@@ -1,4 +1,4 @@
-fragment TextyDocumentFragment on TextyDocumentOutput {
+fragment TextyDocumentFragment on TextyDocument {
   document_id
   file_id
   file_name

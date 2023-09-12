@@ -95,4 +95,7 @@ export const typePolicies: TypePolicies = {
   Post: {
     keyFields: ['post_id'],
   },
+  TextyDocument: {
+    keyFields: ['document_id'],
+  },
 };

@@ -285,7 +285,7 @@ export type GetAllDocumentsInput = {
 
 export type GetAllDocumentsOutput = {
   __typename?: 'GetAllDocumentsOutput';
-  documents?: Maybe<Array<TextyDocumentOutput>>;
+  documents?: Maybe<Array<TextyDocument>>;
   error: ErrorType;
 };
 
@@ -304,7 +304,7 @@ export type GetDocumentInput = {
 
 export type GetDocumentOutput = {
   __typename?: 'GetDocumentOutput';
-  document?: Maybe<TextyDocumentOutput>;
+  document?: Maybe<TextyDocument>;
   error: ErrorType;
 };
 
@@ -1826,15 +1826,8 @@ export type SiteTextWordToWordTranslationWithVote = {
   word_to_word_translation_id: Scalars['ID']['output'];
 };
 
-export type TextyDocumentInput = {
-  dialect_code?: InputMaybe<Scalars['String']['input']>;
-  file_id: Scalars['String']['input'];
-  geo_code?: InputMaybe<Scalars['String']['input']>;
-  language_code: Scalars['String']['input'];
-};
-
-export type TextyDocumentOutput = {
-  __typename?: 'TextyDocumentOutput';
+export type TextyDocument = {
+  __typename?: 'TextyDocument';
   dialect_code?: Maybe<Scalars['String']['output']>;
   document_id: Scalars['ID']['output'];
   file_id: Scalars['String']['output'];
@@ -1842,6 +1835,13 @@ export type TextyDocumentOutput = {
   file_url: Scalars['String']['output'];
   geo_code?: Maybe<Scalars['String']['output']>;
   language_code: Scalars['String']['output'];
+};
+
+export type TextyDocumentInput = {
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  file_id: Scalars['String']['input'];
+  geo_code?: InputMaybe<Scalars['String']['input']>;
+  language_code: Scalars['String']['input'];
 };
 
 export type Thread = {
@@ -2368,7 +2368,7 @@ export type WordUpsertMutationVariables = Exact<{
 
 export type WordUpsertMutation = { __typename?: 'Mutation', wordUpsert: { __typename?: 'WordOutput', error: ErrorType, word?: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
 
-export type TextyDocumentFragmentFragment = { __typename?: 'TextyDocumentOutput', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
+export type TextyDocumentFragmentFragment = { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
 export type DocumentUploadMutationVariables = Exact<{
   document: TextyDocumentInput;
@@ -2382,14 +2382,14 @@ export type GetAllDocumentsQueryVariables = Exact<{
 }>;
 
 
-export type GetAllDocumentsQuery = { __typename?: 'Query', getAllDocuments: { __typename?: 'GetAllDocumentsOutput', documents?: Array<{ __typename?: 'TextyDocumentOutput', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null }> | null } };
+export type GetAllDocumentsQuery = { __typename?: 'Query', getAllDocuments: { __typename?: 'GetAllDocumentsOutput', documents?: Array<{ __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null }> | null } };
 
 export type GetDocumentQueryVariables = Exact<{
   document_id: Scalars['String']['input'];
 }>;
 
 
-export type GetDocumentQuery = { __typename?: 'Query', getDocument: { __typename?: 'GetDocumentOutput', document?: { __typename?: 'TextyDocumentOutput', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
+export type GetDocumentQuery = { __typename?: 'Query', getDocument: { __typename?: 'GetDocumentOutput', document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
 
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -3102,7 +3102,7 @@ export const PageInfoFragmentFragmentDoc = gql`
 }
     `;
 export const TextyDocumentFragmentFragmentDoc = gql`
-    fragment TextyDocumentFragment on TextyDocumentOutput {
+    fragment TextyDocumentFragment on TextyDocument {
   document_id
   file_id
   file_name

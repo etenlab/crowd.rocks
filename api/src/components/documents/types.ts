@@ -3,7 +3,7 @@ import { GenericOutput } from '../../common/types';
 import { LanguageInput } from '../common/types';
 
 @ObjectType()
-export class TextyDocumentOutput {
+export class TextyDocument {
   @Field(() => ID) document_id: string;
   @Field(() => String) file_id: string;
   @Field(() => String) file_name: string;
@@ -38,8 +38,8 @@ export class GetAllDocumentsInput {
 
 @ObjectType()
 export class GetAllDocumentsOutput extends GenericOutput {
-  @Field(() => [TextyDocumentOutput], { nullable: true })
-  documents: TextyDocumentOutput[] | null;
+  @Field(() => [TextyDocument], { nullable: true })
+  documents: TextyDocument[] | null;
 }
 @InputType()
 export class GetDocumentInput {
@@ -47,6 +47,6 @@ export class GetDocumentInput {
 }
 @ObjectType()
 export class GetDocumentOutput extends GenericOutput {
-  @Field(() => TextyDocumentOutput, { nullable: true })
-  document: TextyDocumentOutput | null;
+  @Field(() => TextyDocument, { nullable: true })
+  document: TextyDocument | null;
 }

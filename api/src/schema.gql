@@ -252,7 +252,7 @@ input GetAllDocumentsInput {
 }
 
 type GetAllDocumentsOutput {
-  documents: [TextyDocumentOutput!]
+  documents: [TextyDocument!]
   error: ErrorType!
 }
 
@@ -269,7 +269,7 @@ input GetDocumentInput {
 }
 
 type GetDocumentOutput {
-  document: TextyDocumentOutput
+  document: TextyDocument
   error: ErrorType!
 }
 
@@ -1094,19 +1094,19 @@ type SiteTextWordToWordTranslationWithVote {
   word_to_word_translation_id: ID!
 }
 
-input TextyDocumentInput {
-  dialect_code: String
-  file_id: String!
-  geo_code: String
-  language_code: String!
-}
-
-type TextyDocumentOutput {
+type TextyDocument {
   dialect_code: String
   document_id: ID!
   file_id: String!
   file_name: String!
   file_url: String!
+  geo_code: String
+  language_code: String!
+}
+
+input TextyDocumentInput {
+  dialect_code: String
+  file_id: String!
   geo_code: String
   language_code: String!
 }

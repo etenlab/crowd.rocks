@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import { useTr } from '../../hooks/useTr';
 import { styled } from 'styled-components';
-// import { Textarea } from '../common/styled';
 import { ConfirmButtons } from '../common/ConfirmButtons';
 import { LangSelector } from '../common/LangSelector/LangSelector';
 import { useAppContext } from '../../hooks/useAppContext';
