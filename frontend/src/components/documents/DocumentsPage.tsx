@@ -136,7 +136,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
       </FilterContainer>
       <DocumentsTools onAddClick={() => setIsOpenModal(true)} />
       <DocumentsList
-        allDocuments={allDocuments?.getAllDocuments.documents}
+        allDocuments={allDocuments?.getAllDocuments.documents || undefined}
         match={match}
       />
       <IonModal isOpen={isOpenModal}>
