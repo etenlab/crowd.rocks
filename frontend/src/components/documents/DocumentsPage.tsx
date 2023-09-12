@@ -7,7 +7,6 @@ import { LangSelector } from '../common/LangSelector/LangSelector';
 import { useAppContext } from '../../hooks/useAppContext';
 import { useCallback, useState } from 'react';
 import {
-  GetAllDocumentsDocument,
   useDocumentUploadMutation,
   useGetAllDocumentsQuery,
   useUploadFileMutation,
@@ -50,17 +49,18 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
 
   const [present] = useIonToast();
 
-  const { data: allDocuments } = useGetAllDocumentsQuery({
-    variables: {
-      languageInput: sourceLang
-        ? {
-            language_code: sourceLang?.lang.tag,
-            dialect_code: sourceLang?.dialect?.tag,
-            geo_code: sourceLang?.region?.tag,
-          }
-        : undefined,
-    },
-  });
+  const { data: allDocuments, refetch: refetchDocuments } =
+    useGetAllDocumentsQuery({
+      variables: {
+        languageInput: sourceLang
+          ? {
+              language_code: sourceLang?.lang.tag,
+              dialect_code: sourceLang?.dialect?.tag,
+              geo_code: sourceLang?.region?.tag,
+            }
+          : undefined,
+      },
+    });
 
   const handleAddDocument = useCallback(
     async (file: File | undefined) => {
@@ -89,7 +89,6 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
           file_size: file.size,
           file_type: file.type,
         },
-        refetchQueries: [GetAllDocumentsDocument],
       });
       if (!uploadResult.data?.uploadFile.file?.id) {
         console.log(`S3 upload error `, uploadResult.data?.uploadFile.error);
@@ -107,11 +106,13 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
         },
       });
       console.log(`uploaded: `, res);
+      refetchDocuments();
       setIsOpenModal(false);
     },
     [
       documentUpload,
       present,
+      refetchDocuments,
       sourceLang?.dialect?.tag,
       sourceLang?.lang,
       sourceLang?.region?.tag,
