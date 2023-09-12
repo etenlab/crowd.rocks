@@ -112,8 +112,8 @@ const Body: React.FC = () => {
       count = nData.notifications.notifications.filter(
         (n) => !n.isNotified,
       ).length;
-      setUnreadCount(count);
     }
+    setUnreadCount(count);
   }, [getNotifications, nData, nError]);
 
   let sub: Subscription;
@@ -428,7 +428,7 @@ const Body: React.FC = () => {
           />
           <Route
             exact
-            path="/:nation_id/:language_id/:cluster_id/discussion/:parent/:parent_id/:page_title"
+            path="/:nation_id/:language_id/:cluster_id/discussion/:parent/:parent_id"
             component={DiscussionPage}
           />
           <Route

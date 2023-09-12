@@ -23,7 +23,7 @@ import {
 export class ThreadsService {
   constructor(private pg: PostgresService) {}
 
-  async read(input: ThreadReadInput): Promise<ThreadReadOutput> {
+  async getThread(input: ThreadReadInput): Promise<ThreadReadOutput> {
     const res1 = await this.pg.pool.query<GetThreadObjectById>(
       ...getThreadObjById(+input.thread_id),
     );
@@ -97,7 +97,7 @@ export class ThreadsService {
         };
       }
 
-      const { error: readingError, thread } = await this.read({
+      const { error: readingError, thread } = await this.getThread({
         thread_id: thread_id + '',
       });
 
@@ -133,4 +133,13 @@ export class ThreadsService {
       thread_id: res.rows[0].p_thread_id + '',
     };
   }
+
+  getDiscussionTitle = async (id: string): Promise<string> => {
+    const thread = await this.getThread({ thread_id: id });
+    if (thread.error !== ErrorType.NoError || thread.thread == null) {
+      console.error(thread.error);
+      return 'Thread';
+    }
+    return thread.thread.name;
+  };
 }

@@ -578,4 +578,13 @@ export class WordsService {
     };
     return word;
   }
+
+  getDiscussionTitle = async (id: string): Promise<string> => {
+    const word = await this.getWordWithVoteById(Number(id), null);
+    if (word.error !== ErrorType.NoError || word.word_with_vote == null) {
+      console.error(word.error);
+      return 'Dictionary:';
+    }
+    return `Dictionary: ${word.word_with_vote.word}`;
+  };
 }

@@ -133,7 +133,7 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
           discussion={{
             onChatClick: () =>
               router.push(
-                `/${match.params.nation_id}/${match.params.language_id}/1/discussion/word_definitions/${definition.word_definition_id}/Dictionary: ${wordData?.getWordWithVoteById.word_with_vote?.word} - ${definition.definition}`,
+                `/${match.params.nation_id}/${match.params.language_id}/1/discussion/word_definitions/${definition.word_definition_id}`,
               ),
           }}
           flags={{
@@ -152,7 +152,6 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
     match.params.nation_id,
     router,
     toggleWordDefinitionVoteStatus,
-    wordData?.getWordWithVoteById.word_with_vote?.word,
   ]);
 
   const wordCom = useMemo(() => {
@@ -196,7 +195,7 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
           icon={chatbubbleEllipsesSharp}
           onClick={() =>
             router.push(
-              `/${match.params.nation_id}/${match.params.language_id}/1/discussion/words/${wordWithVote.word_id}/Dictionary: ${wordWithVote.word}`,
+              `/${match.params.nation_id}/${match.params.language_id}/1/discussion/words/${wordWithVote.word_id}`,
             )
           }
         />

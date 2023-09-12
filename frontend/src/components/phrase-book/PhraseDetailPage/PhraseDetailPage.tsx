@@ -138,7 +138,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
             onChatClick: () =>
               router.push(
                 // TODO: maybe can extract the sender from the router in discussion page
-                `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrase_definitions/${definition.phrase_definition_id}/Phrase Book: ${phraseData?.getPhraseWithVoteById.phrase_with_vote?.phrase} - ${definition.definition}`,
+                `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrase_definitions/${definition.phrase_definition_id}`,
               ),
           }}
           flags={{
@@ -154,7 +154,6 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
     definitionError,
     match.params.language_id,
     match.params.nation_id,
-    phraseData?.getPhraseWithVoteById.phrase_with_vote?.phrase,
     router,
     togglePhraseDefinitionVoteStatus,
   ]);
@@ -204,7 +203,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
           icon={chatbubbleEllipsesSharp}
           onClick={() =>
             router.push(
-              `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrases/${phraseWithVote.phrase_id}/Phrase Book: ${phraseWithVote.phrase}`,
+              `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrases/${phraseWithVote.phrase_id}`,
             )
           }
         />
