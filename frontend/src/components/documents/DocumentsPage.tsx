@@ -28,9 +28,12 @@ interface DocumentsPageProps
   extends RouteComponentProps<{
     nation_id: string;
     language_id: string;
+    cluster_id: string;
   }> {}
 
-export const DocumentsPage: React.FC<DocumentsPageProps> = () => {
+export const DocumentsPage: React.FC<DocumentsPageProps> = ({
+  match,
+}: DocumentsPageProps) => {
   const { tr } = useTr();
   const {
     states: {
@@ -132,7 +135,10 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = () => {
         />
       </FilterContainer>
       <DocumentsTools onAddClick={() => setIsOpenModal(true)} />
-      <DocumentsList allDocuments={allDocuments?.getAllDocuments.documents} />
+      <DocumentsList
+        allDocuments={allDocuments?.getAllDocuments.documents}
+        match={match}
+      />
       <IonModal isOpen={isOpenModal}>
         <IonHeader>
           <IonToolbar>

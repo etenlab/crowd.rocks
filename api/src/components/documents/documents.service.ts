@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { PostgresService } from '../../core/postgres.service';
 import { LanguageInput } from '../common/types';
 import { DocumentsRepository } from './documents.repository';
-import { GetAllDocumentsOutput, TextyDocumentInput } from './types';
+import {
+  GetAllDocumentsOutput,
+  GetDocumentOutput,
+  TextyDocumentInput,
+} from './types';
 
 export interface ISaveDocumentParams {
   document: TextyDocumentInput;
@@ -38,5 +42,8 @@ export class DocumentsService {
 
   async getAllDocuments(lang?: LanguageInput): Promise<GetAllDocumentsOutput> {
     return this.documentsRepository.getAllDocuments(lang);
+  }
+  async getDocument(document_id: string): Promise<GetDocumentOutput> {
+    return this.documentsRepository.getDocument(document_id);
   }
 }

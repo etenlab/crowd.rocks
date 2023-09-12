@@ -37,6 +37,16 @@ export class GetAllDocumentsInput {
 }
 
 @ObjectType()
-export class GetAllDocumentsOutput {
-  @Field(() => [TextyDocumentOutput]) documents: TextyDocumentOutput[];
+export class GetAllDocumentsOutput extends GenericOutput {
+  @Field(() => [TextyDocumentOutput], { nullable: true })
+  documents: TextyDocumentOutput[] | null;
+}
+@InputType()
+export class GetDocumentInput {
+  @Field(() => String) document_id: string;
+}
+@ObjectType()
+export class GetDocumentOutput extends GenericOutput {
+  @Field(() => TextyDocumentOutput, { nullable: true })
+  document: TextyDocumentOutput | null;
 }

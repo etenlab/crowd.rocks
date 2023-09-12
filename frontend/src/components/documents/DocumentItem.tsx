@@ -4,13 +4,18 @@ import { IonBadge, IonIcon, IonItem } from '@ionic/react';
 import { langInfo2String, subTags2LangInfo } from '../../common/langUtils';
 import { downloadOutline } from 'ionicons/icons';
 import { downloadFromUrl } from '../../common/utility';
+import { match } from 'react-router';
 
 type TDocumentItemProps = {
   document: TextyDocumentOutput;
+  match: match<{ nation_id: string; language_id: string; cluster_id: string }>;
 };
 
 const DocumentItemNS: React.FC<TDocumentItemProps> = ({
   document: d,
+  match: {
+    params: { language_id, nation_id, cluster_id },
+  },
 }: TDocumentItemProps) => {
   const langInfo = subTags2LangInfo({
     lang: d.language_code,
@@ -21,9 +26,10 @@ const DocumentItemNS: React.FC<TDocumentItemProps> = ({
   const handleDownloadFile = (document: TextyDocumentOutput) => {
     downloadFromUrl(document.file_name, document.file_url);
   };
+  const routerLink = `/${nation_id}/${language_id}/${cluster_id}/documents/${d.document_id}`;
 
   return (
-    <StItem>
+    <StItem routerLink={routerLink}>
       <FileName>{d.file_name}</FileName>
       <IconRow>
         <IonBadge>{langInfo2String(langInfo)}</IonBadge>

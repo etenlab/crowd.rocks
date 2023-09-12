@@ -9,6 +9,8 @@ import {
   DocumentUploadOutput,
   GetAllDocumentsInput,
   GetAllDocumentsOutput,
+  GetDocumentInput,
+  GetDocumentOutput,
 } from './types';
 
 @Injectable()
@@ -46,6 +48,14 @@ export class DocumentsResolver {
     @Args('input') input: GetAllDocumentsInput,
   ): Promise<GetAllDocumentsOutput> {
     const res = await this.documentsSevice.getAllDocuments(input.lang);
+    return res;
+  }
+
+  @Query(() => GetDocumentOutput)
+  async getDocument(
+    @Args('input') input: GetDocumentInput,
+  ): Promise<GetDocumentOutput> {
+    const res = await this.documentsSevice.getDocument(input.document_id);
     return res;
   }
 }

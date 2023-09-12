@@ -87,6 +87,8 @@ export enum ErrorType {
   AvatarUnavailable = 'AvatarUnavailable',
   CandidateNotFound = 'CandidateNotFound',
   CandidateNotFoundInBallot = 'CandidateNotFoundInBallot',
+  DocumentIdNotProvided = 'DocumentIdNotProvided',
+  DocumentNotFound = 'DocumentNotFound',
   ElectionNotFound = 'ElectionNotFound',
   EmailInvalid = 'EmailInvalid',
   EmailIsBlocked = 'EmailIsBlocked',
@@ -283,7 +285,8 @@ export type GetAllDocumentsInput = {
 
 export type GetAllDocumentsOutput = {
   __typename?: 'GetAllDocumentsOutput';
-  documents: Array<TextyDocumentOutput>;
+  documents?: Maybe<Array<TextyDocumentOutput>>;
+  error: ErrorType;
 };
 
 export type GetAllMapsListInput = {
@@ -293,6 +296,16 @@ export type GetAllMapsListInput = {
 export type GetAllMapsListOutput = {
   __typename?: 'GetAllMapsListOutput';
   allMapsList: Array<MapFileOutput>;
+};
+
+export type GetDocumentInput = {
+  document_id: Scalars['String']['input'];
+};
+
+export type GetDocumentOutput = {
+  __typename?: 'GetDocumentOutput';
+  document?: Maybe<TextyDocumentOutput>;
+  error: ErrorType;
 };
 
 export type GetOrigMapContentInput = {
@@ -1219,6 +1232,7 @@ export type Query = {
   getAllSiteTextLanguageList: SiteTextLanguageListOutput;
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput;
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
+  getDocument: GetDocumentOutput;
   getOrigMapContent: GetOrigMapContentOutput;
   getOrigMapPhrases: GetOrigMapPhrasesOutput;
   getOrigMapWords: GetOrigMapWordsOutput;
@@ -1324,6 +1338,11 @@ export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
   language_code: Scalars['String']['input'];
   site_text_id: Scalars['ID']['input'];
   site_text_type_is_word: Scalars['Boolean']['input'];
+};
+
+
+export type QueryGetDocumentArgs = {
+  input: GetDocumentInput;
 };
 
 
@@ -2349,6 +2368,8 @@ export type WordUpsertMutationVariables = Exact<{
 
 export type WordUpsertMutation = { __typename?: 'Mutation', wordUpsert: { __typename?: 'WordOutput', error: ErrorType, word?: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
 
+export type TextyDocumentFragmentFragment = { __typename?: 'TextyDocumentOutput', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
+
 export type DocumentUploadMutationVariables = Exact<{
   document: TextyDocumentInput;
 }>;
@@ -2361,7 +2382,14 @@ export type GetAllDocumentsQueryVariables = Exact<{
 }>;
 
 
-export type GetAllDocumentsQuery = { __typename?: 'Query', getAllDocuments: { __typename?: 'GetAllDocumentsOutput', documents: Array<{ __typename?: 'TextyDocumentOutput', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null }> } };
+export type GetAllDocumentsQuery = { __typename?: 'Query', getAllDocuments: { __typename?: 'GetAllDocumentsOutput', documents?: Array<{ __typename?: 'TextyDocumentOutput', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null }> | null } };
+
+export type GetDocumentQueryVariables = Exact<{
+  document_id: Scalars['String']['input'];
+}>;
+
+
+export type GetDocumentQuery = { __typename?: 'Query', getDocument: { __typename?: 'GetDocumentOutput', document?: { __typename?: 'TextyDocumentOutput', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
 
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -3071,6 +3099,17 @@ export const PageInfoFragmentFragmentDoc = gql`
   hasNextPage
   hasPreviousPage
   startCursor
+}
+    `;
+export const TextyDocumentFragmentFragmentDoc = gql`
+    fragment TextyDocumentFragment on TextyDocumentOutput {
+  document_id
+  file_id
+  file_name
+  file_url
+  language_code
+  dialect_code
+  geo_code
 }
     `;
 export const ForumFolderFragmentFragmentDoc = gql`
@@ -4047,17 +4086,11 @@ export const GetAllDocumentsDocument = gql`
     query GetAllDocuments($languageInput: LanguageInput) {
   getAllDocuments(input: {lang: $languageInput}) {
     documents {
-      document_id
-      file_id
-      file_name
-      file_url
-      language_code
-      dialect_code
-      geo_code
+      ...TextyDocumentFragment
     }
   }
 }
-    `;
+    ${TextyDocumentFragmentFragmentDoc}`;
 
 /**
  * __useGetAllDocumentsQuery__
@@ -4086,6 +4119,43 @@ export function useGetAllDocumentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type GetAllDocumentsQueryHookResult = ReturnType<typeof useGetAllDocumentsQuery>;
 export type GetAllDocumentsLazyQueryHookResult = ReturnType<typeof useGetAllDocumentsLazyQuery>;
 export type GetAllDocumentsQueryResult = Apollo.QueryResult<GetAllDocumentsQuery, GetAllDocumentsQueryVariables>;
+export const GetDocumentDocument = gql`
+    query GetDocument($document_id: String!) {
+  getDocument(input: {document_id: $document_id}) {
+    document {
+      ...TextyDocumentFragment
+    }
+  }
+}
+    ${TextyDocumentFragmentFragmentDoc}`;
+
+/**
+ * __useGetDocumentQuery__
+ *
+ * To run a query within a React component, call `useGetDocumentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDocumentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDocumentQuery({
+ *   variables: {
+ *      document_id: // value for 'document_id'
+ *   },
+ * });
+ */
+export function useGetDocumentQuery(baseOptions: Apollo.QueryHookOptions<GetDocumentQuery, GetDocumentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDocumentQuery, GetDocumentQueryVariables>(GetDocumentDocument, options);
+      }
+export function useGetDocumentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDocumentQuery, GetDocumentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDocumentQuery, GetDocumentQueryVariables>(GetDocumentDocument, options);
+        }
+export type GetDocumentQueryHookResult = ReturnType<typeof useGetDocumentQuery>;
+export type GetDocumentLazyQueryHookResult = ReturnType<typeof useGetDocumentLazyQuery>;
+export type GetDocumentQueryResult = Apollo.QueryResult<GetDocumentQuery, GetDocumentQueryVariables>;
 export const EmailResponseDocument = gql`
     mutation EmailResponse($token: String!) {
   emailResponseResolver(input: {token: $token}) {
@@ -6786,6 +6856,7 @@ export const namedOperations = {
     GetWordDefinitionsByWordId: 'GetWordDefinitionsByWordId',
     GetWordWithVoteById: 'GetWordWithVoteById',
     GetAllDocuments: 'GetAllDocuments',
+    GetDocument: 'GetDocument',
     GetThreadById: 'GetThreadById',
     GetThreads: 'GetThreads',
     GetForumFolderById: 'GetForumFolderById',
@@ -6878,6 +6949,7 @@ export const namedOperations = {
     WordVoteStatusFragment: 'WordVoteStatusFragment',
     WordWithVoteListEdgeFragment: 'WordWithVoteListEdgeFragment',
     PageInfoFragment: 'PageInfoFragment',
+    TextyDocumentFragment: 'TextyDocumentFragment',
     ForumFolderFragment: 'ForumFolderFragment',
     ForumFragment: 'ForumFragment',
     MapPhraseWithVotesFragment: 'MapPhraseWithVotesFragment',

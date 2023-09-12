@@ -40,7 +40,7 @@ export function NewDocumentForm({ onSave, onCancel }: NewDocumentFormProps) {
           fileInput?.current?.click();
         }}
       >
-        {tr('Select file')}
+        {file?.name ? tr('Change selected file') : tr('Select file')}
       </IonButton>
       <input
         ref={fileInput}

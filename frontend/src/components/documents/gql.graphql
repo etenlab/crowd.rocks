@@ -1,3 +1,13 @@
+fragment TextyDocumentFragment on TextyDocumentOutput {
+  document_id
+  file_id
+  file_name
+  file_url
+  language_code
+  dialect_code
+  geo_code
+}
+
 mutation DocumentUpload($document: TextyDocumentInput!) {
   documentUpload(input: { document: $document }) {
     error
@@ -8,13 +18,15 @@ mutation DocumentUpload($document: TextyDocumentInput!) {
 query GetAllDocuments($languageInput: LanguageInput) {
   getAllDocuments(input: { lang: $languageInput }) {
     documents {
-      document_id
-      file_id
-      file_name
-      file_url
-      language_code
-      dialect_code
-      geo_code
+      ...TextyDocumentFragment
+    }
+  }
+}
+
+query GetDocument($document_id: String!) {
+  getDocument(input: { document_id: $document_id }) {
+    document {
+      ...TextyDocumentFragment
     }
   }
 }

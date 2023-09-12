@@ -1,8 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PoolClient } from 'pg';
+import { ErrorType } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
 import { LanguageInput } from '../common/types';
-import { GetAllDocumentsOutput, TextyDocumentInput } from './types';
+import {
+  GetAllDocumentsOutput,
+  GetDocumentOutput,
+  TextyDocumentInput,
+} from './types';
 
 @Injectable()
 export class DocumentsRepository {
@@ -65,6 +70,7 @@ export class DocumentsRepository {
     const resQ = await this.pg.pool.query(sqlStr, params);
 
     const allDocumentsOutput: GetAllDocumentsOutput = {
+      error: ErrorType.NoError,
       documents: resQ.rows.map(
         ({
           document_id,
@@ -87,5 +93,57 @@ export class DocumentsRepository {
     };
 
     return allDocumentsOutput;
+  }
+
+  async getDocument(document_id: string): Promise<GetDocumentOutput> {
+    if (!document_id) {
+      return {
+        error: ErrorType.DocumentIdNotProvided,
+        document: null,
+      };
+    }
+    const sqlStr = `
+        select
+          d.document_id,
+          d.language_code,
+          d.dialect_code,
+          d.geo_code,
+          d.file_id,
+          f.file_name,
+          f.file_url
+        from
+          documents d
+        left join files f on
+          d.file_id  = f.file_id
+        where d.document_id = $1
+      `;
+    const resQ = await this.pg.pool.query(sqlStr, [document_id]);
+    if (!(resQ.rows.length > 0)) {
+      return {
+        error: ErrorType.DocumentNotFound,
+        document: null,
+      };
+    }
+    const {
+      language_code,
+      dialect_code,
+      geo_code,
+      file_id,
+      file_name,
+      file_url,
+    } = resQ.rows[0];
+
+    return {
+      error: ErrorType.NoError,
+      document: {
+        document_id,
+        language_code,
+        dialect_code,
+        geo_code,
+        file_id,
+        file_name,
+        file_url,
+      },
+    };
   }
 }
