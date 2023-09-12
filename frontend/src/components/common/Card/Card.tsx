@@ -1,4 +1,7 @@
 import { ReactNode, useCallback, useState } from 'react';
+import { IonIcon, IonInput } from '@ionic/react';
+import { chatbubbleEllipsesSharp, checkmark, pencil } from 'ionicons/icons';
+
 import {
   CustomCard,
   CustomCardTitle,
@@ -7,9 +10,12 @@ import {
 } from './styled';
 
 import { VoteButtonsHerizontal } from '../VoteButtonsHerizontal';
-import { chatbubbleEllipsesSharp, checkmark, pencil } from 'ionicons/icons';
+import { Flag } from '../../flags/Flag';
+
 import { StChatIcon } from '../styled';
-import { IonIcon, IonInput } from '@ionic/react';
+
+import { FlagName } from '../../flags/flagGroups';
+import { TableNameType } from '../../../generated/graphql';
 
 type CardProps = {
   content?: string;
@@ -25,6 +31,11 @@ type CardProps = {
   discussion?: {
     onChatClick: () => void;
   };
+  flags?: {
+    parent_table: TableNameType;
+    parent_id: string;
+    flag_names: FlagName[];
+  };
   onClick?: () => void;
   routerLink?: string;
   onContentEdit?: (newValue: string) => void;
@@ -39,37 +50,12 @@ export function Card({
   routerLink,
   vote,
   discussion,
+  flags,
   onContentEdit,
 }: CardProps) {
   const voteButtonCom = vote ? <VoteButtonsHerizontal {...vote} /> : null;
   const [editing, setEditing] = useState(false);
   const [newContentVal, setNewContentVal] = useState(content);
-
-  // the chat icon should be grouped with the vote buttons
-  const reactionCom = discussion ? (
-    vote ? (
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
-        {voteButtonCom}
-        <StChatIcon
-          icon={chatbubbleEllipsesSharp}
-          onClick={(e) => {
-            e.stopPropagation();
-            discussion.onChatClick && discussion.onChatClick();
-          }}
-        />
-      </div>
-    ) : (
-      <StChatIcon
-        icon={chatbubbleEllipsesSharp}
-        onClick={(e) => {
-          e.stopPropagation();
-          discussion.onChatClick && discussion.onChatClick();
-        }}
-      />
-    )
-  ) : vote ? (
-    voteButtonCom
-  ) : null;
 
   const handleSave = useCallback(() => {
     setEditing(false);
@@ -93,6 +79,41 @@ export function Card({
       )}
     </div>
   );
+
+  const flagsCom = flags ? (
+    <Flag
+      parent_table={flags.parent_table}
+      parent_id={flags.parent_id}
+      flag_names={flags.flag_names}
+    />
+  ) : null;
+
+  // the chat icon should be grouped with the vote buttons
+  const reactionCom = discussion ? (
+    vote ? (
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+        {voteButtonCom}
+        {flagsCom}
+        <StChatIcon
+          icon={chatbubbleEllipsesSharp}
+          onClick={(e) => {
+            e.stopPropagation();
+            discussion.onChatClick && discussion.onChatClick();
+          }}
+        />
+      </div>
+    ) : (
+      <StChatIcon
+        icon={chatbubbleEllipsesSharp}
+        onClick={(e) => {
+          e.stopPropagation();
+          discussion.onChatClick && discussion.onChatClick();
+        }}
+      />
+    )
+  ) : vote ? (
+    voteButtonCom
+  ) : null;
 
   const editableIconComp = (
     <IonIcon

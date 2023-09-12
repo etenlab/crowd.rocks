@@ -19,7 +19,7 @@ import {
   useGetWordWithVoteByIdQuery,
 } from '../../../generated/graphql';
 
-import { ErrorType } from '../../../generated/graphql';
+import { ErrorType, TableNameType } from '../../../generated/graphql';
 
 import {
   CaptionContainer,
@@ -36,6 +36,8 @@ import { AddListHeader } from '../../common/ListHeader';
 import { VoteButtonsHerizontal } from '../../common/VoteButtonsHerizontal';
 import { NewWordDefinitionForm } from '../NewWordDefinitionForm';
 import { chatbubbleEllipsesSharp } from 'ionicons/icons';
+
+import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 interface WordDetailPageProps
   extends RouteComponentProps<{
@@ -134,6 +136,11 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
                 `/${match.params.nation_id}/${match.params.language_id}/1/discussion/word_definitions/${definition.word_definition_id}/Dictionary: ${wordData?.getWordWithVoteById.word_with_vote?.word} - ${definition.definition}`,
               ),
           }}
+          flags={{
+            parent_table: TableNameType.WordDefinitions,
+            parent_id: definition.word_definition_id,
+            flag_names: WORD_AND_PHRASE_FLAGS,
+          }}
           voteFor="description"
         />
       </CardContainer>
@@ -219,7 +226,7 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
 
       <CardListContainer>{definitionsCom}</CardListContainer>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Word Definition')}</IonTitle>
