@@ -78,6 +78,13 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           description: tr('Translate maps into any language'),
           isShown: () => true,
         },
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/documents`,
+          icon: mapOutline,
+          title: tr('Documents'),
+          description: tr('Documents'),
+          isShown: () => true,
+        },
       ],
     },
     {
@@ -89,13 +96,6 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           icon: sendOutline,
           title: tr('Forums'),
           description: tr('Hold discussions with other members'),
-          isShown: () => true,
-        },
-        {
-          link: `/${match.params.nation_id}/${match.params.language_id}/1/documents`,
-          icon: mapOutline,
-          title: tr('Documents'),
-          description: tr('Documents'),
           isShown: () => true,
         },
       ],
