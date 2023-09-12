@@ -125,9 +125,7 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
               router.push(
                 `/${nation_id}/${language_id}/1/discussion/${
                   isWord ? 'words' : 'phrases'
-                }/${wordOrPhraseWithTranslations.id}/${
-                  isWord ? 'Dictionary' : 'Phrase Book'
-                }: ${wordOrPhraseWithTranslations.value}`,
+                }/${wordOrPhraseWithTranslations.id}`,
               ),
           }}
         />
@@ -153,9 +151,7 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
                         router.push(
                           `/${nation_id}/${language_id}/1/discussion/${
                             isWord ? 'words' : 'phrases'
-                          }/${tr.id}/${
-                            // eslint-disable-next-line prettier/prettier
-                          isWord ? 'Dictionary' : 'Phrase Book'}:${tr.value}`,
+                          }/${tr.id}`,
                         ),
                     }}
                     vote={{

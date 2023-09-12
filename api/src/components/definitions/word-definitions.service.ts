@@ -501,4 +501,17 @@ export class WordDefinitionsService {
       word_definition_list: [],
     };
   }
+
+  getDiscussionTitle = async (id: string): Promise<string> => {
+    const word_def = await this.read(Number(id), null);
+    if (
+      word_def.error !== ErrorType.NoError ||
+      word_def.word_definition == null
+    ) {
+      console.error(word_def.error);
+      return 'Dictionary: ';
+    }
+
+    return `Dictionary: ${word_def.word_definition.word.word} - ${word_def.word_definition.definition}`;
+  };
 }
