@@ -276,7 +276,7 @@ export function WordListPage({ match }: WordListPageProps) {
         {loading ? <IonSpinner name="bubbles" /> : null}
       </IonButton>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Word')}</IonTitle>

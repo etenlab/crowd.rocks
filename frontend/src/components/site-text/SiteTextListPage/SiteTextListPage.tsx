@@ -258,7 +258,7 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
 
       <CardListContainer>{cardListComs}</CardListContainer>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Site Text')}</IonTitle>

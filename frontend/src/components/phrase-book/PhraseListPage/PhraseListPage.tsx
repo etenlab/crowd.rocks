@@ -259,7 +259,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
         {loading ? <IonSpinner name="bubbles" /> : null}
       </IonButton>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Phrase')}</IonTitle>
