@@ -6,7 +6,7 @@ import { LangSelector } from '../common/LangSelector/LangSelector';
 import { useAppContext } from '../../hooks/useAppContext';
 import { IonButton, useIonToast } from '@ionic/react';
 
-const ACCEPT_EXT = 'text/*, .md';
+const ACCEPT_EXT = '*';
 
 type NewDocumentFormProps = {
   onSave: (file: File | undefined) => void;
