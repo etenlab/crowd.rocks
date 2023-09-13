@@ -1,0 +1,1 @@
+export { FastTranslationPage } from './FastTranslationPage';

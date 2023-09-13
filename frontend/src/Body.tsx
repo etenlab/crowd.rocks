@@ -42,6 +42,11 @@ import {
   tag2langInfo,
 } from './common/langUtils';
 
+import { useAppContext } from './hooks/useAppContext';
+import { useTr } from './hooks/useTr';
+
+import AppTypeahead from './components/common/LangSelector/TypeAhead';
+
 import Home from './components/home/Home';
 import Login from './components/authentication/Login';
 import Profile from './components/user/Profile';
@@ -62,11 +67,8 @@ import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
 
 import { TranslationPage } from './components/translation/TranslationPage';
 import { GoogleTranslationPage } from './components/translation/GoogleTranslationPage';
+import { FastTranslationPage } from './components/translation/FastTranslationPage';
 
-import { useAppContext } from './hooks/useAppContext';
-import { useTr } from './hooks/useTr';
-
-import AppTypeahead from './components/common/LangSelector/TypeAhead';
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
 import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
 import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
@@ -450,6 +452,11 @@ const Body: React.FC = () => {
             exact
             path="/:nation_id/:language_id/:cluster_id/translation"
             component={TranslationPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/fast-translation"
+            component={FastTranslationPage}
           />
           <Route
             exact

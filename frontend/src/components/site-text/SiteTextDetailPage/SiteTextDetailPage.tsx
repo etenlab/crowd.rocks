@@ -347,7 +347,7 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
 
       <CardListContainer>{translationsCom}</CardListContainer>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Translation')}</IonTitle>

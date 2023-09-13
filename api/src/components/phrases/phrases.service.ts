@@ -536,7 +536,7 @@ export class PhrasesService {
       );
 
       let offset: number | null = null;
-      let hasNextPage = false;
+      let hasNextPage = true;
       let startCursor: string | null = null;
       let endCursor: string | null = null;
 

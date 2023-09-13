@@ -119,6 +119,15 @@ registerEnumType(FlagType, {
   name: 'FlagType',
 });
 
+export enum TableNameType {
+  word_definitions = 'word_definitions',
+  phrase_definitions = 'phrase_definitions',
+}
+
+registerEnumType(TableNameType, {
+  name: 'TableNameType',
+});
+
 export interface ITagInfo {
   tag: string | null;
   descriptions?: Array<string>;
