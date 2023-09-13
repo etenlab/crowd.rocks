@@ -34,38 +34,35 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
   const newTrRef = useRef<HTMLIonInputElement | null>(null);
   const newDefinitionRef = useRef<HTMLIonInputElement | null>(null);
 
-  const [upsertTranslation, { data: upsertData, error: upsertError }] =
+  const [upsertTranslation, { data: upsertData, loading: upsertLoading }] =
     useUpsertTranslationFromWordAndDefinitionlikeStringMutation({
       refetchQueries: ['GetOrigMapWords', 'GetOrigMapPhrases'],
     });
 
+  const [toggleTrVoteStatus, { data: voteData, loading: voteLoading }] =
+    useToggleTranslationVoteStatusMutation({
+      refetchQueries: ['GetOrigMapWords', 'GetOrigMapPhrases'],
+    });
+
   useEffect(() => {
+    if (upsertLoading || voteLoading) return;
     if (
-      upsertError ||
       (upsertData &&
         upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error !==
-          ErrorType.NoError)
+          ErrorType.NoError) ||
+      (voteData &&
+        voteData?.toggleTranslationVoteStatus.error !== ErrorType.NoError)
     ) {
       present({
-        message: `Word/phrase addition error: ${
-          upsertError ||
-          upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error
-        }`,
+        message:
+          upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error ||
+          voteData?.toggleTranslationVoteStatus.error,
         duration: 1500,
         position: 'top',
         color: 'danger',
       });
     }
-  }, [
-    present,
-    upsertError,
-    upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error,
-    upsertData,
-  ]);
-
-  const [toggleTrVoteStatus] = useToggleTranslationVoteStatusMutation({
-    refetchQueries: ['GetOrigMapWords', 'GetOrigMapPhrases'],
-  });
+  }, [present, upsertData, upsertLoading, voteData, voteLoading]);
 
   const handleNewTranslation = async (
     from_definition_type_is_word: boolean,
