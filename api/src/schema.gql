@@ -343,7 +343,7 @@ type GetOrigMapWordsOutput {
 }
 
 type GetOrigMapsListOutput {
-  origMapList: [MapFileOutput!]!
+  mapList: [MapFileOutput!]!
 }
 
 input GetTranslatedMapContentInput {

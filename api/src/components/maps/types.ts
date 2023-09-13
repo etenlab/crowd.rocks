@@ -47,7 +47,7 @@ export class MapDeleteOutput extends GenericOutput {
 
 @ObjectType()
 export class GetOrigMapsListOutput {
-  @Field(() => [MapFileOutput]) origMapList: MapFileOutput[];
+  @Field(() => [MapFileOutput]) mapList: MapFileOutput[];
 }
 
 @InputType()

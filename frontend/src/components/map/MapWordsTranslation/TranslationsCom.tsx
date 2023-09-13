@@ -1,9 +1,10 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Caption } from '../../common/Caption/Caption';
 import { WordOrPhraseCard } from '../../word/WordCard/WordOrPhraseCard';
 import { IonButton, IonInput, useIonRouter, useIonToast } from '@ionic/react';
 import {
+  ErrorType,
   useToggleTranslationVoteStatusMutation,
   useUpsertTranslationFromWordAndDefinitionlikeStringMutation,
 } from '../../../generated/graphql';
@@ -33,10 +34,32 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
   const newTrRef = useRef<HTMLIonInputElement | null>(null);
   const newDefinitionRef = useRef<HTMLIonInputElement | null>(null);
 
-  const [upsertTranslation] =
+  const [upsertTranslation, { data: upsertData, error: upsertError }] =
     useUpsertTranslationFromWordAndDefinitionlikeStringMutation({
       refetchQueries: ['GetOrigMapWords', 'GetOrigMapPhrases'],
     });
+
+  useEffect(() => {
+    if (
+      upsertError ||
+      upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error !==
+        ErrorType.NoError
+    ) {
+      present({
+        message: `Word/phrase addition error: ${
+          upsertError ||
+          upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error
+        }`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+  }, [
+    present,
+    upsertError,
+    upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error,
+  ]);
 
   const [toggleTrVoteStatus] = useToggleTranslationVoteStatusMutation({
     refetchQueries: ['GetOrigMapWords', 'GetOrigMapPhrases'],

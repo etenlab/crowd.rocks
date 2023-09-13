@@ -265,13 +265,7 @@ export class MapsService {
   async getAllMapsList(lang?: LanguageInput): Promise<GetAllMapsListOutput> {
     const origMaps = await this.mapsRepository.getOrigMaps(lang);
     const translatedMaps = await this.mapsRepository.getTranslatedMaps(lang);
-    const translatedMapsWithPercent: Array<MapFileOutput> = [];
-    for (const mapInfo of translatedMaps.origMapList) {
-      translatedMapsWithPercent.push(
-        await this.calculateTranslatedPercent(mapInfo),
-      );
-    }
-    const allMapsList = [...origMaps.origMapList, ...translatedMapsWithPercent];
+    const allMapsList = [...origMaps.mapList, ...translatedMaps.mapList];
     return { allMapsList };
   }
 
@@ -301,6 +295,7 @@ export class MapsService {
       geo_code: t_geo_code,
     } = mapFileInfo.language;
     const originalWords = await this.mapsRepository.getOrigMapWords(
+      //!!!!!!!!!!!!!!!!!!!!!!!!!! SLOW ????
       mapFileInfo.original_map_id,
       {
         o_language_code,
@@ -660,6 +655,12 @@ export class MapsService {
         t_dialect_code: dialect_code,
         t_geo_code: geo_code,
         dbPoolClient,
+        translated_percent:
+          origMapWordsAndPhrases.length > 0
+            ? Math.round(
+                (translations.length / origMapWordsAndPhrases.length) * 100,
+              )
+            : 100,
       });
       translatedMapIds.push(data!.map_id);
     }
@@ -700,7 +701,7 @@ export class MapsService {
       await this.mapsRepository.deleteAllTranslatedMapsTrn(dbPoolClient);
       await dbPoolClient.query('COMMIT');
       const allOriginalMaps = await this.mapsRepository.getOrigMaps();
-      for (const origMap of allOriginalMaps.origMapList) {
+      for (const origMap of allOriginalMaps.mapList) {
         dbPoolClient.query('BEGIN');
         await this.parseOrigMapTrn({
           map_id: origMap.original_map_id,
@@ -730,8 +731,8 @@ export class MapsService {
       geo_code: langInfo.region?.tag || null,
     };
     const originalMaps = await this.mapsRepository.getOrigMaps();
-    if (!(originalMaps.origMapList?.length > 0)) return;
-    const origMapIds = originalMaps.origMapList.map((m) => m.original_map_id);
+    if (!(originalMaps.mapList?.length > 0)) return;
+    const origMapIds = originalMaps.mapList.map((m) => m.original_map_id);
     const dbPoolClient = await this.pg.pool.connect();
     try {
       for (const origMapId of origMapIds) {
@@ -805,3 +806,11 @@ export class MapsService {
     return foundLangs;
   }
 }
+
+// const translatedMapsWithPercent: Array<MapFileOutput> = [];
+// for (const mapInfo of translatedMaps.origMapList) {
+//   translatedMapsWithPercent.push(
+//     await this.calculateTranslatedPercent(mapInfo),
+//     mapInfo
+//   );
+// }
