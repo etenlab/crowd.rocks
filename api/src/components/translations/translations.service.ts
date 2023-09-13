@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { ErrorType } from 'src/common/types';
 import { calc_vote_weight } from 'src/common/utility';
@@ -36,6 +36,8 @@ import {
 } from './types';
 import { PoolClient } from 'pg';
 import { PhraseDefinition, WordDefinition } from '../definitions/types';
+import { PostgresService } from '../../core/postgres.service';
+import { getTranslationLangSqlStr } from './sql-string';
 
 export function makeStr(
   word_definition_id: number,
@@ -66,6 +68,7 @@ export class TranslationsService {
     private wordsService: WordsService,
     private phrasesService: PhrasesService,
     private gTrService: GoogleTranslateService,
+    private pg: PostgresService,
   ) {}
 
   async getTranslationsByFromDefinitionId(
@@ -1343,6 +1346,40 @@ export class TranslationsService {
     return {
       error: ErrorType.UnknownError,
       languages: null,
+    };
+  }
+
+  async getTranslationLanguage(
+    translation_id: string,
+    from_definition_type_is_word: boolean,
+    to_definition_type_is_word: boolean,
+  ): Promise<LanguageInput | null> {
+    if (isNaN(Number(translation_id))) {
+      Logger.error(
+        `translationsService#getTranslationLanguage: Number(${JSON.stringify(
+          translation_id,
+        )}) is NaN`,
+      );
+      return null;
+    }
+    const resQ = await this.pg.pool.query(
+      ...getTranslationLangSqlStr(
+        Number(translation_id),
+        from_definition_type_is_word,
+        to_definition_type_is_word,
+      ),
+    );
+
+    if (!resQ.rows[0].language_code || resQ.rows.length > 1) {
+      Logger.error(
+        `translationsService#getTranslationLanguage: translation language not found or several results are found`,
+      );
+      return null;
+    }
+    return {
+      language_code: resQ.rows[0].language_code,
+      geo_code: resQ.rows[0].geo_code,
+      dialect_code: resQ.rows[0].dialect_code,
     };
   }
 }

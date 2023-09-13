@@ -2712,7 +2712,7 @@
         "description": null,
         "fields": [
           {
-            "name": "origMapList",
+            "name": "mapList",
             "description": null,
             "args": [],
             "type": {

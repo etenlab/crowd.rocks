@@ -384,7 +384,7 @@ export type GetOrigMapWordsOutput = {
 
 export type GetOrigMapsListOutput = {
   __typename?: 'GetOrigMapsListOutput';
-  origMapList: Array<MapFileOutput>;
+  mapList: Array<MapFileOutput>;
 };
 
 export type GetTranslatedMapContentInput = {

@@ -51,9 +51,12 @@ export const MapList: React.FC = () => {
   const [isAdmin, { data: isAdminRes }] = useIsAdminLoggedInLazyQuery();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sendMapFile] = useMapUploadMutation();
-  const [uploadFile] = useUploadFileMutation();
-  const [mapDelete] = useMapDeleteMutation();
+  const [sendMapFile, { loading: loadingSendMapFile, data: dataSendMapFile }] =
+    useMapUploadMutation();
+  const [uploadFile, { loading: loadingUploadFile, data: dataUploadFile }] =
+    useUploadFileMutation();
+  const [mapDelete, { loading: loadingMapDelete, data: dataMapDelete }] =
+    useMapDeleteMutation();
   const [
     mapTranslationReset,
     {
@@ -71,6 +74,35 @@ export const MapList: React.FC = () => {
   const [isMapDeleteModalOpen, setIsMapDeleteModalOpen] = useState(false);
   const [isMapResetModalOpen, setIsMapResetModalOpen] = useState(false);
   const candidateForDeletion = useRef<MapFileOutput | undefined>();
+
+  useEffect(() => {
+    if (loadingSendMapFile || loadingUploadFile || loadingMapDelete) return;
+    if (
+      (dataSendMapFile &&
+        dataSendMapFile?.mapUpload.error !== ErrorType.NoError) ||
+      (dataUploadFile &&
+        dataUploadFile?.uploadFile.error !== ErrorType.NoError) ||
+      (dataMapDelete && dataMapDelete?.mapDelete.error !== ErrorType.NoError)
+    ) {
+      present({
+        message:
+          dataSendMapFile?.mapUpload.error ||
+          dataUploadFile?.uploadFile.error ||
+          dataMapDelete?.mapDelete.error,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+  }, [
+    dataMapDelete,
+    dataSendMapFile,
+    dataUploadFile,
+    loadingMapDelete,
+    loadingSendMapFile,
+    loadingUploadFile,
+    present,
+  ]);
 
   useEffect(() => {
     if (!dataMapResetCalled || loadingMapReset) return;
