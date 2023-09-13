@@ -1,0 +1,32 @@
+fragment TextyDocumentFragment on TextyDocument {
+  document_id
+  file_id
+  file_name
+  file_url
+  language_code
+  dialect_code
+  geo_code
+}
+
+mutation DocumentUpload($document: TextyDocumentInput!) {
+  documentUpload(input: { document: $document }) {
+    error
+    document_id
+  }
+}
+
+query GetAllDocuments($languageInput: LanguageInput) {
+  getAllDocuments(input: { lang: $languageInput }) {
+    documents {
+      ...TextyDocumentFragment
+    }
+  }
+}
+
+query GetDocument($document_id: String!) {
+  getDocument(input: { document_id: $document_id }) {
+    document {
+      ...TextyDocumentFragment
+    }
+  }
+}

@@ -100,4 +100,7 @@ export const typePolicies: TypePolicies = {
   Flag: {
     keyFields: ['flag_id'],
   },
+  TextyDocument: {
+    keyFields: ['document_id'],
+  },
 };

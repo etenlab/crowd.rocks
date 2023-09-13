@@ -8,6 +8,8 @@ export type TLangCodes = {
 export enum StringContentTypes {
   WORD = 'word',
   PHRASE = 'phrase',
+  TEXT_UTF8 = 'text_utf8',
+  BINARY_OR_UNKNOWN = 'binary_or_unknown',
 }
 
 export function useForceUpdate() {

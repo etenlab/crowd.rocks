@@ -142,7 +142,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
               ),
           }}
           flags={{
-            parent_table: TableNameType.WordDefinitions,
+            parent_table: TableNameType.PhraseDefinitions,
             parent_id: definition.phrase_definition_id,
             flag_names: WORD_AND_PHRASE_FLAGS,
           }}

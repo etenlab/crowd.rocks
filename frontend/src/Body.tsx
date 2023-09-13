@@ -75,6 +75,8 @@ import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetail
 import { ForumFolder } from './components/forums/ForumFolderDetail/FolderDetail';
 import { NotificationPage } from './components/notifications/NotificationPage';
 import { SettingsPage } from './components/settings/SettingsPage';
+import { DocumentsPage } from './components/documents/DocumentsPage';
+import { DocumentDetailsPage } from './components/documents/DocumentDetails/DocumentDetails';
 
 const Body: React.FC = () => {
   const {
@@ -485,6 +487,16 @@ const Body: React.FC = () => {
             exact
             path="/:nation_id/:language_id/:cluster_id/settings"
             component={SettingsPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/documents"
+            component={DocumentsPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/documents/:document_id"
+            component={DocumentDetailsPage}
           />
           <Route exact path="/">
             <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />

@@ -43,6 +43,15 @@ type DefinitionVoteStatusOutputRow {
   vote_status: DefinitionVoteStatus
 }
 
+input DocumentUploadInput {
+  document: TextyDocumentInput!
+}
+
+type DocumentUploadOutput {
+  document_id: String
+  error: ErrorType!
+}
+
 input EmailResponseInput {
   token: String!
 }
@@ -58,6 +67,8 @@ enum ErrorType {
   AvatarUnavailable
   CandidateNotFound
   CandidateNotFoundInBallot
+  DocumentIdNotProvided
+  DocumentNotFound
   ElectionNotFound
   EmailInvalid
   EmailIsBlocked
@@ -254,12 +265,30 @@ type GenericOutput {
   error: ErrorType!
 }
 
+input GetAllDocumentsInput {
+  lang: LanguageInput
+}
+
+type GetAllDocumentsOutput {
+  documents: [TextyDocument!]
+  error: ErrorType!
+}
+
 input GetAllMapsListInput {
   lang: LanguageInput
 }
 
 type GetAllMapsListOutput {
   allMapsList: [MapFileOutput!]!
+}
+
+input GetDocumentInput {
+  document_id: String!
+}
+
+type GetDocumentOutput {
+  document: TextyDocument
+  error: ErrorType!
 }
 
 input GetOrigMapContentInput {
@@ -490,6 +519,7 @@ type MarkNotificationReadOutput {
 type Mutation {
   addNotification(input: AddNotificationInput!): AddNotificationOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
+  documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   forumDelete(input: ForumDeleteInput!): ForumDeleteOutput!
   forumFolderDelete(input: ForumFolderDeleteInput!): ForumFolderDeleteOutput!
@@ -839,6 +869,7 @@ type Query {
   forumFolders(input: ForumFolderListInput!): ForumFolderListOutput!
   forumRead(input: ForumReadInput!): ForumReadOutput!
   forums: ForumListOutput!
+  getAllDocuments(input: GetAllDocumentsInput!): GetAllDocumentsOutput!
   getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput!
   getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): SiteTextTranslationWithVoteListByLanguageOutput!
@@ -846,6 +877,7 @@ type Query {
   getAllSiteTextLanguageList: SiteTextLanguageListOutput!
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput!
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
+  getDocument(input: GetDocumentInput!): GetDocumentOutput!
   getFlagsFromRef(parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   getOrigMapContent(input: GetOrigMapContentInput!): GetOrigMapContentOutput!
   getOrigMapPhrases(input: GetOrigMapPhrasesInput): GetOrigMapPhrasesOutput!
@@ -1105,6 +1137,23 @@ type SiteTextWordToWordTranslationWithVote {
 enum TableNameType {
   phrase_definitions
   word_definitions
+}
+
+type TextyDocument {
+  dialect_code: String
+  document_id: ID!
+  file_id: String!
+  file_name: String!
+  file_url: String!
+  geo_code: String
+  language_code: String!
+}
+
+input TextyDocumentInput {
+  dialect_code: String
+  file_id: String!
+  geo_code: String
+  language_code: String!
 }
 
 type Thread {
