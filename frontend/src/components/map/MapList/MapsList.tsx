@@ -307,7 +307,10 @@ export const MapList: React.FC = () => {
         </IonList>
       )}
 
-      <IonModal isOpen={isMapDeleteModalOpen}>
+      <IonModal
+        isOpen={isMapDeleteModalOpen}
+        onDidDismiss={() => setIsMapDeleteModalOpen(false)}
+      >
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Delete map ?')}</IonTitle>
@@ -366,7 +369,10 @@ export const MapList: React.FC = () => {
         </IonContent>
       </IonModal>
 
-      <IonModal isOpen={isMapResetModalOpen}>
+      <IonModal
+        isOpen={isMapResetModalOpen}
+        onDidDismiss={() => setIsMapResetModalOpen(false)}
+      >
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Reset map data ?')}</IonTitle>

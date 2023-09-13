@@ -4,9 +4,9 @@ import { styled } from 'styled-components';
 import { ConfirmButtons } from '../common/ConfirmButtons';
 import { LangSelector } from '../common/LangSelector/LangSelector';
 import { useAppContext } from '../../hooks/useAppContext';
-import { IonButton, useIonToast } from '@ionic/react';
+import { IonButton } from '@ionic/react';
 
-const ACCEPT_EXT = 'text/*, .md';
+const ACCEPT_EXT = '*';
 
 type NewDocumentFormProps = {
   onSave: (file: File | undefined) => void;
@@ -15,7 +15,7 @@ type NewDocumentFormProps = {
 
 export function NewDocumentForm({ onSave, onCancel }: NewDocumentFormProps) {
   const { tr } = useTr();
-  const [present] = useIonToast();
+  // const [present] = useIonToast();
 
   const {
     states: {
@@ -30,26 +30,7 @@ export function NewDocumentForm({ onSave, onCancel }: NewDocumentFormProps) {
   const [file, setFile] = useState<File>();
 
   const handleSave = (file: File | undefined) => {
-    console.log('mime type:' + file?.type);
-    if (!file?.type) {
-      onSave(undefined);
-      return;
-    }
-    if (/text/.test(file.type)) {
-      onSave(file);
-    } else {
-      present({
-        message: tr(
-          'You try to upload the file of type ' +
-            file.type +
-            ', ' +
-            tr('Expecting any text type.'),
-        ),
-        color: 'danger',
-        position: 'top',
-        duration: 2000,
-      });
-    }
+    onSave(file);
   };
 
   return (

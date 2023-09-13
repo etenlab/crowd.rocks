@@ -489,7 +489,7 @@ export function TranslationWordOrPhraseList({
         {wordsLoading || phrasesLoading ? <IonSpinner name="bubbles" /> : null}
       </IonButton>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Definition')}</IonTitle>

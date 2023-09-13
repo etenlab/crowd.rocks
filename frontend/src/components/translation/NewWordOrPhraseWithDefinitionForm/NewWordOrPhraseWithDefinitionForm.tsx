@@ -14,7 +14,7 @@ import { useUpsertPhraseDefinitionFromPhraseAndDefinitionlikeStringMutation } fr
 import { ConfirmButtons } from '../../common/ConfirmButtons';
 
 interface NewWordOrPhraseWithDefinitionFormProps {
-  onCreated(): void;
+  onCreated(data: { is_word_type: boolean; definition_id: string }): void;
   onCancel(): void;
   langInfo: LanguageInfo;
 }
@@ -67,7 +67,12 @@ export function NewWordOrPhraseWithDefinitionForm({
         return;
       }
 
-      onCreated();
+      onCreated({
+        is_word_type: true,
+        definition_id:
+          wordData.upsertWordDefinitionFromWordAndDefinitionlikeString
+            .word_definition!.word_definition_id,
+      });
     }
   }, [wordData, wordError, wordLoading, wordCalled, present, tr, onCreated]);
 
@@ -88,7 +93,12 @@ export function NewWordOrPhraseWithDefinitionForm({
         return;
       }
 
-      onCreated();
+      onCreated({
+        is_word_type: false,
+        definition_id:
+          phraseData.upsertPhraseDefinitionFromPhraseAndDefinitionlikeString
+            .phrase_definition!.phrase_definition_id,
+      });
     }
   }, [
     phraseData,

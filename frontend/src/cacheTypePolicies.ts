@@ -6,6 +6,8 @@ export const typePolicies: TypePolicies = {
     fields: {
       getWordsByLanguage: relayStylePagination(['input']),
       getPhrasesByLanguage: relayStylePagination(['input']),
+      getWordDefinitionsByFlag: relayStylePagination(['flag_name']),
+      getPhraseDefinitionsByFlag: relayStylePagination(['flag_name']),
     },
   },
   WordWithDefinitions: {
@@ -94,6 +96,9 @@ export const typePolicies: TypePolicies = {
   },
   Post: {
     keyFields: ['post_id'],
+  },
+  Flag: {
+    keyFields: ['flag_id'],
   },
   TextyDocument: {
     keyFields: ['document_id'],

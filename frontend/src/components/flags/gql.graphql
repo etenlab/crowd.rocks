@@ -1,0 +1,84 @@
+fragment FlagFragment on Flag {
+  flag_id
+  parent_table
+  parent_id
+  name
+  created_at
+  created_by
+}
+
+fragment WordDefinitionListEdgeFragment on WordDefinitionListEdge {
+  cursor
+  node {
+    ...WordDefinitionFragment
+  }
+}
+
+fragment PhraseDefinitionListEdgeFragment on PhraseDefinitionListEdge {
+  cursor
+  node {
+    ...PhraseDefinitionFragment
+  }
+}
+
+query GetFlagsFromRef($parent_table: TableNameType!, $parent_id: String!) {
+  getFlagsFromRef(parent_table: $parent_table, parent_id: $parent_id) {
+    error
+    flags {
+      ...FlagFragment
+    }
+  }
+}
+
+query GetWordDefinitionsByFlag($flag_name: FlagType!, $first: Int, $after: ID) {
+  getWordDefinitionsByFlag(
+    flag_name: $flag_name
+    first: $first
+    after: $after
+  ) {
+    error
+    edges {
+      ...WordDefinitionListEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+
+query GetPhraseDefinitionsByFlag(
+  $flag_name: FlagType!
+  $first: Int
+  $after: ID
+) {
+  getPhraseDefinitionsByFlag(
+    flag_name: $flag_name
+    first: $first
+    after: $after
+  ) {
+    error
+    edges {
+      ...PhraseDefinitionListEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+
+mutation ToggleFlagWithRef(
+  $parent_table: TableNameType!
+  $parent_id: String!
+  $name: String!
+) {
+  toggleFlagWithRef(
+    parent_table: $parent_table
+    parent_id: $parent_id
+    name: $name
+  ) {
+    error
+    flags {
+      ...FlagFragment
+    }
+  }
+}
