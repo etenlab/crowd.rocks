@@ -73,7 +73,6 @@ export const MapList: React.FC = () => {
   const candidateForDeletion = useRef<MapFileOutput | undefined>();
 
   useEffect(() => {
-    console.log(dataMapReset);
     if (!dataMapResetCalled || loadingMapReset) return;
     if (dataMapReset?.mapsTranslationsReset.error === ErrorType.NoError) {
       present({

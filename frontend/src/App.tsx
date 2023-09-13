@@ -25,6 +25,8 @@ import { AppContextProvider } from './AppContext';
 
 import Body from './Body';
 
+console.info('Runninig in environment: ' + import.meta.env.MODE);
+
 setupIonicReact({
   innerHTMLTemplatesEnabled: true,
 });

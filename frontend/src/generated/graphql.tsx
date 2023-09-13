@@ -61,6 +61,16 @@ export type DefinitionVoteStatusOutputRow = {
   vote_status?: Maybe<DefinitionVoteStatus>;
 };
 
+export type DocumentUploadInput = {
+  document: TextyDocumentInput;
+};
+
+export type DocumentUploadOutput = {
+  __typename?: 'DocumentUploadOutput';
+  document_id?: Maybe<Scalars['String']['output']>;
+  error: ErrorType;
+};
+
 export type EmailResponseInput = {
   token: Scalars['String']['input'];
 };
@@ -77,6 +87,8 @@ export enum ErrorType {
   AvatarUnavailable = 'AvatarUnavailable',
   CandidateNotFound = 'CandidateNotFound',
   CandidateNotFoundInBallot = 'CandidateNotFoundInBallot',
+  DocumentIdNotProvided = 'DocumentIdNotProvided',
+  DocumentNotFound = 'DocumentNotFound',
   ElectionNotFound = 'ElectionNotFound',
   EmailInvalid = 'EmailInvalid',
   EmailIsBlocked = 'EmailIsBlocked',
@@ -287,6 +299,16 @@ export type GenericOutput = {
   error: ErrorType;
 };
 
+export type GetAllDocumentsInput = {
+  lang?: InputMaybe<LanguageInput>;
+};
+
+export type GetAllDocumentsOutput = {
+  __typename?: 'GetAllDocumentsOutput';
+  documents?: Maybe<Array<TextyDocument>>;
+  error: ErrorType;
+};
+
 export type GetAllMapsListInput = {
   lang?: InputMaybe<LanguageInput>;
 };
@@ -294,6 +316,16 @@ export type GetAllMapsListInput = {
 export type GetAllMapsListOutput = {
   __typename?: 'GetAllMapsListOutput';
   allMapsList: Array<MapFileOutput>;
+};
+
+export type GetDocumentInput = {
+  document_id: Scalars['String']['input'];
+};
+
+export type GetDocumentOutput = {
+  __typename?: 'GetDocumentOutput';
+  document?: Maybe<TextyDocument>;
+  error: ErrorType;
 };
 
 export type GetOrigMapContentInput = {
@@ -546,6 +578,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   addNotification: AddNotificationOutput;
   avatarUpdateResolver: AvatarUpdateOutput;
+  documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
   forumDelete: ForumDeleteOutput;
   forumFolderDelete: ForumFolderDeleteOutput;
@@ -610,6 +643,11 @@ export type MutationAddNotificationArgs = {
 
 export type MutationAvatarUpdateResolverArgs = {
   input: AvatarUpdateInput;
+};
+
+
+export type MutationDocumentUploadArgs = {
+  input: DocumentUploadInput;
 };
 
 
@@ -1226,6 +1264,7 @@ export type Query = {
   forumFolders: ForumFolderListOutput;
   forumRead: ForumReadOutput;
   forums: ForumListOutput;
+  getAllDocuments: GetAllDocumentsOutput;
   getAllMapsList: GetAllMapsListOutput;
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput;
   getAllRecommendedSiteTextTranslationListByLanguage: SiteTextTranslationWithVoteListByLanguageOutput;
@@ -1233,6 +1272,7 @@ export type Query = {
   getAllSiteTextLanguageList: SiteTextLanguageListOutput;
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput;
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
+  getDocument: GetDocumentOutput;
   getFlagsFromRef: FlagsOutput;
   getOrigMapContent: GetOrigMapContentOutput;
   getOrigMapPhrases: GetOrigMapPhrasesOutput;
@@ -1311,6 +1351,11 @@ export type QueryForumReadArgs = {
 };
 
 
+export type QueryGetAllDocumentsArgs = {
+  input: GetAllDocumentsInput;
+};
+
+
 export type QueryGetAllMapsListArgs = {
   input: GetAllMapsListInput;
 };
@@ -1334,6 +1379,11 @@ export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
   language_code: Scalars['String']['input'];
   site_text_id: Scalars['ID']['input'];
   site_text_type_is_word: Scalars['Boolean']['input'];
+};
+
+
+export type QueryGetDocumentArgs = {
+  input: GetDocumentInput;
 };
 
 
@@ -1821,6 +1871,24 @@ export type SiteTextWordToWordTranslationWithVote = {
   to_word_definition: WordDefinition;
   upvotes: Scalars['Int']['output'];
   word_to_word_translation_id: Scalars['ID']['output'];
+};
+
+export type TextyDocument = {
+  __typename?: 'TextyDocument';
+  dialect_code?: Maybe<Scalars['String']['output']>;
+  document_id: Scalars['ID']['output'];
+  file_id: Scalars['String']['output'];
+  file_name: Scalars['String']['output'];
+  file_url: Scalars['String']['output'];
+  geo_code?: Maybe<Scalars['String']['output']>;
+  language_code: Scalars['String']['output'];
+};
+
+export type TextyDocumentInput = {
+  dialect_code?: InputMaybe<Scalars['String']['input']>;
+  file_id: Scalars['String']['input'];
+  geo_code?: InputMaybe<Scalars['String']['input']>;
+  language_code: Scalars['String']['input'];
 };
 
 export type Thread = {
@@ -2347,12 +2415,44 @@ export type WordUpsertMutationVariables = Exact<{
 
 export type WordUpsertMutation = { __typename?: 'Mutation', wordUpsert: { __typename?: 'WordOutput', error: ErrorType, word?: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
 
+export type TextyDocumentFragmentFragment = { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
+
+export type DocumentUploadMutationVariables = Exact<{
+  document: TextyDocumentInput;
+}>;
+
+
+export type DocumentUploadMutation = { __typename?: 'Mutation', documentUpload: { __typename?: 'DocumentUploadOutput', error: ErrorType, document_id?: string | null } };
+
+export type GetAllDocumentsQueryVariables = Exact<{
+  languageInput?: InputMaybe<LanguageInput>;
+}>;
+
+
+export type GetAllDocumentsQuery = { __typename?: 'Query', getAllDocuments: { __typename?: 'GetAllDocumentsOutput', documents?: Array<{ __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null }> | null } };
+
+export type GetDocumentQueryVariables = Exact<{
+  document_id: Scalars['String']['input'];
+}>;
+
+
+export type GetDocumentQuery = { __typename?: 'Query', getDocument: { __typename?: 'GetDocumentOutput', document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
+
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
 }>;
 
 
 export type EmailResponseMutation = { __typename?: 'Mutation', emailResponseResolver: { __typename?: 'EmailResponseOutput', error: ErrorType } };
+
+export type UploadFileMutationVariables = Exact<{
+  file: Scalars['Upload']['input'];
+  file_size: Scalars['Int']['input'];
+  file_type: Scalars['String']['input'];
+}>;
+
+
+export type UploadFileMutation = { __typename?: 'Mutation', uploadFile: { __typename?: 'IFileOutput', error: ErrorType, file?: { __typename?: 'IFile', id: number } | null } };
 
 export type CreateThreadMutationVariables = Exact<{
   name: Scalars['String']['input'];
@@ -2537,15 +2637,6 @@ export type MapDeleteMutationVariables = Exact<{
 
 
 export type MapDeleteMutation = { __typename?: 'Mutation', mapDelete: { __typename?: 'MapDeleteOutput', error: ErrorType, deletedMapId?: string | null } };
-
-export type UploadFileMutationVariables = Exact<{
-  file: Scalars['Upload']['input'];
-  file_size: Scalars['Int']['input'];
-  file_type: Scalars['String']['input'];
-}>;
-
-
-export type UploadFileMutation = { __typename?: 'Mutation', uploadFile: { __typename?: 'IFileOutput', error: ErrorType, file?: { __typename?: 'IFile', id: number } | null } };
 
 export type MapsTranslationsResetMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -3055,6 +3146,17 @@ export const PageInfoFragmentFragmentDoc = gql`
   hasNextPage
   hasPreviousPage
   startCursor
+}
+    `;
+export const TextyDocumentFragmentFragmentDoc = gql`
+    fragment TextyDocumentFragment on TextyDocument {
+  document_id
+  file_id
+  file_name
+  file_url
+  language_code
+  dialect_code
+  geo_code
 }
     `;
 export const ForumFolderFragmentFragmentDoc = gql`
@@ -3994,6 +4096,114 @@ export function useWordUpsertMutation(baseOptions?: Apollo.MutationHookOptions<W
 export type WordUpsertMutationHookResult = ReturnType<typeof useWordUpsertMutation>;
 export type WordUpsertMutationResult = Apollo.MutationResult<WordUpsertMutation>;
 export type WordUpsertMutationOptions = Apollo.BaseMutationOptions<WordUpsertMutation, WordUpsertMutationVariables>;
+export const DocumentUploadDocument = gql`
+    mutation DocumentUpload($document: TextyDocumentInput!) {
+  documentUpload(input: {document: $document}) {
+    error
+    document_id
+  }
+}
+    `;
+export type DocumentUploadMutationFn = Apollo.MutationFunction<DocumentUploadMutation, DocumentUploadMutationVariables>;
+
+/**
+ * __useDocumentUploadMutation__
+ *
+ * To run a mutation, you first call `useDocumentUploadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDocumentUploadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [documentUploadMutation, { data, loading, error }] = useDocumentUploadMutation({
+ *   variables: {
+ *      document: // value for 'document'
+ *   },
+ * });
+ */
+export function useDocumentUploadMutation(baseOptions?: Apollo.MutationHookOptions<DocumentUploadMutation, DocumentUploadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DocumentUploadMutation, DocumentUploadMutationVariables>(DocumentUploadDocument, options);
+      }
+export type DocumentUploadMutationHookResult = ReturnType<typeof useDocumentUploadMutation>;
+export type DocumentUploadMutationResult = Apollo.MutationResult<DocumentUploadMutation>;
+export type DocumentUploadMutationOptions = Apollo.BaseMutationOptions<DocumentUploadMutation, DocumentUploadMutationVariables>;
+export const GetAllDocumentsDocument = gql`
+    query GetAllDocuments($languageInput: LanguageInput) {
+  getAllDocuments(input: {lang: $languageInput}) {
+    documents {
+      ...TextyDocumentFragment
+    }
+  }
+}
+    ${TextyDocumentFragmentFragmentDoc}`;
+
+/**
+ * __useGetAllDocumentsQuery__
+ *
+ * To run a query within a React component, call `useGetAllDocumentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllDocumentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllDocumentsQuery({
+ *   variables: {
+ *      languageInput: // value for 'languageInput'
+ *   },
+ * });
+ */
+export function useGetAllDocumentsQuery(baseOptions?: Apollo.QueryHookOptions<GetAllDocumentsQuery, GetAllDocumentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllDocumentsQuery, GetAllDocumentsQueryVariables>(GetAllDocumentsDocument, options);
+      }
+export function useGetAllDocumentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllDocumentsQuery, GetAllDocumentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllDocumentsQuery, GetAllDocumentsQueryVariables>(GetAllDocumentsDocument, options);
+        }
+export type GetAllDocumentsQueryHookResult = ReturnType<typeof useGetAllDocumentsQuery>;
+export type GetAllDocumentsLazyQueryHookResult = ReturnType<typeof useGetAllDocumentsLazyQuery>;
+export type GetAllDocumentsQueryResult = Apollo.QueryResult<GetAllDocumentsQuery, GetAllDocumentsQueryVariables>;
+export const GetDocumentDocument = gql`
+    query GetDocument($document_id: String!) {
+  getDocument(input: {document_id: $document_id}) {
+    document {
+      ...TextyDocumentFragment
+    }
+  }
+}
+    ${TextyDocumentFragmentFragmentDoc}`;
+
+/**
+ * __useGetDocumentQuery__
+ *
+ * To run a query within a React component, call `useGetDocumentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDocumentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDocumentQuery({
+ *   variables: {
+ *      document_id: // value for 'document_id'
+ *   },
+ * });
+ */
+export function useGetDocumentQuery(baseOptions: Apollo.QueryHookOptions<GetDocumentQuery, GetDocumentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDocumentQuery, GetDocumentQueryVariables>(GetDocumentDocument, options);
+      }
+export function useGetDocumentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDocumentQuery, GetDocumentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDocumentQuery, GetDocumentQueryVariables>(GetDocumentDocument, options);
+        }
+export type GetDocumentQueryHookResult = ReturnType<typeof useGetDocumentQuery>;
+export type GetDocumentLazyQueryHookResult = ReturnType<typeof useGetDocumentLazyQuery>;
+export type GetDocumentQueryResult = Apollo.QueryResult<GetDocumentQuery, GetDocumentQueryVariables>;
 export const EmailResponseDocument = gql`
     mutation EmailResponse($token: String!) {
   emailResponseResolver(input: {token: $token}) {
@@ -4027,6 +4237,44 @@ export function useEmailResponseMutation(baseOptions?: Apollo.MutationHookOption
 export type EmailResponseMutationHookResult = ReturnType<typeof useEmailResponseMutation>;
 export type EmailResponseMutationResult = Apollo.MutationResult<EmailResponseMutation>;
 export type EmailResponseMutationOptions = Apollo.BaseMutationOptions<EmailResponseMutation, EmailResponseMutationVariables>;
+export const UploadFileDocument = gql`
+    mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
+  uploadFile(file: $file, file_size: $file_size, file_type: $file_type) {
+    error
+    file {
+      id
+    }
+  }
+}
+    `;
+export type UploadFileMutationFn = Apollo.MutationFunction<UploadFileMutation, UploadFileMutationVariables>;
+
+/**
+ * __useUploadFileMutation__
+ *
+ * To run a mutation, you first call `useUploadFileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUploadFileMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [uploadFileMutation, { data, loading, error }] = useUploadFileMutation({
+ *   variables: {
+ *      file: // value for 'file'
+ *      file_size: // value for 'file_size'
+ *      file_type: // value for 'file_type'
+ *   },
+ * });
+ */
+export function useUploadFileMutation(baseOptions?: Apollo.MutationHookOptions<UploadFileMutation, UploadFileMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UploadFileMutation, UploadFileMutationVariables>(UploadFileDocument, options);
+      }
+export type UploadFileMutationHookResult = ReturnType<typeof useUploadFileMutation>;
+export type UploadFileMutationResult = Apollo.MutationResult<UploadFileMutation>;
+export type UploadFileMutationOptions = Apollo.BaseMutationOptions<UploadFileMutation, UploadFileMutationVariables>;
 export const CreateThreadDocument = gql`
     mutation CreateThread($name: String!, $folder_id: ID!) {
   threadUpsert(input: {name: $name, folder_id: $folder_id}) {
@@ -4936,44 +5184,6 @@ export function useMapDeleteMutation(baseOptions?: Apollo.MutationHookOptions<Ma
 export type MapDeleteMutationHookResult = ReturnType<typeof useMapDeleteMutation>;
 export type MapDeleteMutationResult = Apollo.MutationResult<MapDeleteMutation>;
 export type MapDeleteMutationOptions = Apollo.BaseMutationOptions<MapDeleteMutation, MapDeleteMutationVariables>;
-export const UploadFileDocument = gql`
-    mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
-  uploadFile(file: $file, file_size: $file_size, file_type: $file_type) {
-    error
-    file {
-      id
-    }
-  }
-}
-    `;
-export type UploadFileMutationFn = Apollo.MutationFunction<UploadFileMutation, UploadFileMutationVariables>;
-
-/**
- * __useUploadFileMutation__
- *
- * To run a mutation, you first call `useUploadFileMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUploadFileMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [uploadFileMutation, { data, loading, error }] = useUploadFileMutation({
- *   variables: {
- *      file: // value for 'file'
- *      file_size: // value for 'file_size'
- *      file_type: // value for 'file_type'
- *   },
- * });
- */
-export function useUploadFileMutation(baseOptions?: Apollo.MutationHookOptions<UploadFileMutation, UploadFileMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UploadFileMutation, UploadFileMutationVariables>(UploadFileDocument, options);
-      }
-export type UploadFileMutationHookResult = ReturnType<typeof useUploadFileMutation>;
-export type UploadFileMutationResult = Apollo.MutationResult<UploadFileMutation>;
-export type UploadFileMutationOptions = Apollo.BaseMutationOptions<UploadFileMutation, UploadFileMutationVariables>;
 export const MapsTranslationsResetDocument = gql`
     mutation MapsTranslationsReset {
   mapsTranslationsReset {
@@ -6693,6 +6903,8 @@ export const namedOperations = {
     GetWordsByLanguage: 'GetWordsByLanguage',
     GetWordDefinitionsByWordId: 'GetWordDefinitionsByWordId',
     GetWordWithVoteById: 'GetWordWithVoteById',
+    GetAllDocuments: 'GetAllDocuments',
+    GetDocument: 'GetDocument',
     GetThreadById: 'GetThreadById',
     GetThreads: 'GetThreads',
     GetForumFolderById: 'GetForumFolderById',
@@ -6737,7 +6949,9 @@ export const namedOperations = {
     ToggleWordDefinitionVoteStatus: 'ToggleWordDefinitionVoteStatus',
     ToggleWordVoteStatus: 'ToggleWordVoteStatus',
     WordUpsert: 'WordUpsert',
+    DocumentUpload: 'DocumentUpload',
     EmailResponse: 'EmailResponse',
+    UploadFile: 'UploadFile',
     CreateThread: 'CreateThread',
     UpdateThread: 'UpdateThread',
     DeleteThread: 'DeleteThread',
@@ -6749,7 +6963,6 @@ export const namedOperations = {
     DeleteForum: 'DeleteForum',
     MapUpload: 'MapUpload',
     MapDelete: 'MapDelete',
-    UploadFile: 'UploadFile',
     MapsTranslationsReset: 'MapsTranslationsReset',
     MapsReTranslate: 'MapsReTranslate',
     AddNotification: 'AddNotification',
@@ -6784,6 +6997,7 @@ export const namedOperations = {
     WordVoteStatusFragment: 'WordVoteStatusFragment',
     WordWithVoteListEdgeFragment: 'WordWithVoteListEdgeFragment',
     PageInfoFragment: 'PageInfoFragment',
+    TextyDocumentFragment: 'TextyDocumentFragment',
     ForumFolderFragment: 'ForumFolderFragment',
     ForumFragment: 'ForumFragment',
     MapPhraseWithVotesFragment: 'MapPhraseWithVotesFragment',
