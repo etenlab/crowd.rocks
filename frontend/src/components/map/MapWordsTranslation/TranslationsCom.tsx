@@ -42,8 +42,9 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
   useEffect(() => {
     if (
       upsertError ||
-      upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error !==
-        ErrorType.NoError
+      (upsertData &&
+        upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error !==
+          ErrorType.NoError)
     ) {
       present({
         message: `Word/phrase addition error: ${
@@ -59,6 +60,7 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
     present,
     upsertError,
     upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error,
+    upsertData,
   ]);
 
   const [toggleTrVoteStatus] = useToggleTranslationVoteStatusMutation({

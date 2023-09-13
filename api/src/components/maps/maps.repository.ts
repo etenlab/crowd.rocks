@@ -170,7 +170,8 @@ export class MapsRepository {
           $7
         )
         on conflict(original_map_id, language_code, dialect_code, geo_code) do update
-          set content = EXCLUDED.content
+          set content = EXCLUDED.content,
+        translated_percent = EXCLUDED.translated_percent
         returning 
           translated_map_id, created_by, created_at
       `;

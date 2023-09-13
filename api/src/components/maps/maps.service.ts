@@ -31,6 +31,7 @@ import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
 import { putLangCodesToFileName } from '../../common/utility';
 import { FileService } from '../file/file.service';
+import { TranslationsService } from '../translations/translations.service';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
@@ -67,6 +68,7 @@ export class MapsService {
     private wordDefinitionsService: WordDefinitionsService,
     private wordToWordTranslationsService: WordToWordTranslationsService,
     private fileService: FileService,
+    private translationsService: TranslationsService,
   ) {}
 
   async saveAndParseNewMap({
@@ -497,12 +499,26 @@ export class MapsService {
         to_definition_type_is_word,
       });
 
-    return this.translateOrigMapsByIds(origMapIds, token);
+    const toLang = await this.translationsService.getTranslationLanguage(
+      translation_id,
+      from_definition_type_is_word,
+      to_definition_type_is_word,
+    );
+
+    if (!toLang) {
+      Logger.error(
+        `mapsService#translateMapsWithTranslationId: toLang is not defined`,
+      );
+      return [];
+    }
+
+    return this.translateOrigMapsByIds(origMapIds, token, toLang);
   }
 
   async translateOrigMapsByIds(
     origMapIds: Array<string>,
     token: string,
+    toLang?: LanguageInput,
   ): Promise<Array<string>> {
     const translatedMapsIds: string[] = [];
     const dbPoolClient = await this.pg.pool.connect();
@@ -513,6 +529,7 @@ export class MapsService {
             origMapId,
             token,
             dbPoolClient,
+            toLang,
           );
         translatedMapsIds.push(...translatedToSomeLanguages);
       }
@@ -529,10 +546,12 @@ export class MapsService {
     from_definition_id,
     from_definition_type_is_word,
     token,
+    toLang,
   }: {
     from_definition_id: string;
     from_definition_type_is_word: boolean;
     token: string;
+    toLang?: LanguageInput;
   }): Promise<Array<string>> {
     let origMapIds: string[] = [];
     if (from_definition_type_is_word) {
@@ -544,7 +563,7 @@ export class MapsService {
         from_definition_id,
       );
     }
-    return this.translateOrigMapsByIds(origMapIds, token);
+    return this.translateOrigMapsByIds(origMapIds, token, toLang);
   }
 
   async translateMapAndSaveTranslatedTrn(

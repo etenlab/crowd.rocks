@@ -785,3 +785,71 @@ export function getPhraseToPhraseTranslationListByFromPhraseDefinitionIds({
     returnArr,
   ];
 }
+
+export function getTranslationLangSqlStr(
+  translation_id: number,
+  from_definition_type_is_word: boolean,
+  to_definition_type_is_word: boolean,
+): [string, [number]] {
+  if (from_definition_type_is_word && to_definition_type_is_word) {
+    return [
+      `
+        select w.language_code, w.dialect_code, w.geo_code 
+        from word_to_word_translations wtwt
+        left join word_definitions wd on wtwt.to_word_definition_id=wd.word_definition_id 
+        left join words w on wd.word_id =w.word_id 
+        where wtwt.word_to_word_translation_id = $1
+        `,
+      [translation_id],
+    ];
+  } else if (from_definition_type_is_word && !to_definition_type_is_word) {
+    return [
+      `
+        select w.language_code, w.dialect_code, w.geo_code 
+        from word_to_phrase_translations wtpt
+        left join phrase_definitions pd on wtpt.to_phrase_definition_id = pd.phrase_definition_id 
+        left join phrases p on pd.phrase_id =p.phrase_id  
+        left join words w on w.word_id = p.words[1]
+        where wtpt.word_to_phrase_translation_id = $1
+      `,
+      [translation_id],
+    ];
+  } else if (!from_definition_type_is_word && to_definition_type_is_word) {
+    return [
+      `
+        select
+          w.language_code,
+          w.dialect_code,
+          w.geo_code
+        from
+          phrase_to_word_translations ptwt 
+        left join word_definitions wd on
+          ptwt.to_word_definition_id = wd.word_definition_id
+        left join words w on
+          wd.word_id = w.word_id
+        where
+          ptwt.phrase_to_word_translation_id = $1
+      `,
+      [translation_id],
+    ];
+  }
+  return [
+    `
+      select
+        w.language_code,
+        w.dialect_code,
+        w.geo_code
+      from
+        phrase_to_phrase_translations ptpt
+      left join phrase_definitions pd on
+        ptpt.to_phrase_definition_id = pd.phrase_definition_id
+      left join phrases p on
+        pd.phrase_id = p.phrase_id
+      left join words w on
+        w.word_id = p.words[1]
+      where
+        ptpt.phrase_to_phrase_translation_id = $1
+      `,
+    [translation_id],
+  ];
+}
