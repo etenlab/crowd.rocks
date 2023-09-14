@@ -69,12 +69,16 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   useEffect(() => {
     setWordsAndPhrases([
       ...addValueToWordsOrPhrases(
-        wordsData?.getOrigMapWords
-          .origMapWords as WordOrPhraseWithValueAndTranslations[],
+        wordsData?.getOrigMapWords.origMapWords.map((data) => ({
+          ...data,
+          is_word_type: true,
+        })) as WordOrPhraseWithValueAndTranslations[],
       ),
       ...addValueToWordsOrPhrases(
-        phrasesData?.getOrigMapPhrases
-          .origMapPhrases as WordOrPhraseWithValueAndTranslations[],
+        phrasesData?.getOrigMapPhrases.origMapPhrases.map((data) => ({
+          ...data,
+          is_word_type: false,
+        })) as WordOrPhraseWithValueAndTranslations[],
       ),
     ]);
   }, [wordsData, phrasesData, addValueToWordsOrPhrases]);

@@ -1136,7 +1136,9 @@ type SiteTextWordToWordTranslationWithVote {
 
 enum TableNameType {
   phrase_definitions
+  phrases
   word_definitions
+  words
 }
 
 type TextyDocument {

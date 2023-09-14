@@ -23,8 +23,7 @@ import {
   getFlagsFromRefsQuery,
   FlagToggleProcedureOutput,
   callFlagToggleFlagWithRef,
-  getPhrasesByFlag,
-  getWordsByFlag,
+  getFlagsByRef,
 } from './sql-string';
 
 @Injectable()
@@ -155,36 +154,74 @@ export class FlagsService {
     pgClient: PoolClient | null,
   ): Promise<WordDefinitionListConnection> {
     try {
-      const res = await pgClientOrPool({
+      const res1 = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
-      }).query<GetFlagRow>(...getWordsByFlag(flag_name));
+      }).query<GetFlagRow>(
+        ...getFlagsByRef({
+          flag_name,
+          parent_table: TableNameType.word_definitions,
+        }),
+      );
+      const res2 = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetFlagRow>(
+        ...getFlagsByRef({
+          flag_name,
+          parent_table: TableNameType.words,
+        }),
+      );
 
-      const wordDefinitionIds: number[] = [];
+      const { error: wordDefinitionError, ids } =
+        await this.wordDefinitionsService.getWordDefinitionIdsByWordIds(
+          res2.rows.map((row) => +row.parent_id),
+          null,
+        );
+
+      if (wordDefinitionError !== ErrorType.NoError) {
+        return {
+          error: wordDefinitionError,
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+          },
+        };
+      }
+
+      const wordDefinitionIds: string[] = [
+        ...res1.rows.map((row) => row.parent_id),
+        ...ids.map((id) => id),
+      ];
+
+      const selectedIds: number[] = [];
 
       let offset: number | null = null;
       let hasNextPage = false;
       let startCursor: string | null = null;
       let endCursor: string | null = null;
 
-      for (let i = 0; i < res.rowCount; i++) {
-        const { parent_id } = res.rows[i];
+      for (let i = 0; i < wordDefinitionIds.length; i++) {
+        const id = wordDefinitionIds[i];
 
         if (after === null && offset === null) {
           offset = 0;
         }
 
-        if (parent_id !== after && offset === null) {
+        if (id !== after && offset === null) {
           continue;
         }
 
-        if (parent_id === after && offset === null) {
+        if (id === after && offset === null) {
           offset = 0;
           continue;
         }
 
         if (offset === 0) {
-          startCursor = parent_id;
+          startCursor = id;
         }
 
         if (first !== null && offset! >= first) {
@@ -192,14 +229,14 @@ export class FlagsService {
           break;
         }
 
-        wordDefinitionIds.push(+parent_id);
+        selectedIds.push(+id);
 
-        endCursor = parent_id;
+        endCursor = id;
         offset!++;
       }
 
       const { error, word_definitions } =
-        await this.wordDefinitionsService.reads(wordDefinitionIds, pgClient);
+        await this.wordDefinitionsService.reads(selectedIds, pgClient);
 
       if (error !== ErrorType.NoError) {
         return {
@@ -252,36 +289,74 @@ export class FlagsService {
     pgClient: PoolClient | null,
   ): Promise<PhraseDefinitionListConnection> {
     try {
-      const res = await pgClientOrPool({
+      const res1 = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
-      }).query<GetFlagRow>(...getPhrasesByFlag(flag_name));
+      }).query<GetFlagRow>(
+        ...getFlagsByRef({
+          flag_name,
+          parent_table: TableNameType.phrase_definitions,
+        }),
+      );
+      const res2 = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetFlagRow>(
+        ...getFlagsByRef({
+          flag_name,
+          parent_table: TableNameType.phrases,
+        }),
+      );
 
-      const phraseDefinitionIds: number[] = [];
+      const { error: phraseDefinitionError, ids } =
+        await this.phraseDefinitionsService.getPhraseDefinitionIdsByPhraseIds(
+          res2.rows.map((row) => +row.parent_id),
+          null,
+        );
+
+      if (phraseDefinitionError !== ErrorType.NoError) {
+        return {
+          error: phraseDefinitionError,
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+          },
+        };
+      }
+
+      const phraseDefinitionIds: string[] = [
+        ...res1.rows.map((row) => row.parent_id),
+        ...ids.map((id) => id),
+      ];
+
+      const selectedIds: number[] = [];
 
       let offset: number | null = null;
       let hasNextPage = false;
       let startCursor: string | null = null;
       let endCursor: string | null = null;
 
-      for (let i = 0; i < res.rowCount; i++) {
-        const { parent_id } = res.rows[i];
+      for (let i = 0; i < phraseDefinitionIds.length; i++) {
+        const id = phraseDefinitionIds[i];
 
         if (after === null && offset === null) {
           offset = 0;
         }
 
-        if (parent_id !== after && offset === null) {
+        if (id !== after && offset === null) {
           continue;
         }
 
-        if (parent_id === after && offset === null) {
+        if (id === after && offset === null) {
           offset = 0;
           continue;
         }
 
         if (offset === 0) {
-          startCursor = parent_id;
+          startCursor = id;
         }
 
         if (first !== null && offset! >= first) {
@@ -289,17 +364,14 @@ export class FlagsService {
           break;
         }
 
-        phraseDefinitionIds.push(+parent_id);
+        selectedIds.push(+id);
 
-        endCursor = parent_id;
+        endCursor = id;
         offset!++;
       }
 
       const { error, phrase_definitions } =
-        await this.phraseDefinitionsService.reads(
-          phraseDefinitionIds,
-          pgClient,
-        );
+        await this.phraseDefinitionsService.reads(selectedIds, pgClient);
 
       if (error !== ErrorType.NoError) {
         return {

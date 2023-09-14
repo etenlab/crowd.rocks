@@ -23,7 +23,9 @@ import { Input } from '../../common/styled';
 
 import { useGetWordsByLanguageLazyQuery } from '../../../generated/graphql';
 
-import { ErrorType } from '../../../generated/graphql';
+import { ErrorType, TableNameType } from '../../../generated/graphql';
+
+import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 import {
   CaptionContainer,
@@ -213,6 +215,11 @@ export function WordListPage({ match }: WordListPageProps) {
             }}
             discussion={{
               onChatClick: () => handleGoToChat(word.word_id),
+            }}
+            flags={{
+              parent_table: TableNameType.Words,
+              parent_id: word.word_id,
+              flag_names: WORD_AND_PHRASE_FLAGS,
             }}
             voteFor="content"
             onClick={() => handleGoToDefinitionDetail(word.word_id)}

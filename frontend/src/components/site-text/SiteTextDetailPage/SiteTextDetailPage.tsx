@@ -7,7 +7,6 @@ import {
   IonToolbar,
   IonTitle,
   useIonRouter,
-  // useIonToast,
 } from '@ionic/react';
 
 import { Caption } from '../../common/Caption/Caption';
@@ -19,7 +18,7 @@ import {
   useSiteTextWordDefinitionReadLazyQuery,
 } from '../../../generated/graphql';
 
-import { ErrorType } from '../../../generated/graphql';
+import { ErrorType, TableNameType } from '../../../generated/graphql';
 
 import {
   CaptionContainer,
@@ -34,6 +33,8 @@ import { useToggleSiteTextTranslationVoteStatusMutation } from '../../../hooks/u
 import { AddListHeader } from '../../common/ListHeader';
 import { PageLayout } from '../../common/PageLayout';
 import { NewSiteTextTranslationForm } from '../NewSiteTextTranslationForm';
+
+import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 interface SiteTextDetailPageProps
   extends RouteComponentProps<{
@@ -165,6 +166,7 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
       to_type_is_word: boolean;
       siteTextlikeString: string;
       definitionlikeString: string;
+      definition_id: string;
       upvotes: number;
       downvotes: number;
       to_word_or_phrase_id: string;
@@ -206,6 +208,8 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
               translationWithVote.to_word_definition.word.word,
             definitionlikeString:
               translationWithVote.to_word_definition.definition,
+            definition_id:
+              translationWithVote.to_word_definition.word_definition_id,
             upvotes: translationWithVote.upvotes,
             downvotes: translationWithVote.downvotes,
             to_word_or_phrase_id:
@@ -223,6 +227,8 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
               translationWithVote.to_phrase_definition.phrase.phrase,
             definitionlikeString:
               translationWithVote.to_phrase_definition.definition,
+            definition_id:
+              translationWithVote.to_phrase_definition.phrase_definition_id,
             upvotes: translationWithVote.upvotes,
             downvotes: translationWithVote.downvotes,
             to_word_or_phrase_id:
@@ -240,6 +246,8 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
               translationWithVote.to_word_definition.word.word,
             definitionlikeString:
               translationWithVote.to_word_definition.definition,
+            definition_id:
+              translationWithVote.to_word_definition.word_definition_id,
             upvotes: translationWithVote.upvotes,
             downvotes: translationWithVote.downvotes,
             to_word_or_phrase_id:
@@ -257,6 +265,8 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
               translationWithVote.to_phrase_definition.phrase.phrase,
             definitionlikeString:
               translationWithVote.to_phrase_definition.definition,
+            definition_id:
+              translationWithVote.to_phrase_definition.phrase_definition_id,
             upvotes: translationWithVote.upvotes,
             downvotes: translationWithVote.downvotes,
             to_word_or_phrase_id:
@@ -306,6 +316,13 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
                   translation.to_type_is_word ? 'words' : 'phrases'
                 }/${translation.to_word_or_phrase_id}`,
               ),
+          }}
+          flags={{
+            parent_table: translation.to_type_is_word
+              ? TableNameType.WordDefinitions
+              : TableNameType.PhraseDefinitions,
+            parent_id: translation.definition_id,
+            flag_names: WORD_AND_PHRASE_FLAGS,
           }}
         />
       </CardContainer>

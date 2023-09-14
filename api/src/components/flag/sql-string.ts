@@ -85,9 +85,13 @@ export function getFlagsFromRefsQuery(
   ];
 }
 
-export function getWordsByFlag(
-  flag_name: FlagType,
-): [string, [TableNameType, FlagType]] {
+export function getFlagsByRef({
+  flag_name,
+  parent_table,
+}: {
+  flag_name: FlagType;
+  parent_table: TableNameType;
+}): [string, [TableNameType, FlagType]] {
   return [
     `
       select
@@ -101,26 +105,6 @@ export function getWordsByFlag(
       where parent_table = $1 
         and name = $2;
     `,
-    [TableNameType.word_definitions, flag_name],
-  ];
-}
-
-export function getPhrasesByFlag(
-  flag_name: FlagType,
-): [string, [TableNameType, FlagType]] {
-  return [
-    `
-      select
-        flag_id,
-        parent_table,
-        parent_id,
-        name,
-        created_at,
-        created_by
-      from flags
-      where parent_table = $1 
-        and name = $2;
-    `,
-    [TableNameType.phrase_definitions, flag_name],
+    [parent_table, flag_name],
   ];
 }

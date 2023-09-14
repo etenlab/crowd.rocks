@@ -1904,7 +1904,9 @@ export type SiteTextWordToWordTranslationWithVote = {
 
 export enum TableNameType {
   PhraseDefinitions = 'phrase_definitions',
-  WordDefinitions = 'word_definitions'
+  Phrases = 'phrases',
+  WordDefinitions = 'word_definitions',
+  Words = 'words'
 }
 
 export type TextyDocument = {

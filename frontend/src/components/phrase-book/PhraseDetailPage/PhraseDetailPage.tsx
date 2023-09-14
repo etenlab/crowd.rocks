@@ -12,6 +12,7 @@ import {
 
 import { Caption } from '../../common/Caption/Caption';
 import { Card } from '../../common/Card';
+import { Flag } from '../../flags/Flag';
 
 import {
   useGetPhraseDefinitionsByPhraseIdQuery,
@@ -198,6 +199,11 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
               },
             })
           }
+        />
+        <Flag
+          parent_table={TableNameType.Phrases}
+          parent_id={phraseWithVote.phrase_id}
+          flag_names={WORD_AND_PHRASE_FLAGS}
         />
         <StChatIcon
           icon={chatbubbleEllipsesSharp}

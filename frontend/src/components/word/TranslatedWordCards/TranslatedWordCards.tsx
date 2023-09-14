@@ -5,6 +5,9 @@ import {
 import { useMapTranslationTools } from '../../map/hooks/useMapTranslationTools';
 import { WordOrPhraseCard } from '../WordCard/WordOrPhraseCard';
 import { styled } from 'styled-components';
+import { TableNameType } from '../../../generated/graphql';
+
+import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 export type TWordTranslationCardProps = {
   wordTranslated: MapWordTranslations | MapPhraseTranslations;
@@ -43,6 +46,14 @@ export const TranslatedCards = ({
           definition={wordOrPhraseTranslated.definition}
           onClick={onClick}
           routerLink={routerLink}
+          flags={{
+            parent_table:
+              wordOrPhraseTranslated.__typename === 'MapWordTranslations'
+                ? TableNameType.WordDefinitions
+                : TableNameType.Phrases,
+            parent_id: wordOrPhraseTranslated.definition_id!,
+            flag_names: WORD_AND_PHRASE_FLAGS,
+          }}
         />
       </StCard>
       <StCard>
