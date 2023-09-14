@@ -2,14 +2,8 @@
 
 ## env
 
-export CR_DB_USER=postgres
-export CR_DB_URL=localhost
-export CR_DB=crowdrocks
-export CR_DB_PASSWORD=asdfasdf
-export CR_DB_PORT=5434
+look for .env.example
 
-export AWS_ACCESS_KEY_ID=asdf
-export AWS_SECRET_ACCESS_KEY=asdf
-export AWS_REGION=us-east-2
-
-export EMAIL_SERVER=asdf
+## postgres docker container logs
+to see postgres docker container logs, run 
+`docker logs -f env-postgres_1-1`
