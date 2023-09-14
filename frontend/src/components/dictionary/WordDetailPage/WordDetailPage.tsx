@@ -13,6 +13,7 @@ import { PageLayout } from '../../common/PageLayout';
 
 import { Caption } from '../../common/Caption/Caption';
 import { Card } from '../../common/Card';
+import { Flag } from '../../flags/Flag';
 
 import {
   useGetWordDefinitionsByWordIdQuery,
@@ -190,6 +191,11 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
               },
             });
           }}
+        />
+        <Flag
+          parent_table={TableNameType.Words}
+          parent_id={wordWithVote.word_id}
+          flag_names={WORD_AND_PHRASE_FLAGS}
         />
         <StChatIcon
           icon={chatbubbleEllipsesSharp}
