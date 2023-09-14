@@ -103,7 +103,7 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
     },
     {
       group: tr('Language'),
-      isShown: () => true,
+      isShown: () => !!settings?.isBetaTools,
       subMenu: [
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/dictionary-list`,
