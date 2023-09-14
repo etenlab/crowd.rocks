@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { v2 } from '@google-cloud/translate';
+import { convert } from 'html-to-text';
 
 import { LanguageInput } from '../common/types';
 
@@ -77,7 +78,11 @@ export class GoogleTranslateService {
 
         translationTexts = [
           ...translationTexts,
-          ...unSubstituteN(translations.split('<br/>')),
+          ...unSubstituteN(
+            translations
+              .split('<br/>')
+              .map((translation) => convert(translation)),
+          ),
         ];
 
         chunks = [];
