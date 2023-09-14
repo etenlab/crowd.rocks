@@ -30,8 +30,8 @@ const DocumentItemNS: React.FC<TDocumentItemProps> = ({
 
   return (
     <StItem routerLink={routerLink}>
-      <FileName>{d.file_name}</FileName>
-      <IconRow>
+      <FileName slot="start">{d.file_name}</FileName>
+      <IconRow slot="end">
         <IonBadge>{langInfo2String(langInfo)}</IonBadge>
         <DownloadIcon
           icon={downloadOutline}
