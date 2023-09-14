@@ -134,6 +134,22 @@ export const MapList: React.FC = () => {
   }, [isAdmin]);
 
   useEffect(() => {
+    if (!targetLang) {
+      setTargetLanguage({
+        lang: {
+          tag: 'en',
+          descriptions: ['English'],
+        },
+      });
+    }
+  }, [setTargetLanguage, targetLang]);
+
+  useEffect(() => {
+    // just performance problem
+    if (!targetLang) {
+      return;
+    }
+
     const variables = targetLang?.lang
       ? {
           lang: {
