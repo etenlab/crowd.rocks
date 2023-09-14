@@ -88,32 +88,24 @@ export function Card({
     />
   ) : null;
 
-  // the chat icon should be grouped with the vote buttons
-  const reactionCom = discussion ? (
-    vote ? (
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
-        {voteButtonCom}
-        {flagsCom}
-        <StChatIcon
-          icon={chatbubbleEllipsesSharp}
-          onClick={(e) => {
-            e.stopPropagation();
-            discussion.onChatClick && discussion.onChatClick();
-          }}
-        />
-      </div>
-    ) : (
-      <StChatIcon
-        icon={chatbubbleEllipsesSharp}
-        onClick={(e) => {
-          e.stopPropagation();
-          discussion.onChatClick && discussion.onChatClick();
-        }}
-      />
-    )
-  ) : vote ? (
-    voteButtonCom
+  const discussionCom = discussion ? (
+    <StChatIcon
+      icon={chatbubbleEllipsesSharp}
+      onClick={(e) => {
+        e.stopPropagation();
+        discussion.onChatClick && discussion.onChatClick();
+      }}
+    />
   ) : null;
+
+  // the chat icon should be grouped with the vote buttons
+  const reactionCom = (
+    <div style={{ display: 'flex', flexDirection: 'row' }}>
+      {voteButtonCom}
+      {flagsCom}
+      {discussionCom}
+    </div>
+  );
 
   const editableIconComp = (
     <IonIcon
