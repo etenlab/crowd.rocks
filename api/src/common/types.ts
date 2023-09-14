@@ -122,6 +122,8 @@ registerEnumType(FlagType, {
 export enum TableNameType {
   word_definitions = 'word_definitions',
   phrase_definitions = 'phrase_definitions',
+  words = 'words',
+  phrases = 'phrases',
 }
 
 registerEnumType(TableNameType, {
