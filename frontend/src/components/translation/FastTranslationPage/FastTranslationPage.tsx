@@ -134,7 +134,7 @@ export function FastTranslationPage() {
         flag_name: FlagType.FastTranslation,
       },
     });
-  }, [getWordDefinitionsByFlag, getPhraseDefinitionsByFlag]);
+  }, [getWordDefinitionsByFlag, getPhraseDefinitionsByFlag, source]);
 
   const handleInfinite = useCallback(
     async (ev: IonInfiniteScrollCustomEvent<void>) => {
@@ -371,7 +371,13 @@ export function FastTranslationPage() {
 
         const keyStr = `${edge.node.word.word_id}-${edge.node.word.word}-word-definition`;
         const arr = tempMap.get(keyStr);
-        const item = {
+        const item: {
+          id: string;
+          wordOrPhraseLikeString: string;
+          type: TableNameType.PhraseDefinitions | TableNameType.WordDefinitions;
+          definition_id: string;
+          definition: string;
+        } = {
           id: edge.node.word.word_id,
           type: TableNameType.WordDefinitions,
           wordOrPhraseLikeString: edge.node.word.word,
@@ -411,7 +417,13 @@ export function FastTranslationPage() {
 
         const keyStr = `${edge.node.phrase.phrase_id}-${edge.node.phrase.phrase}-phrase-definition`;
         const arr = tempMap.get(keyStr);
-        const item = {
+        const item: {
+          id: string;
+          wordOrPhraseLikeString: string;
+          type: TableNameType.PhraseDefinitions | TableNameType.WordDefinitions;
+          definition_id: string;
+          definition: string;
+        } = {
           id: edge.node.phrase.phrase_id,
           type: TableNameType.PhraseDefinitions,
           wordOrPhraseLikeString: edge.node.phrase.phrase,
@@ -577,6 +589,14 @@ export function FastTranslationPage() {
                 })}
               </IonAccordionGroup>
             }
+            flags={{
+              parent_table:
+                item.type === TableNameType.WordDefinitions
+                  ? TableNameType.Words
+                  : TableNameType.Phrases,
+              parent_id: item.id,
+              flag_names: WORD_AND_PHRASE_FLAGS,
+            }}
           />
         </CardContainer>
       ));

@@ -14114,7 +14114,19 @@
             "deprecationReason": null
           },
           {
+            "name": "phrases",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "word_definitions",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "words",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
