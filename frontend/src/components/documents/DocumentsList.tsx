@@ -20,7 +20,7 @@ export const DocumentsList: React.FC<TDocumentListProps> = ({
   }
 
   return (
-    <IonList lines="inset">
+    <IonList lines="full">
       {allDocuments?.length > 0 &&
         [...allDocuments]
           .sort((d1, d2) => d1.file_name.localeCompare(d2.file_name))
