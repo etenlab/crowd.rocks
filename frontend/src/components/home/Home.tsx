@@ -84,7 +84,7 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           icon: mapOutline,
           title: tr('Documents'),
           description: tr('Documents'),
-          isShown: () => true,
+          isShown: () => !!settings?.isBetaTools,
         },
       ],
     },
