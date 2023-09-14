@@ -23,7 +23,9 @@ import { useGetPhrasesByLanguageLazyQuery } from '../../../generated/graphql';
 
 import { useTogglePhraseVoteStatusMutation } from '../../../hooks/useTogglePhraseVoteStatusMutation';
 
-import { ErrorType } from '../../../generated/graphql';
+import { ErrorType, TableNameType } from '../../../generated/graphql';
+
+import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 import {
   CaptionContainer,
@@ -206,6 +208,11 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
                 router.push(
                   `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrases/${phrase.phrase_id}`,
                 ),
+            }}
+            flags={{
+              parent_table: TableNameType.Phrases,
+              parent_id: phrase.phrase_id,
+              flag_names: WORD_AND_PHRASE_FLAGS,
             }}
             voteFor="content"
             onClick={() => handleGoToDefinitionDetail(phrase.phrase_id)}
