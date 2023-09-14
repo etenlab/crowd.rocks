@@ -16,6 +16,7 @@ import {
   PhraseDefinitionUpdateInput,
   PhraseDefinitionWithVoteListOutput,
   PhraseDefinition,
+  DefinitionIdsOutput,
 } from './types';
 import { Phrase } from '../phrases/types';
 
@@ -479,6 +480,32 @@ export class PhraseDefinitionsService {
     return {
       error: ErrorType.UnknownError,
       phrase_definition_list: [],
+    };
+  }
+
+  async getPhraseDefinitionIdsByPhraseIds(
+    phraseIds: number[],
+    pgClient: PoolClient | null,
+  ): Promise<DefinitionIdsOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetPhraseDefinitionListByPhraseId>(
+        ...getPhraseDefinitionListByPhraseIds(phraseIds),
+      );
+
+      return {
+        error: ErrorType.NoError,
+        ids: res.rows.map((row) => row.phrase_definition_id),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      ids: [],
     };
   }
 

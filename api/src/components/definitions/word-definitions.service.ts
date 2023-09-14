@@ -16,6 +16,7 @@ import {
   WordDefinitionWithVoteListOutput,
   WordDefinition,
   WordDefinitionWithVote,
+  DefinitionIdsOutput,
 } from './types';
 import { Word } from '../words/types';
 
@@ -473,6 +474,32 @@ export class WordDefinitionsService {
     return {
       error: ErrorType.UnknownError,
       word_definition_list: [],
+    };
+  }
+
+  async getWordDefinitionIdsByWordIds(
+    wordIds: number[],
+    pgClient: PoolClient | null,
+  ): Promise<DefinitionIdsOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetWordDefinitionListByWordId>(
+        ...getWordDefinitionListByWordIds(wordIds),
+      );
+
+      return {
+        error: ErrorType.NoError,
+        ids: res.rows.map((row) => row.word_definition_id),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      ids: [],
     };
   }
 

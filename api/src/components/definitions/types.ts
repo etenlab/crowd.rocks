@@ -207,11 +207,17 @@ export class DefinitionVoteStatusOutput extends GenericOutput {
 @ObjectType()
 export class WordDefinitionListOutput extends GenericOutput {
   @Field(() => [WordDefinition], { nullable: 'items' })
-  definitions: WordDefinition[];
+  definitions: (WordDefinition | null)[];
 }
 
 @ObjectType()
 export class PhraseDefinitionListOutput extends GenericOutput {
   @Field(() => [PhraseDefinition], { nullable: 'items' })
-  definitions: PhraseDefinition[];
+  definitions: (PhraseDefinition | null)[];
+}
+
+@ObjectType()
+export class DefinitionIdsOutput extends GenericOutput {
+  @Field(() => [String])
+  ids: string[];
 }
