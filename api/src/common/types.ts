@@ -26,6 +26,7 @@ export enum ErrorType {
   ForumUpsertFailed = 'ForumUpsertFailed',
   ForumDeleteFailed = 'ForumDeleteFailed',
 
+  FileNotExists = 'FileNotExists',
   FileSaveFailed = 'FileSaveFailed',
   FileDeleteFailed = 'FileDeleteFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',

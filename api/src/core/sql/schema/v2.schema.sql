@@ -113,3 +113,6 @@ create table site_text_translation_counts(
 
 alter table wordlike_strings
 alter column wordlike_string type varchar;
+
+alter table versions
+add column file_id bigint references files(file_id);

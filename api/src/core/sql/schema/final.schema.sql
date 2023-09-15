@@ -215,6 +215,7 @@ create table versions(
   post_id bigint not null references posts(post_id),
   created_at timestamp not null default CURRENT_TIMESTAMP,
   license_title varchar(128) references license_options(license_title),
+  file_id bigint references files(file_id),
   content text not null
 );
 

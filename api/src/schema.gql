@@ -66,6 +66,7 @@ enum ErrorType {
   EmailTooShort
   EmailUnavailable
   FileDeleteFailed
+  FileNotExists
   FileSaveFailed
   FileWithFilenameAlreadyExists
   FolderForThreadNotExists
@@ -786,11 +787,13 @@ type Post {
   content: String!
   created_at: DateTime!
   created_by_user: User!
+  file_url: ID
   post_id: ID!
 }
 
 input PostCreateInput {
   content: String!
+  file_id: ID
   parent_id: Int!
   parent_table: String!
 }

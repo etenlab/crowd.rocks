@@ -17,6 +17,7 @@ export class Post {
   @Field(() => Date) created_at: string;
   @Field(() => User) created_by_user: User;
   @Field(() => String) content: string;
+  @Field(() => ID, { nullable: true }) file_url: string | null;
 }
 
 @InputType()
@@ -24,6 +25,7 @@ export class PostCreateInput {
   @Field(() => String) content: string; //super simple with just one version content for now
   @Field(() => Int) parent_id: number;
   @Field(() => String) parent_table: string;
+  @Field(() => ID, { nullable: true }) file_id?: string;
 }
 
 @ObjectType()
