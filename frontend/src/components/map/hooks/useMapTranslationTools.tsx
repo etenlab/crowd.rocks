@@ -16,15 +16,18 @@ export interface ITranslationsVotes {
 export type WordOrPhraseWithVotesAndValue =
   | (MapWordWithVotes & {
       value?: string | null | undefined;
+      is_word_type: boolean;
       id: string;
     })
   | (MapPhraseWithVotes & {
       value?: string | null | undefined;
+      is_word_type: boolean;
       id: string;
     });
 
 export type WordOrPhraseWithValueAndTranslations = {
   value?: string | null | undefined;
+  is_word_type: boolean;
   id: string;
   translations: Array<WordOrPhraseWithVotesAndValue>;
 } & (MapWordTranslations | MapPhraseTranslations);
@@ -78,12 +81,14 @@ export function useMapTranslationTools() {
                 ...tr,
                 value: tr.word || '',
                 id: tr.word_id,
+                is_word_type: true,
               };
             } else if (tr.__typename === 'MapPhraseWithVotes') {
               wordOrPhrase.translations[i] = {
                 ...tr,
                 value: tr.phrase || '',
                 id: tr.phrase_id,
+                is_word_type: false,
               };
             }
           });

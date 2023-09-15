@@ -51,9 +51,12 @@ export const MapList: React.FC = () => {
   const [isAdmin, { data: isAdminRes }] = useIsAdminLoggedInLazyQuery();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sendMapFile] = useMapUploadMutation();
-  const [uploadFile] = useUploadFileMutation();
-  const [mapDelete] = useMapDeleteMutation();
+  const [sendMapFile, { loading: loadingSendMapFile, data: dataSendMapFile }] =
+    useMapUploadMutation();
+  const [uploadFile, { loading: loadingUploadFile, data: dataUploadFile }] =
+    useUploadFileMutation();
+  const [mapDelete, { loading: loadingMapDelete, data: dataMapDelete }] =
+    useMapDeleteMutation();
   const [
     mapTranslationReset,
     {
@@ -73,7 +76,35 @@ export const MapList: React.FC = () => {
   const candidateForDeletion = useRef<MapFileOutput | undefined>();
 
   useEffect(() => {
-    console.log(dataMapReset);
+    if (loadingSendMapFile || loadingUploadFile || loadingMapDelete) return;
+    if (
+      (dataSendMapFile &&
+        dataSendMapFile?.mapUpload.error !== ErrorType.NoError) ||
+      (dataUploadFile &&
+        dataUploadFile?.uploadFile.error !== ErrorType.NoError) ||
+      (dataMapDelete && dataMapDelete?.mapDelete.error !== ErrorType.NoError)
+    ) {
+      present({
+        message:
+          dataSendMapFile?.mapUpload.error ||
+          dataUploadFile?.uploadFile.error ||
+          dataMapDelete?.mapDelete.error,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+  }, [
+    dataMapDelete,
+    dataSendMapFile,
+    dataUploadFile,
+    loadingMapDelete,
+    loadingSendMapFile,
+    loadingUploadFile,
+    present,
+  ]);
+
+  useEffect(() => {
     if (!dataMapResetCalled || loadingMapReset) return;
     if (dataMapReset?.mapsTranslationsReset.error === ErrorType.NoError) {
       present({
@@ -103,6 +134,22 @@ export const MapList: React.FC = () => {
   }, [isAdmin]);
 
   useEffect(() => {
+    if (!targetLang) {
+      setTargetLanguage({
+        lang: {
+          tag: 'en',
+          descriptions: ['English'],
+        },
+      });
+    }
+  }, [setTargetLanguage, targetLang]);
+
+  useEffect(() => {
+    // just performance problem
+    if (!targetLang) {
+      return;
+    }
+
     const variables = targetLang?.lang
       ? {
           lang: {
@@ -276,7 +323,10 @@ export const MapList: React.FC = () => {
         </IonList>
       )}
 
-      <IonModal isOpen={isMapDeleteModalOpen}>
+      <IonModal
+        isOpen={isMapDeleteModalOpen}
+        onDidDismiss={() => setIsMapDeleteModalOpen(false)}
+      >
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Delete map ?')}</IonTitle>
@@ -335,7 +385,10 @@ export const MapList: React.FC = () => {
         </IonContent>
       </IonModal>
 
-      <IonModal isOpen={isMapResetModalOpen}>
+      <IonModal
+        isOpen={isMapResetModalOpen}
+        onDidDismiss={() => setIsMapResetModalOpen(false)}
+      >
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Reset map data ?')}</IonTitle>

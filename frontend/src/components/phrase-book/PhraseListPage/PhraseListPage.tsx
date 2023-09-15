@@ -1,8 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
-  IonButton,
-  IonSpinner,
   IonContent,
   IonModal,
   IonToolbar,
@@ -11,7 +9,10 @@ import {
   useIonRouter,
   InputCustomEvent,
   InputChangeEventDetail,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
 } from '@ionic/react';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -22,7 +23,9 @@ import { useGetPhrasesByLanguageLazyQuery } from '../../../generated/graphql';
 
 import { useTogglePhraseVoteStatusMutation } from '../../../hooks/useTogglePhraseVoteStatusMutation';
 
-import { ErrorType } from '../../../generated/graphql';
+import { ErrorType, TableNameType } from '../../../generated/graphql';
+
+import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 import {
   CaptionContainer,
@@ -63,10 +66,8 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
   const [filter, setFilter] = useState<string>('');
 
-  const [
-    getPhrasesByLanguage,
-    { data: phrasesData, loading, error, fetchMore },
-  ] = useGetPhrasesByLanguageLazyQuery();
+  const [getPhrasesByLanguage, { data: phrasesData, error, fetchMore }] =
+    useGetPhrasesByLanguageLazyQuery();
   const [togglePhraseVoteStatus] = useTogglePhraseVoteStatusMutation();
 
   useEffect(() => {
@@ -101,20 +102,28 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
     setFilter(event.detail.value!);
   };
 
-  const handleFetchMore = () => {
-    if (phrasesData?.getPhrasesByLanguage.pageInfo.hasNextPage && targetLang) {
-      fetchMore({
-        variables: {
-          first: PAGE_SIZE,
-          after: phrasesData.getPhrasesByLanguage.pageInfo.endCursor,
-          language_code: targetLang.lang.tag,
-          dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
-          geo_code: targetLang.region ? targetLang.region.tag : null,
-          filter: filter.trim(),
-        },
-      });
-    }
-  };
+  const handleInfinite = useCallback(
+    async (ev: IonInfiniteScrollCustomEvent<void>) => {
+      if (
+        phrasesData?.getPhrasesByLanguage.pageInfo.hasNextPage &&
+        targetLang
+      ) {
+        await fetchMore({
+          variables: {
+            first: PAGE_SIZE,
+            after: phrasesData.getPhrasesByLanguage.pageInfo.endCursor,
+            language_code: targetLang.lang.tag,
+            dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
+            geo_code: targetLang.region ? targetLang.region.tag : null,
+            filter: filter.trim(),
+          },
+        });
+      }
+
+      setTimeout(() => ev.target.complete(), 500);
+    },
+    [fetchMore, filter, phrasesData, targetLang],
+  );
 
   const cardListComs = useMemo(() => {
     const tempPhrases: {
@@ -200,6 +209,11 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
                   `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrases/${phrase.phrase_id}`,
                 ),
             }}
+            flags={{
+              parent_table: TableNameType.Phrases,
+              parent_id: phrase.phrase_id,
+              flag_names: WORD_AND_PHRASE_FLAGS,
+            }}
             voteFor="content"
             onClick={() => handleGoToDefinitionDetail(phrase.phrase_id)}
           />
@@ -249,17 +263,14 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
       <CardListContainer>{cardListComs}</CardListContainer>
 
-      <IonButton
-        fill="outline"
-        shape="round"
-        onClick={handleFetchMore}
-        disabled={!phrasesData?.getPhrasesByLanguage.pageInfo.hasNextPage}
-      >
-        {tr('Load More')}
-        {loading ? <IonSpinner name="bubbles" /> : null}
-      </IonButton>
+      <IonInfiniteScroll onIonInfinite={handleInfinite}>
+        <IonInfiniteScrollContent
+          loadingText={`${tr('Loading')}...`}
+          loadingSpinner="bubbles"
+        />
+      </IonInfiniteScroll>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Phrase')}</IonTitle>

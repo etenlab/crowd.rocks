@@ -1,8 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
-  IonButton,
-  IonSpinner,
   IonModal,
   IonHeader,
   IonTitle,
@@ -10,7 +8,10 @@ import {
   useIonRouter,
   InputCustomEvent,
   InputChangeEventDetail,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
 } from '@ionic/react';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 import { IonContent, useIonToast } from '@ionic/react';
 
 import { PageLayout } from '../../common/PageLayout';
@@ -22,7 +23,9 @@ import { Input } from '../../common/styled';
 
 import { useGetWordsByLanguageLazyQuery } from '../../../generated/graphql';
 
-import { ErrorType } from '../../../generated/graphql';
+import { ErrorType, TableNameType } from '../../../generated/graphql';
+
+import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 import {
   CaptionContainer,
@@ -64,7 +67,7 @@ export function WordListPage({ match }: WordListPageProps) {
 
   const [filter, setFilter] = useState<string>('');
 
-  const [getWordsByLanguage, { data: wordsData, loading, error, fetchMore }] =
+  const [getWordsByLanguage, { data: wordsData, error, fetchMore }] =
     useGetWordsByLanguageLazyQuery();
   const [toggleWordVoteStatus] = useToggleWordVoteStatusMutation();
 
@@ -109,20 +112,25 @@ export function WordListPage({ match }: WordListPageProps) {
     setFilter(event.detail.value!);
   };
 
-  const handleFetchMore = () => {
-    if (wordsData?.getWordsByLanguage.pageInfo.hasNextPage && targetLang) {
-      fetchMore({
-        variables: {
-          first: PAGE_SIZE,
-          after: wordsData.getWordsByLanguage.pageInfo.endCursor,
-          language_code: targetLang.lang.tag,
-          dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
-          geo_code: targetLang.region ? targetLang.region.tag : null,
-          filter: filter.trim(),
-        },
-      });
-    }
-  };
+  const handleInfinite = useCallback(
+    async (ev: IonInfiniteScrollCustomEvent<void>) => {
+      if (wordsData?.getWordsByLanguage.pageInfo.hasNextPage && targetLang) {
+        await fetchMore({
+          variables: {
+            first: PAGE_SIZE,
+            after: wordsData.getWordsByLanguage.pageInfo.endCursor,
+            language_code: targetLang.lang.tag,
+            dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
+            geo_code: targetLang.region ? targetLang.region.tag : null,
+            filter: filter.trim(),
+          },
+        });
+      }
+
+      setTimeout(() => ev.target.complete(), 500);
+    },
+    [fetchMore, filter, targetLang, wordsData],
+  );
 
   const cardListComs = useMemo(() => {
     const tempWords: {
@@ -208,6 +216,11 @@ export function WordListPage({ match }: WordListPageProps) {
             discussion={{
               onChatClick: () => handleGoToChat(word.word_id),
             }}
+            flags={{
+              parent_table: TableNameType.Words,
+              parent_id: word.word_id,
+              flag_names: WORD_AND_PHRASE_FLAGS,
+            }}
             voteFor="content"
             onClick={() => handleGoToDefinitionDetail(word.word_id)}
           />
@@ -266,17 +279,14 @@ export function WordListPage({ match }: WordListPageProps) {
 
       <CardListContainer>{cardListComs}</CardListContainer>
 
-      <IonButton
-        fill="outline"
-        shape="round"
-        onClick={handleFetchMore}
-        disabled={!wordsData?.getWordsByLanguage.pageInfo.hasNextPage}
-      >
-        {tr('Load More')}
-        {loading ? <IonSpinner name="bubbles" /> : null}
-      </IonButton>
+      <IonInfiniteScroll onIonInfinite={handleInfinite}>
+        <IonInfiniteScrollContent
+          loadingText={`${tr('Loading')}...`}
+          loadingSpinner="bubbles"
+        />
+      </IonInfiniteScroll>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Word')}</IonTitle>

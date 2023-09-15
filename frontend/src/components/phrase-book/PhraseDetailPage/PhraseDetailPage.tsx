@@ -12,13 +12,14 @@ import {
 
 import { Caption } from '../../common/Caption/Caption';
 import { Card } from '../../common/Card';
+import { Flag } from '../../flags/Flag';
 
 import {
   useGetPhraseDefinitionsByPhraseIdQuery,
   useGetPhraseWithVoteByIdQuery,
 } from '../../../generated/graphql';
 
-import { ErrorType, Phrase } from '../../../generated/graphql';
+import { ErrorType, Phrase, TableNameType } from '../../../generated/graphql';
 
 import { useTogglePhraseDefinitonVoteStatusMutation } from '../../../hooks/useTogglePhraseDefinitionVoteStatusMutation';
 
@@ -38,6 +39,8 @@ import { PageLayout } from '../../common/PageLayout';
 
 import { NewPhraseDefinitionForm } from '../NewPhraseDefinitionForm';
 import { chatbubbleEllipsesSharp } from 'ionicons/icons';
+
+import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 interface PhraseDetailPageProps
   extends RouteComponentProps<{
@@ -139,6 +142,11 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
                 `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrase_definitions/${definition.phrase_definition_id}`,
               ),
           }}
+          flags={{
+            parent_table: TableNameType.PhraseDefinitions,
+            parent_id: definition.phrase_definition_id,
+            flag_names: WORD_AND_PHRASE_FLAGS,
+          }}
         />
       </CardContainer>
     ));
@@ -192,6 +200,11 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
             })
           }
         />
+        <Flag
+          parent_table={TableNameType.Phrases}
+          parent_id={phraseWithVote.phrase_id}
+          flag_names={WORD_AND_PHRASE_FLAGS}
+        />
         <StChatIcon
           icon={chatbubbleEllipsesSharp}
           onClick={() =>
@@ -226,7 +239,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
 
       <CardListContainer>{definitionsCom}</CardListContainer>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Phrase Definition')}</IonTitle>

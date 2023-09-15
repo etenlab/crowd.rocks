@@ -501,6 +501,11 @@ export class TranslationsResolver {
         from_definition_id,
         from_definition_type_is_word,
         token: getBearer(req) || '',
+        toLang: {
+          language_code: to_definition_input.language_code,
+          dialect_code: to_definition_input.dialect_code || null,
+          geo_code: to_definition_input.geo_code || null,
+        },
       });
     }
     return res;

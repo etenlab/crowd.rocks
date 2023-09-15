@@ -125,7 +125,9 @@ const NotStyledMapItem = ({
           ) : (
             <IonBadge>
               {langInfo2String(langInfo) +
-                ` ${mapItem.translated_percent || ''}%`}
+                (mapItem.translated_percent
+                  ? ' ' + mapItem.translated_percent + '%'
+                  : ' ? %')}
             </IonBadge>
           )}
           <DownloadIcon

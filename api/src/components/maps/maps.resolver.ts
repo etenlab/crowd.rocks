@@ -26,7 +26,7 @@ import { AuthenticationService } from '../authentication/authentication.service'
 import { ErrorType, GenericOutput } from 'src/common/types';
 
 @Injectable()
-@Resolver(Map)
+@Resolver(Map) // todo: wtf with paramenter, looks like `Map` is wrong and redundant here.
 export class MapsResolver {
   constructor(
     private mapService: MapsService,

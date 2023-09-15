@@ -42,6 +42,11 @@ import {
   tag2langInfo,
 } from './common/langUtils';
 
+import { useAppContext } from './hooks/useAppContext';
+import { useTr } from './hooks/useTr';
+
+import AppTypeahead from './components/common/LangSelector/TypeAhead';
+
 import Home from './components/home/Home';
 import Login from './components/authentication/Login';
 import Profile from './components/user/Profile';
@@ -62,16 +67,15 @@ import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
 
 import { TranslationPage } from './components/translation/TranslationPage';
 import { GoogleTranslationPage } from './components/translation/GoogleTranslationPage';
+import { FastTranslationPage } from './components/translation/FastTranslationPage';
 
-import { useAppContext } from './hooks/useAppContext';
-import { useTr } from './hooks/useTr';
-
-import AppTypeahead from './components/common/LangSelector/TypeAhead';
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
 import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
 import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
 import { NotificationPage } from './components/notifications/NotificationPage';
 import { SettingsPage } from './components/settings/SettingsPage';
+import { DocumentsPage } from './components/documents/DocumentsPage';
+import { DocumentDetailsPage } from './components/documents/DocumentDetails/DocumentDetails';
 
 const Body: React.FC = () => {
   const {
@@ -450,6 +454,11 @@ const Body: React.FC = () => {
           />
           <Route
             exact
+            path="/:nation_id/:language_id/:cluster_id/fast-translation"
+            component={FastTranslationPage}
+          />
+          <Route
+            exact
             path="/:nation_id/:language_id/:cluster_id/forums"
             component={ForumListPage}
           />
@@ -472,6 +481,16 @@ const Body: React.FC = () => {
             exact
             path="/:nation_id/:language_id/:cluster_id/settings"
             component={SettingsPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/documents"
+            component={DocumentsPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/documents/:document_id"
+            component={DocumentDetailsPage}
           />
           <Route exact path="/">
             <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />

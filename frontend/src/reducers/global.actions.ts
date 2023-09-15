@@ -4,6 +4,7 @@ export const actions = {
     'CHANGE_TRANSLATION_PAGE_SOURCE_LANGAUGE',
   CHANGE_TRANSLATION_PAGE_TARGET_LANGAUGE:
     'CHANGE_TRANSLATION_PAGE_TARGET_LANGAUGE',
+  SET_CURRENT_SOURCE_LANG: 'SET_CURRENT_SOURCE_LANGUAGE',
   SET_CURRENT_TARGET_LANG: 'SET_CURRENT_TARGET_LANGUAGE',
   SET_SITE_TEXT_LANGUAGE_LIST: 'SET_SITE_TEXT_LANGUAGE_LIST',
   SET_ORIGINAL_SITE_TEXT_MAP: 'SET_ORIGINAL_SITE_TEXT_MAP',
@@ -49,6 +50,13 @@ export function changeAppLanguage(langInfo: LanguageInfo) {
 export function setTargetLanguage(language: LanguageInfo | null) {
   return {
     type: actions.SET_CURRENT_TARGET_LANG,
+    payload: language,
+  };
+}
+
+export function setSourceLanguage(language: LanguageInfo | null) {
+  return {
+    type: actions.SET_CURRENT_SOURCE_LANG,
     payload: language,
   };
 }

@@ -11,6 +11,7 @@ export interface StateType {
       target: LanguageInfo | null;
     };
     targetLang: LanguageInfo | null;
+    sourceLang: LanguageInfo | null;
   };
   siteTexts: {
     originalMap: Record<string, string>;
@@ -32,6 +33,7 @@ export const initialState: StateType = {
       target: null,
     },
     targetLang: null,
+    sourceLang: null,
   },
   siteTexts: {
     originalMap: {},
@@ -118,6 +120,15 @@ export function reducer(
         langauges: {
           ...prevState.langauges,
           targetLang: action.payload as LanguageInfo,
+        },
+      };
+    }
+    case actions.SET_CURRENT_SOURCE_LANG: {
+      return {
+        ...prevState,
+        langauges: {
+          ...prevState.langauges,
+          sourceLang: action.payload as LanguageInfo,
         },
       };
     }

@@ -67,6 +67,7 @@ export class FileService {
         Bucket: bucketName,
         Key: fileKey,
         Body: calcHashTr,
+        ContentDisposition: `attachment; filename=${fileName}`,
       };
 
       // TODO validate the user's token before doing any uploading

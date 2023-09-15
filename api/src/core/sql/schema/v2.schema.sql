@@ -116,3 +116,5 @@ alter column wordlike_string type varchar;
 
 alter table versions
 add column file_id bigint references files(file_id);
+
+alter table translated_maps add column translated_percent int2

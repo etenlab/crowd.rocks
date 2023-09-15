@@ -98,6 +98,9 @@ export enum ErrorType {
   MapDeletionError = 'MapDeletionError',
   MapNotFound = 'MapNotFound',
 
+  DocumentIdNotProvided = 'DocumentIdNotProvided',
+  DocumentNotFound = 'DocumentNotFound',
+
   PostNotFound = 'PostNotFound',
 
   Unauthorized = 'Unauthorized',
@@ -115,6 +118,17 @@ export enum FlagType {
 
 registerEnumType(FlagType, {
   name: 'FlagType',
+});
+
+export enum TableNameType {
+  word_definitions = 'word_definitions',
+  phrase_definitions = 'phrase_definitions',
+  words = 'words',
+  phrases = 'phrases',
+}
+
+registerEnumType(TableNameType, {
+  name: 'TableNameType',
 });
 
 export interface ITagInfo {

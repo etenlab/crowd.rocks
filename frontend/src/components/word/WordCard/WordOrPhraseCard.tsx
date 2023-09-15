@@ -8,6 +8,9 @@ import { styled } from 'styled-components';
 import { StChatIcon } from '../../common/styled';
 import { chatbubbleEllipsesSharp } from 'ionicons/icons';
 import { VoteButtonsVertical } from '../../common/VoteButtonsVertical/VoteButtonsVertical';
+import { TableNameType } from '../../../generated/graphql';
+import { Flag } from '../../flags/Flag';
+import { FlagName } from '../../flags/flagGroups';
 
 type TWordCardProps = {
   value?: string | null;
@@ -23,6 +26,11 @@ type TWordCardProps = {
     onVoteUpClick: () => void;
     onVoteDownClick: () => void;
   };
+  flags?: {
+    parent_table: TableNameType;
+    parent_id: string;
+    flag_names: FlagName[];
+  };
 };
 
 export const WordOrPhraseCard = ({
@@ -32,6 +40,7 @@ export const WordOrPhraseCard = ({
   routerLink,
   discussion,
   vote,
+  flags,
 }: TWordCardProps) => {
   const chatButton = discussion ? (
     <StChatIcon
@@ -40,6 +49,14 @@ export const WordOrPhraseCard = ({
     />
   ) : null;
   const voteButtonCom = vote ? <VoteButtonsVertical {...vote} /> : null;
+  const flagsCom = flags ? (
+    <Flag
+      parent_table={flags.parent_table}
+      parent_id={flags.parent_id}
+      flag_names={flags.flag_names}
+    />
+  ) : null;
+
   return (
     <StCard onClick={() => onClick && onClick()} routerLink={routerLink}>
       <IonCardHeader>
@@ -51,6 +68,7 @@ export const WordOrPhraseCard = ({
             </StCardSubtitle>
           </div>
           <div style={{ display: 'flex', flexDirection: 'row' }}>
+            {flagsCom}
             {chatButton}
             {voteButtonCom}
           </div>

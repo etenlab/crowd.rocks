@@ -124,7 +124,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
         }}
       />
       {postsComp}
-      <IonModal isOpen={isAdding}>
+      <IonModal isOpen={isAdding} onDidDismiss={() => set_is_adding(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Post')}</IonTitle>
