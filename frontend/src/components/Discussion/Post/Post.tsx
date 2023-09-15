@@ -11,11 +11,13 @@ import {
   CustomCardTitle,
   TimestampContainer,
 } from './styled';
+import { AudioPlayer } from '../AudioPlayer';
 
 type PostProps = {
   created_by: string;
   created_at: string;
   chatContent: ReactNode;
+  av_file_url?: string | null;
   voteFor?: 'content' | 'description';
   vote?: {
     upVotes: number;
@@ -39,6 +41,7 @@ export function Post({
   routerLink,
   vote,
   discussion,
+  av_file_url,
 }: PostProps) {
   const voteButtonCom = vote ? <VoteButtonsHerizontal {...vote} /> : null;
   const chatButton = discussion ? (
@@ -46,6 +49,10 @@ export function Post({
       icon={chatbubbleEllipsesSharp}
       onClick={() => discussion.onChatClick && discussion.onChatClick()}
     />
+  ) : null;
+
+  const avComp = av_file_url ? (
+    <AudioPlayer src={av_file_url} file_type="audio/x-wav" />
   ) : null;
 
   return (
@@ -70,6 +77,7 @@ export function Post({
           {voteFor === 'description' ? voteButtonCom : null}
           {chatButton}
         </div>
+        {avComp}
       </CustomCardContent>
     </CustomCard>
   );

@@ -2,9 +2,13 @@ import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
   IonHeader,
+  IonLabel,
   IonModal,
+  IonSegment,
+  IonSegmentButton,
   IonTitle,
   IonToolbar,
+  isPlatform,
   useIonRouter,
 } from '@ionic/react';
 import { useTr } from '../../hooks/useTr';
@@ -21,12 +25,16 @@ import { useEffect, useMemo, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import { Post } from './Post';
 import { NewPostForm } from './NewPostForm/NewPostForm';
+import { AudioRecorder } from './NewAudioForm/AudioRecorder';
 
 interface DiscussionPageProps
   extends RouteComponentProps<{
     parent: string;
     parent_id: string;
+    page_title: string;
   }> {}
+
+type PostKind = 'video' | 'audio' | 'text';
 
 export function DiscussionPage({ match }: DiscussionPageProps) {
   const router = useIonRouter();
@@ -36,6 +44,8 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [getPostsByParent, { data: postData, error: postError }] =
     usePostsByParentLazyQuery();
+
+  const [postKind, setPostKind] = useState<PostKind>();
 
   useEffect(() => {
     getPostsByParent({
@@ -58,6 +68,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
       created_by_user: User;
       created_at: string;
       id: string;
+      file_url?: string | null;
     }[] = [];
 
     const allPosts = postData.postsByParent.posts;
@@ -70,6 +81,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
             created_by_user: post.created_by_user,
             created_at: new Date(post.created_at).toDateString(),
             id: post.post_id,
+            file_url: post.file_url,
           });
         }
       }
@@ -83,6 +95,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
                 dangerouslySetInnerHTML={{ __html: `${post.content}` }}
               ></div>
             }
+            av_file_url={post.file_url}
           />
         </CardContainer>
       ));
@@ -91,6 +104,11 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
     }
   }, [postData, postError]);
 
+  const handleCancel = () => {
+    set_is_adding(false);
+    setPostKind(undefined);
+  };
+
   return (
     <PageLayout>
       <CaptionContainer>
@@ -98,7 +116,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
           {tr('Discussion')}
         </Caption>
       </CaptionContainer>
-      <IonTitle>{postData?.postsByParent.title}</IonTitle>
+      <IonTitle>{match.params.page_title}</IonTitle>
       <AddListHeader
         title={tr('Posts')}
         onClick={() => {
@@ -113,12 +131,52 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
           </IonToolbar>
         </IonHeader>
         <IonContent>
-          <NewPostForm
-            parent={match.params.parent}
-            parent_id={match.params.parent_id}
-            onCancel={() => set_is_adding(false)}
-            onCreated={() => set_is_adding(false)}
-          />
+          <div style={{ paddingTop: '10px' }}>
+            <IonSegment>
+              <IonSegmentButton
+                onClick={() => setPostKind('text')}
+                value="text"
+              >
+                <IonLabel>Text</IonLabel>
+              </IonSegmentButton>
+              <IonSegmentButton
+                onClick={() => setPostKind('video')}
+                value="video"
+              >
+                <IonLabel>Video</IonLabel>
+              </IonSegmentButton>
+              <IonSegmentButton
+                onClick={() => setPostKind('audio')}
+                value="audio"
+              >
+                <IonLabel>Audio</IonLabel>
+              </IonSegmentButton>
+            </IonSegment>
+          </div>
+
+          {postKind === 'text' && (
+            <NewPostForm
+              parent={match.params.parent}
+              parent_id={match.params.parent_id}
+              onCancel={() => handleCancel()}
+              onCreated={() => handleCancel()}
+            />
+          )}
+          {postKind === 'video' && <p>video coming soon...</p>}
+          {postKind === 'audio' &&
+            (isPlatform('mobileweb') ||
+              isPlatform('pwa') ||
+              isPlatform('desktop')) && (
+              <AudioRecorder
+                onCancel={() => handleCancel()}
+                onCreated={() => handleCancel()}
+                parent={match.params.parent}
+                parent_id={match.params.parent_id}
+              />
+            )}
+          {!postKind && (
+            <p style={{ textAlign: 'center' }}>Please select a post type</p>
+          )}
         </IonContent>
       </IonModal>
     </PageLayout>

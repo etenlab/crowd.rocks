@@ -85,6 +85,7 @@ export enum ErrorType {
   EmailTooShort = 'EmailTooShort',
   EmailUnavailable = 'EmailUnavailable',
   FileDeleteFailed = 'FileDeleteFailed',
+  FileNotExists = 'FileNotExists',
   FileSaveFailed = 'FileSaveFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
   FolderForThreadNotExists = 'FolderForThreadNotExists',
@@ -1180,11 +1181,13 @@ export type Post = {
   content: Scalars['String']['output'];
   created_at: Scalars['DateTime']['output'];
   created_by_user: User;
+  file_url?: Maybe<Scalars['ID']['output']>;
   post_id: Scalars['ID']['output'];
 };
 
 export type PostCreateInput = {
   content: Scalars['String']['input'];
+  file_id?: InputMaybe<Scalars['ID']['input']>;
   parent_id: Scalars['Int']['input'];
   parent_table: Scalars['String']['input'];
 };
@@ -2202,7 +2205,7 @@ export type WordWithVoteOutput = {
 
 export type UserFieldsFragment = { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null };
 
-export type PostFieldsFragment = { __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } };
+export type PostFieldsFragment = { __typename?: 'Post', post_id: string, content: string, created_at: any, file_url?: string | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } };
 
 export type PostsByParentQueryVariables = Exact<{
   parent_id: Scalars['ID']['input'];
@@ -2210,16 +2213,17 @@ export type PostsByParentQueryVariables = Exact<{
 }>;
 
 
-export type PostsByParentQuery = { __typename?: 'Query', postsByParent: { __typename?: 'PostsByParentOutput', error: ErrorType, title: string, posts?: Array<{ __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } }> | null } };
+export type PostsByParentQuery = { __typename?: 'Query', postsByParent: { __typename?: 'PostsByParentOutput', error: ErrorType, title: string, posts?: Array<{ __typename?: 'Post', post_id: string, content: string, created_at: any, file_url?: string | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } }> | null } };
 
 export type PostCreateMutationVariables = Exact<{
   content: Scalars['String']['input'];
   parentId: Scalars['Int']['input'];
   parentTable: Scalars['String']['input'];
+  file_id?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
-export type PostCreateMutation = { __typename?: 'Mutation', postCreateResolver: { __typename?: 'PostCreateOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } } | null } };
+export type PostCreateMutation = { __typename?: 'Mutation', postCreateResolver: { __typename?: 'PostCreateOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, content: string, created_at: any, file_url?: string | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } } | null } };
 
 export type SessionFieldsFragment = { __typename?: 'Session', user_id: string, token: string, avatar: string, avatar_url?: string | null };
 
@@ -2683,7 +2687,7 @@ export type PostReadQueryVariables = Exact<{
 }>;
 
 
-export type PostReadQuery = { __typename?: 'Query', postReadResolver: { __typename?: 'PostReadOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, content: string, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } } | null } };
+export type PostReadQuery = { __typename?: 'Query', postReadResolver: { __typename?: 'PostReadOutput', error: ErrorType, post?: { __typename?: 'Post', post_id: string, content: string, created_at: any, file_url?: string | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } } | null } };
 
 export type SiteTextWordToWordTranslationWithVoteFragmentFragment = { __typename?: 'SiteTextWordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: string, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
 
@@ -2958,6 +2962,7 @@ export const PostFieldsFragmentDoc = gql`
   post_id
   content
   created_at
+  file_url
   created_by_user {
     ...UserFields
   }
@@ -3457,9 +3462,9 @@ export type PostsByParentQueryHookResult = ReturnType<typeof usePostsByParentQue
 export type PostsByParentLazyQueryHookResult = ReturnType<typeof usePostsByParentLazyQuery>;
 export type PostsByParentQueryResult = Apollo.QueryResult<PostsByParentQuery, PostsByParentQueryVariables>;
 export const PostCreateDocument = gql`
-    mutation PostCreate($content: String!, $parentId: Int!, $parentTable: String!) {
+    mutation PostCreate($content: String!, $parentId: Int!, $parentTable: String!, $file_id: ID) {
   postCreateResolver(
-    input: {content: $content, parent_id: $parentId, parent_table: $parentTable}
+    input: {content: $content, parent_id: $parentId, parent_table: $parentTable, file_id: $file_id}
   ) {
     error
     post {
@@ -3486,6 +3491,7 @@ export type PostCreateMutationFn = Apollo.MutationFunction<PostCreateMutation, P
  *      content: // value for 'content'
  *      parentId: // value for 'parentId'
  *      parentTable: // value for 'parentTable'
+ *      file_id: // value for 'file_id'
  *   },
  * });
  */
