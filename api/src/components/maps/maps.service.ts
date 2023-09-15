@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, Logger } from '@nestjs/common';
 
 import {
   GetAllMapsListOutput,
@@ -66,8 +66,10 @@ export class MapsService {
     private phrasesService: PhrasesService,
     private phraseDefinitionsService: PhraseDefinitionsService,
     private wordDefinitionsService: WordDefinitionsService,
+    @Inject(forwardRef(() => WordToWordTranslationsService))
     private wordToWordTranslationsService: WordToWordTranslationsService,
     private fileService: FileService,
+    @Inject(forwardRef(() => TranslationsService))
     private translationsService: TranslationsService,
   ) {}
 
