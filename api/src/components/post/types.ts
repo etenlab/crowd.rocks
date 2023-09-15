@@ -18,6 +18,7 @@ export class Post {
   @Field(() => User) created_by_user: User;
   @Field(() => String) content: string;
   @Field(() => ID, { nullable: true }) file_url: string | null;
+  @Field(() => String, { nullable: true }) file_type: string | null;
 }
 
 @InputType()
