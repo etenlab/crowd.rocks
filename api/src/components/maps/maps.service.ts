@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-
 import {
   GetAllMapsListOutput,
   GetOrigMapContentOutput,
@@ -32,6 +31,8 @@ import { PhraseDefinitionsService } from '../definitions/phrase-definitions.serv
 import { putLangCodesToFileName } from '../../common/utility';
 import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const string2fileStream = require('string-to-file-stream');
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
@@ -39,6 +40,7 @@ const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes'
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
 const DEFAULT_MAP_WORD_DEFINITION = 'A geographical place';
 const DEFAULT_MAP_PHRASE_DEFINITION = 'A geographical place phrase';
+const SVG_MIME_TYPE = 'image/svg+xml';
 
 export type MapTranslationResult = {
   translatedMap: string;
@@ -46,7 +48,7 @@ export type MapTranslationResult = {
 };
 
 interface IParseAndSaveNewMapParams {
-  fileBody: string;
+  content_file_id: string;
   mapFileName: string;
   previewFileId?: string;
   mapLanguage?: LanguageInfo;
@@ -72,7 +74,7 @@ export class MapsService {
   ) {}
 
   async saveAndParseNewMap({
-    fileBody,
+    content_file_id,
     mapFileName,
     previewFileId,
     mapLanguage = DEFAULT_NEW_MAP_LANGUAGE,
@@ -88,7 +90,7 @@ export class MapsService {
       dbPoolClient.query('BEGIN');
       const { map_id } = await this.mapsRepository.saveOriginalMapTrn({
         mapFileName,
-        fileBody,
+        content_file_id,
         previewFileId: previewFileId!,
         token,
         dbPoolClient,
@@ -119,11 +121,14 @@ export class MapsService {
     dbPoolClient,
     token,
   }: IParseOrigMapParams): Promise<MapFileOutput> {
-    const { language, content_url, map_file_name, created_at, created_by } =
-      await this.mapsRepository.getOrigMapContent(map_id);
+    const { language, content_file_id, map_file_name, created_at, created_by } =
+      await this.mapsRepository.getOrigMapWithContentUrl(map_id);
     const { language_code, dialect_code, geo_code } = language;
+    const origMapString = await this.fileService.getFileContentAsString(
+      content_file_id,
+    );
     const { transformedSvgINode, foundWords, foundPhrases } =
-      this.parseSvgMapString(content_url);
+      this.parseSvgMapString(origMapString);
 
     //--save found words with definitions and original map boundng
 
@@ -272,13 +277,14 @@ export class MapsService {
   }
 
   async getOrigMapContent(id: string): Promise<GetOrigMapContentOutput> {
-    return this.mapsRepository.getOrigMapContent(id);
+    return this.mapsRepository.getOrigMapWithContentUrl(id);
   }
 
   async getTranslatedMapContent(
     id: string,
   ): Promise<GetTranslatedMapContentOutput> {
-    const mapFileInfo = await this.mapsRepository.getTranslatedMapContent(id);
+    const mapFileInfo =
+      await this.mapsRepository.getTranslatedMapWithContentUrl(id);
     return mapFileInfo;
   }
 
@@ -498,8 +504,8 @@ export class MapsService {
     toLang?: LanguageInput,
   ): Promise<Array<string>> {
     const translatedMapIds: Array<string> = [];
-    const { content_url: origMapContentUrl } =
-      await this.mapsRepository.getOrigMapContent(origMapId);
+    const { content_file_id, map_file_name } =
+      await this.mapsRepository.getOrigMapWithContentUrl(origMapId);
 
     const { origMapWords } = await this.getOrigMapWords({
       original_map_id: origMapId,
@@ -585,15 +591,35 @@ export class MapsService {
           }
         }
       }
+      const origMapString = await this.fileService.getFileContentAsString(
+        content_file_id,
+      );
 
       const { translatedMap } = await this.translateMapString(
-        origMapContentUrl, //todo
+        origMapString,
         translations,
       )!;
+      const translatedContentFile = await this.fileService.uploadFile(
+        string2fileStream(translatedMap),
+        putLangCodesToFileName(map_file_name, {
+          language_code: tag2langInfo(languageFullTag).lang.tag,
+          dialect_code: tag2langInfo(languageFullTag).dialect?.tag || null,
+          geo_code: tag2langInfo(languageFullTag).region?.tag || null,
+        }),
+        SVG_MIME_TYPE,
+        translatedMap.length,
+        token,
+      );
+      if (!translatedContentFile?.file?.id) {
+        Logger.error(
+          `mapsService#translateMapAndSaveTranslatedTrn: Error: translatedContentFile?.file?.id is undefined`,
+        );
+        return [];
+      }
 
       const data = await this.mapsRepository.saveTranslatedMapTrn({
         original_map_id: origMapId,
-        fileBody: translatedMap,
+        content_file_id: String(translatedContentFile.file.id),
         token,
         t_language_code: language_code,
         t_dialect_code: dialect_code,

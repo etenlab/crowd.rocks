@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 import { Caption } from '../../common/Caption/Caption';
 import { useGetOrigMapContentQuery } from '../../../generated/graphql';
-import { downloadFromSrc } from '../../../common/utility';
+import { downloadFromUrl } from '../../../common/utility';
 
 import { useTr } from '../../../hooks/useTr';
 
@@ -37,12 +37,10 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   }, []);
 
   const handleDownloadSvg = () => {
-    if (origMapContent.data?.getOrigMapContent.content_url) {
-      downloadFromSrc(
+    if (origMapContent.data?.getOrigMapContent.content_file_url) {
+      downloadFromUrl(
         origMapContent.data?.getOrigMapContent.map_file_name,
-        `data:image/svg+xml;utf8,${encodeURIComponent(
-          origMapContent.data?.getOrigMapContent.content_url,
-        )}`,
+        origMapContent.data?.getOrigMapContent.content_file_url,
       );
     }
   };
@@ -53,7 +51,7 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
         <>
           {tr('Map')} -{' '}
           {origMapContent.data?.getOrigMapContent.map_file_name || ''}
-          {origMapContent.data?.getOrigMapContent.content && (
+          {origMapContent.data?.getOrigMapContent.content_file_url && (
             <IonIcon
               icon={downloadOutline}
               onClick={handleDownloadSvg}
@@ -66,13 +64,14 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
       </Caption>
 
       <StyledMapImg>
-        {origMapContent.data?.getOrigMapContent.content && (
+        {origMapContent.data?.getOrigMapContent.content_file_url && (
           <img
             width={`${windowWidth - 10}px`}
             height={'auto'}
-            src={`data:image/svg+xml;utf8,${encodeURIComponent(
-              origMapContent.data?.getOrigMapContent.content,
-            )}`} // without `encodeURIComponent(image)` everal .svg images won't work
+            src={origMapContent.data?.getOrigMapContent.content_file_url}
+            // src={`data:image/svg+xml;utf8,${encodeURIComponent(
+            //   origMapContent.data?.getOrigMapContent.content,
+            // )}`} // without `encodeURIComponent(image)` everal .svg images won't work
             alt="Original map"
           />
         )}

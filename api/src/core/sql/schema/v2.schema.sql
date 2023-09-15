@@ -116,5 +116,8 @@ alter column wordlike_string type varchar;
 
 alter table translated_maps add column translated_percent int2
 
-alter table translated_maps rename column content to content_url 
-alter table original_maps rename column content to content_url
+ALTER TABLE original_maps DROP COLUMN if exists "content";
+ALTER TABLE translated_maps DROP COLUMN if exists "content";
+ALTER TABLE original_maps add if not exists content_file_id int8 NULL;
+ALTER TABLE translated_maps add if not exists content_file_id int8 NULL;
+

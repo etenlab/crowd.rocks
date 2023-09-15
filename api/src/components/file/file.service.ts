@@ -1,7 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
-// import 'react-native-get-random-values';
-// import 'react-native-url-polyfill/auto';
+import {
+  S3Client,
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommandInput,
+} from '@aws-sdk/client-s3';
 import { ReadStream } from 'fs';
 import { Transform } from 'stream';
 import { createHash } from 'crypto';
@@ -27,10 +30,6 @@ export class FileService {
     token: string,
   ): Promise<IFileOutput | undefined> {
     try {
-      const accessKeyId = process.env.AWS_ACCESS_KEY_ID || '';
-      const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || '';
-      const bucketName = process.env.AWS_S3_BUCKET_NAME;
-      const region = process.env.AWS_S3_REGION || '';
       const fileKey = `${nanoid()}-${fileName}`;
 
       const hash = createHash('sha256');
@@ -50,24 +49,14 @@ export class FileService {
 
       readStream.pipe(calcHashTr);
 
-      const creds = AWS_ENVIRONMENTS.includes(process.env.NODE_ENV || '')
-        ? {
-            region,
-          }
-        : {
-            region,
-            credentials: {
-              accessKeyId,
-              secretAccessKey,
-            },
-          };
-      const s3Client = new S3Client(creds);
+      const s3Client = new S3Client(this.makeS3Creds().creds);
 
-      const uploadParams = {
-        Bucket: bucketName,
+      const uploadParams: PutObjectCommandInput = {
+        Bucket: this.makeS3Creds().bucketName,
         Key: fileKey,
         Body: calcHashTr,
         ContentDisposition: `attachment; filename=${fileName}`,
+        ContentType: fileType,
       };
 
       // TODO validate the user's token before doing any uploading
@@ -92,24 +81,35 @@ export class FileService {
         },
       });
 
-      if (fileEntity) {
+      if (fileEntity?.file?.fileUrl) {
         const deleteParams = {
-          Bucket: bucketName,
-          Key: fileKey,
+          Bucket: this.makeS3Creds().bucketName,
+          Key: fileEntity.file?.fileUrl.split('/').at(-1),
         };
 
         const deleteCommand = new DeleteObjectCommand(deleteParams);
 
         await s3Client.send(deleteCommand);
-
-        return fileEntity;
+        return await this.fileRepository.update({
+          file_id: fileEntity.file.id,
+          file_name: fileName,
+          file_type: fileType,
+          file_size: fileSize,
+          file_url: `https://${this.makeS3Creds().bucketName}.s3.${
+            this.makeS3Creds().region
+          }.amazonaws.com/${fileKey}`,
+          file_hash: hashValue || '',
+          token,
+        });
       }
 
       return await this.fileRepository.save({
         file_name: fileName,
         file_type: fileType,
         file_size: fileSize,
-        file_url: `https://${bucketName}.s3.${region}.amazonaws.com/${fileKey}`, //TODO: it'd be cool to generate differently for local environments
+        file_url: `https://${this.makeS3Creds().bucketName}.s3.${
+          this.makeS3Creds().region
+        }.amazonaws.com/${fileKey}`,
         file_hash: hashValue || '',
         token,
       });
@@ -247,5 +247,50 @@ export class FileService {
     return await this.fileRepository.find({
       where: { file_id: id },
     });
+  }
+
+  async getFileContentAsString(fileId: string): Promise<string> {
+    if (isNaN(Number(fileId)))
+      throw new Error(
+        `flieService#getFileContentAsString: Error: Number(fileId) is NaN`,
+      );
+    const s3Client = new S3Client(this.makeS3Creds().creds);
+    const fileData = await this.fileRepository.find({
+      where: { file_id: Number(fileId) },
+    });
+
+    const command = new GetObjectCommand({
+      Bucket: this.makeS3Creds().bucketName,
+      Key: fileData?.file?.fileUrl.split('/').at(-1),
+    });
+
+    const response = await s3Client.send(command);
+    if (!response.Body)
+      throw new Error(
+        `flieService#getFileContentAsString: Error: can't get file ${fileData?.file?.fileUrl
+          .split('/')
+          .at(-1)} from S3 bucket`,
+      );
+    return response?.Body?.transformToString();
+  }
+
+  makeS3Creds() {
+    const accessKeyId = process.env.AWS_ACCESS_KEY_ID || '';
+    const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || '';
+    const bucketName = process.env.AWS_S3_BUCKET_NAME;
+    const region = process.env.AWS_S3_REGION || '';
+    const creds = AWS_ENVIRONMENTS.includes(process.env.NODE_ENV || '')
+      ? {
+          region,
+        }
+      : {
+          region,
+          credentials: {
+            accessKeyId,
+            secretAccessKey,
+          },
+        };
+
+    return { creds, bucketName, region };
   }
 }

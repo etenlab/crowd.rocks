@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Resolver, Mutation, Query, Context } from '@nestjs/graphql';
+import { Args, Resolver, Mutation, Query, Context, Int } from '@nestjs/graphql';
 
 import { MapsService } from './maps.service';
 
@@ -24,6 +24,7 @@ import {
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { ErrorType, GenericOutput } from 'src/common/types';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 @Resolver(Map) // todo: wtf with paramenter, looks like `Map` is wrong and redundant here.
@@ -31,6 +32,7 @@ export class MapsResolver {
   constructor(
     private mapService: MapsService,
     private authenticationService: AuthenticationService,
+    private fileService: FileService,
   ) {}
 
   @Mutation(() => MapUploadOutput)
@@ -39,17 +41,30 @@ export class MapsResolver {
     { createReadStream, filename: map_file_name }: FileUpload,
     @Args({ name: 'previewFileId', type: () => String, nullable: true })
     previewFileId: string | undefined | null,
+    @Args({ name: 'file_type', type: () => String })
+    file_type: string,
+    @Args({ name: 'file_size', type: () => Int })
+    file_size: number,
     @Context() req: any,
   ): Promise<MapUploadOutput> {
     const bearer = getBearer(req) || '';
     let fileBody = '';
-    for await (const chunk of createReadStream()) {
+    const readStream = createReadStream();
+    const filePormise = this.fileService.uploadFile(
+      readStream,
+      map_file_name,
+      file_type,
+      file_size,
+      bearer,
+    );
+    for await (const chunk of readStream) {
       if (!fileBody) {
         fileBody = chunk;
       } else {
         fileBody += chunk;
       }
     }
+    const uploadedContent = await filePormise;
 
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       bearer,
@@ -61,9 +76,21 @@ export class MapsResolver {
         mapFileOutput: null,
       };
     }
+    if (!uploadedContent?.file?.fileUrl) {
+      return {
+        error: ErrorType.FileSaveFailed,
+        mapFileOutput: null,
+      };
+    }
+    if (isNaN(Number(uploadedContent.file.id))) {
+      return {
+        error: ErrorType.FileSaveFailed,
+        mapFileOutput: null,
+      };
+    }
     try {
       const map = await this.mapService.saveAndParseNewMap({
-        fileBody,
+        content_file_id: String(uploadedContent.file.id),
         mapFileName: map_file_name,
         previewFileId: previewFileId!,
         token: bearer,
@@ -187,20 +214,20 @@ export class MapsResolver {
   async getOrigMapContent(
     @Args('input') input: GetOrigMapContentInput,
   ): Promise<GetOrigMapContentOutput> {
-    const mapContentUrl = await this.mapService.getOrigMapContent(
+    const mapWithContentUrl = await this.mapService.getOrigMapContent(
       input.original_map_id,
     );
-    return mapContentUrl;
+    return mapWithContentUrl;
   }
 
   @Query(() => GetTranslatedMapContentOutput)
   async getTranslatedMapContent(
     @Args('input') input: GetTranslatedMapContentInput,
   ): Promise<GetTranslatedMapContentOutput> {
-    const mapContent = await this.mapService.getTranslatedMapContent(
+    const mapWithContentUrl = await this.mapService.getTranslatedMapContent(
       input.translated_map_id,
     );
-    return mapContent;
+    return mapWithContentUrl;
   }
 
   @Query(() => GetOrigMapWordsOutput)

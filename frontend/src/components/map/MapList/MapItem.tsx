@@ -10,7 +10,7 @@ import {
 } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
-import { downloadFromSrc } from '../../../common/utility';
+import { downloadFromUrl } from '../../../common/utility';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
@@ -80,11 +80,9 @@ const NotStyledMapItem = ({
     !origMapContent.loading &&
     downloadFlagRef.current === 'original'
   ) {
-    downloadFromSrc(
+    downloadFromUrl(
       origMapContent.data.getOrigMapContent.map_file_name,
-      `data:image/svg+xml;utf8,${encodeURIComponent(
-        origMapContent.data.getOrigMapContent.content,
-      )}`,
+      origMapContent.data.getOrigMapContent.content_file_url,
     );
     downloadFlagRef.current = null;
   }
@@ -95,12 +93,10 @@ const NotStyledMapItem = ({
     !translatedMapContent.loading &&
     downloadFlagRef.current === 'translated'
   ) {
-    downloadFromSrc(
+    downloadFromUrl(
       translatedMapContent.data.getTranslatedMapContent
         .map_file_name_with_langs,
-      `data:image/svg+xml;utf8,${encodeURIComponent(
-        translatedMapContent.data.getTranslatedMapContent.content,
-      )}`,
+      translatedMapContent.data.getTranslatedMapContent.content_file_url,
     );
     downloadFlagRef.current = null;
   }
