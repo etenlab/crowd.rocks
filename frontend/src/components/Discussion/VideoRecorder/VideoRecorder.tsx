@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
-import { AudioRecorderUI } from './AudioRecorderUI';
+import { VideoRecorderUI } from './VideoRecorderUI';
 import { globals } from '../../../services/globals';
 import { useIonToast } from '@ionic/react';
 import { useTr } from '../../../hooks/useTr';
@@ -9,19 +9,20 @@ import { usePostCreateMutation } from '../../../hooks/useCreatePostMutation';
 
 const maxFileSize = 1024 * 1024 * 50;
 
-type AudioRecorderProps = {
+// TODO cleanup: rename to MediaRecorderProps for here and audio
+type VideoRecorderProps = {
   onCancel(): void;
   onCreated(): void;
   parent: string;
   parent_id: string;
 };
 
-export function AudioRecorder({
+export function VideoRecorder({
   onCancel,
   onCreated,
   parent,
   parent_id,
-}: AudioRecorderProps) {
+}: VideoRecorderProps) {
   const [status, setStatus] = useState<
     'init' | 'save' | 'uploading' | 'uploaded'
   >('init');
@@ -52,17 +53,11 @@ export function AudioRecorder({
     if (!loading && status === 'uploading') {
       setStatus('uploaded');
     }
-    if (status === 'save') {
-      setStatus('uploading');
-    }
-    if (status === 'uploading') {
-      return;
-    }
   }, [loading, status]);
 
   useEffect(() => {
     if (status === 'uploaded') {
-      console.log('uploaded');
+      //TODO: cleanup - put the file upload stuff maybe in a utility thing with uploading the post and have video and audio use that.
       if (
         data &&
         data.uploadFile.file &&
@@ -70,14 +65,13 @@ export function AudioRecorder({
       ) {
         createPost({
           variables: {
-            content: '<h2>Audio</h2>',
+            content: '<h2>Video</h2>',
             parentId: Number(parent_id),
             parentTable: parent,
             file_id: data.uploadFile.file.id + '',
           },
         });
       }
-
       if (!data || data.uploadFile.error !== ErrorType.NoError || error) {
         console.error(error);
         console.error(data?.uploadFile.error);
@@ -94,19 +88,20 @@ export function AudioRecorder({
       onCreated();
     }
   }, [
-    status,
-    data,
-    onCreated,
-    present,
-    tr,
-    error,
     createPost,
-    parent_id,
+    data,
+    error,
+    onCreated,
     parent,
+    parent_id,
+    present,
+    status,
+    tr,
   ]);
 
   const handleSave = (blobs: Blob[]) => {
-    const file = new File(blobs, `record_${user_id}.wav`);
+    const file = new File(blobs, `record_${user_id}.webm`);
+
     if (file.size > maxFileSize) {
       present({
         message: `${tr('Exceeded max file size')} [${maxFileSize}]`,
@@ -118,7 +113,7 @@ export function AudioRecorder({
     }
 
     uploadFile({
-      variables: { file, file_size: file.size, file_type: 'audio/x-wav' },
+      variables: { file, file_size: file.size, file_type: 'video/webm' },
     });
 
     setStatus('save');
@@ -128,5 +123,5 @@ export function AudioRecorder({
     onCancel();
   };
 
-  return <AudioRecorderUI onSave={handleSave} onCancel={handleCancel} />;
+  return <VideoRecorderUI onSave={handleSave} onCancel={handleCancel} />;
 }

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 
 import { chatbubbleEllipsesSharp } from 'ionicons/icons';
 import { StChatIcon } from '../../common/styled';
@@ -12,12 +12,39 @@ import {
   TimestampContainer,
 } from './styled';
 import { AudioPlayer } from '../AudioPlayer';
+import { VideoPlayer } from '../VideoPlayer';
+
+export const getMimeType = (fileType: string | null): string => {
+  if (fileType === null || fileType.trim().length === 0) {
+    return 'normal';
+  }
+
+  const classic = fileType.trim().split('/');
+
+  if (classic.length < 2) return 'normal';
+
+  switch (classic[0]) {
+    case 'video': {
+      return 'video';
+    }
+    case 'audio': {
+      return 'audio';
+    }
+    case 'image': {
+      return 'image';
+    }
+    default: {
+      return 'normal';
+    }
+  }
+};
 
 type PostProps = {
   created_by: string;
   created_at: string;
   chatContent: ReactNode;
   av_file_url?: string | null;
+  av_file_type?: string | null;
   voteFor?: 'content' | 'description';
   vote?: {
     upVotes: number;
@@ -42,6 +69,7 @@ export function Post({
   vote,
   discussion,
   av_file_url,
+  av_file_type,
 }: PostProps) {
   const voteButtonCom = vote ? <VoteButtonsHerizontal {...vote} /> : null;
   const chatButton = discussion ? (
@@ -51,9 +79,29 @@ export function Post({
     />
   ) : null;
 
-  const avComp = av_file_url ? (
-    <AudioPlayer src={av_file_url} file_type="audio/x-wav" />
-  ) : null;
+  const mime = getMimeType(av_file_type ?? null);
+
+  let avComp: ReactElement | null = null;
+
+  if (av_file_url) {
+    switch (mime) {
+      case 'video': {
+        avComp = (
+          <VideoPlayer src={av_file_url} file_type={av_file_type || ''} />
+        );
+        break;
+      }
+      case 'audio': {
+        avComp = <AudioPlayer src={av_file_url} file_type="audio/x-wav" />;
+        break;
+      }
+      default: {
+        // put stuff here for other attachments...
+        console.log('not implemented yet');
+        break;
+      }
+    }
+  }
 
   return (
     <CustomCard

@@ -25,7 +25,8 @@ import { useEffect, useMemo, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import { Post } from './Post';
 import { NewPostForm } from './NewPostForm/NewPostForm';
-import { AudioRecorder } from './NewAudioForm/AudioRecorder';
+import { AudioRecorder } from './AudioRecorder/AudioRecorder';
+import { VideoRecorder } from './VideoRecorder';
 
 interface DiscussionPageProps
   extends RouteComponentProps<{
@@ -69,6 +70,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
       created_at: string;
       id: string;
       file_url?: string | null;
+      file_type?: string | null;
     }[] = [];
 
     const allPosts = postData.postsByParent.posts;
@@ -82,6 +84,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
             created_at: new Date(post.created_at).toDateString(),
             id: post.post_id,
             file_url: post.file_url,
+            file_type: post.file_type,
           });
         }
       }
@@ -96,6 +99,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
               ></div>
             }
             av_file_url={post.file_url}
+            av_file_type={post.file_type}
           />
         </CardContainer>
       ));
@@ -124,7 +128,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
         }}
       />
       {postsComp}
-      <IonModal isOpen={isAdding} onDidDismiss={() => set_is_adding(false)}>
+      <IonModal isOpen={isAdding}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Post')}</IonTitle>
@@ -162,7 +166,17 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
               onCreated={() => handleCancel()}
             />
           )}
-          {postKind === 'video' && <p>video coming soon...</p>}
+          {postKind === 'video' &&
+            (isPlatform('mobileweb') ||
+              isPlatform('pwa') ||
+              isPlatform('desktop')) && (
+              <VideoRecorder
+                onCancel={() => handleCancel()}
+                onCreated={() => handleCancel()}
+                parent={match.params.parent}
+                parent_id={match.params.parent_id}
+              />
+            )}
           {postKind === 'audio' &&
             (isPlatform('mobileweb') ||
               isPlatform('pwa') ||

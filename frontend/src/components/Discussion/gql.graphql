@@ -9,6 +9,7 @@ fragment PostFields on Post {
   content
   created_at
   file_url
+  file_type
   created_by_user {
     ...UserFields
   }

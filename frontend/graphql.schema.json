@@ -9284,6 +9284,18 @@
             "deprecationReason": null
           },
           {
+            "name": "file_type",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "file_url",
             "description": null,
             "args": [],
