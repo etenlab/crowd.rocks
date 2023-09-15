@@ -100,22 +100,26 @@ const Body: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [logoutMutation, { data, loading, error }] = useLogoutMutation();
 
-  const [getNotifications, { data: nData, error: nError }] =
-    useListNotificationsLazyQuery();
+  const [getNotifications, { data: nData }] = useListNotificationsLazyQuery();
   const [unreadNotificationCount, setUnreadCount] = useState<
     number | undefined
   >(undefined);
 
   useEffect(() => {
-    getNotifications();
+    const handleError = () => {
+      setUnreadCount(undefined);
+    };
+    getNotifications()
+      .then()
+      .catch(() => handleError);
     let count = undefined;
-    if (!nError && nData && nData.notifications.error === ErrorType.NoError) {
+    if (nData && nData.notifications.error === ErrorType.NoError) {
       count = nData.notifications.notifications.filter(
         (n) => !n.isNotified,
       ).length;
     }
     setUnreadCount(count);
-  }, [getNotifications, nData, nError]);
+  }, [getNotifications, nData]);
 
   let sub: Subscription;
 
