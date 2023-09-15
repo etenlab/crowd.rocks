@@ -334,7 +334,7 @@ export type GetOrigMapContentInput = {
 
 export type GetOrigMapContentOutput = {
   __typename?: 'GetOrigMapContentOutput';
-  content: Scalars['String']['output'];
+  content_url: Scalars['String']['output'];
   created_at: Scalars['String']['output'];
   created_by: Scalars['ID']['output'];
   is_original: Scalars['Boolean']['output'];
@@ -393,7 +393,7 @@ export type GetTranslatedMapContentInput = {
 
 export type GetTranslatedMapContentOutput = {
   __typename?: 'GetTranslatedMapContentOutput';
-  content: Scalars['String']['output'];
+  content_url: Scalars['String']['output'];
   created_at: Scalars['String']['output'];
   created_by: Scalars['ID']['output'];
   is_original: Scalars['Boolean']['output'];
@@ -2696,7 +2696,7 @@ export type GetTranslatedMapContentQueryVariables = Exact<{
 }>;
 
 
-export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'GetTranslatedMapContentOutput', translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, content: string, map_file_name_with_langs: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'GetTranslatedMapContentOutput', translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, content_url: string, map_file_name_with_langs: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
 
 export type IsAdminLoggedInQueryVariables = Exact<{
   input: IsAdminIdInput;
@@ -2710,7 +2710,7 @@ export type GetOrigMapContentQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: { __typename?: 'GetOrigMapContentOutput', original_map_id: string, map_file_name_with_langs: string, map_file_name: string, created_at: string, created_by: string, content: string } };
+export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: { __typename?: 'GetOrigMapContentOutput', original_map_id: string, map_file_name_with_langs: string, map_file_name: string, created_at: string, created_by: string, content_url: string } };
 
 export type MapUploadMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
@@ -5288,7 +5288,7 @@ export const GetTranslatedMapContentDocument = gql`
     }
     created_at
     created_by
-    content
+    content_url
     map_file_name_with_langs
   }
 }
@@ -5364,7 +5364,7 @@ export const GetOrigMapContentDocument = gql`
     map_file_name
     created_at
     created_by
-    content
+    content_url
   }
 }
     `;

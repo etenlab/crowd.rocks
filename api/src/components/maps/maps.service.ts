@@ -119,11 +119,11 @@ export class MapsService {
     dbPoolClient,
     token,
   }: IParseOrigMapParams): Promise<MapFileOutput> {
-    const { language, content, map_file_name, created_at, created_by } =
+    const { language, content_url, map_file_name, created_at, created_by } =
       await this.mapsRepository.getOrigMapContent(map_id);
     const { language_code, dialect_code, geo_code } = language;
     const { transformedSvgINode, foundWords, foundPhrases } =
-      this.parseSvgMapString(content);
+      this.parseSvgMapString(content_url);
 
     //--save found words with definitions and original map boundng
 
@@ -275,86 +275,11 @@ export class MapsService {
     return this.mapsRepository.getOrigMapContent(id);
   }
 
-  async calculateTranslatedPercent<T extends MapFileOutput>(
-    mapFileInfo: T,
-  ): Promise<T> {
-    if (mapFileInfo.is_original)
-      throw new Error(
-        'It is possible to get translated % only for transalted (not original) map.',
-      );
-
-    const originalMap = await this.mapsRepository.getOrigMapInfo(
-      mapFileInfo.original_map_id,
-    );
-    const {
-      language_code: o_language_code,
-      dialect_code: o_dialect_code,
-      geo_code: o_geo_code,
-    } = originalMap.language;
-    const {
-      language_code: t_language_code,
-      dialect_code: t_dialect_code,
-      geo_code: t_geo_code,
-    } = mapFileInfo.language;
-    const originalWords = await this.mapsRepository.getOrigMapWords(
-      //!!!!!!!!!!!!!!!!!!!!!!!!!! SLOW ????
-      mapFileInfo.original_map_id,
-      {
-        o_language_code,
-        o_dialect_code: o_dialect_code || undefined,
-        o_geo_code: o_dialect_code || undefined,
-        t_language_code,
-        t_dialect_code: t_dialect_code || undefined,
-        t_geo_code: t_geo_code || undefined,
-      },
-    );
-    const transaltedWordsCount = originalWords.origMapWords.reduce(
-      (total, ow) => {
-        if (ow.translations?.length && ow.translations.length > 0) {
-          return total + 1;
-        }
-        return total;
-      },
-      0,
-    );
-
-    const originalPhrases = await this.mapsRepository.getOrigMapPhrases(
-      mapFileInfo.original_map_id,
-      {
-        o_language_code,
-        o_dialect_code: o_dialect_code || undefined,
-        o_geo_code: o_geo_code || undefined,
-        t_language_code,
-        t_dialect_code: t_dialect_code || undefined,
-        t_geo_code: t_geo_code || undefined,
-      },
-    );
-    const transaltedPhrasesCount = originalPhrases.origMapPhrases.reduce(
-      (total, oph) => {
-        if (oph.translations?.length && oph.translations.length > 0) {
-          return total + 1;
-        }
-        return total;
-      },
-      0,
-    );
-    const translatedCount = transaltedPhrasesCount + transaltedWordsCount;
-    const originalCount =
-      originalPhrases.origMapPhrases.length + originalWords.origMapWords.length;
-    const translated_percent = String(
-      Math.round((translatedCount / originalCount) * 100),
-    );
-    return {
-      ...mapFileInfo,
-      translated_percent,
-    };
-  }
-
   async getTranslatedMapContent(
     id: string,
   ): Promise<GetTranslatedMapContentOutput> {
     const mapFileInfo = await this.mapsRepository.getTranslatedMapContent(id);
-    return this.calculateTranslatedPercent(mapFileInfo);
+    return mapFileInfo;
   }
 
   /**
@@ -573,7 +498,7 @@ export class MapsService {
     toLang?: LanguageInput,
   ): Promise<Array<string>> {
     const translatedMapIds: Array<string> = [];
-    const { content: origMapContentStr } =
+    const { content_url: origMapContentUrl } =
       await this.mapsRepository.getOrigMapContent(origMapId);
 
     const { origMapWords } = await this.getOrigMapWords({
@@ -662,7 +587,7 @@ export class MapsService {
       }
 
       const { translatedMap } = await this.translateMapString(
-        origMapContentStr,
+        origMapContentUrl, //todo
         translations,
       )!;
 
@@ -832,4 +757,78 @@ export class MapsService {
 //     await this.calculateTranslatedPercent(mapInfo),
 //     mapInfo
 //   );
+// }
+
+// async calculateTranslatedPercent<T extends MapFileOutput>(
+//   mapFileInfo: T,
+// ): Promise<T> {
+//   if (mapFileInfo.is_original)
+//     throw new Error(
+//       'It is possible to get translated % only for transalted (not original) map.',
+//     );
+
+//   const originalMap = await this.mapsRepository.getOrigMapInfo(
+//     mapFileInfo.original_map_id,
+//   );
+//   const {
+//     language_code: o_language_code,
+//     dialect_code: o_dialect_code,
+//     geo_code: o_geo_code,
+//   } = originalMap.language;
+//   const {
+//     language_code: t_language_code,
+//     dialect_code: t_dialect_code,
+//     geo_code: t_geo_code,
+//   } = mapFileInfo.language;
+//   const originalWords = await this.mapsRepository.getOrigMapWords(
+//     mapFileInfo.original_map_id,
+//     {
+//       o_language_code,
+//       o_dialect_code: o_dialect_code || undefined,
+//       o_geo_code: o_dialect_code || undefined,
+//       t_language_code,
+//       t_dialect_code: t_dialect_code || undefined,
+//       t_geo_code: t_geo_code || undefined,
+//     },
+//   );
+//   const transaltedWordsCount = originalWords.origMapWords.reduce(
+//     (total, ow) => {
+//       if (ow.translations?.length && ow.translations.length > 0) {
+//         return total + 1;
+//       }
+//       return total;
+//     },
+//     0,
+//   );
+
+//   const originalPhrases = await this.mapsRepository.getOrigMapPhrases(
+//     mapFileInfo.original_map_id,
+//     {
+//       o_language_code,
+//       o_dialect_code: o_dialect_code || undefined,
+//       o_geo_code: o_geo_code || undefined,
+//       t_language_code,
+//       t_dialect_code: t_dialect_code || undefined,
+//       t_geo_code: t_geo_code || undefined,
+//     },
+//   );
+//   const transaltedPhrasesCount = originalPhrases.origMapPhrases.reduce(
+//     (total, oph) => {
+//       if (oph.translations?.length && oph.translations.length > 0) {
+//         return total + 1;
+//       }
+//       return total;
+//     },
+//     0,
+//   );
+//   const translatedCount = transaltedPhrasesCount + transaltedWordsCount;
+//   const originalCount =
+//     originalPhrases.origMapPhrases.length + originalWords.origMapWords.length;
+//   const translated_percent = String(
+//     Math.round((translatedCount / originalCount) * 100),
+//   );
+//   return {
+//     ...mapFileInfo,
+//     translated_percent,
+//   };
 // }

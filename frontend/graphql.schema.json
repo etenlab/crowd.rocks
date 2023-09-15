@@ -2242,7 +2242,7 @@
         "description": null,
         "fields": [
           {
-            "name": "content",
+            "name": "content_url",
             "description": null,
             "args": [],
             "type": {
@@ -2774,7 +2774,7 @@
         "description": null,
         "fields": [
           {
-            "name": "content",
+            "name": "content_url",
             "description": null,
             "args": [],
             "type": {

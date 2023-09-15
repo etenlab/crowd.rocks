@@ -121,7 +121,7 @@ query GetTranslatedMapContent($id: ID!) {
     }
     created_at
     created_by
-    content
+    content_url
     map_file_name_with_langs
   }
 }
@@ -139,7 +139,7 @@ query GetOrigMapContent($id: ID!) {
     map_file_name
     created_at
     created_by
-    content
+    content_url
   }
 }
 

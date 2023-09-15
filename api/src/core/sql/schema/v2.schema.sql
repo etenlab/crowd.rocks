@@ -115,3 +115,6 @@ alter table wordlike_strings
 alter column wordlike_string type varchar;
 
 alter table translated_maps add column translated_percent int2
+
+alter table translated_maps rename column content to content_url 
+alter table original_maps rename column content to content_url

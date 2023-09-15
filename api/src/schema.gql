@@ -296,7 +296,7 @@ input GetOrigMapContentInput {
 }
 
 type GetOrigMapContentOutput {
-  content: String!
+  content_url: String!
   created_at: String!
   created_by: ID!
   is_original: Boolean!
@@ -351,7 +351,7 @@ input GetTranslatedMapContentInput {
 }
 
 type GetTranslatedMapContentOutput {
-  content: String!
+  content_url: String!
   created_at: String!
   created_by: ID!
   is_original: Boolean!

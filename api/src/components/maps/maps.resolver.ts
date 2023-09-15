@@ -187,10 +187,10 @@ export class MapsResolver {
   async getOrigMapContent(
     @Args('input') input: GetOrigMapContentInput,
   ): Promise<GetOrigMapContentOutput> {
-    const mapContent = await this.mapService.getOrigMapContent(
+    const mapContentUrl = await this.mapService.getOrigMapContent(
       input.original_map_id,
     );
-    return mapContent;
+    return mapContentUrl;
   }
 
   @Query(() => GetTranslatedMapContentOutput)

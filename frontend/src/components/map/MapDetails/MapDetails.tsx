@@ -37,11 +37,11 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   }, []);
 
   const handleDownloadSvg = () => {
-    if (origMapContent.data?.getOrigMapContent.content) {
+    if (origMapContent.data?.getOrigMapContent.content_url) {
       downloadFromSrc(
         origMapContent.data?.getOrigMapContent.map_file_name,
         `data:image/svg+xml;utf8,${encodeURIComponent(
-          origMapContent.data?.getOrigMapContent.content,
+          origMapContent.data?.getOrigMapContent.content_url,
         )}`,
       );
     }

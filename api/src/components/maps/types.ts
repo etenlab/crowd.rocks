@@ -66,7 +66,7 @@ export class GetOrigMapContentInput {
 }
 @ObjectType()
 export class GetOrigMapContentOutput extends MapFileOutput {
-  @Field(() => String) content: string;
+  @Field(() => String) content_url: string;
 }
 
 @InputType()

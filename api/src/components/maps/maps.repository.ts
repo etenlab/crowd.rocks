@@ -152,7 +152,7 @@ export class MapsRepository {
       insert into
         translated_maps(
           original_map_id,
-          content,
+          content_url,
           created_by,
           language_code,
           translated_percent,
@@ -170,7 +170,7 @@ export class MapsRepository {
           $7
         )
         on conflict(original_map_id, language_code, dialect_code, geo_code) do update
-          set content = EXCLUDED.content,
+          set content_url = EXCLUDED.content_url,
         translated_percent = EXCLUDED.translated_percent
         returning 
           translated_map_id, created_by, created_at
@@ -379,7 +379,7 @@ export class MapsRepository {
       `
         select 
           om.original_map_id,
-          om.content, 
+          om.content_url, 
           om.map_file_name, 
           om.created_at, 
           om.created_by, 
@@ -416,7 +416,7 @@ export class MapsRepository {
       }),
       created_at,
       created_by,
-      content: resQ.rows[0].content,
+      content_url: resQ.rows[0].content_url,
       is_original: true,
       language: { language_code, dialect_code, geo_code },
       preview_file_url,
@@ -434,10 +434,11 @@ export class MapsRepository {
         om.map_file_name,
         tm.created_at,
         tm.created_by,
-        tm.language_code ,
-        tm.dialect_code ,
+        tm.language_code,
+        tm.dialect_code,
         tm.geo_code,
-        tm.content,
+        tm.content_url,
+        tm.translated_percent,
         f.file_url as preview_file_url
       from
         translated_maps tm
@@ -457,10 +458,11 @@ export class MapsRepository {
       map_file_name,
       created_at,
       created_by,
-      content,
+      content_url,
       language_code,
       dialect_code,
       geo_code,
+      translated_percent,
       preview_file_url,
     } = resQ.rows[0];
 
@@ -470,7 +472,7 @@ export class MapsRepository {
       map_file_name,
       created_at,
       created_by,
-      content,
+      content_url,
       is_original: false,
       language: { language_code, dialect_code, geo_code },
       map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
@@ -478,6 +480,7 @@ export class MapsRepository {
         dialect_code,
         geo_code,
       }),
+      translated_percent,
       preview_file_url,
     };
   }
