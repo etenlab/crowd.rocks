@@ -27,6 +27,7 @@ import { Post } from './Post';
 import { NewPostForm } from './NewPostForm/NewPostForm';
 import { AudioRecorder } from './AudioRecorder/AudioRecorder';
 import { VideoRecorder } from './VideoRecorder';
+import { ISettings, globals } from '../../services/globals';
 
 interface DiscussionPageProps
   extends RouteComponentProps<{
@@ -48,6 +49,8 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
 
   const [postKind, setPostKind] = useState<PostKind>();
 
+  const settings: ISettings = globals.get_settings();
+
   useEffect(() => {
     getPostsByParent({
       variables: {
@@ -56,6 +59,29 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
       },
     });
   }, [getPostsByParent, match.params.parent, match.params.parent_id]);
+
+  const addPostMenuComp = useMemo(() => {
+    if (settings.isSign) {
+      setPostKind('video');
+    }
+    return (
+      !settings.isSign && (
+        <IonSegment>
+          {!settings.isOral && (
+            <IonSegmentButton onClick={() => setPostKind('text')} value="text">
+              <IonLabel>Text</IonLabel>
+            </IonSegmentButton>
+          )}
+          <IonSegmentButton onClick={() => setPostKind('video')} value="video">
+            <IonLabel>Video</IonLabel>
+          </IonSegmentButton>
+          <IonSegmentButton onClick={() => setPostKind('audio')} value="audio">
+            <IonLabel>Audio</IonLabel>
+          </IonSegmentButton>
+        </IonSegment>
+      )
+    );
+  }, [settings.isOral, settings.isSign]);
 
   const postsComp = useMemo(() => {
     if (postError) return null;
@@ -135,28 +161,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
           </IonToolbar>
         </IonHeader>
         <IonContent>
-          <div style={{ paddingTop: '10px' }}>
-            <IonSegment>
-              <IonSegmentButton
-                onClick={() => setPostKind('text')}
-                value="text"
-              >
-                <IonLabel>Text</IonLabel>
-              </IonSegmentButton>
-              <IonSegmentButton
-                onClick={() => setPostKind('video')}
-                value="video"
-              >
-                <IonLabel>Video</IonLabel>
-              </IonSegmentButton>
-              <IonSegmentButton
-                onClick={() => setPostKind('audio')}
-                value="audio"
-              >
-                <IonLabel>Audio</IonLabel>
-              </IonSegmentButton>
-            </IonSegment>
-          </div>
+          <div style={{ paddingTop: '10px' }}>{addPostMenuComp}</div>
 
           {postKind === 'text' && (
             <NewPostForm

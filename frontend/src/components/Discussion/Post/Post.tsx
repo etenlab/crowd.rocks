@@ -80,6 +80,8 @@ export function Post({
   ) : null;
 
   const mime = getMimeType(av_file_type ?? null);
+  console.log(`av_file_url: ${av_file_url}`);
+  console.log(`av_file_type: ${av_file_type}`);
 
   let avComp: ReactElement | null = null;
 
