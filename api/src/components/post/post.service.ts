@@ -212,7 +212,8 @@ export class PostService {
               p.created_at,
               p.created_by,
               v.content,
-              f.file_url
+              f.file_url,
+              f.file_type
             from 
               posts p
             join versions v
