@@ -52,7 +52,7 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
       downloadFromSrc(
         currentMapWithContent.map_file_name_with_langs,
         `data:image/svg+xml;utf8,${encodeURIComponent(
-          currentMapWithContent.content,
+          currentMapWithContent.content_file_url,
         )}`,
       );
     }
@@ -92,10 +92,11 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
           <img
             width={`${windowWidth - 10}px`}
             height={'auto'}
-            src={`data:image/svg+xml;utf8,${encodeURIComponent(
-              currentMapWithContent.content,
-            )}`} // without `encodeURIComponent(image)` everal .svg images won't work
-            alt="Original map"
+            src={currentMapWithContent.content_file_url}
+            // src={`data:image/svg+xml;utf8,${encodeURIComponent(
+            //   currentMapWithContent.content_url,
+            // )}`} // without `encodeURIComponent(image)` everal .svg images won't work
+            alt="Translated map"
           />
         )}
       </StyledMapImg>

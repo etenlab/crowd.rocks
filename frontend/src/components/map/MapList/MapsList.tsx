@@ -197,6 +197,8 @@ export const MapList: React.FC = () => {
           variables: {
             file,
             previewFileId,
+            file_size: file.size,
+            file_type: file.type,
           },
           refetchQueries: ['GetAllMapsList'],
         });
