@@ -296,7 +296,8 @@ input GetOrigMapContentInput {
 }
 
 type GetOrigMapContentOutput {
-  content: String!
+  content_file_id: String!
+  content_file_url: String!
   created_at: String!
   created_by: ID!
   is_original: Boolean!
@@ -351,7 +352,8 @@ input GetTranslatedMapContentInput {
 }
 
 type GetTranslatedMapContentOutput {
-  content: String!
+  content_file_id: String!
+  content_file_url: String!
   created_at: String!
   created_by: ID!
   is_original: Boolean!
@@ -439,6 +441,8 @@ type MapDeleteOutput {
 }
 
 type MapFileOutput {
+  content_file_id: ID
+  content_file_url: ID
   created_at: String!
   created_by: ID!
   is_original: Boolean!
@@ -528,7 +532,7 @@ type Mutation {
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
   mapDelete(input: MapDeleteInput!): MapDeleteOutput!
-  mapUpload(file: Upload!, previewFileId: String): MapUploadOutput!
+  mapUpload(file: Upload!, file_size: Int!, file_type: String!, previewFileId: String): MapUploadOutput!
   mapsReTranslate(forLangTag: String): GenericOutput!
   mapsTranslationsReset: GenericOutput!
   markNotificationAsRead(input: MarkNotificationReadInput!): MarkNotificationReadOutput!

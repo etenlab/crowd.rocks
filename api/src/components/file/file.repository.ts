@@ -22,6 +22,15 @@ export interface FileSaveParams {
   file_hash: string;
   token: string;
 }
+export interface FileUpdateParams {
+  file_id: number;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  file_url: string;
+  file_hash: string;
+  token: string;
+}
 
 @Injectable()
 export class FileRepository {
@@ -67,7 +76,7 @@ export class FileRepository {
 
     return {
       file: {
-        id: resQ.rows[0].file_id,
+        id: Number(resQ.rows[0].file_id),
         fileName: resQ.rows[0].file_name,
         fileSize: resQ.rows[0].file_size,
         fileType: resQ.rows[0].file_type,
@@ -129,6 +138,39 @@ export class FileRepository {
     return {
       file: {
         id: res.rows[0].p_file_id,
+        fileName: file_name,
+        fileSize: file_size,
+        fileType: file_type,
+        fileUrl: file_url,
+        fileHash: file_hash,
+      },
+      error,
+    };
+  }
+
+  async update({
+    file_id,
+    file_name,
+    file_type,
+    file_size,
+    file_url,
+    file_hash,
+    token,
+  }: FileUpdateParams): Promise<IFileOutput> {
+    const res = await this.pg.pool.query(
+      `
+            call file_update($1,$2,$3,$4,$5,$6,$7,null,null,null)
+            `,
+      [file_id, file_name, file_size, file_type, file_url, file_hash, token],
+    );
+
+    const error = res.rows[0].p_error_type;
+    if (error !== ErrorType.NoError) {
+      return { file: null, error };
+    }
+    return {
+      file: {
+        id: file_id,
         fileName: file_name,
         fileSize: file_size,
         fileType: file_type,
