@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
+import {
+  Args,
+  Query,
+  Resolver,
+  Mutation,
+  Context,
+  ID,
+  Int,
+} from '@nestjs/graphql';
 
 import { WordsService } from './words.service';
 import { WordVotesService } from './word-votes.service';
@@ -7,13 +15,12 @@ import { WordVotesService } from './word-votes.service';
 import {
   Word,
   WordReadInput,
-  WordReadOutput,
-  WordUpsertOutput,
+  WordOutput,
   WordUpsertInput,
   WordVoteOutput,
   WordVoteUpsertInput,
   WordVoteStatusOutputRow,
-  WordWithVoteListOutput,
+  WordWithVoteListConnection,
   WordWithVoteOutput,
 } from './types';
 import { getBearer } from 'src/common/utility';
@@ -27,21 +34,21 @@ export class WordsResolver {
     private wordVoteService: WordVotesService,
   ) {}
 
-  @Query(() => WordReadOutput)
-  async wordRead(@Args('input') input: WordReadInput): Promise<WordReadOutput> {
+  @Query(() => WordOutput)
+  async wordRead(@Args('input') input: WordReadInput): Promise<WordOutput> {
     console.log('word read resolver, word_id:', input.word_id);
 
-    return this.wordsService.read(input);
+    return this.wordsService.read(input, null);
   }
 
-  @Mutation(() => WordUpsertOutput)
+  @Mutation(() => WordOutput)
   async wordUpsert(
     @Args('input') input: WordUpsertInput,
     @Context() req: any,
-  ): Promise<WordUpsertOutput> {
+  ): Promise<WordOutput> {
     console.log('word upsert resolver, string: ', input.wordlike_string);
 
-    return this.wordsService.upsert(input, getBearer(req));
+    return this.wordsService.upsert(input, getBearer(req) || '', null);
   }
 
   @Query(() => WordVoteOutput)
@@ -50,7 +57,7 @@ export class WordsResolver {
   ): Promise<WordVoteOutput> {
     console.log('word vote read resolver, words_vote_id:', id);
 
-    return this.wordVoteService.read(+id);
+    return this.wordVoteService.read(+id, null);
   }
 
   @Mutation(() => WordVoteOutput)
@@ -60,7 +67,7 @@ export class WordsResolver {
   ): Promise<WordVoteOutput> {
     console.log('word vote upsert resolver: ', JSON.stringify(input, null, 2));
 
-    return this.wordVoteService.upsert(input, getBearer(req));
+    return this.wordVoteService.upsert(input, getBearer(req)! || '', null);
   }
 
   @Query(() => WordVoteStatusOutputRow)
@@ -69,7 +76,7 @@ export class WordsResolver {
   ): Promise<WordVoteStatusOutputRow> {
     console.log('get word vote status resolver, word_id:', word_id);
 
-    return this.wordVoteService.getVoteStatus(+word_id);
+    return this.wordVoteService.getVoteStatus(+word_id, null);
   }
 
   @Mutation(() => WordVoteStatusOutputRow)
@@ -83,20 +90,23 @@ export class WordsResolver {
     return this.wordVoteService.toggleVoteStatus(
       +word_id,
       vote,
-      getBearer(req),
+      getBearer(req)! || '',
+      null,
     );
   }
 
-  @Query(() => WordWithVoteListOutput)
+  @Query(() => WordWithVoteListConnection)
   async getWordsByLanguage(
     @Args('input', { type: () => LanguageInput }) input: LanguageInput,
-  ): Promise<WordWithVoteListOutput> {
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<WordWithVoteListConnection> {
     console.log(
       'get words by language resolver',
-      JSON.stringify(input, null, 2),
+      JSON.stringify({ ...input, first, after }, null, 2),
     );
 
-    return this.wordsService.getWordsByLanguage(input);
+    return this.wordsService.getWordsByLanguage(input, first, after, null);
   }
 
   @Query(() => WordWithVoteOutput)
@@ -105,6 +115,6 @@ export class WordsResolver {
   ): Promise<WordWithVoteOutput> {
     console.log('getWordWithVoteById resolver', word_id);
 
-    return this.wordsService.getWordWithVoteById(+word_id);
+    return this.wordsService.getWordWithVoteById(+word_id, null);
   }
 }

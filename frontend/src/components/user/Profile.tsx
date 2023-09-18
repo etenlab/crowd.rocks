@@ -21,6 +21,7 @@ import { CropperComp } from '../post/Cropper';
 import { useTr } from '../../hooks/useTr';
 import { useAppContext } from '../../hooks/useAppContext';
 import { PageLayout } from '../common/PageLayout';
+import { styled } from 'styled-components';
 
 const Profile: React.FC = () => {
   const history = useHistory();
@@ -144,6 +145,9 @@ const Profile: React.FC = () => {
       }
     }
   };
+  const click_reset_password = () => {
+    history.push(`/US/${appLanguage.lang.tag}/1/reset-email-request`);
+  };
 
   return (
     <PageLayout>
@@ -266,8 +270,20 @@ const Profile: React.FC = () => {
           </IonButton>
         </IonItem>
       )}
+      <StIonButton
+        type="button"
+        color="primary"
+        fill="clear"
+        onClick={click_reset_password}
+      >
+        {tr('Reset Password')}
+      </StIonButton>
     </PageLayout>
   );
 };
+
+const StIonButton = styled(IonButton)(() => ({
+  width: '200px',
+}));
 
 export default Profile;

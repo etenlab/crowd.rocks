@@ -42,8 +42,6 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
 
   useEffect(() => {
     const getMap = async () => {
-      // const map = await getOrigMapContent(_mapId);
-      // setCurrentMapWithContent(map);
       getTranslatedMapContent({ variables: { id: mapId } });
     };
     getMap();
@@ -52,7 +50,7 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
   const handleDownloadSvg = () => {
     if (currentMapWithContent) {
       downloadFromSrc(
-        currentMapWithContent.map_file_name,
+        currentMapWithContent.map_file_name_with_langs,
         `data:image/svg+xml;utf8,${encodeURIComponent(
           currentMapWithContent.content,
         )}`,
@@ -72,9 +70,12 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
     <>
       <Caption>
         <>
-          {tr('Map')} - {currentMapWithContent?.map_file_name || ''}
+          {tr('Map')} - {currentMapWithContent?.map_file_name_with_langs}
           <IonBadge>
             {tr('translated to')} {langInfo2String(langInfo)}
+            {currentMapWithContent?.translated_percent
+              ? ` [${currentMapWithContent.translated_percent}%]`
+              : ''}
           </IonBadge>
           <IonIcon
             icon={downloadOutline}

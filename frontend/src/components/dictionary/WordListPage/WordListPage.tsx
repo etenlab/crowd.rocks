@@ -8,7 +8,10 @@ import {
   useIonRouter,
   InputCustomEvent,
   InputChangeEventDetail,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
 } from '@ionic/react';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 import { IonContent, useIonToast } from '@ionic/react';
 
 import { PageLayout } from '../../common/PageLayout';
@@ -20,7 +23,9 @@ import { Input } from '../../common/styled';
 
 import { useGetWordsByLanguageLazyQuery } from '../../../generated/graphql';
 
-import { ErrorType } from '../../../generated/graphql';
+import { ErrorType, TableNameType } from '../../../generated/graphql';
+
+import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 import {
   CaptionContainer,
@@ -34,6 +39,8 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { useToggleWordVoteStatusMutation } from '../../../hooks/useToggleWordVoteStatusMutation';
 
 import { NewWordForm } from '../NewWordForm';
+
+import { PAGE_SIZE } from '../../../const/commonConst';
 
 interface WordListPageProps
   extends RouteComponentProps<{
@@ -60,7 +67,7 @@ export function WordListPage({ match }: WordListPageProps) {
 
   const [filter, setFilter] = useState<string>('');
 
-  const [getWordsByLanguage, { data: wordsData, error }] =
+  const [getWordsByLanguage, { data: wordsData, error, fetchMore }] =
     useGetWordsByLanguageLazyQuery();
   const [toggleWordVoteStatus] = useToggleWordVoteStatusMutation();
 
@@ -71,6 +78,8 @@ export function WordListPage({ match }: WordListPageProps) {
 
     getWordsByLanguage({
       variables: {
+        first: PAGE_SIZE,
+        after: null,
         language_code: targetLang.lang.tag,
         dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
         geo_code: targetLang.region ? targetLang.region.tag : null,
@@ -85,7 +94,16 @@ export function WordListPage({ match }: WordListPageProps) {
         `/${match.params.nation_id}/${match.params.language_id}/1/dictionary-detail/${wordId}`,
       );
     },
-    [match, router],
+    [match.params.language_id, match.params.nation_id, router],
+  );
+
+  const handleGoToChat = useCallback(
+    (wordId: string) => {
+      router.push(
+        `/${match.params.nation_id}/${match.params.language_id}/1/discussion/words/${wordId}`,
+      );
+    },
+    [match.params.language_id, match.params.nation_id, router],
   );
 
   const handleFilterChange = (
@@ -93,6 +111,26 @@ export function WordListPage({ match }: WordListPageProps) {
   ) => {
     setFilter(event.detail.value!);
   };
+
+  const handleInfinite = useCallback(
+    async (ev: IonInfiniteScrollCustomEvent<void>) => {
+      if (wordsData?.getWordsByLanguage.pageInfo.hasNextPage && targetLang) {
+        await fetchMore({
+          variables: {
+            first: PAGE_SIZE,
+            after: wordsData.getWordsByLanguage.pageInfo.endCursor,
+            language_code: targetLang.lang.tag,
+            dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
+            geo_code: targetLang.region ? targetLang.region.tag : null,
+            filter: filter.trim(),
+          },
+        });
+      }
+
+      setTimeout(() => ev.target.complete(), 500);
+    },
+    [fetchMore, filter, targetLang, wordsData],
+  );
 
   const cardListComs = useMemo(() => {
     const tempWords: {
@@ -114,18 +152,20 @@ export function WordListPage({ match }: WordListPageProps) {
       return null;
     }
 
-    const wordWithVoteList = wordsData.getWordsByLanguage.word_with_vote_list;
+    const wordWithVoteListEdges = wordsData.getWordsByLanguage.edges;
 
-    for (const wordWithVote of wordWithVoteList) {
-      if (wordWithVote) {
+    for (const edge of wordWithVoteListEdges) {
+      const { node } = edge;
+
+      if (node) {
         tempWords.push({
-          word_id: wordWithVote.word_id,
-          word: wordWithVote.word,
-          definitionlike_strings: wordWithVote.definitions.map(
+          word_id: node.word_id,
+          word: node.word,
+          definitionlike_strings: node.definitions.map(
             (definition) => definition?.definition,
           ) as string[],
-          upvotes: wordWithVote.upvotes,
-          downvotes: wordWithVote.downvotes,
+          upvotes: node.upvotes,
+          downvotes: node.downvotes,
         });
       }
     }
@@ -173,12 +213,26 @@ export function WordListPage({ match }: WordListPageProps) {
                 });
               },
             }}
+            discussion={{
+              onChatClick: () => handleGoToChat(word.word_id),
+            }}
+            flags={{
+              parent_table: TableNameType.Words,
+              parent_id: word.word_id,
+              flag_names: WORD_AND_PHRASE_FLAGS,
+            }}
             voteFor="content"
             onClick={() => handleGoToDefinitionDetail(word.word_id)}
           />
         </CardContainer>
       ));
-  }, [error, handleGoToDefinitionDetail, toggleWordVoteStatus, wordsData]);
+  }, [
+    error,
+    handleGoToChat,
+    handleGoToDefinitionDetail,
+    toggleWordVoteStatus,
+    wordsData,
+  ]);
 
   return (
     <PageLayout>
@@ -225,7 +279,14 @@ export function WordListPage({ match }: WordListPageProps) {
 
       <CardListContainer>{cardListComs}</CardListContainer>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonInfiniteScroll onIonInfinite={handleInfinite}>
+        <IonInfiniteScrollContent
+          loadingText={`${tr('Loading')}...`}
+          loadingSpinner="bubbles"
+        />
+      </IonInfiniteScroll>
+
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Word')}</IonTitle>

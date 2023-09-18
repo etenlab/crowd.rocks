@@ -12,6 +12,7 @@ fragment WordDefinitionFragment on WordDefinition {
     ...WordFragment
   }
   definition
+  created_at
 }
 
 fragment WordWithDefinitionsFragment on WordWithDefinitions {
@@ -60,6 +61,20 @@ fragment WordVoteStatusFragment on WordVoteStatus {
   upvotes
 }
 
+fragment WordWithVoteListEdgeFragment on WordWithVoteListEdge {
+  cursor
+  node {
+    ...WordWithDefinitionsFragment
+  }
+}
+
+fragment PageInfoFragment on PageInfo {
+  endCursor
+  hasNextPage
+  hasPreviousPage
+  startCursor
+}
+
 query WordDefinitionRead($id: ID!) {
   wordDefinitionRead(id: $id) {
     error
@@ -70,12 +85,16 @@ query WordDefinitionRead($id: ID!) {
 }
 
 query GetWordsByLanguage(
+  $first: Int!
+  $after: ID
   $language_code: String!
   $dialect_code: String
   $geo_code: String
   $filter: String
 ) {
   getWordsByLanguage(
+    first: $first
+    after: $after
     input: {
       language_code: $language_code
       dialect_code: $dialect_code
@@ -84,8 +103,11 @@ query GetWordsByLanguage(
     }
   ) {
     error
-    word_with_vote_list {
-      ...WordWithDefinitionsFragment
+    edges {
+      ...WordWithVoteListEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }

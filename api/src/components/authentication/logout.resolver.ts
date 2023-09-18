@@ -1,16 +1,7 @@
-import {
-  Args,
-  Context,
-  GqlContextType,
-  Mutation,
-  Query,
-  Resolver,
-} from '@nestjs/graphql';
-import { ApolloError } from 'apollo-server-express';
-import { createToken, getBearer, validateEmail } from 'src/common/utility';
+import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { getBearer } from 'src/common/utility';
 import { PostgresService } from 'src/core/postgres.service';
 import { LogoutOutput, LogoutInput } from './types';
-import { hash } from 'argon2';
 import { ErrorType } from 'src/common/types';
 @Resolver(LogoutOutput)
 export class LogoutResolver {
@@ -31,7 +22,7 @@ export class LogoutResolver {
         };
       }
 
-      const res = await this.pg.pool.query(
+      await this.pg.pool.query(
         `
         delete from tokens
         where token = $1

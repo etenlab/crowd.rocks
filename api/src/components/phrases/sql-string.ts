@@ -1,16 +1,18 @@
 import { ErrorType } from 'src/common/types';
 
 export type GetPhraseObjByIdResultRow = {
+  phrase_id: string;
   phrase: string;
   language_code: string;
   dialect_code: string | null;
   geo_code: string | null;
 };
 
-export function getPhraseObjById(id: number): [string, [number]] {
+export function getPhraseObjByIds(ids: number[]): [string, [number[]]] {
   return [
     `
       select 
+        phrases.phrase_id as phrase_id,
         phrases.phraselike_string as phrase,
         words.language_code as language_code,
         words.dialect_code as dialect_code,
@@ -18,14 +20,14 @@ export function getPhraseObjById(id: number): [string, [number]] {
       from phrases
       join words
       on words.word_id = any(phrases.words)
-      where phrases.phrase_id = $1
+      where phrases.phrase_id = any($1)
     `,
-    [id],
+    [ids],
   ];
 }
 
 export type PhraseUpsertProcedureOutputRow = {
-  p_phrase_id: number;
+  p_phrase_id: string;
   p_error_type: ErrorType;
 };
 
@@ -35,9 +37,9 @@ export function callPhraseUpsertProcedure({
   token,
 }: {
   phraselike_string: string;
-  wordIds: number[];
+  wordIds: (number | null)[];
   token: string;
-}): [string, [string, number[], string]] {
+}): [string, [string, (number | null)[], string]] {
   return [
     `
       call phrase_upsert($1, $2, $3, 0, '');
@@ -46,10 +48,43 @@ export function callPhraseUpsertProcedure({
   ];
 }
 
+export type PhraseUpsertsProcedureOutput = {
+  p_phrase_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callPhraseUpsertsProcedure({
+  phraselike_strings,
+  wordIds_list,
+  token,
+}: {
+  phraselike_strings: string[];
+  wordIds_list: number[][];
+  token: string;
+}): [string, [string[], string[], string]] {
+  return [
+    `
+      call batch_phrase_upsert($1::text[], $2::jsonb[], $3, null, null, '');
+    `,
+    [
+      phraselike_strings,
+      wordIds_list.map((wordIds) =>
+        JSON.stringify(
+          wordIds.map((id) => ({
+            id,
+          })),
+        ),
+      ),
+      token,
+    ],
+  ];
+}
+
 export type GetPhraseVoteObjectById = {
-  phrase_vote_id: number;
-  phrase_id: number;
-  user_id: number;
+  phrase_vote_id: string;
+  phrase_id: string;
+  user_id: string;
   vote: boolean;
   last_updated_at: string;
 };
@@ -71,7 +106,7 @@ export function getPhraseVoteObjById(id: number): [string, [number]] {
 }
 
 export type PhraseVoteUpsertProcedureOutputRow = {
-  p_phrase_vote_id: number;
+  p_phrase_vote_id: string;
   p_error_type: ErrorType;
 };
 
@@ -93,12 +128,14 @@ export function callPhraseVoteUpsertProcedure({
 }
 
 export type GetPhraseVoteStatus = {
-  phrase_id: number;
+  phrase_id: string;
   upvotes: number;
   downvotes: number;
 };
 
-export function getPhraseVoteStatus(phrase_id: number): [string, [number]] {
+export function getPhraseVoteStatusFromPhraseIds(
+  phraseIds: number[],
+): [string, [number[]]] {
   return [
     `
       select 
@@ -112,7 +149,7 @@ export function getPhraseVoteStatus(phrase_id: number): [string, [number]] {
       from 
         phrase_votes AS v 
       where 
-        v.phrase_id = $1
+        v.phrase_id = any($1)
       group BY 
         v.phrase_id 
       order by 
@@ -120,12 +157,12 @@ export function getPhraseVoteStatus(phrase_id: number): [string, [number]] {
           case when v.vote = true then 1 when v.vote = false then 0 else null end
         ) desc;
     `,
-    [phrase_id],
+    [phraseIds],
   ];
 }
 
 export type TogglePhraseVoteStatus = {
-  p_phrase_vote_id: number;
+  p_phrase_vote_id: string;
   p_error_type: ErrorType;
 };
 
@@ -148,6 +185,7 @@ export function togglePhraseVoteStatus({
 
 export type GetPhraseListByLang = {
   phrase_id: string;
+  phraselike_string: string;
 };
 
 export function getPhraseListByLang({
@@ -208,12 +246,14 @@ export function getPhraseListByLang({
   return [
     `
       select distinct 
-        p.phrase_id
+        p.phrase_id as phrase_id,
+        p.phraselike_string as phraselike_string
       from phrases as p
       join words as w
       on w.word_id = any(p.words)
       where w.language_code = $1
-        ${wherePlsStr};
+        ${wherePlsStr}
+      order by p.phraselike_string;
     `,
     [...returnArr],
   ];

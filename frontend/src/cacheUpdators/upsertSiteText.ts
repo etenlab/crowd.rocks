@@ -18,13 +18,15 @@ export function updateCacheWithUpsertSiteText(
     (data) => {
       if (data && data.getAllSiteTextDefinitions.site_text_definition_list) {
         const alreadyExists =
-          data.getAllSiteTextDefinitions.site_text_definition_list.filter(
-            (site_text_definition) =>
-              site_text_definition.__typename ===
-                newSiteTextDefinition.__typename &&
-              site_text_definition.site_text_id ===
-                newSiteTextDefinition.site_text_id,
-          );
+          data.getAllSiteTextDefinitions.site_text_definition_list
+            .filter((site_text_definition) => !!site_text_definition)
+            .filter(
+              (site_text_definition) =>
+                site_text_definition!.__typename ===
+                  newSiteTextDefinition.__typename &&
+                site_text_definition!.site_text_id ===
+                  newSiteTextDefinition.site_text_id,
+            );
 
         if (alreadyExists.length > 0) {
           return data;

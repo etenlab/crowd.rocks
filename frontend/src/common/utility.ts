@@ -1,4 +1,16 @@
 import { useState } from 'react';
+export type TLangCodes = {
+  language_code: string;
+  dialect_code?: string | null | undefined;
+  geo_code?: string | null | undefined;
+};
+
+export enum StringContentTypes {
+  WORD = 'word',
+  PHRASE = 'phrase',
+  TEXT_UTF8 = 'text_utf8',
+  BINARY_OR_UNKNOWN = 'binary_or_unknown',
+}
 
 export function useForceUpdate() {
   const [value, setState] = useState(true);
@@ -74,4 +86,10 @@ export const downloadFromSrc = (file_name: string, src: string) => {
   hiddenElement.href = src;
   hiddenElement.download = file_name;
   hiddenElement.click();
+};
+
+export const typeOfString = (wordOrPhrase: string): StringContentTypes => {
+  const parts = wordOrPhrase.split(' ');
+  if (parts.length === 1) return StringContentTypes.WORD;
+  return StringContentTypes.PHRASE;
 };

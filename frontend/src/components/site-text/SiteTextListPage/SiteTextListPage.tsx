@@ -19,7 +19,11 @@ import { Card } from '../../common/Card';
 
 import { useGetAllSiteTextDefinitionsLazyQuery } from '../../../generated/graphql';
 
-import { ErrorType, useIsAdminLoggedInQuery } from '../../../generated/graphql';
+import {
+  ErrorType,
+  useIsAdminLoggedInQuery,
+  TableNameType,
+} from '../../../generated/graphql';
 
 import {
   AppLanguageShowerContainer,
@@ -43,6 +47,8 @@ import { sortSiteTextFn } from '../../../common/langUtils';
 import { globals } from '../../../services/globals';
 import { AddListHeader } from '../../common/ListHeader';
 import { PageLayout } from '../../common/PageLayout';
+
+import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 interface SiteTextListPageProps
   extends RouteComponentProps<{
@@ -126,6 +132,7 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
       isWord: boolean;
       siteTextlikeString: string;
       definitionlikeString: string;
+      definition_id: string;
     }[] = [];
 
     if (error) {
@@ -144,6 +151,10 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
     }
 
     for (const siteTextDefinition of allSiteTextDefinitions) {
+      if (!siteTextDefinition) {
+        continue;
+      }
+
       switch (siteTextDefinition.__typename) {
         case 'SiteTextWordDefinition': {
           tempDefinitions.push({
@@ -151,6 +162,8 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
             isWord: true,
             siteTextlikeString: siteTextDefinition.word_definition.word.word,
             definitionlikeString: siteTextDefinition.word_definition.definition,
+            definition_id:
+              siteTextDefinition.word_definition.word_definition_id,
           });
           break;
         }
@@ -162,6 +175,8 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
               siteTextDefinition.phrase_definition.phrase.phrase,
             definitionlikeString:
               siteTextDefinition.phrase_definition.definition,
+            definition_id:
+              siteTextDefinition.phrase_definition.phrase_definition_id,
           });
           break;
         }
@@ -186,6 +201,13 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
                 definition.isWord,
               )
             }
+            flags={{
+              parent_table: definition.isWord
+                ? TableNameType.WordDefinitions
+                : TableNameType.PhraseDefinitions,
+              parent_id: definition.definition_id,
+              flag_names: WORD_AND_PHRASE_FLAGS,
+            }}
           />
         </CardContainer>
         <CardContainer>
@@ -254,7 +276,7 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
 
       <CardListContainer>{cardListComs}</CardListContainer>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Site Text')}</IonTitle>

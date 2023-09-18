@@ -20,6 +20,7 @@ services:
       POSTGRES_DB: crowdrocks
     ports:
       - "5434:5432"
+    command: ["postgres", "-c", "log_statement=all"]
 
   pgadmin:
     image: dpage/pgadmin4

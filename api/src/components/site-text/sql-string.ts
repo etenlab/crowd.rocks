@@ -2,26 +2,26 @@ import { ErrorType } from 'src/common/types';
 
 export type GetSiteTextWordDefinitionObjectById = {
   site_text_id: string;
-  word_definition_id: number;
+  word_definition_id: string;
 };
 
-export function getSiteTextWordDefinitionObjById(
-  id: number,
-): [string, [number]] {
+export function getSiteTextWordDefinitionObjByIds(
+  ids: number[],
+): [string, [number[]]] {
   return [
     `
       select 
         site_text_id,
         word_definition_id
       from site_text_word_definitions
-      where site_text_id = $1
+      where site_text_id = any($1);
     `,
-    [id],
+    [ids],
   ];
 }
 
 export type SiteTextWordDefinitionUpsertProcedureOutputRow = {
-  p_site_text_id: number;
+  p_site_text_id: string;
   p_error_type: ErrorType;
 };
 
@@ -42,26 +42,26 @@ export function callSiteTextWordDefinitionUpsertProcedure({
 
 export type GetSiteTextPhraseDefinitionObjectById = {
   site_text_id: string;
-  phrase_definition_id: number;
+  phrase_definition_id: string;
 };
 
-export function getSiteTextPhraseDefinitionObjById(
-  id: number,
-): [string, [number]] {
+export function getSiteTextPhraseDefinitionObjByIds(
+  ids: number[],
+): [string, [number[]]] {
   return [
     `
       select 
         site_text_id,
         phrase_definition_id
       from site_text_phrase_definitions
-      where site_text_id = $1
+      where site_text_id = any($1)
     `,
-    [id],
+    [ids],
   ];
 }
 
 export type SiteTextPhraseDefinitionUpsertProcedureOutputRow = {
-  p_site_text_id: number;
+  p_site_text_id: string;
   p_error_type: ErrorType;
 };
 
@@ -81,11 +81,11 @@ export function callSiteTextPhraseDefinitionUpsertProcedure({
 }
 
 export type GetSiteTextTranslationVoteObjectById = {
-  site_text_translation_vote_id: number;
-  translation_id: number;
+  site_text_translation_vote_id: string;
+  translation_id: string;
   from_type_is_word: boolean;
   to_type_is_word: boolean;
-  user_id: number;
+  user_id: string;
   vote: boolean;
   last_updated_at: string;
 };
@@ -111,7 +111,7 @@ export function getSiteTextTranslationVoteObjById(
 }
 
 export type SiteTextTranslationVoteUpsertProcedureOutputRow = {
-  p_site_text_translation_vote_id: number;
+  p_site_text_translation_vote_id: string;
   p_error_type: ErrorType;
 };
 
@@ -137,18 +137,20 @@ export function callSiteTextTranslationVoteUpsertProcedure({
 }
 
 export type GetSiteTextTranslationVoteStatus = {
-  translation_id: number;
-  from_type_word_id: boolean;
-  to_type_word_id: boolean;
+  translation_id: string;
+  from_type_is_word: boolean;
+  to_type_is_word: boolean;
   upvotes: number;
   downvotes: number;
 };
 
-export function getSiteTextTranslationVoteStatus(
-  translation_id: number,
-  from_type_is_word: boolean,
-  to_type_is_word: boolean,
-): [string, [number, boolean, boolean]] {
+export function getSiteTextTranslationVoteStatusFromIds(
+  ids: {
+    translation_id: number;
+    from_type_is_word: boolean;
+    to_type_is_word: boolean;
+  }[],
+): [string, [string]] {
   return [
     `
       select 
@@ -162,10 +164,17 @@ export function getSiteTextTranslationVoteStatus(
           case when v.vote = false then 1 else null end
         ) as downvotes 
       from 
-        site_text_translation_votes AS v 
-      where v.translation_id = $1
-        and v.from_type_is_word = $2
-        and v.to_type_is_word = $3
+        site_text_translation_votes AS v
+      join (
+        select * 
+        from jsonb_populate_recordset(
+          null::site_text_translation_vote_id_type, 
+          $1
+        ) 
+      ) as t
+      on v.translation_id = t.translation_id
+        and v.from_type_is_word = t.from_type_is_word
+        and v.to_type_is_word = t.to_type_is_word
       group BY 
         v.translation_id,
         v.from_type_is_word,
@@ -175,12 +184,12 @@ export function getSiteTextTranslationVoteStatus(
           case when v.vote = true then 1 when v.vote = false then 0 else null end
         ) desc;
     `,
-    [translation_id, from_type_is_word, to_type_is_word],
+    [JSON.stringify(ids)],
   ];
 }
 
 export type ToggleSiteTextTranslationVoteStatus = {
-  p_site_text_translation_vote_id: number;
+  p_site_text_translation_vote_id: string;
   p_error_type: ErrorType;
 };
 
@@ -206,7 +215,7 @@ export function toggleSiteTextTranslationVoteStatus({
 }
 
 export type GetAllSiteTextWordDefinition = {
-  site_text_id: number;
+  site_text_id: string;
 };
 
 export function getAllSiteTextWordDefinition(
@@ -241,7 +250,7 @@ export function getAllSiteTextWordDefinition(
 }
 
 export type GetAllSiteTextPhraseDefinition = {
-  site_text_id: number;
+  site_text_id: string;
 };
 
 export function getAllSiteTextPhraseDefinition(
@@ -274,7 +283,7 @@ export function getAllSiteTextPhraseDefinition(
 }
 
 export type GetDefinitionIdBySiteTextId = {
-  definition_id: number;
+  definition_id: string;
 };
 
 export function getDefinitionIdBySiteTextId(
@@ -388,7 +397,7 @@ export function getSiteTextLanguageList(): [string, []] {
 }
 
 export type GetDefinitionIdFromWordId = {
-  word_definition_id: number;
+  word_definition_id: string;
 };
 
 export function getDefinitionIdFromWordId(word_id: number): [string, [number]] {
@@ -406,7 +415,7 @@ export function getDefinitionIdFromWordId(word_id: number): [string, [number]] {
 }
 
 export type GetDefinitionIdFromPhraseId = {
-  phrase_definition_id: number;
+  phrase_definition_id: string;
 };
 
 export function getDefinitionIdFromPhraseId(
@@ -422,5 +431,99 @@ export function getDefinitionIdFromPhraseId(
       where pds.phrase_id = $1;
     `,
     [phrase_id],
+  ];
+}
+
+export type SiteTextDefinitionTranslationCountUpsertsProcedureOutput = {
+  p_site_text_translation_count_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callSiteTextDefinitionTranslationCountUpsertsProcedure({
+  site_text_ids,
+  is_word_definitions,
+  language_codes,
+  dialect_codes,
+  geo_codes,
+  counts,
+}: {
+  site_text_ids: number[];
+  is_word_definitions: boolean[];
+  language_codes: string[];
+  dialect_codes: (string | null)[];
+  geo_codes: (string | null)[];
+  counts: number[];
+}): [
+  string,
+  [
+    number[],
+    boolean[],
+    string[],
+    (string | null)[],
+    (string | null)[],
+    number[],
+  ],
+] {
+  return [
+    `
+      call batch_site_text_translation_count_upsert($1::bigint[], $2::bool[], $3::text[], $4::text[], $5::text[], $6::int[], null, null, '');
+    `,
+    [
+      site_text_ids,
+      is_word_definitions,
+      language_codes,
+      dialect_codes,
+      geo_codes,
+      counts,
+    ],
+  ];
+}
+
+export type GetSiteTextLanguageListV2 = {
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+};
+
+export function getSiteTextLanguageListV2(): [string, []] {
+  return [
+    `
+      select 
+        language_code,
+        dialect_code,
+        geo_code
+      from site_text_translation_counts
+      group by language_code, dialect_code, geo_code;
+    `,
+    [],
+  ];
+}
+
+export type SiteTextTranslationCountRow = {
+  site_text_translation_count_id: string;
+  site_text_id: string;
+  is_word_definition: boolean;
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+  count: number;
+};
+
+export function getSiteTextTranslationCount(): [string, []] {
+  return [
+    `
+      select 
+        site_text_translation_count_id,
+        site_text_id,
+        is_word_definition,
+        language_code,
+        dialect_code,
+        geo_code,
+        count
+      from site_text_translation_counts
+      order by language_code, dialect_code, geo_code;
+    `,
+    [],
   ];
 }

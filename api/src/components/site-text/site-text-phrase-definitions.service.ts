@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { PoolClient } from 'pg';
+
+import { pgClientOrPool } from 'src/common/utility';
 
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
@@ -7,11 +10,14 @@ import { PhraseDefinitionsService } from 'src/components/definitions/phrase-defi
 
 import {
   SiteTextPhraseDefinitionOutput,
+  SiteTextPhraseDefinitionsOutput,
   SiteTextPhraseDefinitionListOutput,
+  SiteTextPhraseDefinition,
 } from './types';
+import { PhraseDefinition } from 'src/components/definitions/types';
 
 import {
-  getSiteTextPhraseDefinitionObjById,
+  getSiteTextPhraseDefinitionObjByIds,
   GetSiteTextPhraseDefinitionObjectById,
   callSiteTextPhraseDefinitionUpsertProcedure,
   SiteTextPhraseDefinitionUpsertProcedureOutputRow,
@@ -28,25 +34,39 @@ export class SiteTextPhraseDefinitionsService {
     private phraseDefinitionService: PhraseDefinitionsService,
   ) {}
 
-  async read(id: number): Promise<SiteTextPhraseDefinitionOutput> {
+  async read(
+    id: number,
+    pgClient: PoolClient | null,
+  ): Promise<SiteTextPhraseDefinitionOutput> {
     try {
-      const res1 =
-        await this.pg.pool.query<GetSiteTextPhraseDefinitionObjectById>(
-          ...getSiteTextPhraseDefinitionObjById(id),
-        );
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetSiteTextPhraseDefinitionObjectById>(
+        ...getSiteTextPhraseDefinitionObjByIds([id]),
+      );
 
-      if (res1.rowCount !== 1) {
+      if (res.rowCount !== 1) {
         console.error(`no site-text-phrase-definition for id: ${id}`);
       } else {
-        const phraseDefinition = await this.phraseDefinitionService.read(
-          res1.rows[0].phrase_definition_id,
-        );
+        const { error, phrase_definition } =
+          await this.phraseDefinitionService.read(
+            +res.rows[0].phrase_definition_id,
+            pgClient,
+          );
+
+        if (error !== ErrorType.NoError || !phrase_definition) {
+          return {
+            error,
+            site_text_phrase_definition: null,
+          };
+        }
 
         return {
-          error: phraseDefinition.error,
+          error: ErrorType.NoError,
           site_text_phrase_definition: {
             site_text_id: id + '',
-            phrase_definition: phraseDefinition.phrase_definition,
+            phrase_definition: phrase_definition,
           },
         };
       }
@@ -60,16 +80,101 @@ export class SiteTextPhraseDefinitionsService {
     };
   }
 
-  async getDefinitionIdFromWordId(phrase_id: number): Promise<number | null> {
+  async reads(
+    ids: number[],
+    pgClient: PoolClient | null,
+  ): Promise<SiteTextPhraseDefinitionsOutput> {
     try {
-      const res = await this.pg.pool.query<GetDefinitionIdFromPhraseId>(
+      const res1 = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetSiteTextPhraseDefinitionObjectById>(
+        ...getSiteTextPhraseDefinitionObjByIds(ids),
+      );
+
+      const siteTextPhraseDefinitionsMap = new Map<
+        string,
+        GetSiteTextPhraseDefinitionObjectById
+      >();
+
+      res1.rows.forEach((row) =>
+        siteTextPhraseDefinitionsMap.set(row.site_text_id, row),
+      );
+
+      const phraseDefinitionIds = res1.rows.map(
+        (row) => +row.phrase_definition_id,
+      );
+
+      const { error, phrase_definitions } =
+        await this.phraseDefinitionService.reads(phraseDefinitionIds, pgClient);
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error,
+          site_text_phrase_definitions: [],
+        };
+      }
+
+      const phraseDefinitionsMap = new Map<string, PhraseDefinition>();
+
+      phrase_definitions.forEach((phraseDefinition) =>
+        phraseDefinition
+          ? phraseDefinitionsMap.set(
+              phraseDefinition.phrase_definition_id,
+              phraseDefinition,
+            )
+          : null,
+      );
+
+      return {
+        error: ErrorType.NoError,
+        site_text_phrase_definitions: ids.map((id) => {
+          const row = siteTextPhraseDefinitionsMap.get(id + '');
+
+          if (!row) {
+            return null;
+          }
+
+          const phraseDefinition = phraseDefinitionsMap.get(
+            row.phrase_definition_id + '',
+          );
+
+          if (!phraseDefinition) {
+            return null;
+          }
+
+          return {
+            site_text_id: row.site_text_id,
+            phrase_definition: phraseDefinition,
+          };
+        }),
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      site_text_phrase_definitions: [],
+    };
+  }
+
+  async getDefinitionIdFromWordId(
+    phrase_id: number,
+    pgClient: PoolClient | null,
+  ): Promise<number | null> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetDefinitionIdFromPhraseId>(
         ...getDefinitionIdFromPhraseId(phrase_id),
       );
 
       if (res.rowCount === 0) {
         return null;
       } else {
-        return res.rows[0].phrase_definition_id;
+        return +res.rows[0].phrase_definition_id;
       }
     } catch (e) {
       console.error(e);
@@ -81,15 +186,18 @@ export class SiteTextPhraseDefinitionsService {
   async upsert(
     phrase_definition_id: number,
     token: string,
+    pgClient: PoolClient | null,
   ): Promise<SiteTextPhraseDefinitionOutput> {
     try {
-      const res =
-        await this.pg.pool.query<SiteTextPhraseDefinitionUpsertProcedureOutputRow>(
-          ...callSiteTextPhraseDefinitionUpsertProcedure({
-            phrase_definition_id: phrase_definition_id,
-            token: token,
-          }),
-        );
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<SiteTextPhraseDefinitionUpsertProcedureOutputRow>(
+        ...callSiteTextPhraseDefinitionUpsertProcedure({
+          phrase_definition_id: phrase_definition_id,
+          token: token,
+        }),
+      );
 
       const creatingError = res.rows[0].p_error_type;
       const site_text_id = res.rows[0].p_site_text_id;
@@ -102,7 +210,7 @@ export class SiteTextPhraseDefinitionsService {
       }
 
       const { error: readingError, site_text_phrase_definition } =
-        await this.read(site_text_id);
+        await this.read(+site_text_id, pgClient);
 
       return {
         error: readingError,
@@ -118,34 +226,40 @@ export class SiteTextPhraseDefinitionsService {
     };
   }
 
-  async getAllSiteTextPhraseDefinitions(
-    filter?: string,
-  ): Promise<SiteTextPhraseDefinitionListOutput> {
+  async getAllSiteTextPhraseDefinitions({
+    filter,
+    pgClient,
+  }: {
+    filter?: string;
+    pgClient: PoolClient | null;
+  }): Promise<SiteTextPhraseDefinitionListOutput> {
     try {
-      const res1 = await this.pg.pool.query<GetAllSiteTextPhraseDefinition>(
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetAllSiteTextPhraseDefinition>(
         ...getAllSiteTextPhraseDefinition(filter),
       );
 
-      const siteTextPhraseDefinitionList = [];
+      const siteTextIds = res.rows.map((row) => +row.site_text_id);
 
-      for (let i = 0; i < res1.rowCount; i++) {
-        const { error, site_text_phrase_definition } = await this.read(
-          res1.rows[i].site_text_id,
-        );
+      const { error, site_text_phrase_definitions } = await this.reads(
+        siteTextIds,
+        pgClient,
+      );
 
-        if (error !== ErrorType.NoError) {
-          return {
-            error,
-            site_text_phrase_definition_list: [],
-          };
-        }
-
-        siteTextPhraseDefinitionList.push(site_text_phrase_definition);
+      if (error !== ErrorType.NoError) {
+        return {
+          error,
+          site_text_phrase_definition_list: [],
+        };
       }
 
       return {
         error: ErrorType.NoError,
-        site_text_phrase_definition_list: siteTextPhraseDefinitionList,
+        site_text_phrase_definition_list: site_text_phrase_definitions.filter(
+          (definition) => definition,
+        ) as SiteTextPhraseDefinition[],
       };
     } catch (e) {
       console.error(e);

@@ -6,25 +6,27 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
-  // useIonToast,
+  useIonRouter,
 } from '@ionic/react';
 
 import { PageLayout } from '../../common/PageLayout';
 
 import { Caption } from '../../common/Caption/Caption';
 import { Card } from '../../common/Card';
+import { Flag } from '../../flags/Flag';
 
 import {
   useGetWordDefinitionsByWordIdQuery,
   useGetWordWithVoteByIdQuery,
 } from '../../../generated/graphql';
 
-import { ErrorType } from '../../../generated/graphql';
+import { ErrorType, TableNameType } from '../../../generated/graphql';
 
 import {
   CaptionContainer,
   CardListContainer,
   CardContainer,
+  StChatIcon,
 } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
@@ -34,6 +36,9 @@ import { useToggleWordDefinitionVoteStatusMutation } from '../../../hooks/useTog
 import { AddListHeader } from '../../common/ListHeader';
 import { VoteButtonsHerizontal } from '../../common/VoteButtonsHerizontal';
 import { NewWordDefinitionForm } from '../NewWordDefinitionForm';
+import { chatbubbleEllipsesSharp } from 'ionicons/icons';
+
+import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 interface WordDetailPageProps
   extends RouteComponentProps<{
@@ -44,6 +49,7 @@ interface WordDetailPageProps
 
 export function WordDetailPage({ match }: WordDetailPageProps) {
   const { tr } = useTr();
+  const router = useIonRouter();
   // const [present] = useIonToast();
 
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
@@ -125,11 +131,29 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
               });
             },
           }}
+          discussion={{
+            onChatClick: () =>
+              router.push(
+                `/${match.params.nation_id}/${match.params.language_id}/1/discussion/word_definitions/${definition.word_definition_id}`,
+              ),
+          }}
+          flags={{
+            parent_table: TableNameType.WordDefinitions,
+            parent_id: definition.word_definition_id,
+            flag_names: WORD_AND_PHRASE_FLAGS,
+          }}
           voteFor="description"
         />
       </CardContainer>
     ));
-  }, [definitionData, definitionError, toggleWordDefinitionVoteStatus]);
+  }, [
+    definitionData,
+    definitionError,
+    match.params.language_id,
+    match.params.nation_id,
+    router,
+    toggleWordDefinitionVoteStatus,
+  ]);
 
   const wordCom = useMemo(() => {
     if (wordError) {
@@ -145,7 +169,6 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
     if (!wordWithVote) {
       return null;
     }
-
     return (
       <div style={{ display: 'flex' }}>
         <IonTitle>Word: {wordWithVote.word}</IonTitle>
@@ -169,9 +192,29 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
             });
           }}
         />
+        <Flag
+          parent_table={TableNameType.Words}
+          parent_id={wordWithVote.word_id}
+          flag_names={WORD_AND_PHRASE_FLAGS}
+        />
+        <StChatIcon
+          icon={chatbubbleEllipsesSharp}
+          onClick={() =>
+            router.push(
+              `/${match.params.nation_id}/${match.params.language_id}/1/discussion/words/${wordWithVote.word_id}`,
+            )
+          }
+        />
       </div>
     );
-  }, [toggleWordVoteStatus, wordData, wordError]);
+  }, [
+    match.params.language_id,
+    match.params.nation_id,
+    router,
+    toggleWordVoteStatus,
+    wordData,
+    wordError,
+  ]);
 
   return (
     <PageLayout>
@@ -181,16 +224,14 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
 
       <CardContainer>{wordCom}</CardContainer>
 
-      <h4>{tr('Definitions')}</h4>
-
       <AddListHeader
-        title={tr('All Words')}
+        title={tr('Definitions')}
         onClick={() => setIsOpenModal(true)}
       />
 
       <CardListContainer>{definitionsCom}</CardListContainer>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Word Definition')}</IonTitle>

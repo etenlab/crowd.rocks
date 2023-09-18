@@ -1,7 +1,7 @@
 import { actions } from './global.actions';
 import { type ActionType } from '.';
 
-import { SiteTextLanguage } from '../generated/graphql';
+import { SiteTextLanguageWithTranslationInfo } from '../generated/graphql';
 
 export interface StateType {
   langauges: {
@@ -11,11 +11,12 @@ export interface StateType {
       target: LanguageInfo | null;
     };
     targetLang: LanguageInfo | null;
+    sourceLang: LanguageInfo | null;
   };
   siteTexts: {
     originalMap: Record<string, string>;
-    translationMap: Record<string, Record<string, string>>;
-    languages: SiteTextLanguage[];
+    translationMap: Record<string, string>;
+    languages: SiteTextLanguageWithTranslationInfo[];
   };
 }
 
@@ -32,6 +33,7 @@ export const initialState: StateType = {
       target: null,
     },
     targetLang: null,
+    sourceLang: null,
   },
   siteTexts: {
     originalMap: {},
@@ -62,7 +64,7 @@ export function reducer(
         ...prevState,
         siteTexts: {
           ...prevState.siteTexts,
-          languages: action.payload as SiteTextLanguage[],
+          languages: action.payload as SiteTextLanguageWithTranslationInfo[],
         },
       };
     }
@@ -76,21 +78,15 @@ export function reducer(
       };
     }
     case actions.SET_TRANSLATION_SITE_TEXT_MAP: {
-      const prevTranslationMap = prevState.siteTexts.translationMap;
-      const { languageKey, translationMap } = action.payload as {
-        languageKey: string;
+      const { translationMap } = action.payload as {
         translationMap: Record<string, string>;
       };
-
-      prevTranslationMap[languageKey] = translationMap;
 
       return {
         ...prevState,
         siteTexts: {
           ...prevState.siteTexts,
-          translationMap: {
-            ...prevTranslationMap,
-          },
+          translationMap: translationMap,
         },
       };
     }
@@ -124,6 +120,15 @@ export function reducer(
         langauges: {
           ...prevState.langauges,
           targetLang: action.payload as LanguageInfo,
+        },
+      };
+    }
+    case actions.SET_CURRENT_SOURCE_LANG: {
+      return {
+        ...prevState,
+        langauges: {
+          ...prevState.langauges,
+          sourceLang: action.payload as LanguageInfo,
         },
       };
     }

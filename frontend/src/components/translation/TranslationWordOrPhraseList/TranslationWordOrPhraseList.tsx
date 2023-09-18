@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import {
+  IonButton,
+  IonSpinner,
   IonItemGroup,
   IonItemDivider,
   IonContent,
@@ -30,6 +32,8 @@ import { NewWordOrPhraseWithDefinitionForm } from '../NewWordOrPhraseWithDefinit
 
 import { NoDefinition, CardContainer, CardListContainer } from './styled';
 import { WordOrPhraseListContainer } from '../styled';
+
+import { PAGE_SIZE } from '../../../const/commonConst';
 
 interface TranslationWordOrPhraseListProps {
   listLabel?: string;
@@ -83,10 +87,24 @@ export function TranslationWordOrPhraseList({
 
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
 
-  const [getWordsByLanguage, { data: wordsData, error: wordsError }] =
-    useGetWordsByLanguageLazyQuery();
-  const [getPhrasesByLanguage, { data: phrasesData, error: phraseError }] =
-    useGetPhrasesByLanguageLazyQuery();
+  const [
+    getWordsByLanguage,
+    {
+      data: wordsData,
+      error: wordsError,
+      loading: wordsLoading,
+      fetchMore: wordsFetchMore,
+    },
+  ] = useGetWordsByLanguageLazyQuery();
+  const [
+    getPhrasesByLanguage,
+    {
+      data: phrasesData,
+      error: phraseError,
+      loading: phrasesLoading,
+      fetchMore: phrasesFetchMore,
+    },
+  ] = useGetPhrasesByLanguageLazyQuery();
   const [
     getTranslationsByFromDefinitionId,
     {
@@ -104,22 +122,54 @@ export function TranslationWordOrPhraseList({
 
     getWordsByLanguage({
       variables: {
+        first: PAGE_SIZE,
+        after: null,
         language_code: langInfo.lang.tag,
         dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
         geo_code: langInfo.region ? langInfo.region.tag : null,
-        filter: filter ? filter.trim() : null,
+        filter: filter ? filter.trim() : '',
       },
     });
 
     getPhrasesByLanguage({
       variables: {
+        first: PAGE_SIZE,
+        after: null,
         language_code: langInfo.lang.tag,
         dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
         geo_code: langInfo.region ? langInfo.region.tag : null,
-        filter: filter ? filter.trim() : null,
+        filter: filter ? filter.trim() : '',
       },
     });
   }, [langInfo, getWordsByLanguage, getPhrasesByLanguage, filter]);
+
+  const handleFetchMore = () => {
+    if (wordsData?.getWordsByLanguage.pageInfo.hasNextPage && langInfo) {
+      wordsFetchMore({
+        variables: {
+          first: PAGE_SIZE,
+          after: wordsData.getWordsByLanguage.pageInfo.endCursor,
+          language_code: langInfo.lang.tag,
+          dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
+          geo_code: langInfo.region ? langInfo.region.tag : null,
+          filter: filter ? filter.trim() : '',
+        },
+      });
+    }
+
+    if (phrasesData?.getPhrasesByLanguage.pageInfo.hasNextPage && langInfo) {
+      phrasesFetchMore({
+        variables: {
+          first: PAGE_SIZE,
+          after: phrasesData.getPhrasesByLanguage.pageInfo.endCursor,
+          language_code: langInfo.lang.tag,
+          dialect_code: langInfo.dialect ? langInfo.dialect.tag : null,
+          geo_code: langInfo.region ? langInfo.region.tag : null,
+          filter: filter ? filter.trim() : '',
+        },
+      });
+    }
+  };
 
   useEffect(() => {
     if (!langInfo || !originalDefinition) {
@@ -176,20 +226,22 @@ export function TranslationWordOrPhraseList({
             .translation_with_vote_list
         : [];
 
-    const wordWithVoteList =
+    const wordWithVoteListEdges =
       !wordsError &&
       wordsData &&
       wordsData.getWordsByLanguage.error === ErrorType.NoError
-        ? wordsData.getWordsByLanguage.word_with_vote_list
+        ? wordsData.getWordsByLanguage.edges
         : null;
 
-    if (wordWithVoteList) {
-      for (const wordWithVote of wordWithVoteList) {
-        if (wordWithVote) {
+    if (wordWithVoteListEdges) {
+      for (const edge of wordWithVoteListEdges) {
+        const { node } = edge;
+
+        if (node) {
           tempWordAndPhrases.push({
-            id: `word_${wordWithVote.word_id}`,
-            wordOrPhrase: wordWithVote.word,
-            definitions: wordWithVote.definitions
+            id: `word_${node.word_id}`,
+            wordOrPhrase: node.word,
+            definitions: node.definitions
               .filter((definition) => definition)
               .map((definition) => {
                 let translationVote:
@@ -203,6 +255,10 @@ export function TranslationWordOrPhraseList({
                   | undefined = undefined;
 
                 translationWithVoteList.forEach((translationWithVote) => {
+                  if (!translationWithVote) {
+                    return;
+                  }
+
                   switch (translationWithVote.__typename) {
                     case 'WordToWordTranslationWithVote': {
                       if (
@@ -237,8 +293,6 @@ export function TranslationWordOrPhraseList({
                       break;
                     }
                   }
-
-                  return false;
                 });
 
                 return {
@@ -253,20 +307,22 @@ export function TranslationWordOrPhraseList({
       }
     }
 
-    const phraseWithVoteList =
+    const phraseWithVoteListEdges =
       !phraseError &&
       phrasesData &&
       phrasesData.getPhrasesByLanguage.error === ErrorType.NoError
-        ? phrasesData.getPhrasesByLanguage.phrase_with_vote_list
+        ? phrasesData.getPhrasesByLanguage.edges
         : null;
 
-    if (phraseWithVoteList) {
-      for (const phraseWithVote of phraseWithVoteList) {
-        if (phraseWithVote) {
+    if (phraseWithVoteListEdges) {
+      for (const edge of phraseWithVoteListEdges) {
+        const { node } = edge;
+
+        if (node) {
           tempWordAndPhrases.push({
-            id: `phrase_${phraseWithVote.phrase_id}`,
-            wordOrPhrase: phraseWithVote.phrase,
-            definitions: phraseWithVote.definitions
+            id: `phrase_${node.phrase_id}`,
+            wordOrPhrase: node.phrase,
+            definitions: node.definitions
               .filter((definition) => definition)
               .map((definition) => {
                 let translationVote:
@@ -280,6 +336,10 @@ export function TranslationWordOrPhraseList({
                   | undefined = undefined;
 
                 translationWithVoteList.forEach((translationWithVote) => {
+                  if (!translationWithVote) {
+                    return;
+                  }
+
                   switch (translationWithVote.__typename) {
                     case 'WordToPhraseTranslationWithVote': {
                       if (
@@ -316,8 +376,6 @@ export function TranslationWordOrPhraseList({
                       break;
                     }
                   }
-
-                  return false;
                 });
 
                 return {
@@ -335,9 +393,9 @@ export function TranslationWordOrPhraseList({
     return tempWordAndPhrases
       .sort((a, b) => {
         if (a.wordOrPhrase < b.wordOrPhrase) {
-          return 1;
-        } else if (a.wordOrPhrase > b.wordOrPhrase) {
           return -1;
+        } else if (a.wordOrPhrase > b.wordOrPhrase) {
+          return 1;
         } else {
           return 0;
         }
@@ -407,6 +465,11 @@ export function TranslationWordOrPhraseList({
     onToggleSelectedValue,
   ]);
 
+  const disabledFetchMore =
+    !originalDefinition ||
+    (!wordsData?.getWordsByLanguage.pageInfo.hasNextPage &&
+      !phrasesData?.getPhrasesByLanguage.pageInfo.hasNextPage);
+
   return (
     <WordOrPhraseListContainer>
       <AddListHeader
@@ -416,7 +479,17 @@ export function TranslationWordOrPhraseList({
 
       <CardListContainer>{cardListComs}</CardListContainer>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonButton
+        fill="outline"
+        shape="round"
+        onClick={handleFetchMore}
+        disabled={disabledFetchMore}
+      >
+        {tr('Load More')}
+        {wordsLoading || phrasesLoading ? <IonSpinner name="bubbles" /> : null}
+      </IonButton>
+
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Definition')}</IonTitle>

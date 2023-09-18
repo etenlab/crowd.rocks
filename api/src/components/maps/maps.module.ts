@@ -9,6 +9,7 @@ import { MapsRepository } from './maps.repository';
 import { DefinitionsModule } from '../definitions/definitions.module';
 import { TranslationsModule } from '../translations/translations.module';
 import { PhraseModule } from '../phrases/phrases.module';
+import { FileModule } from '../file/file.module';
 @Module({
   imports: [
     forwardRef(() => CoreModule),
@@ -17,6 +18,7 @@ import { PhraseModule } from '../phrases/phrases.module';
     forwardRef(() => PhraseModule),
     forwardRef(() => DefinitionsModule),
     forwardRef(() => TranslationsModule),
+    FileModule,
   ],
   providers: [MapsService, MapsResolver, MapsRepository],
   exports: [MapsService],

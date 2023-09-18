@@ -1,6 +1,8 @@
-import { useState, useRef, useMemo, useCallback } from 'react';
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { Redirect, Route } from 'react-router';
 import {
+  IonBadge,
+  IonButton,
   IonContent,
   IonHeader,
   IonIcon,
@@ -11,12 +13,22 @@ import {
   useIonViewWillEnter,
   useIonViewWillLeave,
 } from '@ionic/react';
-import { menu, moon, sunny, languageOutline } from 'ionicons/icons';
+import {
+  menu,
+  moon,
+  sunny,
+  languageOutline,
+  notificationsOutline,
+} from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 
 import './Body.css';
 
-import { ErrorType, useLogoutMutation } from './generated/graphql';
+import {
+  ErrorType,
+  useListNotificationsLazyQuery,
+  useLogoutMutation,
+} from './generated/graphql';
 
 import { globals } from './services/globals';
 import { login_change } from './services/subscriptions';
@@ -29,6 +41,11 @@ import {
   langInfo2tag,
   tag2langInfo,
 } from './common/langUtils';
+
+import { useAppContext } from './hooks/useAppContext';
+import { useTr } from './hooks/useTr';
+
+import AppTypeahead from './components/common/LangSelector/TypeAhead';
 
 import Home from './components/home/Home';
 import Login from './components/authentication/Login';
@@ -49,18 +66,24 @@ import { PhraseListPage } from './components/phrase-book/PhraseListPage';
 import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
 
 import { TranslationPage } from './components/translation/TranslationPage';
+import { GoogleTranslationPage } from './components/translation/GoogleTranslationPage';
+import { FastTranslationPage } from './components/translation/FastTranslationPage';
 
-import { useAppContext } from './hooks/useAppContext';
-import { useTr } from './hooks/useTr';
-
-import AppTypeahead from './components/common/LangSelector/TypeAhead';
+import { DiscussionPage } from './components/Discussion/DiscussionPage';
+import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
+import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
+import { ForumFolder } from './components/forums/ForumFolderDetail/FolderDetail';
+import { NotificationPage } from './components/notifications/NotificationPage';
+import { SettingsPage } from './components/settings/SettingsPage';
+import { DocumentsPage } from './components/documents/DocumentsPage';
+import { DocumentDetailsPage } from './components/documents/DocumentDetails/DocumentDetails';
 
 const Body: React.FC = () => {
   const {
     states: {
       global: {
         langauges: { appLanguage },
-        siteTexts: { languages, originalMap, translationMap },
+        siteTexts: { languages, originalMap },
       },
     },
     actions: { changeAppLanguage },
@@ -77,6 +100,23 @@ const Body: React.FC = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [logoutMutation, { data, loading, error }] = useLogoutMutation();
+
+  const [getNotifications, { data: nData, error: nError }] =
+    useListNotificationsLazyQuery();
+  const [unreadNotificationCount, setUnreadCount] = useState<
+    number | undefined
+  >(undefined);
+
+  useEffect(() => {
+    getNotifications();
+    let count = undefined;
+    if (!nError && nData && nData.notifications.error === ErrorType.NoError) {
+      count = nData.notifications.notifications.filter(
+        (n) => !n.isNotified,
+      ).length;
+    }
+    setUnreadCount(count);
+  }, [getNotifications, nData, nError]);
 
   let sub: Subscription;
 
@@ -122,6 +162,11 @@ const Body: React.FC = () => {
     router.push(`/US/${appLanguage.lang.tag}/1/profile`);
   };
 
+  const click_settings = () => {
+    toggleMenu();
+    router.push(`/US/${appLanguage.lang.tag}/1/settings`);
+  };
+
   const click_register = () => {
     toggleMenu();
     router.push(`/US/${appLanguage.lang.tag}/1/register`);
@@ -157,6 +202,10 @@ const Body: React.FC = () => {
     await apollo_client.resetStore();
 
     router.push(`/US/${appLanguage.lang.tag}/1/home`);
+  };
+
+  const click_notifications = () => {
+    router.push(`/US/${appLanguage.lang.tag}/1/notifications`);
   };
 
   const toggle_theme = () => {
@@ -198,13 +247,9 @@ const Body: React.FC = () => {
         region: language.geo_code as string | undefined,
       });
 
-      const langInfoStr = langInfo2String(langInfo);
-
       const originalCnt = Object.keys(originalMap).length;
       const translationCnt =
-        langInfo.lang.tag !== 'en'
-          ? Object.keys(translationMap[langInfoStr]).length
-          : originalCnt;
+        langInfo.lang.tag !== 'en' ? language.translated_count : originalCnt;
 
       const percent =
         originalCnt > 0 ? (translationCnt / originalCnt) * 100 : 100;
@@ -220,7 +265,7 @@ const Body: React.FC = () => {
         },
       };
     });
-  }, [languages, originalMap, translationMap]);
+  }, [languages, originalMap]);
 
   return (
     <IonPage>
@@ -251,6 +296,21 @@ const Body: React.FC = () => {
                     className="clickable theme-icon"
                   />
                 )}
+                <IonButton
+                  size="small"
+                  fill="clear"
+                  buttonType="string"
+                  className="notification"
+                  onClick={click_notifications}
+                >
+                  <IonIcon icon={notificationsOutline} className="theme-icon" />
+                  <IonBadge className="notification-badge">
+                    {unreadNotificationCount === 0
+                      ? undefined
+                      : unreadNotificationCount}
+                  </IonBadge>
+                </IonButton>
+
                 <IonIcon
                   icon={menu}
                   onClick={toggleMenu}
@@ -261,6 +321,14 @@ const Body: React.FC = () => {
             <div className="header-menu">
               {show_menu && (
                 <div className="accordion-group">
+                  <div slot="content" className="header-menu-item-holder">
+                    <div
+                      className="clickable ion-text-end"
+                      onClick={click_settings}
+                    >
+                      Settings
+                    </div>
+                  </div>
                   {is_logged_in && (
                     <div slot="content" className="header-menu-item-holder">
                       <div
@@ -346,6 +414,7 @@ const Body: React.FC = () => {
             component={MapsPage}
           />
           <Route
+            exact
             path="/:nation_id/:language_id/:cluster_id/site-text-list"
             component={SiteTextListPage}
           />
@@ -358,6 +427,11 @@ const Body: React.FC = () => {
             exact
             path="/:nation_id/:language_id/:cluster_id/dictionary-list"
             component={WordListPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/discussion/:parent/:parent_id"
+            component={DiscussionPage}
           />
           <Route
             exact
@@ -378,6 +452,51 @@ const Body: React.FC = () => {
             exact
             path="/:nation_id/:language_id/:cluster_id/translation"
             component={TranslationPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/fast-translation"
+            component={FastTranslationPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/forums"
+            component={ForumListPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/forums/:forum_id/:forum_name"
+            component={ForumDetailPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/folders/:forum_folder_id/:forum_folder_name"
+            component={ForumFolder}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/notifications"
+            component={NotificationPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/google-translate"
+            component={GoogleTranslationPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/settings"
+            component={SettingsPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/documents"
+            component={DocumentsPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/documents/:document_id"
+            component={DocumentDetailsPage}
           />
           <Route exact path="/">
             <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />

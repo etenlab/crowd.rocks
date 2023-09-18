@@ -12,6 +12,7 @@ fragment PhraseDefinitionFragment on PhraseDefinition {
   phrase {
     ...PhraseFragment
   }
+  created_at
 }
 
 fragment PhraseWithDefinitionsFragment on PhraseWithDefinitions {
@@ -54,6 +55,13 @@ fragment PhraseVoteStatusFragment on PhraseVoteStatus {
   upvotes
 }
 
+fragment PhraseWithVoteListEdgeFragment on PhraseWithVoteListEdge {
+  cursor
+  node {
+    ...PhraseWithDefinitionsFragment
+  }
+}
+
 query PhraseDefinitionRead($id: ID!) {
   phraseDefinitionRead(id: $id) {
     error
@@ -64,12 +72,16 @@ query PhraseDefinitionRead($id: ID!) {
 }
 
 query GetPhrasesByLanguage(
+  $first: Int!
+  $after: ID
   $language_code: String!
   $dialect_code: String
   $geo_code: String
   $filter: String
 ) {
   getPhrasesByLanguage(
+    first: $first
+    after: $after
     input: {
       language_code: $language_code
       dialect_code: $dialect_code
@@ -78,8 +90,11 @@ query GetPhrasesByLanguage(
     }
   ) {
     error
-    phrase_with_vote_list {
-      ...PhraseWithDefinitionsFragment
+    edges {
+      ...PhraseWithVoteListEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }

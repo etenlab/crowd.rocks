@@ -8,13 +8,12 @@ import {
   changeTranslationSourceLanguage as changeTranslationSourceLanguageAction,
   changeTranslationTargetLanguage as changeTranslationTargetLanguageAction,
   setTargetLanguage as setTargetLangAction,
+  setSourceLanguage as setSourceLangAction,
 } from '../reducers/global.actions';
 
 import { type ActionType } from '../reducers/index';
 
-import { langInfo2String } from '../common/langUtils';
-
-import { SiteTextLanguage } from '../generated/graphql';
+import { SiteTextLanguageWithTranslationInfo } from '../generated/graphql';
 
 interface UseGlobalProps {
   dispatch: Dispatch<ActionType<unknown>>;
@@ -26,7 +25,7 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
   });
 
   const setSiteTextLanguageList = useCallback(
-    (languages: SiteTextLanguage[]) => {
+    (languages: SiteTextLanguageWithTranslationInfo[]) => {
       dispatchRef.current.dispatch(setSiteTextLanguageListAction(languages));
     },
     [],
@@ -42,10 +41,7 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
   const setTranslationSiteTextMap = useCallback(
     (langInfo: LanguageInfo, translationMapMap: Record<string, string>) => {
       dispatchRef.current.dispatch(
-        setTranslationSiteTextMapAction(
-          langInfo2String(langInfo),
-          translationMapMap,
-        ),
+        setTranslationSiteTextMapAction(translationMapMap),
       );
     },
     [],
@@ -76,6 +72,9 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
   const setTargetLanguage = useCallback((language: LanguageInfo | null) => {
     dispatchRef.current.dispatch(setTargetLangAction(language));
   }, []);
+  const setSourceLanguage = useCallback((language: LanguageInfo | null) => {
+    dispatchRef.current.dispatch(setSourceLangAction(language));
+  }, []);
 
   return {
     setOriginalSiteTextMap,
@@ -84,6 +83,7 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     changeAppLanguage,
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
+    setSourceLanguage,
     setTargetLanguage,
   };
 }

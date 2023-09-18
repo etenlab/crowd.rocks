@@ -44,7 +44,13 @@ apiService:
   priority: 10
   rootdomain: 'dev.crowd.rocks'
   serviceName: 'crowdrocksApiServer'
-  dockerImageUrl: 'etenlab/crowd-rocks'
+  dockerImageUrl: 'etenlab/crowd-rocks:dev'
   cpu: 2048
   memory: 4096
   healthCheckPath: '/'
+
+docsApp:
+  appId: docs
+  domainName: docs.dev.crowd.rocks
+  enabled: true
+  createCustomDomain: true

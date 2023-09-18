@@ -138,11 +138,11 @@ export class ApiServiceStack extends cdk.Stack {
       `${props.appPrefix}TaskRole`,
     );
 
-    const apiServiceExecutionPolicy = new iam.Policy(
+    const apiServiceTaskPolicy = new iam.Policy(
       this,
-      `${props.serviceName}ExecutionPolicy`,
+      `${props.serviceName}TaskPermissions`,
       {
-        policyName: `${props.serviceName}-service-execution-policy`,
+        policyName: `${props.serviceName}-service-task-permissions`,
         statements: [
           new iam.PolicyStatement({
             effect: iam.Effect.ALLOW,
@@ -153,7 +153,7 @@ export class ApiServiceStack extends cdk.Stack {
       },
     );
 
-    execRole.attachInlinePolicy(apiServiceExecutionPolicy);
+    taskRole.attachInlinePolicy(apiServiceTaskPolicy);
 
     const cluster = ecs.Cluster.fromClusterAttributes(
       this,

@@ -1,6 +1,7 @@
 import { Field, ID, InputType, ObjectType, Int } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
 import { WordDefinition } from 'src/components/definitions/types';
+import { PageInfo } from 'src/components/common/types';
 
 @ObjectType()
 export class Word {
@@ -10,34 +11,13 @@ export class Word {
   @Field(() => String, { nullable: true }) dialect_code: string | null;
   @Field(() => String, { nullable: true }) geo_code: string | null;
 }
-@ObjectType()
-export class WordWithDefinition extends Word {
-  @Field(() => String, { nullable: true }) definition: string;
-  @Field(() => String, { nullable: true }) definition_id: string;
-}
-@ObjectType()
-export class WordWithVotes extends WordWithDefinition {
-  @Field(() => String) up_votes: string;
-  @Field(() => String) down_votes: string;
-  @Field(() => String) translation_id: string;
-}
-@ObjectType()
-export class WordTranslations extends WordWithDefinition {
-  @Field(() => [WordWithVotes], { nullable: true })
-  translations?: WordWithVotes[];
-}
 
 @InputType()
 export class WordUpsertInput {
   @Field(() => String) wordlike_string: string;
   @Field(() => String) language_code: string;
-  @Field(() => String, { nullable: true }) dialect_code?: string | null;
-  @Field(() => String, { nullable: true }) geo_code?: string | null;
-}
-
-@ObjectType()
-export class WordUpsertOutput extends GenericOutput {
-  @Field(() => Word, { nullable: true }) word: Word | null;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
 }
 
 @InputType()
@@ -46,8 +26,13 @@ export class WordReadInput {
 }
 
 @ObjectType()
-export class WordReadOutput extends GenericOutput {
+export class WordOutput extends GenericOutput {
   @Field(() => Word, { nullable: true }) word: Word | null;
+}
+
+@ObjectType()
+export class WordsOutput extends GenericOutput {
+  @Field(() => [Word], { nullable: 'items' }) words: (Word | null)[];
 }
 
 @ObjectType()
@@ -85,6 +70,12 @@ export class WordVoteStatusOutputRow extends GenericOutput {
 }
 
 @ObjectType()
+export class WordVoteStatusOutput extends GenericOutput {
+  @Field(() => [WordVoteStatus])
+  vote_status_list: WordVoteStatus[];
+}
+
+@ObjectType()
 export class WordWithVote extends Word {
   @Field(() => Int) upvotes: number;
   @Field(() => Int) downvotes: number;
@@ -97,9 +88,21 @@ export class WordWithDefinitions extends WordWithVote {
 }
 
 @ObjectType()
+export class WordWithVoteListEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => WordWithDefinitions) node: WordWithDefinitions;
+}
+
+@ObjectType()
+export class WordWithVoteListConnection extends GenericOutput {
+  @Field(() => [WordWithVoteListEdge]) edges: WordWithVoteListEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
+}
+
+@ObjectType()
 export class WordWithVoteListOutput extends GenericOutput {
-  @Field(() => [WordWithDefinitions], { nullable: 'items' })
-  word_with_vote_list: WordWithDefinitions[];
+  @Field(() => [WordWithVote], { nullable: 'items' })
+  word_with_vote_list: (WordWithVote | null)[];
 }
 
 @ObjectType()

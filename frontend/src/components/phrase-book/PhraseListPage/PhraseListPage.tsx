@@ -9,7 +9,10 @@ import {
   useIonRouter,
   InputCustomEvent,
   InputChangeEventDetail,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
 } from '@ionic/react';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -20,7 +23,9 @@ import { useGetPhrasesByLanguageLazyQuery } from '../../../generated/graphql';
 
 import { useTogglePhraseVoteStatusMutation } from '../../../hooks/useTogglePhraseVoteStatusMutation';
 
-import { ErrorType } from '../../../generated/graphql';
+import { ErrorType, TableNameType } from '../../../generated/graphql';
+
+import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 import {
   CaptionContainer,
@@ -35,6 +40,8 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { AddListHeader } from '../../common/ListHeader';
 import { PageLayout } from '../../common/PageLayout';
 import { NewPhraseForm } from '../NewPhraseForm';
+
+import { PAGE_SIZE } from '../../../const/commonConst';
 
 interface PhraseListPageProps
   extends RouteComponentProps<{
@@ -59,7 +66,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
   const [filter, setFilter] = useState<string>('');
 
-  const [getPhrasesByLanguage, { data: phrasesData, error }] =
+  const [getPhrasesByLanguage, { data: phrasesData, error, fetchMore }] =
     useGetPhrasesByLanguageLazyQuery();
   const [togglePhraseVoteStatus] = useTogglePhraseVoteStatusMutation();
 
@@ -70,6 +77,8 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
     getPhrasesByLanguage({
       variables: {
+        first: PAGE_SIZE,
+        after: null,
         language_code: targetLang.lang.tag,
         dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
         geo_code: targetLang.region ? targetLang.region.tag : null,
@@ -93,6 +102,29 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
     setFilter(event.detail.value!);
   };
 
+  const handleInfinite = useCallback(
+    async (ev: IonInfiniteScrollCustomEvent<void>) => {
+      if (
+        phrasesData?.getPhrasesByLanguage.pageInfo.hasNextPage &&
+        targetLang
+      ) {
+        await fetchMore({
+          variables: {
+            first: PAGE_SIZE,
+            after: phrasesData.getPhrasesByLanguage.pageInfo.endCursor,
+            language_code: targetLang.lang.tag,
+            dialect_code: targetLang.dialect ? targetLang.dialect.tag : null,
+            geo_code: targetLang.region ? targetLang.region.tag : null,
+            filter: filter.trim(),
+          },
+        });
+      }
+
+      setTimeout(() => ev.target.complete(), 500);
+    },
+    [fetchMore, filter, phrasesData, targetLang],
+  );
+
   const cardListComs = useMemo(() => {
     const tempPhrases: {
       phrase_id: string;
@@ -113,19 +145,20 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
       return null;
     }
 
-    const phraseWithVoteList =
-      phrasesData.getPhrasesByLanguage.phrase_with_vote_list;
+    const phraseWithVoteListEdges = phrasesData.getPhrasesByLanguage.edges;
 
-    for (const phraseWithVote of phraseWithVoteList) {
-      if (phraseWithVote) {
+    for (const edge of phraseWithVoteListEdges) {
+      const { node } = edge;
+
+      if (node) {
         tempPhrases.push({
-          phrase_id: phraseWithVote.phrase_id,
-          phrase: phraseWithVote.phrase,
-          definitionlike_strings: phraseWithVote.definitions.map(
+          phrase_id: node.phrase_id,
+          phrase: node.phrase,
+          definitionlike_strings: node.definitions.map(
             (definition) => definition?.definition,
           ) as string[],
-          upvotes: phraseWithVote.upvotes,
-          downvotes: phraseWithVote.downvotes,
+          upvotes: node.upvotes,
+          downvotes: node.downvotes,
         });
       }
     }
@@ -170,12 +203,31 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
                 });
               },
             }}
+            discussion={{
+              onChatClick: () =>
+                router.push(
+                  `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrases/${phrase.phrase_id}`,
+                ),
+            }}
+            flags={{
+              parent_table: TableNameType.Phrases,
+              parent_id: phrase.phrase_id,
+              flag_names: WORD_AND_PHRASE_FLAGS,
+            }}
             voteFor="content"
             onClick={() => handleGoToDefinitionDetail(phrase.phrase_id)}
           />
         </CardContainer>
       ));
-  }, [error, handleGoToDefinitionDetail, phrasesData, togglePhraseVoteStatus]);
+  }, [
+    error,
+    handleGoToDefinitionDetail,
+    match.params.language_id,
+    match.params.nation_id,
+    phrasesData,
+    router,
+    togglePhraseVoteStatus,
+  ]);
 
   return (
     <PageLayout>
@@ -211,7 +263,14 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
       <CardListContainer>{cardListComs}</CardListContainer>
 
-      <IonModal isOpen={isOpenModal}>
+      <IonInfiniteScroll onIonInfinite={handleInfinite}>
+        <IonInfiniteScrollContent
+          loadingText={`${tr('Loading')}...`}
+          loadingSpinner="bubbles"
+        />
+      </IonInfiniteScroll>
+
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Phrase')}</IonTitle>

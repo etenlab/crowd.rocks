@@ -1,6 +1,15 @@
 import { TypePolicies } from '@apollo/client';
+import { relayStylePagination } from '@apollo/client/utilities';
 
 export const typePolicies: TypePolicies = {
+  Query: {
+    fields: {
+      getWordsByLanguage: relayStylePagination(['input']),
+      getPhrasesByLanguage: relayStylePagination(['input']),
+      getWordDefinitionsByFlag: relayStylePagination(['flag_name']),
+      getPhraseDefinitionsByFlag: relayStylePagination(['flag_name']),
+    },
+  },
   WordWithDefinitions: {
     keyFields: ['word_id'],
   },
@@ -9,6 +18,9 @@ export const typePolicies: TypePolicies = {
   },
   WordWithVote: {
     keyFields: ['word_id'],
+  },
+  WordWithVoteListEdge: {
+    keyFields: ['cursor'],
   },
   WordVoteStatus: {
     keyFields: ['word_id'],
@@ -21,6 +33,9 @@ export const typePolicies: TypePolicies = {
   },
   PhraseWithVote: {
     keyFields: ['phrase_id'],
+  },
+  PhraseWithVoteListEdge: {
+    keyFields: ['cursor'],
   },
   PhraseVoteStatus: {
     keyFields: ['phrase_id'],
@@ -78,5 +93,14 @@ export const typePolicies: TypePolicies = {
   },
   PhraseToPhraseTranslation: {
     keyFields: ['phrase_to_phrase_translation_id'],
+  },
+  Post: {
+    keyFields: ['post_id'],
+  },
+  Flag: {
+    keyFields: ['flag_id'],
+  },
+  TextyDocument: {
+    keyFields: ['document_id'],
   },
 };

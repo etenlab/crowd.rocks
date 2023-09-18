@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "build:local": "tsc && vite build --mode local-dev",
     "build:staging": "tsc && vite build --mode staging",
     "build:prod": "tsc && vite build",
     "preview": "vite preview",
@@ -14,7 +15,7 @@
     "codegen": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
-    "@apollo/client": "^3.7.17",
+    "@apollo/client": "^3.8.1",
     "@capacitor/android": "5.1.1",
     "@capacitor/app": "5.0.5",
     "@capacitor/core": "5.1.1",
@@ -33,9 +34,11 @@
     "react": "^18.2.0",
     "react-cropper": "^2.3.3",
     "react-dom": "^18.2.0",
+    "react-infinite-scroller": "^1.2.6",
     "react-quill": "^2.0.0",
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4",
+    "react-virtuoso": "^4.5.1",
     "styled-components": "^6.0.4",
     "use-debounce": "^9.0.4"
   },
@@ -57,6 +60,7 @@
     "@types/language-tags": "^1.0.1",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
+    "@types/react-infinite-scroller": "^1.2.3",
     "@typescript-eslint/eslint-plugin": "^6.1.0",
     "@vitejs/plugin-legacy": "^4.0.2",
     "@vitejs/plugin-react": "^4.0.1",

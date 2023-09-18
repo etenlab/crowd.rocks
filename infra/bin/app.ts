@@ -5,6 +5,7 @@ import { CommonStack } from '../lib/stacks/common-stack';
 import { StorageStack } from '../lib/stacks/storage-stack';
 import { getConfig } from './getConfig';
 import { ApiServiceStack } from '../lib/stacks/api-service-stack';
+import { FrontendStack } from '../lib/stacks/frontend-stack';
 
 enum TAGS {
   PROJECT = 'project',
@@ -13,8 +14,6 @@ enum TAGS {
 
 const app = new cdk.App();
 const config = getConfig(app);
-
-cdk.Tags.of(app).add(TAGS.ENVIRONMENT, config.environment);
 
 /** Common resources */
 const commonStack = new CommonStack(app, `${config.environment}CommonStack`, {
@@ -95,6 +94,18 @@ const apiServiceStack = new ApiServiceStack(
         AWS_REGION: config.awsRegion,
       },
       {
+        NODE_ENV: config.environment,
+      },
+      {
+        AWS_S3_REGION: config.awsRegion,
+      },
+      {
+        AWS_S3_BUCKET_NAME: config.publicFilesBucketName,
+      },
+      {
+        HTTP_LOGGING: 'false',
+      },
+      {
         REACT_APP_SERVER_URL: `https://${apiService.rootdomain}`,
       },
       {
@@ -108,6 +119,16 @@ const apiServiceStack = new ApiServiceStack(
       {
         taskDefSecretName: 'ADMIN_PASSWORD',
         secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/adminPassword`,
+        createNewSecret: true,
+      },
+      {
+        taskDefSecretName: 'GCP_PROJECT_ID',
+        secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/gcpProjectId`,
+        createNewSecret: true,
+      },
+      {
+        taskDefSecretName: 'GCP_API_KEY',
+        secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/gcpApiKey`,
         createNewSecret: true,
       },
       {
@@ -139,6 +160,23 @@ const apiServiceStack = new ApiServiceStack(
   },
 );
 
+/** API docs */
+const { docsApp } = config;
+const docsStack = new FrontendStack(app, `${config.environment}DocsAppStack`, {
+  env: {
+    account: config.awsAccountId,
+    region: config.awsRegion,
+  },
+  appPrefix: config.appPrefix,
+  envName: config.environment,
+  domainName: docsApp.domainName,
+  appId: docsApp.appId,
+  enabled: docsApp.enabled,
+  createCustomDomain: docsApp.createCustomDomain,
+});
+
 /** Tags */
+cdk.Tags.of(app).add(TAGS.ENVIRONMENT, config.environment);
 cdk.Tags.of(databaseStack).add(TAGS.PROJECT, 'crowd');
 cdk.Tags.of(apiServiceStack).add(TAGS.PROJECT, 'crowd');
+cdk.Tags.of(docsStack).add(TAGS.PROJECT, 'crowd');

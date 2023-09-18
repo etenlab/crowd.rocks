@@ -18,7 +18,15 @@ export interface EnvConfig {
   dbCredentialSecret: string;
   dbPublicAccess: boolean;
   apiService: FargateServiceConfig;
+  docsApp: AppConfig;
   dns: DNSConfig[];
+}
+
+export interface AppConfig {
+  appId: string;
+  domainName: string;
+  enabled: boolean;
+  createCustomDomain: boolean;
 }
 
 export interface FargateServiceConfig {

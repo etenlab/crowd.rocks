@@ -25,7 +25,11 @@ import { AppContextProvider } from './AppContext';
 
 import Body from './Body';
 
-setupIonicReact();
+console.info('Runninig in environment: ' + import.meta.env.MODE);
+
+setupIonicReact({
+  innerHTMLTemplatesEnabled: true,
+});
 
 const App: React.FC = () => (
   <IonApp>

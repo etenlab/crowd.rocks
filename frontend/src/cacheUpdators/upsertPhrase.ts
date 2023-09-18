@@ -2,15 +2,40 @@ import { ApolloCache } from '@apollo/client';
 
 import {
   Phrase,
+  PhraseWithVoteListEdge,
   PhraseWithDefinitions,
   GetPhrasesByLanguageQuery,
 } from '../generated/graphql';
-import { GetPhrasesByLanguageDocument } from '../generated/graphql';
+import {
+  GetPhrasesByLanguageDocument,
+  PhraseWithVoteListEdgeFragmentFragmentDoc,
+} from '../generated/graphql';
 
 export function updateCacheWithUpsertPhrase(
   cache: ApolloCache<unknown>,
   newPhrase: Phrase,
 ) {
+  cache.writeFragment<PhraseWithVoteListEdge>({
+    id: cache.identify({
+      __typename: 'PhraseWithVoteListEdge',
+      cursor: newPhrase.phrase_id,
+    }),
+    fragment: PhraseWithVoteListEdgeFragmentFragmentDoc,
+    fragmentName: 'PhraseWithVoteListEdgeFragment',
+    data: {
+      __typename: 'PhraseWithVoteListEdge',
+      cursor: newPhrase.phrase_id,
+      node: {
+        ...newPhrase,
+        __typename: 'PhraseWithDefinitions',
+        definitions: [],
+        upvotes: 0,
+        downvotes: 0,
+        created_at: new Date().toISOString(),
+      } as PhraseWithDefinitions,
+    },
+  });
+
   cache.updateQuery<GetPhrasesByLanguageQuery>(
     {
       query: GetPhrasesByLanguageDocument,
@@ -23,12 +48,9 @@ export function updateCacheWithUpsertPhrase(
     },
     (data) => {
       if (data) {
-        const alreadyExists =
-          data.getPhrasesByLanguage.phrase_with_vote_list.filter(
-            (phraseWithVote) => {
-              return phraseWithVote?.phrase_id === newPhrase.phrase_id;
-            },
-          );
+        const alreadyExists = data.getPhrasesByLanguage.edges.filter((edge) => {
+          return edge.node.phrase_id === newPhrase.phrase_id;
+        });
 
         if (alreadyExists.length > 0) {
           return data;
@@ -38,17 +60,24 @@ export function updateCacheWithUpsertPhrase(
           ...data,
           getPhrasesByLanguage: {
             ...data.getPhrasesByLanguage,
-            phrase_with_vote_list: [
-              ...data.getPhrasesByLanguage.phrase_with_vote_list,
+            edges: [
+              ...data.getPhrasesByLanguage.edges,
               {
-                ...newPhrase,
-                __typename: 'PhraseWithDefinitions',
-                definitions: [],
-                upvotes: 0,
-                downvotes: 0,
-                created_at: new Date().toISOString(),
-              } as PhraseWithDefinitions,
+                __typename: 'PhraseWithVoteListEdge',
+                cursor: newPhrase.phrase_id,
+                node: {
+                  ...newPhrase,
+                  __typename: 'PhraseWithDefinitions',
+                  definitions: [],
+                  upvotes: 0,
+                  downvotes: 0,
+                  created_at: new Date().toISOString(),
+                } as PhraseWithDefinitions,
+              } as PhraseWithVoteListEdge,
             ],
+            pageInfo: {
+              ...data.getPhrasesByLanguage.pageInfo,
+            },
           },
         };
       } else {
