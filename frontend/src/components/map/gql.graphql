@@ -135,7 +135,7 @@ query GetTranslatedMapContent($id: ID!) {
     }
     created_at
     created_by
-    content
+    content_file_url
     map_file_name_with_langs
   }
 }
@@ -153,12 +153,22 @@ query GetOrigMapContent($id: ID!) {
     map_file_name
     created_at
     created_by
-    content
+    content_file_url
   }
 }
 
-mutation MapUpload($file: Upload!, $previewFileId: String) {
-  mapUpload(file: $file, previewFileId: $previewFileId) {
+mutation MapUpload(
+  $file: Upload!
+  $previewFileId: String
+  $file_type: String!
+  $file_size: Int!
+) {
+  mapUpload(
+    file: $file
+    previewFileId: $previewFileId
+    file_type: $file_type
+    file_size: $file_size
+  ) {
     error
     mapFileOutput {
       original_map_id

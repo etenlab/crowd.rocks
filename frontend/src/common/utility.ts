@@ -76,14 +76,14 @@ export function get_cardinal_suffix(vote: number): string {
 
 export const downloadFromUrl = (file_name: string, file_url: string) => {
   const hiddenElement = document.createElement('a');
-  hiddenElement.href = encodeURI(file_url);
+  hiddenElement.href = file_url;
   hiddenElement.download = file_name;
   hiddenElement.click();
 };
 
 export const downloadFromSrc = (file_name: string, src: string) => {
   const hiddenElement = document.createElement('a');
-  hiddenElement.href = src;
+  hiddenElement.href = `data:image/svg+xml;utf8,${encodeURIComponent(src)}`;
   hiddenElement.download = file_name;
   hiddenElement.click();
 };

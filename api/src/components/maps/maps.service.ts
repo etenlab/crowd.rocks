@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-
 import {
   MapFileListConnection,
   GetOrigMapContentOutput,
@@ -33,6 +32,8 @@ import { PhraseDefinitionsService } from '../definitions/phrase-definitions.serv
 import { putLangCodesToFileName, compareObject } from '../../common/utility';
 import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const string2fileStream = require('string-to-file-stream');
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
@@ -40,6 +41,7 @@ const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes'
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
 const DEFAULT_MAP_WORD_DEFINITION = 'A geographical place';
 const DEFAULT_MAP_PHRASE_DEFINITION = 'A geographical place phrase';
+const SVG_MIME_TYPE = 'image/svg+xml';
 
 export type MapTranslationResult = {
   translatedMap: string;
@@ -47,7 +49,7 @@ export type MapTranslationResult = {
 };
 
 interface IParseAndSaveNewMapParams {
-  fileBody: string;
+  content_file_id: string;
   mapFileName: string;
   previewFileId?: string;
   mapLanguage?: LanguageInfo;
@@ -73,7 +75,7 @@ export class MapsService {
   ) {}
 
   async saveAndParseNewMap({
-    fileBody,
+    content_file_id,
     mapFileName,
     previewFileId,
     mapLanguage = DEFAULT_NEW_MAP_LANGUAGE,
@@ -89,7 +91,7 @@ export class MapsService {
       dbPoolClient.query('BEGIN');
       const { map_id } = await this.mapsRepository.saveOriginalMapTrn({
         mapFileName,
-        fileBody,
+        content_file_id,
         previewFileId: previewFileId!,
         token,
         dbPoolClient,
@@ -120,11 +122,14 @@ export class MapsService {
     dbPoolClient,
     token,
   }: IParseOrigMapParams): Promise<MapFileOutput> {
-    const { language, content, map_file_name, created_at, created_by } =
-      await this.mapsRepository.getOrigMapContent(map_id);
+    const { language, content_file_id, map_file_name, created_at, created_by } =
+      await this.mapsRepository.getOrigMapWithContentUrl(map_id);
     const { language_code, dialect_code, geo_code } = language;
+    const origMapString = await this.fileService.getFileContentAsString(
+      content_file_id,
+    );
     const { transformedSvgINode, foundWords, foundPhrases } =
-      this.parseSvgMapString(content);
+      this.parseSvgMapString(origMapString);
 
     //--save found words with definitions and original map boundng
 
@@ -360,89 +365,15 @@ export class MapsService {
   }
 
   async getOrigMapContent(id: string): Promise<GetOrigMapContentOutput> {
-    return this.mapsRepository.getOrigMapContent(id);
-  }
-
-  async calculateTranslatedPercent<T extends MapFileOutput>(
-    mapFileInfo: T,
-  ): Promise<T> {
-    if (mapFileInfo.is_original)
-      throw new Error(
-        'It is possible to get translated % only for transalted (not original) map.',
-      );
-
-    const originalMap = await this.mapsRepository.getOrigMapInfo(
-      mapFileInfo.original_map_id,
-    );
-    const {
-      language_code: o_language_code,
-      dialect_code: o_dialect_code,
-      geo_code: o_geo_code,
-    } = originalMap.language;
-    const {
-      language_code: t_language_code,
-      dialect_code: t_dialect_code,
-      geo_code: t_geo_code,
-    } = mapFileInfo.language;
-    const originalWords = await this.mapsRepository.getOrigMapWords(
-      //!!!!!!!!!!!!!!!!!!!!!!!!!! SLOW ????
-      mapFileInfo.original_map_id,
-      {
-        o_language_code,
-        o_dialect_code: o_dialect_code || undefined,
-        o_geo_code: o_dialect_code || undefined,
-        t_language_code,
-        t_dialect_code: t_dialect_code || undefined,
-        t_geo_code: t_geo_code || undefined,
-      },
-    );
-    const transaltedWordsCount = originalWords.origMapWords.reduce(
-      (total, ow) => {
-        if (ow.translations?.length && ow.translations.length > 0) {
-          return total + 1;
-        }
-        return total;
-      },
-      0,
-    );
-
-    const originalPhrases = await this.mapsRepository.getOrigMapPhrases(
-      mapFileInfo.original_map_id,
-      {
-        o_language_code,
-        o_dialect_code: o_dialect_code || undefined,
-        o_geo_code: o_geo_code || undefined,
-        t_language_code,
-        t_dialect_code: t_dialect_code || undefined,
-        t_geo_code: t_geo_code || undefined,
-      },
-    );
-    const transaltedPhrasesCount = originalPhrases.origMapPhrases.reduce(
-      (total, oph) => {
-        if (oph.translations?.length && oph.translations.length > 0) {
-          return total + 1;
-        }
-        return total;
-      },
-      0,
-    );
-    const translatedCount = transaltedPhrasesCount + transaltedWordsCount;
-    const originalCount =
-      originalPhrases.origMapPhrases.length + originalWords.origMapWords.length;
-    const translated_percent = String(
-      Math.round((translatedCount / originalCount) * 100),
-    );
-    return {
-      ...mapFileInfo,
-      translated_percent,
-    };
+    return this.mapsRepository.getOrigMapWithContentUrl(id);
   }
 
   async getTranslatedMapContent(
     id: string,
   ): Promise<GetTranslatedMapContentOutput> {
-    const mapFileInfo = await this.mapsRepository.getTranslatedMapContent(id);
-    return this.calculateTranslatedPercent(mapFileInfo);
+    const mapFileInfo =
+      await this.mapsRepository.getTranslatedMapWithContentUrl(id);
+    return mapFileInfo;
   }
 
   /**
@@ -660,9 +591,13 @@ export class MapsService {
     dbPoolClient: PoolClient,
     toLang?: LanguageInput,
   ): Promise<Array<string>> {
+    const p0 = performance.now();
+    Logger.log(
+      `START translating of orig map id ${origMapId} to lang ${toLang?.language_code}`,
+    );
     const translatedMapIds: Array<string> = [];
-    const { content: origMapContentStr } =
-      await this.mapsRepository.getOrigMapContent(origMapId);
+    const { content_file_id, map_file_name } =
+      await this.mapsRepository.getOrigMapWithContentUrl(origMapId);
 
     const { origMapWords } = await this.getOrigMapWords({
       original_map_id: origMapId,
@@ -688,6 +623,8 @@ export class MapsService {
     } else {
       targetLanguagesFullTags = this.getLangFullTags(origMapWordsAndPhrases);
     }
+
+    Logger.log(`...found ${targetLanguagesFullTags.length} target languages`);
 
     for (const languageFullTag of targetLanguagesFullTags) {
       const language_code: string = tag2langInfo(languageFullTag).lang.tag;
@@ -748,15 +685,36 @@ export class MapsService {
           }
         }
       }
-
+      const origMapString = await this.fileService.getFileContentAsString(
+        content_file_id,
+      );
+      const p1 = performance.now();
       const { translatedMap } = await this.translateMapString(
-        origMapContentStr,
+        origMapString,
         translations,
       )!;
+      Logger.debug(`translation is done in ${performance.now() - p1} ms`);
+      const translatedContentFile = await this.fileService.uploadFile(
+        string2fileStream(translatedMap),
+        putLangCodesToFileName(map_file_name, {
+          language_code: tag2langInfo(languageFullTag).lang.tag,
+          dialect_code: tag2langInfo(languageFullTag).dialect?.tag || null,
+          geo_code: tag2langInfo(languageFullTag).region?.tag || null,
+        }),
+        SVG_MIME_TYPE,
+        translatedMap.length,
+        token,
+      );
+      if (!translatedContentFile?.file?.id) {
+        Logger.error(
+          `mapsService#translateMapAndSaveTranslatedTrn: Error: translatedContentFile?.file?.id is undefined`,
+        );
+        return [];
+      }
 
       const data = await this.mapsRepository.saveTranslatedMapTrn({
         original_map_id: origMapId,
-        fileBody: translatedMap,
+        content_file_id: String(translatedContentFile.file.id),
         token,
         t_language_code: language_code,
         t_dialect_code: dialect_code,
@@ -771,6 +729,10 @@ export class MapsService {
       });
       translatedMapIds.push(data!.map_id);
     }
+    Logger.log(
+      `DONE translating of orig map id ${origMapId} for ${performance.now() - p0
+      } ms.`,
+    );
 
     return translatedMapIds;
   }
@@ -789,14 +751,35 @@ export class MapsService {
   }
 
   async deleteMap(mapId: string, is_original: boolean): Promise<string> {
-    if (is_original) {
-      const mapInfo = await this.mapsRepository.getOrigMapInfo(mapId);
-      const deletedMapId = await this.mapsRepository.deleteOriginalMap(mapId);
-      await this.fileService.deleteFile(mapInfo.preview_file_id!);
-      return deletedMapId;
-    } else {
-      return this.mapsRepository.deleteTranslatedMap(mapId);
+    return is_original
+      ? await this.deleteOriginalMap(mapId)
+      : await this.deleteTranslatedMap(mapId);
+  }
+
+  async deleteOriginalMap(mapId: string): Promise<string> {
+    const mapInfo = await this.mapsRepository.getOrigMapWithContentUrl(mapId);
+    const translatedMaps = await this.mapsRepository.getTranslatedMaps({
+      originalMapId: Number(mapId),
+    });
+
+    for (const translatedMap of translatedMaps.mapList) {
+      translatedMap.translated_map_id &&
+        (await this.deleteTranslatedMap(translatedMap.translated_map_id));
     }
+
+    const deletedMapId = await this.mapsRepository.deleteOriginalMap(mapId);
+    await this.fileService.deleteFile(mapInfo.preview_file_id!);
+    await this.fileService.deleteFile(mapInfo.content_file_id!);
+    return deletedMapId;
+  }
+
+  async deleteTranslatedMap(mapId: string): Promise<string> {
+    const mapInfo = await this.mapsRepository.getTranslatedMapWithContentUrl(
+      mapId,
+    );
+    const deletedMapId = await this.mapsRepository.deleteTranslatedMap(mapId);
+    await this.fileService.deleteFile(mapInfo.content_file_id!);
+    return deletedMapId;
   }
 
   async translationsReset(token): Promise<void> {
@@ -913,11 +896,3 @@ export class MapsService {
     return foundLangs;
   }
 }
-
-// const translatedMapsWithPercent: Array<MapFileOutput> = [];
-// for (const mapInfo of translatedMaps.origMapList) {
-//   translatedMapsWithPercent.push(
-//     await this.calculateTranslatedPercent(mapInfo),
-//     mapInfo
-//   );
-// }

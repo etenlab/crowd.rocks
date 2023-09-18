@@ -21,7 +21,7 @@ import { putLangCodesToFileName } from '../../common/utility';
 
 interface ISaveMapParams {
   mapFileName: string;
-  fileBody: string;
+  content_file_id: string;
   previewFileId: string;
   token: string;
   language_code: string;
@@ -31,7 +31,7 @@ interface ISaveMapParams {
 }
 export interface ISaveTranslatedMapParams {
   original_map_id: string;
-  fileBody: string;
+  content_file_id: string;
   token: string;
   t_language_code: string;
   t_dialect_code?: string;
@@ -71,7 +71,7 @@ export class MapsRepository {
    */
   async saveOriginalMapTrn({
     mapFileName,
-    fileBody,
+    content_file_id,
     previewFileId,
     token,
     dbPoolClient,
@@ -80,7 +80,8 @@ export class MapsRepository {
     geo_code,
   }: ISaveMapParams): Promise<ISaveMapRes> {
     const previewFileIdN = Number(previewFileId);
-    if (isNaN(previewFileIdN)) {
+    const content_file_idN = Number(content_file_id);
+    if (isNaN(previewFileIdN) || isNaN(content_file_idN)) {
       throw new Error(ErrorType.ProvidedIdIsMalformed);
     }
     const poolClient = dbPoolClient
@@ -93,12 +94,12 @@ export class MapsRepository {
         `,
       [
         mapFileName,
-        fileBody,
+        content_file_idN,
+        previewFileIdN,
         token,
         language_code,
         dialect_code,
         geo_code,
-        previewFileIdN,
       ],
     );
 
@@ -120,7 +121,7 @@ export class MapsRepository {
    */
   async saveTranslatedMapTrn({
     original_map_id,
-    fileBody,
+    content_file_id,
     dbPoolClient,
     token,
     t_language_code,
@@ -141,7 +142,7 @@ export class MapsRepository {
 
     const params = [
       original_map_id,
-      fileBody,
+      content_file_id,
       userId,
       t_language_code,
       translated_percent,
@@ -152,7 +153,7 @@ export class MapsRepository {
       insert into
         translated_maps(
           original_map_id,
-          content,
+          content_file_id,
           created_by,
           language_code,
           translated_percent,
@@ -170,8 +171,8 @@ export class MapsRepository {
           $7
         )
         on conflict(original_map_id, language_code, dialect_code, geo_code) do update
-          set content = EXCLUDED.content,
-        translated_percent = EXCLUDED.translated_percent
+          set content_file_id = EXCLUDED.content_file_id,
+          translated_percent = EXCLUDED.translated_percent
         returning 
           translated_map_id, created_by, created_at
       `;
@@ -247,9 +248,13 @@ export class MapsRepository {
     return { mapList };
   }
 
-  async getTranslatedMaps(
-    lang?: LanguageInput,
-  ): Promise<GetOrigMapsListOutput> {
+  async getTranslatedMaps({
+    lang,
+    originalMapId,
+  }: {
+    lang?: LanguageInput | undefined;
+    originalMapId?: number | undefined;
+  }): Promise<GetOrigMapsListOutput> {
     const params: string[] = [];
     let languageClause = '';
     if (lang?.language_code) {
@@ -264,6 +269,12 @@ export class MapsRepository {
       params.push(lang?.geo_code);
       languageClause += ` and tm.geo_code = $${params.length}`;
     }
+
+    if (originalMapId) {
+      params.push(String(originalMapId));
+      languageClause += ` and tm.original_map_id = $${params.length}`;
+    }
+
     const sqlStr = `
       select
         tm.translated_map_id,
@@ -275,13 +286,17 @@ export class MapsRepository {
         tm.dialect_code,
         tm.geo_code,
         tm.translated_percent,
-        f.file_url as preview_file_url
+        f.file_url as preview_file_url,
+        f.file_id as preview_file_id,
+        f2.file_id as content_file_id
       from
         translated_maps tm
       left join original_maps om
         on tm.original_map_id = om.original_map_id
       left join files f on
         om.preview_file_id = f.file_id
+      left join files f2 on
+        om.content_file_id = f2.file_id
       where
         true
         ${languageClause}
@@ -299,6 +314,8 @@ export class MapsRepository {
         dialect_code,
         geo_code,
         preview_file_url,
+        preview_file_id,
+        content_file_id,
         translated_percent,
       }) => ({
         translated_map_id,
@@ -314,6 +331,8 @@ export class MapsRepository {
         is_original: false,
         language: { language_code, dialect_code, geo_code },
         preview_file_url,
+        preview_file_id,
+        content_file_id,
         translated_percent,
       }),
     );
@@ -374,22 +393,26 @@ export class MapsRepository {
     return { ...origMapList[0] };
   }
 
-  async getOrigMapContent(id: string): Promise<GetOrigMapContentOutput> {
+  async getOrigMapWithContentUrl(id: string): Promise<GetOrigMapContentOutput> {
     const resQ = await this.pg.pool.query(
       `
         select 
           om.original_map_id,
-          om.content, 
           om.map_file_name, 
           om.created_at, 
           om.created_by, 
           om.language_code,	
           om.dialect_code,	
           om.geo_code,
-          f.file_url as preview_file_url
+          om.preview_file_id,
+          om.content_file_id,
+          f.file_url as preview_file_url,
+          f2.file_url as content_file_url
         from original_maps om 
         left join files f on
           om.preview_file_id = f.file_id
+        left join files f2 on
+          om.content_file_id = f2.file_id
         where original_map_id = $1
       `,
       [id],
@@ -404,6 +427,9 @@ export class MapsRepository {
       dialect_code,
       geo_code,
       preview_file_url,
+      content_file_url,
+      preview_file_id,
+      content_file_id,
     } = resQ.rows[0];
 
     return {
@@ -416,14 +442,16 @@ export class MapsRepository {
       }),
       created_at,
       created_by,
-      content: resQ.rows[0].content,
       is_original: true,
       language: { language_code, dialect_code, geo_code },
       preview_file_url,
+      content_file_url,
+      preview_file_id,
+      content_file_id,
     };
   }
 
-  async getTranslatedMapContent(
+  async getTranslatedMapWithContentUrl(
     id: string,
   ): Promise<GetTranslatedMapContentOutput> {
     const resQ = await this.pg.pool.query(
@@ -434,17 +462,21 @@ export class MapsRepository {
         om.map_file_name,
         tm.created_at,
         tm.created_by,
-        tm.language_code ,
-        tm.dialect_code ,
+        tm.language_code,
+        tm.dialect_code,
         tm.geo_code,
-        tm.content,
-        f.file_url as preview_file_url
+        tm.translated_percent,
+        tm.content_file_id,
+        f.file_url as preview_file_url,
+        f2.file_url as content_file_url
       from
         translated_maps tm
       left join original_maps om
         on tm.original_map_id = om.original_map_id
       left join files f on
         om.preview_file_id = f.file_id
+      left join files f2 on
+        tm.content_file_id = f2.file_id
       where
         translated_map_id = $1
       `,
@@ -457,11 +489,13 @@ export class MapsRepository {
       map_file_name,
       created_at,
       created_by,
-      content,
       language_code,
       dialect_code,
       geo_code,
+      translated_percent,
       preview_file_url,
+      content_file_url,
+      content_file_id,
     } = resQ.rows[0];
 
     return {
@@ -470,7 +504,6 @@ export class MapsRepository {
       map_file_name,
       created_at,
       created_by,
-      content,
       is_original: false,
       language: { language_code, dialect_code, geo_code },
       map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
@@ -478,7 +511,10 @@ export class MapsRepository {
         dialect_code,
         geo_code,
       }),
+      translated_percent,
       preview_file_url,
+      content_file_url,
+      content_file_id,
     };
   }
 

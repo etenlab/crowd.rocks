@@ -329,7 +329,8 @@ export type GetOrigMapContentInput = {
 
 export type GetOrigMapContentOutput = {
   __typename?: 'GetOrigMapContentOutput';
-  content: Scalars['String']['output'];
+  content_file_id: Scalars['String']['output'];
+  content_file_url: Scalars['String']['output'];
   created_at: Scalars['String']['output'];
   created_by: Scalars['ID']['output'];
   is_original: Scalars['Boolean']['output'];
@@ -388,7 +389,8 @@ export type GetTranslatedMapContentInput = {
 
 export type GetTranslatedMapContentOutput = {
   __typename?: 'GetTranslatedMapContentOutput';
-  content: Scalars['String']['output'];
+  content_file_id: Scalars['String']['output'];
+  content_file_url: Scalars['String']['output'];
   created_at: Scalars['String']['output'];
   created_by: Scalars['ID']['output'];
   is_original: Scalars['Boolean']['output'];
@@ -492,6 +494,8 @@ export type MapFileListConnection = {
 
 export type MapFileOutput = {
   __typename?: 'MapFileOutput';
+  content_file_id?: Maybe<Scalars['ID']['output']>;
+  content_file_url?: Maybe<Scalars['ID']['output']>;
   created_at: Scalars['String']['output'];
   created_by: Scalars['ID']['output'];
   is_original: Scalars['Boolean']['output'];
@@ -700,6 +704,8 @@ export type MutationMapDeleteArgs = {
 
 export type MutationMapUploadArgs = {
   file: Scalars['Upload']['input'];
+  file_size: Scalars['Int']['input'];
+  file_type: Scalars['String']['input'];
   previewFileId?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -2711,7 +2717,7 @@ export type GetTranslatedMapContentQueryVariables = Exact<{
 }>;
 
 
-export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'GetTranslatedMapContentOutput', translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, content: string, map_file_name_with_langs: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'GetTranslatedMapContentOutput', translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, content_file_url: string, map_file_name_with_langs: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
 
 export type IsAdminLoggedInQueryVariables = Exact<{
   input: IsAdminIdInput;
@@ -2725,11 +2731,13 @@ export type GetOrigMapContentQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: { __typename?: 'GetOrigMapContentOutput', original_map_id: string, map_file_name_with_langs: string, map_file_name: string, created_at: string, created_by: string, content: string } };
+export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: { __typename?: 'GetOrigMapContentOutput', original_map_id: string, map_file_name_with_langs: string, map_file_name: string, created_at: string, created_by: string, content_file_url: string } };
 
 export type MapUploadMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
   previewFileId?: InputMaybe<Scalars['String']['input']>;
+  file_type: Scalars['String']['input'];
+  file_size: Scalars['Int']['input'];
 }>;
 
 
@@ -5322,7 +5330,7 @@ export const GetTranslatedMapContentDocument = gql`
     }
     created_at
     created_by
-    content
+    content_file_url
     map_file_name_with_langs
   }
 }
@@ -5398,7 +5406,7 @@ export const GetOrigMapContentDocument = gql`
     map_file_name
     created_at
     created_by
-    content
+    content_file_url
   }
 }
     `;
@@ -5431,8 +5439,13 @@ export type GetOrigMapContentQueryHookResult = ReturnType<typeof useGetOrigMapCo
 export type GetOrigMapContentLazyQueryHookResult = ReturnType<typeof useGetOrigMapContentLazyQuery>;
 export type GetOrigMapContentQueryResult = Apollo.QueryResult<GetOrigMapContentQuery, GetOrigMapContentQueryVariables>;
 export const MapUploadDocument = gql`
-    mutation MapUpload($file: Upload!, $previewFileId: String) {
-  mapUpload(file: $file, previewFileId: $previewFileId) {
+    mutation MapUpload($file: Upload!, $previewFileId: String, $file_type: String!, $file_size: Int!) {
+  mapUpload(
+    file: $file
+    previewFileId: $previewFileId
+    file_type: $file_type
+    file_size: $file_size
+  ) {
     error
     mapFileOutput {
       original_map_id
@@ -5458,6 +5471,8 @@ export type MapUploadMutationFn = Apollo.MutationFunction<MapUploadMutation, Map
  *   variables: {
  *      file: // value for 'file'
  *      previewFileId: // value for 'previewFileId'
+ *      file_type: // value for 'file_type'
+ *      file_size: // value for 'file_size'
  *   },
  * });
  */

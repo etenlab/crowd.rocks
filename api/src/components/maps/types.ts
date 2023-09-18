@@ -24,6 +24,8 @@ export class MapFileOutput {
   @Field(() => ID, { nullable: true }) translated_map_id?: string;
   @Field(() => ID, { nullable: true }) preview_file_url?: string;
   @Field(() => ID, { nullable: true }) preview_file_id?: string;
+  @Field(() => ID, { nullable: true }) content_file_url?: string;
+  @Field(() => ID, { nullable: true }) content_file_id?: string;
 }
 @InputType()
 export class GetOrigMapListInput {
@@ -74,7 +76,8 @@ export class GetOrigMapContentInput {
 }
 @ObjectType()
 export class GetOrigMapContentOutput extends MapFileOutput {
-  @Field(() => String) content: string;
+  @Field(() => String) content_file_url: string;
+  @Field(() => String) content_file_id: string;
 }
 
 @InputType()

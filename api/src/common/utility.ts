@@ -1,5 +1,5 @@
 import { PoolClient, Pool } from 'pg';
-import { TLangCodes } from './types';
+import { LanguageInput } from '../components/common/types';
 const N_PLACEHOLDER = '-n-Qh_Q1A-';
 
 export function createToken(length = 64): string {
@@ -58,7 +58,7 @@ export function calc_vote_weight(upvotes: number, downvotes: number): number {
 
 export const putLangCodesToFileName = (
   file_name: string,
-  langCodes: TLangCodes,
+  langCodes: LanguageInput,
 ): string => {
   if (!langCodes.language_code) {
     throw new Error(`language_code insn't provided!`);
