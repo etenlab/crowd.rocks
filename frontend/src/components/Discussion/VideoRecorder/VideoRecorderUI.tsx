@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { RecorderStatus } from '../AudioRecorder/AudioRecorderUI';
 import { IonAlert, IonButton, IonIcon } from '@ionic/react';
 import {
@@ -8,9 +8,10 @@ import {
   playCircleOutline,
   videocam,
 } from 'ionicons/icons';
+import { UploadMedia } from '../UploadMedia/UploadMedia';
 
 type VideoRecorderProps = {
-  onSave(blobs: Blob[]): void;
+  onSave(blobsOrFile: Blob[] | File): void;
   onCancel(): void;
 };
 
@@ -241,6 +242,8 @@ export function VideoRecorderUI({ onSave, onCancel }: VideoRecorderProps) {
             <IonIcon icon={checkmarkCircleOutline} />
           </IonButton>
         </div>
+        <hr />
+        <UploadMedia onSave={onSave} accept="video/*" />
       </div>
 
       <IonAlert

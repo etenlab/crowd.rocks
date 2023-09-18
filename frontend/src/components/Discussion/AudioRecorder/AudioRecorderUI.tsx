@@ -10,10 +10,11 @@ import {
   micCircleOutline,
   playCircleOutline,
 } from 'ionicons/icons';
+import { UploadMedia } from '../UploadMedia/UploadMedia';
 
 type AudioRecorderProps = {
   onCancel(): void;
-  onSave(blobs: Blob[]): void;
+  onSave(blobsOrFile: Blob[] | File): void;
 };
 
 export type RecorderStatus = 'new' | 'paused' | 'recording' | 'ended';
@@ -227,6 +228,8 @@ export function AudioRecorderUI({ onCancel, onSave }: AudioRecorderProps) {
           <IonIcon icon={checkmarkCircleOutline} />
         </IonButton>
       </div>
+      <hr />
+      <UploadMedia onSave={onSave} accept="audio/*" />
     </div>
   );
 }

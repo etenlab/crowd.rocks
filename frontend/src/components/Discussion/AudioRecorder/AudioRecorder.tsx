@@ -105,8 +105,14 @@ export function AudioRecorder({
     parent,
   ]);
 
-  const handleSave = (blobs: Blob[]) => {
-    const file = new File(blobs, `record_${user_id}.wav`);
+  const handleSave = (blobsOrFile: Blob[] | File) => {
+    let file = null;
+    if (blobsOrFile instanceof File) {
+      file = blobsOrFile;
+    } else {
+      file = new File(blobsOrFile, `record_${user_id}.wav`);
+    }
+
     if (file.size > maxFileSize) {
       present({
         message: `${tr('Exceeded max file size')} [${maxFileSize}]`,

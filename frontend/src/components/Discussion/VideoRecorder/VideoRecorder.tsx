@@ -57,7 +57,6 @@ export function VideoRecorder({
 
   useEffect(() => {
     if (status === 'uploaded') {
-      //TODO: cleanup - put the file upload stuff maybe in a utility thing with uploading the post and have video and audio use that.
       if (
         data &&
         data.uploadFile.file &&
@@ -99,8 +98,13 @@ export function VideoRecorder({
     tr,
   ]);
 
-  const handleSave = (blobs: Blob[]) => {
-    const file = new File(blobs, `record_${user_id}.webm`);
+  const handleSave = (blobsOrFile: Blob[] | File) => {
+    let file = null;
+    if (blobsOrFile instanceof File) {
+      file = blobsOrFile;
+    } else {
+      file = new File(blobsOrFile, `record_${user_id}.webm`);
+    }
 
     if (file.size > maxFileSize) {
       present({
