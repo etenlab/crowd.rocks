@@ -93,6 +93,7 @@ export function GoogleTranslationPage() {
   } | null>(null);
   const [result, setResult] =
     useState<TranslateAllWordsAndPhrasesByGoogleResult | null>(null);
+  const [isStopPressed, setIsStopPressed] = useState<boolean>(false);
 
   useEffect(() => {
     if (translationResult && translationResult.TranslationReport) {
@@ -112,6 +113,7 @@ export function GoogleTranslationPage() {
         batchTranslatingRef.current = false;
       } else {
         setBatchTranslating(true);
+        setIsStopPressed(false);
         batchTranslatingRef.current = true;
       }
 
@@ -196,6 +198,7 @@ export function GoogleTranslationPage() {
   };
 
   const handleCancelTranslateAll = async () => {
+    setIsStopPressed(true);
     await stopGoogleTranslation();
   };
 
@@ -228,9 +231,9 @@ export function GoogleTranslationPage() {
           <IonButton
             color="danger"
             onClick={handleCancelTranslateAll}
-            disabled={!batchTranslating}
+            disabled={!batchTranslating || isStopPressed}
           >
-            {tr('Cancel')}
+            {isStopPressed ? `${tr('Canceling')}...` : tr('Cancel')}
           </IonButton>
         </Stack>
 

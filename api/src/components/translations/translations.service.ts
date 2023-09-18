@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
 import { Subject } from 'rxjs';
 
@@ -43,7 +43,6 @@ import {
 import { PoolClient } from 'pg';
 import { PhraseDefinition, WordDefinition } from '../definitions/types';
 import { PostgresService } from '../../core/postgres.service';
-import { MapsService } from '../maps/maps.service';
 import { getTranslationLangSqlStr } from './sql-string';
 
 export function makeStr(
@@ -79,8 +78,6 @@ export class TranslationsService {
     private phrasesService: PhrasesService,
     private gTrService: GoogleTranslateService,
     private pg: PostgresService,
-    @Inject(forwardRef(() => MapsService))
-    private mapService: MapsService,
   ) {
     this.translationSubject = new Subject<number>();
   }
@@ -169,7 +166,7 @@ export class TranslationsService {
         };
       }
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -325,7 +322,7 @@ export class TranslationsService {
         }),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -401,7 +398,7 @@ export class TranslationsService {
         translation_with_vote: mostVoted,
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -483,7 +480,7 @@ export class TranslationsService {
         }),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -559,7 +556,7 @@ export class TranslationsService {
         }
       }
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -749,7 +746,7 @@ export class TranslationsService {
         ),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -959,7 +956,7 @@ export class TranslationsService {
         }),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -1036,7 +1033,7 @@ export class TranslationsService {
         );
       }
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -1112,7 +1109,7 @@ export class TranslationsService {
         }
       }
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -1373,8 +1370,37 @@ export class TranslationsService {
       const hasErrors: string[] = [];
       let status: 'Progressing' | 'Completed' = 'Progressing';
 
+      this.pubSub.publish(SubscriptionToken.TranslationReport, {
+        [SubscriptionToken.TranslationReport]: {
+          ...totalResult,
+          status,
+          message: `Translating ${langInfo2String(
+            subTags2LangInfo({
+              lang: from_language.language_code,
+              dialect: from_language.dialect_code || undefined,
+              region: from_language.geo_code || undefined,
+            }),
+          )} into ${
+            languages.length > 0
+              ? langInfo2String(
+                  subTags2LangInfo({
+                    lang: languages[0].code,
+                    dialect: undefined,
+                    region: undefined,
+                  }),
+                )
+              : ''
+          }...`,
+          errors: hasErrors,
+          total: languages.length,
+          completed: 0,
+        },
+      });
+
       this.translationSubject.subscribe({
         next: async (step) => {
+          console.log(step, languages.length);
+
           if (step >= languages.length) {
             this.translationSubject.complete();
             return;
@@ -1407,7 +1433,6 @@ export class TranslationsService {
               ),
             );
           }
-          // await this.mapService.reTranslate(token, language.code);
 
           if (result) {
             totalResult = {
@@ -1448,9 +1473,7 @@ export class TranslationsService {
             },
           });
 
-          // setTimeout(() => {
           this.translationSubject.next(step + 1);
-          // }, 5000);
         },
         complete: () => {
           status = 'Completed';
@@ -1483,7 +1506,7 @@ export class TranslationsService {
         languages,
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
