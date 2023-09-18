@@ -1,12 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Resolver, Mutation, Query, Context } from '@nestjs/graphql';
+import {
+  Args,
+  Resolver,
+  Mutation,
+  Query,
+  Context,
+  Int,
+  ID,
+} from '@nestjs/graphql';
 
 import { MapsService } from './maps.service';
 
 import { getBearer } from '../../common/utility';
 import {
   GetAllMapsListInput,
-  GetAllMapsListOutput,
+  MapFileListConnection,
   GetOrigMapContentInput,
   GetOrigMapContentOutput,
   GetOrigMapListInput,
@@ -175,12 +183,17 @@ export class MapsResolver {
     return maps;
   }
 
-  @Query(() => GetAllMapsListOutput)
+  @Query(() => MapFileListConnection)
   async getAllMapsList(
     @Args('input') input: GetAllMapsListInput,
-  ): Promise<GetAllMapsListOutput> {
-    const maps = await this.mapService.getAllMapsList(input.lang);
-    return maps;
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<MapFileListConnection> {
+    return this.mapService.getAllMapsList({
+      lang: input.lang,
+      first,
+      after,
+    });
   }
 
   @Query(() => GetOrigMapContentOutput)

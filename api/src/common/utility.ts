@@ -155,3 +155,39 @@ export function unSubstituteN<T extends string | Array<string>>(inStr: T): T {
     return inStr.replaceAll(N_PLACEHOLDER, '\n') as T;
   }
 }
+
+export function compareObject(
+  obj1: object | undefined | null,
+  obj2: object | undefined | null,
+) {
+  if (!obj1 === !obj2) {
+    return true;
+  }
+
+  if (!obj1) {
+    return false;
+  }
+
+  if (!obj2) {
+    return false;
+  }
+
+  const key1 = Object.keys(obj1).sort();
+  const key2 = Object.keys(obj2).sort();
+
+  if (key1.length !== key2.length) {
+    return false;
+  }
+
+  for (let i = 0; i < key1.length; i++) {
+    if (key1[i] !== key2[i]) {
+      return false;
+    }
+
+    if (obj1[key1[i]] !== obj2[key2[i]]) {
+      return false;
+    }
+  }
+
+  return true;
+}

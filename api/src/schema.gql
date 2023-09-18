@@ -278,10 +278,6 @@ input GetAllMapsListInput {
   lang: LanguageInput
 }
 
-type GetAllMapsListOutput {
-  allMapsList: [MapFileOutput!]!
-}
-
 input GetDocumentInput {
   document_id: String!
 }
@@ -438,6 +434,11 @@ type MapDeleteOutput {
   error: ErrorType!
 }
 
+type MapFileListConnection {
+  edges: [MapFileOutputEdge!]!
+  pageInfo: PageInfo!
+}
+
 type MapFileOutput {
   created_at: String!
   created_by: ID!
@@ -450,6 +451,11 @@ type MapFileOutput {
   preview_file_url: ID
   translated_map_id: ID
   translated_percent: String
+}
+
+type MapFileOutputEdge {
+  cursor: ID!
+  node: MapFileOutput!
 }
 
 type MapPhraseTranslations {
@@ -870,7 +876,7 @@ type Query {
   forumRead(input: ForumReadInput!): ForumReadOutput!
   forums: ForumListOutput!
   getAllDocuments(input: GetAllDocumentsInput!): GetAllDocumentsOutput!
-  getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
+  getAllMapsList(after: ID, first: Int, input: GetAllMapsListInput!): MapFileListConnection!
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput!
   getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): SiteTextTranslationWithVoteListByLanguageOutput!
   getAllSiteTextDefinitions(filter: String): SiteTextDefinitionListOutput!
