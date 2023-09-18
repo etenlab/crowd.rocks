@@ -7,6 +7,7 @@ import {
 } from '@nestjs/graphql';
 import { LanguageInput, LanguageOutput } from 'src/components/common/types';
 import { GenericOutput } from '../../common/types';
+import { PageInfo } from 'src/components/common/types';
 import { Phrase } from '../phrases/types';
 import { Word } from '../words/types';
 
@@ -23,6 +24,8 @@ export class MapFileOutput {
   @Field(() => ID, { nullable: true }) translated_map_id?: string;
   @Field(() => ID, { nullable: true }) preview_file_url?: string;
   @Field(() => ID, { nullable: true }) preview_file_id?: string;
+  @Field(() => ID, { nullable: true }) content_file_url?: string;
+  @Field(() => ID, { nullable: true }) content_file_id?: string;
 }
 @InputType()
 export class GetOrigMapListInput {
@@ -56,8 +59,15 @@ export class GetAllMapsListInput {
 }
 
 @ObjectType()
-export class GetAllMapsListOutput {
-  @Field(() => [MapFileOutput]) allMapsList: MapFileOutput[];
+export class MapFileOutputEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => MapFileOutput) node: MapFileOutput;
+}
+
+@ObjectType()
+export class MapFileListConnection {
+  @Field(() => [MapFileOutputEdge]) edges: MapFileOutputEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
 }
 
 @InputType()
@@ -66,7 +76,8 @@ export class GetOrigMapContentInput {
 }
 @ObjectType()
 export class GetOrigMapContentOutput extends MapFileOutput {
-  @Field(() => String) content: string;
+  @Field(() => String) content_file_url: string;
+  @Field(() => String) content_file_id: string;
 }
 
 @InputType()

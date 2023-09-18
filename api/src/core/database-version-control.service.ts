@@ -253,6 +253,7 @@ export class DatabaseVersionControlService {
 
     // file
     await this.runSqlFile('./src/core/sql/file/file_create.sql');
+    await this.runSqlFile('./src/core/sql/file/file_update-v2.sql');
 
     // forum
     await this.runSqlFile('./src/core/sql/forums/forum_upsert.sql');
@@ -280,6 +281,9 @@ export class DatabaseVersionControlService {
     await this.runSqlFile(
       './src/core/sql/notification/mark_notification_as_read.sql',
     );
+
+    // map
+    await this.runSqlFile('./src/core/sql/map/original_map_create-v2.sql');
 
     await this.setVersionNumber(2);
   }

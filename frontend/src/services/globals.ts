@@ -1,8 +1,12 @@
 export interface ISettings {
   isBetaTools: boolean;
+  isOral: boolean;
+  isSign: boolean;
 }
 const DEFAULT_SETTINGS: ISettings = {
   isBetaTools: false,
+  isOral: false,
+  isSign: false,
 };
 
 export class Globals {

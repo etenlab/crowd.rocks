@@ -77,6 +77,7 @@ enum ErrorType {
   EmailTooShort
   EmailUnavailable
   FileDeleteFailed
+  FileNotExists
   FileSaveFailed
   FileWithFilenameAlreadyExists
   FolderForThreadNotExists
@@ -278,10 +279,6 @@ input GetAllMapsListInput {
   lang: LanguageInput
 }
 
-type GetAllMapsListOutput {
-  allMapsList: [MapFileOutput!]!
-}
-
 input GetDocumentInput {
   document_id: String!
 }
@@ -296,7 +293,8 @@ input GetOrigMapContentInput {
 }
 
 type GetOrigMapContentOutput {
-  content: String!
+  content_file_id: String!
+  content_file_url: String!
   created_at: String!
   created_by: ID!
   is_original: Boolean!
@@ -351,7 +349,8 @@ input GetTranslatedMapContentInput {
 }
 
 type GetTranslatedMapContentOutput {
-  content: String!
+  content_file_id: String!
+  content_file_url: String!
   created_at: String!
   created_by: ID!
   is_original: Boolean!
@@ -438,7 +437,14 @@ type MapDeleteOutput {
   error: ErrorType!
 }
 
+type MapFileListConnection {
+  edges: [MapFileOutputEdge!]!
+  pageInfo: PageInfo!
+}
+
 type MapFileOutput {
+  content_file_id: ID
+  content_file_url: ID
   created_at: String!
   created_by: ID!
   is_original: Boolean!
@@ -450,6 +456,11 @@ type MapFileOutput {
   preview_file_url: ID
   translated_map_id: ID
   translated_percent: String
+}
+
+type MapFileOutputEdge {
+  cursor: ID!
+  node: MapFileOutput!
 }
 
 type MapPhraseTranslations {
@@ -528,7 +539,7 @@ type Mutation {
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
   mapDelete(input: MapDeleteInput!): MapDeleteOutput!
-  mapUpload(file: Upload!, previewFileId: String): MapUploadOutput!
+  mapUpload(file: Upload!, file_size: Int!, file_type: String!, previewFileId: String): MapUploadOutput!
   mapsReTranslate(forLangTag: String): GenericOutput!
   mapsTranslationsReset: GenericOutput!
   markNotificationAsRead(input: MarkNotificationReadInput!): MarkNotificationReadOutput!
@@ -827,11 +838,14 @@ type Post {
   content: String!
   created_at: DateTime!
   created_by_user: User!
+  file_type: String
+  file_url: ID
   post_id: ID!
 }
 
 input PostCreateInput {
   content: String!
+  file_id: ID
   parent_id: Int!
   parent_table: String!
 }
@@ -870,7 +884,7 @@ type Query {
   forumRead(input: ForumReadInput!): ForumReadOutput!
   forums: ForumListOutput!
   getAllDocuments(input: GetAllDocumentsInput!): GetAllDocumentsOutput!
-  getAllMapsList(input: GetAllMapsListInput!): GetAllMapsListOutput!
+  getAllMapsList(after: ID, first: Int, input: GetAllMapsListInput!): MapFileListConnection!
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput!
   getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): SiteTextTranslationWithVoteListByLanguageOutput!
   getAllSiteTextDefinitions(filter: String): SiteTextDefinitionListOutput!

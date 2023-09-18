@@ -114,4 +114,13 @@ create table site_text_translation_counts(
 alter table wordlike_strings
 alter column wordlike_string type varchar;
 
-alter table translated_maps add column translated_percent int2
+alter table versions
+add column file_id bigint references files(file_id);
+
+alter table translated_maps add column translated_percent int2;
+
+ALTER TABLE original_maps DROP COLUMN if exists "content";
+ALTER TABLE translated_maps DROP COLUMN if exists "content";
+ALTER TABLE original_maps add if not exists content_file_id int8 NULL;
+ALTER TABLE translated_maps add if not exists content_file_id int8 NULL;
+

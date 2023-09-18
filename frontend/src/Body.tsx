@@ -72,7 +72,6 @@ import { FastTranslationPage } from './components/translation/FastTranslationPag
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
 import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
 import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
-import { ForumFolder } from './components/forums/ForumFolderDetail/FolderDetail';
 import { NotificationPage } from './components/notifications/NotificationPage';
 import { SettingsPage } from './components/settings/SettingsPage';
 import { DocumentsPage } from './components/documents/DocumentsPage';
@@ -101,22 +100,26 @@ const Body: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [logoutMutation, { data, loading, error }] = useLogoutMutation();
 
-  const [getNotifications, { data: nData, error: nError }] =
-    useListNotificationsLazyQuery();
+  const [getNotifications, { data: nData }] = useListNotificationsLazyQuery();
   const [unreadNotificationCount, setUnreadCount] = useState<
     number | undefined
   >(undefined);
 
   useEffect(() => {
-    getNotifications();
+    const handleError = () => {
+      setUnreadCount(undefined);
+    };
+    getNotifications()
+      .then()
+      .catch(() => handleError);
     let count = undefined;
-    if (!nError && nData && nData.notifications.error === ErrorType.NoError) {
+    if (nData && nData.notifications.error === ErrorType.NoError) {
       count = nData.notifications.notifications.filter(
         (n) => !n.isNotified,
       ).length;
     }
     setUnreadCount(count);
-  }, [getNotifications, nData, nError]);
+  }, [getNotifications, nData]);
 
   let sub: Subscription;
 
@@ -467,11 +470,6 @@ const Body: React.FC = () => {
             exact
             path="/:nation_id/:language_id/:cluster_id/forums/:forum_id/:forum_name"
             component={ForumDetailPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/folders/:forum_folder_id/:forum_folder_name"
-            component={ForumFolder}
           />
           <Route
             exact

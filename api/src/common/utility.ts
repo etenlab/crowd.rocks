@@ -1,5 +1,5 @@
 import { PoolClient, Pool } from 'pg';
-import { TLangCodes } from './types';
+import { LanguageInput } from '../components/common/types';
 const N_PLACEHOLDER = '-n-Qh_Q1A-';
 
 export function createToken(length = 64): string {
@@ -58,7 +58,7 @@ export function calc_vote_weight(upvotes: number, downvotes: number): number {
 
 export const putLangCodesToFileName = (
   file_name: string,
-  langCodes: TLangCodes,
+  langCodes: LanguageInput,
 ): string => {
   if (!langCodes.language_code) {
     throw new Error(`language_code insn't provided!`);
@@ -154,4 +154,40 @@ export function unSubstituteN<T extends string | Array<string>>(inStr: T): T {
   } else {
     return inStr.replaceAll(N_PLACEHOLDER, '\n') as T;
   }
+}
+
+export function compareObject(
+  obj1: object | undefined | null,
+  obj2: object | undefined | null,
+) {
+  if (!obj1 === !obj2) {
+    return true;
+  }
+
+  if (!obj1) {
+    return false;
+  }
+
+  if (!obj2) {
+    return false;
+  }
+
+  const key1 = Object.keys(obj1).sort();
+  const key2 = Object.keys(obj2).sort();
+
+  if (key1.length !== key2.length) {
+    return false;
+  }
+
+  for (let i = 0; i < key1.length; i++) {
+    if (key1[i] !== key2[i]) {
+      return false;
+    }
+
+    if (obj1[key1[i]] !== obj2[key2[i]]) {
+      return false;
+    }
+  }
+
+  return true;
 }

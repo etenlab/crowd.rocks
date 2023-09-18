@@ -6,9 +6,10 @@ import { styled } from 'styled-components';
 export type FileUploadProps = {
   accept: string;
   onSelect: (file: File) => void;
+  icon?: string;
 };
 
-export const FileUploadBtn = ({ accept, onSelect }: FileUploadProps) => {
+export const FileUploadBtn = ({ accept, onSelect, icon }: FileUploadProps) => {
   const fileInput = useRef<HTMLInputElement | null>(null);
 
   return (
@@ -23,7 +24,7 @@ export const FileUploadBtn = ({ accept, onSelect }: FileUploadProps) => {
         }}
       />
       <StIonIcon
-        icon={add}
+        icon={icon ?? add}
         onClick={() => {
           fileInput?.current?.click();
         }}

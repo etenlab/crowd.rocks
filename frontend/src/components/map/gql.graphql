@@ -24,6 +24,30 @@ fragment WordWithVotesFragment on MapWordWithVotes {
   translation_id
 }
 
+fragment MapFileOutputFragment on MapFileOutput {
+  is_original
+  original_map_id
+  translated_map_id
+  map_file_name
+  translated_percent
+  language {
+    language_code
+    dialect_code
+    geo_code
+  }
+  created_at
+  created_by
+  map_file_name_with_langs
+  preview_file_url
+}
+
+fragment MapFileOutputEdgeFragment on MapFileOutputEdge {
+  cursor
+  node {
+    ...MapFileOutputFragment
+  }
+}
+
 query GetOrigMapWords(
   $original_map_id: ID
   $o_language_code: String
@@ -88,23 +112,13 @@ query GetOrigMapPhrases(
   }
 }
 
-query GetAllMapsList($lang: LanguageInput) {
-  getAllMapsList(input: { lang: $lang }) {
-    allMapsList {
-      is_original
-      original_map_id
-      translated_map_id
-      map_file_name
-      translated_percent
-      language {
-        language_code
-        dialect_code
-        geo_code
-      }
-      created_at
-      created_by
-      map_file_name_with_langs
-      preview_file_url
+query GetAllMapsList($lang: LanguageInput, $after: ID, $first: Int) {
+  getAllMapsList(input: { lang: $lang }, after: $after, first: $first) {
+    edges {
+      ...MapFileOutputEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
@@ -121,7 +135,7 @@ query GetTranslatedMapContent($id: ID!) {
     }
     created_at
     created_by
-    content
+    content_file_url
     map_file_name_with_langs
   }
 }
@@ -139,12 +153,22 @@ query GetOrigMapContent($id: ID!) {
     map_file_name
     created_at
     created_by
-    content
+    content_file_url
   }
 }
 
-mutation MapUpload($file: Upload!, $previewFileId: String) {
-  mapUpload(file: $file, previewFileId: $previewFileId) {
+mutation MapUpload(
+  $file: Upload!
+  $previewFileId: String
+  $file_type: String!
+  $file_size: Int!
+) {
+  mapUpload(
+    file: $file
+    previewFileId: $previewFileId
+    file_type: $file_type
+    file_size: $file_size
+  ) {
     error
     mapFileOutput {
       original_map_id
