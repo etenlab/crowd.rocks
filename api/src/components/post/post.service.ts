@@ -64,11 +64,15 @@ export class PostService {
             p.post_id,
             p.created_at,
             p.created_by,
-            v.content
+            v.content,
+            f.file_url,
+            f.file_type
           from 
             posts p
           join versions v
             on p.post_id = v.post_id
+          left join files f
+            on v.file_id = f.file_id
           where
             true
             and p.post_id = $1
@@ -93,6 +97,8 @@ export class PostService {
               created_at: res1.rows[0].created_at,
               created_by_user: createdBy!,
               content: res1.rows[0].content,
+              file_url: res1.rows[0].file_url,
+              file_type: res1.rows[0].file_type,
             },
           };
           return post;
@@ -118,9 +124,15 @@ export class PostService {
 
       const res = await this.pg.pool.query(
         `
-            call post_create($1, $2, $3, $4,null,null,null,null,null);
+            call post_create($1, $2, $3, $4, $5,null,null,null,null,null);
           `,
-        [input.content, bearer, input.parent_table, input.parent_id],
+        [
+          input.content,
+          bearer,
+          input.parent_table,
+          input.parent_id,
+          input.file_id,
+        ],
       );
 
       const error = res.rows[0].p_error_type;
@@ -199,11 +211,15 @@ export class PostService {
               p.post_id,
               p.created_at,
               p.created_by,
-              v.content
+              v.content,
+              f.file_url,
+              f.file_type
             from 
               posts p
             join versions v
               on p.post_id = v.post_id
+            left join files f
+              on v.file_id = f.file_id
             where
               true
               and p.parent_table = $1
@@ -215,7 +231,14 @@ export class PostService {
 
       const posts = await Promise.all(
         res1.rows.map<Promise<Post>>(async (data: any) => {
-          const { post_id, created_at, created_by, content } = data;
+          const {
+            post_id,
+            created_at,
+            created_by,
+            content,
+            file_url,
+            file_type,
+          } = data;
           const user = (await this.userService.read({ user_id: created_by }))
             .user;
           return {
@@ -223,6 +246,8 @@ export class PostService {
             created_at,
             created_by_user: user!,
             content,
+            file_url: file_url,
+            file_type,
           };
         }),
       );
@@ -270,11 +295,15 @@ export class PostService {
               p.post_id,
               p.created_at,
               p.created_by,
-              v.content
+              v.content,
+              f.file_url,
+              f.file_type
             from 
               posts p
             join versions v
               on p.post_id = v.post_id
+            left join files f
+              on v.file_id = f.file_id
             where
               true
               and p.parent_table = $1
@@ -304,6 +333,8 @@ export class PostService {
             created_at: res1.rows[0].created_at,
             created_by_user: createdBy!,
             content: res1.rows[0].content,
+            file_url: res1.rows[0].file_url,
+            file_type: res1.rows[0].file_type,
           },
         };
         return post;
