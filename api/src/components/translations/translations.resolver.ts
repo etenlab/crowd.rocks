@@ -1,11 +1,21 @@
-import { Injectable } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
+import { Injectable, Inject } from '@nestjs/common';
+import {
+  Args,
+  Query,
+  Mutation,
+  Subscription,
+  Resolver,
+  Context,
+  ID,
+} from '@nestjs/graphql';
+import { PubSub } from 'graphql-subscriptions';
 
+import { PUB_SUB } from 'src/pubSub.module';
 import { getBearer } from 'src/common/utility';
+import { SubscriptionToken } from 'src/common/subscription-token';
 
 import { LanguageInput } from 'src/components/common/types';
 
-import { AuthenticationService } from 'src/components/authentication/authentication.service';
 import { MapsService } from 'src/components/maps/maps.service';
 
 import { WordToWordTranslationsService } from './word-to-word-translations.service';
@@ -36,19 +46,20 @@ import {
   TranslationWithVoteOutput,
   LanguageListForGoogleTranslateOutput,
   TranslateAllWordsAndPhrasesByGoogleOutput,
+  TranslateAllWordsAndPhrasesByGoogleResult,
 } from './types';
-import { ErrorType } from '../../common/types';
+import { ErrorType, GenericOutput } from '../../common/types';
 
 @Injectable()
 @Resolver()
 export class TranslationsResolver {
   constructor(
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private translationService: TranslationsService,
     private wordToWordTranslationService: WordToWordTranslationsService,
     private wordToPhraseTranslationService: WordToPhraseTranslationsService,
     private phraseToWordTranslationService: PhraseToWordTranslationsService,
     private phraseToPhraseTranslationService: PhraseToPhraseTranslationsService,
-    private authenticationService: AuthenticationService,
     private mapsService: MapsService,
   ) {}
 
@@ -386,7 +397,7 @@ export class TranslationsResolver {
   }
 
   @Mutation(() => TranslateAllWordsAndPhrasesByGoogleOutput)
-  async translateAllWordsAndPhrasesByGoogle(
+  async translateWordsAndPhrasesByGoogle(
     @Args('from_language', { type: () => LanguageInput })
     from_language: LanguageInput,
     @Args('to_language', { type: () => LanguageInput })
@@ -394,16 +405,36 @@ export class TranslationsResolver {
     @Context() req: any,
   ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
     console.log(
-      'translateAllWordsAndPhrasesByGoogle',
+      'translateWordsAndPhrasesByGoogle',
       JSON.stringify({
         from_language,
         to_language,
       }),
     );
 
-    return this.translationService.translateAllWordsAndPhrasesByGoogle(
+    return this.translationService.translateWordsAndPhrasesByGoogle(
       from_language,
       to_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @Mutation(() => TranslateAllWordsAndPhrasesByGoogleOutput)
+  async translateAllWordsAndPhrasesByGoogle(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<GenericOutput> {
+    console.log(
+      'translateAllWordsAndPhrasesByGoogle',
+      JSON.stringify({
+        from_language,
+      }),
+    );
+
+    return this.translationService.translateAllWordsAndPhrasesByGoogle(
+      from_language,
       getBearer(req) || '',
       null,
     );
@@ -509,5 +540,20 @@ export class TranslationsResolver {
       });
     }
     return res;
+  }
+
+  @Mutation(() => GenericOutput)
+  async stopGoogleTranslation(): Promise<GenericOutput> {
+    console.log('stopGoogleTranslation');
+
+    return this.translationService.stopGoogleTranslation();
+  }
+
+  @Subscription(() => TranslateAllWordsAndPhrasesByGoogleResult, {
+    name: SubscriptionToken.TranslationReport,
+  })
+  async subscribeToTranslationReport() {
+    console.log('subscribeToTranslationReport');
+    return this.pubSub.asyncIterator(SubscriptionToken.TranslationReport);
   }
 }

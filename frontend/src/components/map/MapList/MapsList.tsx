@@ -138,6 +138,21 @@ export const MapList: React.FC = () => {
   }, [isAdmin]);
 
   useEffect(() => {
+    if (!targetLang) {
+      setTargetLanguage({
+        lang: {
+          tag: 'en',
+          descriptions: ['English'],
+        },
+      });
+    }
+  }, [setTargetLanguage, targetLang]);
+
+  useEffect(() => {
+    if (!targetLang) {
+      return;
+    }
+
     const variables = targetLang?.lang
       ? {
           lang: {

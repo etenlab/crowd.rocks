@@ -46,7 +46,7 @@ export function callWordUpsertProcedure({
 }): [string, [string, string, string | null, string | null, string]] {
   return [
     `
-      call word_upsert($1, $2, $3, $4, $5, 0, '');
+      call word_upsert($1::text, $2::text, $3::text, $4::text, $5::text, 0, '');
     `,
     [wordlike_string, language_code, dialect_code, geo_code, token],
   ];

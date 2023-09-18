@@ -172,7 +172,7 @@ query LanguagesForGoogleTranslate {
   }
 }
 
-mutation TranslateAllWordsAndPhrasesByGoogle(
+mutation TranslateWordsAndPhrasesByGoogle(
   $from_language_code: String!
   $from_dialect_code: String
   $from_geo_code: String
@@ -180,7 +180,7 @@ mutation TranslateAllWordsAndPhrasesByGoogle(
   $to_dialect_code: String
   $to_geo_code: String
 ) {
-  translateAllWordsAndPhrasesByGoogle(
+  translateWordsAndPhrasesByGoogle(
     from_language: {
       language_code: $from_language_code
       dialect_code: $from_dialect_code
@@ -200,6 +200,28 @@ mutation TranslateAllWordsAndPhrasesByGoogle(
       translatedPhraseCount
       translatedWordCount
     }
+  }
+}
+
+mutation TranslateAllWordsAndPhrasesByGoogle(
+  $from_language_code: String!
+  $from_dialect_code: String
+  $from_geo_code: String
+) {
+  translateAllWordsAndPhrasesByGoogle(
+    from_language: {
+      language_code: $from_language_code
+      dialect_code: $from_dialect_code
+      geo_code: $from_geo_code
+    }
+  ) {
+    error
+  }
+}
+
+mutation StopGoogleTranslation {
+  stopGoogleTranslation {
+    error
   }
 }
 
@@ -322,5 +344,20 @@ mutation UpsertPhraseDefinitionFromPhraseAndDefinitionlikeString(
     phrase_definition {
       ...PhraseDefinitionFragment
     }
+  }
+}
+
+subscription SubscribeToTranslationReport {
+  TranslationReport {
+    requestedCharactors
+    totalPhraseCount
+    totalWordCount
+    translatedPhraseCount
+    translatedWordCount
+    status
+    message
+    errors
+    total
+    completed
   }
 }
