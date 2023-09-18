@@ -8,6 +8,7 @@ export const typePolicies: TypePolicies = {
       getPhrasesByLanguage: relayStylePagination(['input']),
       getWordDefinitionsByFlag: relayStylePagination(['flag_name']),
       getPhraseDefinitionsByFlag: relayStylePagination(['flag_name']),
+      getAllMapsList: relayStylePagination(['input']),
     },
   },
   WordWithDefinitions: {
@@ -102,5 +103,8 @@ export const typePolicies: TypePolicies = {
   },
   TextyDocument: {
     keyFields: ['document_id'],
+  },
+  MapFileOutputEdge: {
+    keyFields: ['cursor'],
   },
 };

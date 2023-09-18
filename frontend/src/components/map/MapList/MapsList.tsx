@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
   InputChangeEventDetail,
   InputCustomEvent,
@@ -11,11 +12,14 @@ import {
   IonToolbar,
   useIonRouter,
   useIonToast,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
 } from '@ionic/react';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
+
 import { MapItem } from './MapItem';
 import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ErrorType,
   MapFileOutput,
@@ -32,6 +36,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { globals } from '../../../services/globals';
 import { FilterContainer, Input } from '../../common/styled';
 import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
+import { PAGE_SIZE } from '../../../const/commonConst';
 
 export const MapList: React.FC = () => {
   const router = useIonRouter();
@@ -66,9 +71,8 @@ export const MapList: React.FC = () => {
     },
   ] = useMapsTranslationsResetMutation();
 
-  const [getAllMapsList, { data: allMapsQuery }] = useGetAllMapsListLazyQuery({
-    fetchPolicy: 'no-cache',
-  });
+  const [getAllMapsList, { data: allMapsQuery, fetchMore }] =
+    useGetAllMapsListLazyQuery();
 
   const { makeMapThumbnail } = useMapTranslationTools();
   const [isMapDeleteModalOpen, setIsMapDeleteModalOpen] = useState(false);
@@ -134,22 +138,6 @@ export const MapList: React.FC = () => {
   }, [isAdmin]);
 
   useEffect(() => {
-    if (!targetLang) {
-      setTargetLanguage({
-        lang: {
-          tag: 'en',
-          descriptions: ['English'],
-        },
-      });
-    }
-  }, [setTargetLanguage, targetLang]);
-
-  useEffect(() => {
-    // just performance problem
-    if (!targetLang) {
-      return;
-    }
-
     const variables = targetLang?.lang
       ? {
           lang: {
@@ -157,8 +145,14 @@ export const MapList: React.FC = () => {
             dialect_code: targetLang?.dialect?.tag,
             geo_code: targetLang?.region?.tag,
           },
+          first: PAGE_SIZE,
+          after: null,
         }
-      : undefined;
+      : {
+          lang: undefined,
+          first: PAGE_SIZE,
+          after: null,
+        };
 
     getAllMapsList({ variables });
   }, [getAllMapsList, targetLang]);
@@ -168,6 +162,35 @@ export const MapList: React.FC = () => {
   ) => {
     setFilter(event.detail.value!);
   };
+
+  const handleInfinite = useCallback(
+    async (ev: IonInfiniteScrollCustomEvent<void>) => {
+      if (allMapsQuery?.getAllMapsList.pageInfo.hasNextPage) {
+        const variables = targetLang?.lang
+          ? {
+              lang: {
+                language_code: targetLang.lang.tag,
+                dialect_code: targetLang?.dialect?.tag,
+                geo_code: targetLang?.region?.tag,
+              },
+              first: PAGE_SIZE,
+              after: allMapsQuery.getAllMapsList.pageInfo.endCursor,
+            }
+          : {
+              lang: undefined,
+              first: PAGE_SIZE,
+              after: allMapsQuery.getAllMapsList.pageInfo.endCursor,
+            };
+
+        await fetchMore({
+          variables,
+        });
+      }
+
+      setTimeout(() => ev.target.complete(), 500);
+    },
+    [fetchMore, allMapsQuery, targetLang],
+  );
 
   const addMap = useCallback(
     async (file: File) => {
@@ -257,6 +280,35 @@ export const MapList: React.FC = () => {
     });
   };
 
+  const mapItemComs = useMemo(
+    () =>
+      allMapsQuery?.getAllMapsList.edges?.length ? (
+        allMapsQuery?.getAllMapsList.edges
+          ?.filter((edge) => {
+            return edge.node.map_file_name_with_langs
+              .toLowerCase()
+              .includes(filter.toLowerCase());
+          })
+          .map((edge) => (
+            <MapItem
+              mapItem={edge.node}
+              key={edge.cursor}
+              candidateForDeletionRef={candidateForDeletion}
+              setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
+              showDelete={!!isAdminRes?.loggedInIsAdmin.isAdmin}
+            />
+          ))
+      ) : (
+        <div> {tr('No maps found')} </div>
+      ),
+    [
+      allMapsQuery?.getAllMapsList.edges,
+      filter,
+      isAdminRes?.loggedInIsAdmin.isAdmin,
+      tr,
+    ],
+  );
+
   return (
     <>
       <Caption>{tr('Maps')}</Caption>
@@ -297,33 +349,15 @@ export const MapList: React.FC = () => {
       {loadingMapReset ? (
         <div>Resetting map data...</div>
       ) : (
-        <IonList lines="none">
-          {allMapsQuery?.getAllMapsList.allMapsList?.length ? (
-            allMapsQuery?.getAllMapsList.allMapsList
-              ?.filter((m) => {
-                return m.map_file_name_with_langs
-                  .toLowerCase()
-                  .includes(filter.toLowerCase());
-              })
-              .sort((m1, m2) =>
-                m1.map_file_name_with_langs.localeCompare(
-                  m2.map_file_name_with_langs,
-                ),
-              )
-              .map((m, i) => (
-                <MapItem
-                  mapItem={m}
-                  key={i}
-                  candidateForDeletionRef={candidateForDeletion}
-                  setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
-                  showDelete={!!isAdminRes?.loggedInIsAdmin.isAdmin}
-                />
-              ))
-          ) : (
-            <div> {tr('No maps found')} </div>
-          )}
-        </IonList>
+        <IonList lines="none">{mapItemComs}</IonList>
       )}
+
+      <IonInfiniteScroll onIonInfinite={handleInfinite}>
+        <IonInfiniteScrollContent
+          loadingText={`${tr('Loading')}...`}
+          loadingSpinner="bubbles"
+        />
+      </IonInfiniteScroll>
 
       <IonModal
         isOpen={isMapDeleteModalOpen}

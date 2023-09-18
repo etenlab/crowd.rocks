@@ -313,11 +313,6 @@ export type GetAllMapsListInput = {
   lang?: InputMaybe<LanguageInput>;
 };
 
-export type GetAllMapsListOutput = {
-  __typename?: 'GetAllMapsListOutput';
-  allMapsList: Array<MapFileOutput>;
-};
-
 export type GetDocumentInput = {
   document_id: Scalars['String']['input'];
 };
@@ -491,6 +486,12 @@ export type MapDeleteOutput = {
   error: ErrorType;
 };
 
+export type MapFileListConnection = {
+  __typename?: 'MapFileListConnection';
+  edges: Array<MapFileOutputEdge>;
+  pageInfo: PageInfo;
+};
+
 export type MapFileOutput = {
   __typename?: 'MapFileOutput';
   content_file_id?: Maybe<Scalars['ID']['output']>;
@@ -506,6 +507,12 @@ export type MapFileOutput = {
   preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
+};
+
+export type MapFileOutputEdge = {
+  __typename?: 'MapFileOutputEdge';
+  cursor: Scalars['ID']['output'];
+  node: MapFileOutput;
 };
 
 export type MapPhraseTranslations = {
@@ -1284,7 +1291,7 @@ export type Query = {
   forumRead: ForumReadOutput;
   forums: ForumListOutput;
   getAllDocuments: GetAllDocumentsOutput;
-  getAllMapsList: GetAllMapsListOutput;
+  getAllMapsList: MapFileListConnection;
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput;
   getAllRecommendedSiteTextTranslationListByLanguage: SiteTextTranslationWithVoteListByLanguageOutput;
   getAllSiteTextDefinitions: SiteTextDefinitionListOutput;
@@ -1378,6 +1385,8 @@ export type QueryGetAllDocumentsArgs = {
 
 
 export type QueryGetAllMapsListArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
   input: GetAllMapsListInput;
 };
 
@@ -2668,6 +2677,10 @@ export type MapPhraseWithVotesFragmentFragment = { __typename?: 'MapPhraseWithVo
 
 export type WordWithVotesFragmentFragment = { __typename?: 'MapWordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string };
 
+export type MapFileOutputFragmentFragment = { __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
+
+export type MapFileOutputEdgeFragmentFragment = { __typename?: 'MapFileOutputEdge', cursor: string, node: { __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+
 export type GetOrigMapWordsQueryVariables = Exact<{
   original_map_id?: InputMaybe<Scalars['ID']['input']>;
   o_language_code?: InputMaybe<Scalars['String']['input']>;
@@ -2692,10 +2705,12 @@ export type GetOrigMapPhrasesQuery = { __typename?: 'Query', getOrigMapPhrases: 
 
 export type GetAllMapsListQueryVariables = Exact<{
   lang?: InputMaybe<LanguageInput>;
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'GetAllMapsListOutput', allMapsList: Array<{ __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
+export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'MapFileListConnection', edges: Array<{ __typename?: 'MapFileOutputEdge', cursor: string, node: { __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type GetTranslatedMapContentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3342,6 +3357,32 @@ export const WordWithVotesFragmentFragmentDoc = gql`
   translation_id
 }
     `;
+export const MapFileOutputFragmentFragmentDoc = gql`
+    fragment MapFileOutputFragment on MapFileOutput {
+  is_original
+  original_map_id
+  translated_map_id
+  map_file_name
+  translated_percent
+  language {
+    language_code
+    dialect_code
+    geo_code
+  }
+  created_at
+  created_by
+  map_file_name_with_langs
+  preview_file_url
+}
+    `;
+export const MapFileOutputEdgeFragmentFragmentDoc = gql`
+    fragment MapFileOutputEdgeFragment on MapFileOutputEdge {
+  cursor
+  node {
+    ...MapFileOutputFragment
+  }
+}
+    ${MapFileOutputFragmentFragmentDoc}`;
 export const PhraseDefinitionWithVoteFragmentFragmentDoc = gql`
     fragment PhraseDefinitionWithVoteFragment on PhraseDefinitionWithVote {
   phrase_definition_id
@@ -5234,27 +5275,18 @@ export type GetOrigMapPhrasesQueryHookResult = ReturnType<typeof useGetOrigMapPh
 export type GetOrigMapPhrasesLazyQueryHookResult = ReturnType<typeof useGetOrigMapPhrasesLazyQuery>;
 export type GetOrigMapPhrasesQueryResult = Apollo.QueryResult<GetOrigMapPhrasesQuery, GetOrigMapPhrasesQueryVariables>;
 export const GetAllMapsListDocument = gql`
-    query GetAllMapsList($lang: LanguageInput) {
-  getAllMapsList(input: {lang: $lang}) {
-    allMapsList {
-      is_original
-      original_map_id
-      translated_map_id
-      map_file_name
-      translated_percent
-      language {
-        language_code
-        dialect_code
-        geo_code
-      }
-      created_at
-      created_by
-      map_file_name_with_langs
-      preview_file_url
+    query GetAllMapsList($lang: LanguageInput, $after: ID, $first: Int) {
+  getAllMapsList(input: {lang: $lang}, after: $after, first: $first) {
+    edges {
+      ...MapFileOutputEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
-    `;
+    ${MapFileOutputEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
 
 /**
  * __useGetAllMapsListQuery__
@@ -5269,6 +5301,8 @@ export const GetAllMapsListDocument = gql`
  * const { data, loading, error } = useGetAllMapsListQuery({
  *   variables: {
  *      lang: // value for 'lang'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
  *   },
  * });
  */
@@ -7309,6 +7343,8 @@ export const namedOperations = {
     ForumFragment: 'ForumFragment',
     MapPhraseWithVotesFragment: 'MapPhraseWithVotesFragment',
     WordWithVotesFragment: 'WordWithVotesFragment',
+    MapFileOutputFragment: 'MapFileOutputFragment',
+    MapFileOutputEdgeFragment: 'MapFileOutputEdgeFragment',
     PhraseFragment: 'PhraseFragment',
     PhraseDefinitionFragment: 'PhraseDefinitionFragment',
     PhraseWithDefinitionsFragment: 'PhraseWithDefinitionsFragment',

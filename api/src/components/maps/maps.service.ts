@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  GetAllMapsListOutput,
+  MapFileListConnection,
   GetOrigMapContentOutput,
   GetOrigMapPhrasesInput,
   GetOrigMapPhrasesOutput,
@@ -11,6 +11,7 @@ import {
   MapFileOutput,
   MapPhraseTranslations,
   MapWordTranslations,
+  MapFileOutputEdge,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
@@ -28,7 +29,7 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
-import { putLangCodesToFileName } from '../../common/utility';
+import { putLangCodesToFileName, compareObject } from '../../common/utility';
 import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -269,13 +270,100 @@ export class MapsService {
     return this.mapsRepository.getOrigMaps();
   }
 
-  async getAllMapsList(lang?: LanguageInput): Promise<GetAllMapsListOutput> {
-    const origMaps = await this.mapsRepository.getOrigMaps(lang);
-    const translatedMaps = await this.mapsRepository.getTranslatedMaps({
-      lang,
-    });
-    const allMapsList = [...origMaps.mapList, ...translatedMaps.mapList];
-    return { allMapsList };
+  async getAllMapsList({
+    lang,
+    first,
+    after,
+  }: {
+    lang?: LanguageInput;
+    first: number | null;
+    after: string | null;
+  }): Promise<MapFileListConnection> {
+    try {
+      const origMaps = await this.mapsRepository.getOrigMaps(lang);
+      const translatedMaps = await this.mapsRepository.getTranslatedMaps({
+        lang,
+      });
+      const allMapsList = [...origMaps.mapList, ...translatedMaps.mapList].sort(
+        (map1, map2) =>
+          map1.map_file_name_with_langs.localeCompare(
+            map2.map_file_name_with_langs,
+          ),
+      );
+
+      let offset: number | null = null;
+      let hasNextPage = true;
+      let startCursor: string | null = null;
+      let endCursor: string | null = null;
+
+      const mapFileOutputEdge: MapFileOutputEdge[] = [];
+
+      const makeCursorStr = (id: string, is_original: boolean) => {
+        return `${id}-${is_original ? 'true' : 'false'}`;
+      };
+
+      for (let i = 0; i < allMapsList.length; i++) {
+        const tempMap = allMapsList[i];
+        const tempCursor = makeCursorStr(
+          tempMap.is_original
+            ? tempMap.original_map_id
+            : tempMap.translated_map_id!,
+          tempMap.is_original,
+        );
+
+        if (after === null && offset === null) {
+          offset = 0;
+        }
+
+        if (tempCursor !== after && offset === null) {
+          continue;
+        }
+
+        if (tempCursor === after && offset === null) {
+          offset = 0;
+          continue;
+        }
+
+        if (offset === 0) {
+          startCursor = tempCursor;
+        }
+
+        if (first !== null && offset! >= first) {
+          hasNextPage = true;
+          break;
+        }
+
+        mapFileOutputEdge.push({
+          cursor: tempCursor,
+          node: tempMap,
+        });
+
+        endCursor = tempCursor;
+        offset!++;
+      }
+
+      return {
+        edges: mapFileOutputEdge,
+        pageInfo: {
+          hasNextPage,
+          hasPreviousPage: false,
+          startCursor,
+          endCursor,
+        },
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+      },
+    };
   }
 
   async getOrigMapContent(id: string): Promise<GetOrigMapContentOutput> {
@@ -644,7 +732,8 @@ export class MapsService {
       translatedMapIds.push(data!.map_id);
     }
     Logger.log(
-      `DONE translating of orig map id ${origMapId} for ${performance.now() - p0
+      `DONE translating of orig map id ${origMapId} for ${
+        performance.now() - p0
       } ms.`,
     );
 

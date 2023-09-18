@@ -7,6 +7,7 @@ import {
 } from '@nestjs/graphql';
 import { LanguageInput, LanguageOutput } from 'src/components/common/types';
 import { GenericOutput } from '../../common/types';
+import { PageInfo } from 'src/components/common/types';
 import { Phrase } from '../phrases/types';
 import { Word } from '../words/types';
 
@@ -58,8 +59,15 @@ export class GetAllMapsListInput {
 }
 
 @ObjectType()
-export class GetAllMapsListOutput {
-  @Field(() => [MapFileOutput]) allMapsList: MapFileOutput[];
+export class MapFileOutputEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => MapFileOutput) node: MapFileOutput;
+}
+
+@ObjectType()
+export class MapFileListConnection {
+  @Field(() => [MapFileOutputEdge]) edges: MapFileOutputEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
 }
 
 @InputType()
