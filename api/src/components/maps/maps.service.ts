@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, Logger } from '@nestjs/common';
+
 import {
   MapFileListConnection,
   GetOrigMapContentOutput,
@@ -29,7 +30,7 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
-import { putLangCodesToFileName, compareObject } from '../../common/utility';
+import { putLangCodesToFileName } from '../../common/utility';
 import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -69,8 +70,10 @@ export class MapsService {
     private phrasesService: PhrasesService,
     private phraseDefinitionsService: PhraseDefinitionsService,
     private wordDefinitionsService: WordDefinitionsService,
+    @Inject(forwardRef(() => WordToWordTranslationsService))
     private wordToWordTranslationsService: WordToWordTranslationsService,
     private fileService: FileService,
+    @Inject(forwardRef(() => TranslationsService))
     private translationsService: TranslationsService,
   ) {}
 

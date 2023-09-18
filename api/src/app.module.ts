@@ -5,6 +5,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 
 import { join } from 'path';
 
+import { PubSubModule } from './pubSub.module';
 import { AuthenticationModule } from './components/authentication/authentication.module';
 import { EmailModule } from './components/email/email.module';
 import { PostModule } from './components/post/post.module';
@@ -23,17 +24,22 @@ import { ThreadModule } from './components/threads/threads.module';
 import { NotificationModule } from './components/notifications/notification.module';
 import { DocumentsModule } from './components/documents/documents.module';
 import { FlagsModule } from './components/flag/flags.module';
+import { FileModule } from './components/file/file.module';
 
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      subscriptions: {
+        'graphql-ws': true,
+      },
       sortSchema: true,
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', 'frontend', 'dist'),
     }),
+    PubSubModule,
     TranslationsModule,
     AuthenticationModule,
     UserModule,
@@ -51,6 +57,7 @@ import { FlagsModule } from './components/flag/flags.module';
     NotificationModule,
     DocumentsModule,
     FlagsModule,
+    FileModule,
   ],
   controllers: [],
   providers: [],

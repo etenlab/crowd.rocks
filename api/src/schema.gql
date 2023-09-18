@@ -557,6 +557,7 @@ type Mutation {
   siteTextTranslationVoteUpsert(from_type_is_word: Boolean!, to_type_is_word: Boolean!, translation_id: ID!, vote: Boolean!): SiteTextTranslationVoteOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextDefinitionOutput!
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
+  stopGoogleTranslation: GenericOutput!
   threadDelete(input: ThreadDeleteInput!): ThreadDeleteOutput!
   threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
@@ -569,7 +570,8 @@ type Mutation {
   toggleWordDefinitionVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
-  translateAllWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
+  translateAllWordsAndPhrasesByGoogle(from_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
+  translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionOutput!
   updateFile(file: Upload, file_size: Int, file_type: String, id: Int!): IFileOutput!
   uploadFile(file: Upload!, file_size: Int!, file_type: String!): IFileOutput!
@@ -1148,6 +1150,10 @@ type SiteTextWordToWordTranslationWithVote {
   word_to_word_translation_id: ID!
 }
 
+type Subscription {
+  TranslationReport: TranslateAllWordsAndPhrasesByGoogleResult!
+}
+
 enum TableNameType {
   phrase_definitions
   phrases
@@ -1230,7 +1236,12 @@ type TranslateAllWordsAndPhrasesByGoogleOutput {
 }
 
 type TranslateAllWordsAndPhrasesByGoogleResult {
+  completed: Int
+  errors: [String!]
+  message: String
   requestedCharactors: Int!
+  status: String
+  total: Int
   totalPhraseCount: Int!
   totalWordCount: Int!
   translatedPhraseCount: Int!
