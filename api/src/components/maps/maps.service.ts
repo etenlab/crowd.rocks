@@ -281,7 +281,9 @@ export class MapsService {
   }): Promise<MapFileListConnection> {
     try {
       const origMaps = await this.mapsRepository.getOrigMaps(lang);
-      const translatedMaps = await this.mapsRepository.getTranslatedMaps(lang);
+      const translatedMaps = await this.mapsRepository.getTranslatedMaps({
+        lang,
+      });
       const allMapsList = [...origMaps.mapList, ...translatedMaps.mapList].sort(
         (map1, map2) =>
           map1.map_file_name_with_langs.localeCompare(
@@ -730,7 +732,8 @@ export class MapsService {
       translatedMapIds.push(data!.map_id);
     }
     Logger.log(
-      `DONE translating of orig map id ${origMapId} for ${performance.now() - p0
+      `DONE translating of orig map id ${origMapId} for ${
+        performance.now() - p0
       } ms.`,
     );
 
