@@ -505,6 +505,10 @@ export class MapsService {
     dbPoolClient: PoolClient,
     toLang?: LanguageInput,
   ): Promise<Array<string>> {
+    const p0 = performance.now();
+    Logger.log(
+      `START translating of orig map id ${origMapId} to lang ${toLang?.language_code}`,
+    );
     const translatedMapIds: Array<string> = [];
     const { content_file_id, map_file_name } =
       await this.mapsRepository.getOrigMapWithContentUrl(origMapId);
@@ -533,6 +537,8 @@ export class MapsService {
     } else {
       targetLanguagesFullTags = this.getLangFullTags(origMapWordsAndPhrases);
     }
+
+    Logger.log(`...found ${targetLanguagesFullTags.length} target languages`);
 
     for (const languageFullTag of targetLanguagesFullTags) {
       const language_code: string = tag2langInfo(languageFullTag).lang.tag;
@@ -637,6 +643,10 @@ export class MapsService {
       });
       translatedMapIds.push(data!.map_id);
     }
+    Logger.log(
+      `DONE translating of orig map id ${origMapId} for ${performance.now() - p0
+      } ms.`,
+    );
 
     return translatedMapIds;
   }
