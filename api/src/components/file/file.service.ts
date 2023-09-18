@@ -49,6 +49,7 @@ export class FileService {
       });
 
       readStream.pipe(calcHashTr);
+      const p1 = performance.now();
 
       const s3Client = new S3Client(this.makeS3Creds().creds);
 
@@ -72,6 +73,9 @@ export class FileService {
       });
 
       await parallelUploads3.done();
+      Logger.debug(
+        `Saved file, key ${uploadParams.Key} for ${performance.now() - p1} ms.`,
+      );
 
       const fileEntity = await this.fileRepository.find({
         where: {
@@ -91,7 +95,13 @@ export class FileService {
         const deleteCommand = new DeleteObjectCommand(deleteParams);
 
         await s3Client.send(deleteCommand);
-        return await this.fileRepository.update({
+
+        Logger.debug(
+          `Deleted old file, key ${deleteParams.Key} . Save+delete took ${
+            performance.now() - p1
+          } ms. `,
+        );
+        return this.fileRepository.update({
           file_id: fileEntity.file.id,
           file_name: fileName,
           file_type: fileType,
@@ -103,7 +113,6 @@ export class FileService {
           token,
         });
       }
-      Logger.log(`Uploading finished, key: ` + fileKey);
 
       return await this.fileRepository.save({
         file_name: fileName,
@@ -116,7 +125,7 @@ export class FileService {
         token,
       });
     } catch (err) {
-      console.log('File upload failed', err);
+      Logger.log('File upload failed', err);
     }
   }
 
@@ -213,6 +222,7 @@ export class FileService {
       });
       if (!oldFileEntity) throw new Error(`Not found file with id=${id}`);
 
+      const p1 = performance.now();
       const bucketName = process.env.AWS_S3_BUCKET_NAME;
       const region = process.env.AWS_S3_REGION;
 
@@ -228,7 +238,9 @@ export class FileService {
       await s3Client.send(deleteCommand);
 
       const deletedId = await this.fileRepository.delete(id);
-      Logger.debug(`Deleted file ID=${deletedId}`);
+      Logger.debug(
+        `Deleted file ID=${deletedId} for ${performance.now() - p1} ms.`,
+      );
       return {
         deletedId,
         error: ErrorType.NoError,
@@ -257,6 +269,7 @@ export class FileService {
       throw new Error(
         `flieService#getFileContentAsString: Error: Number(fileId) is NaN`,
       );
+    const p1 = performance.now();
     const s3Client = new S3Client(this.makeS3Creds().creds);
     const fileData = await this.fileRepository.find({
       where: { file_id: Number(fileId) },
@@ -274,6 +287,11 @@ export class FileService {
           .split('/')
           .at(-1)} from S3 bucket`,
       );
+    Logger.debug(
+      `File id ` +
+        fileId +
+        ` is downloaded from S3 bucket for ${performance.now() - p1} ms.`,
+    );
     return response?.Body?.transformToString();
   }
 

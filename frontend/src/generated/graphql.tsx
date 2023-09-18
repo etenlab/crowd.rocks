@@ -493,6 +493,8 @@ export type MapDeleteOutput = {
 
 export type MapFileOutput = {
   __typename?: 'MapFileOutput';
+  content_file_id?: Maybe<Scalars['ID']['output']>;
+  content_file_url?: Maybe<Scalars['ID']['output']>;
   created_at: Scalars['String']['output'];
   created_by: Scalars['ID']['output'];
   is_original: Scalars['Boolean']['output'];
