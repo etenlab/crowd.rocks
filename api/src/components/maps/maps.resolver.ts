@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Args, Resolver, Mutation, Query, Context, Int } from '@nestjs/graphql';
 
 import { MapsService } from './maps.service';
@@ -127,6 +127,7 @@ export class MapsResolver {
         error: ErrorType.Unauthorized,
       };
     }
+    Logger.debug(`Mutation mapDelete, id: ` + mapId);
     try {
       const deletedMapId = await this.mapService.deleteMap(mapId, is_original);
 

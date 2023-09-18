@@ -441,6 +441,8 @@ type MapDeleteOutput {
 }
 
 type MapFileOutput {
+  content_file_id: ID
+  content_file_url: ID
   created_at: String!
   created_by: ID!
   is_original: Boolean!

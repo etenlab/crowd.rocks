@@ -23,6 +23,8 @@ export class MapFileOutput {
   @Field(() => ID, { nullable: true }) translated_map_id?: string;
   @Field(() => ID, { nullable: true }) preview_file_url?: string;
   @Field(() => ID, { nullable: true }) preview_file_id?: string;
+  @Field(() => ID, { nullable: true }) content_file_url?: string;
+  @Field(() => ID, { nullable: true }) content_file_id?: string;
 }
 @InputType()
 export class GetOrigMapListInput {

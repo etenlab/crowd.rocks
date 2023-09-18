@@ -248,9 +248,13 @@ export class MapsRepository {
     return { mapList };
   }
 
-  async getTranslatedMaps(
-    lang?: LanguageInput,
-  ): Promise<GetOrigMapsListOutput> {
+  async getTranslatedMaps({
+    lang,
+    originalMapId,
+  }: {
+    lang?: LanguageInput | undefined;
+    originalMapId?: number | undefined;
+  }): Promise<GetOrigMapsListOutput> {
     const params: string[] = [];
     let languageClause = '';
     if (lang?.language_code) {
@@ -265,6 +269,12 @@ export class MapsRepository {
       params.push(lang?.geo_code);
       languageClause += ` and tm.geo_code = $${params.length}`;
     }
+
+    if (originalMapId) {
+      params.push(String(originalMapId));
+      languageClause += ` and tm.original_map_id = $${params.length}`;
+    }
+
     const sqlStr = `
       select
         tm.translated_map_id,
@@ -276,13 +286,17 @@ export class MapsRepository {
         tm.dialect_code,
         tm.geo_code,
         tm.translated_percent,
-        f.file_url as preview_file_url
+        f.file_url as preview_file_url,
+        f.file_id as preview_file_id,
+        f2.file_id as content_file_id
       from
         translated_maps tm
       left join original_maps om
         on tm.original_map_id = om.original_map_id
       left join files f on
         om.preview_file_id = f.file_id
+      left join files f2 on
+        om.content_file_id = f2.file_id
       where
         true
         ${languageClause}
@@ -300,6 +314,8 @@ export class MapsRepository {
         dialect_code,
         geo_code,
         preview_file_url,
+        preview_file_id,
+        content_file_id,
         translated_percent,
       }) => ({
         translated_map_id,
@@ -315,6 +331,8 @@ export class MapsRepository {
         is_original: false,
         language: { language_code, dialect_code, geo_code },
         preview_file_url,
+        preview_file_id,
+        content_file_id,
         translated_percent,
       }),
     );
@@ -386,6 +404,7 @@ export class MapsRepository {
           om.language_code,	
           om.dialect_code,	
           om.geo_code,
+          om.preview_file_id,
           om.content_file_id,
           f.file_url as preview_file_url,
           f2.file_url as content_file_url
@@ -409,6 +428,7 @@ export class MapsRepository {
       geo_code,
       preview_file_url,
       content_file_url,
+      preview_file_id,
       content_file_id,
     } = resQ.rows[0];
 
@@ -426,6 +446,7 @@ export class MapsRepository {
       language: { language_code, dialect_code, geo_code },
       preview_file_url,
       content_file_url,
+      preview_file_id,
       content_file_id,
     };
   }

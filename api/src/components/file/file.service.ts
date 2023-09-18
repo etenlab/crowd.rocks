@@ -29,6 +29,7 @@ export class FileService {
     fileSize: number,
     token: string,
   ): Promise<IFileOutput | undefined> {
+    Logger.log(`Uploading file ` + fileName);
     try {
       const fileKey = `${nanoid()}-${fileName}`;
 
@@ -102,6 +103,7 @@ export class FileService {
           token,
         });
       }
+      Logger.log(`Uploading finished, key: ` + fileKey);
 
       return await this.fileRepository.save({
         file_name: fileName,
@@ -226,6 +228,7 @@ export class FileService {
       await s3Client.send(deleteCommand);
 
       const deletedId = await this.fileRepository.delete(id);
+      Logger.debug(`Deleted file ID=${deletedId}`);
       return {
         deletedId,
         error: ErrorType.NoError,

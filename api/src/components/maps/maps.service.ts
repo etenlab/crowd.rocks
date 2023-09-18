@@ -271,7 +271,9 @@ export class MapsService {
 
   async getAllMapsList(lang?: LanguageInput): Promise<GetAllMapsListOutput> {
     const origMaps = await this.mapsRepository.getOrigMaps(lang);
-    const translatedMaps = await this.mapsRepository.getTranslatedMaps(lang);
+    const translatedMaps = await this.mapsRepository.getTranslatedMaps({
+      lang,
+    });
     const allMapsList = [...origMaps.mapList, ...translatedMaps.mapList];
     return { allMapsList };
   }
@@ -652,14 +654,35 @@ export class MapsService {
   }
 
   async deleteMap(mapId: string, is_original: boolean): Promise<string> {
-    if (is_original) {
-      const mapInfo = await this.mapsRepository.getOrigMapInfo(mapId);
-      const deletedMapId = await this.mapsRepository.deleteOriginalMap(mapId);
-      await this.fileService.deleteFile(mapInfo.preview_file_id!);
-      return deletedMapId;
-    } else {
-      return this.mapsRepository.deleteTranslatedMap(mapId);
+    return is_original
+      ? await this.deleteOriginalMap(mapId)
+      : await this.deleteTranslatedMap(mapId);
+  }
+
+  async deleteOriginalMap(mapId: string): Promise<string> {
+    const mapInfo = await this.mapsRepository.getOrigMapWithContentUrl(mapId);
+    const translatedMaps = await this.mapsRepository.getTranslatedMaps({
+      originalMapId: Number(mapId),
+    });
+
+    for (const translatedMap of translatedMaps.mapList) {
+      translatedMap.translated_map_id &&
+        (await this.deleteTranslatedMap(translatedMap.translated_map_id));
     }
+
+    const deletedMapId = await this.mapsRepository.deleteOriginalMap(mapId);
+    await this.fileService.deleteFile(mapInfo.preview_file_id!);
+    await this.fileService.deleteFile(mapInfo.content_file_id!);
+    return deletedMapId;
+  }
+
+  async deleteTranslatedMap(mapId: string): Promise<string> {
+    const mapInfo = await this.mapsRepository.getTranslatedMapWithContentUrl(
+      mapId,
+    );
+    const deletedMapId = await this.mapsRepository.deleteTranslatedMap(mapId);
+    await this.fileService.deleteFile(mapInfo.content_file_id!);
+    return deletedMapId;
   }
 
   async translationsReset(token): Promise<void> {
