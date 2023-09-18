@@ -136,7 +136,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
 
   const handleCancel = () => {
     set_is_adding(false);
-    setPostKind(undefined);
+    setPostKind(settings.isSign ? 'video' : undefined);
   };
 
   return (

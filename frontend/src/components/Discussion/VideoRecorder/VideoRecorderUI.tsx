@@ -1,9 +1,10 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { RecorderStatus } from '../AudioRecorder/AudioRecorderUI';
-import { IonButton, IonIcon } from '@ionic/react';
+import { IonAlert, IonButton, IonIcon } from '@ionic/react';
 import {
   checkmarkCircleOutline,
   closeCircleOutline,
+  pauseCircleOutline,
   playCircleOutline,
   videocam,
 } from 'ionicons/icons';
@@ -19,6 +20,7 @@ export function VideoRecorderUI({ onSave, onCancel }: VideoRecorderProps) {
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>(
     'environment',
   );
+  const [showConfirmCancel, setShowConfirmCancel] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -136,10 +138,7 @@ export function VideoRecorderUI({ onSave, onCancel }: VideoRecorderProps) {
 
   const handleClickCancel = () => {
     if (recorderStatus === 'paused') {
-      // eslint-disable-next-line no-restricted-globals
-      if (confirm('Recorded data will be lost!')) {
-        refreshRecorder();
-      }
+      setShowConfirmCancel(true);
     } else {
       onCancel();
     }
@@ -184,8 +183,22 @@ export function VideoRecorderUI({ onSave, onCancel }: VideoRecorderProps) {
       >
         <IonIcon icon={videocam} style={{ ...controlButtonStyle }} />
       </IonButton>
+    ) : recorderStatus === 'recording' ? (
+      <IonButton
+        onClick={handleClickPause}
+        disabled={disabledControl}
+        fill="clear"
+        style={{ height: '100%' }}
+      >
+        <IonIcon
+          icon={pauseCircleOutline}
+          style={{
+            ...controlButtonStyle,
+            backgroundColor: 'primary',
+          }}
+        />
+      </IonButton>
     ) : (
-      //TODO: cleanup have a styled button for audio and video
       <IonButton
         onClick={handleClickPause}
         disabled={disabledControl}
@@ -203,30 +216,52 @@ export function VideoRecorderUI({ onSave, onCancel }: VideoRecorderProps) {
     );
 
   return (
-    <div style={{ textAlign: 'center' }}>
-      <video height="50%" width="50%" ref={videoRef} autoPlay muted />
-      <div>
-        <IonButton
-          fill="clear"
-          onClick={handleClickCancel}
-          disabled={disabledCancel}
-        >
-          <IonIcon icon={closeCircleOutline} style={{ color: 'gray' }} />
-        </IonButton>
+    <>
+      <div style={{ textAlign: 'center' }}>
+        <video height="50%" width="50%" ref={videoRef} autoPlay muted />
+        <div>
+          <IonButton
+            fill="clear"
+            onClick={handleClickCancel}
+            disabled={disabledCancel}
+          >
+            <IonIcon icon={closeCircleOutline} style={{ color: 'gray' }} />
+          </IonButton>
 
-        {controlButton}
-        {/* todo later... <IonButton onClick={switchFacingMode} fill="clear">
+          {controlButton}
+          {/* todo later... <IonButton onClick={switchFacingMode} fill="clear">
           <IonIcon icon={syncCircle} />
         </IonButton> */}
-        <IonButton
-          onClick={handleClickSave}
-          fill="clear"
-          style={{ color: 'green' }}
-          disabled={disabledSave}
-        >
-          <IonIcon icon={checkmarkCircleOutline} />
-        </IonButton>
+          <IonButton
+            onClick={handleClickSave}
+            fill="clear"
+            style={{ color: 'green' }}
+            disabled={disabledSave}
+          >
+            <IonIcon icon={checkmarkCircleOutline} />
+          </IonButton>
+        </div>
       </div>
-    </div>
+
+      <IonAlert
+        header="Are you sure?"
+        subHeader="Deleting what you have recorded cannot be undone."
+        isOpen={showConfirmCancel}
+        buttons={[
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            handler: () => {},
+          },
+          {
+            text: 'OK',
+            role: 'confirm',
+            handler: () => {
+              refreshRecorder();
+            },
+          },
+        ]}
+      ></IonAlert>
+    </>
   );
 }
