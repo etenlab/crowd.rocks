@@ -1399,8 +1399,6 @@ export class TranslationsService {
 
       this.translationSubject.subscribe({
         next: async (step) => {
-          console.log(step, languages.length);
-
           if (step >= languages.length) {
             this.translationSubject.complete();
             return;
@@ -1453,7 +1451,7 @@ export class TranslationsService {
           this.pubSub.publish(SubscriptionToken.TranslationReport, {
             [SubscriptionToken.TranslationReport]: {
               ...totalResult,
-              status,
+              status: step + 1 === languages.length ? 'Completed' : status,
               message: `Translating ${langInfo2String(
                 subTags2LangInfo({
                   lang: from_language.language_code,

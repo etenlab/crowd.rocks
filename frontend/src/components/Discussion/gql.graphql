@@ -8,6 +8,8 @@ fragment PostFields on Post {
   post_id
   content
   created_at
+  file_url
+  file_type
   created_by_user {
     ...UserFields
   }
@@ -23,12 +25,13 @@ query PostsByParent($parent_id: ID!, $parent_name: String!) {
   }
 }
 
-mutation PostCreate($content: String!, $parentId: Int!, $parentTable: String!) {
+mutation PostCreate($content: String!, $parentId: Int!, $parentTable: String!, $file_id: ID) {
   postCreateResolver(
     input: {
       content: $content
       parent_id: $parentId
       parent_table: $parentTable
+      file_id: $file_id
     }
   ) {
     error
