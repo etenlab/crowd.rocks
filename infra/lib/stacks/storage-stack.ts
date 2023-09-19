@@ -115,6 +115,8 @@ export class StorageStack extends cdk.Stack {
       {
         bucketName: props.publicFilesBucketName,
         removalPolicy: cdk.RemovalPolicy.RETAIN,
+        publicReadAccess: true,
+        accessControl: s3.BucketAccessControl.PUBLIC_READ,
         blockPublicAccess: new s3.BlockPublicAccess({
           blockPublicAcls: false,
           blockPublicPolicy: false,

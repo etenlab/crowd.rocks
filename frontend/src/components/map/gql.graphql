@@ -25,20 +25,25 @@ fragment WordWithVotesFragment on MapWordWithVotes {
 }
 
 fragment MapFileOutputFragment on MapFileOutput {
-  is_original
-  original_map_id
-  translated_map_id
-  map_file_name
-  translated_percent
-  language {
-    language_code
-    dialect_code
-    geo_code
+  error
+  mapFileInfo {
+    is_original
+    original_map_id
+    translated_map_id
+    map_file_name
+    translated_percent
+    language {
+      language_code
+      dialect_code
+      geo_code
+    }
+    created_at
+    created_by
+    map_file_name_with_langs
+    preview_file_url
+    content_file_url
+    content_file_id
   }
-  created_at
-  created_by
-  map_file_name_with_langs
-  preview_file_url
 }
 
 fragment MapFileOutputEdgeFragment on MapFileOutputEdge {
@@ -125,18 +130,7 @@ query GetAllMapsList($lang: LanguageInput, $after: ID, $first: Int) {
 
 query GetTranslatedMapContent($id: ID!) {
   getTranslatedMapContent(input: { translated_map_id: $id }) {
-    translated_map_id
-    map_file_name
-    translated_percent
-    language {
-      language_code
-      dialect_code
-      geo_code
-    }
-    created_at
-    created_by
-    content_file_url
-    map_file_name_with_langs
+    ...MapFileOutputFragment
   }
 }
 
@@ -148,12 +142,7 @@ query IsAdminLoggedIn($input: IsAdminIdInput!) {
 
 query GetOrigMapContent($id: ID!) {
   getOrigMapContent(input: { original_map_id: $id }) {
-    original_map_id
-    map_file_name_with_langs
-    map_file_name
-    created_at
-    created_by
-    content_file_url
+    ...MapFileOutputFragment
   }
 }
 
@@ -171,8 +160,7 @@ mutation MapUpload(
   ) {
     error
     mapFileOutput {
-      original_map_id
-      map_file_name
+      ...MapFileOutputFragment
     }
   }
 }
