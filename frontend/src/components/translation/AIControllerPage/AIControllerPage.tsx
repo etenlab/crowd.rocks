@@ -1,9 +1,12 @@
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useCallback } from 'react';
 import {
   IonButton,
   useIonLoading,
   useIonToast,
   IonSpinner,
+  IonToggle,
+  IonLabel,
+  IonTitle,
 } from '@ionic/react';
 
 import { PageLayout } from '../../common/PageLayout';
@@ -11,12 +14,16 @@ import { Caption } from '../../common/Caption/Caption';
 
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 
+import { FilterContainer, CaptionContainer } from '../../common/styled';
 import {
-  FilterContainer,
-  CaptionContainer,
+  ResultBoard,
+  LoadingBoard,
+  Stack,
+  LanguageSectionContainer,
   LanguageSelectorContainer,
-} from '../../common/styled';
-import { ResultBoard, LoadingBoard, Stack } from './styled';
+  AIContainer,
+  AIActionsContainer,
+} from './styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -52,10 +59,11 @@ function messageHTML({
   `;
 }
 
-export function GoogleTranslationPage() {
+export function AIControllerPage() {
   const { tr } = useTr();
   const [presentToast] = useIonToast();
   const [presentLoading, dismiss] = useIonLoading();
+  const [selectTarget, setSelectTarget] = useState<boolean>(true);
 
   const {
     states: {
@@ -103,16 +111,31 @@ export function GoogleTranslationPage() {
   }, [languagesError, languagesLoading, languagesData]);
 
   const handleTranslate = async () => {
-    if (!source || !target) {
+    if (!source) {
       presentToast({
-        message: `${tr('Please select source and target language!')}`,
+        message: `${tr('Please select source language!')}`,
         duration: 1500,
         position: 'top',
+        color: 'danger',
       });
 
       return;
     }
 
+    if (!selectTarget) {
+      handleTranslateToAllLangs();
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
     presentLoading({
       message: messageHTML({
         total: 1,
@@ -144,7 +167,7 @@ export function GoogleTranslationPage() {
     }
   };
 
-  const handleTranslateAll = async () => {
+  const handleTranslateToAllLangs = useCallback(async () => {
     if (!source) {
       presentToast({
         message: `${tr('Please select source language!')}`,
@@ -218,7 +241,14 @@ export function GoogleTranslationPage() {
     });
     setBatchTranslating(false);
     setResult(sumOfResult);
-  };
+  }, [
+    enabledTags,
+    mapsReTranslate,
+    presentToast,
+    source,
+    tr,
+    translateAllWordsAndPhrasesByGoogleMutation,
+  ]);
 
   const handleCancelTranslateAll = () => {
     setBatchTranslating(false);
@@ -269,48 +299,67 @@ export function GoogleTranslationPage() {
   return (
     <PageLayout>
       <CaptionContainer>
-        <Caption>{tr('Google Translation')}</Caption>
+        <Caption>{tr('AI Controller')}</Caption>
       </CaptionContainer>
 
       <FilterContainer>
-        <LanguageSelectorContainer>
-          <LangSelector
-            title={tr('Source language')}
-            langSelectorId="translation-g-source-langSelector"
-            selected={source as LanguageInfo | undefined}
-            onChange={(_sourceLangTag, sourceLangInfo) => {
-              changeTranslationSourceLanguage(sourceLangInfo);
-            }}
-            onClearClick={() => changeTranslationSourceLanguage(null)}
-            enabledTags={enabledTags}
-            disabled={disabled}
-          />
-
-          <LangSelector
-            title={tr('Target language')}
-            langSelectorId="translation-g-target-langSelector"
-            selected={target as LanguageInfo | undefined}
-            onChange={(_targetLangTag, targetLanguageInfo) => {
-              changeTranslationTargetLanguage(targetLanguageInfo);
-            }}
-            onClearClick={() => changeTranslationTargetLanguage(null)}
-            enabledTags={enabledTags}
-            disabled={disabled}
-          />
-        </LanguageSelectorContainer>
+        <LanguageSectionContainer>
+          <LanguageSelectorContainer>
+            <IonLabel>Source</IonLabel>
+            <LangSelector
+              title={tr('Source language')}
+              langSelectorId="translation-g-source-langSelector"
+              selected={source as LanguageInfo | undefined}
+              onChange={(_sourceLangTag, sourceLangInfo) => {
+                changeTranslationSourceLanguage(sourceLangInfo);
+              }}
+              onClearClick={() => changeTranslationSourceLanguage(null)}
+              enabledTags={enabledTags}
+              disabled={disabled}
+            />
+          </LanguageSelectorContainer>
+          <LanguageSelectorContainer>
+            <div>
+              <IonLabel>Target</IonLabel>
+              <IonToggle
+                checked={selectTarget}
+                onIonChange={() => setSelectTarget(!selectTarget)}
+                style={{ marginLeft: '10px' }}
+              />
+            </div>
+            <LangSelector
+              title={tr('Target language')}
+              langSelectorId="translation-g-target-langSelector"
+              selected={target as LanguageInfo | undefined}
+              onChange={(_targetLangTag, targetLanguageInfo) => {
+                changeTranslationTargetLanguage(targetLanguageInfo);
+              }}
+              onClearClick={() => changeTranslationTargetLanguage(null)}
+              enabledTags={enabledTags}
+              disabled={!selectTarget || batchTranslating}
+            />
+          </LanguageSelectorContainer>
+        </LanguageSectionContainer>
       </FilterContainer>
+      <br />
 
-      <IonButton onClick={handleTranslate} disabled={disabled}>
-        {tr('Translate All Words and Phrases')}
-      </IonButton>
+      <AIContainer>
+        <IonTitle>Google Translate</IonTitle>
 
-      <IonButton
-        color="warning"
-        onClick={handleTranslateAll}
-        disabled={disabled}
-      >
-        {tr('Translate All Words and Phrases')}
-      </IonButton>
+        <AIActionsContainer>
+          <IonButton onClick={handleTranslate} disabled={disabled}>
+            {tr('Translate All')}
+          </IonButton>
+
+          {/* <IonButton
+            color="warning"
+            onClick={handleTranslateAll}
+            disabled={disabled}
+          >
+            {tr('Translate All Words and Phrases')}
+          </IonButton> */}
+        </AIActionsContainer>
+      </AIContainer>
 
       {loadingCom}
 

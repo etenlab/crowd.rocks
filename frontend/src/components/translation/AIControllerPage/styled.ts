@@ -19,3 +19,24 @@ export const Stack = styled.div`
   align-items: center;
   justify-content: space-between;
 `;
+
+export const LanguageSectionContainer = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+`;
+export const LanguageSelectorContainer = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+`;
+
+export const AIActionsContainer = styled.div`
+  margin-top: 10px;
+  display: flex;
+  gap: 30px;
+`;
+
+export const AIContainer = styled.div``;
