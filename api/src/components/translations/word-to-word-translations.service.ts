@@ -368,62 +368,6 @@ export class WordToWordTranslationsService {
     };
   }
 
-  async addWordAsTranslationForWord(
-    originalDefinitionId: string,
-    tWord: WordUpsertInput,
-    tDefinitionText: string,
-    token: string,
-  ): Promise<AddWordAsTranslationForWordOutput> {
-    const dbPoolClient = await this.pg.pool.connect();
-    try {
-      dbPoolClient.query('BEGIN');
-
-      const { word_id, error: wordErr } = await this.wordsService.upsertInTrn(
-        tWord,
-        token,
-        dbPoolClient,
-      );
-
-      if (wordErr !== ErrorType.NoError || !word_id) {
-        throw new Error('Error with adding translation');
-      }
-
-      const { word_definition_id, error: definitionErr } =
-        await this.wordDefinitionService.upsertInTrn(
-          {
-            word_id: word_id,
-            definition: tDefinitionText,
-          },
-          token,
-          dbPoolClient,
-        );
-
-      if (definitionErr !== ErrorType.NoError || !word_definition_id) {
-        throw new Error('Error with adding translation');
-      }
-
-      const { error: translationErr } = await this.upsertInTrn(
-        Number(originalDefinitionId),
-        Number(word_definition_id),
-        token,
-        dbPoolClient,
-      );
-
-      if (translationErr !== ErrorType.NoError) {
-        throw new Error('Error with adding translation');
-      }
-
-      dbPoolClient.query('COMMIT');
-      return { wordTranslationId: word_id, error: ErrorType.NoError };
-    } catch (error) {
-      await dbPoolClient.query('ROLLBACK');
-      console.log('[error]', error);
-      return { wordTranslationId: null, error: ErrorType.WordInsertFailed };
-    } finally {
-      dbPoolClient.release();
-    }
-  }
-
   async getVoteStatus(
     word_to_word_translation_id: number,
     pgClient: PoolClient | null,

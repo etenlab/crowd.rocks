@@ -89,7 +89,6 @@ export class MapsService {
     const dbPoolClient = await this.pg.pool.connect();
     try {
       //-- Save map
-      dbPoolClient.query('BEGIN');
       const { map_id } = await this.mapsRepository.saveOriginalMapTrn({
         mapFileName,
         content_file_id,
@@ -100,18 +99,13 @@ export class MapsService {
         dialect_code: dialect_code || undefined,
         geo_code: geo_code || undefined,
       });
-      await dbPoolClient.query('COMMIT');
-      // parsing depends on results of saveOriginalMapTrn so we must commit and start a new transaction
-      dbPoolClient.query('BEGIN');
       const res = await this.parseOrigMapTrn({
         map_id,
         dbPoolClient,
         token,
       });
-      dbPoolClient.query('COMMIT');
       return res;
     } catch (error) {
-      dbPoolClient.query('ROLLBACK');
       throw error;
     } finally {
       dbPoolClient.release();
