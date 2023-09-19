@@ -16,7 +16,6 @@ import {
   GetAllMapsListInput,
   MapFileListConnection,
   GetOrigMapContentInput,
-  GetOrigMapContentOutput,
   GetOrigMapListInput,
   GetOrigMapPhrasesInput,
   GetOrigMapPhrasesOutput,
@@ -24,10 +23,10 @@ import {
   GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
   GetTranslatedMapContentInput,
-  GetTranslatedMapContentOutput,
   MapDeleteInput,
   MapDeleteOutput,
   MapUploadOutput,
+  MapFileOutput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
@@ -97,19 +96,25 @@ export class MapsResolver {
       };
     }
     try {
-      const map = await this.mapService.saveAndParseNewMap({
+      const savedParsedMap = await this.mapService.saveAndParseNewMap({
         content_file_id: String(uploadedContent.file.id),
         mapFileName: map_file_name,
         previewFileId: previewFileId!,
         token: bearer,
       });
+      if (!savedParsedMap.mapFileInfo?.original_map_id) {
+        Logger.error(
+          `mapsResolver#mapUpload: savedParsedMap.mapFileInfo?.original_map_id is falsy`,
+        );
+        throw new Error(ErrorType.MapNotFound);
+      }
       await this.mapService.translateOrigMapsByIds(
-        [map.original_map_id],
+        [savedParsedMap.mapFileInfo.original_map_id],
         bearer,
       );
       return {
         error: ErrorType.NoError,
-        mapFileOutput: map,
+        mapFileOutput: savedParsedMap,
       };
     } catch (error) {
       return {
@@ -224,20 +229,20 @@ export class MapsResolver {
     });
   }
 
-  @Query(() => GetOrigMapContentOutput)
+  @Query(() => MapFileOutput)
   async getOrigMapContent(
     @Args('input') input: GetOrigMapContentInput,
-  ): Promise<GetOrigMapContentOutput> {
+  ): Promise<MapFileOutput> {
     const mapWithContentUrl = await this.mapService.getOrigMapContent(
       input.original_map_id,
     );
     return mapWithContentUrl;
   }
 
-  @Query(() => GetTranslatedMapContentOutput)
+  @Query(() => MapFileOutput)
   async getTranslatedMapContent(
     @Args('input') input: GetTranslatedMapContentInput,
-  ): Promise<GetTranslatedMapContentOutput> {
+  ): Promise<MapFileOutput> {
     const mapWithContentUrl = await this.mapService.getTranslatedMapContent(
       input.translated_map_id,
     );

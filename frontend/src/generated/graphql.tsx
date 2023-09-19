@@ -328,23 +328,6 @@ export type GetOrigMapContentInput = {
   original_map_id: Scalars['ID']['input'];
 };
 
-export type GetOrigMapContentOutput = {
-  __typename?: 'GetOrigMapContentOutput';
-  content_file_id: Scalars['String']['output'];
-  content_file_url: Scalars['String']['output'];
-  created_at: Scalars['String']['output'];
-  created_by: Scalars['ID']['output'];
-  is_original: Scalars['Boolean']['output'];
-  language: LanguageOutput;
-  map_file_name: Scalars['String']['output'];
-  map_file_name_with_langs: Scalars['String']['output'];
-  original_map_id: Scalars['ID']['output'];
-  preview_file_id?: Maybe<Scalars['ID']['output']>;
-  preview_file_url?: Maybe<Scalars['ID']['output']>;
-  translated_map_id?: Maybe<Scalars['ID']['output']>;
-  translated_percent?: Maybe<Scalars['String']['output']>;
-};
-
 export type GetOrigMapListInput = {
   search?: InputMaybe<Scalars['String']['input']>;
 };
@@ -386,23 +369,6 @@ export type GetOrigMapsListOutput = {
 
 export type GetTranslatedMapContentInput = {
   translated_map_id: Scalars['ID']['input'];
-};
-
-export type GetTranslatedMapContentOutput = {
-  __typename?: 'GetTranslatedMapContentOutput';
-  content_file_id: Scalars['String']['output'];
-  content_file_url: Scalars['String']['output'];
-  created_at: Scalars['String']['output'];
-  created_by: Scalars['ID']['output'];
-  is_original: Scalars['Boolean']['output'];
-  language: LanguageOutput;
-  map_file_name: Scalars['String']['output'];
-  map_file_name_with_langs: Scalars['String']['output'];
-  original_map_id: Scalars['ID']['output'];
-  preview_file_id?: Maybe<Scalars['ID']['output']>;
-  preview_file_url?: Maybe<Scalars['ID']['output']>;
-  translated_map_id?: Maybe<Scalars['ID']['output']>;
-  translated_percent?: Maybe<Scalars['String']['output']>;
 };
 
 export type IFile = {
@@ -487,16 +453,10 @@ export type MapDeleteOutput = {
   error: ErrorType;
 };
 
-export type MapFileListConnection = {
-  __typename?: 'MapFileListConnection';
-  edges: Array<MapFileOutputEdge>;
-  pageInfo: PageInfo;
-};
-
-export type MapFileOutput = {
-  __typename?: 'MapFileOutput';
-  content_file_id?: Maybe<Scalars['ID']['output']>;
-  content_file_url?: Maybe<Scalars['ID']['output']>;
+export type MapFileInfo = {
+  __typename?: 'MapFileInfo';
+  content_file_id: Scalars['ID']['output'];
+  content_file_url: Scalars['ID']['output'];
   created_at: Scalars['String']['output'];
   created_by: Scalars['ID']['output'];
   is_original: Scalars['Boolean']['output'];
@@ -508,6 +468,18 @@ export type MapFileOutput = {
   preview_file_url?: Maybe<Scalars['ID']['output']>;
   translated_map_id?: Maybe<Scalars['ID']['output']>;
   translated_percent?: Maybe<Scalars['String']['output']>;
+};
+
+export type MapFileListConnection = {
+  __typename?: 'MapFileListConnection';
+  edges: Array<MapFileOutputEdge>;
+  pageInfo: PageInfo;
+};
+
+export type MapFileOutput = {
+  __typename?: 'MapFileOutput';
+  error: ErrorType;
+  mapFileInfo?: Maybe<MapFileInfo>;
 };
 
 export type MapFileOutputEdge = {
@@ -1311,7 +1283,7 @@ export type Query = {
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
   getDocument: GetDocumentOutput;
   getFlagsFromRef: FlagsOutput;
-  getOrigMapContent: GetOrigMapContentOutput;
+  getOrigMapContent: MapFileOutput;
   getOrigMapPhrases: GetOrigMapPhrasesOutput;
   getOrigMapWords: GetOrigMapWordsOutput;
   getOrigMapsList: GetOrigMapsListOutput;
@@ -1329,7 +1301,7 @@ export type Query = {
   getRecommendedTranslationFromDefinitionID: TranslationWithVoteOutput;
   getRecommendedTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteOutput;
   getSiteTextTranslationVoteStatus: SiteTextTranslationVoteStatusOutputRow;
-  getTranslatedMapContent: GetTranslatedMapContentOutput;
+  getTranslatedMapContent: MapFileOutput;
   getTranslationsByFromDefinitionId: TranslationWithVoteListOutput;
   getWordDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   getWordDefinitionsByFlag: WordDefinitionListConnection;
@@ -2699,9 +2671,9 @@ export type MapPhraseWithVotesFragmentFragment = { __typename?: 'MapPhraseWithVo
 
 export type WordWithVotesFragmentFragment = { __typename?: 'MapWordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string };
 
-export type MapFileOutputFragmentFragment = { __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
+export type MapFileOutputFragmentFragment = { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null };
 
-export type MapFileOutputEdgeFragmentFragment = { __typename?: 'MapFileOutputEdge', cursor: string, node: { __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+export type MapFileOutputEdgeFragmentFragment = { __typename?: 'MapFileOutputEdge', cursor: string, node: { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
 
 export type GetOrigMapWordsQueryVariables = Exact<{
   original_map_id?: InputMaybe<Scalars['ID']['input']>;
@@ -2732,14 +2704,14 @@ export type GetAllMapsListQueryVariables = Exact<{
 }>;
 
 
-export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'MapFileListConnection', edges: Array<{ __typename?: 'MapFileOutputEdge', cursor: string, node: { __typename?: 'MapFileOutput', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
+export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'MapFileListConnection', edges: Array<{ __typename?: 'MapFileOutputEdge', cursor: string, node: { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type GetTranslatedMapContentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'GetTranslatedMapContentOutput', translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, content_file_url: string, map_file_name_with_langs: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
 
 export type IsAdminLoggedInQueryVariables = Exact<{
   input: IsAdminIdInput;
@@ -2753,7 +2725,7 @@ export type GetOrigMapContentQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: { __typename?: 'GetOrigMapContentOutput', original_map_id: string, map_file_name_with_langs: string, map_file_name: string, created_at: string, created_by: string, content_file_url: string } };
+export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
 
 export type MapUploadMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
@@ -2763,7 +2735,7 @@ export type MapUploadMutationVariables = Exact<{
 }>;
 
 
-export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typename?: 'MapUploadOutput', error: ErrorType, mapFileOutput?: { __typename?: 'MapFileOutput', original_map_id: string, map_file_name: string } | null } };
+export type MapUploadMutation = { __typename?: 'Mutation', mapUpload: { __typename?: 'MapUploadOutput', error: ErrorType, mapFileOutput?: { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } | null } };
 
 export type MapDeleteMutationVariables = Exact<{
   mapId: Scalars['String']['input'];
@@ -3402,20 +3374,25 @@ export const WordWithVotesFragmentFragmentDoc = gql`
     `;
 export const MapFileOutputFragmentFragmentDoc = gql`
     fragment MapFileOutputFragment on MapFileOutput {
-  is_original
-  original_map_id
-  translated_map_id
-  map_file_name
-  translated_percent
-  language {
-    language_code
-    dialect_code
-    geo_code
+  error
+  mapFileInfo {
+    is_original
+    original_map_id
+    translated_map_id
+    map_file_name
+    translated_percent
+    language {
+      language_code
+      dialect_code
+      geo_code
+    }
+    created_at
+    created_by
+    map_file_name_with_langs
+    preview_file_url
+    content_file_url
+    content_file_id
   }
-  created_at
-  created_by
-  map_file_name_with_langs
-  preview_file_url
 }
     `;
 export const MapFileOutputEdgeFragmentFragmentDoc = gql`
@@ -5364,21 +5341,10 @@ export type GetAllMapsListQueryResult = Apollo.QueryResult<GetAllMapsListQuery, 
 export const GetTranslatedMapContentDocument = gql`
     query GetTranslatedMapContent($id: ID!) {
   getTranslatedMapContent(input: {translated_map_id: $id}) {
-    translated_map_id
-    map_file_name
-    translated_percent
-    language {
-      language_code
-      dialect_code
-      geo_code
-    }
-    created_at
-    created_by
-    content_file_url
-    map_file_name_with_langs
+    ...MapFileOutputFragment
   }
 }
-    `;
+    ${MapFileOutputFragmentFragmentDoc}`;
 
 /**
  * __useGetTranslatedMapContentQuery__
@@ -5445,15 +5411,10 @@ export type IsAdminLoggedInQueryResult = Apollo.QueryResult<IsAdminLoggedInQuery
 export const GetOrigMapContentDocument = gql`
     query GetOrigMapContent($id: ID!) {
   getOrigMapContent(input: {original_map_id: $id}) {
-    original_map_id
-    map_file_name_with_langs
-    map_file_name
-    created_at
-    created_by
-    content_file_url
+    ...MapFileOutputFragment
   }
 }
-    `;
+    ${MapFileOutputFragmentFragmentDoc}`;
 
 /**
  * __useGetOrigMapContentQuery__
@@ -5492,12 +5453,11 @@ export const MapUploadDocument = gql`
   ) {
     error
     mapFileOutput {
-      original_map_id
-      map_file_name
+      ...MapFileOutputFragment
     }
   }
 }
-    `;
+    ${MapFileOutputFragmentFragmentDoc}`;
 export type MapUploadMutationFn = Apollo.MutationFunction<MapUploadMutation, MapUploadMutationVariables>;
 
 /**

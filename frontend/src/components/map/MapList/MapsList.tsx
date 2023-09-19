@@ -22,7 +22,7 @@ import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
 import {
   ErrorType,
-  MapFileOutput,
+  MapFileInfo,
   useGetAllMapsListLazyQuery,
   useIsAdminLoggedInLazyQuery,
   useMapDeleteMutation,
@@ -77,7 +77,7 @@ export const MapList: React.FC = () => {
   const { makeMapThumbnail } = useMapTranslationTools();
   const [isMapDeleteModalOpen, setIsMapDeleteModalOpen] = useState(false);
   const [isMapResetModalOpen, setIsMapResetModalOpen] = useState(false);
-  const candidateForDeletion = useRef<MapFileOutput | undefined>();
+  const candidateForDeletion = useRef<MapFileInfo | undefined>();
 
   useEffect(() => {
     if (loadingSendMapFile || loadingUploadFile || loadingMapDelete) return;
@@ -300,19 +300,23 @@ export const MapList: React.FC = () => {
       allMapsQuery?.getAllMapsList.edges?.length ? (
         allMapsQuery?.getAllMapsList.edges
           ?.filter((edge) => {
-            return edge.node.map_file_name_with_langs
+            return (edge.node.mapFileInfo?.map_file_name_with_langs || '')
               .toLowerCase()
               .includes(filter.toLowerCase());
           })
-          .map((edge) => (
-            <MapItem
-              mapItem={edge.node}
-              key={edge.cursor}
-              candidateForDeletionRef={candidateForDeletion}
-              setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
-              showDelete={!!isAdminRes?.loggedInIsAdmin.isAdmin}
-            />
-          ))
+          .map((edge) =>
+            edge.node.mapFileInfo ? (
+              <MapItem
+                mapItem={edge.node.mapFileInfo}
+                key={edge.cursor}
+                candidateForDeletionRef={candidateForDeletion}
+                setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
+                showDelete={!!isAdminRes?.loggedInIsAdmin.isAdmin}
+              />
+            ) : (
+              <>{edge.node.error}</>
+            ),
+          )
       ) : (
         <div> {tr('No maps found')} </div>
       ),
