@@ -13,12 +13,12 @@ import { FileModule } from '../file/file.module';
 @Module({
   imports: [
     forwardRef(() => CoreModule),
+    forwardRef(() => FileModule),
     forwardRef(() => AuthenticationModule),
     forwardRef(() => WordsModule),
     forwardRef(() => PhraseModule),
     forwardRef(() => DefinitionsModule),
     forwardRef(() => TranslationsModule),
-    FileModule,
   ],
   providers: [MapsService, MapsResolver, MapsRepository],
   exports: [MapsService],

@@ -24,16 +24,13 @@ export class DocumentsService {
     const dbPoolClient = await this.pg.pool.connect();
 
     try {
-      dbPoolClient.query('BEGIN');
       const document_id = await this.documentsRepository.saveDocumentTrn(
         document,
         token,
         dbPoolClient,
       );
-      await dbPoolClient.query('COMMIT');
       return document_id;
     } catch (error) {
-      dbPoolClient.query('ROLLBACK');
       throw error;
     } finally {
       dbPoolClient.release();

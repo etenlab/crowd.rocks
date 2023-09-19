@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
-import { IonIcon } from '@ionic/react';
+import { IonIcon, useIonToast } from '@ionic/react';
 import { downloadOutline } from 'ionicons/icons';
 import styled from 'styled-components';
 
 import { Caption } from '../../common/Caption/Caption';
-import { useGetOrigMapContentQuery } from '../../../generated/graphql';
+import {
+  ErrorType,
+  useGetOrigMapContentQuery,
+} from '../../../generated/graphql';
 import { downloadFromUrl } from '../../../common/utility';
 
 import { useTr } from '../../../hooks/useTr';
@@ -19,6 +22,7 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   match,
 }: MapDetailsProps) => {
   const { tr } = useTr();
+  const [present] = useIonToast();
 
   const origMapContent = useGetOrigMapContentQuery({
     variables: { id: match.params.id },
@@ -37,11 +41,21 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   }, []);
 
   const handleDownloadSvg = () => {
-    if (origMapContent.data?.getOrigMapContent.content_file_url) {
+    if (
+      origMapContent.data?.getOrigMapContent.mapFileInfo?.content_file_url &&
+      origMapContent.data?.getOrigMapContent.error === ErrorType.NoError
+    ) {
       downloadFromUrl(
-        origMapContent.data?.getOrigMapContent.map_file_name,
-        origMapContent.data?.getOrigMapContent.content_file_url,
+        origMapContent.data?.getOrigMapContent.mapFileInfo.map_file_name,
+        origMapContent.data?.getOrigMapContent.mapFileInfo.content_file_url,
       );
+    } else {
+      present({
+        message: origMapContent.data?.getOrigMapContent.error,
+        position: 'top',
+        color: 'danger',
+        duration: 2000,
+      });
     }
   };
 
@@ -50,8 +64,10 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
       <Caption>
         <>
           {tr('Map')} -{' '}
-          {origMapContent.data?.getOrigMapContent.map_file_name || ''}
-          {origMapContent.data?.getOrigMapContent.content_file_url && (
+          {origMapContent.data?.getOrigMapContent.mapFileInfo?.map_file_name ||
+            ''}
+          {origMapContent.data?.getOrigMapContent.mapFileInfo
+            ?.content_file_url && (
             <IonIcon
               icon={downloadOutline}
               onClick={handleDownloadSvg}
@@ -64,11 +80,15 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
       </Caption>
 
       <StyledMapImg>
-        {origMapContent.data?.getOrigMapContent.content_file_url && (
+        {origMapContent.data?.getOrigMapContent.mapFileInfo
+          ?.content_file_url && (
           <img
             width={`${windowWidth - 10}px`}
             height={'auto'}
-            src={origMapContent.data?.getOrigMapContent.content_file_url}
+            src={
+              origMapContent.data?.getOrigMapContent.mapFileInfo
+                .content_file_url
+            }
             // src={`data:image/svg+xml;utf8,${encodeURIComponent(
             //   origMapContent.data?.getOrigMapContent.content,
             // )}`} // without `encodeURIComponent(image)` everal .svg images won't work

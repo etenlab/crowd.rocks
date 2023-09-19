@@ -1,9 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
+import { PubSub } from 'graphql-subscriptions';
+import { Subject } from 'rxjs';
 
-import { ErrorType } from 'src/common/types';
+import { ErrorType, GenericOutput } from 'src/common/types';
 import { calc_vote_weight } from 'src/common/utility';
-
+import { subTags2LangInfo, langInfo2String } from 'src/common/langUtils';
 import { LanguageInput } from 'src/components/common/types';
+
+import { SubscriptionToken } from 'src/common/subscription-token';
+
+import { PUB_SUB } from 'src/pubSub.module';
 
 import { DefinitionsService } from 'src/components/definitions/definitions.service';
 import { WordsService } from '../words/words.service';
@@ -59,7 +65,10 @@ const makeKey = (
 
 @Injectable()
 export class TranslationsService {
+  private translationSubject: Subject<number>;
+
   constructor(
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private wordToWordTrService: WordToWordTranslationsService,
     private wordToPhraseTrService: WordToPhraseTranslationsService,
     private phraseToWordTrService: PhraseToWordTranslationsService,
@@ -69,7 +78,9 @@ export class TranslationsService {
     private phrasesService: PhrasesService,
     private gTrService: GoogleTranslateService,
     private pg: PostgresService,
-  ) {}
+  ) {
+    this.translationSubject = new Subject<number>();
+  }
 
   async getTranslationsByFromDefinitionId(
     definition_id: number,
@@ -155,7 +166,7 @@ export class TranslationsService {
         };
       }
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -311,7 +322,7 @@ export class TranslationsService {
         }),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -387,7 +398,7 @@ export class TranslationsService {
         translation_with_vote: mostVoted,
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -469,7 +480,7 @@ export class TranslationsService {
         }),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -545,7 +556,7 @@ export class TranslationsService {
         }
       }
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -735,7 +746,7 @@ export class TranslationsService {
         ),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -945,7 +956,7 @@ export class TranslationsService {
         }),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -1022,7 +1033,7 @@ export class TranslationsService {
         );
       }
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -1098,7 +1109,7 @@ export class TranslationsService {
         }
       }
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -1107,7 +1118,7 @@ export class TranslationsService {
     };
   }
 
-  async translateAllWordsAndPhrasesByGoogle(
+  async translateWordsAndPhrasesByGoogle(
     from_language: LanguageInput,
     to_language: LanguageInput,
     token: string,
@@ -1331,6 +1342,159 @@ export class TranslationsService {
     };
   }
 
+  async translateAllWordsAndPhrasesByGoogle(
+    from_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<GenericOutput> {
+    try {
+      if (this.translationSubject) {
+        this.translationSubject.complete();
+      }
+
+      this.translationSubject = new Subject<number>();
+
+      const { error, languages } = await this.languagesForGoogleTranslate();
+
+      if (error !== ErrorType.NoError || !languages) {
+        return { error };
+      }
+
+      let totalResult = {
+        requestedCharactors: 0,
+        totalWordCount: 0,
+        totalPhraseCount: 0,
+        translatedWordCount: 0,
+        translatedPhraseCount: 0,
+      };
+      const hasErrors: string[] = [];
+      let status: 'Progressing' | 'Completed' = 'Progressing';
+
+      this.pubSub.publish(SubscriptionToken.TranslationReport, {
+        [SubscriptionToken.TranslationReport]: {
+          ...totalResult,
+          status,
+          message: `Translating ${langInfo2String(
+            subTags2LangInfo({
+              lang: from_language.language_code,
+              dialect: from_language.dialect_code || undefined,
+              region: from_language.geo_code || undefined,
+            }),
+          )} into ${
+            languages.length > 0
+              ? langInfo2String(
+                  subTags2LangInfo({
+                    lang: languages[0].code,
+                    dialect: undefined,
+                    region: undefined,
+                  }),
+                )
+              : ''
+          }...`,
+          errors: hasErrors,
+          total: languages.length,
+          completed: 0,
+        },
+      });
+
+      this.translationSubject.subscribe({
+        next: async (step) => {
+          if (step >= languages.length) {
+            this.translationSubject.complete();
+            return;
+          }
+
+          const language = languages[step];
+
+          if (language.code === from_language.language_code) {
+            this.translationSubject.next(step + 1);
+            return;
+          }
+
+          const { error, result } = await this.translateWordsAndPhrasesByGoogle(
+            from_language,
+            {
+              language_code: language.code,
+              dialect_code: null,
+              geo_code: null,
+            },
+            token,
+            pgClient,
+          );
+
+          if (error !== ErrorType.NoError) {
+            hasErrors.push(
+              langInfo2String(
+                subTags2LangInfo({
+                  lang: language.code,
+                }),
+              ),
+            );
+          }
+
+          if (result) {
+            totalResult = {
+              requestedCharactors:
+                totalResult.requestedCharactors + result.requestedCharactors,
+              totalWordCount:
+                totalResult.totalWordCount + result.totalWordCount,
+              totalPhraseCount:
+                totalResult.totalPhraseCount + result.totalPhraseCount,
+              translatedWordCount:
+                totalResult.translatedWordCount + result.totalWordCount,
+              translatedPhraseCount:
+                totalResult.translatedPhraseCount +
+                result.translatedPhraseCount,
+            };
+          }
+
+          this.pubSub.publish(SubscriptionToken.TranslationReport, {
+            [SubscriptionToken.TranslationReport]: {
+              ...totalResult,
+              status: step + 1 === languages.length ? 'Completed' : status,
+              message: `Translating ${langInfo2String(
+                subTags2LangInfo({
+                  lang: from_language.language_code,
+                  dialect: from_language.dialect_code || undefined,
+                  region: from_language.geo_code || undefined,
+                }),
+              )} into ${langInfo2String(
+                subTags2LangInfo({
+                  lang: language.code,
+                  dialect: undefined,
+                  region: undefined,
+                }),
+              )}...`,
+              errors: hasErrors,
+              total: languages.length,
+              completed: step,
+            },
+          });
+
+          this.translationSubject.next(step + 1);
+        },
+        complete: () => {
+          status = 'Completed';
+        },
+      });
+
+      this.translationSubject.next(0);
+    } catch (err) {
+      console.error(err);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+    };
+  }
+
+  async stopGoogleTranslation(): Promise<GenericOutput> {
+    this.translationSubject.complete();
+    return {
+      error: ErrorType.NoError,
+    };
+  }
+
   async languagesForGoogleTranslate(): Promise<LanguageListForGoogleTranslateOutput> {
     try {
       const languages = await this.gTrService.getLanguages();
@@ -1340,7 +1504,7 @@ export class TranslationsService {
         languages,
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {

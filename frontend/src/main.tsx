@@ -2,17 +2,21 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import {
+  split,
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
-  // createHttpLink,
 } from '@apollo/client';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { getMainDefinition } from '@apollo/client/utilities';
 import { createUploadLink } from 'apollo-upload-client';
 import { setContext } from '@apollo/client/link/context';
+import { createClient } from 'graphql-ws';
 
 import { typePolicies } from './cacheTypePolicies';
 
 const server_url = `${import.meta.env.VITE_APP_SERVER_URL}/graphql`;
+const ws_server_url = `${import.meta.env.VITE_APP_WS_SERVER_URL}/graphql`;
 
 const httpLink = createUploadLink({
   uri: server_url,
@@ -20,6 +24,24 @@ const httpLink = createUploadLink({
     'Apollo-Require-Preflight': 'true',
   },
 });
+
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: ws_server_url,
+  }),
+);
+
+const splitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    );
+  },
+  wsLink,
+  httpLink,
+);
 
 const authLink = setContext((_, { headers }) => {
   // get the authentication token from local storage if it exists
@@ -34,7 +56,7 @@ const authLink = setContext((_, { headers }) => {
 });
 
 export const apollo_client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: authLink.concat(splitLink),
   cache: new InMemoryCache({
     typePolicies,
   }),

@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useCallback } from 'react';
+import { useMemo, useState, useRef, useCallback, useEffect } from 'react';
 import {
   IonButton,
   useIonLoading,
@@ -30,17 +30,15 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 import {
   useLanguagesForGoogleTranslateQuery,
+  useTranslateWordsAndPhrasesByGoogleMutation,
   useTranslateAllWordsAndPhrasesByGoogleMutation,
+  useStopGoogleTranslationMutation,
+  useSubscribeToTranslationReportSubscription,
   TranslateAllWordsAndPhrasesByGoogleResult,
   useMapsReTranslateMutation,
 } from '../../../generated/graphql';
 
-import {
-  langInfo2String,
-  subTags2LangInfo,
-  getLangsRegistry,
-  langInfo2tag,
-} from '../../../common/langUtils';
+import { langInfo2String, langInfo2tag } from '../../../common/langUtils';
 
 function messageHTML({
   total,
@@ -84,10 +82,15 @@ export function AIControllerPage() {
     error: languagesError,
     loading: languagesLoading,
   } = useLanguagesForGoogleTranslateQuery();
-  const [translateAllWordsAndPhrasesByGoogleMutation] =
+  const [translateWordsAndPhrasesByGoogle] =
+    useTranslateWordsAndPhrasesByGoogleMutation();
+  const [translateAllWordsAndPhrasesByGoogle] =
     useTranslateAllWordsAndPhrasesByGoogleMutation();
+  const { data: translationResult } =
+    useSubscribeToTranslationReportSubscription();
 
   const [mapsReTranslate] = useMapsReTranslateMutation();
+  const [stopGoogleTranslation] = useStopGoogleTranslationMutation();
 
   const batchTranslatingRef = useRef<boolean>(false);
   const [batchTranslating, setBatchTranslating] = useState<boolean>(false);
@@ -98,6 +101,33 @@ export function AIControllerPage() {
   } | null>(null);
   const [result, setResult] =
     useState<TranslateAllWordsAndPhrasesByGoogleResult | null>(null);
+  const [isStopPressed, setIsStopPressed] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (translationResult && translationResult.TranslationReport) {
+      const report = translationResult.TranslationReport;
+
+      if (report.message) {
+        setBatchStatus({
+          completed: report.completed || 0,
+          total: report.total || 0,
+          message: report.message || '',
+        });
+      }
+
+      if (report.status !== 'Progressing') {
+        setBatchStatus(null);
+        setBatchTranslating(false);
+        batchTranslatingRef.current = false;
+      } else {
+        setBatchTranslating(true);
+        setIsStopPressed(false);
+        batchTranslatingRef.current = true;
+      }
+
+      setResult(report);
+    }
+  }, [translationResult]);
 
   const enabledTags = useMemo(() => {
     return !languagesError &&
@@ -146,7 +176,7 @@ export function AIControllerPage() {
       }),
     });
 
-    const { data } = await translateAllWordsAndPhrasesByGoogleMutation({
+    const { data } = await translateWordsAndPhrasesByGoogle({
       variables: {
         from_language_code: source.lang.tag,
         from_dialect_code: source.dialect?.tag,
@@ -159,8 +189,8 @@ export function AIControllerPage() {
 
     dismiss();
 
-    if (data && data.translateAllWordsAndPhrasesByGoogle.result) {
-      setResult(data.translateAllWordsAndPhrasesByGoogle.result);
+    if (data && data.translateWordsAndPhrasesByGoogle.result) {
+      setResult(data.translateWordsAndPhrasesByGoogle.result);
       await mapsReTranslate({
         variables: { forLangTag: langInfo2tag(target) },
       });
@@ -181,78 +211,18 @@ export function AIControllerPage() {
     setBatchTranslating(true);
     batchTranslatingRef.current = true;
 
-    const { langs } = await getLangsRegistry(enabledTags);
-
-    let completed = 0;
-    const sumOfResult: TranslateAllWordsAndPhrasesByGoogleResult = {
-      __typename: 'TranslateAllWordsAndPhrasesByGoogleResult',
-      requestedCharactors: 0,
-      totalWordCount: 0,
-      totalPhraseCount: 0,
-      translatedPhraseCount: 0,
-      translatedWordCount: 0,
-    };
-
-    for (const lang of langs) {
-      if (!batchTranslatingRef.current) {
-        break;
-      }
-
-      setBatchStatus({
-        total: langs.length,
-        completed: completed,
-        message: `${tr(
-          `Translate ${langInfo2String(source)} into ${langInfo2String(
-            subTags2LangInfo({ lang: lang.tag }),
-          )}`,
-        )} ...`,
-      });
-
-      const { data } = await translateAllWordsAndPhrasesByGoogleMutation({
-        variables: {
-          from_language_code: source.lang.tag,
-          from_dialect_code: source.dialect?.tag,
-          from_geo_code: source.region?.tag,
-          to_language_code: lang.tag,
-          to_dialect_code: null,
-          to_geo_code: null,
-        },
-      });
-
-      if (data && data.translateAllWordsAndPhrasesByGoogle.result) {
-        const t = data.translateAllWordsAndPhrasesByGoogle.result;
-        sumOfResult.requestedCharactors += t.requestedCharactors;
-        sumOfResult.totalWordCount += t.totalWordCount;
-        sumOfResult.totalPhraseCount += t.totalPhraseCount;
-        sumOfResult.translatedPhraseCount += t.translatedPhraseCount;
-        sumOfResult.translatedWordCount += t.translatedWordCount;
-        await mapsReTranslate({
-          variables: { forLangTag: lang.tag },
-        });
-      }
-
-      completed++;
-    }
-
-    setBatchStatus({
-      total: langs.length,
-      completed: completed,
-      message: `${tr(langs.length === completed ? 'Done' : 'Interrupted')}`,
+    translateAllWordsAndPhrasesByGoogle({
+      variables: {
+        from_language_code: source.lang.tag,
+        from_dialect_code: source.dialect?.tag,
+        from_geo_code: source.region?.tag,
+      },
     });
-    setBatchTranslating(false);
-    setResult(sumOfResult);
-  }, [
-    enabledTags,
-    mapsReTranslate,
-    presentToast,
-    source,
-    tr,
-    translateAllWordsAndPhrasesByGoogleMutation,
-  ]);
+  }, [presentToast, source, tr, translateAllWordsAndPhrasesByGoogle]);
 
-  const handleCancelTranslateAll = () => {
-    setBatchTranslating(false);
-    batchTranslatingRef.current = false;
+  const handleCancelTranslateAll = async () => {
+    setIsStopPressed(true);
+    await stopGoogleTranslation();
   };
 
   const resultCom = result ? (
@@ -284,9 +254,9 @@ export function AIControllerPage() {
           <IonButton
             color="danger"
             onClick={handleCancelTranslateAll}
-            disabled={!batchTranslating}
+            disabled={!batchTranslating || isStopPressed}
           >
-            {tr('Cancel')}
+            {isStopPressed ? `${tr('Canceling')}...` : tr('Cancel')}
           </IonButton>
         </Stack>
 

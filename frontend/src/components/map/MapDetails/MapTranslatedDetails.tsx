@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
-import { IonBadge, IonIcon } from '@ionic/react';
+import { IonBadge, IonIcon, useIonToast } from '@ionic/react';
 import { downloadOutline } from 'ionicons/icons';
 import styled from 'styled-components';
 
 import { Caption } from '../../common/Caption/Caption';
 
-import { useGetTranslatedMapContentLazyQuery } from '../../../generated/graphql';
+import {
+  ErrorType,
+  useGetTranslatedMapContentLazyQuery,
+} from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 import { downloadFromSrc } from '../../../common/utility';
@@ -22,6 +25,7 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
   match,
 }: MapDetailsProps) => {
   const { tr } = useTr();
+  const [present] = useIonToast();
 
   const [getTranslatedMapContent, { data }] =
     useGetTranslatedMapContentLazyQuery({ fetchPolicy: 'no-cache' });
@@ -41,6 +45,20 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
   }, []);
 
   useEffect(() => {
+    if (
+      currentMapWithContent?.error &&
+      currentMapWithContent?.error !== ErrorType.NoError
+    ) {
+      present({
+        message: currentMapWithContent?.error,
+        position: 'top',
+        color: 'danger',
+        duration: 2000,
+      });
+    }
+  }, [currentMapWithContent?.error, present]);
+
+  useEffect(() => {
     const getMap = async () => {
       getTranslatedMapContent({ variables: { id: mapId } });
     };
@@ -48,33 +66,42 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
   }, [getTranslatedMapContent, mapId]);
 
   const handleDownloadSvg = () => {
-    if (currentMapWithContent) {
+    if (currentMapWithContent?.mapFileInfo) {
       downloadFromSrc(
-        currentMapWithContent.map_file_name_with_langs,
+        currentMapWithContent.mapFileInfo.map_file_name_with_langs,
         `data:image/svg+xml;utf8,${encodeURIComponent(
-          currentMapWithContent.content_file_url,
+          currentMapWithContent.mapFileInfo.content_file_url,
         )}`,
       );
     }
   };
 
-  const langInfo = currentMapWithContent
-    ? subTags2LangInfo({
-        lang: currentMapWithContent.language.language_code,
-        dialect: currentMapWithContent.language.dialect_code || undefined,
-        region: currentMapWithContent.language.geo_code || undefined,
-      })
-    : undefined;
+  const langInfo = useMemo(() => {
+    if (!currentMapWithContent?.mapFileInfo?.language.language_code) {
+      return undefined;
+    }
+    return currentMapWithContent
+      ? subTags2LangInfo({
+          lang: currentMapWithContent.mapFileInfo.language.language_code,
+          dialect:
+            currentMapWithContent.mapFileInfo.language.dialect_code ||
+            undefined,
+          region:
+            currentMapWithContent.mapFileInfo.language.geo_code || undefined,
+        })
+      : undefined;
+  }, [currentMapWithContent]);
 
   return (
     <>
       <Caption>
         <>
-          {tr('Map')} - {currentMapWithContent?.map_file_name_with_langs}
+          {tr('Map')} -{' '}
+          {currentMapWithContent?.mapFileInfo?.map_file_name_with_langs}
           <IonBadge>
             {tr('translated to')} {langInfo2String(langInfo)}
-            {currentMapWithContent?.translated_percent
-              ? ` [${currentMapWithContent.translated_percent}%]`
+            {currentMapWithContent?.mapFileInfo?.translated_percent
+              ? ` [${currentMapWithContent.mapFileInfo.translated_percent}%]`
               : ''}
           </IonBadge>
           <IonIcon
@@ -88,11 +115,11 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
       </Caption>
 
       <StyledMapImg>
-        {currentMapWithContent && (
+        {currentMapWithContent?.mapFileInfo && (
           <img
             width={`${windowWidth - 10}px`}
             height={'auto'}
-            src={currentMapWithContent.content_file_url}
+            src={currentMapWithContent.mapFileInfo.content_file_url}
             // src={`data:image/svg+xml;utf8,${encodeURIComponent(
             //   currentMapWithContent.content_url,
             // )}`} // without `encodeURIComponent(image)` everal .svg images won't work
