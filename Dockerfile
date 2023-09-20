@@ -14,7 +14,7 @@ RUN npm install
 RUN if [ "$BUILD_MODE" = "staging" ]; then \
         npm run build:staging; \
     elif [ "$BUILD_MODE" = "test" ]; then \
-        npm run build:test
+        npm run build:test; \
     else \
         npm run build:prod; \
     fi
