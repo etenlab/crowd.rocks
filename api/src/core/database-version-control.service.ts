@@ -321,7 +321,7 @@ export class DatabaseVersionControlService {
     try {
       console.log('loading SQL:', path);
       const data = readFileSync(path, 'utf8');
-      console.log(data);
+
       await this.pg.pool.query(data, []);
     } catch (err) {
       console.log(err);
