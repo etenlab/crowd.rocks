@@ -1,34 +1,42 @@
 name: Pre-Test Workflow
 on:
+  push:
+    branches:
+      - test-framework
   pull_request:
     branches: [dev, prod, test]
     types: [opened, synchronize, reopened]
+    paths:
+      - "api/**"
+      - "frontend/**"
 
 jobs:
   test-buildable:
-    - name: Checkout
-      uses: actions/checkout@v1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Extract metadata (tags, labels) for Docker
-      id: meta
-      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-      with:
-        images: etenlab/crowd-rocks
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: etenlab/crowd-rocks
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-      with:
-        context: .
-        push: true
-        tags: etenlab/crowd-rocks:test
-        labels: ${{ steps.meta.outputs.labels }}
-        build-args: BUILD_MODE=test
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          push: true
+          tags: etenlab/crowd-rocks:test
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: BUILD_MODE=test
 
   test-api-e2e:
     runs-on: ubuntu-latest
@@ -48,7 +56,6 @@ jobs:
         with:
           node-version: 16
 
-      - name: Install dependencies for api
       - run: cd api && yarn install
 
       - name: Test
@@ -73,7 +80,6 @@ jobs:
             postgres
             api
 
-      - name: Install dependences
       - run: cd frontend && npm ci --force
 
       - name: Install Playwright Browsers
