@@ -318,8 +318,12 @@ export class DatabaseVersionControlService {
   }
 
   async runSqlFile(path: string): Promise<void> {
-    console.log('loading SQL:', path);
-    const data = readFileSync(path, 'utf8');
-    await this.pg.pool.query(data, []);
+    try {
+      console.log('loading SQL:', path);
+      const data = readFileSync(path, 'utf8');
+      await this.pg.pool.query(data, []);
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
