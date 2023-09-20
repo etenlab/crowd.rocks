@@ -8,20 +8,20 @@ services:
     image: postgres:14.5
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: example
-      POSTGRES_DB: eil
+      POSTGRES_PASSWORD: asdfasdf
+      POSTGRES_DB: crowdrocks
     ports:
       - 5432:5432
 
   api:
     image: etenlab/crowd-rocks:dev
     environment:
-      CR_DB_URL: postgres
+      CR_DB_URL: localhost
       CR_DB_PORT: 5432
       CR_DB_USER: postgres
-      CR_DB_PASSWORD: example
-      CR_DB: eil
-      CR_ADMIN_PASSWORD: asdfasdf
+      CR_DB_PASSWORD: asdfasdf
+      CR_DB: crowdrocks
+      ADMIN_PASSWORD: asdfasdf
       MODE: DEV
       PORT: 80
     ports:

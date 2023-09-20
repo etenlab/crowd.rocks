@@ -176,7 +176,7 @@ export class DatabaseVersionControlService {
     await this.registerUser(
       'admin@crowd.rocks',
       'Admin',
-      this.config.CR_ADMIN_PASSWORD || 'asdfasdf',
+      this.config.ADMIN_PASSWORD || 'asdfasdf',
     );
     await this.registerUser('anonymous@crowd.rocks', 'Anonymous', 'asdfasdf');
 
