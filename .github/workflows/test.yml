@@ -1,8 +1,5 @@
 name: Pre-Test Workflow
 on:
-  push:
-    branches:
-      - test-framework
   pull_request:
     branches: [dev, prod, test]
     types: [opened, synchronize, reopened]
