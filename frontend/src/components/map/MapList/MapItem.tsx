@@ -4,7 +4,7 @@ import { downloadOutline, trashBin } from 'ionicons/icons';
 import { styled } from 'styled-components';
 
 import {
-  MapFileOutput,
+  MapFileInfo,
   useGetOrigMapContentLazyQuery,
   useGetTranslatedMapContentLazyQuery,
 } from '../../../generated/graphql';
@@ -14,8 +14,8 @@ import { downloadFromUrl } from '../../../common/utility';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
-  mapItem: MapFileOutput;
-  candidateForDeletionRef: React.MutableRefObject<MapFileOutput | undefined>;
+  mapItem: MapFileInfo;
+  candidateForDeletionRef: React.MutableRefObject<MapFileInfo | undefined>;
   setIsMapDeleteModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   showDelete: boolean;
 };
@@ -78,11 +78,12 @@ const NotStyledMapItem = ({
     origMapContent.data &&
     !origMapContent.error &&
     !origMapContent.loading &&
-    downloadFlagRef.current === 'original'
+    downloadFlagRef.current === 'original' &&
+    origMapContent.data.getOrigMapContent.mapFileInfo
   ) {
     downloadFromUrl(
-      origMapContent.data.getOrigMapContent.map_file_name,
-      origMapContent.data.getOrigMapContent.content_file_url,
+      origMapContent.data.getOrigMapContent.mapFileInfo.map_file_name,
+      origMapContent.data.getOrigMapContent.mapFileInfo.content_file_url,
     );
     downloadFlagRef.current = null;
   }
@@ -91,12 +92,14 @@ const NotStyledMapItem = ({
     translatedMapContent.data &&
     !translatedMapContent.error &&
     !translatedMapContent.loading &&
-    downloadFlagRef.current === 'translated'
+    downloadFlagRef.current === 'translated' &&
+    translatedMapContent.data.getTranslatedMapContent.mapFileInfo
   ) {
     downloadFromUrl(
-      translatedMapContent.data.getTranslatedMapContent
+      translatedMapContent.data.getTranslatedMapContent.mapFileInfo
         .map_file_name_with_langs,
-      translatedMapContent.data.getTranslatedMapContent.content_file_url,
+      translatedMapContent.data.getTranslatedMapContent.mapFileInfo
+        .content_file_url,
     );
     downloadFlagRef.current = null;
   }

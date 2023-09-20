@@ -12,7 +12,7 @@ import { Phrase } from '../phrases/types';
 import { Word } from '../words/types';
 
 @ObjectType()
-export class MapFileOutput {
+export class MapFileInfo {
   @Field(() => Boolean) is_original: boolean;
   @Field(() => ID) original_map_id: string;
   @Field(() => String, { nullable: true }) translated_percent?: string;
@@ -24,8 +24,13 @@ export class MapFileOutput {
   @Field(() => ID, { nullable: true }) translated_map_id?: string;
   @Field(() => ID, { nullable: true }) preview_file_url?: string;
   @Field(() => ID, { nullable: true }) preview_file_id?: string;
-  @Field(() => ID, { nullable: true }) content_file_url?: string;
-  @Field(() => ID, { nullable: true }) content_file_id?: string;
+  @Field(() => ID) content_file_url: string;
+  @Field(() => ID) content_file_id: string;
+}
+@ObjectType()
+export class MapFileOutput extends GenericOutput {
+  @Field(() => MapFileInfo, { nullable: true })
+  mapFileInfo?: MapFileInfo | null;
 }
 @InputType()
 export class GetOrigMapListInput {
@@ -74,18 +79,18 @@ export class MapFileListConnection {
 export class GetOrigMapContentInput {
   @Field(() => ID) original_map_id: string;
 }
-@ObjectType()
-export class GetOrigMapContentOutput extends MapFileOutput {
-  @Field(() => String) content_file_url: string;
-  @Field(() => String) content_file_id: string;
-}
+// @ObjectType()
+// export class GetOrigMapContentOutput extends MapFileOutput {
+//   @Field(() => String) content_file_url: string;
+//   @Field(() => String) content_file_id: string;
+// }
 
 @InputType()
 export class GetTranslatedMapContentInput {
   @Field(() => ID) translated_map_id: string;
 }
-@ObjectType()
-export class GetTranslatedMapContentOutput extends GetOrigMapContentOutput {}
+// @ObjectType()
+// export class GetTranslatedMapContentOutput extends GetOrigMapContentOutput {}
 
 @InputType()
 export class GetOrigMapWordsInput {

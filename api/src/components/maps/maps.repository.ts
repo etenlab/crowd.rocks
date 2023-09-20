@@ -4,11 +4,9 @@ import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
 import { LanguageInput } from 'src/components/common/types';
 import {
-  GetOrigMapContentOutput,
   GetOrigMapPhrasesOutput,
   GetOrigMapsListOutput,
   GetOrigMapWordsOutput,
-  GetTranslatedMapContentOutput,
   MapFileOutput,
   MapPhraseTranslations,
   MapPhraseWithVotes,
@@ -209,11 +207,16 @@ export class MapsRepository {
           om.language_code,
           om.dialect_code,
           om.geo_code,
-          f.file_url as preview_file_url
+          f.file_id as preview_file_id,
+          f.file_url as preview_file_url,
+          f2.file_id as content_file_id,
+          f2.file_url as content_file_url
         from
           original_maps om
         left join files f on
           om.preview_file_id = f.file_id
+        left join files f2 on
+          om.content_file_id = f2.file_id
         where true
         ${languageClause}
       `;
@@ -228,20 +231,29 @@ export class MapsRepository {
         language_code,
         dialect_code,
         geo_code,
+        preview_file_id,
         preview_file_url,
+        content_file_id,
+        content_file_url,
       }) => ({
-        original_map_id,
-        map_file_name,
-        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
-          language_code,
-          dialect_code,
-          geo_code,
-        }),
-        created_at,
-        created_by,
-        is_original: true,
-        language: { language_code, dialect_code, geo_code },
-        preview_file_url,
+        error: ErrorType.NoError,
+        mapFileInfo: {
+          original_map_id,
+          map_file_name,
+          map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+            language_code,
+            dialect_code,
+            geo_code,
+          }),
+          created_at,
+          created_by,
+          is_original: true,
+          language: { language_code, dialect_code, geo_code },
+          preview_file_id,
+          preview_file_url,
+          content_file_id,
+          content_file_url,
+        },
       }),
     );
 
@@ -288,6 +300,7 @@ export class MapsRepository {
         tm.translated_percent,
         f.file_url as preview_file_url,
         f.file_id as preview_file_id,
+        f2.file_url as content_file_url,
         f2.file_id as content_file_id
       from
         translated_maps tm
@@ -315,25 +328,30 @@ export class MapsRepository {
         geo_code,
         preview_file_url,
         preview_file_id,
+        content_file_url,
         content_file_id,
         translated_percent,
       }) => ({
-        translated_map_id,
-        original_map_id,
-        map_file_name,
-        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
-          language_code,
-          dialect_code,
-          geo_code,
-        }),
-        created_at,
-        created_by,
-        is_original: false,
-        language: { language_code, dialect_code, geo_code },
-        preview_file_url,
-        preview_file_id,
-        content_file_id,
-        translated_percent,
+        error: ErrorType.NoError,
+        mapFileInfo: {
+          translated_map_id,
+          original_map_id,
+          map_file_name,
+          map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+            language_code,
+            dialect_code,
+            geo_code,
+          }),
+          created_at,
+          created_by,
+          is_original: false,
+          language: { language_code, dialect_code, geo_code },
+          preview_file_url,
+          preview_file_id,
+          content_file_url,
+          content_file_id,
+          translated_percent,
+        },
       }),
     );
 
@@ -352,11 +370,15 @@ export class MapsRepository {
           om.dialect_code,
           om.geo_code,
           f.file_id as preview_file_id,
-          f.file_url as preview_file_url
+          f.file_url as preview_file_url,
+          f2.file_id as content_file_id,
+          f2.file_url as content_file_url
         from
           original_maps om
         left join files f on
           om.preview_file_id = f.file_id
+        left join files f2 on
+          om.content_file_id = f2.file_id
         where original_map_id = $1
       `;
 
@@ -373,27 +395,34 @@ export class MapsRepository {
         geo_code,
         preview_file_id,
         preview_file_url,
+        content_file_id,
+        content_file_url,
       }) => ({
-        original_map_id,
-        map_file_name,
-        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
-          language_code,
-          dialect_code,
-          geo_code,
-        }),
-        created_at,
-        created_by,
-        is_original: true,
-        language: { language_code, dialect_code, geo_code },
-        preview_file_id,
-        preview_file_url,
+        error: ErrorType.NoError,
+        mapFileInfo: {
+          original_map_id,
+          map_file_name,
+          map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+            language_code,
+            dialect_code,
+            geo_code,
+          }),
+          created_at,
+          created_by,
+          is_original: true,
+          language: { language_code, dialect_code, geo_code },
+          preview_file_id,
+          preview_file_url,
+          content_file_id,
+          content_file_url,
+        },
       }),
     );
 
     return { ...origMapList[0] };
   }
 
-  async getOrigMapWithContentUrl(id: string): Promise<GetOrigMapContentOutput> {
+  async getOrigMapWithContentUrl(id: string): Promise<MapFileOutput> {
     const resQ = await this.pg.pool.query(
       `
         select 
@@ -433,27 +462,28 @@ export class MapsRepository {
     } = resQ.rows[0];
 
     return {
-      original_map_id,
-      map_file_name,
-      map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
-        language_code,
-        dialect_code,
-        geo_code,
-      }),
-      created_at,
-      created_by,
-      is_original: true,
-      language: { language_code, dialect_code, geo_code },
-      preview_file_url,
-      content_file_url,
-      preview_file_id,
-      content_file_id,
+      error: ErrorType.NoError,
+      mapFileInfo: {
+        original_map_id,
+        map_file_name,
+        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+          language_code,
+          dialect_code,
+          geo_code,
+        }),
+        created_at,
+        created_by,
+        is_original: true,
+        language: { language_code, dialect_code, geo_code },
+        preview_file_url,
+        content_file_url,
+        preview_file_id,
+        content_file_id,
+      },
     };
   }
 
-  async getTranslatedMapWithContentUrl(
-    id: string,
-  ): Promise<GetTranslatedMapContentOutput> {
+  async getTranslatedMapWithContentUrl(id: string): Promise<MapFileOutput> {
     const resQ = await this.pg.pool.query(
       `
       select
@@ -466,9 +496,10 @@ export class MapsRepository {
         tm.dialect_code,
         tm.geo_code,
         tm.translated_percent,
-        tm.content_file_id,
         f.file_url as preview_file_url,
-        f2.file_url as content_file_url
+        f.file_id as preview_file_id,
+        f2.file_url as content_file_url,
+        f2.file_id as content_file_id
       from
         translated_maps tm
       left join original_maps om
@@ -483,6 +514,13 @@ export class MapsRepository {
       [id],
     );
 
+    if (!(resQ.rows.length > 0)) {
+      return {
+        error: ErrorType.MapNotFound,
+        mapFileInfo: null,
+      };
+    }
+
     const {
       original_map_id,
       translated_map_id,
@@ -494,27 +532,32 @@ export class MapsRepository {
       geo_code,
       translated_percent,
       preview_file_url,
+      preview_file_id,
       content_file_url,
       content_file_id,
     } = resQ.rows[0];
 
     return {
-      original_map_id,
-      translated_map_id,
-      map_file_name,
-      created_at,
-      created_by,
-      is_original: false,
-      language: { language_code, dialect_code, geo_code },
-      map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
-        language_code,
-        dialect_code,
-        geo_code,
-      }),
-      translated_percent,
-      preview_file_url,
-      content_file_url,
-      content_file_id,
+      error: ErrorType.NoError,
+      mapFileInfo: {
+        original_map_id,
+        translated_map_id,
+        map_file_name,
+        created_at,
+        created_by,
+        is_original: false,
+        language: { language_code, dialect_code, geo_code },
+        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+          language_code,
+          dialect_code,
+          geo_code,
+        }),
+        translated_percent,
+        preview_file_url,
+        preview_file_id,
+        content_file_url,
+        content_file_id,
+      },
     };
   }
 
