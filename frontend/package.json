@@ -8,6 +8,7 @@
     "build:local": "tsc && vite build --mode local-dev",
     "build:staging": "tsc && vite build --mode staging",
     "build:prod": "tsc && vite build",
+    "format": "prettier --write \"src/**/*.{ts,tsx,md,mdx,js,jsx}\"",
     "preview": "vite preview",
     "test.e2e": "cypress run",
     "test.unit": "vitest",
