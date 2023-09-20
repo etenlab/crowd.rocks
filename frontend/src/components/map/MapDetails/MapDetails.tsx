@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps, useLocation } from 'react-router';
-import { IonBadge, IonIcon, useIonToast } from '@ionic/react';
+import { IonBadge, IonIcon, IonLoading, useIonToast } from '@ionic/react';
 import { downloadOutline } from 'ionicons/icons';
 import styled from 'styled-components';
 
@@ -29,6 +29,8 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   const isOriginal = useMemo(() => {
     return new URLSearchParams(search).get('is_original') === 'true';
   }, [search]);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const currentMapWithContent = useGetMapContentQuery({
     variables: { id: match.params.id, is_original: isOriginal },
@@ -87,6 +89,14 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
     currentMapWithContent,
   ]);
 
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   return (
     <>
       <Caption>
@@ -114,16 +124,26 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
 
       <StyledMapImg>
         {currMapContent?.mapFileInfo && (
-          <TransformWrapper>
-            <TransformComponent>
-              <img
-                width={`${windowWidth - 10}px`}
-                height={'auto'}
-                src={currMapContent.mapFileInfo.content_file_url}
-                alt="Translated map"
-              />
-            </TransformComponent>
-          </TransformWrapper>
+          <>
+            {imageError && <p>{tr('Error loading image')}</p>}
+            <IonLoading
+              message={tr('Loading image')}
+              isOpen={!imageLoaded && !imageError}
+            />
+            <TransformWrapper>
+              <TransformComponent>
+                <img
+                  width={`${windowWidth - 10}px`}
+                  height={'auto'}
+                  src={currMapContent.mapFileInfo.content_file_url}
+                  alt="Translated map"
+                  placeholder="asdf"
+                  onLoad={handleImageLoad}
+                  onError={handleImageError}
+                />
+              </TransformComponent>
+            </TransformWrapper>
+          </>
         )}
       </StyledMapImg>
     </>
