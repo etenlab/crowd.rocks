@@ -24,8 +24,8 @@ import {
   MapDeleteInput,
   MapDeleteOutput,
   MapUploadOutput,
-  MapFileOutput,
-  GetMapContentInput,
+  MapFileOutput as MapDetailsOutput,
+  GetMapContentInput as GetMapDetailsInput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
@@ -228,13 +228,13 @@ export class MapsResolver {
     });
   }
 
-  @Query(() => MapFileOutput)
-  async getMapContent(
-    @Args('input') input: GetMapContentInput,
-  ): Promise<MapFileOutput> {
+  @Query(() => MapDetailsOutput)
+  async getMapDetails(
+    @Args('input') input: GetMapDetailsInput,
+  ): Promise<MapDetailsOutput> {
     return input.is_original
-      ? this.mapService.getOrigMapContent(input.map_id)
-      : this.mapService.getTranslatedMapContent(input.map_id);
+      ? this.mapService.getOrigMapWithContentUrl(input.map_id)
+      : this.mapService.getTranslatedMapWithContentUrl(input.map_id);
   }
 
   @Query(() => GetOrigMapWordsOutput)

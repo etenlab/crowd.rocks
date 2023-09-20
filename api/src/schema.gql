@@ -865,7 +865,7 @@ type Query {
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
   getDocument(input: GetDocumentInput!): GetDocumentOutput!
   getFlagsFromRef(parent_id: String!, parent_table: TableNameType!): FlagsOutput!
-  getMapContent(input: GetMapContentInput!): MapFileOutput!
+  getMapDetails(input: GetMapContentInput!): MapFileOutput!
   getOrigMapPhrases(input: GetOrigMapPhrasesInput): GetOrigMapPhrasesOutput!
   getOrigMapWords(input: GetOrigMapWordsInput): GetOrigMapWordsOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!

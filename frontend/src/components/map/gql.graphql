@@ -128,8 +128,8 @@ query GetAllMapsList($lang: LanguageInput, $after: ID, $first: Int) {
   }
 }
 
-query GetMapContent($id: ID!, $is_original: Boolean!) {
-  getMapContent(input: { map_id: $id, is_original: $is_original }) {
+query GetMapDetails($id: ID!, $is_original: Boolean!) {
+  getMapDetails(input: { map_id: $id, is_original: $is_original }) {
     ...MapFileOutputFragment
   }
 }

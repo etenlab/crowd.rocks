@@ -357,11 +357,11 @@ export class MapsService {
     };
   }
 
-  async getOrigMapContent(id: string): Promise<MapFileOutput> {
+  async getOrigMapWithContentUrl(id: string): Promise<MapFileOutput> {
     return this.mapsRepository.getOrigMapWithContentUrl(id);
   }
 
-  async getTranslatedMapContent(id: string): Promise<MapFileOutput> {
+  async getTranslatedMapWithContentUrl(id: string): Promise<MapFileOutput> {
     const mapFileInfo =
       await this.mapsRepository.getTranslatedMapWithContentUrl(id);
     return mapFileInfo;

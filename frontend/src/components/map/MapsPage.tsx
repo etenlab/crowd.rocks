@@ -23,11 +23,6 @@ export const MapsPage: React.FC<MapsPageProps> = ({ match }: MapsPageProps) => {
         path={`/${match.params.nation_id}/${match.params.language_id}/1/maps/translation`}
         component={MapWordsTranslation}
       />
-      {/* <Route
-        exact
-        path={`/${match.params.nation_id}/${match.params.language_id}/1/maps/details-translated/:id`}
-        component={MapDetails}
-      /> */}
       <Route
         exact
         path={`/${match.params.nation_id}/${match.params.language_id}/1/maps/details/:id`}

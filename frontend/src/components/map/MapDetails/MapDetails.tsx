@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 import { Caption } from '../../common/Caption/Caption';
 
-import { ErrorType, useGetMapContentQuery } from '../../../generated/graphql';
+import { ErrorType, useGetMapDetailsQuery } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 import { downloadFromUrl } from '../../../common/utility';
@@ -32,13 +32,13 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const currentMapWithContent = useGetMapContentQuery({
+  const currentMapWithContent = useGetMapDetailsQuery({
     variables: { id: match.params.id, is_original: isOriginal },
     fetchPolicy: 'no-cache',
   });
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const currMapContent = currentMapWithContent?.data?.getMapContent;
+  const currMapContent = currentMapWithContent?.data?.getMapDetails;
 
   useEffect(() => {
     function handleWindowResize() {

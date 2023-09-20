@@ -5,7 +5,7 @@ import { styled } from 'styled-components';
 
 import {
   MapFileInfo,
-  useGetMapContentLazyQuery,
+  useGetMapDetailsLazyQuery,
 } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
@@ -36,7 +36,7 @@ const NotStyledMapItem = ({
   } = useAppContext();
   const downloadFlagRef = useRef<'original' | 'translated' | null>(null);
 
-  const [getMapContent, mapContent] = useGetMapContentLazyQuery();
+  const [getMapDetails, mapContent] = useGetMapDetailsLazyQuery();
 
   const routerLink = `/US/${appLanguage.lang.tag}/1/maps/details/${
     mapItem.is_original ? mapItem.original_map_id : mapItem.translated_map_id
@@ -50,7 +50,7 @@ const NotStyledMapItem = ({
 
   const handleDownloadSvg: MouseEventHandler<HTMLIonIconElement> = (e) => {
     downloadFlagRef.current = mapItem.is_original ? 'original' : 'translated';
-    getMapContent({
+    getMapDetails({
       variables: {
         is_original: mapItem.is_original,
         id: mapItem.is_original
@@ -68,11 +68,11 @@ const NotStyledMapItem = ({
     !mapContent.error &&
     !mapContent.loading &&
     downloadFlagRef.current === 'original' &&
-    mapContent.data.getMapContent.mapFileInfo
+    mapContent.data.getMapDetails.mapFileInfo
   ) {
     downloadFromUrl(
-      mapContent.data.getMapContent.mapFileInfo.map_file_name,
-      mapContent.data.getMapContent.mapFileInfo.content_file_url,
+      mapContent.data.getMapDetails.mapFileInfo.map_file_name,
+      mapContent.data.getMapDetails.mapFileInfo.content_file_url,
     );
     downloadFlagRef.current = null;
   }
@@ -82,11 +82,11 @@ const NotStyledMapItem = ({
     !mapContent.error &&
     !mapContent.loading &&
     downloadFlagRef.current === 'translated' &&
-    mapContent.data.getMapContent.mapFileInfo
+    mapContent.data.getMapDetails.mapFileInfo
   ) {
     downloadFromUrl(
-      mapContent.data.getMapContent.mapFileInfo.map_file_name_with_langs,
-      mapContent.data.getMapContent.mapFileInfo.content_file_url,
+      mapContent.data.getMapDetails.mapFileInfo.map_file_name_with_langs,
+      mapContent.data.getMapDetails.mapFileInfo.content_file_url,
     );
     downloadFlagRef.current = null;
   }

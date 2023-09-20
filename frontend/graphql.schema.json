@@ -10045,7 +10045,7 @@
             "deprecationReason": null
           },
           {
-            "name": "getMapContent",
+            "name": "getMapDetails",
             "description": null,
             "args": [
               {
