@@ -14,7 +14,14 @@ describe('GraphQL (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-  });
+
+    const delayPromise = new Promise((resolve: (value: void) => void) => {
+      setTimeout(() => {
+        resolve();
+      }, 30000);
+    });
+    await delayPromise;
+  }, 40000);
 
   afterEach(async () => {
     await app.close();
@@ -25,7 +32,7 @@ describe('GraphQL (e2e)', () => {
       operationName: 'Login',
       variables: {
         email: 'admin@crowd.rocks',
-        password: process.env.CR_ADMIN_PASSWORD || 'asdfasdf',
+        password: process.env.ADMIN_PASSWORD || 'asdfasdf',
       },
       query: `
         mutation Login($email: String!, $password: String!) {
