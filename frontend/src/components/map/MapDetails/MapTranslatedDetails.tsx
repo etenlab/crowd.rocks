@@ -15,6 +15,7 @@ import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 import { downloadFromSrc } from '../../../common/utility';
 
 import { useTr } from '../../../hooks/useTr';
+import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 
 interface MapDetailsProps
   extends RouteComponentProps<{
@@ -116,15 +117,16 @@ export const MapTranslatedDetails: React.FC<MapDetailsProps> = ({
 
       <StyledMapImg>
         {currentMapWithContent?.mapFileInfo && (
-          <img
-            width={`${windowWidth - 10}px`}
-            height={'auto'}
-            src={currentMapWithContent.mapFileInfo.content_file_url}
-            // src={`data:image/svg+xml;utf8,${encodeURIComponent(
-            //   currentMapWithContent.content_url,
-            // )}`} // without `encodeURIComponent(image)` everal .svg images won't work
-            alt="Translated map"
-          />
+          <TransformWrapper>
+            <TransformComponent>
+              <img
+                width={`${windowWidth - 10}px`}
+                height={'auto'}
+                src={currentMapWithContent.mapFileInfo.content_file_url}
+                alt="Translated map"
+              />
+            </TransformComponent>
+          </TransformWrapper>
         )}
       </StyledMapImg>
     </>

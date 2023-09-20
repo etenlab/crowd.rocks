@@ -12,6 +12,7 @@ import {
 import { downloadFromUrl } from '../../../common/utility';
 
 import { useTr } from '../../../hooks/useTr';
+import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 
 interface MapDetailsProps
   extends RouteComponentProps<{
@@ -82,18 +83,19 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
       <StyledMapImg>
         {origMapContent.data?.getOrigMapContent.mapFileInfo
           ?.content_file_url && (
-          <img
-            width={`${windowWidth - 10}px`}
-            height={'auto'}
-            src={
-              origMapContent.data?.getOrigMapContent.mapFileInfo
-                .content_file_url
-            }
-            // src={`data:image/svg+xml;utf8,${encodeURIComponent(
-            //   origMapContent.data?.getOrigMapContent.content,
-            // )}`} // without `encodeURIComponent(image)` everal .svg images won't work
-            alt="Original map"
-          />
+          <TransformWrapper>
+            <TransformComponent>
+              <img
+                width={`${windowWidth - 10}px`}
+                height={'auto'}
+                src={
+                  origMapContent.data?.getOrigMapContent.mapFileInfo
+                    .content_file_url
+                }
+                alt="Original map"
+              />
+            </TransformComponent>
+          </TransformWrapper>
         )}
       </StyledMapImg>
     </>
