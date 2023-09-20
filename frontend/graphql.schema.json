@@ -2184,12 +2184,28 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "GetOrigMapContentInput",
+        "name": "GetMapContentInput",
         "description": null,
         "fields": null,
         "inputFields": [
           {
-            "name": "original_map_id",
+            "name": "is_original",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "map_id",
             "description": null,
             "type": {
               "kind": "NON_NULL",
@@ -2524,33 +2540,6 @@
         ],
         "inputFields": null,
         "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "GetTranslatedMapContentInput",
-        "description": null,
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "translated_map_id",
-            "description": null,
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -10056,7 +10045,7 @@
             "deprecationReason": null
           },
           {
-            "name": "getOrigMapContent",
+            "name": "getMapContent",
             "description": null,
             "args": [
               {
@@ -10067,7 +10056,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "GetOrigMapContentInput",
+                    "name": "GetMapContentInput",
                     "ofType": null
                   }
                 },
@@ -10835,39 +10824,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "SiteTextTranslationVoteStatusOutputRow",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "getTranslatedMapContent",
-            "description": null,
-            "args": [
-              {
-                "name": "input",
-                "description": null,
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "GetTranslatedMapContentInput",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null,
-                "isDeprecated": false,
-                "deprecationReason": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "MapFileOutput",
                 "ofType": null
               }
             },
