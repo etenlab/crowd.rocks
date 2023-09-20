@@ -14,7 +14,7 @@ services:
       - 5432:5432
 
   api:
-    image: etenlab/crowd-rocks:dev
+    image: etenlab/crowd-rocks:test
     environment:
       CR_DB_URL: postgres
       CR_DB_PORT: 5432
