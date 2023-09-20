@@ -15,18 +15,17 @@ import { getBearer } from '../../common/utility';
 import {
   GetAllMapsListInput,
   MapFileListConnection,
-  GetOrigMapContentInput,
   GetOrigMapListInput,
   GetOrigMapPhrasesInput,
   GetOrigMapPhrasesOutput,
   GetOrigMapsListOutput,
   GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
-  GetTranslatedMapContentInput,
   MapDeleteInput,
   MapDeleteOutput,
   MapUploadOutput,
   MapFileOutput,
+  GetMapContentInput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
@@ -230,23 +229,12 @@ export class MapsResolver {
   }
 
   @Query(() => MapFileOutput)
-  async getOrigMapContent(
-    @Args('input') input: GetOrigMapContentInput,
+  async getMapContent(
+    @Args('input') input: GetMapContentInput,
   ): Promise<MapFileOutput> {
-    const mapWithContentUrl = await this.mapService.getOrigMapContent(
-      input.original_map_id,
-    );
-    return mapWithContentUrl;
-  }
-
-  @Query(() => MapFileOutput)
-  async getTranslatedMapContent(
-    @Args('input') input: GetTranslatedMapContentInput,
-  ): Promise<MapFileOutput> {
-    const mapWithContentUrl = await this.mapService.getTranslatedMapContent(
-      input.translated_map_id,
-    );
-    return mapWithContentUrl;
+    return input.is_original
+      ? this.mapService.getOrigMapContent(input.map_id)
+      : this.mapService.getTranslatedMapContent(input.map_id);
   }
 
   @Query(() => GetOrigMapWordsOutput)

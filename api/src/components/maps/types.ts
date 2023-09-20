@@ -76,22 +76,10 @@ export class MapFileListConnection {
 }
 
 @InputType()
-export class GetOrigMapContentInput {
-  @Field(() => ID) original_map_id: string;
+export class GetMapContentInput {
+  @Field(() => ID) map_id: string;
+  @Field(() => Boolean) is_original: boolean;
 }
-// @ObjectType()
-// export class GetOrigMapContentOutput extends MapFileOutput {
-//   @Field(() => String) content_file_url: string;
-//   @Field(() => String) content_file_id: string;
-// }
-
-@InputType()
-export class GetTranslatedMapContentInput {
-  @Field(() => ID) translated_map_id: string;
-}
-// @ObjectType()
-// export class GetTranslatedMapContentOutput extends GetOrigMapContentOutput {}
-
 @InputType()
 export class GetOrigMapWordsInput {
   @Field(() => ID, { nullable: true }) original_map_id?: string;

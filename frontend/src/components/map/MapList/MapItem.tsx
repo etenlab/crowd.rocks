@@ -5,13 +5,13 @@ import { styled } from 'styled-components';
 
 import {
   MapFileInfo,
-  useGetOrigMapContentLazyQuery,
-  useGetTranslatedMapContentLazyQuery,
+  useGetMapContentLazyQuery,
 } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 import { downloadFromUrl } from '../../../common/utility';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { OrigBadge } from './styled';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
   mapItem: MapFileInfo;
@@ -36,16 +36,11 @@ const NotStyledMapItem = ({
   } = useAppContext();
   const downloadFlagRef = useRef<'original' | 'translated' | null>(null);
 
-  const [getOrigMapContent, origMapContent] = useGetOrigMapContentLazyQuery({
-    fetchPolicy: 'no-cache',
-  });
-  const [getTranslatedMapContent, translatedMapContent] =
-    useGetTranslatedMapContentLazyQuery({ fetchPolicy: 'no-cache' });
+  const [getMapContent, mapContent] = useGetMapContentLazyQuery();
 
-  const routerLink =
-    mapItem.is_original || !mapItem.translated_map_id
-      ? `/US/${appLanguage.lang.tag}/1/maps/details-original/${mapItem.original_map_id}`
-      : `/US/${appLanguage.lang.tag}/1/maps/details-translated/${mapItem.translated_map_id}`;
+  const routerLink = `/US/${appLanguage.lang.tag}/1/maps/details/${
+    mapItem.is_original ? mapItem.original_map_id : mapItem.translated_map_id
+  }?is_original=${!!mapItem.is_original}`;
 
   const langInfo = subTags2LangInfo({
     lang: mapItem.language.language_code,
@@ -54,52 +49,44 @@ const NotStyledMapItem = ({
   });
 
   const handleDownloadSvg: MouseEventHandler<HTMLIonIconElement> = (e) => {
-    if (mapItem.is_original || !mapItem.translated_map_id) {
-      downloadFlagRef.current = 'original';
-      getOrigMapContent({
-        variables: {
-          id: mapItem.original_map_id,
-        },
-      });
-    } else {
-      downloadFlagRef.current = 'translated';
-      getTranslatedMapContent({
-        variables: {
-          id: mapItem.translated_map_id,
-        },
-      });
-    }
+    downloadFlagRef.current = mapItem.is_original ? 'original' : 'translated';
+    getMapContent({
+      variables: {
+        is_original: mapItem.is_original,
+        id: mapItem.is_original
+          ? mapItem.original_map_id!
+          : mapItem.translated_map_id!,
+      },
+    });
 
     e.preventDefault();
     e.stopPropagation();
   };
 
   if (
-    origMapContent.data &&
-    !origMapContent.error &&
-    !origMapContent.loading &&
+    mapContent.data &&
+    !mapContent.error &&
+    !mapContent.loading &&
     downloadFlagRef.current === 'original' &&
-    origMapContent.data.getOrigMapContent.mapFileInfo
+    mapContent.data.getMapContent.mapFileInfo
   ) {
     downloadFromUrl(
-      origMapContent.data.getOrigMapContent.mapFileInfo.map_file_name,
-      origMapContent.data.getOrigMapContent.mapFileInfo.content_file_url,
+      mapContent.data.getMapContent.mapFileInfo.map_file_name,
+      mapContent.data.getMapContent.mapFileInfo.content_file_url,
     );
     downloadFlagRef.current = null;
   }
 
   if (
-    translatedMapContent.data &&
-    !translatedMapContent.error &&
-    !translatedMapContent.loading &&
+    mapContent.data &&
+    !mapContent.error &&
+    !mapContent.loading &&
     downloadFlagRef.current === 'translated' &&
-    translatedMapContent.data.getTranslatedMapContent.mapFileInfo
+    mapContent.data.getMapContent.mapFileInfo
   ) {
     downloadFromUrl(
-      translatedMapContent.data.getTranslatedMapContent.mapFileInfo
-        .map_file_name_with_langs,
-      translatedMapContent.data.getTranslatedMapContent.mapFileInfo
-        .content_file_url,
+      mapContent.data.getMapContent.mapFileInfo.map_file_name_with_langs,
+      mapContent.data.getMapContent.mapFileInfo.content_file_url,
     );
     downloadFlagRef.current = null;
   }
@@ -177,10 +164,6 @@ const IconRow = styled.div`
   display: flex;
   align-items: center;
 `;
-
-const OrigBadge = styled(IonBadge)(() => ({
-  background: 'purple',
-}));
 
 const TrashIcon = styled(IonIcon)`
   padding: 3px;

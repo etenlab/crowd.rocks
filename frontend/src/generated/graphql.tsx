@@ -324,8 +324,9 @@ export type GetDocumentOutput = {
   error: ErrorType;
 };
 
-export type GetOrigMapContentInput = {
-  original_map_id: Scalars['ID']['input'];
+export type GetMapContentInput = {
+  is_original: Scalars['Boolean']['input'];
+  map_id: Scalars['ID']['input'];
 };
 
 export type GetOrigMapListInput = {
@@ -365,10 +366,6 @@ export type GetOrigMapWordsOutput = {
 export type GetOrigMapsListOutput = {
   __typename?: 'GetOrigMapsListOutput';
   mapList: Array<MapFileOutput>;
-};
-
-export type GetTranslatedMapContentInput = {
-  translated_map_id: Scalars['ID']['input'];
 };
 
 export type IFile = {
@@ -1283,7 +1280,7 @@ export type Query = {
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
   getDocument: GetDocumentOutput;
   getFlagsFromRef: FlagsOutput;
-  getOrigMapContent: MapFileOutput;
+  getMapContent: MapFileOutput;
   getOrigMapPhrases: GetOrigMapPhrasesOutput;
   getOrigMapWords: GetOrigMapWordsOutput;
   getOrigMapsList: GetOrigMapsListOutput;
@@ -1301,7 +1298,6 @@ export type Query = {
   getRecommendedTranslationFromDefinitionID: TranslationWithVoteOutput;
   getRecommendedTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteOutput;
   getSiteTextTranslationVoteStatus: SiteTextTranslationVoteStatusOutputRow;
-  getTranslatedMapContent: MapFileOutput;
   getTranslationsByFromDefinitionId: TranslationWithVoteListOutput;
   getWordDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   getWordDefinitionsByFlag: WordDefinitionListConnection;
@@ -1406,8 +1402,8 @@ export type QueryGetFlagsFromRefArgs = {
 };
 
 
-export type QueryGetOrigMapContentArgs = {
-  input: GetOrigMapContentInput;
+export type QueryGetMapContentArgs = {
+  input: GetMapContentInput;
 };
 
 
@@ -1507,11 +1503,6 @@ export type QueryGetSiteTextTranslationVoteStatusArgs = {
   from_type_is_word: Scalars['Boolean']['input'];
   to_type_is_word: Scalars['Boolean']['input'];
   translation_id: Scalars['ID']['input'];
-};
-
-
-export type QueryGetTranslatedMapContentArgs = {
-  input: GetTranslatedMapContentInput;
 };
 
 
@@ -2706,12 +2697,13 @@ export type GetAllMapsListQueryVariables = Exact<{
 
 export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'MapFileListConnection', edges: Array<{ __typename?: 'MapFileOutputEdge', cursor: string, node: { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
-export type GetTranslatedMapContentQueryVariables = Exact<{
+export type GetMapContentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
+  is_original: Scalars['Boolean']['input'];
 }>;
 
 
-export type GetTranslatedMapContentQuery = { __typename?: 'Query', getTranslatedMapContent: { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
+export type GetMapContentQuery = { __typename?: 'Query', getMapContent: { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
 
 export type IsAdminLoggedInQueryVariables = Exact<{
   input: IsAdminIdInput;
@@ -2719,13 +2711,6 @@ export type IsAdminLoggedInQueryVariables = Exact<{
 
 
 export type IsAdminLoggedInQuery = { __typename?: 'Query', loggedInIsAdmin: { __typename?: 'IsAdminIdOutput', isAdmin: boolean } };
-
-export type GetOrigMapContentQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type GetOrigMapContentQuery = { __typename?: 'Query', getOrigMapContent: { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
 
 export type MapUploadMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
@@ -5338,41 +5323,42 @@ export function useGetAllMapsListLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
 export type GetAllMapsListQueryHookResult = ReturnType<typeof useGetAllMapsListQuery>;
 export type GetAllMapsListLazyQueryHookResult = ReturnType<typeof useGetAllMapsListLazyQuery>;
 export type GetAllMapsListQueryResult = Apollo.QueryResult<GetAllMapsListQuery, GetAllMapsListQueryVariables>;
-export const GetTranslatedMapContentDocument = gql`
-    query GetTranslatedMapContent($id: ID!) {
-  getTranslatedMapContent(input: {translated_map_id: $id}) {
+export const GetMapContentDocument = gql`
+    query GetMapContent($id: ID!, $is_original: Boolean!) {
+  getMapContent(input: {map_id: $id, is_original: $is_original}) {
     ...MapFileOutputFragment
   }
 }
     ${MapFileOutputFragmentFragmentDoc}`;
 
 /**
- * __useGetTranslatedMapContentQuery__
+ * __useGetMapContentQuery__
  *
- * To run a query within a React component, call `useGetTranslatedMapContentQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetTranslatedMapContentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetMapContentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetMapContentQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetTranslatedMapContentQuery({
+ * const { data, loading, error } = useGetMapContentQuery({
  *   variables: {
  *      id: // value for 'id'
+ *      is_original: // value for 'is_original'
  *   },
  * });
  */
-export function useGetTranslatedMapContentQuery(baseOptions: Apollo.QueryHookOptions<GetTranslatedMapContentQuery, GetTranslatedMapContentQueryVariables>) {
+export function useGetMapContentQuery(baseOptions: Apollo.QueryHookOptions<GetMapContentQuery, GetMapContentQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetTranslatedMapContentQuery, GetTranslatedMapContentQueryVariables>(GetTranslatedMapContentDocument, options);
+        return Apollo.useQuery<GetMapContentQuery, GetMapContentQueryVariables>(GetMapContentDocument, options);
       }
-export function useGetTranslatedMapContentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTranslatedMapContentQuery, GetTranslatedMapContentQueryVariables>) {
+export function useGetMapContentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMapContentQuery, GetMapContentQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetTranslatedMapContentQuery, GetTranslatedMapContentQueryVariables>(GetTranslatedMapContentDocument, options);
+          return Apollo.useLazyQuery<GetMapContentQuery, GetMapContentQueryVariables>(GetMapContentDocument, options);
         }
-export type GetTranslatedMapContentQueryHookResult = ReturnType<typeof useGetTranslatedMapContentQuery>;
-export type GetTranslatedMapContentLazyQueryHookResult = ReturnType<typeof useGetTranslatedMapContentLazyQuery>;
-export type GetTranslatedMapContentQueryResult = Apollo.QueryResult<GetTranslatedMapContentQuery, GetTranslatedMapContentQueryVariables>;
+export type GetMapContentQueryHookResult = ReturnType<typeof useGetMapContentQuery>;
+export type GetMapContentLazyQueryHookResult = ReturnType<typeof useGetMapContentLazyQuery>;
+export type GetMapContentQueryResult = Apollo.QueryResult<GetMapContentQuery, GetMapContentQueryVariables>;
 export const IsAdminLoggedInDocument = gql`
     query IsAdminLoggedIn($input: IsAdminIdInput!) {
   loggedInIsAdmin(input: $input) {
@@ -5408,41 +5394,6 @@ export function useIsAdminLoggedInLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type IsAdminLoggedInQueryHookResult = ReturnType<typeof useIsAdminLoggedInQuery>;
 export type IsAdminLoggedInLazyQueryHookResult = ReturnType<typeof useIsAdminLoggedInLazyQuery>;
 export type IsAdminLoggedInQueryResult = Apollo.QueryResult<IsAdminLoggedInQuery, IsAdminLoggedInQueryVariables>;
-export const GetOrigMapContentDocument = gql`
-    query GetOrigMapContent($id: ID!) {
-  getOrigMapContent(input: {original_map_id: $id}) {
-    ...MapFileOutputFragment
-  }
-}
-    ${MapFileOutputFragmentFragmentDoc}`;
-
-/**
- * __useGetOrigMapContentQuery__
- *
- * To run a query within a React component, call `useGetOrigMapContentQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetOrigMapContentQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetOrigMapContentQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useGetOrigMapContentQuery(baseOptions: Apollo.QueryHookOptions<GetOrigMapContentQuery, GetOrigMapContentQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetOrigMapContentQuery, GetOrigMapContentQueryVariables>(GetOrigMapContentDocument, options);
-      }
-export function useGetOrigMapContentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOrigMapContentQuery, GetOrigMapContentQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetOrigMapContentQuery, GetOrigMapContentQueryVariables>(GetOrigMapContentDocument, options);
-        }
-export type GetOrigMapContentQueryHookResult = ReturnType<typeof useGetOrigMapContentQuery>;
-export type GetOrigMapContentLazyQueryHookResult = ReturnType<typeof useGetOrigMapContentLazyQuery>;
-export type GetOrigMapContentQueryResult = Apollo.QueryResult<GetOrigMapContentQuery, GetOrigMapContentQueryVariables>;
 export const MapUploadDocument = gql`
     mutation MapUpload($file: Upload!, $previewFileId: String, $file_type: String!, $file_size: Int!) {
   mapUpload(
@@ -7362,9 +7313,8 @@ export const namedOperations = {
     GetOrigMapWords: 'GetOrigMapWords',
     GetOrigMapPhrases: 'GetOrigMapPhrases',
     GetAllMapsList: 'GetAllMapsList',
-    GetTranslatedMapContent: 'GetTranslatedMapContent',
+    GetMapContent: 'GetMapContent',
     IsAdminLoggedIn: 'IsAdminLoggedIn',
-    GetOrigMapContent: 'GetOrigMapContent',
     ListNotifications: 'ListNotifications',
     PhraseDefinitionRead: 'PhraseDefinitionRead',
     GetPhrasesByLanguage: 'GetPhrasesByLanguage',
