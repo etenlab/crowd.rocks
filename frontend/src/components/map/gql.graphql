@@ -128,8 +128,8 @@ query GetAllMapsList($lang: LanguageInput, $after: ID, $first: Int) {
   }
 }
 
-query GetTranslatedMapContent($id: ID!) {
-  getTranslatedMapContent(input: { translated_map_id: $id }) {
+query GetMapContent($id: ID!, $is_original: Boolean!) {
+  getMapContent(input: { map_id: $id, is_original: $is_original }) {
     ...MapFileOutputFragment
   }
 }
@@ -137,12 +137,6 @@ query GetTranslatedMapContent($id: ID!) {
 query IsAdminLoggedIn($input: IsAdminIdInput!) {
   loggedInIsAdmin(input: $input) {
     isAdmin
-  }
-}
-
-query GetOrigMapContent($id: ID!) {
-  getOrigMapContent(input: { original_map_id: $id }) {
-    ...MapFileOutputFragment
   }
 }
 

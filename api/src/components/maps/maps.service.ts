@@ -31,8 +31,7 @@ import { PhraseDefinitionsService } from '../definitions/phrase-definitions.serv
 import { putLangCodesToFileName } from '../../common/utility';
 import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const string2fileStream = require('string-to-file-stream');
+import { Readable } from 'stream';
 
 // const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
@@ -700,8 +699,10 @@ export class MapsService {
         translations,
       )!;
       Logger.debug(`translation is done in ${performance.now() - p1} ms`);
+
+      const stream = Readable.from([translatedMap]);
       const translatedContentFile = await this.fileService.uploadFile(
-        string2fileStream(translatedMap),
+        stream,
         putLangCodesToFileName(map_file_name, {
           language_code: tag2langInfo(languageFullTag).lang.tag,
           dialect_code: tag2langInfo(languageFullTag).dialect?.tag || null,
