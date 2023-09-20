@@ -20,7 +20,7 @@ export class ConfigService {
   public readonly CR_DB = noneTestEnv ? process.env.CR_DB : testEnv.CR_DB;
   public readonly CR_DB_URL = noneTestEnv
     ? process.env.CR_DB_URL
-    : testEnv.CR_DB;
+    : testEnv.CR_DB_URL;
   public readonly CR_DB_PORT = noneTestEnv
     ? +(process.env.CR_DB_PORT || 5432)
     : testEnv.CR_DB_PORT;
