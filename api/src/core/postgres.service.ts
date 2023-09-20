@@ -4,7 +4,9 @@ import { ConfigService } from './config.service';
 
 @Injectable()
 export class PostgresService {
-  constructor(private config: ConfigService) {}
+  constructor(private config: ConfigService) {
+    console.log(this.config);
+  }
 
   readonly pool = new Pool({
     user: this.config.CR_DB_USER,
