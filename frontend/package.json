@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "build:test": "tsc && vite build --mode test",
     "build:local": "tsc && vite build --mode local-dev",
     "build:staging": "tsc && vite build --mode staging",
     "build:prod": "tsc && vite build",

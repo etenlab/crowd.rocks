@@ -25,7 +25,7 @@ describe('GraphQL (e2e)', () => {
       operationName: 'Login',
       variables: {
         email: 'admin@crowd.rocks',
-        password: 'asdfasdf',
+        password: process.env.CR_ADMIN_PASSWORD || 'asdfasdf',
       },
       query: `
         mutation Login($email: String!, $password: String!) {
