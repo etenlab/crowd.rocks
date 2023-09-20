@@ -80,8 +80,9 @@ export class GetMapContentInput {
   @Field(() => ID) map_id: string;
   @Field(() => Boolean) is_original: boolean;
 }
+
 @InputType()
-export class GetOrigMapWordsInput {
+export class GetOrigMapWordsAndPhrasesInput {
   @Field(() => ID, { nullable: true }) original_map_id?: string;
   @Field(() => String, { nullable: true }) o_language_code?: string;
   @Field(() => String, { nullable: true }) o_dialect_code?: string;
@@ -91,9 +92,30 @@ export class GetOrigMapWordsInput {
   @Field(() => String, { nullable: true }) t_geo_code?: string;
 }
 
+//todo: check and delete (will be used only common resolver for words and pharses because of pagination)
+// @InputType()
+// export class GetOrigMapWordsInput {
+//   @Field(() => ID, { nullable: true }) original_map_id?: string;
+//   @Field(() => String, { nullable: true }) o_language_code?: string;
+//   @Field(() => String, { nullable: true }) o_dialect_code?: string;
+//   @Field(() => String, { nullable: true }) o_geo_code?: string;
+//   @Field(() => String, { nullable: true }) t_language_code?: string;
+//   @Field(() => String, { nullable: true }) t_dialect_code?: string;
+//   @Field(() => String, { nullable: true }) t_geo_code?: string;
+// }
+
+// todo: check and delete
 @ObjectType()
 export class GetOrigMapWordsOutput {
-  @Field(() => [MapWordTranslations]) origMapWords: MapWordTranslations[];
+  @Field(() => [MapWordTranslations])
+  origMapWords: MapWordTranslations[];
+}
+// todo: check and delete
+
+@ObjectType()
+export class GetOrigMapPhrasesOutput {
+  @Field(() => [MapPhraseTranslations])
+  origMapPhrases: MapPhraseTranslations[];
 }
 @InputType()
 export class GetOrigMapPhrasesInput {
@@ -106,10 +128,28 @@ export class GetOrigMapPhrasesInput {
   @Field(() => String, { nullable: true }) t_geo_code?: string;
 }
 
+const MapWordOrPhrase = createUnionType({
+  name: 'MapWordOrPhraseTranslationWithVotes',
+  types: () => [MapWordTranslations, MapPhraseTranslations],
+  resolveType(value: MapPhraseTranslations & MapWordTranslations) {
+    if (value.phrase_id) {
+      return MapPhraseTranslations;
+    }
+    return MapWordTranslations;
+  },
+});
 @ObjectType()
-export class GetOrigMapPhrasesOutput {
-  @Field(() => [MapPhraseTranslations])
-  origMapPhrases: MapPhraseTranslations[];
+export class OrigMapWordsAndPhrasesEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => MapWordOrPhrase) node:
+    | MapWordTranslations
+    | MapPhraseTranslations;
+}
+
+@InputType()
+export class OrigMapWordsConnection {
+  @Field(() => [OrigMapWordsAndPhrasesEdge])
+  edges: OrigMapWordsAndPhrasesEdge[];
 }
 
 export type OriginalMapWordInput = {
@@ -124,9 +164,6 @@ export type OriginalMapPhraseInput = {
 
 @ObjectType()
 export class MapPhraseWithDefinition extends Phrase {
-  @Field(() => String) language_code: string;
-  @Field(() => String, { nullable: true }) dialect_code: string | null;
-  @Field(() => String, { nullable: true }) geo_code: string | null;
   @Field(() => String, { nullable: true }) definition: string;
   @Field(() => String, { nullable: true }) definition_id: string;
 }
