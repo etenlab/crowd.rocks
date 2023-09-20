@@ -16,7 +16,7 @@ services:
   api:
     image: etenlab/crowd-rocks:dev
     environment:
-      CR_DB_URL: localhost
+      CR_DB_URL: postgres
       CR_DB_PORT: 5432
       CR_DB_USER: postgres
       CR_DB_PASSWORD: asdfasdf

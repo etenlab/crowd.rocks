@@ -13,27 +13,24 @@ const testEnv = {
   ADMIN_PASSWORD: 'asdfasdf',
 };
 
-const noneTestEnv = process.env.NODE_ENV === 'test' ? false : true;
+if (process.env.NODE_ENV === 'test') {
+  process.env.CR_DB = testEnv.CR_DB;
+  process.env.CR_DB_URL = testEnv.CR_DB_URL;
+  process.env.CR_DB_PORT = testEnv.CR_DB_PORT + '';
+  process.env.CR_DB_USER = testEnv.CR_DB_USER;
+  process.env.CR_DB_PASSWORD = testEnv.CR_DB_PASSWORD;
+  process.env.ADMIN_PASSWORD = testEnv.ADMIN_PASSWORD;
+}
 
 @Injectable()
 export class ConfigService {
-  public readonly CR_DB = noneTestEnv ? process.env.CR_DB : testEnv.CR_DB;
-  public readonly CR_DB_URL = noneTestEnv
-    ? process.env.CR_DB_URL
-    : testEnv.CR_DB_URL;
-  public readonly CR_DB_PORT = noneTestEnv
-    ? +(process.env.CR_DB_PORT || 5432)
-    : testEnv.CR_DB_PORT;
-  public readonly CR_DB_USER = noneTestEnv
-    ? process.env.CR_DB_USER
-    : testEnv.CR_DB_USER;
-  public readonly CR_DB_PASSWORD = noneTestEnv
-    ? process.env.CR_DB_PASSWORD
-    : testEnv.CR_DB_PASSWORD;
+  public readonly CR_DB = process.env.CR_DB;
+  public readonly CR_DB_URL = process.env.CR_DB_URL;
+  public readonly CR_DB_PORT = +(process.env.CR_DB_PORT || 5432);
+  public readonly CR_DB_USER = process.env.CR_DB_USER;
+  public readonly CR_DB_PASSWORD = process.env.CR_DB_PASSWORD;
 
-  public readonly ADMIN_PASSWORD = noneTestEnv
-    ? process.env.ADMIN_PASSWORD
-    : testEnv.ADMIN_PASSWORD;
+  public readonly ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
   public readonly AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
   public readonly AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
