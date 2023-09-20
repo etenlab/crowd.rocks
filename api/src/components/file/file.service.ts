@@ -6,7 +6,7 @@ import {
   PutObjectCommandInput,
 } from '@aws-sdk/client-s3';
 import { ReadStream } from 'fs';
-import { Transform } from 'stream';
+import { Readable, Transform } from 'stream';
 import { createHash } from 'crypto';
 import { nanoid } from 'nanoid';
 import { Upload } from '@aws-sdk/lib-storage';
@@ -23,7 +23,7 @@ export class FileService {
   constructor(private fileRepository: FileRepository) {}
 
   async uploadFile(
-    readStream: ReadStream,
+    readStream: ReadStream | Readable,
     fileName: string,
     fileType: string,
     fileSize: number,

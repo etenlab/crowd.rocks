@@ -4272,7 +4272,6 @@ __metadata:
     rimraf: ^5.0.1
     rxjs: ^7.8.1
     source-map-support: ^0.5.20
-    string-to-file-stream: ^1.3.0
     supertest: ^6.1.3
     svgson: ^5.3.1
     ts-jest: 28.0.8
@@ -9978,13 +9977,6 @@ __metadata:
     char-regex: ^1.0.2
     strip-ansi: ^6.0.0
   checksum: ce85533ef5113fcb7e522bcf9e62cb33871aa99b3729cec5595f4447f660b0cefd542ca6df4150c97a677d58b0cb727a3fe09ac1de94071d05526c73579bf505
-  languageName: node
-  linkType: hard
-
-"string-to-file-stream@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "string-to-file-stream@npm:1.3.0"
-  checksum: 37c4bdea9e92fdd455ddca02a37c317933909dd3d3f083e86c01c00b5837873c3cbfe62160925939b1752278e8b47399f2f4491d850373fc2cf3a8fcbe8d761d
   languageName: node
   linkType: hard
 
