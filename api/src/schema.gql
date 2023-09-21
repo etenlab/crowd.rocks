@@ -308,7 +308,17 @@ input GetOrigMapPhrasesInput {
 }
 
 type GetOrigMapPhrasesOutput {
-  origMapPhrases: [MapPhraseTranslations!]!
+  origMapPhrases: [MapPhraseWithTranslations!]!
+}
+
+input GetOrigMapWordsAndPhrasesInput {
+  o_dialect_code: String
+  o_geo_code: String
+  o_language_code: String
+  original_map_id: ID
+  t_dialect_code: String
+  t_geo_code: String
+  t_language_code: String
 }
 
 input GetOrigMapWordsInput {
@@ -322,7 +332,7 @@ input GetOrigMapWordsInput {
 }
 
 type GetOrigMapWordsOutput {
-  origMapWords: [MapWordTranslations!]!
+  origMapWords: [MapWordWithTranslations!]!
 }
 
 type GetOrigMapsListOutput {
@@ -433,18 +443,7 @@ type MapFileOutputEdge {
   node: MapFileOutput!
 }
 
-type MapPhraseTranslations {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  geo_code: String
-  language_code: String!
-  phrase: String!
-  phrase_id: ID!
-  translations: [MapWordOrPhraseTranslationWithVotes!]
-}
-
-type MapPhraseWithVotes {
+type MapPhraseAsTranslation {
   definition: String
   definition_id: String
   dialect_code: String
@@ -455,6 +454,17 @@ type MapPhraseWithVotes {
   phrase_id: ID!
   translation_id: String!
   up_votes: String!
+}
+
+type MapPhraseWithTranslations {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  phrase: String!
+  phrase_id: ID!
+  translations: [MapWordOrPhraseAsTranslation!]
 }
 
 type MapUploadOutput {
@@ -462,20 +472,7 @@ type MapUploadOutput {
   mapFileOutput: MapFileOutput
 }
 
-union MapWordOrPhraseTranslationWithVotes = MapPhraseWithVotes | MapWordWithVotes
-
-type MapWordTranslations {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  geo_code: String
-  language_code: String!
-  translations: [MapWordOrPhraseTranslationWithVotes!]
-  word: String!
-  word_id: ID!
-}
-
-type MapWordWithVotes {
+type MapWordAsTranslation {
   definition: String
   definition_id: String
   dialect_code: String
@@ -486,6 +483,31 @@ type MapWordWithVotes {
   up_votes: String!
   word: String!
   word_id: ID!
+}
+
+union MapWordOrPhrase = MapPhraseWithTranslations | MapWordWithTranslations
+
+union MapWordOrPhraseAsTranslation = MapPhraseAsTranslation | MapWordAsTranslation
+
+type MapWordWithTranslations {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  translations: [MapWordOrPhraseAsTranslation!]
+  word: String!
+  word_id: ID!
+}
+
+type MapWordsAndPhrasesConnection {
+  edges: [MapWordsAndPhrasesEdge!]!
+  pageInfo: PageInfo!
+}
+
+type MapWordsAndPhrasesEdge {
+  cursor: ID!
+  node: MapWordOrPhrase!
 }
 
 input MarkNotificationReadInput {
@@ -868,6 +890,7 @@ type Query {
   getMapDetails(input: GetMapContentInput!): MapFileOutput!
   getOrigMapPhrases(input: GetOrigMapPhrasesInput): GetOrigMapPhrasesOutput!
   getOrigMapWords(input: GetOrigMapWordsInput): GetOrigMapWordsOutput!
+  getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getPhraseDefinitionsByFlag(after: ID, first: Int, flag_name: FlagType!): PhraseDefinitionListConnection!

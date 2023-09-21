@@ -284,6 +284,7 @@ export class DatabaseVersionControlService {
 
     // map
     await this.runSqlFile('./src/core/sql/map/original_map_create-v2.sql');
+    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v3.sql');
 
     await this.setVersionNumber(2);
   }

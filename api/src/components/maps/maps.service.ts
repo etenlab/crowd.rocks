@@ -8,9 +8,11 @@ import {
   GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
   MapFileOutput,
-  MapPhraseTranslations,
-  MapWordTranslations,
+  MapPhraseWithTranslations,
+  MapWordWithTranslations,
   MapFileOutputEdge,
+  GetOrigMapWordsAndPhrasesInput,
+  MapWordsAndPhrasesConnection,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
@@ -467,8 +469,18 @@ export class MapsService {
     return origMapPhrases;
   }
 
+  async getOrigMapWordsAndPhrases(params: {
+    input: GetOrigMapWordsAndPhrasesInput;
+    first?: number | null;
+    after?: string | null;
+  }): Promise<MapWordsAndPhrasesConnection> {
+    return this.mapsRepository.getOrigMapWordsAndPhrases(params);
+  }
+
   checkForLanguageCodePresence(
-    origMapWordsOrPhrases: Array<MapWordTranslations | MapPhraseTranslations>,
+    origMapWordsOrPhrases: Array<
+      MapWordWithTranslations | MapPhraseWithTranslations
+    >,
   ): boolean {
     origMapWordsOrPhrases.forEach((wordOrPhrase) => {
       if (!wordOrPhrase.language_code) {
@@ -613,7 +625,7 @@ export class MapsService {
     });
 
     const origMapWordsAndPhrases: Array<
-      MapWordTranslations | MapPhraseTranslations
+      MapWordWithTranslations | MapPhraseWithTranslations
     > = [...origMapWords, ...origMapPhrases];
 
     let targetLanguagesFullTags: Array<string>;
@@ -888,7 +900,7 @@ export class MapsService {
   }
 
   getLangFullTags(
-    wordsOrPhrases: Array<MapWordTranslations | MapPhraseTranslations>,
+    wordsOrPhrases: Array<MapWordWithTranslations | MapPhraseWithTranslations>,
   ): Array<string> {
     const foundLangs: Array<string> = [];
     wordsOrPhrases.forEach((wordOrPhrase) => {

@@ -81,8 +81,9 @@ export class GetMapContentInput {
   @Field(() => Boolean) is_original: boolean;
 }
 
+//todo: check and delete (will be used only common resolver for words and pharses because of pagination)
 @InputType()
-export class GetOrigMapWordsAndPhrasesInput {
+export class GetOrigMapWordsInput {
   @Field(() => ID, { nullable: true }) original_map_id?: string;
   @Field(() => String, { nullable: true }) o_language_code?: string;
   @Field(() => String, { nullable: true }) o_dialect_code?: string;
@@ -91,32 +92,19 @@ export class GetOrigMapWordsAndPhrasesInput {
   @Field(() => String, { nullable: true }) t_dialect_code?: string;
   @Field(() => String, { nullable: true }) t_geo_code?: string;
 }
-
 //todo: check and delete (will be used only common resolver for words and pharses because of pagination)
-// @InputType()
-// export class GetOrigMapWordsInput {
-//   @Field(() => ID, { nullable: true }) original_map_id?: string;
-//   @Field(() => String, { nullable: true }) o_language_code?: string;
-//   @Field(() => String, { nullable: true }) o_dialect_code?: string;
-//   @Field(() => String, { nullable: true }) o_geo_code?: string;
-//   @Field(() => String, { nullable: true }) t_language_code?: string;
-//   @Field(() => String, { nullable: true }) t_dialect_code?: string;
-//   @Field(() => String, { nullable: true }) t_geo_code?: string;
-// }
-
-// todo: check and delete
 @ObjectType()
 export class GetOrigMapWordsOutput {
-  @Field(() => [MapWordTranslations])
-  origMapWords: MapWordTranslations[];
+  @Field(() => [MapWordWithTranslations])
+  origMapWords: MapWordWithTranslations[];
 }
-// todo: check and delete
-
+//todo: check and delete (will be used only common resolver for words and pharses because of pagination)
 @ObjectType()
 export class GetOrigMapPhrasesOutput {
-  @Field(() => [MapPhraseTranslations])
-  origMapPhrases: MapPhraseTranslations[];
+  @Field(() => [MapPhraseWithTranslations])
+  origMapPhrases: MapPhraseWithTranslations[];
 }
+//todo: check and delete (will be used only common resolver for words and pharses because of pagination)
 @InputType()
 export class GetOrigMapPhrasesInput {
   @Field(() => ID, { nullable: true }) original_map_id?: string;
@@ -128,69 +116,81 @@ export class GetOrigMapPhrasesInput {
   @Field(() => String, { nullable: true }) t_geo_code?: string;
 }
 
-const MapWordOrPhrase = createUnionType({
-  name: 'MapWordOrPhraseTranslationWithVotes',
-  types: () => [MapWordTranslations, MapPhraseTranslations],
-  resolveType(value: MapPhraseTranslations & MapWordTranslations) {
+@InputType()
+export class GetOrigMapWordsAndPhrasesInput {
+  @Field(() => ID, { nullable: true }) original_map_id?: string;
+  @Field(() => String, { nullable: true }) o_language_code?: string;
+  @Field(() => String, { nullable: true }) o_dialect_code?: string;
+  @Field(() => String, { nullable: true }) o_geo_code?: string;
+  // @Field(() => String, { nullable: true }) t_language_code?: string;
+  // @Field(() => String, { nullable: true }) t_dialect_code?: string;
+  // @Field(() => String, { nullable: true }) t_geo_code?: string;
+}
+
+// const MapWordOrPhrase = createUnionType({
+//   name: 'MapWordOrPhrase',
+//   types: () => [MapWordWithDefinition, MapPhraseWithDefinition],
+//   resolveType(value: MapWordWithDefinition & MapPhraseWithDefinition) {
+//     if (value.phrase_id) {
+//       return MapPhraseWithDefinition;
+//     }
+//     return MapWordWithDefinition;
+//   },
+// });
+
+@ObjectType()
+export class MapWordOrPhrase {
+  @Field(() => ID) id: string;
+  @Field(() => String) type: 'word' | 'phrase';
+  @Field(() => String) o_id: string;
+  @Field(() => String) o_like_string: string;
+  @Field(() => String) o_definition: string;
+  @Field(() => String) o_definition_id: string;
+  @Field(() => String) o_language_code: string;
+  @Field(() => String) o_dialect_code: string;
+  @Field(() => String) o_geo_code: string;
+}
+@ObjectType()
+export class MapWordsAndPhrasesEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => MapWordOrPhrase) node: MapWordOrPhrase;
+}
+
+@ObjectType()
+export class MapWordsAndPhrasesConnection {
+  @Field(() => [MapWordsAndPhrasesEdge])
+  edges: MapWordsAndPhrasesEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
+}
+
+const MapWordOrPhraseAsTranslation = createUnionType({
+  name: 'MapWordOrPhraseAsTranslation',
+  types: () => [MapPhraseAsTranslation, MapWordAsTranslation],
+  resolveType(value) {
     if (value.phrase_id) {
-      return MapPhraseTranslations;
+      return MapPhraseAsTranslation;
     }
-    return MapWordTranslations;
+    return MapWordAsTranslation;
   },
 });
-@ObjectType()
-export class OrigMapWordsAndPhrasesEdge {
-  @Field(() => ID) cursor: string;
-  @Field(() => MapWordOrPhrase) node:
-    | MapWordTranslations
-    | MapPhraseTranslations;
-}
 
-@InputType()
-export class OrigMapWordsConnection {
-  @Field(() => [OrigMapWordsAndPhrasesEdge])
-  edges: OrigMapWordsAndPhrasesEdge[];
-}
-
-export type OriginalMapWordInput = {
-  word_id: string;
-  original_map_id: string;
-};
-
-export type OriginalMapPhraseInput = {
-  phrase_id: string;
-  original_map_id: string;
-};
-
+// phrase types
 @ObjectType()
 export class MapPhraseWithDefinition extends Phrase {
   @Field(() => String, { nullable: true }) definition: string;
   @Field(() => String, { nullable: true }) definition_id: string;
 }
 
-// todo: rename to MapPhraseAsTranslationWithVotes
 @ObjectType()
-export class MapPhraseWithVotes extends MapPhraseWithDefinition {
+export class MapPhraseAsTranslation extends MapPhraseWithDefinition {
   @Field(() => String) up_votes: string;
   @Field(() => String) down_votes: string;
   @Field(() => String) translation_id: string;
 }
-
-const MapWordOrPhraseTranslationWithVotes = createUnionType({
-  name: 'MapWordOrPhraseTranslationWithVotes',
-  types: () => [MapPhraseWithVotes, MapWordWithVotes],
-  resolveType(value) {
-    if (value.phrase_id) {
-      return MapPhraseWithVotes;
-    }
-    return MapWordWithVotes;
-  },
-});
-
 @ObjectType()
-export class MapPhraseTranslations extends MapPhraseWithDefinition {
-  @Field(() => [MapWordOrPhraseTranslationWithVotes], { nullable: true })
-  translations?: Array<MapPhraseWithVotes | MapWordWithVotes>;
+export class MapPhraseWithTranslations extends MapPhraseWithDefinition {
+  @Field(() => [MapWordOrPhraseAsTranslation], { nullable: true })
+  translations?: Array<MapPhraseAsTranslation | MapWordAsTranslation>;
 }
 
 // word types
@@ -202,14 +202,24 @@ export class MapWordWithDefinition extends Word {
 }
 
 @ObjectType()
-export class MapWordWithVotes extends MapWordWithDefinition {
+export class MapWordAsTranslation extends MapWordWithDefinition {
   @Field(() => String) up_votes: string;
   @Field(() => String) down_votes: string;
   @Field(() => String) translation_id: string;
 }
 
 @ObjectType()
-export class MapWordTranslations extends MapWordWithDefinition {
-  @Field(() => [MapWordOrPhraseTranslationWithVotes], { nullable: true })
-  translations?: Array<MapPhraseWithVotes | MapWordWithVotes>;
+export class MapWordWithTranslations extends MapWordWithDefinition {
+  @Field(() => [MapWordOrPhraseAsTranslation], { nullable: true })
+  translations?: Array<MapPhraseAsTranslation | MapWordAsTranslation>;
 }
+
+export type OriginalMapWordInput = {
+  word_id: string;
+  original_map_id: string;
+};
+
+export type OriginalMapPhraseInput = {
+  phrase_id: string;
+  original_map_id: string;
+};

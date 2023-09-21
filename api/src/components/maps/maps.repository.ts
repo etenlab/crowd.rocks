@@ -8,12 +8,18 @@ import {
   GetOrigMapsListOutput,
   GetOrigMapWordsOutput,
   MapFileOutput,
-  MapPhraseTranslations,
-  MapPhraseWithVotes,
-  MapWordTranslations,
-  MapWordWithVotes,
+  MapPhraseWithTranslations,
+  MapPhraseAsTranslation,
+  MapWordWithTranslations,
+  MapWordAsTranslation,
   OriginalMapPhraseInput,
   OriginalMapWordInput,
+  MapWordsAndPhrasesConnection,
+  GetOrigMapWordsAndPhrasesInput,
+  MapWordsAndPhrasesEdge,
+  MapWordWithDefinition,
+  MapPhraseWithDefinition,
+  MapWordOrPhrase,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
 
@@ -740,10 +746,10 @@ export class MapsRepository {
 
     const resQ_wtwt = await this.pg.pool.query(wtwt_sqlStr, params);
     const resQ_wtpt = await this.pg.pool.query(wtwp_sqlStr, params);
-    const words: MapWordTranslations[] = [];
+    const words: MapWordWithTranslations[] = [];
 
     resQ_wtwt.rows.forEach((r) => {
-      const currTranslation: MapWordWithVotes = {
+      const currTranslation: MapWordAsTranslation = {
         word_id: r.t_word_id,
         word: r.t_wordlike_string,
         definition: r.t_definition,
@@ -778,7 +784,7 @@ export class MapsRepository {
     });
 
     resQ_wtpt.rows.forEach((r) => {
-      const currTranslation: MapPhraseWithVotes = {
+      const currTranslation: MapPhraseAsTranslation = {
         phrase_id: r.t_phrase_id,
         phrase: r.t_phraselike_string,
         definition: r.t_definition,
@@ -948,10 +954,10 @@ export class MapsRepository {
 
     const resQptpt = await this.pg.pool.query(ptpt_sqlStr, params);
     const resQptwt = await this.pg.pool.query(ptwt_sqlStr, params);
-    const phrases: Array<MapPhraseTranslations> = [];
+    const phrases: Array<MapPhraseWithTranslations> = [];
 
     resQptpt.rows.forEach((r) => {
-      const currTranslation: MapPhraseWithVotes = {
+      const currTranslation: MapPhraseAsTranslation = {
         phrase_id: r.t_phrase_id,
         phrase: r.t_phraselike_string,
         definition: r.t_definition,
@@ -986,7 +992,7 @@ export class MapsRepository {
     });
 
     resQptwt.rows.forEach((r) => {
-      const currTranslation: MapWordWithVotes = {
+      const currTranslation: MapWordAsTranslation = {
         word_id: r.t_word_id,
         word: r.t_wordlike_string,
         definition: r.t_definition,
@@ -1022,6 +1028,78 @@ export class MapsRepository {
 
     return {
       origMapPhrases: phrases,
+    };
+  }
+
+  async getOrigMapWordsAndPhrases({
+    input,
+    first,
+    after,
+  }: {
+    input: GetOrigMapWordsAndPhrasesInput;
+    first?: number | null;
+    after?: string | null;
+  }): Promise<MapWordsAndPhrasesConnection> {
+    const params: string[] = [];
+    let languagesRestrictionClause = '';
+    let paginationClause = '';
+    if (input.o_language_code) {
+      params.push(input.o_language_code);
+      languagesRestrictionClause += ` and o_language_code =  $${params.length} `;
+    }
+    if (input.o_dialect_code) {
+      params.push(input.o_dialect_code);
+      languagesRestrictionClause += ` and o_dialect_code =  $${params.length} `;
+    }
+    if (input.o_geo_code) {
+      params.push(input.o_geo_code);
+      languagesRestrictionClause += ` and o_geo_code =  $${params.length} `;
+    }
+
+    if (after) {
+      params.push(String(after));
+      paginationClause += `and cursor >= $${after} `;
+    }
+    paginationClause += `order by cursor`;
+    if (first) {
+      params.push(String(first));
+      paginationClause += `limit $${first} `;
+    }
+
+    const sqlStr = `
+      select * from mv_map_translations
+      where true
+      ${languagesRestrictionClause}
+      ${paginationClause}
+    `;
+
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    const edges: MapWordsAndPhrasesEdge[] = resQ.rows.map((r) => {
+      const node: MapWordOrPhrase = {
+        id: r.cursor,
+        type: r.type,
+        o_id: r.o_id,
+        o_like_string: r.o_like_string,
+        o_definition: r.o_definition,
+        o_definition_id: r.o_definition_id,
+        o_language_code: r.o_language_code,
+        o_dialect_code: r.o_dialect_code,
+        o_geo_code: r.o_geo_code,
+      };
+      return {
+        cursor: r.cursor,
+        node,
+      };
+    });
+
+    return {
+      edges,
+      pageInfo: {
+        startCursor: '', //wip: stopped here
+        endCursor: '',//wip: stopped here
+        hasNextPage: true,//wip: stopped here
+        hasPreviousPage: true,//wip: stopped here
+      },
     };
   }
 

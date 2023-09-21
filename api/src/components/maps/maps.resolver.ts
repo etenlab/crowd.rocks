@@ -26,12 +26,13 @@ import {
   MapUploadOutput,
   MapFileOutput as MapDetailsOutput,
   GetMapContentInput as GetMapDetailsInput,
+  GetOrigMapWordsAndPhrasesInput,
+  MapWordsAndPhrasesConnection,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { ErrorType, GenericOutput } from 'src/common/types';
 import { FileService } from '../file/file.service';
-import { first } from 'rxjs';
 
 @Injectable()
 @Resolver(Map) // todo: wtf with paramenter, looks like `Map` is wrong and redundant here.
@@ -238,18 +239,13 @@ export class MapsResolver {
       : this.mapService.getTranslatedMapWithContentUrl(input.map_id);
   }
 
-  @Query(() => GetOrigMapWordsOutput)
+  @Query(() => MapWordsAndPhrasesConnection)
   async getOrigMapWordsAndPhrases(
-    @Args('input', { nullable: true }) input?: GetOrigMapWordsInput,
+    @Args('input') input: GetOrigMapWordsAndPhrasesInput,
     @Args('first', { type: () => Int, nullable: true }) first?: number | null,
-    @Args('after', {
-      type: () => {
-        ID;
-      },
-      nullable: true,
-    })
-    after?: string,
-  ): Promise<GetOrigMapWordsOutput> {
+    @Args('after', { type: () => ID, nullable: true })
+    after?: string | null,
+  ): Promise<MapWordsAndPhrasesConnection> {
     return this.mapService.getOrigMapWordsAndPhrases({ input, first, after });
   }
 
