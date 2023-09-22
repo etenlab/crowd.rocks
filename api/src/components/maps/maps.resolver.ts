@@ -249,7 +249,7 @@ export class MapsResolver {
     return this.mapService.getOrigMapWordsAndPhrases({ input, first, after });
   }
 
-  //// todo: refactor to paginate
+  //// todo: refactor to paginated and delete
   @Query(() => GetOrigMapWordsOutput)
   async getOrigMapWords(
     @Args('input', { nullable: true }) input?: GetOrigMapWordsInput,

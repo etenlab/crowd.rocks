@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PoolClient } from 'pg';
+import { PoolClient, ClientBase } from 'pg';
 import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
 import { LanguageInput } from 'src/components/common/types';
@@ -1035,45 +1035,66 @@ export class MapsRepository {
     input,
     first,
     after,
+    poolClient,
   }: {
     input: GetOrigMapWordsAndPhrasesInput;
     first?: number | null;
     after?: string | null;
+      poolClient?: PoolClient;
   }): Promise<MapWordsAndPhrasesConnection> {
-    const params: string[] = [];
+    const dbPoolClient = poolClient || (await this.pg.pool.connect());
+    const langParams: string[] = [];
     let languagesRestrictionClause = '';
-    let paginationClause = '';
-    if (input.o_language_code) {
-      params.push(input.o_language_code);
-      languagesRestrictionClause += ` and o_language_code =  $${params.length} `;
+    let pickDataClause = '';
+    if (input.lang.language_code) {
+      langParams.push(input.lang.language_code);
+      languagesRestrictionClause += ` and o_language_code =  $${langParams.length} `;
     }
-    if (input.o_dialect_code) {
-      params.push(input.o_dialect_code);
-      languagesRestrictionClause += ` and o_dialect_code =  $${params.length} `;
+    if (input.lang.dialect_code) {
+      langParams.push(input.lang.dialect_code);
+      languagesRestrictionClause += ` and o_dialect_code =  $${langParams.length} `;
     }
-    if (input.o_geo_code) {
-      params.push(input.o_geo_code);
-      languagesRestrictionClause += ` and o_geo_code =  $${params.length} `;
+    if (input.lang.geo_code) {
+      langParams.push(input.lang.geo_code);
+      languagesRestrictionClause += ` and o_geo_code =  $${langParams.length} `;
     }
 
+    const langAndPickParams: string[] = [...langParams];
     if (after) {
-      params.push(String(after));
-      paginationClause += `and cursor >= $${after} `;
+      langAndPickParams.push(String(after));
+      pickDataClause += `and cursor >= $${langAndPickParams.length} `;
     }
-    paginationClause += `order by cursor`;
+    pickDataClause += ` order by cursor `;
     if (first) {
-      params.push(String(first));
-      paginationClause += `limit $${first} `;
+      langAndPickParams.push(String(first));
+      pickDataClause += ` limit $${langAndPickParams.length} `;
     }
 
     const sqlStr = `
-      select * from mv_map_translations
+      select * from v_map_words_and_phrases
       where true
       ${languagesRestrictionClause}
-      ${paginationClause}
+      ${pickDataClause}
     `;
 
-    const resQ = await this.pg.pool.query(sqlStr, params);
+    const resQ = await dbPoolClient.query(sqlStr, langAndPickParams);
+
+    const sqlAfter = `
+      select count(*) as count_after from v_map_words_and_phrases
+      where true
+      ${languagesRestrictionClause}
+      and cursor>${dbPoolClient.escapeLiteral(resQ.rows.at(-1).cursor)}
+    `;
+    const resCheckAfter = await dbPoolClient.query(sqlAfter, langParams);
+
+    const sqlBefore = `
+      select count(*) as count_before from v_map_words_and_phrases
+      where true
+      ${languagesRestrictionClause}
+      and cursor<${dbPoolClient.escapeLiteral(resQ.rows[0].cursor)}
+    `;
+    const resCheckBefore = await dbPoolClient.query(sqlBefore, langParams);
+
     const edges: MapWordsAndPhrasesEdge[] = resQ.rows.map((r) => {
       const node: MapWordOrPhrase = {
         id: r.cursor,
@@ -1095,10 +1116,14 @@ export class MapsRepository {
     return {
       edges,
       pageInfo: {
-        startCursor: '', //wip: stopped here
-        endCursor: '',//wip: stopped here
-        hasNextPage: true,//wip: stopped here
-        hasPreviousPage: true,//wip: stopped here
+        startCursor: resQ.rows[0].cursor,
+        endCursor: resQ.rows.at(-1).cursor,
+        hasNextPage:
+          resCheckAfter.rows[0].count_after &&
+          resCheckAfter.rows[0].count_after > 0,
+        hasPreviousPage:
+          resCheckBefore.rows[0].count_before &&
+          resCheckBefore.rows[0].count_before > 0,
       },
     };
   }

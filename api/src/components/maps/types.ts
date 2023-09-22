@@ -118,25 +118,11 @@ export class GetOrigMapPhrasesInput {
 
 @InputType()
 export class GetOrigMapWordsAndPhrasesInput {
-  @Field(() => ID, { nullable: true }) original_map_id?: string;
-  @Field(() => String, { nullable: true }) o_language_code?: string;
-  @Field(() => String, { nullable: true }) o_dialect_code?: string;
-  @Field(() => String, { nullable: true }) o_geo_code?: string;
-  // @Field(() => String, { nullable: true }) t_language_code?: string;
-  // @Field(() => String, { nullable: true }) t_dialect_code?: string;
-  // @Field(() => String, { nullable: true }) t_geo_code?: string;
+  @Field(() => LanguageInput) lang: LanguageInput;
+  // @Field(() => String, { nullable: true }) o_language_code?: string;
+  // @Field(() => String, { nullable: true }) o_dialect_code?: string;
+  // @Field(() => String, { nullable: true }) o_geo_code?: string;
 }
-
-// const MapWordOrPhrase = createUnionType({
-//   name: 'MapWordOrPhrase',
-//   types: () => [MapWordWithDefinition, MapPhraseWithDefinition],
-//   resolveType(value: MapWordWithDefinition & MapPhraseWithDefinition) {
-//     if (value.phrase_id) {
-//       return MapPhraseWithDefinition;
-//     }
-//     return MapWordWithDefinition;
-//   },
-// });
 
 @ObjectType()
 export class MapWordOrPhrase {
@@ -147,8 +133,8 @@ export class MapWordOrPhrase {
   @Field(() => String) o_definition: string;
   @Field(() => String) o_definition_id: string;
   @Field(() => String) o_language_code: string;
-  @Field(() => String) o_dialect_code: string;
-  @Field(() => String) o_geo_code: string;
+  @Field(() => String, { nullable: true }) o_dialect_code?: string | null;
+  @Field(() => String, { nullable: true }) o_geo_code?: string | null;
 }
 @ObjectType()
 export class MapWordsAndPhrasesEdge {

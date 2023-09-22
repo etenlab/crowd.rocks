@@ -1,4 +1,4 @@
-fragment MapPhraseWithVotesFragment on MapPhraseWithVotes {
+fragment MapPhraseAsTranslationFragment on MapPhraseAsTranslation {
   phrase
   phrase_id
   language_code
@@ -11,7 +11,7 @@ fragment MapPhraseWithVotesFragment on MapPhraseWithVotes {
   translation_id
 }
 
-fragment WordWithVotesFragment on MapWordWithVotes {
+fragment MapWordAsTranslationFragment on MapWordAsTranslation {
   word
   word_id
   language_code
@@ -53,6 +53,41 @@ fragment MapFileOutputEdgeFragment on MapFileOutputEdge {
   }
 }
 
+fragment MapWordOrPhraseFragment on MapWordOrPhrase {
+  id
+  type
+  o_id
+  o_like_string
+  o_definition
+  o_definition_id
+  o_language_code
+  o_dialect_code
+  o_geo_code
+}
+
+fragment MapWordsAndPhrasesEdgeFragment on MapWordsAndPhrasesEdge {
+  cursor
+  node {
+    ...MapWordOrPhraseFragment
+  }
+}
+
+query GetOrigMapWordsAndPhrases(
+  $lang: LanguageInput!
+  $after: ID
+  $first: Int
+) {
+  getOrigMapWordsAndPhrases(
+    input: { lang: $lang }
+    after: $after
+    first: $first
+  ) {
+    edges {
+      ...MapWordsAndPhrasesEdgeFragment
+    }
+  }
+}
+
 query GetOrigMapWords(
   $original_map_id: ID
   $o_language_code: String
@@ -78,8 +113,8 @@ query GetOrigMapWords(
       definition
       definition_id
       translations {
-        ...MapPhraseWithVotesFragment
-        ...WordWithVotesFragment
+        ...MapPhraseAsTranslationFragment
+        ...MapWordAsTranslationFragment
       }
     }
   }
@@ -110,8 +145,8 @@ query GetOrigMapPhrases(
       definition
       definition_id
       translations {
-        ...MapPhraseWithVotesFragment
-        ...WordWithVotesFragment
+        ...MapPhraseAsTranslationFragment
+        ...MapWordAsTranslationFragment
       }
     }
   }

@@ -312,13 +312,7 @@ type GetOrigMapPhrasesOutput {
 }
 
 input GetOrigMapWordsAndPhrasesInput {
-  o_dialect_code: String
-  o_geo_code: String
-  o_language_code: String
-  original_map_id: ID
-  t_dialect_code: String
-  t_geo_code: String
-  t_language_code: String
+  lang: LanguageInput!
 }
 
 input GetOrigMapWordsInput {
@@ -485,7 +479,17 @@ type MapWordAsTranslation {
   word_id: ID!
 }
 
-union MapWordOrPhrase = MapPhraseWithTranslations | MapWordWithTranslations
+type MapWordOrPhrase {
+  id: ID!
+  o_definition: String!
+  o_definition_id: String!
+  o_dialect_code: String
+  o_geo_code: String
+  o_id: String!
+  o_language_code: String!
+  o_like_string: String!
+  type: String!
+}
 
 union MapWordOrPhraseAsTranslation = MapPhraseAsTranslation | MapWordAsTranslation
 

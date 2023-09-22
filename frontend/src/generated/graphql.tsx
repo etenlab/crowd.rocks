@@ -345,7 +345,11 @@ export type GetOrigMapPhrasesInput = {
 
 export type GetOrigMapPhrasesOutput = {
   __typename?: 'GetOrigMapPhrasesOutput';
-  origMapPhrases: Array<MapPhraseTranslations>;
+  origMapPhrases: Array<MapPhraseWithTranslations>;
+};
+
+export type GetOrigMapWordsAndPhrasesInput = {
+  lang: LanguageInput;
 };
 
 export type GetOrigMapWordsInput = {
@@ -360,7 +364,7 @@ export type GetOrigMapWordsInput = {
 
 export type GetOrigMapWordsOutput = {
   __typename?: 'GetOrigMapWordsOutput';
-  origMapWords: Array<MapWordTranslations>;
+  origMapWords: Array<MapWordWithTranslations>;
 };
 
 export type GetOrigMapsListOutput = {
@@ -485,20 +489,8 @@ export type MapFileOutputEdge = {
   node: MapFileOutput;
 };
 
-export type MapPhraseTranslations = {
-  __typename?: 'MapPhraseTranslations';
-  definition?: Maybe<Scalars['String']['output']>;
-  definition_id?: Maybe<Scalars['String']['output']>;
-  dialect_code?: Maybe<Scalars['String']['output']>;
-  geo_code?: Maybe<Scalars['String']['output']>;
-  language_code: Scalars['String']['output'];
-  phrase: Scalars['String']['output'];
-  phrase_id: Scalars['ID']['output'];
-  translations?: Maybe<Array<MapWordOrPhraseTranslationWithVotes>>;
-};
-
-export type MapPhraseWithVotes = {
-  __typename?: 'MapPhraseWithVotes';
+export type MapPhraseAsTranslation = {
+  __typename?: 'MapPhraseAsTranslation';
   definition?: Maybe<Scalars['String']['output']>;
   definition_id?: Maybe<Scalars['String']['output']>;
   dialect_code?: Maybe<Scalars['String']['output']>;
@@ -509,6 +501,18 @@ export type MapPhraseWithVotes = {
   phrase_id: Scalars['ID']['output'];
   translation_id: Scalars['String']['output'];
   up_votes: Scalars['String']['output'];
+};
+
+export type MapPhraseWithTranslations = {
+  __typename?: 'MapPhraseWithTranslations';
+  definition?: Maybe<Scalars['String']['output']>;
+  definition_id?: Maybe<Scalars['String']['output']>;
+  dialect_code?: Maybe<Scalars['String']['output']>;
+  geo_code?: Maybe<Scalars['String']['output']>;
+  language_code: Scalars['String']['output'];
+  phrase: Scalars['String']['output'];
+  phrase_id: Scalars['ID']['output'];
+  translations?: Maybe<Array<MapWordOrPhraseAsTranslation>>;
 };
 
 export type MapUploadOutput = {
@@ -517,22 +521,8 @@ export type MapUploadOutput = {
   mapFileOutput?: Maybe<MapFileOutput>;
 };
 
-export type MapWordOrPhraseTranslationWithVotes = MapPhraseWithVotes | MapWordWithVotes;
-
-export type MapWordTranslations = {
-  __typename?: 'MapWordTranslations';
-  definition?: Maybe<Scalars['String']['output']>;
-  definition_id?: Maybe<Scalars['String']['output']>;
-  dialect_code?: Maybe<Scalars['String']['output']>;
-  geo_code?: Maybe<Scalars['String']['output']>;
-  language_code: Scalars['String']['output'];
-  translations?: Maybe<Array<MapWordOrPhraseTranslationWithVotes>>;
-  word: Scalars['String']['output'];
-  word_id: Scalars['ID']['output'];
-};
-
-export type MapWordWithVotes = {
-  __typename?: 'MapWordWithVotes';
+export type MapWordAsTranslation = {
+  __typename?: 'MapWordAsTranslation';
   definition?: Maybe<Scalars['String']['output']>;
   definition_id?: Maybe<Scalars['String']['output']>;
   dialect_code?: Maybe<Scalars['String']['output']>;
@@ -543,6 +533,45 @@ export type MapWordWithVotes = {
   up_votes: Scalars['String']['output'];
   word: Scalars['String']['output'];
   word_id: Scalars['ID']['output'];
+};
+
+export type MapWordOrPhrase = {
+  __typename?: 'MapWordOrPhrase';
+  id: Scalars['ID']['output'];
+  o_definition: Scalars['String']['output'];
+  o_definition_id: Scalars['String']['output'];
+  o_dialect_code?: Maybe<Scalars['String']['output']>;
+  o_geo_code?: Maybe<Scalars['String']['output']>;
+  o_id: Scalars['String']['output'];
+  o_language_code: Scalars['String']['output'];
+  o_like_string: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+};
+
+export type MapWordOrPhraseAsTranslation = MapPhraseAsTranslation | MapWordAsTranslation;
+
+export type MapWordWithTranslations = {
+  __typename?: 'MapWordWithTranslations';
+  definition?: Maybe<Scalars['String']['output']>;
+  definition_id?: Maybe<Scalars['String']['output']>;
+  dialect_code?: Maybe<Scalars['String']['output']>;
+  geo_code?: Maybe<Scalars['String']['output']>;
+  language_code: Scalars['String']['output'];
+  translations?: Maybe<Array<MapWordOrPhraseAsTranslation>>;
+  word: Scalars['String']['output'];
+  word_id: Scalars['ID']['output'];
+};
+
+export type MapWordsAndPhrasesConnection = {
+  __typename?: 'MapWordsAndPhrasesConnection';
+  edges: Array<MapWordsAndPhrasesEdge>;
+  pageInfo: PageInfo;
+};
+
+export type MapWordsAndPhrasesEdge = {
+  __typename?: 'MapWordsAndPhrasesEdge';
+  cursor: Scalars['ID']['output'];
+  node: MapWordOrPhrase;
 };
 
 export type MarkNotificationReadInput = {
@@ -1283,6 +1312,7 @@ export type Query = {
   getMapDetails: MapFileOutput;
   getOrigMapPhrases: GetOrigMapPhrasesOutput;
   getOrigMapWords: GetOrigMapWordsOutput;
+  getOrigMapWordsAndPhrases: MapWordsAndPhrasesConnection;
   getOrigMapsList: GetOrigMapsListOutput;
   getPhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   getPhraseDefinitionsByFlag: PhraseDefinitionListConnection;
@@ -1414,6 +1444,13 @@ export type QueryGetOrigMapPhrasesArgs = {
 
 export type QueryGetOrigMapWordsArgs = {
   input?: InputMaybe<GetOrigMapWordsInput>;
+};
+
+
+export type QueryGetOrigMapWordsAndPhrasesArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  input: GetOrigMapWordsAndPhrasesInput;
 };
 
 
@@ -2658,13 +2695,26 @@ export type DeleteForumMutationVariables = Exact<{
 
 export type DeleteForumMutation = { __typename?: 'Mutation', forumDelete: { __typename?: 'ForumDeleteOutput', error: ErrorType, forum_id: string } };
 
-export type MapPhraseWithVotesFragmentFragment = { __typename?: 'MapPhraseWithVotes', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string };
+export type MapPhraseAsTranslationFragmentFragment = { __typename?: 'MapPhraseAsTranslation', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string };
 
-export type WordWithVotesFragmentFragment = { __typename?: 'MapWordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string };
+export type MapWordAsTranslationFragmentFragment = { __typename?: 'MapWordAsTranslation', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string };
 
 export type MapFileOutputFragmentFragment = { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null };
 
 export type MapFileOutputEdgeFragmentFragment = { __typename?: 'MapFileOutputEdge', cursor: string, node: { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
+
+export type MapWordOrPhraseFragmentFragment = { __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null };
+
+export type MapWordsAndPhrasesEdgeFragmentFragment = { __typename?: 'MapWordsAndPhrasesEdge', cursor: string, node: { __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null } };
+
+export type GetOrigMapWordsAndPhrasesQueryVariables = Exact<{
+  lang: LanguageInput;
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetOrigMapWordsAndPhrasesQuery = { __typename?: 'Query', getOrigMapWordsAndPhrases: { __typename?: 'MapWordsAndPhrasesConnection', edges: Array<{ __typename?: 'MapWordsAndPhrasesEdge', cursor: string, node: { __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null } }> } };
 
 export type GetOrigMapWordsQueryVariables = Exact<{
   original_map_id?: InputMaybe<Scalars['ID']['input']>;
@@ -2675,7 +2725,7 @@ export type GetOrigMapWordsQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'MapWordTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'MapPhraseWithVotes', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string } | { __typename?: 'MapWordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
+export type GetOrigMapWordsQuery = { __typename?: 'Query', getOrigMapWords: { __typename?: 'GetOrigMapWordsOutput', origMapWords: Array<{ __typename?: 'MapWordWithTranslations', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'MapPhraseAsTranslation', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string } | { __typename?: 'MapWordAsTranslation', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
 
 export type GetOrigMapPhrasesQueryVariables = Exact<{
   original_map_id?: InputMaybe<Scalars['ID']['input']>;
@@ -2686,7 +2736,7 @@ export type GetOrigMapPhrasesQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapPhrasesQuery = { __typename?: 'Query', getOrigMapPhrases: { __typename?: 'GetOrigMapPhrasesOutput', origMapPhrases: Array<{ __typename?: 'MapPhraseTranslations', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'MapPhraseWithVotes', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string } | { __typename?: 'MapWordWithVotes', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
+export type GetOrigMapPhrasesQuery = { __typename?: 'Query', getOrigMapPhrases: { __typename?: 'GetOrigMapPhrasesOutput', origMapPhrases: Array<{ __typename?: 'MapPhraseWithTranslations', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, translations?: Array<{ __typename?: 'MapPhraseAsTranslation', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string } | { __typename?: 'MapWordAsTranslation', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string }> | null }> } };
 
 export type GetAllMapsListQueryVariables = Exact<{
   lang?: InputMaybe<LanguageInput>;
@@ -3329,8 +3379,8 @@ export const ForumFragmentFragmentDoc = gql`
   name
 }
     `;
-export const MapPhraseWithVotesFragmentFragmentDoc = gql`
-    fragment MapPhraseWithVotesFragment on MapPhraseWithVotes {
+export const MapPhraseAsTranslationFragmentFragmentDoc = gql`
+    fragment MapPhraseAsTranslationFragment on MapPhraseAsTranslation {
   phrase
   phrase_id
   language_code
@@ -3343,8 +3393,8 @@ export const MapPhraseWithVotesFragmentFragmentDoc = gql`
   translation_id
 }
     `;
-export const WordWithVotesFragmentFragmentDoc = gql`
-    fragment WordWithVotesFragment on MapWordWithVotes {
+export const MapWordAsTranslationFragmentFragmentDoc = gql`
+    fragment MapWordAsTranslationFragment on MapWordAsTranslation {
   word
   word_id
   language_code
@@ -3388,6 +3438,27 @@ export const MapFileOutputEdgeFragmentFragmentDoc = gql`
   }
 }
     ${MapFileOutputFragmentFragmentDoc}`;
+export const MapWordOrPhraseFragmentFragmentDoc = gql`
+    fragment MapWordOrPhraseFragment on MapWordOrPhrase {
+  id
+  type
+  o_id
+  o_like_string
+  o_definition
+  o_definition_id
+  o_language_code
+  o_dialect_code
+  o_geo_code
+}
+    `;
+export const MapWordsAndPhrasesEdgeFragmentFragmentDoc = gql`
+    fragment MapWordsAndPhrasesEdgeFragment on MapWordsAndPhrasesEdge {
+  cursor
+  node {
+    ...MapWordOrPhraseFragment
+  }
+}
+    ${MapWordOrPhraseFragmentFragmentDoc}`;
 export const PhraseDefinitionWithVoteFragmentFragmentDoc = gql`
     fragment PhraseDefinitionWithVoteFragment on PhraseDefinitionWithVote {
   phrase_definition_id
@@ -5172,6 +5243,45 @@ export function useDeleteForumMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteForumMutationHookResult = ReturnType<typeof useDeleteForumMutation>;
 export type DeleteForumMutationResult = Apollo.MutationResult<DeleteForumMutation>;
 export type DeleteForumMutationOptions = Apollo.BaseMutationOptions<DeleteForumMutation, DeleteForumMutationVariables>;
+export const GetOrigMapWordsAndPhrasesDocument = gql`
+    query GetOrigMapWordsAndPhrases($lang: LanguageInput!, $after: ID, $first: Int) {
+  getOrigMapWordsAndPhrases(input: {lang: $lang}, after: $after, first: $first) {
+    edges {
+      ...MapWordsAndPhrasesEdgeFragment
+    }
+  }
+}
+    ${MapWordsAndPhrasesEdgeFragmentFragmentDoc}`;
+
+/**
+ * __useGetOrigMapWordsAndPhrasesQuery__
+ *
+ * To run a query within a React component, call `useGetOrigMapWordsAndPhrasesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOrigMapWordsAndPhrasesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOrigMapWordsAndPhrasesQuery({
+ *   variables: {
+ *      lang: // value for 'lang'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function useGetOrigMapWordsAndPhrasesQuery(baseOptions: Apollo.QueryHookOptions<GetOrigMapWordsAndPhrasesQuery, GetOrigMapWordsAndPhrasesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetOrigMapWordsAndPhrasesQuery, GetOrigMapWordsAndPhrasesQueryVariables>(GetOrigMapWordsAndPhrasesDocument, options);
+      }
+export function useGetOrigMapWordsAndPhrasesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOrigMapWordsAndPhrasesQuery, GetOrigMapWordsAndPhrasesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetOrigMapWordsAndPhrasesQuery, GetOrigMapWordsAndPhrasesQueryVariables>(GetOrigMapWordsAndPhrasesDocument, options);
+        }
+export type GetOrigMapWordsAndPhrasesQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesQuery>;
+export type GetOrigMapWordsAndPhrasesLazyQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesLazyQuery>;
+export type GetOrigMapWordsAndPhrasesQueryResult = Apollo.QueryResult<GetOrigMapWordsAndPhrasesQuery, GetOrigMapWordsAndPhrasesQueryVariables>;
 export const GetOrigMapWordsDocument = gql`
     query GetOrigMapWords($original_map_id: ID, $o_language_code: String, $t_language_code: String, $t_dialect_code: String, $t_geo_code: String) {
   getOrigMapWords(
@@ -5186,14 +5296,14 @@ export const GetOrigMapWordsDocument = gql`
       definition
       definition_id
       translations {
-        ...MapPhraseWithVotesFragment
-        ...WordWithVotesFragment
+        ...MapPhraseAsTranslationFragment
+        ...MapWordAsTranslationFragment
       }
     }
   }
 }
-    ${MapPhraseWithVotesFragmentFragmentDoc}
-${WordWithVotesFragmentFragmentDoc}`;
+    ${MapPhraseAsTranslationFragmentFragmentDoc}
+${MapWordAsTranslationFragmentFragmentDoc}`;
 
 /**
  * __useGetOrigMapWordsQuery__
@@ -5240,14 +5350,14 @@ export const GetOrigMapPhrasesDocument = gql`
       definition
       definition_id
       translations {
-        ...MapPhraseWithVotesFragment
-        ...WordWithVotesFragment
+        ...MapPhraseAsTranslationFragment
+        ...MapWordAsTranslationFragment
       }
     }
   }
 }
-    ${MapPhraseWithVotesFragmentFragmentDoc}
-${WordWithVotesFragmentFragmentDoc}`;
+    ${MapPhraseAsTranslationFragmentFragmentDoc}
+${MapWordAsTranslationFragmentFragmentDoc}`;
 
 /**
  * __useGetOrigMapPhrasesQuery__
@@ -7256,9 +7366,9 @@ export type GetFileUploadUrlQueryResult = Apollo.QueryResult<GetFileUploadUrlQue
       }
       const result: PossibleTypesResultData = {
   "possibleTypes": {
-    "MapWordOrPhraseTranslationWithVotes": [
-      "MapPhraseWithVotes",
-      "MapWordWithVotes"
+    "MapWordOrPhraseAsTranslation": [
+      "MapPhraseAsTranslation",
+      "MapWordAsTranslation"
     ],
     "SiteTextDefinition": [
       "SiteTextPhraseDefinition",
@@ -7310,6 +7420,7 @@ export const namedOperations = {
     GetForumFolders: 'GetForumFolders',
     GetForumById: 'GetForumById',
     GetForums: 'GetForums',
+    GetOrigMapWordsAndPhrases: 'GetOrigMapWordsAndPhrases',
     GetOrigMapWords: 'GetOrigMapWords',
     GetOrigMapPhrases: 'GetOrigMapPhrases',
     GetAllMapsList: 'GetAllMapsList',
@@ -7407,10 +7518,12 @@ export const namedOperations = {
     PhraseDefinitionListEdgeFragment: 'PhraseDefinitionListEdgeFragment',
     ForumFolderFragment: 'ForumFolderFragment',
     ForumFragment: 'ForumFragment',
-    MapPhraseWithVotesFragment: 'MapPhraseWithVotesFragment',
-    WordWithVotesFragment: 'WordWithVotesFragment',
+    MapPhraseAsTranslationFragment: 'MapPhraseAsTranslationFragment',
+    MapWordAsTranslationFragment: 'MapWordAsTranslationFragment',
     MapFileOutputFragment: 'MapFileOutputFragment',
     MapFileOutputEdgeFragment: 'MapFileOutputEdgeFragment',
+    MapWordOrPhraseFragment: 'MapWordOrPhraseFragment',
+    MapWordsAndPhrasesEdgeFragment: 'MapWordsAndPhrasesEdgeFragment',
     PhraseFragment: 'PhraseFragment',
     PhraseDefinitionFragment: 'PhraseDefinitionFragment',
     PhraseWithDefinitionsFragment: 'PhraseWithDefinitionsFragment',
