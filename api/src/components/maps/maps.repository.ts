@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PoolClient, ClientBase } from 'pg';
+import { PoolClient } from 'pg';
 import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
 import { LanguageInput } from 'src/components/common/types';
@@ -17,8 +17,6 @@ import {
   MapWordsAndPhrasesConnection,
   GetOrigMapWordsAndPhrasesInput,
   MapWordsAndPhrasesEdge,
-  MapWordWithDefinition,
-  MapPhraseWithDefinition,
   MapWordOrPhrase,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
@@ -1031,18 +1029,18 @@ export class MapsRepository {
     };
   }
 
-  async getOrigMapWordsAndPhrases({
-    input,
-    first,
-    after,
-    poolClient,
-  }: {
-    input: GetOrigMapWordsAndPhrasesInput;
-    first?: number | null;
-    after?: string | null;
-      poolClient?: PoolClient;
-  }): Promise<MapWordsAndPhrasesConnection> {
-    const dbPoolClient = poolClient || (await this.pg.pool.connect());
+  async getOrigMapWordsAndPhrases(
+    dbPoolClient: PoolClient,
+    {
+      input,
+      first,
+      after,
+    }: {
+      input: GetOrigMapWordsAndPhrasesInput;
+      first?: number | null;
+      after?: string | null;
+    },
+  ): Promise<MapWordsAndPhrasesConnection> {
     const langParams: string[] = [];
     let languagesRestrictionClause = '';
     let pickDataClause = '';
@@ -1062,7 +1060,7 @@ export class MapsRepository {
     const langAndPickParams: string[] = [...langParams];
     if (after) {
       langAndPickParams.push(String(after));
-      pickDataClause += `and cursor >= $${langAndPickParams.length} `;
+      pickDataClause += `and cursor > $${langAndPickParams.length} `;
     }
     pickDataClause += ` order by cursor `;
     if (first) {
@@ -1113,18 +1111,20 @@ export class MapsRepository {
       };
     });
 
+    const pageInfo = {
+      startCursor: resQ.rows[0].cursor,
+      endCursor: resQ.rows.at(-1).cursor,
+      hasNextPage:
+        resCheckAfter.rows[0].count_after &&
+        resCheckAfter.rows[0].count_after > 0,
+      hasPreviousPage:
+        resCheckBefore.rows[0].count_before &&
+        resCheckBefore.rows[0].count_before > 0,
+    };
+
     return {
       edges,
-      pageInfo: {
-        startCursor: resQ.rows[0].cursor,
-        endCursor: resQ.rows.at(-1).cursor,
-        hasNextPage:
-          resCheckAfter.rows[0].count_after &&
-          resCheckAfter.rows[0].count_after > 0,
-        hasPreviousPage:
-          resCheckBefore.rows[0].count_before &&
-          resCheckBefore.rows[0].count_before > 0,
-      },
+      pageInfo,
     };
   }
 

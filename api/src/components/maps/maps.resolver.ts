@@ -245,7 +245,7 @@ export class MapsResolver {
     @Args('first', { type: () => Int, nullable: true }) first?: number | null,
     @Args('after', { type: () => ID, nullable: true })
     after?: string | null,
-  ): Promise<MapWordsAndPhrasesConnection> {
+  ): Promise<MapWordsAndPhrasesConnection | undefined> {
     return this.mapService.getOrigMapWordsAndPhrases({ input, first, after });
   }
 

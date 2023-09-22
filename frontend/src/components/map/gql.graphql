@@ -85,6 +85,12 @@ query GetOrigMapWordsAndPhrases(
     edges {
       ...MapWordsAndPhrasesEdgeFragment
     }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
   }
 }
 

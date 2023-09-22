@@ -473,8 +473,19 @@ export class MapsService {
     input: GetOrigMapWordsAndPhrasesInput;
     first?: number | null;
     after?: string | null;
-  }): Promise<MapWordsAndPhrasesConnection> {
-    return this.mapsRepository.getOrigMapWordsAndPhrases(params);
+  }): Promise<MapWordsAndPhrasesConnection | undefined> {
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      const res = this.mapsRepository.getOrigMapWordsAndPhrases(
+        dbPoolClient,
+        params,
+      );
+      return res;
+    } catch (e) {
+      Logger.error(`mapsService#getOrigMapWordsAndPhrases: ${e}`);
+    } finally {
+      dbPoolClient.release();
+    }
   }
 
   checkForLanguageCodePresence(

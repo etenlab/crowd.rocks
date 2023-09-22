@@ -9,6 +9,7 @@ export const typePolicies: TypePolicies = {
       getWordDefinitionsByFlag: relayStylePagination(['flag_name']),
       getPhraseDefinitionsByFlag: relayStylePagination(['flag_name']),
       getAllMapsList: relayStylePagination(['input']),
+      getOrigMapWordsAndPhrases: relayStylePagination(['input']),
     },
   },
   WordWithDefinitions: {
@@ -105,6 +106,9 @@ export const typePolicies: TypePolicies = {
     keyFields: ['document_id'],
   },
   MapFileOutputEdge: {
+    keyFields: ['cursor'],
+  },
+  MapWordsAndPhrasesEdge: {
     keyFields: ['cursor'],
   },
 };

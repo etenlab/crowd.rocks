@@ -166,17 +166,19 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
       <StTranslationsDiv>
         {wordOrPhraseWithTranslations.translations &&
           wordOrPhraseWithTranslations.translations
-            .sort((tr1, tr2) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .sort((tr1: any, tr2: any) => {
               if (!tr1.value || !tr2.value) return 0;
               return tr1.value.localeCompare(tr2.value);
             })
-            .map((tr, i) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((tr: any, i: any) => {
               const isWord = tr.__typename === 'MapWordWithVotes';
 
               return (
                 <StTranslationDiv key={i}>
                   <WordOrPhraseCard
-                    value={tr.value} // typing is somehave have lost after .sort
+                    value={tr.value} // typing is somehow have lost after .sort
                     definition={tr.definition}
                     discussion={{
                       onChatClick: () =>
