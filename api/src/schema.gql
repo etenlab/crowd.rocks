@@ -409,46 +409,9 @@ type MapFileOutputEdge {
   node: MapFileOutput!
 }
 
-type MapPhraseAsTranslation {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  down_votes: String!
-  geo_code: String
-  language_code: String!
-  phrase: String!
-  phrase_id: ID!
-  translation_id: String!
-  up_votes: String!
-}
-
-type MapPhraseWithTranslations {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  geo_code: String
-  language_code: String!
-  phrase: String!
-  phrase_id: ID!
-  translations: [MapWordOrPhraseAsTranslation!]
-}
-
 type MapUploadOutput {
   error: ErrorType!
   mapFileOutput: MapFileOutput
-}
-
-type MapWordAsTranslation {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  down_votes: String!
-  geo_code: String
-  language_code: String!
-  translation_id: String!
-  up_votes: String!
-  word: String!
-  word_id: ID!
 }
 
 type MapWordOrPhrase {
@@ -461,19 +424,6 @@ type MapWordOrPhrase {
   o_language_code: String!
   o_like_string: String!
   type: String!
-}
-
-union MapWordOrPhraseAsTranslation = MapPhraseAsTranslation | MapWordAsTranslation
-
-type MapWordWithTranslations {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  geo_code: String
-  language_code: String!
-  translations: [MapWordOrPhraseAsTranslation!]
-  word: String!
-  word_id: ID!
 }
 
 type MapWordsAndPhrasesConnection {

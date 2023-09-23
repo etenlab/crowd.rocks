@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -8,14 +8,17 @@ import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
 import { PAGE_SIZE } from '../../../const/commonConst';
-import { useGetOrigMapWordsAndPhrasesLazyQuery } from '../../../generated/graphql';
+import {
+  MapWordOrPhrase,
+  useGetOrigMapWordsAndPhrasesLazyQuery,
+} from '../../../generated/graphql';
 import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 
 interface MapWordsTranslationProps extends RouteComponentProps {}
 export type TWordOrPhraseId = { word_id: string } | { phrase_id: string };
 
-export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
+export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
   const { tr } = useTr();
   // const router = useIonRouter();
 
@@ -28,7 +31,7 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
     actions: { setTargetLanguage },
   } = useAppContext();
 
-  const [selectedId, setSelectedId] = useState<string>();
+  // const [selectedId, setSelectedId] = useState<string>();
   const [getWordAndPhrases, { data: wordsAndPhrases, fetchMore }] =
     useGetOrigMapWordsAndPhrasesLazyQuery({});
 
@@ -70,10 +73,16 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
 
   // const nation = router.routeInfo.pathname.split('/')[1];
   // const language_id = router.routeInfo.pathname.split('/')[2];
+  const handleWordOrPhraseSelect = useCallback(
+    (wordOrPhrase: MapWordOrPhrase) => {
+      console.log(wordOrPhrase.o_definition_id, wordOrPhrase.type);
+    },
+    [],
+  );
 
   return (
     <>
-      {!selectedId || !targetLang ? (
+      {targetLang ? (
         <>
           <Caption>{tr('Map Translation')}</Caption>
           <LangSelectorBox>
@@ -92,7 +101,7 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
                 <TranslatedCards
                   key={i}
                   wordOrPhrase={omw.node}
-                  onClick={() => setSelectedId(omw.node.id)}
+                  onClick={() => handleWordOrPhraseSelect(omw.node)}
                 />
               ))}
           </WordsDiv>
@@ -104,16 +113,7 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
           </IonInfiniteScroll>
         </>
       ) : (
-        // <TranslationsCom
-        //   tLangInfo={targetLang}
-        //   wordOrPhraseWithTranslations={selected}
-        //   nation_id={nation}
-        //   language_id={language_id}
-        //   onBackClick={() => {
-        //     setSelectedId(undefined);
-        //   }}
-        // />
-        <>{selectedId}</>
+        <></>
       )}
     </>
   );

@@ -1,11 +1,14 @@
 import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Caption } from '../../common/Caption/Caption';
-import { WordOrPhraseCard } from './WordOrPhraseCard';
+import { WordOrPhraseCard } from '../WordOrPhraseCard';
 import { IonButton, IonInput, useIonRouter, useIonToast } from '@ionic/react';
 import {
   ErrorType,
   TableNameType,
+  useGetOrigMapWordsAndPhrasesQuery,
+  useGetTranslationsByFromDefinitionIdLazyQuery,
+  useGetTranslationsByFromDefinitionIdQuery,
   useToggleTranslationVoteStatusMutation,
   useUpsertTranslationFromWordAndDefinitionlikeStringMutation,
 } from '../../../generated/graphql';
@@ -14,28 +17,45 @@ import { WordOrPhraseWithValueAndTranslations } from '../hooks/useMapTranslation
 import { StringContentTypes, typeOfString } from '../../../common/utility';
 
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
+import { RouteComponentProps } from 'react-router';
+import { useAppContext } from '../../../hooks/useAppContext';
 
-interface TranslationsComProps {
-  wordOrPhraseWithTranslations: WordOrPhraseWithValueAndTranslations;
-  tLangInfo: LanguageInfo;
-  onBackClick: () => void;
-  nation_id: string;
-  language_id: string;
-}
+interface TranslationsComProps
+  extends RouteComponentProps<{
+    definition_id: string;
+    type: string;
+  }> {}
 
-export const TranslationsCom: React.FC<TranslationsComProps> = ({
-  wordOrPhraseWithTranslations,
-  tLangInfo,
-  onBackClick,
-  nation_id,
-  language_id,
+export const MapWordOrPhraseTr: React.FC<TranslationsComProps> = ({
+  match: {
+    params: { definition_id, type },
+  },
 }: TranslationsComProps) => {
   const { tr } = useTr();
+  const {
+    states: {
+      global: {
+        langauges: { targetLang },
+      },
+    },
+  } = useAppContext();
   const [present] = useIonToast();
   const router = useIonRouter();
 
   const newTrRef = useRef<HTMLIonInputElement | null>(null);
   const newDefinitionRef = useRef<HTMLIonInputElement | null>(null);
+//WIP: add api to get wordorphrase by definition_id and type
+  const wordOrPhrase = 
+
+  const translations = useGetTranslationsByFromDefinitionIdQuery({
+    variables: {
+      definition_id,
+      from_definition_type_is_word: type === 'word',
+      language_code: targetLang?.lang.tag || '',
+      dialect_code: targetLang?.dialect?.tag,
+      geo_code: targetLang?.region?.tag,
+    },
+  });
 
   const [upsertTranslation, { data: upsertData, loading: upsertLoading }] =
     useUpsertTranslationFromWordAndDefinitionlikeStringMutation({
@@ -140,7 +160,7 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
 
   return (
     <>
-      <Caption handleBackClick={() => onBackClick()}>Translations</Caption>
+      <Caption handleBackClick={() => router.goBack()}>Translations</Caption>
       <StSourceWordDiv>
         <WordOrPhraseCard
           value={wordOrPhraseWithTranslations.value}
@@ -164,7 +184,7 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
       </StSourceWordDiv>
 
       <StTranslationsDiv>
-        {wordOrPhraseWithTranslations.translations &&
+        {/* {wordOrPhraseWithTranslations.translations &&
           wordOrPhraseWithTranslations.translations
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .sort((tr1: any, tr2: any) => {
@@ -220,7 +240,7 @@ export const TranslationsCom: React.FC<TranslationsComProps> = ({
                   />
                 </StTranslationDiv>
               );
-            })}
+            })} */}
       </StTranslationsDiv>
 
       <StNewTranslationDiv>

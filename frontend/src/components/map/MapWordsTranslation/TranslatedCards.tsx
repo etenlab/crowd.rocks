@@ -3,7 +3,7 @@ import {
   useGetRecommendedTranslationFromDefinitionIdQuery,
 } from '../../../generated/graphql';
 // import { useMapTranslationTools } from '../../map/hooks/useMapTranslationTools';
-import { WordOrPhraseCard } from './WordOrPhraseCard';
+import { WordOrPhraseCard } from '../WordOrPhraseCard';
 import { styled } from 'styled-components';
 import { TableNameType } from '../../../generated/graphql';
 

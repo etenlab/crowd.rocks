@@ -81,41 +81,6 @@ export class GetMapContentInput {
   @Field(() => Boolean) is_original: boolean;
 }
 
-//todo: check and delete (will be used only common resolver for words and pharses because of pagination)
-@InputType()
-export class GetOrigMapWordsInput {
-  @Field(() => ID, { nullable: true }) original_map_id?: string;
-  @Field(() => String, { nullable: true }) o_language_code?: string;
-  @Field(() => String, { nullable: true }) o_dialect_code?: string;
-  @Field(() => String, { nullable: true }) o_geo_code?: string;
-  @Field(() => String, { nullable: true }) t_language_code?: string;
-  @Field(() => String, { nullable: true }) t_dialect_code?: string;
-  @Field(() => String, { nullable: true }) t_geo_code?: string;
-}
-//todo: check and delete (will be used only common resolver for words and pharses because of pagination)
-@ObjectType()
-export class GetOrigMapWordsOutput {
-  @Field(() => [MapWordWithTranslations])
-  origMapWords: MapWordWithTranslations[];
-}
-//todo: check and delete (will be used only common resolver for words and pharses because of pagination)
-@ObjectType()
-export class GetOrigMapPhrasesOutput {
-  @Field(() => [MapPhraseWithTranslations])
-  origMapPhrases: MapPhraseWithTranslations[];
-}
-//todo: check and delete (will be used only common resolver for words and pharses because of pagination)
-@InputType()
-export class GetOrigMapPhrasesInput {
-  @Field(() => ID, { nullable: true }) original_map_id?: string;
-  @Field(() => String, { nullable: true }) o_language_code?: string;
-  @Field(() => String, { nullable: true }) o_dialect_code?: string;
-  @Field(() => String, { nullable: true }) o_geo_code?: string;
-  @Field(() => String, { nullable: true }) t_language_code?: string;
-  @Field(() => String, { nullable: true }) t_dialect_code?: string;
-  @Field(() => String, { nullable: true }) t_geo_code?: string;
-}
-
 @InputType()
 export class GetOrigMapWordsAndPhrasesInput {
   @Field(() => LanguageInput) lang: LanguageInput;
@@ -200,12 +165,50 @@ export class MapWordWithTranslations extends MapWordWithDefinition {
   translations?: Array<MapPhraseAsTranslation | MapWordAsTranslation>;
 }
 
+// for internal purposes (map translation routines)
 export type OriginalMapWordInput = {
   word_id: string;
   original_map_id: string;
 };
 
+// for internal purposes (map translation routines)
 export type OriginalMapPhraseInput = {
   phrase_id: string;
   original_map_id: string;
 };
+
+// for internal purposes (map translation routines)
+// @ObjectType()
+export class GetOrigMapWordsOutput {
+  @Field(() => [MapWordWithTranslations])
+  origMapWords: MapWordWithTranslations[];
+}
+//for internal purposes (map translation routines)
+// @ObjectType()
+export class GetOrigMapPhrasesOutput {
+  @Field(() => [MapPhraseWithTranslations])
+  origMapPhrases: MapPhraseWithTranslations[];
+}
+
+// for internal purposes (map translation routines)
+// @InputType()
+export class GetOrigMapWordsInput {
+  @Field(() => ID) original_map_id: string;
+  @Field(() => String, { nullable: true }) o_language_code?: string;
+  @Field(() => String, { nullable: true }) o_dialect_code?: string;
+  @Field(() => String, { nullable: true }) o_geo_code?: string;
+  @Field(() => String, { nullable: true }) t_language_code?: string;
+  @Field(() => String, { nullable: true }) t_dialect_code?: string;
+  @Field(() => String, { nullable: true }) t_geo_code?: string;
+}
+// for internal purposes (map translation routines)
+// @InputType()
+export class GetOrigMapPhrasesInput {
+  @Field(() => ID, { nullable: true }) original_map_id?: string;
+  @Field(() => String, { nullable: true }) o_language_code?: string;
+  @Field(() => String, { nullable: true }) o_dialect_code?: string;
+  @Field(() => String, { nullable: true }) o_geo_code?: string;
+  @Field(() => String, { nullable: true }) t_language_code?: string;
+  @Field(() => String, { nullable: true }) t_dialect_code?: string;
+  @Field(() => String, { nullable: true }) t_geo_code?: string;
+}

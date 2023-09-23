@@ -459,50 +459,10 @@ export type MapFileOutputEdge = {
   node: MapFileOutput;
 };
 
-export type MapPhraseAsTranslation = {
-  __typename?: 'MapPhraseAsTranslation';
-  definition?: Maybe<Scalars['String']['output']>;
-  definition_id?: Maybe<Scalars['String']['output']>;
-  dialect_code?: Maybe<Scalars['String']['output']>;
-  down_votes: Scalars['String']['output'];
-  geo_code?: Maybe<Scalars['String']['output']>;
-  language_code: Scalars['String']['output'];
-  phrase: Scalars['String']['output'];
-  phrase_id: Scalars['ID']['output'];
-  translation_id: Scalars['String']['output'];
-  up_votes: Scalars['String']['output'];
-};
-
-export type MapPhraseWithTranslations = {
-  __typename?: 'MapPhraseWithTranslations';
-  definition?: Maybe<Scalars['String']['output']>;
-  definition_id?: Maybe<Scalars['String']['output']>;
-  dialect_code?: Maybe<Scalars['String']['output']>;
-  geo_code?: Maybe<Scalars['String']['output']>;
-  language_code: Scalars['String']['output'];
-  phrase: Scalars['String']['output'];
-  phrase_id: Scalars['ID']['output'];
-  translations?: Maybe<Array<MapWordOrPhraseAsTranslation>>;
-};
-
 export type MapUploadOutput = {
   __typename?: 'MapUploadOutput';
   error: ErrorType;
   mapFileOutput?: Maybe<MapFileOutput>;
-};
-
-export type MapWordAsTranslation = {
-  __typename?: 'MapWordAsTranslation';
-  definition?: Maybe<Scalars['String']['output']>;
-  definition_id?: Maybe<Scalars['String']['output']>;
-  dialect_code?: Maybe<Scalars['String']['output']>;
-  down_votes: Scalars['String']['output'];
-  geo_code?: Maybe<Scalars['String']['output']>;
-  language_code: Scalars['String']['output'];
-  translation_id: Scalars['String']['output'];
-  up_votes: Scalars['String']['output'];
-  word: Scalars['String']['output'];
-  word_id: Scalars['ID']['output'];
 };
 
 export type MapWordOrPhrase = {
@@ -516,20 +476,6 @@ export type MapWordOrPhrase = {
   o_language_code: Scalars['String']['output'];
   o_like_string: Scalars['String']['output'];
   type: Scalars['String']['output'];
-};
-
-export type MapWordOrPhraseAsTranslation = MapPhraseAsTranslation | MapWordAsTranslation;
-
-export type MapWordWithTranslations = {
-  __typename?: 'MapWordWithTranslations';
-  definition?: Maybe<Scalars['String']['output']>;
-  definition_id?: Maybe<Scalars['String']['output']>;
-  dialect_code?: Maybe<Scalars['String']['output']>;
-  geo_code?: Maybe<Scalars['String']['output']>;
-  language_code: Scalars['String']['output'];
-  translations?: Maybe<Array<MapWordOrPhraseAsTranslation>>;
-  word: Scalars['String']['output'];
-  word_id: Scalars['ID']['output'];
 };
 
 export type MapWordsAndPhrasesConnection = {
@@ -2653,10 +2599,6 @@ export type DeleteForumMutationVariables = Exact<{
 
 export type DeleteForumMutation = { __typename?: 'Mutation', forumDelete: { __typename?: 'ForumDeleteOutput', error: ErrorType, forum_id: string } };
 
-export type MapPhraseAsTranslationFragmentFragment = { __typename?: 'MapPhraseAsTranslation', phrase: string, phrase_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string };
-
-export type MapWordAsTranslationFragmentFragment = { __typename?: 'MapWordAsTranslation', word: string, word_id: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null, up_votes: string, down_votes: string, translation_id: string };
-
 export type MapFileOutputFragmentFragment = { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null };
 
 export type MapFileOutputEdgeFragmentFragment = { __typename?: 'MapFileOutputEdge', cursor: string, node: { __typename?: 'MapFileOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapFileInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
@@ -3313,34 +3255,6 @@ export const ForumFragmentFragmentDoc = gql`
     fragment ForumFragment on Forum {
   forum_id
   name
-}
-    `;
-export const MapPhraseAsTranslationFragmentFragmentDoc = gql`
-    fragment MapPhraseAsTranslationFragment on MapPhraseAsTranslation {
-  phrase
-  phrase_id
-  language_code
-  dialect_code
-  geo_code
-  definition
-  definition_id
-  up_votes
-  down_votes
-  translation_id
-}
-    `;
-export const MapWordAsTranslationFragmentFragmentDoc = gql`
-    fragment MapWordAsTranslationFragment on MapWordAsTranslation {
-  word
-  word_id
-  language_code
-  dialect_code
-  geo_code
-  definition
-  definition_id
-  up_votes
-  down_votes
-  translation_id
 }
     `;
 export const MapFileOutputFragmentFragmentDoc = gql`
@@ -7200,10 +7114,6 @@ export type GetFileUploadUrlQueryResult = Apollo.QueryResult<GetFileUploadUrlQue
       }
       const result: PossibleTypesResultData = {
   "possibleTypes": {
-    "MapWordOrPhraseAsTranslation": [
-      "MapPhraseAsTranslation",
-      "MapWordAsTranslation"
-    ],
     "SiteTextDefinition": [
       "SiteTextPhraseDefinition",
       "SiteTextWordDefinition"
@@ -7350,8 +7260,6 @@ export const namedOperations = {
     PhraseDefinitionListEdgeFragment: 'PhraseDefinitionListEdgeFragment',
     ForumFolderFragment: 'ForumFolderFragment',
     ForumFragment: 'ForumFragment',
-    MapPhraseAsTranslationFragment: 'MapPhraseAsTranslationFragment',
-    MapWordAsTranslationFragment: 'MapWordAsTranslationFragment',
     MapFileOutputFragment: 'MapFileOutputFragment',
     MapFileOutputEdgeFragment: 'MapFileOutputEdgeFragment',
     MapWordOrPhraseFragment: 'MapWordOrPhraseFragment',
