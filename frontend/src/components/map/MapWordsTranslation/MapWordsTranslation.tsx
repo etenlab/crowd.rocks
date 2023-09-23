@@ -3,7 +3,7 @@ import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { styled } from 'styled-components';
-import { TranslatedCards } from '../../word/TranslatedWordCards/TranslatedCards';
+import { TranslatedCards } from './TranslatedCards';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
@@ -29,7 +29,6 @@ export const MapWordsTranslation: React.FC<MapWordsTranslationProps> = () => {
   } = useAppContext();
 
   const [selectedId, setSelectedId] = useState<string>();
-  // const [getWordAndPhrases, { data: wordsAndPhrases, fetchMore }] =
   const [getWordAndPhrases, { data: wordsAndPhrases, fetchMore }] =
     useGetOrigMapWordsAndPhrasesLazyQuery({});
 

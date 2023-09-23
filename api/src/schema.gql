@@ -297,36 +297,8 @@ input GetOrigMapListInput {
   search: String
 }
 
-input GetOrigMapPhrasesInput {
-  o_dialect_code: String
-  o_geo_code: String
-  o_language_code: String
-  original_map_id: ID
-  t_dialect_code: String
-  t_geo_code: String
-  t_language_code: String
-}
-
-type GetOrigMapPhrasesOutput {
-  origMapPhrases: [MapPhraseWithTranslations!]!
-}
-
 input GetOrigMapWordsAndPhrasesInput {
   lang: LanguageInput!
-}
-
-input GetOrigMapWordsInput {
-  o_dialect_code: String
-  o_geo_code: String
-  o_language_code: String
-  original_map_id: ID
-  t_dialect_code: String
-  t_geo_code: String
-  t_language_code: String
-}
-
-type GetOrigMapWordsOutput {
-  origMapWords: [MapWordWithTranslations!]!
 }
 
 type GetOrigMapsListOutput {
@@ -892,8 +864,6 @@ type Query {
   getDocument(input: GetDocumentInput!): GetDocumentOutput!
   getFlagsFromRef(parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   getMapDetails(input: GetMapContentInput!): MapFileOutput!
-  getOrigMapPhrases(input: GetOrigMapPhrasesInput): GetOrigMapPhrasesOutput!
-  getOrigMapWords(input: GetOrigMapWordsInput): GetOrigMapWordsOutput!
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!

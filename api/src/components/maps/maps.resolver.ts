@@ -250,22 +250,22 @@ export class MapsResolver {
   }
 
   //// todo: refactor to paginated and delete
-  @Query(() => GetOrigMapWordsOutput)
-  async getOrigMapWords(
-    @Args('input', { nullable: true }) input?: GetOrigMapWordsInput,
-  ): Promise<GetOrigMapWordsOutput> {
-    const words = await this.mapService.getOrigMapWords(input!);
+  // @Query(() => GetOrigMapWordsOutput)
+  // async getOrigMapWords(
+  //   @Args('input', { nullable: true }) input?: GetOrigMapWordsInput,
+  // ): Promise<GetOrigMapWordsOutput> {
+  //   const words = await this.mapService.getOrigMapWords(input!);
 
-    return words;
-  }
-  @Query(() => GetOrigMapPhrasesOutput)
-  async getOrigMapPhrases(
-    @Args('input', { nullable: true }) input?: GetOrigMapPhrasesInput,
-  ): Promise<GetOrigMapPhrasesOutput> {
-    const origMapPhraseTranslations = await this.mapService.getOrigMapPhrases(
-      input!,
-    );
-    return origMapPhraseTranslations;
-  }
+  //   return words;
+  // }
+  // @Query(() => GetOrigMapPhrasesOutput)
+  // async getOrigMapPhrases(
+  //   @Args('input', { nullable: true }) input?: GetOrigMapPhrasesInput,
+  // ): Promise<GetOrigMapPhrasesOutput> {
+  //   const origMapPhraseTranslations = await this.mapService.getOrigMapPhrases(
+  //     input!,
+  //   );
+  //   return origMapPhraseTranslations;
+  // }
   ////
 }

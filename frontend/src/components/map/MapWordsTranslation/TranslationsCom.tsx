@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Caption } from '../../common/Caption/Caption';
-import { WordOrPhraseCard } from '../../word/WordCard/WordOrPhraseCard';
+import { WordOrPhraseCard } from './WordOrPhraseCard';
 import { IonButton, IonInput, useIonRouter, useIonToast } from '@ionic/react';
 import {
   ErrorType,
