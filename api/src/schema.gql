@@ -293,36 +293,17 @@ input GetMapContentInput {
   map_id: ID!
 }
 
+input GetMapWordOrPhraseByDefinitionIdInput {
+  definition_id: ID!
+  is_word_definition: Boolean!
+}
+
 input GetOrigMapListInput {
   search: String
 }
 
-input GetOrigMapPhrasesInput {
-  o_dialect_code: String
-  o_geo_code: String
-  o_language_code: String
-  original_map_id: ID
-  t_dialect_code: String
-  t_geo_code: String
-  t_language_code: String
-}
-
-type GetOrigMapPhrasesOutput {
-  origMapPhrases: [MapPhraseTranslations!]!
-}
-
-input GetOrigMapWordsInput {
-  o_dialect_code: String
-  o_geo_code: String
-  o_language_code: String
-  original_map_id: ID
-  t_dialect_code: String
-  t_geo_code: String
-  t_language_code: String
-}
-
-type GetOrigMapWordsOutput {
-  origMapWords: [MapWordTranslations!]!
+input GetOrigMapWordsAndPhrasesInput {
+  lang: LanguageInput!
 }
 
 type GetOrigMapsListOutput {
@@ -433,59 +414,38 @@ type MapFileOutputEdge {
   node: MapFileOutput!
 }
 
-type MapPhraseTranslations {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  geo_code: String
-  language_code: String!
-  phrase: String!
-  phrase_id: ID!
-  translations: [MapWordOrPhraseTranslationWithVotes!]
-}
-
-type MapPhraseWithVotes {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  down_votes: String!
-  geo_code: String
-  language_code: String!
-  phrase: String!
-  phrase_id: ID!
-  translation_id: String!
-  up_votes: String!
-}
-
 type MapUploadOutput {
   error: ErrorType!
   mapFileOutput: MapFileOutput
 }
 
-union MapWordOrPhraseTranslationWithVotes = MapPhraseWithVotes | MapWordWithVotes
-
-type MapWordTranslations {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  geo_code: String
-  language_code: String!
-  translations: [MapWordOrPhraseTranslationWithVotes!]
-  word: String!
-  word_id: ID!
+type MapWordOrPhrase {
+  id: ID!
+  o_definition: String!
+  o_definition_id: String!
+  o_dialect_code: String
+  o_geo_code: String
+  o_id: String!
+  o_language_code: String!
+  o_like_string: String!
+  type: String!
 }
 
-type MapWordWithVotes {
-  definition: String
-  definition_id: String
-  dialect_code: String
-  down_votes: String!
-  geo_code: String
-  language_code: String!
-  translation_id: String!
-  up_votes: String!
-  word: String!
-  word_id: ID!
+union MapWordOrPhraseAsOrig = PhraseWithDefinition | WordWithDefinition
+
+type MapWordOrPhraseAsOrigOutput {
+  error: ErrorType!
+  wordOrPhrase: MapWordOrPhraseAsOrig
+}
+
+type MapWordsAndPhrasesConnection {
+  edges: [MapWordsAndPhrasesEdge!]!
+  pageInfo: PageInfo!
+}
+
+type MapWordsAndPhrasesEdge {
+  cursor: ID!
+  node: MapWordOrPhrase!
 }
 
 input MarkNotificationReadInput {
@@ -769,6 +729,16 @@ input PhraseVoteUpsertInput {
   vote: Boolean!
 }
 
+type PhraseWithDefinition {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  phrase: String!
+  phrase_id: ID!
+}
+
 type PhraseWithDefinitions {
   definitions: [PhraseDefinition]!
   dialect_code: String
@@ -865,9 +835,9 @@ type Query {
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
   getDocument(input: GetDocumentInput!): GetDocumentOutput!
   getFlagsFromRef(parent_id: String!, parent_table: TableNameType!): FlagsOutput!
-  getMapContent(input: GetMapContentInput!): MapFileOutput!
-  getOrigMapPhrases(input: GetOrigMapPhrasesInput): GetOrigMapPhrasesOutput!
-  getOrigMapWords(input: GetOrigMapWordsInput): GetOrigMapWordsOutput!
+  getMapDetails(input: GetMapContentInput!): MapFileOutput!
+  getMapWordOrPhraseAsOrigByDefinitionId(input: GetMapWordOrPhraseByDefinitionIdInput!): MapWordOrPhraseAsOrigOutput!
+  getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getPhraseDefinitionsByFlag(after: ID, first: Int, flag_name: FlagType!): PhraseDefinitionListConnection!
@@ -1460,6 +1430,16 @@ type WordVoteStatusOutputRow {
 
 input WordVoteUpsertInput {
   vote: Boolean!
+  word_id: ID!
+}
+
+type WordWithDefinition {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  word: String!
   word_id: ID!
 }
 

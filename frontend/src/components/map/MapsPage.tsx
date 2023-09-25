@@ -1,8 +1,9 @@
 import { MapList } from './MapList/MapsList';
 import { Redirect, Route, RouteComponentProps } from 'react-router-dom';
-import { MapWordsTranslation } from './MapWordsTranslation/MapWordsTranslation';
+import { MapWordsList } from './MapWordsTranslation/MapWordsList';
 import { MapDetails } from './MapDetails/MapDetails';
 import { PageLayout } from '../common/PageLayout';
+import { MapWordOrPhraseTranslation } from './MapWordOrPhraseTranslation/MapWordOrPhraseTranslantion';
 
 interface MapsPageProps
   extends RouteComponentProps<{
@@ -21,13 +22,13 @@ export const MapsPage: React.FC<MapsPageProps> = ({ match }: MapsPageProps) => {
       <Route
         exact
         path={`/${match.params.nation_id}/${match.params.language_id}/1/maps/translation`}
-        component={MapWordsTranslation}
+        component={MapWordsList}
       />
-      {/* <Route
+      <Route
         exact
-        path={`/${match.params.nation_id}/${match.params.language_id}/1/maps/details-translated/:id`}
-        component={MapDetails}
-      /> */}
+        path={`/${match.params.nation_id}/${match.params.language_id}/1/maps/translate_word/:definition_id/:type`}
+        component={MapWordOrPhraseTranslation}
+      />
       <Route
         exact
         path={`/${match.params.nation_id}/${match.params.language_id}/1/maps/details/:id`}

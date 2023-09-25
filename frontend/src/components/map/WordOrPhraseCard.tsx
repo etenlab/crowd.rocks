@@ -5,12 +5,12 @@ import {
   IonCardTitle,
 } from '@ionic/react';
 import { styled } from 'styled-components';
-import { StChatIcon } from '../../common/styled';
+import { StChatIcon } from '../common/styled';
 import { chatbubbleEllipsesSharp } from 'ionicons/icons';
-import { VoteButtonsVertical } from '../../common/VoteButtonsVertical/VoteButtonsVertical';
-import { TableNameType } from '../../../generated/graphql';
-import { Flag } from '../../flags/Flag';
-import { FlagName } from '../../flags/flagGroups';
+import { VoteButtonsVertical } from '../common/VoteButtonsVertical/VoteButtonsVertical';
+import { TableNameType } from '../../generated/graphql';
+import { Flag } from '../flags/Flag';
+import { FlagName } from '../flags/flagGroups';
 
 type TWordCardProps = {
   value?: string | null;

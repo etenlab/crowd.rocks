@@ -18,6 +18,9 @@ export interface StateType {
     translationMap: Record<string, string>;
     languages: SiteTextLanguageWithTranslationInfo[];
   };
+  maps: {
+    updatedTrDefinitionIds: Array<string>;
+  };
 }
 
 export const initialState: StateType = {
@@ -39,6 +42,9 @@ export const initialState: StateType = {
     originalMap: {},
     translationMap: {},
     languages: [],
+  },
+  maps: {
+    updatedTrDefinitionIds: [],
   },
 };
 
@@ -129,6 +135,15 @@ export function reducer(
         langauges: {
           ...prevState.langauges,
           sourceLang: action.payload as LanguageInfo,
+        },
+      };
+    }
+    case actions.SET_MAP_UPDATED_TR_DEFINITION_IDS: {
+      return {
+        ...prevState,
+        maps: {
+          ...prevState.maps,
+          updatedTrDefinitionIds: action.payload as Array<string>,
         },
       };
     }

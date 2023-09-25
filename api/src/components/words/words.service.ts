@@ -1,4 +1,4 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
 import { pgClientOrPool } from 'src/common/utility';
@@ -31,8 +31,11 @@ import {
   WordUpsertsProcedureOutput,
   GetWordListByLang,
   getWordListByLang,
+  getWordByDefinitionIdSql,
+  GetWordObjectByDefinitionId,
 } from './sql-string';
 import { WordDefinition } from '../definitions/types';
+import { WordWithDefinition } from '../maps/types';
 
 @Injectable()
 export class WordsService {
@@ -538,45 +541,38 @@ export class WordsService {
     };
   }
 
-  /**
-   * @warning
-   * Sync style with other methods
-   */
   async getWordByDefinitionId(
     definitionId: string,
     pgClient: PoolClient | null,
-  ): Promise<Word> {
-    const res = await pgClientOrPool({
-      client: pgClient,
-      pool: this.pg.pool,
-    }).query(
-      `
-      select
-        w.word_id ,
-        ws.wordlike_string ,
-        w.language_code ,
-        w.dialect_code,
-        w.geo_code
-      from
-        words w
-      left join word_definitions wd on
-        w.word_id = wd.word_id
-      left join wordlike_strings ws on
-        w.wordlike_string_id = ws.wordlike_string_id
-      where
-        wd.word_definition_id = $1
-    `,
-      [definitionId],
-    );
+  ): Promise<WordWithDefinition | null> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetWordObjectByDefinitionId>(
+        ...getWordByDefinitionIdSql(+definitionId),
+      );
 
-    const word: Word = {
-      word_id: res[0].word_id,
-      word: res[0].wordlike_string,
-      language_code: res[0].language_code,
-      dialect_code: res[0].dialect_code,
-      geo_code: res[0].geo_code,
-    };
-    return word;
+      if (!res.rows[0].word_id) {
+        Logger.error(
+          `WordsService#getWordByDefinitionId: word with definition id ${definitionId} not found`,
+        );
+        return null;
+      }
+
+      return {
+        word_id: res.rows[0].word_id,
+        word: res.rows[0].word,
+        language_code: res.rows[0].language_code,
+        dialect_code: res.rows[0].dialect_code,
+        geo_code: res.rows[0].geo_code,
+        definition: res.rows[0].definition,
+        definition_id: res.rows[0].definition_id,
+      };
+    } catch (error) {
+      Logger.error(error);
+      return null;
+    }
   }
 
   getDiscussionTitle = async (id: string): Promise<string> => {

@@ -8,12 +8,16 @@ import {
   GetOrigMapsListOutput,
   GetOrigMapWordsOutput,
   MapFileOutput,
-  MapPhraseTranslations,
-  MapPhraseWithVotes,
-  MapWordTranslations,
-  MapWordWithVotes,
+  MapPhraseWithTranslations,
+  MapPhraseAsTranslation,
+  MapWordWithTranslations,
+  MapWordAsTranslation,
   OriginalMapPhraseInput,
   OriginalMapWordInput,
+  MapWordsAndPhrasesConnection,
+  GetOrigMapWordsAndPhrasesInput,
+  MapWordsAndPhrasesEdge,
+  MapWordOrPhrase,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
 
@@ -740,10 +744,10 @@ export class MapsRepository {
 
     const resQ_wtwt = await this.pg.pool.query(wtwt_sqlStr, params);
     const resQ_wtpt = await this.pg.pool.query(wtwp_sqlStr, params);
-    const words: MapWordTranslations[] = [];
+    const words: MapWordWithTranslations[] = [];
 
     resQ_wtwt.rows.forEach((r) => {
-      const currTranslation: MapWordWithVotes = {
+      const currTranslation: MapWordAsTranslation = {
         word_id: r.t_word_id,
         word: r.t_wordlike_string,
         definition: r.t_definition,
@@ -778,7 +782,7 @@ export class MapsRepository {
     });
 
     resQ_wtpt.rows.forEach((r) => {
-      const currTranslation: MapPhraseWithVotes = {
+      const currTranslation: MapPhraseAsTranslation = {
         phrase_id: r.t_phrase_id,
         phrase: r.t_phraselike_string,
         definition: r.t_definition,
@@ -948,10 +952,10 @@ export class MapsRepository {
 
     const resQptpt = await this.pg.pool.query(ptpt_sqlStr, params);
     const resQptwt = await this.pg.pool.query(ptwt_sqlStr, params);
-    const phrases: Array<MapPhraseTranslations> = [];
+    const phrases: Array<MapPhraseWithTranslations> = [];
 
     resQptpt.rows.forEach((r) => {
-      const currTranslation: MapPhraseWithVotes = {
+      const currTranslation: MapPhraseAsTranslation = {
         phrase_id: r.t_phrase_id,
         phrase: r.t_phraselike_string,
         definition: r.t_definition,
@@ -986,7 +990,7 @@ export class MapsRepository {
     });
 
     resQptwt.rows.forEach((r) => {
-      const currTranslation: MapWordWithVotes = {
+      const currTranslation: MapWordAsTranslation = {
         word_id: r.t_word_id,
         word: r.t_wordlike_string,
         definition: r.t_definition,
@@ -1022,6 +1026,105 @@ export class MapsRepository {
 
     return {
       origMapPhrases: phrases,
+    };
+  }
+
+  async getOrigMapWordsAndPhrases(
+    dbPoolClient: PoolClient,
+    {
+      input,
+      first,
+      after,
+    }: {
+      input: GetOrigMapWordsAndPhrasesInput;
+      first?: number | null;
+      after?: string | null;
+    },
+  ): Promise<MapWordsAndPhrasesConnection> {
+    const langParams: string[] = [];
+    let languagesRestrictionClause = '';
+    let pickDataClause = '';
+    if (input.lang.language_code) {
+      langParams.push(input.lang.language_code);
+      languagesRestrictionClause += ` and o_language_code =  $${langParams.length} `;
+    }
+    if (input.lang.dialect_code) {
+      langParams.push(input.lang.dialect_code);
+      languagesRestrictionClause += ` and o_dialect_code =  $${langParams.length} `;
+    }
+    if (input.lang.geo_code) {
+      langParams.push(input.lang.geo_code);
+      languagesRestrictionClause += ` and o_geo_code =  $${langParams.length} `;
+    }
+
+    const langAndPickParams: string[] = [...langParams];
+    if (after) {
+      langAndPickParams.push(String(after));
+      pickDataClause += `and cursor > $${langAndPickParams.length} `;
+    }
+    pickDataClause += ` order by cursor `;
+    if (first) {
+      langAndPickParams.push(String(first));
+      pickDataClause += ` limit $${langAndPickParams.length} `;
+    }
+
+    const sqlStr = `
+      select * from v_map_words_and_phrases
+      where true
+      ${languagesRestrictionClause}
+      ${pickDataClause}
+    `;
+
+    const resQ = await dbPoolClient.query(sqlStr, langAndPickParams);
+
+    const sqlAfter = `
+      select count(*) as count_after from v_map_words_and_phrases
+      where true
+      ${languagesRestrictionClause}
+      and cursor>${dbPoolClient.escapeLiteral(resQ.rows.at(-1).cursor)}
+    `;
+    const resCheckAfter = await dbPoolClient.query(sqlAfter, langParams);
+
+    const sqlBefore = `
+      select count(*) as count_before from v_map_words_and_phrases
+      where true
+      ${languagesRestrictionClause}
+      and cursor<${dbPoolClient.escapeLiteral(resQ.rows[0].cursor)}
+    `;
+    const resCheckBefore = await dbPoolClient.query(sqlBefore, langParams);
+
+    const edges: MapWordsAndPhrasesEdge[] = resQ.rows.map((r) => {
+      const node: MapWordOrPhrase = {
+        id: r.cursor,
+        type: r.type,
+        o_id: r.o_id,
+        o_like_string: r.o_like_string,
+        o_definition: r.o_definition,
+        o_definition_id: r.o_definition_id,
+        o_language_code: r.o_language_code,
+        o_dialect_code: r.o_dialect_code,
+        o_geo_code: r.o_geo_code,
+      };
+      return {
+        cursor: r.cursor,
+        node,
+      };
+    });
+
+    const pageInfo = {
+      startCursor: resQ.rows[0].cursor,
+      endCursor: resQ.rows.at(-1).cursor,
+      hasNextPage:
+        resCheckAfter.rows[0].count_after &&
+        resCheckAfter.rows[0].count_after > 0,
+      hasPreviousPage:
+        resCheckBefore.rows[0].count_before &&
+        resCheckBefore.rows[0].count_before > 0,
+    };
+
+    return {
+      edges,
+      pageInfo,
     };
   }
 

@@ -258,3 +258,38 @@ export function getPhraseListByLang({
     [...returnArr],
   ];
 }
+
+export type GetPhraseObjectByDefinitionId = {
+  phrase_id: string;
+  phrase: string;
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+  definition: string;
+  definition_id: string;
+};
+
+export function getPhraseByDefinitionIdSql(id: number): [string, [number]] {
+  return [
+    `
+      select
+      	p.words,
+        p.phrase_id ,
+        p.phraselike_string as phrase,
+        w.language_code ,
+        w.dialect_code,
+        w.geo_code,
+        phd.phrase_definition_id,
+        phd.definition
+      from
+        phrases p
+      left join phrase_definitions phd on
+        p.phrase_id = phd.phrase_id
+      left join words w on 
+      	w.word_id = p.words[1]
+      where
+        phd.phrase_definition_id = $1
+    `,
+    [id],
+  ];
+}

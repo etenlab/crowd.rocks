@@ -16,16 +16,16 @@ import {
   GetAllMapsListInput,
   MapFileListConnection,
   GetOrigMapListInput,
-  GetOrigMapPhrasesInput,
-  GetOrigMapPhrasesOutput,
   GetOrigMapsListOutput,
-  GetOrigMapWordsInput,
-  GetOrigMapWordsOutput,
   MapDeleteInput,
   MapDeleteOutput,
   MapUploadOutput,
-  MapFileOutput,
-  GetMapContentInput,
+  MapFileOutput as MapDetailsOutput,
+  GetMapContentInput as GetMapDetailsInput,
+  GetOrigMapWordsAndPhrasesInput,
+  MapWordsAndPhrasesConnection,
+  MapWordOrPhraseAsOrigOutput,
+  GetMapWordOrPhraseByDefinitionIdInput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
@@ -228,31 +228,29 @@ export class MapsResolver {
     });
   }
 
-  @Query(() => MapFileOutput)
-  async getMapContent(
-    @Args('input') input: GetMapContentInput,
-  ): Promise<MapFileOutput> {
+  @Query(() => MapDetailsOutput)
+  async getMapDetails(
+    @Args('input') input: GetMapDetailsInput,
+  ): Promise<MapDetailsOutput> {
     return input.is_original
-      ? this.mapService.getOrigMapContent(input.map_id)
-      : this.mapService.getTranslatedMapContent(input.map_id);
+      ? this.mapService.getOrigMapWithContentUrl(input.map_id)
+      : this.mapService.getTranslatedMapWithContentUrl(input.map_id);
   }
 
-  @Query(() => GetOrigMapWordsOutput)
-  async getOrigMapWords(
-    @Args('input', { nullable: true }) input?: GetOrigMapWordsInput,
-  ): Promise<GetOrigMapWordsOutput> {
-    const words = await this.mapService.getOrigMapWords(input!);
-
-    return words;
+  @Query(() => MapWordsAndPhrasesConnection)
+  async getOrigMapWordsAndPhrases(
+    @Args('input') input: GetOrigMapWordsAndPhrasesInput,
+    @Args('first', { type: () => Int, nullable: true }) first?: number | null,
+    @Args('after', { type: () => ID, nullable: true })
+    after?: string | null,
+  ): Promise<MapWordsAndPhrasesConnection | undefined> {
+    return this.mapService.getOrigMapWordsAndPhrases({ input, first, after });
   }
 
-  @Query(() => GetOrigMapPhrasesOutput)
-  async getOrigMapPhrases(
-    @Args('input', { nullable: true }) input?: GetOrigMapPhrasesInput,
-  ): Promise<GetOrigMapPhrasesOutput> {
-    const origMapPhraseTranslations = await this.mapService.getOrigMapPhrases(
-      input!,
-    );
-    return origMapPhraseTranslations;
+  @Query(() => MapWordOrPhraseAsOrigOutput)
+  async getMapWordOrPhraseAsOrigByDefinitionId(
+    @Args('input') input: GetMapWordOrPhraseByDefinitionIdInput,
+  ): Promise<MapWordOrPhraseAsOrigOutput | undefined> {
+    return this.mapService.getMapWordOrPhraseUnionByDefinitionId(input);
   }
 }

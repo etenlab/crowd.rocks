@@ -1,10 +1,4 @@
-import { useCallback } from 'react';
-import {
-  MapPhraseTranslations,
-  MapPhraseWithVotes,
-  MapWordTranslations,
-  MapWordWithVotes,
-} from '../../../generated/graphql';
+// import { useCallback } from 'react';
 
 export interface ITranslationsVotes {
   translations?:
@@ -13,93 +7,93 @@ export interface ITranslationsVotes {
     | undefined;
 }
 
-export type WordOrPhraseWithVotesAndValue =
-  | (MapWordWithVotes & {
-      value?: string | null | undefined;
-      is_word_type: boolean;
-      id: string;
-    })
-  | (MapPhraseWithVotes & {
-      value?: string | null | undefined;
-      is_word_type: boolean;
-      id: string;
-    });
+// export type WordOrPhraseWithVotesAndValue =
+//   | (MapWordWithVotes & {
+//       value?: string | null | undefined;
+//       is_word_type: boolean;
+//       id: string;
+//     })
+//   | (MapPhraseWithVotes & {
+//       value?: string | null | undefined;
+//       is_word_type: boolean;
+//       id: string;
+//     });
 
-export type WordOrPhraseWithValueAndTranslations = {
-  value?: string | null | undefined;
-  is_word_type: boolean;
-  id: string;
-  translations: Array<WordOrPhraseWithVotesAndValue>;
-} & (MapWordTranslations | MapPhraseTranslations);
+// export type WordOrPhraseWithValueAndTranslations = {
+//   value?: string | null | undefined;
+//   is_word_type: boolean;
+//   id: string;
+//   translations: Array<WordOrPhraseWithVotesAndValue>;
+// } & (MapWordTranslations | MapPhraseTranslations);
 
 export function useMapTranslationTools() {
-  const chooseBestTranslation = useCallback(
-    <T extends ITranslationsVotes>(wordTranslated: T) => {
-      const res = wordTranslated?.translations?.reduce(
-        (bestTr, currTr) => {
-          if (bestTr?.up_votes === undefined) {
-            return currTr;
-          }
+  // const chooseBestTranslation = useCallback(
+  //   <T extends ITranslationsVotes>(wordTranslated: T) => {
+  //     const res = wordTranslated?.translations?.reduce(
+  //       (bestTr, currTr) => {
+  //         if (bestTr?.up_votes === undefined) {
+  //           return currTr;
+  //         }
 
-          const bestTrTotal =
-            Number(bestTr?.up_votes || 0) - Number(bestTr?.down_votes || 0);
+  //         const bestTrTotal =
+  //           Number(bestTr?.up_votes || 0) - Number(bestTr?.down_votes || 0);
 
-          const currTrTotal =
-            Number(currTr?.up_votes || 0) - Number(currTr?.down_votes || 0);
+  //         const currTrTotal =
+  //           Number(currTr?.up_votes || 0) - Number(currTr?.down_votes || 0);
 
-          if (currTrTotal > bestTrTotal) {
-            return currTr;
-          }
+  //         if (currTrTotal > bestTrTotal) {
+  //           return currTr;
+  //         }
 
-          return bestTr;
-        },
-        {} as MapWordWithVotes | MapPhraseWithVotes,
-      );
-      return res as MapWordWithVotes | MapPhraseWithVotes;
-    },
-    [],
-  );
+  //         return bestTr;
+  //       },
+  //       {} as MapWordWithVotes | MapPhraseWithVotes,
+  //     );
+  //     return res as MapWordWithVotes | MapPhraseWithVotes;
+  //   },
+  //   [],
+  // );
 
-  const addValueToWordsOrPhrases = useCallback(
-    (wordOrPhrases: WordOrPhraseWithValueAndTranslations[] | undefined) => {
-      const res: WordOrPhraseWithValueAndTranslations[] = [];
-      wordOrPhrases?.forEach((wordOrPhrase) => {
-        let mainValue = '';
-        let id = '';
-        if (wordOrPhrase.__typename === 'MapWordTranslations') {
-          mainValue = wordOrPhrase.word;
-          id = wordOrPhrase.word_id;
-        } else if (wordOrPhrase.__typename === 'MapPhraseTranslations') {
-          mainValue = wordOrPhrase.phrase;
-          id = wordOrPhrase.phrase_id;
-        }
+  // const addValueToWordsOrPhrases = useCallback(
+  //   (wordOrPhrases: WordOrPhraseWithValueAndTranslations[] | undefined) => {
+  //     const res: WordOrPhraseWithValueAndTranslations[] = [];
+  //     wordOrPhrases?.forEach((wordOrPhrase) => {
+  //       let mainValue = '';
+  //       let id = '';
+  //       if (wordOrPhrase.__typename === 'MapWordTranslations') {
+  //         mainValue = wordOrPhrase.word;
+  //         id = wordOrPhrase.word_id;
+  //       } else if (wordOrPhrase.__typename === 'MapPhraseTranslations') {
+  //         mainValue = wordOrPhrase.phrase;
+  //         id = wordOrPhrase.phrase_id;
+  //       }
 
-        if (wordOrPhrase?.translations) {
-          wordOrPhrase?.translations.forEach((tr, i) => {
-            if (tr.__typename === 'MapWordWithVotes') {
-              wordOrPhrase.translations[i] = {
-                ...tr,
-                value: tr.word || '',
-                id: tr.word_id,
-                is_word_type: true,
-              };
-            } else if (tr.__typename === 'MapPhraseWithVotes') {
-              wordOrPhrase.translations[i] = {
-                ...tr,
-                value: tr.phrase || '',
-                id: tr.phrase_id,
-                is_word_type: false,
-              };
-            }
-          });
-        }
-        res.push({ ...wordOrPhrase, value: mainValue, id });
-      });
+  //       if (wordOrPhrase?.translations) {
+  //         wordOrPhrase?.translations.forEach((tr, i) => {
+  //           if (tr.__typename === 'MapWordWithVotes') {
+  //             wordOrPhrase.translations[i] = {
+  //               ...tr,
+  //               value: tr.word || '',
+  //               id: tr.word_id,
+  //               is_word_type: true,
+  //             };
+  //           } else if (tr.__typename === 'MapPhraseWithVotes') {
+  //             wordOrPhrase.translations[i] = {
+  //               ...tr,
+  //               value: tr.phrase || '',
+  //               id: tr.phrase_id,
+  //               is_word_type: false,
+  //             };
+  //           }
+  //         });
+  //       }
+  //       res.push({ ...wordOrPhrase, value: mainValue, id });
+  //     });
 
-      return res;
-    },
-    [],
-  );
+  //     return res;
+  //   },
+  //   [],
+  // );
 
   const makeMapThumbnail = async (
     content: string,
@@ -162,8 +156,8 @@ export function useMapTranslationTools() {
   };
 
   return {
-    chooseBestTranslation,
-    addValueToWordsOrPhrases,
+    // chooseBestTranslation,
+    // addValueToWordsOrPhrases,
     makeMapThumbnail,
   };
 }
