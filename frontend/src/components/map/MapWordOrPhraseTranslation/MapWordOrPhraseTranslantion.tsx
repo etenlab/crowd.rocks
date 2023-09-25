@@ -231,28 +231,33 @@ export const MapWordOrPhraseTranslation: React.FC<
       let id: string = '';
       let to_type: 'phrase' | 'word' = 'word';
       let definition_id: string = '';
+      let definition: string = '';
       if (translation?.__typename === 'PhraseToPhraseTranslationWithVote') {
         value = translation.to_phrase_definition.phrase.phrase;
         id = translation.phrase_to_phrase_translation_id;
         to_type = 'phrase';
         definition_id = translation.to_phrase_definition.phrase_definition_id;
+        definition = translation.to_phrase_definition.definition;
       }
       if (translation?.__typename === 'PhraseToWordTranslationWithVote') {
         value = translation.to_word_definition.word.word;
         id = translation.phrase_to_word_translation_id;
         to_type = 'word';
         definition_id = translation.to_word_definition.word_definition_id;
+        definition = translation.to_word_definition.definition;
       }
       if (translation?.__typename === 'WordToPhraseTranslationWithVote') {
         value = translation.to_phrase_definition.phrase.phrase;
         id = translation.word_to_phrase_translation_id;
         to_type = 'phrase';
+        definition = translation.to_phrase_definition.definition;
         definition_id = translation.to_phrase_definition.phrase_definition_id;
       }
       if (translation?.__typename === 'WordToWordTranslationWithVote') {
         value = translation.to_word_definition.word.word;
         id = translation.word_to_word_translation_id;
         to_type = 'word';
+        definition = translation.to_word_definition.definition;
         definition_id = translation.to_word_definition.word_definition_id;
       }
       return {
@@ -260,6 +265,7 @@ export const MapWordOrPhraseTranslation: React.FC<
         id,
         to_type,
         definition_id,
+        definition,
       };
     }
   }, []);
@@ -307,7 +313,7 @@ export const MapWordOrPhraseTranslation: React.FC<
                 <StTranslationDiv key={i}>
                   <WordOrPhraseCard
                     value={getTr(translation).value}
-                    definition={getOrig(wordOrPhraseQ).definition}
+                    definition={getTr(translation).definition}
                     discussion={{
                       onChatClick: () =>
                         router.push(
