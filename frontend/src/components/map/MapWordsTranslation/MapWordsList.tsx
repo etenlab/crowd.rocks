@@ -35,7 +35,6 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
     actions: { setTargetLanguage },
   } = useAppContext();
 
-  // const [selectedId, setSelectedId] = useState<string>();
   const [getWordAndPhrases, { data: wordsAndPhrases, fetchMore }] =
     useGetOrigMapWordsAndPhrasesLazyQuery({});
 

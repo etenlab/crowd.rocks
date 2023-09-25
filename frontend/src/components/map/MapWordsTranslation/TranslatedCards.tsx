@@ -2,13 +2,13 @@ import {
   MapWordOrPhrase,
   useGetRecommendedTranslationFromDefinitionIdQuery,
 } from '../../../generated/graphql';
-// import { useMapTranslationTools } from '../../map/hooks/useMapTranslationTools';
 import { WordOrPhraseCard } from '../WordOrPhraseCard';
 import { styled } from 'styled-components';
 import { TableNameType } from '../../../generated/graphql';
 
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { useEffect } from 'react';
 
 export type TWordTranslationCardProps = {
   wordOrPhrase: MapWordOrPhrase;
@@ -21,14 +21,14 @@ export const TranslatedCards = ({
   routerLink,
   onClick,
 }: TWordTranslationCardProps) => {
-  // const { chooseBestTranslation } = useMapTranslationTools();
-  // const wordBestTranslation = chooseBestTranslation(wordOrPhrase.);
   const {
     states: {
       global: {
         langauges: { targetLang },
+        maps: { updatedTrDefinitionIds },
       },
     },
+    actions: { setUpdatedTrDefinitionIds },
   } = useAppContext();
 
   const translation = useGetRecommendedTranslationFromDefinitionIdQuery({
@@ -40,6 +40,33 @@ export const TranslatedCards = ({
       geo_code: targetLang?.region?.tag,
     },
   });
+
+  useEffect(() => {
+    const updatedIdx = updatedTrDefinitionIds.findIndex(
+      (d) => d === wordOrPhrase.o_definition_id,
+    );
+    if (updatedIdx >= 0) {
+      translation.refetch({
+        from_definition_id: wordOrPhrase.o_definition_id,
+        from_type_is_word: wordOrPhrase.type === 'word',
+        language_code: targetLang?.lang.tag || '',
+        dialect_code: targetLang?.dialect?.tag,
+        geo_code: targetLang?.region?.tag,
+      });
+      setUpdatedTrDefinitionIds(
+        updatedTrDefinitionIds.slice(updatedIdx, updatedIdx),
+      );
+    }
+  }, [
+    setUpdatedTrDefinitionIds,
+    targetLang?.dialect?.tag,
+    targetLang?.lang.tag,
+    targetLang?.region?.tag,
+    translation,
+    updatedTrDefinitionIds,
+    wordOrPhrase.o_definition_id,
+    wordOrPhrase.type,
+  ]);
 
   const translationType =
     translation.data?.getRecommendedTranslationFromDefinitionID

@@ -41,8 +41,10 @@ export const MapWordOrPhraseTranslation: React.FC<
     states: {
       global: {
         langauges: { targetLang },
+        maps: { updatedTrDefinitionIds },
       },
     },
+    actions: { setUpdatedTrDefinitionIds },
   } = useAppContext();
   const [present] = useIonToast();
   const router = useIonRouter();
@@ -72,7 +74,6 @@ export const MapWordOrPhraseTranslation: React.FC<
       refetchQueries: ['GetTranslationsByFromDefinitionId'],
     });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [toggleTrVoteStatus, { data: voteData, loading: voteLoading }] =
     useToggleTranslationVoteStatusMutation({
       refetchQueries: ['GetTranslationsByFromDefinitionId'],
@@ -152,6 +153,7 @@ export const MapWordOrPhraseTranslation: React.FC<
         is_type_word: typeOfString(word_or_phrase) === StringContentTypes.WORD,
       },
     });
+    setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]);
 
     if (newTrRef.current?.value) {
       newTrRef.current.value = '';
@@ -161,21 +163,30 @@ export const MapWordOrPhraseTranslation: React.FC<
     }
   };
 
-  const handleVoteClick = (
-    translation_id: string,
-    from_definition_type_is_word: boolean,
-    to_definition_type_is_word: boolean,
-    vote: boolean,
-  ): void => {
-    toggleTrVoteStatus({
-      variables: {
-        from_definition_type_is_word,
-        to_definition_type_is_word,
-        translation_id,
-        vote,
-      },
-    });
-  };
+  const handleVoteClick = useCallback(
+    (
+      translation_id: string,
+      from_definition_type_is_word: boolean,
+      to_definition_type_is_word: boolean,
+      vote: boolean,
+    ): void => {
+      toggleTrVoteStatus({
+        variables: {
+          from_definition_type_is_word,
+          to_definition_type_is_word,
+          translation_id,
+          vote,
+        },
+      });
+      setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]);
+    },
+    [
+      definition_id,
+      setUpdatedTrDefinitionIds,
+      toggleTrVoteStatus,
+      updatedTrDefinitionIds,
+    ],
+  );
 
   const getOrig = useCallback(
     (
