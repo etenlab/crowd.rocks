@@ -293,6 +293,11 @@ input GetMapContentInput {
   map_id: ID!
 }
 
+input GetMapWordOrPhraseByDefinitionIdInput {
+  definition_id: ID!
+  is_word_definition: Boolean!
+}
+
 input GetOrigMapListInput {
   search: String
 }
@@ -424,6 +429,13 @@ type MapWordOrPhrase {
   o_language_code: String!
   o_like_string: String!
   type: String!
+}
+
+union MapWordOrPhraseAsOrig = PhraseWithDefinition | WordWithDefinition
+
+type MapWordOrPhraseAsOrigOutput {
+  error: ErrorType!
+  wordOrPhrase: MapWordOrPhraseAsOrig
 }
 
 type MapWordsAndPhrasesConnection {
@@ -717,6 +729,16 @@ input PhraseVoteUpsertInput {
   vote: Boolean!
 }
 
+type PhraseWithDefinition {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  phrase: String!
+  phrase_id: ID!
+}
+
 type PhraseWithDefinitions {
   definitions: [PhraseDefinition]!
   dialect_code: String
@@ -814,6 +836,7 @@ type Query {
   getDocument(input: GetDocumentInput!): GetDocumentOutput!
   getFlagsFromRef(parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   getMapDetails(input: GetMapContentInput!): MapFileOutput!
+  getMapWordOrPhraseAsOrigByDefinitionId(input: GetMapWordOrPhraseByDefinitionIdInput!): MapWordOrPhraseAsOrigOutput!
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!
@@ -1407,6 +1430,16 @@ type WordVoteStatusOutputRow {
 
 input WordVoteUpsertInput {
   vote: Boolean!
+  word_id: ID!
+}
+
+type WordWithDefinition {
+  definition: String
+  definition_id: String
+  dialect_code: String
+  geo_code: String
+  language_code: String!
+  word: String!
   word_id: ID!
 }
 

@@ -1,4 +1,4 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
 import { pgClientOrPool } from 'src/common/utility';
@@ -34,7 +34,10 @@ import {
   PhraseUpsertsProcedureOutput,
   GetPhraseListByLang,
   getPhraseListByLang,
+  GetPhraseObjectByDefinitionId,
+  getPhraseByDefinitionIdSql,
 } from './sql-string';
+import { PhraseWithDefinition, WordWithDefinition } from '../maps/types';
 
 @Injectable()
 export class PhrasesService {
@@ -663,6 +666,41 @@ export class PhrasesService {
         endCursor: null,
       },
     };
+  }
+
+  async getPhraseByDefinitionId(
+    definitionId: string,
+    pgClient: PoolClient | null,
+  ): Promise<PhraseWithDefinition | null> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetPhraseObjectByDefinitionId>(
+        ...getPhraseByDefinitionIdSql(+definitionId),
+      );
+
+      if (!res.rows[0].phrase_id) {
+        Logger.error(
+          `PhrasesService#getWordByDefinitionId: phrase with definition id ${definitionId} not found`,
+        );
+        return null;
+      }
+
+      const phrase: PhraseWithDefinition = {
+        phrase_id: res.rows[0].phrase_id,
+        phrase: res.rows[0].phrase,
+        language_code: res.rows[0].language_code,
+        dialect_code: res.rows[0].dialect_code,
+        geo_code: res.rows[0].geo_code,
+        definition: res.rows[0].definition,
+        definition_id: res.rows[0].definition_id,
+      };
+      return phrase;
+    } catch (error) {
+      Logger.error(error);
+      return null;
+    }
   }
 
   getDiscussionTitle = async (id: string): Promise<string> => {

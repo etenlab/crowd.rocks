@@ -13,12 +13,14 @@ import {
   MapFileOutputEdge,
   GetOrigMapWordsAndPhrasesInput,
   MapWordsAndPhrasesConnection,
+  MapWordOrPhraseAsOrigOutput,
+  GetMapWordOrPhraseByDefinitionIdInput,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
 import { WordsService } from '../words/words.service';
 import { MapsRepository } from './maps.repository';
-import { WordUpsertInput } from '../words/types';
+import { WordOutput, WordUpsertInput } from '../words/types';
 import { ErrorType, LanguageInfo } from '../../common/types';
 import { DEFAULT_NEW_MAP_LANGUAGE } from '../../common/const';
 import { PostgresService } from '../../core/postgres.service';
@@ -27,7 +29,7 @@ import { PoolClient } from 'pg';
 import { WordToWordTranslationsService } from '../translations/word-to-word-translations.service';
 import { subTags2Tag, tag2langInfo } from '../../common/langUtils';
 import { LanguageInput } from 'src/components/common/types';
-import { PhraseUpsertInput } from '../phrases/types';
+import { PhraseOutput, PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
 import { putLangCodesToFileName } from '../../common/utility';
@@ -485,6 +487,41 @@ export class MapsService {
       Logger.error(`mapsService#getOrigMapWordsAndPhrases: ${e}`);
     } finally {
       dbPoolClient.release();
+    }
+  }
+
+  async getMapWordOrPhraseUnionByDefinitionId({
+    definition_id,
+    is_word_definition,
+  }: GetMapWordOrPhraseByDefinitionIdInput): Promise<MapWordOrPhraseAsOrigOutput> {
+    if (is_word_definition) {
+      const word = await this.wordsService.getWordByDefinitionId(
+        definition_id,
+        null,
+      );
+      if (!word)
+        return {
+          error: ErrorType.WordNotFound,
+          wordOrPhrase: null,
+        };
+      return {
+        error: ErrorType.NoError,
+        wordOrPhrase: word,
+      };
+    } else {
+      const phrase = await this.phrasesService.getPhraseByDefinitionId(
+        definition_id,
+        null,
+      );
+      if (!phrase)
+        return {
+          error: ErrorType.PhraseNotFound,
+          wordOrPhrase: null,
+        };
+      return {
+        error: ErrorType.NoError,
+        wordOrPhrase: phrase,
+      };
     }
   }
 

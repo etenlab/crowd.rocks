@@ -118,28 +118,57 @@ const MapWordOrPhraseAsTranslation = createUnionType({
   name: 'MapWordOrPhraseAsTranslation',
   types: () => [MapPhraseAsTranslation, MapWordAsTranslation],
   resolveType(value) {
-    if (value.phrase_id) {
-      return MapPhraseAsTranslation;
+    if (value.word_id) {
+      return MapWordAsTranslation;
     }
-    return MapWordAsTranslation;
+    return MapPhraseAsTranslation;
   },
 });
 
+const MapWordOrPhraseAsOrig = createUnionType({
+  name: 'MapWordOrPhraseAsOrig',
+  types: () => [WordWithDefinition, PhraseWithDefinition],
+  resolveType(value) {
+    if (value.word_id) {
+      return WordWithDefinition;
+    }
+    return PhraseWithDefinition;
+  },
+});
+
+@ObjectType()
+export class MapWordOrPhraseAsOrigOutput extends GenericOutput {
+  @Field(() => MapWordOrPhraseAsOrig, { nullable: true })
+  wordOrPhrase: WordWithDefinition | PhraseWithDefinition | null;
+}
+
+@InputType()
+export class GetMapWordOrPhraseByDefinitionIdInput {
+  @Field(() => ID) definition_id: string;
+  @Field(() => Boolean) is_word_definition: boolean;
+}
+
 // phrase types
 @ObjectType()
-export class MapPhraseWithDefinition extends Phrase {
+export class PhraseWithDefinition extends Phrase {
   @Field(() => String, { nullable: true }) definition: string;
   @Field(() => String, { nullable: true }) definition_id: string;
 }
 
 @ObjectType()
-export class MapPhraseAsTranslation extends MapPhraseWithDefinition {
+export class MapPhraseWithDefinitionOutput extends GenericOutput {
+  @Field(() => WordWithDefinition, { nullable: true })
+  phrase: MapPhraseWithDefinitionOutput | null;
+}
+
+@ObjectType()
+export class MapPhraseAsTranslation extends PhraseWithDefinition {
   @Field(() => String) up_votes: string;
   @Field(() => String) down_votes: string;
   @Field(() => String) translation_id: string;
 }
 @ObjectType()
-export class MapPhraseWithTranslations extends MapPhraseWithDefinition {
+export class MapPhraseWithTranslations extends PhraseWithDefinition {
   @Field(() => [MapWordOrPhraseAsTranslation], { nullable: true })
   translations?: Array<MapPhraseAsTranslation | MapWordAsTranslation>;
 }
@@ -147,20 +176,25 @@ export class MapPhraseWithTranslations extends MapPhraseWithDefinition {
 // word types
 
 @ObjectType()
-export class MapWordWithDefinition extends Word {
+export class WordWithDefinition extends Word {
   @Field(() => String, { nullable: true }) definition: string;
   @Field(() => String, { nullable: true }) definition_id: string;
 }
+// @ObjectType()
+// export class MapWordWithDefinitionOutput extends GenericOutput {
+//   @Field(() => MapWordWithDefinition, { nullable: true })
+//   word: MapWordWithDefinitionOutput | null;
+// }
 
 @ObjectType()
-export class MapWordAsTranslation extends MapWordWithDefinition {
+export class MapWordAsTranslation extends WordWithDefinition {
   @Field(() => String) up_votes: string;
   @Field(() => String) down_votes: string;
   @Field(() => String) translation_id: string;
 }
 
 @ObjectType()
-export class MapWordWithTranslations extends MapWordWithDefinition {
+export class MapWordWithTranslations extends WordWithDefinition {
   @Field(() => [MapWordOrPhraseAsTranslation], { nullable: true })
   translations?: Array<MapPhraseAsTranslation | MapWordAsTranslation>;
 }

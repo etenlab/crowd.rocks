@@ -28,6 +28,8 @@ import {
   GetMapContentInput as GetMapDetailsInput,
   GetOrigMapWordsAndPhrasesInput,
   MapWordsAndPhrasesConnection,
+  MapWordOrPhraseAsOrigOutput,
+  GetMapWordOrPhraseByDefinitionIdInput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
@@ -247,6 +249,13 @@ export class MapsResolver {
     after?: string | null,
   ): Promise<MapWordsAndPhrasesConnection | undefined> {
     return this.mapService.getOrigMapWordsAndPhrases({ input, first, after });
+  }
+
+  @Query(() => MapWordOrPhraseAsOrigOutput)
+  async getMapWordOrPhraseAsOrigByDefinitionId(
+    @Args('input') input: GetMapWordOrPhraseByDefinitionIdInput,
+  ): Promise<MapWordOrPhraseAsOrigOutput | undefined> {
+    return this.mapService.getMapWordOrPhraseUnionByDefinitionId(input);
   }
 
   //// todo: refactor to paginated and delete

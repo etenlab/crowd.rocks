@@ -1,29 +1,3 @@
-# fragment MapPhraseAsTranslationFragment on MapPhraseAsTranslation {
-#   phrase
-#   phrase_id
-#   language_code
-#   dialect_code
-#   geo_code
-#   definition
-#   definition_id
-#   up_votes
-#   down_votes
-#   translation_id
-# }
-
-# fragment MapWordAsTranslationFragment on MapWordAsTranslation {
-#   word
-#   word_id
-#   language_code
-#   dialect_code
-#   geo_code
-#   definition
-#   definition_id
-#   up_votes
-#   down_votes
-#   translation_id
-# }
-
 fragment MapFileOutputFragment on MapFileOutput {
   error
   mapFileInfo {
@@ -72,6 +46,26 @@ fragment MapWordsAndPhrasesEdgeFragment on MapWordsAndPhrasesEdge {
   }
 }
 
+fragment WordWithDefinitionFragment on WordWithDefinition {
+  word_id
+  word
+  language_code
+  dialect_code
+  geo_code
+  definition
+  definition_id
+}
+
+fragment PhraseWithDefinitionFragment on PhraseWithDefinition {
+  phrase_id
+  phrase
+  language_code
+  dialect_code
+  geo_code
+  definition
+  definition_id
+}
+
 query GetOrigMapWordsAndPhrases(
   $lang: LanguageInput!
   $after: ID
@@ -94,69 +88,23 @@ query GetOrigMapWordsAndPhrases(
   }
 }
 
-# query GetOrigMapWords(
-#   $original_map_id: ID
-#   $o_language_code: String
-#   $t_language_code: String
-#   $t_dialect_code: String
-#   $t_geo_code: String
-# ) {
-#   getOrigMapWords(
-#     input: {
-#       original_map_id: $original_map_id
-#       o_language_code: $o_language_code
-#       t_language_code: $t_language_code
-#       t_dialect_code: $t_dialect_code
-#       t_geo_code: $t_geo_code
-#     }
-#   ) {
-#     origMapWords {
-#       word
-#       word_id
-#       language_code
-#       dialect_code
-#       geo_code
-#       definition
-#       definition_id
-#       translations {
-#         ...MapPhraseAsTranslationFragment
-#         ...MapWordAsTranslationFragment
-#       }
-#     }
-#   }
-# }
-
-# query GetOrigMapPhrases(
-#   $original_map_id: ID
-#   $o_language_code: String
-#   $t_language_code: String
-#   $t_dialect_code: String
-#   $t_geo_code: String
-# ) {
-#   getOrigMapPhrases(
-#     input: {
-#       original_map_id: $original_map_id
-#       o_language_code: $o_language_code
-#       t_language_code: $t_language_code
-#       t_dialect_code: $t_dialect_code
-#       t_geo_code: $t_geo_code
-#     }
-#   ) {
-#     origMapPhrases {
-#       phrase
-#       phrase_id
-#       language_code
-#       dialect_code
-#       geo_code
-#       definition
-#       definition_id
-#       translations {
-#         ...MapPhraseAsTranslationFragment
-#         ...MapWordAsTranslationFragment
-#       }
-#     }
-#   }
-# }
+query GetMapWordOrPhraseAsOrigByDefinitionId(
+  $definition_id: ID!
+  $is_word_definition: Boolean!
+) {
+  getMapWordOrPhraseAsOrigByDefinitionId(
+    input: {
+      definition_id: $definition_id
+      is_word_definition: $is_word_definition
+    }
+  ) {
+    error
+    wordOrPhrase {
+      ...WordWithDefinitionFragment
+      ...PhraseWithDefinitionFragment
+    }
+  }
+}
 
 query GetAllMapsList($lang: LanguageInput, $after: ID, $first: Int) {
   getAllMapsList(input: { lang: $lang }, after: $after, first: $first) {

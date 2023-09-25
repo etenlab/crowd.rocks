@@ -12,7 +12,11 @@ import {
   MapWordOrPhrase,
   useGetOrigMapWordsAndPhrasesLazyQuery,
 } from '../../../generated/graphql';
-import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
+import {
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
+  useIonRouter,
+} from '@ionic/react';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 
 interface MapWordsTranslationProps extends RouteComponentProps {}
@@ -20,7 +24,7 @@ export type TWordOrPhraseId = { word_id: string } | { phrase_id: string };
 
 export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
   const { tr } = useTr();
-  // const router = useIonRouter();
+  const router = useIonRouter();
 
   const {
     states: {
@@ -71,13 +75,15 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
     ],
   );
 
-  // const nation = router.routeInfo.pathname.split('/')[1];
-  // const language_id = router.routeInfo.pathname.split('/')[2];
+  const nation_id = router.routeInfo.pathname.split('/')[1];
+  const language_id = router.routeInfo.pathname.split('/')[2];
   const handleWordOrPhraseSelect = useCallback(
     (wordOrPhrase: MapWordOrPhrase) => {
-      console.log(wordOrPhrase.o_definition_id, wordOrPhrase.type);
+      router.push(
+        `/${nation_id}/${language_id}/1/maps/translate_word/${wordOrPhrase.o_definition_id}/${wordOrPhrase.type}`,
+      );
     },
-    [],
+    [language_id, nation_id, router],
   );
 
   return (
