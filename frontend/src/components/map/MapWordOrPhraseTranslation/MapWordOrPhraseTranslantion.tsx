@@ -303,57 +303,52 @@ export const MapWordOrPhraseTranslation: React.FC<
 
       <StTranslationsDiv>
         {translations &&
-          translations
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .toSorted((tr1, tr2) => {
-              return getTr(tr1).value.localeCompare(getTr(tr2).value);
-            })
-            .map((translation, i) => {
-              return (
-                <StTranslationDiv key={i}>
-                  <WordOrPhraseCard
-                    value={getTr(translation).value}
-                    definition={getTr(translation).definition}
-                    discussion={{
-                      onChatClick: () =>
-                        router.push(
-                          `/${nation_id}/${language_id}/1/discussion/${
-                            getOrig(wordOrPhraseQ).isWord ? 'words' : 'phrases'
-                          }/${getTr(translation).id}`,
-                        ),
-                    }}
-                    vote={{
-                      upVotes: Number(translation?.upvotes || 0),
-                      downVotes: Number(translation?.downvotes || 0),
-                      onVoteUpClick: () => {
-                        handleVoteClick(
-                          getTr(translation).id,
-                          getOrig(wordOrPhraseQ).isWord,
-                          getTr(translation).to_type === 'word',
-                          true,
-                        );
-                      },
-                      onVoteDownClick: () => {
-                        handleVoteClick(
-                          getTr(translation).id,
-                          getOrig(wordOrPhraseQ).isWord,
-                          getTr(translation).to_type === 'word',
-                          false,
-                        );
-                      },
-                    }}
-                    flags={{
-                      parent_table:
-                        getTr(translation).to_type === 'word'
-                          ? TableNameType.WordDefinitions
-                          : TableNameType.PhraseDefinitions,
-                      parent_id: getTr(translation).definition_id!,
-                      flag_names: WORD_AND_PHRASE_FLAGS,
-                    }}
-                  />
-                </StTranslationDiv>
-              );
-            })}
+          translations.map((translation, i) => {
+            return (
+              <StTranslationDiv key={i}>
+                <WordOrPhraseCard
+                  value={getTr(translation).value}
+                  definition={getTr(translation).definition}
+                  discussion={{
+                    onChatClick: () =>
+                      router.push(
+                        `/${nation_id}/${language_id}/1/discussion/${
+                          getOrig(wordOrPhraseQ).isWord ? 'words' : 'phrases'
+                        }/${getTr(translation).id}`,
+                      ),
+                  }}
+                  vote={{
+                    upVotes: Number(translation?.upvotes || 0),
+                    downVotes: Number(translation?.downvotes || 0),
+                    onVoteUpClick: () => {
+                      handleVoteClick(
+                        getTr(translation).id,
+                        getOrig(wordOrPhraseQ).isWord,
+                        getTr(translation).to_type === 'word',
+                        true,
+                      );
+                    },
+                    onVoteDownClick: () => {
+                      handleVoteClick(
+                        getTr(translation).id,
+                        getOrig(wordOrPhraseQ).isWord,
+                        getTr(translation).to_type === 'word',
+                        false,
+                      );
+                    },
+                  }}
+                  flags={{
+                    parent_table:
+                      getTr(translation).to_type === 'word'
+                        ? TableNameType.WordDefinitions
+                        : TableNameType.PhraseDefinitions,
+                    parent_id: getTr(translation).definition_id!,
+                    flag_names: WORD_AND_PHRASE_FLAGS,
+                  }}
+                />
+              </StTranslationDiv>
+            );
+          })}
       </StTranslationsDiv>
 
       <StNewTranslationDiv>
