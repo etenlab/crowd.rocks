@@ -84,9 +84,6 @@ export class GetMapContentInput {
 @InputType()
 export class GetOrigMapWordsAndPhrasesInput {
   @Field(() => LanguageInput) lang: LanguageInput;
-  // @Field(() => String, { nullable: true }) o_language_code?: string;
-  // @Field(() => String, { nullable: true }) o_dialect_code?: string;
-  // @Field(() => String, { nullable: true }) o_geo_code?: string;
 }
 
 @ObjectType()
@@ -156,12 +153,6 @@ export class PhraseWithDefinition extends Phrase {
 }
 
 @ObjectType()
-export class MapPhraseWithDefinitionOutput extends GenericOutput {
-  @Field(() => WordWithDefinition, { nullable: true })
-  phrase: MapPhraseWithDefinitionOutput | null;
-}
-
-@ObjectType()
 export class MapPhraseAsTranslation extends PhraseWithDefinition {
   @Field(() => String) up_votes: string;
   @Field(() => String) down_votes: string;
@@ -180,11 +171,6 @@ export class WordWithDefinition extends Word {
   @Field(() => String, { nullable: true }) definition: string;
   @Field(() => String, { nullable: true }) definition_id: string;
 }
-// @ObjectType()
-// export class MapWordWithDefinitionOutput extends GenericOutput {
-//   @Field(() => MapWordWithDefinition, { nullable: true })
-//   word: MapWordWithDefinitionOutput | null;
-// }
 
 @ObjectType()
 export class MapWordAsTranslation extends WordWithDefinition {

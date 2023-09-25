@@ -20,7 +20,7 @@ import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
 import { WordsService } from '../words/words.service';
 import { MapsRepository } from './maps.repository';
-import { WordOutput, WordUpsertInput } from '../words/types';
+import { WordUpsertInput } from '../words/types';
 import { ErrorType, LanguageInfo } from '../../common/types';
 import { DEFAULT_NEW_MAP_LANGUAGE } from '../../common/const';
 import { PostgresService } from '../../core/postgres.service';
@@ -29,7 +29,7 @@ import { PoolClient } from 'pg';
 import { WordToWordTranslationsService } from '../translations/word-to-word-translations.service';
 import { subTags2Tag, tag2langInfo } from '../../common/langUtils';
 import { LanguageInput } from 'src/components/common/types';
-import { PhraseOutput, PhraseUpsertInput } from '../phrases/types';
+import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
 import { putLangCodesToFileName } from '../../common/utility';
@@ -37,7 +37,6 @@ import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
 import { Readable } from 'stream';
 
-// const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
