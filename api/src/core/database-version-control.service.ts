@@ -176,7 +176,7 @@ export class DatabaseVersionControlService {
     await this.registerUser(
       'admin@crowd.rocks',
       'Admin',
-      this.config.CR_ADMIN_PASSWORD || 'asdfasdf',
+      this.config.ADMIN_PASSWORD || 'asdfasdf',
     );
     await this.registerUser('anonymous@crowd.rocks', 'Anonymous', 'asdfasdf');
 
@@ -319,8 +319,13 @@ export class DatabaseVersionControlService {
   }
 
   async runSqlFile(path: string): Promise<void> {
-    console.log('loading SQL:', path);
-    const data = readFileSync(path, 'utf8');
-    await this.pg.pool.query(data, []);
+    try {
+      console.log('loading SQL:', path);
+      const data = readFileSync(path, 'utf8');
+
+      await this.pg.pool.query(data, []);
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
