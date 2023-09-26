@@ -1,11 +1,11 @@
-create table question_items {
+create table question_items (
   question_item_id bigserial primary key,
   item text not null,
   created_at timestamp not null default CURRENT_TIMESTAMP,
   unique (item)
-}
+);
 
-create table questions {
+create table questions (
   question_id bigserial primary key,
   parent_table varchar(64) not null,
   parent_id bigint not null,
@@ -15,9 +15,9 @@ create table questions {
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
   unique (parent_table, parent_id, question_type_is_multiselect, question)
-}
+);
 
-create table answers {
+create table answers (
   answer_id bigserial primary key,
   question_id bigint not null references questions(question_id),
   answer text,
@@ -25,4 +25,4 @@ create table answers {
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
   unique (question_id, answer, created_by)
-}
+);

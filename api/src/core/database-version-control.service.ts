@@ -36,12 +36,10 @@ export class DatabaseVersionControlService {
       case 1:
         console.log('Updating database to version 2');
         await this.loadVersion2();
-        break;
       // note that there is no break needed in the switch's cases
       case 2:
         console.log('Updating database to version 3');
         await this.loadVersion3();
-        break;
       default:
         console.error('Database version is current');
     }
@@ -301,6 +299,14 @@ export class DatabaseVersionControlService {
     await this.runSqlFile('./src/core/sql/words/wordlike_string_upsert.sql');
     await this.runSqlFile(
       './src/core/sql/words/batch_wordlike_string_upsert.sql',
+    );
+
+    // document
+    await this.runSqlFile(
+      './src/core/sql/document/document_word_entry_upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/document/batch_document_word_entry_upsert.sql',
     );
 
     await this.setVersionNumber(3);

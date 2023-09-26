@@ -1,4 +1,4 @@
-create or replace procedure word_upsert(
+create or replace procedure wordlike_string_upsert(
   in p_wordlike_string varchar(64),
   in p_token varchar(512),
   inout p_wordlike_string_id bigint,
