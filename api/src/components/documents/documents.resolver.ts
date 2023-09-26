@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+
 import { ErrorType } from '../../common/types';
 import { getBearer } from '../../common/utility';
+
 import { AuthenticationService } from '../authentication/authentication.service';
+import { DocumentWordEntriesService } from './document-word-entries.service';
 import { DocumentsService } from './documents.service';
 import {
   DocumentUploadInput,
   DocumentUploadOutput,
+  DocumentWordEntriesOutput,
   GetAllDocumentsInput,
   GetAllDocumentsOutput,
   GetDocumentInput,
@@ -14,11 +18,12 @@ import {
 } from './types';
 
 @Injectable()
-  @Resolver()
+@Resolver()
 export class DocumentsResolver {
   constructor(
     private authenticationService: AuthenticationService,
     private documentsSevice: DocumentsService,
+    private documentWordEntriesService: DocumentWordEntriesService,
   ) {}
 
   @Mutation(() => DocumentUploadOutput)
@@ -32,15 +37,11 @@ export class DocumentsResolver {
         document_id: null,
       };
     }
-    const document_id = await this.documentsSevice.saveDocument({
+
+    return this.documentsSevice.saveDocument({
       document: input.document,
       token: getBearer(req) || '',
     });
-
-    return {
-      error: ErrorType.NoError,
-      document_id,
-    };
   }
 
   @Query(() => GetAllDocumentsOutput)
@@ -57,5 +58,15 @@ export class DocumentsResolver {
   ): Promise<GetDocumentOutput> {
     const res = await this.documentsSevice.getDocument(input.document_id);
     return res;
+  }
+
+  @Query(() => DocumentWordEntriesOutput)
+  async getDocumentWordEntriesByDocumentId(
+    @Args('document_id') document_id: string,
+  ): Promise<DocumentWordEntriesOutput> {
+    return this.documentWordEntriesService.getDocumentWordEntriesByDocumentId(
+      +document_id,
+      null,
+    );
   }
 }

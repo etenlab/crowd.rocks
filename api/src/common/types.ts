@@ -106,6 +106,9 @@ export enum ErrorType {
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
   ProvidedIdIsMalformed = 'ProvidedIdIsMalformed',
+
+  DocumentEntryReadError = 'DocumentEntryReadError',
+  DocumentWordEntryInsertFailed = 'DocumentWordEntryInsertFailed',
 }
 
 registerEnumType(ErrorType, {
