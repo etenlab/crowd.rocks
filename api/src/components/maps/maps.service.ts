@@ -427,15 +427,14 @@ export class MapsService {
     const foundWords: string[] = [];
     const foundPhrases: string[] = [];
     foundTexts.forEach((text) => {
-      const words = text
-        .split(' ')
-        .map((w) => w.trim())
-        .filter((w) => w.length > 1);
+      const words = text.split(' ').map((w) => w.trim());
       if (words.length === 0) return;
       if (words.length > 1) {
-        foundPhrases.push(text);
-      } else {
-        foundWords.push(text);
+        // join trimmed words using single space, thus remove multiple spaces
+        foundPhrases.push(words.join(' '));
+      } else if (words[0].length > 1 && isNaN(Number(words[0]))) {
+        // push only words longer than 1 symbol and only not numbers
+        foundWords.push(words[0]);
       }
     });
     return {

@@ -90,7 +90,9 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   ]);
 
   const handleImageLoad = () => {
-    setImageLoaded(true);
+    setTimeout(() => {
+      setImageLoaded(true);
+    }, 100);
   };
 
   const handleImageError = () => {
