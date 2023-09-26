@@ -36,7 +36,12 @@ export class DatabaseVersionControlService {
       case 1:
         console.log('Updating database to version 2');
         await this.loadVersion2();
+        break;
       // note that there is no break needed in the switch's cases
+      case 2:
+        console.log('Updating database to version 3');
+        await this.loadVersion3();
+        break;
       default:
         console.error('Database version is current');
     }
@@ -286,6 +291,19 @@ export class DatabaseVersionControlService {
     await this.runSqlFile('./src/core/sql/map/original_map_create-v2.sql');
 
     await this.setVersionNumber(2);
+  }
+
+  async loadVersion3(): Promise<void> {
+    // schema
+    await this.runSqlFile('./src/core/sql/schema/v3.schema.sql');
+
+    // words
+    await this.runSqlFile('./src/core/sql/words/wordlike_string_upsert.sql');
+    await this.runSqlFile(
+      './src/core/sql/words/batch_wordlike_string_upsert.sql',
+    );
+
+    await this.setVersionNumber(3);
   }
 
   async registerUser(
