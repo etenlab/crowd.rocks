@@ -20,7 +20,6 @@ import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 import { RouteComponentProps } from 'react-router';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { QueryResult } from '@apollo/client';
-
 interface MapWordOrPhraseTranslationProps
   extends RouteComponentProps<{
     definition_id: string;

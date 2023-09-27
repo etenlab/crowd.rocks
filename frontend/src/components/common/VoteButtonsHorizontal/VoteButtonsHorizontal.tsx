@@ -8,7 +8,7 @@ export type VoteButtonsHerizontalProps = {
   downVotes: number;
 };
 
-export function VoteButtonsHerizontal({
+export function VoteButtonsHorizontal({
   onVoteUpClick,
   onVoteDownClick,
   upVotes,
