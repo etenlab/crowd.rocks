@@ -1231,6 +1231,8 @@ export class TranslationsService {
     };
   }
 
+  // for now, just returns an UnknownError result
+  // until it's finished.
   async translateMissingWordsAndPhrasesByGoogle(
     from_language: LanguageInput,
     to_language: LanguageInput,
