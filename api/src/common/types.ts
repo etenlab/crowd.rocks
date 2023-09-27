@@ -97,6 +97,7 @@ export enum ErrorType {
   MapInsertFailed = 'MapInsertFailed',
   MapDeletionError = 'MapDeletionError',
   MapNotFound = 'MapNotFound',
+  MapVoteNotFound = 'MapVoteNotFound',
 
   DocumentIdNotProvided = 'DocumentIdNotProvided',
   DocumentNotFound = 'DocumentNotFound',

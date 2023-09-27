@@ -1,4 +1,4 @@
-fragment MapFileOutputFragment on MapFileOutput {
+fragment MapDetailsOutputFragment on MapDetailsOutput {
   error
   mapFileInfo {
     is_original
@@ -20,10 +20,10 @@ fragment MapFileOutputFragment on MapFileOutput {
   }
 }
 
-fragment MapFileOutputEdgeFragment on MapFileOutputEdge {
+fragment MapDetailsOutputEdgeFragment on MapDetailsOutputEdge {
   cursor
   node {
-    ...MapFileOutputFragment
+    ...MapDetailsOutputFragment
   }
 }
 
@@ -109,7 +109,7 @@ query GetMapWordOrPhraseAsOrigByDefinitionId(
 query GetAllMapsList($lang: LanguageInput, $after: ID, $first: Int) {
   getAllMapsList(input: { lang: $lang }, after: $after, first: $first) {
     edges {
-      ...MapFileOutputEdgeFragment
+      ...MapDetailsOutputEdgeFragment
     }
     pageInfo {
       ...PageInfoFragment
@@ -119,7 +119,7 @@ query GetAllMapsList($lang: LanguageInput, $after: ID, $first: Int) {
 
 query GetMapDetails($id: ID!, $is_original: Boolean!) {
   getMapDetails(input: { map_id: $id, is_original: $is_original }) {
-    ...MapFileOutputFragment
+    ...MapDetailsOutputFragment
   }
 }
 
@@ -143,7 +143,7 @@ mutation MapUpload(
   ) {
     error
     mapFileOutput {
-      ...MapFileOutputFragment
+      ...MapDetailsOutputFragment
     }
   }
 }

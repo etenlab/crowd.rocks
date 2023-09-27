@@ -27,7 +27,7 @@ import { OrigBadge } from '../MapList/styled';
 import { StChatIcon } from '../../common/styled';
 import { Flag } from '../../flags/Flag';
 import { MAPS_FLAGS } from '../../flags/flagGroups';
-// import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
+import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 
 interface MapDetailsProps
   extends RouteComponentProps<{
@@ -56,6 +56,11 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
     variables: { id, is_original: isOriginal },
     fetchPolicy: 'no-cache',
   });
+
+  // const currentMapVoteStatus = useGetMapDetailsQuery({
+  //   variables: { id, is_original: isOriginal },
+  //   fetchPolicy: 'no-cache',
+  // });
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const currMapContent = currentMapWithContent?.data?.getMapDetails;
@@ -143,7 +148,14 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
     />
   );
 
-  // const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
+  const voteButtonCom = (
+    <VoteButtonsHorizontal
+      downVotes={1}
+      upVotes={1}
+      onVoteUpClick={() => {}}
+      onVoteDownClick={() => {}}
+    />
+  );
 
   return (
     <>
@@ -160,8 +172,6 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
                 : ''}
             </IonBadge>
           )}
-          {chatButton}
-          {flagsCom}
           <IonIcon
             icon={downloadOutline}
             onClick={handleDownloadSvg}
@@ -171,7 +181,11 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
           />
         </>
       </Caption>
-
+      <StButtonsSection>
+        {chatButton}
+        {flagsCom}
+        {voteButtonCom}
+      </StButtonsSection>
       <StyledMapImg>
         {currMapContent?.mapFileInfo && (
           <>
@@ -203,4 +217,14 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
 const StyledMapImg = styled.div`
   margin-top: 10px;
   border: solid 1px gray;
+`;
+
+const StButtonsSection = styled.div`
+  & > * {
+    margin-right: 30px;
+  }
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: end;
 `;

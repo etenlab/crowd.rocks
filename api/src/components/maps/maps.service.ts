@@ -7,10 +7,10 @@ import {
   GetOrigMapsListOutput,
   GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
-  MapFileOutput,
+  MapDetailsOutput,
   MapPhraseWithTranslations,
   MapWordWithTranslations,
-  MapFileOutputEdge,
+  MapDetailsOutputEdge,
   GetOrigMapWordsAndPhrasesInput,
   MapWordsAndPhrasesConnection,
   MapWordOrPhraseAsOrigOutput,
@@ -118,7 +118,7 @@ export class MapsService {
     map_id,
     dbPoolClient,
     token,
-  }: IParseOrigMapParams): Promise<MapFileOutput> {
+  }: IParseOrigMapParams): Promise<MapDetailsOutput> {
     const origMapInfo = await this.mapsRepository.getOrigMapWithContentUrl(
       map_id,
     );
@@ -290,7 +290,7 @@ export class MapsService {
       let startCursor: string | null = null;
       let endCursor: string | null = null;
 
-      const mapFileOutputEdge: MapFileOutputEdge[] = [];
+      const mapFileOutputEdge: MapDetailsOutputEdge[] = [];
 
       const makeCursorStr = (id: string, is_original: boolean) => {
         return `${id}-${is_original ? 'true' : 'false'}`;
@@ -360,11 +360,11 @@ export class MapsService {
     };
   }
 
-  async getOrigMapWithContentUrl(id: string): Promise<MapFileOutput> {
+  async getOrigMapWithContentUrl(id: string): Promise<MapDetailsOutput> {
     return this.mapsRepository.getOrigMapWithContentUrl(id);
   }
 
-  async getTranslatedMapWithContentUrl(id: string): Promise<MapFileOutput> {
+  async getTranslatedMapWithContentUrl(id: string): Promise<MapDetailsOutput> {
     const mapFileInfo =
       await this.mapsRepository.getTranslatedMapWithContentUrl(id);
     return mapFileInfo;
