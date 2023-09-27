@@ -40,7 +40,6 @@ export class DatabaseVersionControlService {
       case 2:
         console.log('Updating database to version 3');
         await this.loadVersion3();
-      // note that there is no break needed in the switch's cases
       default:
         console.error('Database version is current');
     }
@@ -189,9 +188,6 @@ export class DatabaseVersionControlService {
   }
 
   async loadVersion2(): Promise<void> {
-    // authentication
-    await this.runSqlFile('./src/core/sql/authentication/register-v2.sql');
-
     // schema
     await this.runSqlFile('./src/core/sql/schema/v2.schema.sql');
 
@@ -291,7 +287,6 @@ export class DatabaseVersionControlService {
 
     // map
     await this.runSqlFile('./src/core/sql/map/original_map_create-v2.sql');
-    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v2.sql');
 
     await this.setVersionNumber(2);
   }
@@ -299,11 +294,15 @@ export class DatabaseVersionControlService {
     // schema
     await this.runSqlFile('./src/core/sql/schema/v3.schema.sql');
 
+    // authentication
+    await this.runSqlFile('./src/core/sql/authentication/register-v3.sql');
+
     // map
     await this.runSqlFile('./src/core/sql/map/original_map_vote_toggle.sql');
     await this.runSqlFile('./src/core/sql/map/translated_map_vote_toggle.sql');
     await this.runSqlFile('./src/core/sql/map/original_map_vote_upsert.sql');
     await this.runSqlFile('./src/core/sql/map/translated_map_vote_upsert.sql');
+    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v3.sql');
 
     // set version
     await this.setVersionNumber(3);
