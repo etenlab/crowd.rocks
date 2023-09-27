@@ -189,6 +189,9 @@ export class DatabaseVersionControlService {
   }
 
   async loadVersion2(): Promise<void> {
+    // authentication
+    await this.runSqlFile('./src/core/sql/authentication/register-v2.sql');
+
     // schema
     await this.runSqlFile('./src/core/sql/schema/v2.schema.sql');
 

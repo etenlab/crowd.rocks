@@ -6,6 +6,7 @@ import {
   RegisterInput,
   IsAdminIdInput,
   IsAdminIdOutput,
+  MAX_PASSWORD_LENGTH,
 } from './types';
 import { hash } from 'argon2';
 import { ErrorType } from 'src/common/types';
@@ -65,7 +66,7 @@ export class RegisterResolver {
         };
       }
 
-      if (input.password.length > 32) {
+      if (input.password.length > MAX_PASSWORD_LENGTH) {
         return {
           error: ErrorType.PasswordTooLong,
           session: null,

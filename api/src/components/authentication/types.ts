@@ -1,6 +1,8 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
 
+export const MAX_PASSWORD_LENGTH = 128;
+
 @ObjectType()
 export class Session {
   @Field(() => ID) user_id: number;
