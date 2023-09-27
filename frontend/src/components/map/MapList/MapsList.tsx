@@ -22,7 +22,6 @@ import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
 import {
   ErrorType,
-  MapFileInfo,
   useGetAllMapsListLazyQuery,
   useIsAdminLoggedInLazyQuery,
   useMapDeleteMutation,
@@ -364,7 +363,11 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
           onChange={(langTag) => {
             router.push(`/${nation_id}/${language_id}/1/maps/list/${langTag}`);
           }}
-          onClearClick={() => setTargetLanguage(null)}
+          onClearClick={() =>
+            router.push(
+              `/${nation_id}/${language_id}/1/maps/list/${DEFAULT_MAP_LANGUAGE_CODE}`,
+            )
+          }
         />
       </FilterContainer>
       <MapTools

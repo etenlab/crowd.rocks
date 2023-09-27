@@ -18,7 +18,6 @@ import {
   useGetMapDetailsQuery,
   useGetMapVoteStatusQuery,
   useToggleMapVoteStatusMutation,
-  // useToggleWordVoteStatusMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
