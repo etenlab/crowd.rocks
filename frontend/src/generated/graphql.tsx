@@ -1304,6 +1304,10 @@ export type Query = {
   getMapVoteStatus: MapVoteStatusOutputRow;
   getMapWordOrPhraseAsOrigByDefinitionId: MapWordOrPhraseAsOrigOutput;
   getOrigMapWordsAndPhrases: MapWordsAndPhrasesConnection;
+  getLanguageTranslationInfo: TranslatedLanguageInfoOutput;
+  getMapContent: MapFileOutput;
+  getOrigMapPhrases: GetOrigMapPhrasesOutput;
+  getOrigMapWords: GetOrigMapWordsOutput;
   getOrigMapsList: GetOrigMapsListOutput;
   getPhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   getPhraseDefinitionsByFlag: PhraseDefinitionListConnection;
@@ -1425,6 +1429,13 @@ export type QueryGetFlagsFromRefArgs = {
 
 export type QueryGetMapDetailsArgs = {
   input: GetMapDetailsInput;
+export type QueryGetLanguageTranslationInfoArgs = {
+  input: TranslatedLanguageInfoInput;
+};
+
+
+export type QueryGetMapContentArgs = {
+  input: GetMapContentInput;
 };
 
 
@@ -2027,6 +2038,21 @@ export type TranslateAllWordsAndPhrasesByGoogleResult = {
   totalWordCount: Scalars['Int']['output'];
   translatedPhraseCount: Scalars['Int']['output'];
   translatedWordCount: Scalars['Int']['output'];
+};
+
+export type TranslatedLanguageInfoInput = {
+  fromLanguageCode: Scalars['ID']['input'];
+  toLanguageCode?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type TranslatedLanguageInfoOutput = {
+  __typename?: 'TranslatedLanguageInfoOutput';
+  error: ErrorType;
+  googleTranslateTotalLangCount: Scalars['Int']['output'];
+  totalPhraseCount: Scalars['Int']['output'];
+  totalWordCount: Scalars['Int']['output'];
+  translatedMissingPhraseCount?: Maybe<Scalars['Int']['output']>;
+  translatedMissingWordCount?: Maybe<Scalars['Int']['output']>;
 };
 
 export type Translation = PhraseToPhraseTranslation | PhraseToWordTranslation | WordToPhraseTranslation | WordToWordTranslation;
@@ -3072,6 +3098,14 @@ export type WordToPhraseTranslationVoteStatusFragmentFragment = { __typename?: '
 export type PhraseToWordTranslationVoteStatusFragmentFragment = { __typename?: 'PhraseToWordTranslationVoteStatus', phrase_to_word_translation_id: string, upvotes: number, downvotes: number };
 
 export type PhraseToPhraseTranslationVoteStatusFragmentFragment = { __typename?: 'PhraseToPhraseTranslationVoteStatus', phrase_to_phrase_translation_id: string, upvotes: number, downvotes: number };
+
+export type GetTranslationLanguageInfoQueryVariables = Exact<{
+  from_language_code: Scalars['ID']['input'];
+  to_language_code?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type GetTranslationLanguageInfoQuery = { __typename?: 'Query', getLanguageTranslationInfo: { __typename?: 'TranslatedLanguageInfoOutput', error: ErrorType, googleTranslateTotalLangCount: number, totalPhraseCount: number, totalWordCount: number, translatedMissingPhraseCount?: number | null, translatedMissingWordCount?: number | null } };
 
 export type GetTranslationsByFromDefinitionIdQueryVariables = Exact<{
   definition_id: Scalars['ID']['input'];
@@ -6739,6 +6773,49 @@ export function useSiteTextUpsertMutation(baseOptions?: Apollo.MutationHookOptio
 export type SiteTextUpsertMutationHookResult = ReturnType<typeof useSiteTextUpsertMutation>;
 export type SiteTextUpsertMutationResult = Apollo.MutationResult<SiteTextUpsertMutation>;
 export type SiteTextUpsertMutationOptions = Apollo.BaseMutationOptions<SiteTextUpsertMutation, SiteTextUpsertMutationVariables>;
+export const GetTranslationLanguageInfoDocument = gql`
+    query GetTranslationLanguageInfo($from_language_code: ID!, $to_language_code: ID) {
+  getLanguageTranslationInfo(
+    input: {fromLanguageCode: $from_language_code, toLanguageCode: $to_language_code}
+  ) {
+    error
+    googleTranslateTotalLangCount
+    totalPhraseCount
+    totalWordCount
+    translatedMissingPhraseCount
+    translatedMissingWordCount
+  }
+}
+    `;
+
+/**
+ * __useGetTranslationLanguageInfoQuery__
+ *
+ * To run a query within a React component, call `useGetTranslationLanguageInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetTranslationLanguageInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetTranslationLanguageInfoQuery({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      to_language_code: // value for 'to_language_code'
+ *   },
+ * });
+ */
+export function useGetTranslationLanguageInfoQuery(baseOptions: Apollo.QueryHookOptions<GetTranslationLanguageInfoQuery, GetTranslationLanguageInfoQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetTranslationLanguageInfoQuery, GetTranslationLanguageInfoQueryVariables>(GetTranslationLanguageInfoDocument, options);
+      }
+export function useGetTranslationLanguageInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTranslationLanguageInfoQuery, GetTranslationLanguageInfoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetTranslationLanguageInfoQuery, GetTranslationLanguageInfoQueryVariables>(GetTranslationLanguageInfoDocument, options);
+        }
+export type GetTranslationLanguageInfoQueryHookResult = ReturnType<typeof useGetTranslationLanguageInfoQuery>;
+export type GetTranslationLanguageInfoLazyQueryHookResult = ReturnType<typeof useGetTranslationLanguageInfoLazyQuery>;
+export type GetTranslationLanguageInfoQueryResult = Apollo.QueryResult<GetTranslationLanguageInfoQuery, GetTranslationLanguageInfoQueryVariables>;
 export const GetTranslationsByFromDefinitionIdDocument = gql`
     query GetTranslationsByFromDefinitionId($definition_id: ID!, $from_definition_type_is_word: Boolean!, $language_code: String!, $dialect_code: String, $geo_code: String) {
   getTranslationsByFromDefinitionId(
@@ -7471,6 +7548,7 @@ export const namedOperations = {
     GetAllRecommendedSiteTextTranslationListByLanguage: 'GetAllRecommendedSiteTextTranslationListByLanguage',
     GetAllRecommendedSiteTextTranslationList: 'GetAllRecommendedSiteTextTranslationList',
     GetAllSiteTextLanguageListWithRate: 'GetAllSiteTextLanguageListWithRate',
+    GetTranslationLanguageInfo: 'GetTranslationLanguageInfo',
     GetTranslationsByFromDefinitionId: 'GetTranslationsByFromDefinitionId',
     GetRecommendedTranslationFromDefinitionID: 'GetRecommendedTranslationFromDefinitionID',
     LanguagesForGoogleTranslate: 'LanguagesForGoogleTranslate',

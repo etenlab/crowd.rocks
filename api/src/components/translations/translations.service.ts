@@ -1,9 +1,13 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
-import { Subject } from 'rxjs';
+import { from, Subject } from 'rxjs';
 
 import { ErrorType, GenericOutput } from 'src/common/types';
-import { calc_vote_weight } from 'src/common/utility';
+import {
+  calc_vote_weight,
+  createToken,
+  pgClientOrPool,
+} from 'src/common/utility';
 import { subTags2LangInfo, langInfo2String } from 'src/common/langUtils';
 import { LanguageInput } from 'src/components/common/types';
 
@@ -39,11 +43,30 @@ import {
   PhraseToWordTranslation,
   PhraseToPhraseTranslation,
   TranslationsOutput,
+  TranslatedLanguageInfoInput,
+  TranslatedLanguageInfoOutput,
 } from './types';
 import { PoolClient } from 'pg';
 import { PhraseDefinition, WordDefinition } from '../definitions/types';
 import { PostgresService } from '../../core/postgres.service';
-import { getTranslationLangSqlStr } from './sql-string';
+import {
+  getTotalPhraseCountByLanguage,
+  getTotalPhraseToPhraseCountByUser,
+  getTotalPhraseToWordCountByUser,
+  getTotalWordCountByLanguage,
+  getTotalWordToPhraseCountByUser,
+  getTotalWordToWordCountByUser,
+  getTranslatedStringsPhraseToPhrase,
+  getTranslatedStringsPhraseToWord,
+  getTranslatedStringsWordToPhrase,
+  getTranslatedStringsWordToWord,
+  getTranslationLangSqlStr,
+  IdToStringRow,
+} from './sql-string';
+import {
+  getLangConnectionsObjectMapAndTexts,
+  validateTranslateByGoogleInput,
+} from './utility';
 
 export function makeStr(
   word_definition_id: number,
@@ -1118,98 +1141,249 @@ export class TranslationsService {
     };
   }
 
+  async getTranslationLanguageInfo(
+    input: TranslatedLanguageInfoInput,
+    pgClient: PoolClient | null,
+  ): Promise<TranslatedLanguageInfoOutput> {
+    const pg = await pgClientOrPool({
+      client: pgClient,
+      pool: this.pg.pool,
+    });
+
+    const userRes = await this.pg.pool.query(
+      `select u.user_id
+      from users 
+      where email=$1;`,
+      ['googlebot@crowd.rocks'],
+    );
+    const google_user_id = userRes.rows[0].user_id;
+
+    // total words
+    const totalWordres = await pg.query(
+      ...getTotalWordCountByLanguage(input.fromLanguageCode),
+    );
+    const totalWordCount = totalWordres.rows[0].count;
+
+    // total phrases
+    const totalPhraseRes = await pg.query(
+      ...getTotalPhraseCountByLanguage(input.fromLanguageCode),
+    );
+    const totalPhraseCount = totalPhraseRes.rows[0].count;
+
+    let translatedMissingPhraseCount: number | undefined = undefined;
+    // missing phrases
+    if (input.toLanguageCode) {
+      const totalPhraseToWordRes = await pg.query(
+        ...getTotalPhraseToWordCountByUser(
+          input.fromLanguageCode,
+          input.toLanguageCode,
+          google_user_id,
+        ),
+      );
+      const totalPhraseToPhraseRes = await pg.query(
+        ...getTotalPhraseToPhraseCountByUser(
+          input.fromLanguageCode,
+          input.toLanguageCode,
+          google_user_id,
+        ),
+      );
+      translatedMissingPhraseCount =
+        +totalPhraseCount -
+        (+totalPhraseToWordRes.rows[0].count +
+          +totalPhraseToPhraseRes.rows[0].count);
+    }
+
+    // missing phrases
+    let translatedMissingWordCount: number | undefined = undefined;
+    if (input.toLanguageCode) {
+      const totalWordToWordRes = await pg.query(
+        ...getTotalWordToWordCountByUser(
+          input.fromLanguageCode,
+          input.toLanguageCode,
+          google_user_id,
+        ),
+      );
+
+      const totalWordToPhraseRes = await pg.query(
+        ...getTotalWordToPhraseCountByUser(
+          input.fromLanguageCode,
+          input.toLanguageCode,
+          google_user_id,
+        ),
+      );
+      translatedMissingWordCount =
+        +totalWordCount -
+        (+totalWordToWordRes.rows[0].count +
+          +totalWordToPhraseRes.rows[0].count);
+    }
+
+    // total possible 'to' languages googleTranslate can translate to.
+    const googleTranslateTotalLangCount = (await this.gTrService.getLanguages())
+      .length;
+
+    return {
+      error: ErrorType.NoError, // later
+      totalPhraseCount,
+      totalWordCount,
+      translatedMissingPhraseCount,
+      translatedMissingWordCount,
+      googleTranslateTotalLangCount,
+    };
+  }
+
+  async translateMissingWordsAndPhrasesByGoogle(
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+    const badInputResult = validateTranslateByGoogleInput(
+      from_language,
+      to_language,
+    );
+
+    if (badInputResult) {
+      return badInputResult;
+    }
+
+    try {
+      const {
+        strings,
+        originalTextsObjMap,
+        wordsConnection,
+        phrasesConnection,
+      } = await getLangConnectionsObjectMapAndTexts(
+        from_language,
+        pgClient,
+        this.wordsService,
+        this.phrasesService,
+      );
+      const pg = await pgClientOrPool({ client: pgClient, pool: this.pg.pool });
+      // const translatedTextsObjMap = new Map<
+      //   string,
+      //   { text: string; id: number }
+      // >();
+      // let uniqueId = 0;
+      const translatedStrs: string[] = [];
+      // check if token for googlebot exists
+      const tokenRes = await this.pg.pool.query(
+        `select t.token, u.user_id
+      from tokens t 
+      join users u 
+      on t.user_id = u.user_id
+      where u.email=$1;`,
+        ['googlebot@crowd.rocks'],
+      );
+      let gtoken = tokenRes.rows[0].token;
+      const google_user_id = tokenRes.rows[0].user_id;
+      if (!gtoken) {
+        gtoken = createToken();
+        await this.pg.pool.query(
+          `
+          insert into tokens(token, user_id) values($1, $2);
+        `,
+          [gtoken, google_user_id],
+        );
+      }
+
+      const trW2WRes = await pg.query<IdToStringRow>(
+        ...getTranslatedStringsWordToWord(
+          from_language.language_code,
+          to_language.language_code,
+          google_user_id,
+        ),
+      );
+
+      for (let i = 0; i < trW2WRes.rowCount; i++) {
+        const { id, string } = trW2WRes.rows[i];
+        translatedStrs.push(string);
+      }
+
+      const trW2PRes = await pg.query<IdToStringRow>(
+        ...getTranslatedStringsWordToPhrase(
+          from_language.language_code,
+          to_language.language_code,
+          google_user_id,
+        ),
+      );
+      for (let i = 0; i < trW2PRes.rowCount; i++) {
+        const { id, string } = trW2PRes.rows[i];
+        translatedStrs.push(string);
+      }
+
+      const trP2PRes = await pg.query<IdToStringRow>(
+        ...getTranslatedStringsPhraseToPhrase(
+          from_language.language_code,
+          to_language.language_code,
+          google_user_id,
+        ),
+      );
+      for (let i = 0; i < trP2PRes.rowCount; i++) {
+        const { id, string } = trP2PRes.rows[i];
+        translatedStrs.push(string);
+      }
+
+      const trP2WRes = await pg.query<IdToStringRow>(
+        ...getTranslatedStringsPhraseToWord(
+          from_language.language_code,
+          to_language.language_code,
+          google_user_id,
+        ),
+      );
+      for (let i = 0; i < trP2WRes.rowCount; i++) {
+        const { id, string } = trP2WRes.rows[i];
+        translatedStrs.push(string);
+      }
+
+      const allStrings: string[] = [];
+      wordsConnection.edges.map((c) => allStrings.push(c.node.word));
+      phrasesConnection.edges.map((p) => allStrings.push(p.node.phrase));
+
+      const missing = allStrings.filter((s) => {
+        return translatedStrs.indexOf(s) < 0;
+      });
+
+      const translationTexts = await this.gTrService.translate(
+        missing,
+        from_language,
+        to_language,
+      );
+    } catch (err) {
+      console.error(err);
+    }
+    return {
+      error: ErrorType.UnknownError,
+      result: null,
+    };
+  }
+
   async translateWordsAndPhrasesByGoogle(
     from_language: LanguageInput,
     to_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
-    if (
-      from_language.language_code === to_language.language_code &&
-      (from_language.dialect_code || null) ===
-        (to_language.dialect_code || null) &&
-      (from_language.geo_code || null) === (to_language.geo_code || null)
-    ) {
-      return {
-        error: ErrorType.UnknownError,
-        result: null,
-      };
+    const badInputResult = validateTranslateByGoogleInput(
+      from_language,
+      to_language,
+    );
+
+    if (badInputResult) {
+      return badInputResult;
     }
 
     try {
-      const originalTextsObjMap = new Map<
-        string,
-        { text: string; id: number }
-      >();
-      let uniqueId = 0;
-
-      const wordsConnection = await this.wordsService.getWordsByLanguage(
+      const {
+        strings: originalTexts,
+        originalTextsObjMap,
+        wordsConnection,
+        phrasesConnection,
+      } = await getLangConnectionsObjectMapAndTexts(
         from_language,
-        null,
-        null,
         pgClient,
+        this.wordsService,
+        this.phrasesService,
       );
-
-      if (wordsConnection.error === ErrorType.NoError) {
-        for (const edge of wordsConnection.edges) {
-          const { node } = edge;
-
-          if (originalTextsObjMap.get(node.word) === undefined) {
-            originalTextsObjMap.set(node.word, {
-              text: node.word,
-              id: uniqueId++,
-            });
-          }
-
-          for (const definition of node.definitions) {
-            if (originalTextsObjMap.get(definition.definition) === undefined) {
-              originalTextsObjMap.set(definition.definition, {
-                text: definition.definition,
-                id: uniqueId++,
-              });
-            }
-          }
-        }
-      }
-
-      const phrasesConnection = await this.phrasesService.getPhrasesByLanguage(
-        from_language,
-        null,
-        null,
-        pgClient,
-      );
-
-      if (phrasesConnection.error === ErrorType.NoError) {
-        for (const edge of phrasesConnection.edges) {
-          const { node } = edge;
-
-          if (originalTextsObjMap.get(node.phrase) === undefined) {
-            originalTextsObjMap.set(node.phrase, {
-              text: node.phrase,
-              id: uniqueId++,
-            });
-          }
-
-          for (const definition of node.definitions) {
-            if (originalTextsObjMap.get(definition.definition) === undefined) {
-              originalTextsObjMap.set(definition.definition, {
-                text: definition.definition,
-                id: uniqueId++,
-              });
-            }
-          }
-        }
-      }
-
-      const originalObj: { id: number; text: string }[] = [];
-
-      for (const obj of originalTextsObjMap.values()) {
-        originalObj.push(obj);
-      }
-
-      const originalTexts = originalObj
-        .sort((a, b) => a.id - b.id)
-        .map((obj) => obj.text);
 
       const translationTexts = await this.gTrService.translate(
         originalTexts,
@@ -1315,13 +1489,38 @@ export class TranslationsService {
         }
       }
 
-      const { error } =
+      // check if token for googlebot exists
+      const tokenRes = await this.pg.pool.query(
+        `select t.token, u.user_id
+      from tokens t 
+      join users u 
+      on t.user_id = u.user_id
+      where u.email=$1;`,
+        ['googlebot@crowd.rocks'],
+      );
+      let gtoken = tokenRes.rows[0].token;
+      const google_user_id = tokenRes.rows[0].user_id;
+      if (!gtoken) {
+        gtoken = createToken();
+        await this.pg.pool.query(
+          `
+          insert into tokens(token, user_id) values($1, $2);
+        `,
+          [gtoken, google_user_id],
+        );
+      }
+
+      const { error, translations } =
         await this.batchUpsertTranslationFromWordAndDefinitionlikeString(
           upsertInputs,
-          token,
+          gtoken,
           pgClient,
         );
 
+      console.log('translations: ');
+      console.log(translations.filter((t) => t !== null).length);
+      console.log('null translations: ');
+      console.log(translations.filter((t) => t === null).length);
       return {
         error,
         result: {

@@ -110,6 +110,17 @@ fragment PhraseToPhraseTranslationVoteStatusFragment on PhraseToPhraseTranslatio
   downvotes
 }
 
+query GetTranslationLanguageInfo($from_language_code: ID!, $to_language_code: ID) {
+  getLanguageTranslationInfo(input: {fromLanguageCode: $from_language_code, toLanguageCode: $to_language_code}) {
+    error
+    googleTranslateTotalLangCount
+    totalPhraseCount
+    totalWordCount
+    translatedMissingPhraseCount
+    translatedMissingWordCount
+  }
+} 
+
 query GetTranslationsByFromDefinitionId(
   $definition_id: ID!
   $from_definition_type_is_word: Boolean!

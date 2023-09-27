@@ -31,6 +31,7 @@ export class ConfigService {
   public readonly CR_DB_PASSWORD = process.env.CR_DB_PASSWORD;
 
   public readonly ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+  public readonly CR_GOOGLE_BOT_PASSWORD = process.env.GOOGLE_BOT_PASSWORD;
 
   public readonly AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
   public readonly AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;

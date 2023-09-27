@@ -36,6 +36,7 @@ import {
   useSubscribeToTranslationReportSubscription,
   TranslateAllWordsAndPhrasesByGoogleResult,
   useMapsReTranslateMutation,
+  useGetTranslationLanguageInfoLazyQuery,
 } from '../../../generated/graphql';
 
 import { langInfo2String, langInfo2tag } from '../../../common/langUtils';
@@ -89,6 +90,9 @@ export function AIControllerPage() {
   const { data: translationResult } =
     useSubscribeToTranslationReportSubscription();
 
+  const [getLangInfo, { data: languageData }] =
+    useGetTranslationLanguageInfoLazyQuery();
+
   const [mapsReTranslate] = useMapsReTranslateMutation();
   const [stopGoogleTranslation] = useStopGoogleTranslationMutation();
 
@@ -102,6 +106,18 @@ export function AIControllerPage() {
   const [result, setResult] =
     useState<TranslateAllWordsAndPhrasesByGoogleResult | null>(null);
   const [isStopPressed, setIsStopPressed] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (source) {
+      getLangInfo({
+        variables: {
+          from_language_code: source.lang.tag,
+          to_language_code: target?.lang.tag,
+        },
+      });
+    }
+    return;
+  }, [getLangInfo, source, target?.lang.tag]);
 
   useEffect(() => {
     if (translationResult && translationResult.TranslationReport) {
@@ -287,6 +303,14 @@ export function AIControllerPage() {
               enabledTags={enabledTags}
               disabled={disabled}
             />
+            <br />
+            <IonLabel>
+              Words: {languageData?.getLanguageTranslationInfo.totalWordCount}
+            </IonLabel>
+            <IonLabel>
+              Phrases:{' '}
+              {languageData?.getLanguageTranslationInfo.totalPhraseCount}
+            </IonLabel>
           </LanguageSelectorContainer>
           <LanguageSelectorContainer>
             <div>
@@ -308,13 +332,36 @@ export function AIControllerPage() {
               enabledTags={enabledTags}
               disabled={!selectTarget || batchTranslating}
             />
+            <br />
+            <IonLabel>
+              Missing Words:{' '}
+              {selectTarget
+                ? languageData?.getLanguageTranslationInfo
+                    .translatedMissingWordCount
+                : '?'}
+            </IonLabel>
+            <IonLabel>
+              Missing Phrases:{' '}
+              {selectTarget
+                ? languageData?.getLanguageTranslationInfo
+                    .translatedMissingPhraseCount
+                : '?'}
+            </IonLabel>
           </LanguageSelectorContainer>
         </LanguageSectionContainer>
       </FilterContainer>
       <br />
 
       <AIContainer>
-        <IonTitle>Google Translate</IonTitle>
+        <div style={{ display: 'flex' }}>
+          <IonTitle>Google Translate</IonTitle>
+          <IonLabel>
+            {!selectTarget
+              ? languageData?.getLanguageTranslationInfo
+                  .googleTranslateTotalLangCount + ' languages'
+              : '1 language'}
+          </IonLabel>
+        </div>
 
         <AIActionsContainer>
           <IonButton onClick={handleTranslate} disabled={disabled}>
