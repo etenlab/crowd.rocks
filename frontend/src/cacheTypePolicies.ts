@@ -111,4 +111,7 @@ export const typePolicies: TypePolicies = {
   MapWordsAndPhrasesEdge: {
     keyFields: ['cursor'],
   },
+  MapVoteStatus: {
+    keyFields: ['map_id', 'is_original'],
+  },
 };

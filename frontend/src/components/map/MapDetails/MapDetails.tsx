@@ -14,11 +14,10 @@ import { Caption } from '../../common/Caption/Caption';
 
 import {
   ErrorType,
-  GetMapVoteStatusDocument,
+  // GetMapVoteStatusDocument,
   TableNameType,
   useGetMapDetailsQuery,
   useGetMapVoteStatusQuery,
-  useToggleMapVoteStatusMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
@@ -31,6 +30,7 @@ import { StChatIcon } from '../../common/styled';
 import { Flag } from '../../flags/Flag';
 import { MAPS_FLAGS } from '../../flags/flagGroups';
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
+import { useToggleMapVoteStatusMutation } from '../../../hooks/useToggleMapVoteStatusMutation';
 
 interface MapDetailsProps
   extends RouteComponentProps<{
@@ -64,9 +64,7 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
     variables: { map_id: id, is_original: isOriginal },
   });
 
-  const [toggleMapVoteStatus] = useToggleMapVoteStatusMutation({
-    refetchQueries: [GetMapVoteStatusDocument],
-  });
+  const [toggleMapVoteStatus] = useToggleMapVoteStatusMutation();
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const currMapContent = currentMapWithContent?.data?.getMapDetails;

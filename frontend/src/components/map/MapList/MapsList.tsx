@@ -22,6 +22,7 @@ import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
 import {
   ErrorType,
+  MapDetailsInfo,
   useGetAllMapsListLazyQuery,
   useIsAdminLoggedInLazyQuery,
   useMapDeleteMutation,
@@ -87,7 +88,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const { makeMapThumbnail } = useMapTranslationTools();
   const [isMapDeleteModalOpen, setIsMapDeleteModalOpen] = useState(false);
   const [isMapResetModalOpen, setIsMapResetModalOpen] = useState(false);
-  const candidateForDeletion = useRef<MapFileInfo | undefined>();
+  const candidateForDeletion = useRef<MapDetailsInfo | undefined>();
 
   useEffect(() => {
     if (loadingSendMapFile || loadingUploadFile || loadingMapDelete) return;
