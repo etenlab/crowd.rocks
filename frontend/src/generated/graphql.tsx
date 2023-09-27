@@ -597,6 +597,7 @@ export type Mutation = {
   toggleWordToPhraseTrVoteStatus: WordToPhraseTranslationVoteStatusOutputRow;
   toggleWordVoteStatus: WordVoteStatusOutputRow;
   translateAllWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByGoogleOutput;
+  translateMissingWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByGoogleOutput;
   translateWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByGoogleOutput;
   updateDefinition: PhraseDefinitionOutput;
   updateFile: IFileOutput;
@@ -851,6 +852,12 @@ export type MutationToggleWordVoteStatusArgs = {
 
 export type MutationTranslateAllWordsAndPhrasesByGoogleArgs = {
   from_language: LanguageInput;
+};
+
+
+export type MutationTranslateMissingWordsAndPhrasesByGoogleArgs = {
+  from_language: LanguageInput;
+  to_language: LanguageInput;
 };
 
 
@@ -1300,14 +1307,11 @@ export type Query = {
   getAllTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteListOutput;
   getDocument: GetDocumentOutput;
   getFlagsFromRef: FlagsOutput;
+  getLanguageTranslationInfo: TranslatedLanguageInfoOutput;
   getMapDetails: MapDetailsOutput;
   getMapVoteStatus: MapVoteStatusOutputRow;
   getMapWordOrPhraseAsOrigByDefinitionId: MapWordOrPhraseAsOrigOutput;
   getOrigMapWordsAndPhrases: MapWordsAndPhrasesConnection;
-  getLanguageTranslationInfo: TranslatedLanguageInfoOutput;
-  getMapContent: MapFileOutput;
-  getOrigMapPhrases: GetOrigMapPhrasesOutput;
-  getOrigMapWords: GetOrigMapWordsOutput;
   getOrigMapsList: GetOrigMapsListOutput;
   getPhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   getPhraseDefinitionsByFlag: PhraseDefinitionListConnection;
@@ -1427,15 +1431,13 @@ export type QueryGetFlagsFromRefArgs = {
 };
 
 
-export type QueryGetMapDetailsArgs = {
-  input: GetMapDetailsInput;
 export type QueryGetLanguageTranslationInfoArgs = {
   input: TranslatedLanguageInfoInput;
 };
 
 
-export type QueryGetMapContentArgs = {
-  input: GetMapContentInput;
+export type QueryGetMapDetailsArgs = {
+  input: GetMapDetailsInput;
 };
 
 
