@@ -2739,7 +2739,7 @@ export type GetAllMapsListQueryVariables = Exact<{
 export type GetAllMapsListQuery = { __typename?: 'Query', getAllMapsList: { __typename?: 'MapFileListConnection', edges: Array<{ __typename?: 'MapDetailsOutputEdge', cursor: string, node: { __typename?: 'MapDetailsOutput', error: ErrorType, mapFileInfo?: { __typename?: 'MapDetailsInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null } } };
 
 export type GetMapDetailsQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
+  map_id: Scalars['ID']['input'];
   is_original: Scalars['Boolean']['input'];
 }>;
 
@@ -2782,6 +2782,25 @@ export type MapsReTranslateMutationVariables = Exact<{
 
 
 export type MapsReTranslateMutation = { __typename?: 'Mutation', mapsReTranslate: { __typename?: 'GenericOutput', error: ErrorType } };
+
+export type MapVoteStatusFragmentFragment = { __typename?: 'MapVoteStatus', map_id: string, is_original: boolean, downvotes: number, upvotes: number };
+
+export type ToggleMapVoteStatusMutationVariables = Exact<{
+  map_id: Scalars['ID']['input'];
+  is_original: Scalars['Boolean']['input'];
+  vote: Scalars['Boolean']['input'];
+}>;
+
+
+export type ToggleMapVoteStatusMutation = { __typename?: 'Mutation', toggleMapVoteStatus: { __typename?: 'MapVoteStatusOutputRow', error: ErrorType, vote_status?: { __typename?: 'MapVoteStatus', map_id: string, is_original: boolean, downvotes: number, upvotes: number } | null } };
+
+export type GetMapVoteStatusQueryVariables = Exact<{
+  map_id: Scalars['ID']['input'];
+  is_original: Scalars['Boolean']['input'];
+}>;
+
+
+export type GetMapVoteStatusQuery = { __typename?: 'Query', getMapVoteStatus: { __typename?: 'MapVoteStatusOutputRow', error: ErrorType, vote_status?: { __typename?: 'MapVoteStatus', map_id: string, is_original: boolean, downvotes: number, upvotes: number } | null } };
 
 export type AddNotificationMutationVariables = Exact<{
   text: Scalars['String']['input'];
@@ -3442,6 +3461,14 @@ export const PhraseWithDefinitionFragmentFragmentDoc = gql`
   geo_code
   definition
   definition_id
+}
+    `;
+export const MapVoteStatusFragmentFragmentDoc = gql`
+    fragment MapVoteStatusFragment on MapVoteStatus {
+  map_id
+  is_original
+  downvotes
+  upvotes
 }
     `;
 export const PhraseDefinitionWithVoteFragmentFragmentDoc = gql`
@@ -5360,8 +5387,8 @@ export type GetAllMapsListQueryHookResult = ReturnType<typeof useGetAllMapsListQ
 export type GetAllMapsListLazyQueryHookResult = ReturnType<typeof useGetAllMapsListLazyQuery>;
 export type GetAllMapsListQueryResult = Apollo.QueryResult<GetAllMapsListQuery, GetAllMapsListQueryVariables>;
 export const GetMapDetailsDocument = gql`
-    query GetMapDetails($id: ID!, $is_original: Boolean!) {
-  getMapDetails(input: {map_id: $id, is_original: $is_original}) {
+    query GetMapDetails($map_id: ID!, $is_original: Boolean!) {
+  getMapDetails(input: {map_id: $map_id, is_original: $is_original}) {
     ...MapDetailsOutputFragment
   }
 }
@@ -5379,7 +5406,7 @@ export const GetMapDetailsDocument = gql`
  * @example
  * const { data, loading, error } = useGetMapDetailsQuery({
  *   variables: {
- *      id: // value for 'id'
+ *      map_id: // value for 'map_id'
  *      is_original: // value for 'is_original'
  *   },
  * });
@@ -5574,6 +5601,83 @@ export function useMapsReTranslateMutation(baseOptions?: Apollo.MutationHookOpti
 export type MapsReTranslateMutationHookResult = ReturnType<typeof useMapsReTranslateMutation>;
 export type MapsReTranslateMutationResult = Apollo.MutationResult<MapsReTranslateMutation>;
 export type MapsReTranslateMutationOptions = Apollo.BaseMutationOptions<MapsReTranslateMutation, MapsReTranslateMutationVariables>;
+export const ToggleMapVoteStatusDocument = gql`
+    mutation ToggleMapVoteStatus($map_id: ID!, $is_original: Boolean!, $vote: Boolean!) {
+  toggleMapVoteStatus(map_id: $map_id, is_original: $is_original, vote: $vote) {
+    error
+    vote_status {
+      ...MapVoteStatusFragment
+    }
+  }
+}
+    ${MapVoteStatusFragmentFragmentDoc}`;
+export type ToggleMapVoteStatusMutationFn = Apollo.MutationFunction<ToggleMapVoteStatusMutation, ToggleMapVoteStatusMutationVariables>;
+
+/**
+ * __useToggleMapVoteStatusMutation__
+ *
+ * To run a mutation, you first call `useToggleMapVoteStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useToggleMapVoteStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [toggleMapVoteStatusMutation, { data, loading, error }] = useToggleMapVoteStatusMutation({
+ *   variables: {
+ *      map_id: // value for 'map_id'
+ *      is_original: // value for 'is_original'
+ *      vote: // value for 'vote'
+ *   },
+ * });
+ */
+export function useToggleMapVoteStatusMutation(baseOptions?: Apollo.MutationHookOptions<ToggleMapVoteStatusMutation, ToggleMapVoteStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ToggleMapVoteStatusMutation, ToggleMapVoteStatusMutationVariables>(ToggleMapVoteStatusDocument, options);
+      }
+export type ToggleMapVoteStatusMutationHookResult = ReturnType<typeof useToggleMapVoteStatusMutation>;
+export type ToggleMapVoteStatusMutationResult = Apollo.MutationResult<ToggleMapVoteStatusMutation>;
+export type ToggleMapVoteStatusMutationOptions = Apollo.BaseMutationOptions<ToggleMapVoteStatusMutation, ToggleMapVoteStatusMutationVariables>;
+export const GetMapVoteStatusDocument = gql`
+    query GetMapVoteStatus($map_id: ID!, $is_original: Boolean!) {
+  getMapVoteStatus(map_id: $map_id, is_original: $is_original) {
+    error
+    vote_status {
+      ...MapVoteStatusFragment
+    }
+  }
+}
+    ${MapVoteStatusFragmentFragmentDoc}`;
+
+/**
+ * __useGetMapVoteStatusQuery__
+ *
+ * To run a query within a React component, call `useGetMapVoteStatusQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetMapVoteStatusQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetMapVoteStatusQuery({
+ *   variables: {
+ *      map_id: // value for 'map_id'
+ *      is_original: // value for 'is_original'
+ *   },
+ * });
+ */
+export function useGetMapVoteStatusQuery(baseOptions: Apollo.QueryHookOptions<GetMapVoteStatusQuery, GetMapVoteStatusQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetMapVoteStatusQuery, GetMapVoteStatusQueryVariables>(GetMapVoteStatusDocument, options);
+      }
+export function useGetMapVoteStatusLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMapVoteStatusQuery, GetMapVoteStatusQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetMapVoteStatusQuery, GetMapVoteStatusQueryVariables>(GetMapVoteStatusDocument, options);
+        }
+export type GetMapVoteStatusQueryHookResult = ReturnType<typeof useGetMapVoteStatusQuery>;
+export type GetMapVoteStatusLazyQueryHookResult = ReturnType<typeof useGetMapVoteStatusLazyQuery>;
+export type GetMapVoteStatusQueryResult = Apollo.QueryResult<GetMapVoteStatusQuery, GetMapVoteStatusQueryVariables>;
 export const AddNotificationDocument = gql`
     mutation AddNotification($text: String!, $user_id: ID!) {
   addNotification(input: {text: $text, user_id: $user_id}) {
@@ -7351,6 +7455,7 @@ export const namedOperations = {
     GetAllMapsList: 'GetAllMapsList',
     GetMapDetails: 'GetMapDetails',
     IsAdminLoggedIn: 'IsAdminLoggedIn',
+    GetMapVoteStatus: 'GetMapVoteStatus',
     ListNotifications: 'ListNotifications',
     PhraseDefinitionRead: 'PhraseDefinitionRead',
     GetPhrasesByLanguage: 'GetPhrasesByLanguage',
@@ -7400,6 +7505,7 @@ export const namedOperations = {
     MapDelete: 'MapDelete',
     MapsTranslationsReset: 'MapsTranslationsReset',
     MapsReTranslate: 'MapsReTranslate',
+    ToggleMapVoteStatus: 'ToggleMapVoteStatus',
     AddNotification: 'AddNotification',
     DeleteNotification: 'DeleteNotification',
     MarkNotificationRead: 'MarkNotificationRead',
@@ -7449,6 +7555,7 @@ export const namedOperations = {
     MapWordsAndPhrasesEdgeFragment: 'MapWordsAndPhrasesEdgeFragment',
     WordWithDefinitionFragment: 'WordWithDefinitionFragment',
     PhraseWithDefinitionFragment: 'PhraseWithDefinitionFragment',
+    MapVoteStatusFragment: 'MapVoteStatusFragment',
     PhraseFragment: 'PhraseFragment',
     PhraseDefinitionFragment: 'PhraseDefinitionFragment',
     PhraseWithDefinitionsFragment: 'PhraseWithDefinitionsFragment',

@@ -16,6 +16,9 @@ import {
   ErrorType,
   TableNameType,
   useGetMapDetailsQuery,
+  useGetMapVoteStatusQuery,
+  useToggleMapVoteStatusMutation,
+  // useToggleWordVoteStatusMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
@@ -53,14 +56,16 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   const { id, nation_id, language_id } = match.params;
 
   const currentMapWithContent = useGetMapDetailsQuery({
-    variables: { id, is_original: isOriginal },
+    variables: { map_id: id, is_original: isOriginal },
     fetchPolicy: 'no-cache',
   });
 
-  // const currentMapVoteStatus = useGetMapDetailsQuery({
-  //   variables: { id, is_original: isOriginal },
-  //   fetchPolicy: 'no-cache',
-  // });
+  const currentMapVoteStatus = useGetMapVoteStatusQuery({
+    variables: { map_id: id, is_original: isOriginal },
+    fetchPolicy: 'no-cache',
+  });
+
+  const [toggleMapVoteStatus] = useToggleMapVoteStatusMutation();
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const currMapContent = currentMapWithContent?.data?.getMapDetails;
@@ -150,10 +155,30 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
 
   const voteButtonCom = (
     <VoteButtonsHorizontal
-      downVotes={1}
-      upVotes={1}
-      onVoteUpClick={() => {}}
-      onVoteDownClick={() => {}}
+      downVotes={
+        currentMapVoteStatus.data?.getMapVoteStatus.vote_status?.downvotes || 0
+      }
+      upVotes={
+        currentMapVoteStatus.data?.getMapVoteStatus.vote_status?.upvotes || 0
+      }
+      onVoteUpClick={() => {
+        toggleMapVoteStatus({
+          variables: {
+            map_id: id,
+            is_original: isOriginal,
+            vote: true,
+          },
+        });
+      }}
+      onVoteDownClick={() => {
+        toggleMapVoteStatus({
+          variables: {
+            map_id: id,
+            is_original: isOriginal,
+            vote: false,
+          },
+        });
+      }}
     />
   );
 

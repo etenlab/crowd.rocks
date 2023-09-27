@@ -117,8 +117,8 @@ query GetAllMapsList($lang: LanguageInput, $after: ID, $first: Int) {
   }
 }
 
-query GetMapDetails($id: ID!, $is_original: Boolean!) {
-  getMapDetails(input: { map_id: $id, is_original: $is_original }) {
+query GetMapDetails($map_id: ID!, $is_original: Boolean!) {
+  getMapDetails(input: { map_id: $map_id, is_original: $is_original }) {
     ...MapDetailsOutputFragment
   }
 }
@@ -164,5 +164,34 @@ mutation MapsTranslationsReset {
 mutation MapsReTranslate($forLangTag: String) {
   mapsReTranslate(forLangTag: $forLangTag) {
     error
+  }
+}
+
+fragment MapVoteStatusFragment on MapVoteStatus {
+  map_id
+  is_original
+  downvotes
+  upvotes
+}
+
+mutation ToggleMapVoteStatus(
+  $map_id: ID!
+  $is_original: Boolean!
+  $vote: Boolean!
+) {
+  toggleMapVoteStatus(map_id: $map_id, is_original: $is_original, vote: $vote) {
+    error
+    vote_status {
+      ...MapVoteStatusFragment
+    }
+  }
+}
+
+query GetMapVoteStatus($map_id: ID!, $is_original: Boolean!) {
+  getMapVoteStatus(map_id: $map_id, is_original: $is_original) {
+    error
+    vote_status {
+      ...MapVoteStatusFragment
+    }
   }
 }

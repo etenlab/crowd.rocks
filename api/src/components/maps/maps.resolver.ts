@@ -304,6 +304,7 @@ export class MapsResolver {
   // @Query(() => MapWithVoteOutput)
   // async getMapWithVoteById(
   //   @Args('map_id', { type: () => ID }) map_id: string,
+  //   @Args('is_original', { type: () => Boolean }) is_original: boolean,
   // ): Promise<MapWithVoteOutput> {
   //   console.log('getMapWithVoteById resolver', map_id);
 

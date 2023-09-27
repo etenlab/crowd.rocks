@@ -34,9 +34,9 @@ begin
   -- check for translated_map existance
   v_map_id := null;
 
-  select map_id
+  select translated_map_id
   from translated_maps
-  where map_id = p_map_id
+  where translated_map_id = p_map_id
   into v_map_id;
 
   if v_map_id is null then
@@ -48,11 +48,11 @@ begin
   values (p_map_id, v_user_id, p_vote)
   on conflict (map_id, user_id)
   do update set vote = EXCLUDED.vote
-  returning translated_maps_vote_id
+  returning maps_vote_id
   into p_translated_maps_vote_id;
 
   if p_translated_maps_vote_id is null then
-    select translated_maps_vote_id
+    select maps_vote_id
     from translated_maps_votes
     where map_id = p_map_id
       and user_id = v_user_id
