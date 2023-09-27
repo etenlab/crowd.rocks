@@ -4,18 +4,20 @@ import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
 import { LanguageInput } from 'src/components/common/types';
 import {
-  GetOrigMapContentOutput,
   GetOrigMapPhrasesOutput,
   GetOrigMapsListOutput,
   GetOrigMapWordsOutput,
-  GetTranslatedMapContentOutput,
-  MapFileOutput,
-  MapPhraseTranslations,
-  MapPhraseWithVotes,
-  MapWordTranslations,
-  MapWordWithVotes,
+  MapDetailsOutput,
+  MapPhraseWithTranslations,
+  MapPhraseAsTranslation,
+  MapWordWithTranslations,
+  MapWordAsTranslation,
   OriginalMapPhraseInput,
   OriginalMapWordInput,
+  MapWordsAndPhrasesConnection,
+  GetOrigMapWordsAndPhrasesInput,
+  MapWordsAndPhrasesEdge,
+  MapWordOrPhrase,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
 
@@ -209,17 +211,22 @@ export class MapsRepository {
           om.language_code,
           om.dialect_code,
           om.geo_code,
-          f.file_url as preview_file_url
+          f.file_id as preview_file_id,
+          f.file_url as preview_file_url,
+          f2.file_id as content_file_id,
+          f2.file_url as content_file_url
         from
           original_maps om
         left join files f on
           om.preview_file_id = f.file_id
+        left join files f2 on
+          om.content_file_id = f2.file_id
         where true
         ${languageClause}
       `;
     const resQ = await this.pg.pool.query(sqlStr, params);
 
-    const mapList = resQ.rows.map<MapFileOutput>(
+    const mapList = resQ.rows.map<MapDetailsOutput>(
       ({
         original_map_id,
         map_file_name,
@@ -228,20 +235,29 @@ export class MapsRepository {
         language_code,
         dialect_code,
         geo_code,
+        preview_file_id,
         preview_file_url,
+        content_file_id,
+        content_file_url,
       }) => ({
-        original_map_id,
-        map_file_name,
-        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
-          language_code,
-          dialect_code,
-          geo_code,
-        }),
-        created_at,
-        created_by,
-        is_original: true,
-        language: { language_code, dialect_code, geo_code },
-        preview_file_url,
+        error: ErrorType.NoError,
+        mapFileInfo: {
+          original_map_id,
+          map_file_name,
+          map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+            language_code,
+            dialect_code,
+            geo_code,
+          }),
+          created_at,
+          created_by,
+          is_original: true,
+          language: { language_code, dialect_code, geo_code },
+          preview_file_id,
+          preview_file_url,
+          content_file_id,
+          content_file_url,
+        },
       }),
     );
 
@@ -288,6 +304,7 @@ export class MapsRepository {
         tm.translated_percent,
         f.file_url as preview_file_url,
         f.file_id as preview_file_id,
+        f2.file_url as content_file_url,
         f2.file_id as content_file_id
       from
         translated_maps tm
@@ -303,7 +320,7 @@ export class MapsRepository {
     `;
     const resQ = await this.pg.pool.query(sqlStr, params);
 
-    const mapList = resQ.rows.map<MapFileOutput>(
+    const mapList = resQ.rows.map<MapDetailsOutput>(
       ({
         translated_map_id,
         original_map_id,
@@ -315,32 +332,37 @@ export class MapsRepository {
         geo_code,
         preview_file_url,
         preview_file_id,
+        content_file_url,
         content_file_id,
         translated_percent,
       }) => ({
-        translated_map_id,
-        original_map_id,
-        map_file_name,
-        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
-          language_code,
-          dialect_code,
-          geo_code,
-        }),
-        created_at,
-        created_by,
-        is_original: false,
-        language: { language_code, dialect_code, geo_code },
-        preview_file_url,
-        preview_file_id,
-        content_file_id,
-        translated_percent,
+        error: ErrorType.NoError,
+        mapFileInfo: {
+          translated_map_id,
+          original_map_id,
+          map_file_name,
+          map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+            language_code,
+            dialect_code,
+            geo_code,
+          }),
+          created_at,
+          created_by,
+          is_original: false,
+          language: { language_code, dialect_code, geo_code },
+          preview_file_url,
+          preview_file_id,
+          content_file_url,
+          content_file_id,
+          translated_percent,
+        },
       }),
     );
 
     return { mapList };
   }
 
-  async getOrigMapInfo(id: string): Promise<MapFileOutput> {
+  async getOrigMapInfo(id: string): Promise<MapDetailsOutput> {
     const params = [id];
     const sqlStr = `
         select
@@ -352,17 +374,21 @@ export class MapsRepository {
           om.dialect_code,
           om.geo_code,
           f.file_id as preview_file_id,
-          f.file_url as preview_file_url
+          f.file_url as preview_file_url,
+          f2.file_id as content_file_id,
+          f2.file_url as content_file_url
         from
           original_maps om
         left join files f on
           om.preview_file_id = f.file_id
+        left join files f2 on
+          om.content_file_id = f2.file_id
         where original_map_id = $1
       `;
 
     const resQ = await this.pg.pool.query(sqlStr, params);
 
-    const origMapList = resQ.rows.map<MapFileOutput>(
+    const origMapList = resQ.rows.map<MapDetailsOutput>(
       ({
         original_map_id,
         map_file_name,
@@ -373,27 +399,34 @@ export class MapsRepository {
         geo_code,
         preview_file_id,
         preview_file_url,
+        content_file_id,
+        content_file_url,
       }) => ({
-        original_map_id,
-        map_file_name,
-        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
-          language_code,
-          dialect_code,
-          geo_code,
-        }),
-        created_at,
-        created_by,
-        is_original: true,
-        language: { language_code, dialect_code, geo_code },
-        preview_file_id,
-        preview_file_url,
+        error: ErrorType.NoError,
+        mapFileInfo: {
+          original_map_id,
+          map_file_name,
+          map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+            language_code,
+            dialect_code,
+            geo_code,
+          }),
+          created_at,
+          created_by,
+          is_original: true,
+          language: { language_code, dialect_code, geo_code },
+          preview_file_id,
+          preview_file_url,
+          content_file_id,
+          content_file_url,
+        },
       }),
     );
 
     return { ...origMapList[0] };
   }
 
-  async getOrigMapWithContentUrl(id: string): Promise<GetOrigMapContentOutput> {
+  async getOrigMapWithContentUrl(id: string): Promise<MapDetailsOutput> {
     const resQ = await this.pg.pool.query(
       `
         select 
@@ -433,27 +466,28 @@ export class MapsRepository {
     } = resQ.rows[0];
 
     return {
-      original_map_id,
-      map_file_name,
-      map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
-        language_code,
-        dialect_code,
-        geo_code,
-      }),
-      created_at,
-      created_by,
-      is_original: true,
-      language: { language_code, dialect_code, geo_code },
-      preview_file_url,
-      content_file_url,
-      preview_file_id,
-      content_file_id,
+      error: ErrorType.NoError,
+      mapFileInfo: {
+        original_map_id,
+        map_file_name,
+        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+          language_code,
+          dialect_code,
+          geo_code,
+        }),
+        created_at,
+        created_by,
+        is_original: true,
+        language: { language_code, dialect_code, geo_code },
+        preview_file_url,
+        content_file_url,
+        preview_file_id,
+        content_file_id,
+      },
     };
   }
 
-  async getTranslatedMapWithContentUrl(
-    id: string,
-  ): Promise<GetTranslatedMapContentOutput> {
+  async getTranslatedMapWithContentUrl(id: string): Promise<MapDetailsOutput> {
     const resQ = await this.pg.pool.query(
       `
       select
@@ -466,9 +500,10 @@ export class MapsRepository {
         tm.dialect_code,
         tm.geo_code,
         tm.translated_percent,
-        tm.content_file_id,
         f.file_url as preview_file_url,
-        f2.file_url as content_file_url
+        f.file_id as preview_file_id,
+        f2.file_url as content_file_url,
+        f2.file_id as content_file_id
       from
         translated_maps tm
       left join original_maps om
@@ -483,6 +518,13 @@ export class MapsRepository {
       [id],
     );
 
+    if (!(resQ.rows.length > 0)) {
+      return {
+        error: ErrorType.MapNotFound,
+        mapFileInfo: null,
+      };
+    }
+
     const {
       original_map_id,
       translated_map_id,
@@ -494,27 +536,32 @@ export class MapsRepository {
       geo_code,
       translated_percent,
       preview_file_url,
+      preview_file_id,
       content_file_url,
       content_file_id,
     } = resQ.rows[0];
 
     return {
-      original_map_id,
-      translated_map_id,
-      map_file_name,
-      created_at,
-      created_by,
-      is_original: false,
-      language: { language_code, dialect_code, geo_code },
-      map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
-        language_code,
-        dialect_code,
-        geo_code,
-      }),
-      translated_percent,
-      preview_file_url,
-      content_file_url,
-      content_file_id,
+      error: ErrorType.NoError,
+      mapFileInfo: {
+        original_map_id,
+        translated_map_id,
+        map_file_name,
+        created_at,
+        created_by,
+        is_original: false,
+        language: { language_code, dialect_code, geo_code },
+        map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
+          language_code,
+          dialect_code,
+          geo_code,
+        }),
+        translated_percent,
+        preview_file_url,
+        preview_file_id,
+        content_file_url,
+        content_file_id,
+      },
     };
   }
 
@@ -697,10 +744,10 @@ export class MapsRepository {
 
     const resQ_wtwt = await this.pg.pool.query(wtwt_sqlStr, params);
     const resQ_wtpt = await this.pg.pool.query(wtwp_sqlStr, params);
-    const words: MapWordTranslations[] = [];
+    const words: MapWordWithTranslations[] = [];
 
     resQ_wtwt.rows.forEach((r) => {
-      const currTranslation: MapWordWithVotes = {
+      const currTranslation: MapWordAsTranslation = {
         word_id: r.t_word_id,
         word: r.t_wordlike_string,
         definition: r.t_definition,
@@ -735,7 +782,7 @@ export class MapsRepository {
     });
 
     resQ_wtpt.rows.forEach((r) => {
-      const currTranslation: MapPhraseWithVotes = {
+      const currTranslation: MapPhraseAsTranslation = {
         phrase_id: r.t_phrase_id,
         phrase: r.t_phraselike_string,
         definition: r.t_definition,
@@ -905,10 +952,10 @@ export class MapsRepository {
 
     const resQptpt = await this.pg.pool.query(ptpt_sqlStr, params);
     const resQptwt = await this.pg.pool.query(ptwt_sqlStr, params);
-    const phrases: Array<MapPhraseTranslations> = [];
+    const phrases: Array<MapPhraseWithTranslations> = [];
 
     resQptpt.rows.forEach((r) => {
-      const currTranslation: MapPhraseWithVotes = {
+      const currTranslation: MapPhraseAsTranslation = {
         phrase_id: r.t_phrase_id,
         phrase: r.t_phraselike_string,
         definition: r.t_definition,
@@ -943,7 +990,7 @@ export class MapsRepository {
     });
 
     resQptwt.rows.forEach((r) => {
-      const currTranslation: MapWordWithVotes = {
+      const currTranslation: MapWordAsTranslation = {
         word_id: r.t_word_id,
         word: r.t_wordlike_string,
         definition: r.t_definition,
@@ -979,6 +1026,105 @@ export class MapsRepository {
 
     return {
       origMapPhrases: phrases,
+    };
+  }
+
+  async getOrigMapWordsAndPhrases(
+    dbPoolClient: PoolClient,
+    {
+      input,
+      first,
+      after,
+    }: {
+      input: GetOrigMapWordsAndPhrasesInput;
+      first?: number | null;
+      after?: string | null;
+    },
+  ): Promise<MapWordsAndPhrasesConnection> {
+    const langParams: string[] = [];
+    let languagesRestrictionClause = '';
+    let pickDataClause = '';
+    if (input.lang.language_code) {
+      langParams.push(input.lang.language_code);
+      languagesRestrictionClause += ` and o_language_code =  $${langParams.length} `;
+    }
+    if (input.lang.dialect_code) {
+      langParams.push(input.lang.dialect_code);
+      languagesRestrictionClause += ` and o_dialect_code =  $${langParams.length} `;
+    }
+    if (input.lang.geo_code) {
+      langParams.push(input.lang.geo_code);
+      languagesRestrictionClause += ` and o_geo_code =  $${langParams.length} `;
+    }
+
+    const langAndPickParams: string[] = [...langParams];
+    if (after) {
+      langAndPickParams.push(String(after));
+      pickDataClause += `and cursor > $${langAndPickParams.length} `;
+    }
+    pickDataClause += ` order by cursor `;
+    if (first) {
+      langAndPickParams.push(String(first));
+      pickDataClause += ` limit $${langAndPickParams.length} `;
+    }
+
+    const sqlStr = `
+      select * from v_map_words_and_phrases
+      where true
+      ${languagesRestrictionClause}
+      ${pickDataClause}
+    `;
+
+    const resQ = await dbPoolClient.query(sqlStr, langAndPickParams);
+
+    const sqlAfter = `
+      select count(*) as count_after from v_map_words_and_phrases
+      where true
+      ${languagesRestrictionClause}
+      and cursor>${dbPoolClient.escapeLiteral(resQ.rows.at(-1).cursor)}
+    `;
+    const resCheckAfter = await dbPoolClient.query(sqlAfter, langParams);
+
+    const sqlBefore = `
+      select count(*) as count_before from v_map_words_and_phrases
+      where true
+      ${languagesRestrictionClause}
+      and cursor<${dbPoolClient.escapeLiteral(resQ.rows[0].cursor)}
+    `;
+    const resCheckBefore = await dbPoolClient.query(sqlBefore, langParams);
+
+    const edges: MapWordsAndPhrasesEdge[] = resQ.rows.map((r) => {
+      const node: MapWordOrPhrase = {
+        id: r.cursor,
+        type: r.type,
+        o_id: r.o_id,
+        o_like_string: r.o_like_string,
+        o_definition: r.o_definition,
+        o_definition_id: r.o_definition_id,
+        o_language_code: r.o_language_code,
+        o_dialect_code: r.o_dialect_code,
+        o_geo_code: r.o_geo_code,
+      };
+      return {
+        cursor: r.cursor,
+        node,
+      };
+    });
+
+    const pageInfo = {
+      startCursor: resQ.rows[0].cursor,
+      endCursor: resQ.rows.at(-1).cursor,
+      hasNextPage:
+        resCheckAfter.rows[0].count_after &&
+        resCheckAfter.rows[0].count_after > 0,
+      hasPreviousPage:
+        resCheckBefore.rows[0].count_before &&
+        resCheckBefore.rows[0].count_before > 0,
+    };
+
+    return {
+      edges,
+      pageInfo,
     };
   }
 

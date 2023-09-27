@@ -154,9 +154,10 @@ const Login: React.FC = () => {
           <IonInput
             value={email}
             inputmode="email"
+            className="login-email"
             minlength={4}
             maxlength={255}
-            onIonChange={(e) => set_email(e.detail.value!)}
+            onIonInput={(e) => set_email(e.detail.value!)}
             required
           />
         </IonItem>
@@ -170,8 +171,9 @@ const Login: React.FC = () => {
           <IonInput
             value={password}
             type="password"
+            id="login-password"
             inputmode="text"
-            onIonChange={(e) => set_password(e.detail.value!)}
+            onIonInput={(e) => set_password(e.detail.value!)}
             required
           />
         </IonItem>
@@ -180,7 +182,7 @@ const Login: React.FC = () => {
         {is_password_too_short && <div>{tr('Password too short')}</div>}
 
         <IonButton
-          id="loading"
+          id="login-login"
           type="submit"
           color="primary"
           disabled={login_disable}
@@ -200,6 +202,7 @@ const Login: React.FC = () => {
 
         <IonButton
           type="button"
+          id="login-register"
           color="primary"
           fill="clear"
           onClick={click_register}

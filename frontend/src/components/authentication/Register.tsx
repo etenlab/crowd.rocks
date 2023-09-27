@@ -131,6 +131,7 @@ const Register: React.FC = () => {
           <IonInput
             value={email}
             inputmode="email"
+            id="register-email"
             minlength={4}
             maxlength={255}
             onIonChange={(e) => set_email(e.detail.value!)}
@@ -143,10 +144,11 @@ const Register: React.FC = () => {
         {is_email_invalid && <div>{tr('Email Invalid')}</div>}
 
         <IonItem counter={true}>
-          <IonLabel position="floating">{tr('Avatar')}</IonLabel>
+          <IonLabel position="floating">{tr('Username')}</IonLabel>
           <IonInput
             value={avatar}
             inputmode="text"
+            id="register-avatar"
             minlength={1}
             maxlength={64}
             onIonChange={(e) => set_avatar(e.detail.value!)}
@@ -154,17 +156,18 @@ const Register: React.FC = () => {
           />
         </IonItem>
 
-        {is_avatar_too_long && <div>{tr('Avatar too long')}</div>}
-        {is_avatar_too_short && <div>{tr('Avatar too short')}</div>}
-        {is_avatar_unavailable && <div>{tr('Avatar Unavailable')}</div>}
+        {is_avatar_too_long && <div>{tr('Username too long')}</div>}
+        {is_avatar_too_short && <div>{tr('Username too short')}</div>}
+        {is_avatar_unavailable && <div>{tr('Username Unavailable')}</div>}
         <IonItem counter={true}>
           <IonLabel position="floating">{tr('Password')}</IonLabel>
           <IonInput
             value={password}
             type="password"
+            id="register-password"
             minlength={8}
             maxlength={128}
-            onIonChange={(e) => set_password(e.detail.value!)}
+            onIonInput={(e) => set_password(e.detail.value!)}
             required
           />
         </IonItem>
@@ -172,7 +175,7 @@ const Register: React.FC = () => {
         {is_password_too_long && <div>{tr('Password too long')}</div>}
         {is_password_too_short && <div>{tr('Password too short')}</div>}
 
-        <IonButton type="submit" color="primary">
+        <IonButton type="submit" id="register-register" color="primary">
           {tr('Register')}
         </IonButton>
       </form>
@@ -182,6 +185,7 @@ const Register: React.FC = () => {
         color="primary"
         fill="clear"
         onClick={click_login}
+        id="register-login"
       >
         {tr('Login')}
       </IonButton>

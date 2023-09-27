@@ -6,7 +6,7 @@ import {
   validateEmail,
 } from 'src/common/utility';
 import { PostgresService } from 'src/core/postgres.service';
-import { LoginOutput, LoginInput } from './types';
+import { LoginOutput, LoginInput, MAX_PASSWORD_LENGTH } from './types';
 import { verify } from 'argon2';
 import { ErrorType } from 'src/common/types';
 @Resolver(LoginOutput)
@@ -40,7 +40,7 @@ export class LoginResolver {
         };
       }
 
-      if (input.password.length > 32) {
+      if (input.password.length > MAX_PASSWORD_LENGTH) {
         return {
           error: ErrorType.PasswordTooLong,
           session: null,

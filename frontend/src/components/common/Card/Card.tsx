@@ -9,7 +9,7 @@ import {
   CustomCardHeader,
 } from './styled';
 
-import { VoteButtonsHerizontal } from '../VoteButtonsHerizontal';
+import { VoteButtonsHorizontal } from '../VoteButtonsHorizontal';
 import { Flag } from '../../flags/Flag';
 
 import { StChatIcon } from '../styled';
@@ -53,7 +53,7 @@ export function Card({
   flags,
   onContentEdit,
 }: CardProps) {
-  const voteButtonCom = vote ? <VoteButtonsHerizontal {...vote} /> : null;
+  const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
   const [editing, setEditing] = useState(false);
   const [newContentVal, setNewContentVal] = useState(content);
 

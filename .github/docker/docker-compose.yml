@@ -1,0 +1,29 @@
+version: "3"
+networks:
+  default:
+    name: eil
+
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: asdfasdf
+      POSTGRES_DB: crowdrocks
+    ports:
+      - 5432:5432
+
+  api:
+    image: etenlab/crowd-rocks:test
+    environment:
+      CR_DB_URL: postgres
+      CR_DB_PORT: 5432
+      CR_DB_USER: postgres
+      CR_DB_PASSWORD: asdfasdf
+      CR_DB: crowdrocks
+      ADMIN_PASSWORD: asdfasdf
+      MODE: DEV
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres

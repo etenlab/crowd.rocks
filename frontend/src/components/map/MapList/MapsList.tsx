@@ -22,7 +22,7 @@ import { Caption } from '../../common/Caption/Caption';
 import { MapTools } from './MapsTools';
 import {
   ErrorType,
-  MapFileOutput,
+  MapDetailsInfo,
   useGetAllMapsListLazyQuery,
   useIsAdminLoggedInLazyQuery,
   useMapDeleteMutation,
@@ -37,8 +37,19 @@ import { globals } from '../../../services/globals';
 import { FilterContainer, Input } from '../../common/styled';
 import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 import { PAGE_SIZE } from '../../../const/commonConst';
+import { RouteComponentProps } from 'react-router';
+import { langInfo2tag, tag2langInfo } from '../../../common/langUtils';
+import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
 
-export const MapList: React.FC = () => {
+interface MapListProps
+  extends RouteComponentProps<{
+    lang_full_tag: string;
+    nation_id: string;
+    language_id: string;
+  }> {}
+
+export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
+  const { lang_full_tag: url_lang_tag, nation_id, language_id } = match.params;
   const router = useIonRouter();
   const { tr } = useTr();
   const [present] = useIonToast();
@@ -77,7 +88,7 @@ export const MapList: React.FC = () => {
   const { makeMapThumbnail } = useMapTranslationTools();
   const [isMapDeleteModalOpen, setIsMapDeleteModalOpen] = useState(false);
   const [isMapResetModalOpen, setIsMapResetModalOpen] = useState(false);
-  const candidateForDeletion = useRef<MapFileOutput | undefined>();
+  const candidateForDeletion = useRef<MapDetailsInfo | undefined>();
 
   useEffect(() => {
     if (loadingSendMapFile || loadingUploadFile || loadingMapDelete) return;
@@ -138,15 +149,28 @@ export const MapList: React.FC = () => {
   }, [isAdmin]);
 
   useEffect(() => {
-    if (!targetLang) {
-      setTargetLanguage({
-        lang: {
-          tag: 'en',
-          descriptions: ['English'],
-        },
-      });
+    if (
+      url_lang_tag &&
+      url_lang_tag !== langInfo2tag(targetLang || undefined)
+    ) {
+      const langInfo = tag2langInfo(url_lang_tag);
+      if (langInfo.lang.tag) {
+        setTargetLanguage(langInfo);
+      }
+      return;
     }
-  }, [setTargetLanguage, targetLang]);
+
+    if (!targetLang) {
+      setTargetLanguage(tag2langInfo(DEFAULT_MAP_LANGUAGE_CODE));
+    }
+  }, [
+    setTargetLanguage,
+    targetLang,
+    url_lang_tag,
+    router,
+    nation_id,
+    language_id,
+  ]);
 
   useEffect(() => {
     if (!targetLang) {
@@ -300,19 +324,23 @@ export const MapList: React.FC = () => {
       allMapsQuery?.getAllMapsList.edges?.length ? (
         allMapsQuery?.getAllMapsList.edges
           ?.filter((edge) => {
-            return edge.node.map_file_name_with_langs
+            return (edge.node.mapFileInfo?.map_file_name_with_langs || '')
               .toLowerCase()
               .includes(filter.toLowerCase());
           })
-          .map((edge) => (
-            <MapItem
-              mapItem={edge.node}
-              key={edge.cursor}
-              candidateForDeletionRef={candidateForDeletion}
-              setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
-              showDelete={!!isAdminRes?.loggedInIsAdmin.isAdmin}
-            />
-          ))
+          .map((edge) =>
+            edge.node.mapFileInfo ? (
+              <MapItem
+                mapItem={edge.node.mapFileInfo}
+                key={edge.cursor}
+                candidateForDeletionRef={candidateForDeletion}
+                setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
+                showDelete={!!isAdminRes?.loggedInIsAdmin.isAdmin}
+              />
+            ) : (
+              <>{edge.node.error}</>
+            ),
+          )
       ) : (
         <div> {tr('No maps found')} </div>
       ),
@@ -333,10 +361,14 @@ export const MapList: React.FC = () => {
           title={tr('Select language')}
           langSelectorId="mapsListLangSelector"
           selected={targetLang ?? undefined}
-          onChange={(_sourceLangTag, sourceLangInfo) => {
-            setTargetLanguage(sourceLangInfo);
+          onChange={(langTag) => {
+            router.push(`/${nation_id}/${language_id}/1/maps/list/${langTag}`);
           }}
-          onClearClick={() => setTargetLanguage(null)}
+          onClearClick={() =>
+            router.push(
+              `/${nation_id}/${language_id}/1/maps/list/${DEFAULT_MAP_LANGUAGE_CODE}`,
+            )
+          }
         />
       </FilterContainer>
       <MapTools

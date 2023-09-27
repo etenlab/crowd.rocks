@@ -32,7 +32,7 @@ export function RecorderTimer({
   const [time, setTime] = useState<number>(0);
 
   useEffect(() => {
-    let timer: NodeJS.Timer | null = null;
+    let timer: NodeJS.Timeout | undefined = undefined;
 
     switch (recorderStatus) {
       case 'new': {
