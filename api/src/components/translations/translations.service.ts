@@ -1151,9 +1151,9 @@ export class TranslationsService {
     });
 
     const userRes = await this.pg.pool.query(
-      `select u.user_id
-      from users 
-      where email=$1;`,
+      `select user_id
+       from users 
+       where email=$1;`,
       ['googlebot@crowd.rocks'],
     );
     const google_user_id = userRes.rows[0].user_id;

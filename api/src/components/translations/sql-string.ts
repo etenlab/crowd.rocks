@@ -105,7 +105,7 @@ join phrases to_phrase
     on to_phrase_defs.phrase_id = to_phrase.phrase_id
 join words to_phrase_words
     on to_phrase_words.word_id = any(to_phrase.words)
-where from_word.language_code = $1 and to_phrase_words.language_code = $2;
+where from_word.language_code = $1 and to_phrase_words.language_code = $2
     and w2p.created_by = $3;
 
     `,
@@ -160,8 +160,8 @@ join words to_word
     on to_word_defs.word_id = to_word.word_id
 join wordlike_strings to_wls
     on to_wls.wordlike_string_id = to_word.wordlike_string_id
-where from_word.language_code = $1 and to_word.language_code = $2;
-    and p2w.created_by = $3
+where from_word.language_code = $1 and to_word.language_code = $2
+    and p2w.created_by = $3;
     `,
     [fromLanguageCode, toLanguageCode, translated_by],
   ];
