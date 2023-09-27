@@ -1868,8 +1868,10 @@ export type Subscription = {
 };
 
 export enum TableNameType {
+  OriginalMaps = 'original_maps',
   PhraseDefinitions = 'phrase_definitions',
   Phrases = 'phrases',
+  TranslatedMaps = 'translated_maps',
   WordDefinitions = 'word_definitions',
   Words = 'words'
 }

@@ -12,7 +12,11 @@ import styled from 'styled-components';
 
 import { Caption } from '../../common/Caption/Caption';
 
-import { ErrorType, useGetMapDetailsQuery } from '../../../generated/graphql';
+import {
+  ErrorType,
+  TableNameType,
+  useGetMapDetailsQuery,
+} from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 import { downloadFromUrl } from '../../../common/utility';
@@ -21,11 +25,9 @@ import { useTr } from '../../../hooks/useTr';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { OrigBadge } from '../MapList/styled';
 import { StChatIcon } from '../../common/styled';
-// import { Flag } from '../../flags/Flag';
+import { Flag } from '../../flags/Flag';
+import { MAPS_FLAGS } from '../../flags/flagGroups';
 // import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
-
-const ORIGINAL_MAPS_TABELE = 'original_maps';
-const TRANSLATED_MAPS_TABELE = 'translated_maps';
 
 interface MapDetailsProps
   extends RouteComponentProps<{
@@ -123,21 +125,25 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
       onClick={() => {
         router.push(
           `/${nation_id}/${language_id}/1/discussion/${
-            isOriginal ? ORIGINAL_MAPS_TABELE : TRANSLATED_MAPS_TABELE
+            isOriginal
+              ? TableNameType.OriginalMaps
+              : TableNameType.TranslatedMaps
           }/${id}`,
         );
       }}
     />
   );
+  const flagsCom = (
+    <Flag
+      parent_table={
+        isOriginal ? TableNameType.OriginalMaps : TableNameType.TranslatedMaps
+      }
+      parent_id={id}
+      flag_names={MAPS_FLAGS}
+    />
+  );
 
   // const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
-  // const flagsCom = flags ? (
-  //   <Flag
-  //     parent_table={flags.parent_table}
-  //     parent_id={flags.parent_id}
-  //     flag_names={flags.flag_names}
-  //   />
-  // ) : null;
 
   return (
     <>
@@ -155,6 +161,7 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
             </IonBadge>
           )}
           {chatButton}
+          {flagsCom}
           <IonIcon
             icon={downloadOutline}
             onClick={handleDownloadSvg}

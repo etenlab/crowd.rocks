@@ -125,6 +125,8 @@ export enum TableNameType {
   phrase_definitions = 'phrase_definitions',
   words = 'words',
   phrases = 'phrases',
+  original_maps = 'original_maps',
+  translated_maps = 'translated_maps',
 }
 
 registerEnumType(TableNameType, {

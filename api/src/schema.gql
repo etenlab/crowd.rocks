@@ -1094,8 +1094,10 @@ type Subscription {
 }
 
 enum TableNameType {
+  original_maps
   phrase_definitions
   phrases
+  translated_maps
   word_definitions
   words
 }

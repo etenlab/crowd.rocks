@@ -13661,6 +13661,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "original_maps",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "phrase_definitions",
             "description": null,
             "isDeprecated": false,
@@ -13668,6 +13674,12 @@
           },
           {
             "name": "phrases",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "translated_maps",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
