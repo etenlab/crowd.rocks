@@ -40,6 +40,9 @@ export class DatabaseVersionControlService {
       case 2:
         console.log('Updating database to version 3');
         await this.loadVersion3();
+      case 3:
+        console.log('Updating database to version 4');
+        await this.loadVersion4();
       default:
         console.error('Database version is current');
     }
@@ -295,6 +298,24 @@ export class DatabaseVersionControlService {
     // schema
     await this.runSqlFile('./src/core/sql/schema/v3.schema.sql');
 
+    // authentication
+    await this.runSqlFile('./src/core/sql/authentication/register-v3.sql');
+
+    // map
+    await this.runSqlFile('./src/core/sql/map/original_map_vote_toggle.sql');
+    await this.runSqlFile('./src/core/sql/map/translated_map_vote_toggle.sql');
+    await this.runSqlFile('./src/core/sql/map/original_map_vote_upsert.sql');
+    await this.runSqlFile('./src/core/sql/map/translated_map_vote_upsert.sql');
+    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v3.sql');
+
+    // set version
+    await this.setVersionNumber(3);
+  }
+
+  async loadVersion4(): Promise<void> {
+    // schema
+    await this.runSqlFile('./src/core/sql/schema/v4.schema.sql');
+
     // words
     await this.runSqlFile('./src/core/sql/words/wordlike_string_upsert.sql');
     await this.runSqlFile(
@@ -325,7 +346,7 @@ export class DatabaseVersionControlService {
       './src/core/sql/question-answer/batch-answer-upsert.sql',
     );
 
-    await this.setVersionNumber(3);
+    await this.setVersionNumber(4);
   }
 
   async registerUser(

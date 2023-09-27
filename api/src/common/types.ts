@@ -97,6 +97,7 @@ export enum ErrorType {
   MapInsertFailed = 'MapInsertFailed',
   MapDeletionError = 'MapDeletionError',
   MapNotFound = 'MapNotFound',
+  MapVoteNotFound = 'MapVoteNotFound',
 
   DocumentIdNotProvided = 'DocumentIdNotProvided',
   DocumentNotFound = 'DocumentNotFound',
@@ -140,6 +141,8 @@ export enum TableNameType {
   documents = 'documents',
   document_word_entries = 'document_word_entries',
   word_ranges = 'word_ranges',
+  original_maps = 'original_maps',
+  translated_maps = 'translated_maps',
 }
 
 registerEnumType(TableNameType, {

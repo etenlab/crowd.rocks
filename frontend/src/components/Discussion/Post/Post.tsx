@@ -2,7 +2,7 @@ import { ReactElement, ReactNode } from 'react';
 
 import { chatbubbleEllipsesSharp } from 'ionicons/icons';
 import { StChatIcon } from '../../common/styled';
-import { VoteButtonsHerizontal } from '../../common/VoteButtonsHerizontal';
+import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import {
   AuthorContainer,
   CustomCard,
@@ -71,7 +71,7 @@ export function Post({
   av_file_url,
   av_file_type,
 }: PostProps) {
-  const voteButtonCom = vote ? <VoteButtonsHerizontal {...vote} /> : null;
+  const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
   const chatButton = discussion ? (
     <StChatIcon
       icon={chatbubbleEllipsesSharp}

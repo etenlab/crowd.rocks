@@ -34,7 +34,7 @@ import { useTr } from '../../../hooks/useTr';
 import { useTogglePhraseVoteStatusMutation } from '../../../hooks/useTogglePhraseVoteStatusMutation';
 
 import { AddListHeader } from '../../common/ListHeader';
-import { VoteButtonsHerizontal } from '../../common/VoteButtonsHerizontal';
+import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import { PageLayout } from '../../common/PageLayout';
 
 import { NewPhraseDefinitionForm } from '../NewPhraseDefinitionForm';
@@ -180,7 +180,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
     return (
       <div style={{ display: 'flex' }}>
         <IonTitle>Phrase: {phraseWithVote.phrase}</IonTitle>
-        <VoteButtonsHerizontal
+        <VoteButtonsHorizontal
           upVotes={phraseWithVote.upvotes}
           downVotes={phraseWithVote.downvotes}
           onVoteUpClick={() =>

@@ -1,30 +1,4 @@
-fragment MapPhraseWithVotesFragment on MapPhraseWithVotes {
-  phrase
-  phrase_id
-  language_code
-  dialect_code
-  geo_code
-  definition
-  definition_id
-  up_votes
-  down_votes
-  translation_id
-}
-
-fragment WordWithVotesFragment on MapWordWithVotes {
-  word
-  word_id
-  language_code
-  dialect_code
-  geo_code
-  definition
-  definition_id
-  up_votes
-  down_votes
-  translation_id
-}
-
-fragment MapFileOutputFragment on MapFileOutput {
+fragment MapDetailsOutputFragment on MapDetailsOutput {
   error
   mapFileInfo {
     is_original
@@ -46,73 +20,88 @@ fragment MapFileOutputFragment on MapFileOutput {
   }
 }
 
-fragment MapFileOutputEdgeFragment on MapFileOutputEdge {
+fragment MapDetailsOutputEdgeFragment on MapDetailsOutputEdge {
   cursor
   node {
-    ...MapFileOutputFragment
+    ...MapDetailsOutputFragment
   }
 }
 
-query GetOrigMapWords(
-  $original_map_id: ID
-  $o_language_code: String
-  $t_language_code: String
-  $t_dialect_code: String
-  $t_geo_code: String
+fragment MapWordOrPhraseFragment on MapWordOrPhrase {
+  id
+  type
+  o_id
+  o_like_string
+  o_definition
+  o_definition_id
+  o_language_code
+  o_dialect_code
+  o_geo_code
+}
+
+fragment MapWordsAndPhrasesEdgeFragment on MapWordsAndPhrasesEdge {
+  cursor
+  node {
+    ...MapWordOrPhraseFragment
+  }
+}
+
+fragment WordWithDefinitionFragment on WordWithDefinition {
+  word_id
+  word
+  language_code
+  dialect_code
+  geo_code
+  definition
+  definition_id
+}
+
+fragment PhraseWithDefinitionFragment on PhraseWithDefinition {
+  phrase_id
+  phrase
+  language_code
+  dialect_code
+  geo_code
+  definition
+  definition_id
+}
+
+query GetOrigMapWordsAndPhrases(
+  $lang: LanguageInput!
+  $after: ID
+  $first: Int
 ) {
-  getOrigMapWords(
-    input: {
-      original_map_id: $original_map_id
-      o_language_code: $o_language_code
-      t_language_code: $t_language_code
-      t_dialect_code: $t_dialect_code
-      t_geo_code: $t_geo_code
-    }
+  getOrigMapWordsAndPhrases(
+    input: { lang: $lang }
+    after: $after
+    first: $first
   ) {
-    origMapWords {
-      word
-      word_id
-      language_code
-      dialect_code
-      geo_code
-      definition
-      definition_id
-      translations {
-        ...MapPhraseWithVotesFragment
-        ...WordWithVotesFragment
-      }
+    edges {
+      ...MapWordsAndPhrasesEdgeFragment
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
     }
   }
 }
 
-query GetOrigMapPhrases(
-  $original_map_id: ID
-  $o_language_code: String
-  $t_language_code: String
-  $t_dialect_code: String
-  $t_geo_code: String
+query GetMapWordOrPhraseAsOrigByDefinitionId(
+  $definition_id: ID!
+  $is_word_definition: Boolean!
 ) {
-  getOrigMapPhrases(
+  getMapWordOrPhraseAsOrigByDefinitionId(
     input: {
-      original_map_id: $original_map_id
-      o_language_code: $o_language_code
-      t_language_code: $t_language_code
-      t_dialect_code: $t_dialect_code
-      t_geo_code: $t_geo_code
+      definition_id: $definition_id
+      is_word_definition: $is_word_definition
     }
   ) {
-    origMapPhrases {
-      phrase
-      phrase_id
-      language_code
-      dialect_code
-      geo_code
-      definition
-      definition_id
-      translations {
-        ...MapPhraseWithVotesFragment
-        ...WordWithVotesFragment
-      }
+    error
+    wordOrPhrase {
+      ...WordWithDefinitionFragment
+      ...PhraseWithDefinitionFragment
     }
   }
 }
@@ -120,7 +109,7 @@ query GetOrigMapPhrases(
 query GetAllMapsList($lang: LanguageInput, $after: ID, $first: Int) {
   getAllMapsList(input: { lang: $lang }, after: $after, first: $first) {
     edges {
-      ...MapFileOutputEdgeFragment
+      ...MapDetailsOutputEdgeFragment
     }
     pageInfo {
       ...PageInfoFragment
@@ -128,9 +117,9 @@ query GetAllMapsList($lang: LanguageInput, $after: ID, $first: Int) {
   }
 }
 
-query GetMapContent($id: ID!, $is_original: Boolean!) {
-  getMapContent(input: { map_id: $id, is_original: $is_original }) {
-    ...MapFileOutputFragment
+query GetMapDetails($map_id: ID!, $is_original: Boolean!) {
+  getMapDetails(input: { map_id: $map_id, is_original: $is_original }) {
+    ...MapDetailsOutputFragment
   }
 }
 
@@ -154,7 +143,7 @@ mutation MapUpload(
   ) {
     error
     mapFileOutput {
-      ...MapFileOutputFragment
+      ...MapDetailsOutputFragment
     }
   }
 }
@@ -175,5 +164,34 @@ mutation MapsTranslationsReset {
 mutation MapsReTranslate($forLangTag: String) {
   mapsReTranslate(forLangTag: $forLangTag) {
     error
+  }
+}
+
+fragment MapVoteStatusFragment on MapVoteStatus {
+  map_id
+  is_original
+  downvotes
+  upvotes
+}
+
+mutation ToggleMapVoteStatus(
+  $map_id: ID!
+  $is_original: Boolean!
+  $vote: Boolean!
+) {
+  toggleMapVoteStatus(map_id: $map_id, is_original: $is_original, vote: $vote) {
+    error
+    vote_status {
+      ...MapVoteStatusFragment
+    }
+  }
+}
+
+query GetMapVoteStatus($map_id: ID!, $is_original: Boolean!) {
+  getMapVoteStatus(map_id: $map_id, is_original: $is_original) {
+    error
+    vote_status {
+      ...MapVoteStatusFragment
+    }
   }
 }

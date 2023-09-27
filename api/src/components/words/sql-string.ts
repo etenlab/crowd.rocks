@@ -300,3 +300,37 @@ export function getWordListByLang({
     [...returnArr],
   ];
 }
+
+export type GetWordObjectByDefinitionId = {
+  word_id: string;
+  word: string;
+  definition: string;
+  definition_id: string;
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+};
+
+export function getWordByDefinitionIdSql(id: number): [string, [number]] {
+  return [
+    `
+      select
+        w.word_id ,
+        ws.wordlike_string as word,
+        w.language_code ,
+        w.dialect_code,
+        w.geo_code,
+        wd.word_definition_id,
+        wd.definition
+      from
+        words w
+      left join word_definitions wd on
+        w.word_id = wd.word_id
+      left join wordlike_strings ws on
+        w.wordlike_string_id = ws.wordlike_string_id
+      where
+        wd.word_definition_id = $1
+    `,
+    [id],
+  ];
+}
