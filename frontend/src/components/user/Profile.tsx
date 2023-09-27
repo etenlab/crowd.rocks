@@ -160,7 +160,7 @@ const Profile: React.FC = () => {
 
       {!show_update_avatar_form && (
         <IonItem>
-          <IonLabel>{tr('Avatar')}</IonLabel>
+          <IonLabel>{tr('Username')}</IonLabel>
           <div className="clickable" onClick={show_avatar_form}>
             {globals.get_avatar()}
           </div>
@@ -170,7 +170,7 @@ const Profile: React.FC = () => {
       {show_update_avatar_form && (
         <div>
           <IonItem>
-            <IonLabel position="floating">{tr('Avatar')}</IonLabel>
+            <IonLabel position="floating">{tr('Username')}</IonLabel>
             <IonInput
               value={new_avatar}
               type="text"
