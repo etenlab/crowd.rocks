@@ -9,6 +9,7 @@ import { DocumentsResolver } from './documents.resolver';
 import { DocumentsRepository } from './documents.repository';
 import { DocumentsService } from './documents.service';
 import { DocumentWordEntriesService } from './document-word-entries.service';
+import { WordRangesService } from './word-ranges.service';
 
 @Module({
   imports: [
@@ -18,11 +19,12 @@ import { DocumentWordEntriesService } from './document-word-entries.service';
     FileModule,
   ],
   providers: [
-    DocumentsResolver,
+    DocumentsRepository,
     DocumentsService,
     DocumentWordEntriesService,
-    DocumentsRepository,
+    WordRangesService,
+    DocumentsResolver,
   ],
-  exports: [DocumentsService, DocumentWordEntriesService],
+  exports: [DocumentsService, DocumentWordEntriesService, WordRangesService],
 })
 export class DocumentsModule {}

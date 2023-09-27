@@ -63,3 +63,82 @@ export function callDocumentWordEntryUpsertsProcedure({
     [document_ids, wordlike_string_ids, parent_wordlike_string_ids, token],
   ];
 }
+
+export type GetWordRangeRow = {
+  word_range_id: string;
+  begin_word: string;
+  end_word: string;
+};
+
+export function getWordRangeByIds(ids: number[]): [string, [number[]]] {
+  return [
+    `
+      select 
+        word_range_id,
+        begin_word,
+        end_word
+      from word_ranges
+      where word_range_id = any($1)
+    `,
+    [ids],
+  ];
+}
+
+export function getWordRangeByBeginWordIds(
+  ids: number[],
+): [string, [number[]]] {
+  return [
+    `
+      select distinct 
+        word_range_id,
+        begin_word,
+        end_word
+      from word_ranges
+      where begin_word = any($1);
+    `,
+    [ids],
+  ];
+}
+
+export function getWordRangeByDocumentId(id: number): [string, [number]] {
+  return [
+    `
+      select distinct 
+        word_range_id,
+        begin_word,
+        end_word
+      from word_ranges
+      join (
+        select
+          document_word_entry_id
+        from document_word_entries
+        where document_id = $1
+      ) dwes
+      on word_ranges.begin_word = dwes.document_word_entry_id;
+    `,
+    [id],
+  ];
+}
+
+export type WordRangeUpsertsProcedureOutputRow = {
+  p_word_range_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callWordRangeUpsertsProcedure({
+  begin_words,
+  end_words,
+  token,
+}: {
+  begin_words: number[];
+  end_words: number[];
+  token: string;
+}): [string, [number[], number[], string]] {
+  return [
+    `
+      call batch_word_range_upsert($1::bigint[], $2::bigint[], $3, null, null, '');
+    `,
+    [begin_words, end_words, token],
+  ];
+}

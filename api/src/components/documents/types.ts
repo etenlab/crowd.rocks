@@ -24,6 +24,13 @@ export class DocumentWordEntry {
   parent_wordlike_string: WordlikeString | null;
 }
 
+@ObjectType()
+export class WordRange {
+  @Field(() => ID) word_range_id: string;
+  @Field(() => DocumentWordEntry) begin: DocumentWordEntry;
+  @Field(() => DocumentWordEntry) end: DocumentWordEntry;
+}
+
 @InputType()
 export class TextyDocumentInput {
   @Field(() => String) file_id: string;
@@ -69,4 +76,16 @@ export class GetDocumentOutput extends GenericOutput {
 export class DocumentWordEntriesOutput extends GenericOutput {
   @Field(() => [DocumentWordEntry], { nullable: true })
   document_word_entries: (DocumentWordEntry | null)[];
+}
+
+@ObjectType()
+export class WordRangesOutput extends GenericOutput {
+  @Field(() => [WordRange], { nullable: true })
+  word_ranges: (WordRange | null)[];
+}
+
+@InputType()
+export class WordRangeUpsertInput {
+  @Field(() => String) begin_word: string;
+  @Field(() => String) end_word: string;
 }

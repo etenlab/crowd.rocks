@@ -109,6 +109,10 @@ export enum ErrorType {
 
   DocumentEntryReadError = 'DocumentEntryReadError',
   DocumentWordEntryInsertFailed = 'DocumentWordEntryInsertFailed',
+  DocumentWordEntryAlreadyExists = 'DocumentWordEntryAlreadyExists',
+  DocumentWordEntryNotFound = 'DocumentWordEntryNotFound',
+  WordRangeInsertFailed = 'WordRangeInsertFailed',
+
   QuestionItemInsertFailed = 'QuestionItemInsertFailed',
   QuestionInsertFailed = 'QuestionInsertFailed',
   AnswerInsertFailed = 'AnswerInsertFailed',
@@ -129,8 +133,13 @@ registerEnumType(FlagType, {
 export enum TableNameType {
   word_definitions = 'word_definitions',
   phrase_definitions = 'phrase_definitions',
+
   words = 'words',
   phrases = 'phrases',
+
+  documents = 'documents',
+  document_word_entries = 'document_word_entries',
+  word_ranges = 'word_ranges',
 }
 
 registerEnumType(TableNameType, {
