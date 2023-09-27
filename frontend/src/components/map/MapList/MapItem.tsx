@@ -4,7 +4,7 @@ import { downloadOutline, trashBin } from 'ionicons/icons';
 import { styled } from 'styled-components';
 
 import {
-  MapFileInfo,
+  MapDetailsInfo,
   useGetMapDetailsLazyQuery,
 } from '../../../generated/graphql';
 
@@ -14,8 +14,8 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { OrigBadge } from './styled';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
-  mapItem: MapFileInfo;
-  candidateForDeletionRef: React.MutableRefObject<MapFileInfo | undefined>;
+  mapItem: MapDetailsInfo;
+  candidateForDeletionRef: React.MutableRefObject<MapDetailsInfo | undefined>;
   setIsMapDeleteModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   showDelete: boolean;
 };
@@ -53,7 +53,7 @@ const NotStyledMapItem = ({
     getMapDetails({
       variables: {
         is_original: mapItem.is_original,
-        id: mapItem.is_original
+        map_id: mapItem.is_original
           ? mapItem.original_map_id!
           : mapItem.translated_map_id!,
       },
