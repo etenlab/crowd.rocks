@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps, useLocation } from 'react-router';
-import { IonBadge, IonIcon, IonLoading, useIonToast } from '@ionic/react';
-import { downloadOutline } from 'ionicons/icons';
+import {
+  IonBadge,
+  IonIcon,
+  IonLoading,
+  useIonRouter,
+  useIonToast,
+} from '@ionic/react';
+import { chatbubbleEllipsesSharp, downloadOutline } from 'ionicons/icons';
 import styled from 'styled-components';
 
 import { Caption } from '../../common/Caption/Caption';
@@ -14,10 +20,18 @@ import { downloadFromUrl } from '../../../common/utility';
 import { useTr } from '../../../hooks/useTr';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { OrigBadge } from '../MapList/styled';
+import { StChatIcon } from '../../common/styled';
+// import { Flag } from '../../flags/Flag';
+// import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
+
+const ORIGINAL_MAPS_TABELE = 'original_maps';
+const TRANSLATED_MAPS_TABELE = 'translated_maps';
 
 interface MapDetailsProps
   extends RouteComponentProps<{
     id: string;
+    nation_id: string;
+    language_id: string;
   }> {}
 
 export const MapDetails: React.FC<MapDetailsProps> = ({
@@ -26,14 +40,18 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   const { tr } = useTr();
   const [present] = useIonToast();
   const { search } = useLocation();
-  const isOriginal = useMemo(() => {
-    return new URLSearchParams(search).get('is_original') === 'true';
-  }, [search]);
+  const router = useIonRouter();
+
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  const isOriginal = useMemo(() => {
+    return new URLSearchParams(search).get('is_original') === 'true';
+  }, [search]);
+  const { id, nation_id, language_id } = match.params;
+
   const currentMapWithContent = useGetMapDetailsQuery({
-    variables: { id: match.params.id, is_original: isOriginal },
+    variables: { id, is_original: isOriginal },
     fetchPolicy: 'no-cache',
   });
 
@@ -99,6 +117,28 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
     setImageError(true);
   };
 
+  const chatButton = (
+    <StChatIcon
+      icon={chatbubbleEllipsesSharp}
+      onClick={() => {
+        router.push(
+          `/${nation_id}/${language_id}/1/discussion/${
+            isOriginal ? ORIGINAL_MAPS_TABELE : TRANSLATED_MAPS_TABELE
+          }/${id}`,
+        );
+      }}
+    />
+  );
+
+  // const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
+  // const flagsCom = flags ? (
+  //   <Flag
+  //     parent_table={flags.parent_table}
+  //     parent_id={flags.parent_id}
+  //     flag_names={flags.flag_names}
+  //   />
+  // ) : null;
+
   return (
     <>
       <Caption>
@@ -114,6 +154,7 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
                 : ''}
             </IonBadge>
           )}
+          {chatButton}
           <IonIcon
             icon={downloadOutline}
             onClick={handleDownloadSvg}
