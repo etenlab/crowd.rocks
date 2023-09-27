@@ -3,6 +3,7 @@ import {
   Field,
   ID,
   InputType,
+  Int,
   ObjectType,
 } from '@nestjs/graphql';
 import { LanguageInput, LanguageOutput } from 'src/components/common/types';
@@ -12,7 +13,7 @@ import { Phrase } from '../phrases/types';
 import { Word } from '../words/types';
 
 @ObjectType()
-export class MapFileInfo {
+export class MapDetailsInfo {
   @Field(() => Boolean) is_original: boolean;
   @Field(() => ID) original_map_id: string;
   @Field(() => String, { nullable: true }) translated_percent?: string;
@@ -28,9 +29,9 @@ export class MapFileInfo {
   @Field(() => ID) content_file_id: string;
 }
 @ObjectType()
-export class MapFileOutput extends GenericOutput {
-  @Field(() => MapFileInfo, { nullable: true })
-  mapFileInfo?: MapFileInfo | null;
+export class MapDetailsOutput extends GenericOutput {
+  @Field(() => MapDetailsInfo, { nullable: true })
+  mapFileInfo?: MapDetailsInfo | null;
 }
 @InputType()
 export class GetOrigMapListInput {
@@ -38,8 +39,8 @@ export class GetOrigMapListInput {
 }
 @ObjectType()
 export class MapUploadOutput extends GenericOutput {
-  @Field(() => MapFileOutput, { nullable: true })
-  mapFileOutput?: MapFileOutput | null | undefined;
+  @Field(() => MapDetailsOutput, { nullable: true })
+  mapFileOutput?: MapDetailsOutput | null | undefined;
 }
 @InputType()
 export class MapDeleteInput {
@@ -55,7 +56,7 @@ export class MapDeleteOutput extends GenericOutput {
 
 @ObjectType()
 export class GetOrigMapsListOutput {
-  @Field(() => [MapFileOutput]) mapList: MapFileOutput[];
+  @Field(() => [MapDetailsOutput]) mapList: MapDetailsOutput[];
 }
 
 @InputType()
@@ -64,19 +65,19 @@ export class GetAllMapsListInput {
 }
 
 @ObjectType()
-export class MapFileOutputEdge {
+export class MapDetailsOutputEdge {
   @Field(() => ID) cursor: string;
-  @Field(() => MapFileOutput) node: MapFileOutput;
+  @Field(() => MapDetailsOutput) node: MapDetailsOutput;
 }
 
 @ObjectType()
 export class MapFileListConnection {
-  @Field(() => [MapFileOutputEdge]) edges: MapFileOutputEdge[];
+  @Field(() => [MapDetailsOutputEdge]) edges: MapDetailsOutputEdge[];
   @Field(() => PageInfo) pageInfo: PageInfo;
 }
 
 @InputType()
-export class GetMapContentInput {
+export class GetMapDetailsInput {
   @Field(() => ID) map_id: string;
   @Field(() => Boolean) is_original: boolean;
 }
@@ -231,4 +232,51 @@ export class GetOrigMapPhrasesInput {
   @Field(() => String, { nullable: true }) t_language_code?: string;
   @Field(() => String, { nullable: true }) t_dialect_code?: string;
   @Field(() => String, { nullable: true }) t_geo_code?: string;
+}
+
+////////////////////////////////////////////////////
+////////////////////Voting//////////////////////////
+////////////////////////////////////////////////////
+
+@ObjectType()
+export class MapVote {
+  @Field(() => ID) maps_vote_id: string;
+  @Field(() => ID) map_id: string;
+  @Field(() => Boolean) is_original: boolean;
+  @Field(() => ID) user_id: string;
+  @Field(() => Boolean) vote: boolean;
+  @Field(() => Date) last_updated_at: Date;
+}
+
+@ObjectType()
+export class MapVoteOutput extends GenericOutput {
+  @Field(() => MapVote, { nullable: true })
+  map_vote: MapVote | null;
+}
+
+@InputType()
+export class MapVoteUpsertInput {
+  @Field(() => ID) map_id: string;
+  @Field(() => Boolean) is_original: boolean;
+  @Field(() => Boolean) vote: boolean;
+}
+
+@ObjectType()
+export class MapVoteStatus {
+  @Field(() => ID) map_id: string;
+  @Field(() => Boolean) is_original: boolean;
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class MapVoteStatusOutputRow extends GenericOutput {
+  @Field(() => MapVoteStatus, { nullable: true })
+  vote_status: MapVoteStatus | null;
+}
+
+@ObjectType()
+export class MapVoteStatusOutput extends GenericOutput {
+  @Field(() => [MapVoteStatus])
+  vote_status_list: MapVoteStatus[];
 }

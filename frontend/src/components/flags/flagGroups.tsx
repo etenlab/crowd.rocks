@@ -13,3 +13,11 @@ export const WORD_AND_PHRASE_FLAGS: FlagName[] = [
     role: 'admin-only',
   },
 ];
+
+export const MAPS_FLAGS: FlagName[] = [
+  {
+    label: 'Fast Translation',
+    flag: FlagType.FastTranslation,
+    role: 'admin-only',
+  },
+];
