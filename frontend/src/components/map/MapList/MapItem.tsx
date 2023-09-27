@@ -4,8 +4,8 @@ import { downloadOutline, trashBin } from 'ionicons/icons';
 import { styled } from 'styled-components';
 
 import {
-  MapFileInfo,
-  useGetMapContentLazyQuery,
+  MapDetailsInfo,
+  useGetMapDetailsLazyQuery,
 } from '../../../generated/graphql';
 
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
@@ -14,8 +14,8 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { OrigBadge } from './styled';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
-  mapItem: MapFileInfo;
-  candidateForDeletionRef: React.MutableRefObject<MapFileInfo | undefined>;
+  mapItem: MapDetailsInfo;
+  candidateForDeletionRef: React.MutableRefObject<MapDetailsInfo | undefined>;
   setIsMapDeleteModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   showDelete: boolean;
 };
@@ -36,7 +36,7 @@ const NotStyledMapItem = ({
   } = useAppContext();
   const downloadFlagRef = useRef<'original' | 'translated' | null>(null);
 
-  const [getMapContent, mapContent] = useGetMapContentLazyQuery();
+  const [getMapDetails, mapContent] = useGetMapDetailsLazyQuery();
 
   const routerLink = `/US/${appLanguage.lang.tag}/1/maps/details/${
     mapItem.is_original ? mapItem.original_map_id : mapItem.translated_map_id
@@ -50,10 +50,10 @@ const NotStyledMapItem = ({
 
   const handleDownloadSvg: MouseEventHandler<HTMLIonIconElement> = (e) => {
     downloadFlagRef.current = mapItem.is_original ? 'original' : 'translated';
-    getMapContent({
+    getMapDetails({
       variables: {
         is_original: mapItem.is_original,
-        id: mapItem.is_original
+        map_id: mapItem.is_original
           ? mapItem.original_map_id!
           : mapItem.translated_map_id!,
       },
@@ -68,11 +68,11 @@ const NotStyledMapItem = ({
     !mapContent.error &&
     !mapContent.loading &&
     downloadFlagRef.current === 'original' &&
-    mapContent.data.getMapContent.mapFileInfo
+    mapContent.data.getMapDetails.mapFileInfo
   ) {
     downloadFromUrl(
-      mapContent.data.getMapContent.mapFileInfo.map_file_name,
-      mapContent.data.getMapContent.mapFileInfo.content_file_url,
+      mapContent.data.getMapDetails.mapFileInfo.map_file_name,
+      mapContent.data.getMapDetails.mapFileInfo.content_file_url,
     );
     downloadFlagRef.current = null;
   }
@@ -82,11 +82,11 @@ const NotStyledMapItem = ({
     !mapContent.error &&
     !mapContent.loading &&
     downloadFlagRef.current === 'translated' &&
-    mapContent.data.getMapContent.mapFileInfo
+    mapContent.data.getMapDetails.mapFileInfo
   ) {
     downloadFromUrl(
-      mapContent.data.getMapContent.mapFileInfo.map_file_name_with_langs,
-      mapContent.data.getMapContent.mapFileInfo.content_file_url,
+      mapContent.data.getMapDetails.mapFileInfo.map_file_name_with_langs,
+      mapContent.data.getMapDetails.mapFileInfo.content_file_url,
     );
     downloadFlagRef.current = null;
   }

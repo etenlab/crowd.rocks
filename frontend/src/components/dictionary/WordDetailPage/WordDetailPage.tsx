@@ -34,7 +34,7 @@ import { useToggleWordVoteStatusMutation } from '../../../hooks/useToggleWordVot
 import { useToggleWordDefinitionVoteStatusMutation } from '../../../hooks/useToggleWordDefinitionVoteStatusMutation';
 
 import { AddListHeader } from '../../common/ListHeader';
-import { VoteButtonsHerizontal } from '../../common/VoteButtonsHerizontal';
+import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import { NewWordDefinitionForm } from '../NewWordDefinitionForm';
 import { chatbubbleEllipsesSharp } from 'ionicons/icons';
 
@@ -172,7 +172,7 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
     return (
       <div style={{ display: 'flex' }}>
         <IonTitle>Word: {wordWithVote.word}</IonTitle>
-        <VoteButtonsHerizontal
+        <VoteButtonsHorizontal
           upVotes={wordWithVote.upvotes}
           downVotes={wordWithVote.downvotes}
           onVoteUpClick={() => {

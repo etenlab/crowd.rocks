@@ -29,3 +29,6 @@ yarn-error.log*
 .eslintcache
 
 dist/
+/test-results/
+/playwright-report/
+/playwright/.cache/

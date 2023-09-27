@@ -317,7 +317,7 @@ const Body: React.FC = () => {
                 <IonIcon
                   icon={menu}
                   onClick={toggleMenu}
-                  className="clickable"
+                  className="clickable expand-icon"
                 />
               </div>
             </div>
@@ -342,7 +342,7 @@ const Body: React.FC = () => {
                       </div>
 
                       <div
-                        className="clickable ion-text-end"
+                        className="clickable ion-text-end logout"
                         onClick={click_logout}
                       >
                         {tr('Logout')}

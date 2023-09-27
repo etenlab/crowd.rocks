@@ -46,8 +46,10 @@ export function loadPersistedStore(): StateType {
 
     const newState = JSON.parse(state) as StateType;
     return {
+      ...initialState,
       ...newState,
       global: {
+        ...initialState.global,
         ...newState.global,
       },
     };

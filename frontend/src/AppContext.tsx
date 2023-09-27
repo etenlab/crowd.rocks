@@ -35,6 +35,7 @@ export interface ContextType {
     changeTranslationTargetLanguage: (langInfo: LanguageInfo | null) => void;
     setSourceLanguage: (targetLanguage: LanguageInfo | null) => void;
     setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
+    setUpdatedTrDefinitionIds: (definitionIds: Array<string>) => void;
   };
 }
 
@@ -72,6 +73,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
     setTargetLanguage,
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
+    setUpdatedTrDefinitionIds,
   } = useGlobal({
     dispatch,
   });
@@ -320,6 +322,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
       changeTranslationTargetLanguage,
       setSourceLanguage,
       setTargetLanguage,
+      setUpdatedTrDefinitionIds,
     },
   };
 

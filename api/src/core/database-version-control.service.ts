@@ -37,6 +37,9 @@ export class DatabaseVersionControlService {
         console.log('Updating database to version 2');
         await this.loadVersion2();
       // note that there is no break needed in the switch's cases
+      case 2:
+        console.log('Updating database to version 3');
+        await this.loadVersion3();
       default:
         console.error('Database version is current');
     }
@@ -176,7 +179,7 @@ export class DatabaseVersionControlService {
     await this.registerUser(
       'admin@crowd.rocks',
       'Admin',
-      this.config.CR_ADMIN_PASSWORD || 'asdfasdf',
+      this.config.ADMIN_PASSWORD || 'asdfasdf',
     );
     await this.registerUser('anonymous@crowd.rocks', 'Anonymous', 'asdfasdf');
 
@@ -287,6 +290,23 @@ export class DatabaseVersionControlService {
 
     await this.setVersionNumber(2);
   }
+  async loadVersion3(): Promise<void> {
+    // schema
+    await this.runSqlFile('./src/core/sql/schema/v3.schema.sql');
+
+    // authentication
+    await this.runSqlFile('./src/core/sql/authentication/register-v3.sql');
+
+    // map
+    await this.runSqlFile('./src/core/sql/map/original_map_vote_toggle.sql');
+    await this.runSqlFile('./src/core/sql/map/translated_map_vote_toggle.sql');
+    await this.runSqlFile('./src/core/sql/map/original_map_vote_upsert.sql');
+    await this.runSqlFile('./src/core/sql/map/translated_map_vote_upsert.sql');
+    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v3.sql');
+
+    // set version
+    await this.setVersionNumber(3);
+  }
 
   async registerUser(
     email: string,
@@ -318,8 +338,13 @@ export class DatabaseVersionControlService {
   }
 
   async runSqlFile(path: string): Promise<void> {
-    console.log('loading SQL:', path);
-    const data = readFileSync(path, 'utf8');
-    await this.pg.pool.query(data, []);
+    try {
+      console.log('loading SQL:', path);
+      const data = readFileSync(path, 'utf8');
+
+      await this.pg.pool.query(data, []);
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
