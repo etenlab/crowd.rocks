@@ -9,6 +9,7 @@ import {
   changeTranslationTargetLanguage as changeTranslationTargetLanguageAction,
   setTargetLanguage as setTargetLangAction,
   setSourceLanguage as setSourceLangAction,
+  setUpdatedTrDefinitionIds as setUpdatedTrDefinitionIdsAction,
 } from '../reducers/global.actions';
 
 import { type ActionType } from '../reducers/index';
@@ -76,6 +77,15 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     dispatchRef.current.dispatch(setSourceLangAction(language));
   }, []);
 
+  const setUpdatedTrDefinitionIds = useCallback(
+    (definitionIds: Array<string>) => {
+      dispatchRef.current.dispatch(
+        setUpdatedTrDefinitionIdsAction(definitionIds),
+      );
+    },
+    [],
+  );
+
   return {
     setOriginalSiteTextMap,
     setTranslationSiteTextMap,
@@ -85,5 +95,6 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     changeTranslationTargetLanguage,
     setSourceLanguage,
     setTargetLanguage,
+    setUpdatedTrDefinitionIds,
   };
 }

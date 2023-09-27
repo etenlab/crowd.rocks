@@ -37,10 +37,10 @@ import { WordUpsertInput } from '../words/types';
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 import { LanguageInput } from 'src/components/common/types';
 import {
-  MapPhraseTranslations,
-  MapPhraseWithVotes,
-  MapWordTranslations,
-  MapWordWithVotes,
+  MapPhraseWithTranslations,
+  MapPhraseAsTranslation,
+  MapWordWithTranslations,
+  MapWordAsTranslation,
 } from '../maps/types';
 
 @Injectable()
@@ -502,9 +502,9 @@ export class WordToWordTranslationsService {
   }
 
   chooseBestTranslation(
-    wordOrPhraseTranslated: MapWordTranslations | MapPhraseTranslations,
+    wordOrPhraseTranslated: MapWordWithTranslations | MapPhraseWithTranslations,
     langRestrictions?: LanguageInput,
-  ): MapWordWithVotes | MapPhraseWithVotes | undefined {
+  ): MapWordAsTranslation | MapPhraseAsTranslation | undefined {
     const res = wordOrPhraseTranslated?.translations?.reduce(
       (bestTr, currTr) => {
         if (
@@ -541,7 +541,7 @@ export class WordToWordTranslationsService {
         }
         return bestTr;
       },
-      {} as MapWordWithVotes | MapPhraseWithVotes,
+      {} as MapWordAsTranslation | MapPhraseAsTranslation,
     );
 
     return res;

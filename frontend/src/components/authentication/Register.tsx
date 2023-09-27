@@ -144,7 +144,7 @@ const Register: React.FC = () => {
         {is_email_invalid && <div>{tr('Email Invalid')}</div>}
 
         <IonItem counter={true}>
-          <IonLabel position="floating">{tr('Avatar')}</IonLabel>
+          <IonLabel position="floating">{tr('Username')}</IonLabel>
           <IonInput
             value={avatar}
             inputmode="text"
@@ -156,9 +156,9 @@ const Register: React.FC = () => {
           />
         </IonItem>
 
-        {is_avatar_too_long && <div>{tr('Avatar too long')}</div>}
-        {is_avatar_too_short && <div>{tr('Avatar too short')}</div>}
-        {is_avatar_unavailable && <div>{tr('Avatar Unavailable')}</div>}
+        {is_avatar_too_long && <div>{tr('Username too long')}</div>}
+        {is_avatar_too_short && <div>{tr('Username too short')}</div>}
+        {is_avatar_unavailable && <div>{tr('Username Unavailable')}</div>}
         <IonItem counter={true}>
           <IonLabel position="floating">{tr('Password')}</IonLabel>
           <IonInput

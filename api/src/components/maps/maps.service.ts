@@ -7,10 +7,14 @@ import {
   GetOrigMapsListOutput,
   GetOrigMapWordsInput,
   GetOrigMapWordsOutput,
-  MapFileOutput,
-  MapPhraseTranslations,
-  MapWordTranslations,
-  MapFileOutputEdge,
+  MapDetailsOutput,
+  MapPhraseWithTranslations,
+  MapWordWithTranslations,
+  MapDetailsOutputEdge,
+  GetOrigMapWordsAndPhrasesInput,
+  MapWordsAndPhrasesConnection,
+  MapWordOrPhraseAsOrigOutput,
+  GetMapWordOrPhraseByDefinitionIdInput,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
@@ -33,7 +37,6 @@ import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
 import { Readable } from 'stream';
 
-// const TEXTY_INODE_NAMES = ['text', 'textPath']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
 const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Nodes that definitenly don't contain any text. skipped for a performance purposes.
@@ -115,7 +118,7 @@ export class MapsService {
     map_id,
     dbPoolClient,
     token,
-  }: IParseOrigMapParams): Promise<MapFileOutput> {
+  }: IParseOrigMapParams): Promise<MapDetailsOutput> {
     const origMapInfo = await this.mapsRepository.getOrigMapWithContentUrl(
       map_id,
     );
@@ -287,7 +290,7 @@ export class MapsService {
       let startCursor: string | null = null;
       let endCursor: string | null = null;
 
-      const mapFileOutputEdge: MapFileOutputEdge[] = [];
+      const mapFileOutputEdge: MapDetailsOutputEdge[] = [];
 
       const makeCursorStr = (id: string, is_original: boolean) => {
         return `${id}-${is_original ? 'true' : 'false'}`;
@@ -357,11 +360,11 @@ export class MapsService {
     };
   }
 
-  async getOrigMapContent(id: string): Promise<MapFileOutput> {
+  async getOrigMapWithContentUrl(id: string): Promise<MapDetailsOutput> {
     return this.mapsRepository.getOrigMapWithContentUrl(id);
   }
 
-  async getTranslatedMapContent(id: string): Promise<MapFileOutput> {
+  async getTranslatedMapWithContentUrl(id: string): Promise<MapDetailsOutput> {
     const mapFileInfo =
       await this.mapsRepository.getTranslatedMapWithContentUrl(id);
     return mapFileInfo;
@@ -424,15 +427,14 @@ export class MapsService {
     const foundWords: string[] = [];
     const foundPhrases: string[] = [];
     foundTexts.forEach((text) => {
-      const words = text
-        .split(' ')
-        .map((w) => w.trim())
-        .filter((w) => w.length > 1);
+      const words = text.split(' ').map((w) => w.trim());
       if (words.length === 0) return;
       if (words.length > 1) {
-        foundPhrases.push(text);
-      } else {
-        foundWords.push(text);
+        // join trimmed words using single space, thus remove multiple spaces
+        foundPhrases.push(words.join(' '));
+      } else if (words[0].length > 1 && isNaN(Number(words[0]))) {
+        // push only words longer than 1 symbol and only not numbers
+        foundWords.push(words[0]);
       }
     });
     return {
@@ -467,8 +469,64 @@ export class MapsService {
     return origMapPhrases;
   }
 
+  async getOrigMapWordsAndPhrases(params: {
+    input: GetOrigMapWordsAndPhrasesInput;
+    first?: number | null;
+    after?: string | null;
+  }): Promise<MapWordsAndPhrasesConnection | undefined> {
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      const res = this.mapsRepository.getOrigMapWordsAndPhrases(
+        dbPoolClient,
+        params,
+      );
+      return res;
+    } catch (e) {
+      Logger.error(`mapsService#getOrigMapWordsAndPhrases: ${e}`);
+    } finally {
+      dbPoolClient.release();
+    }
+  }
+
+  async getMapWordOrPhraseUnionByDefinitionId({
+    definition_id,
+    is_word_definition,
+  }: GetMapWordOrPhraseByDefinitionIdInput): Promise<MapWordOrPhraseAsOrigOutput> {
+    if (is_word_definition) {
+      const word = await this.wordsService.getWordByDefinitionId(
+        definition_id,
+        null,
+      );
+      if (!word)
+        return {
+          error: ErrorType.WordNotFound,
+          wordOrPhrase: null,
+        };
+      return {
+        error: ErrorType.NoError,
+        wordOrPhrase: word,
+      };
+    } else {
+      const phrase = await this.phrasesService.getPhraseByDefinitionId(
+        definition_id,
+        null,
+      );
+      if (!phrase)
+        return {
+          error: ErrorType.PhraseNotFound,
+          wordOrPhrase: null,
+        };
+      return {
+        error: ErrorType.NoError,
+        wordOrPhrase: phrase,
+      };
+    }
+  }
+
   checkForLanguageCodePresence(
-    origMapWordsOrPhrases: Array<MapWordTranslations | MapPhraseTranslations>,
+    origMapWordsOrPhrases: Array<
+      MapWordWithTranslations | MapPhraseWithTranslations
+    >,
   ): boolean {
     origMapWordsOrPhrases.forEach((wordOrPhrase) => {
       if (!wordOrPhrase.language_code) {
@@ -613,7 +671,7 @@ export class MapsService {
     });
 
     const origMapWordsAndPhrases: Array<
-      MapWordTranslations | MapPhraseTranslations
+      MapWordWithTranslations | MapPhraseWithTranslations
     > = [...origMapWords, ...origMapPhrases];
 
     let targetLanguagesFullTags: Array<string>;
@@ -888,7 +946,7 @@ export class MapsService {
   }
 
   getLangFullTags(
-    wordsOrPhrases: Array<MapWordTranslations | MapPhraseTranslations>,
+    wordsOrPhrases: Array<MapWordWithTranslations | MapPhraseWithTranslations>,
   ): Array<string> {
     const foundLangs: Array<string> = [];
     wordsOrPhrases.forEach((wordOrPhrase) => {
