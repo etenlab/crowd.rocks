@@ -296,6 +296,12 @@ export class DatabaseVersionControlService {
     // schema
     await this.runSqlFile('./src/core/sql/schema/v3.schema.sql');
 
+    // map
+    await this.runSqlFile('./src/core/sql/map/original_map_vote_toggle.sql');
+    await this.runSqlFile('./src/core/sql/map/translated_map_vote_toggle.sql');
+    await this.runSqlFile('./src/core/sql/map/original_map_vote_upsert.sql');
+    await this.runSqlFile('./src/core/sql/map/translated_map_vote_upsert.sql');
+
     // set version
     await this.setVersionNumber(3);
   }
