@@ -3,7 +3,7 @@ create or replace procedure batch_document_word_entry_upsert(
   in p_wordlike_string_ids bigint[],
   in p_parent_wordlike_string_ids bigint[],
   in p_token varchar(512),
-  inout p_document_word_enty_ids bigint[],
+  inout p_document_word_entry_ids bigint[],
   inout p_error_types varchar(32)[],
   inout p_error_type varchar(32)
 )
@@ -25,7 +25,7 @@ begin
   if v_document_ids_length != v_wordlike_string_ids_length or
     v_document_ids_length != v_parent_wordlike_string_ids_length
   then
-    p_error_type := "InvalidInputs";
+    p_error_type := 'InvalidInputs';
     return;
   end if;
   
@@ -45,7 +45,7 @@ begin
       v_temp_error_type
     );
 
-    p_document_word_enty_ids := array_append(p_document_word_enty_ids, v_temp_document_word_entry_id);
+    p_document_word_entry_ids := array_append(p_document_word_entry_ids, v_temp_document_word_entry_id);
     p_error_types := array_append(p_error_types, v_temp_error_type);
   end loop;
 

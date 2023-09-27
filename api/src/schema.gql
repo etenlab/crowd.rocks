@@ -73,6 +73,7 @@ type EmailResponseOutput {
 }
 
 enum ErrorType {
+  AnswerInsertFailed
   AvatarNotFound
   AvatarTooLong
   AvatarTooShort
@@ -130,6 +131,8 @@ enum ErrorType {
   PrefixTooLong
   PrefixTooShort
   ProvidedIdIsMalformed
+  QuestionInsertFailed
+  QuestionItemInsertFailed
   RankInvalid
   RankUnchanged
   SiteTextPhraseDefinitionAlreadyExists
