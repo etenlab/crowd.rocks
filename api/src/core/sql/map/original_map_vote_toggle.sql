@@ -3,7 +3,7 @@ create or replace procedure original_map_vote_toggle(
   in p_map_id bigint,
   in p_vote boolean,
   in p_token varchar(512),
-  inout p_original_maps_vote_id bigint,
+  inout p_maps_vote_id bigint,
   inout p_error_type varchar(32)
 )
 language plpgsql
@@ -62,17 +62,17 @@ begin
   on conflict (map_id, user_id)
   do update set vote = EXCLUDED.vote
   returning maps_vote_id
-  into p_original_maps_vote_id;
+  into p_maps_vote_id;
 
-  if p_original_maps_vote_id is null then
+  if p_maps_vote_id is null then
     select maps_vote_id
     from original_maps_votes
     where map_id = p_map_id
       and user_id = v_user_id
-    into p_original_maps_vote_id;
+    into p_maps_vote_id;
   end if;
 
-  if p_original_maps_vote_id is null then
+  if p_maps_vote_id is null then
     return;
   end if;
   

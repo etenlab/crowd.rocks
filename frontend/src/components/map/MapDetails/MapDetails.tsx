@@ -14,6 +14,7 @@ import { Caption } from '../../common/Caption/Caption';
 
 import {
   ErrorType,
+  GetMapVoteStatusDocument,
   TableNameType,
   useGetMapDetailsQuery,
   useGetMapVoteStatusQuery,
@@ -61,10 +62,11 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
 
   const currentMapVoteStatus = useGetMapVoteStatusQuery({
     variables: { map_id: id, is_original: isOriginal },
-    fetchPolicy: 'no-cache',
   });
 
-  const [toggleMapVoteStatus] = useToggleMapVoteStatusMutation();
+  const [toggleMapVoteStatus] = useToggleMapVoteStatusMutation({
+    refetchQueries: [GetMapVoteStatusDocument],
+  });
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const currMapContent = currentMapWithContent?.data?.getMapDetails;
