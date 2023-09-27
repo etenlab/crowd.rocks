@@ -309,6 +309,22 @@ export class DatabaseVersionControlService {
       './src/core/sql/document/batch_document_word_entry_upsert.sql',
     );
 
+    // question-answer
+    await this.runSqlFile(
+      './src/core/sql/question-answer/question-item-upsert.sql',
+    );
+    await this.runSqlFile('./src/core/sql/question-answer/question-upsert.sql');
+    await this.runSqlFile('./src/core/sql/question-answer/answer-upsert.sql');
+    await this.runSqlFile(
+      './src/core/sql/question-answer/batch-question-item-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/question-answer/batch-question-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/question-answer/batch-answer-upsert.sql',
+    );
+
     await this.setVersionNumber(3);
   }
 

@@ -14,7 +14,7 @@ create table questions (
   question_items bigint[] not null, -- references question_items(question_item_id)
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique (parent_table, parent_id, question_type_is_multiselect, question)
+  unique (parent_table, parent_id, question_type_is_multiselect, question, created_by)
 );
 
 create table answers (

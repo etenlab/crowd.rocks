@@ -109,6 +109,9 @@ export enum ErrorType {
 
   DocumentEntryReadError = 'DocumentEntryReadError',
   DocumentWordEntryInsertFailed = 'DocumentWordEntryInsertFailed',
+  QuestionItemInsertFailed = 'QuestionItemInsertFailed',
+  QuestionInsertFailed = 'QuestionInsertFailed',
+  AnswerInsertFailed = 'AnswerInsertFailed',
 }
 
 registerEnumType(ErrorType, {
