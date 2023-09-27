@@ -7,7 +7,7 @@ import {
   GetOrigMapPhrasesOutput,
   GetOrigMapsListOutput,
   GetOrigMapWordsOutput,
-  MapFileOutput,
+  MapDetailsOutput,
   MapPhraseWithTranslations,
   MapPhraseAsTranslation,
   MapWordWithTranslations,
@@ -226,7 +226,7 @@ export class MapsRepository {
       `;
     const resQ = await this.pg.pool.query(sqlStr, params);
 
-    const mapList = resQ.rows.map<MapFileOutput>(
+    const mapList = resQ.rows.map<MapDetailsOutput>(
       ({
         original_map_id,
         map_file_name,
@@ -320,7 +320,7 @@ export class MapsRepository {
     `;
     const resQ = await this.pg.pool.query(sqlStr, params);
 
-    const mapList = resQ.rows.map<MapFileOutput>(
+    const mapList = resQ.rows.map<MapDetailsOutput>(
       ({
         translated_map_id,
         original_map_id,
@@ -362,7 +362,7 @@ export class MapsRepository {
     return { mapList };
   }
 
-  async getOrigMapInfo(id: string): Promise<MapFileOutput> {
+  async getOrigMapInfo(id: string): Promise<MapDetailsOutput> {
     const params = [id];
     const sqlStr = `
         select
@@ -388,7 +388,7 @@ export class MapsRepository {
 
     const resQ = await this.pg.pool.query(sqlStr, params);
 
-    const origMapList = resQ.rows.map<MapFileOutput>(
+    const origMapList = resQ.rows.map<MapDetailsOutput>(
       ({
         original_map_id,
         map_file_name,
@@ -426,7 +426,7 @@ export class MapsRepository {
     return { ...origMapList[0] };
   }
 
-  async getOrigMapWithContentUrl(id: string): Promise<MapFileOutput> {
+  async getOrigMapWithContentUrl(id: string): Promise<MapDetailsOutput> {
     const resQ = await this.pg.pool.query(
       `
         select 
@@ -487,7 +487,7 @@ export class MapsRepository {
     };
   }
 
-  async getTranslatedMapWithContentUrl(id: string): Promise<MapFileOutput> {
+  async getTranslatedMapWithContentUrl(id: string): Promise<MapDetailsOutput> {
     const resQ = await this.pg.pool.query(
       `
       select

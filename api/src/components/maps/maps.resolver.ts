@@ -20,23 +20,28 @@ import {
   MapDeleteInput,
   MapDeleteOutput,
   MapUploadOutput,
-  MapFileOutput as MapDetailsOutput,
-  GetMapContentInput as GetMapDetailsInput,
+  MapDetailsOutput,
+  GetMapDetailsInput,
   GetOrigMapWordsAndPhrasesInput,
   MapWordsAndPhrasesConnection,
   MapWordOrPhraseAsOrigOutput,
   GetMapWordOrPhraseByDefinitionIdInput,
+  MapVoteOutput,
+  MapVoteUpsertInput,
+  MapVoteStatusOutputRow,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { ErrorType, GenericOutput } from 'src/common/types';
 import { FileService } from '../file/file.service';
+import { MapVotesService } from './map-votes.service';
 
 @Injectable()
 @Resolver(Map) // todo: wtf with paramenter, looks like `Map` is wrong and redundant here.
 export class MapsResolver {
   constructor(
-    private mapService: MapsService,
+    private mapsService: MapsService,
+    private mapVotesService: MapVotesService,
     private authenticationService: AuthenticationService,
     private fileService: FileService,
   ) {}
@@ -95,7 +100,7 @@ export class MapsResolver {
       };
     }
     try {
-      const savedParsedMap = await this.mapService.saveAndParseNewMap({
+      const savedParsedMap = await this.mapsService.saveAndParseNewMap({
         content_file_id: String(uploadedContent.file.id),
         mapFileName: map_file_name,
         previewFileId: previewFileId!,
@@ -107,7 +112,7 @@ export class MapsResolver {
         );
         throw new Error(ErrorType.MapNotFound);
       }
-      await this.mapService.translateOrigMapsByIds(
+      await this.mapsService.translateOrigMapsByIds(
         [savedParsedMap.mapFileInfo.original_map_id],
         bearer,
       );
@@ -141,7 +146,7 @@ export class MapsResolver {
     }
     Logger.debug(`Mutation mapDelete, id: ` + mapId);
     try {
-      const deletedMapId = await this.mapService.deleteMap(mapId, is_original);
+      const deletedMapId = await this.mapsService.deleteMap(mapId, is_original);
 
       return {
         deletedMapId,
@@ -168,7 +173,7 @@ export class MapsResolver {
       };
     }
     try {
-      await this.mapService.translationsReset(userToken);
+      await this.mapsService.translationsReset(userToken);
       return {
         error: ErrorType.NoError,
       };
@@ -196,7 +201,7 @@ export class MapsResolver {
       };
     }
     try {
-      await this.mapService.reTranslate(userToken, forLangTag!);
+      await this.mapsService.reTranslate(userToken, forLangTag!);
       return {
         error: ErrorType.NoError,
       };
@@ -211,7 +216,7 @@ export class MapsResolver {
   async getOrigMapsList(
     @Args('input') input: GetOrigMapListInput,
   ): Promise<GetOrigMapsListOutput> {
-    const maps = await this.mapService.getOrigMaps();
+    const maps = await this.mapsService.getOrigMaps();
     return maps;
   }
 
@@ -221,7 +226,7 @@ export class MapsResolver {
     @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
   ): Promise<MapFileListConnection> {
-    return this.mapService.getAllMapsList({
+    return this.mapsService.getAllMapsList({
       lang: input.lang,
       first,
       after,
@@ -233,8 +238,8 @@ export class MapsResolver {
     @Args('input') input: GetMapDetailsInput,
   ): Promise<MapDetailsOutput> {
     return input.is_original
-      ? this.mapService.getOrigMapWithContentUrl(input.map_id)
-      : this.mapService.getTranslatedMapWithContentUrl(input.map_id);
+      ? this.mapsService.getOrigMapWithContentUrl(input.map_id)
+      : this.mapsService.getTranslatedMapWithContentUrl(input.map_id);
   }
 
   @Query(() => MapWordsAndPhrasesConnection)
@@ -244,13 +249,65 @@ export class MapsResolver {
     @Args('after', { type: () => ID, nullable: true })
     after?: string | null,
   ): Promise<MapWordsAndPhrasesConnection | undefined> {
-    return this.mapService.getOrigMapWordsAndPhrases({ input, first, after });
+    return this.mapsService.getOrigMapWordsAndPhrases({ input, first, after });
   }
 
   @Query(() => MapWordOrPhraseAsOrigOutput)
   async getMapWordOrPhraseAsOrigByDefinitionId(
     @Args('input') input: GetMapWordOrPhraseByDefinitionIdInput,
   ): Promise<MapWordOrPhraseAsOrigOutput | undefined> {
-    return this.mapService.getMapWordOrPhraseUnionByDefinitionId(input);
+    return this.mapsService.getMapWordOrPhraseUnionByDefinitionId(input);
   }
+
+  ///////////////////////////////////////////////
+  ///////////// MAP VOTING //////////////////////
+  ///////////////////////////////////////////////
+
+  @Mutation(() => MapVoteOutput)
+  async mapVoteUpsert(
+    @Args('input') input: MapVoteUpsertInput,
+    @Context() req: any,
+  ): Promise<MapVoteOutput> {
+    console.log('map vote upsert resolver: ', JSON.stringify(input, null, 2));
+
+    return this.mapVotesService.upsert(input, getBearer(req)! || '', null);
+  }
+
+  @Query(() => MapVoteStatusOutputRow)
+  async getMapVoteStatus(
+    @Args('map_id', { type: () => ID }) map_id: string,
+    @Args('is_original', { type: () => Boolean }) is_original: boolean,
+  ): Promise<MapVoteStatusOutputRow> {
+    console.log('get map vote status resolver, map_id:', map_id);
+
+    return this.mapVotesService.getVoteStatus(+map_id, is_original, null);
+  }
+
+  @Mutation(() => MapVoteStatusOutputRow)
+  async toggleMapVoteStatus(
+    @Args('map_id', { type: () => ID }) map_id: string,
+    @Args('is_original', { type: () => Boolean }) is_original: boolean,
+    @Args('vote', { type: () => Boolean }) vote: boolean,
+    @Context() req: any,
+  ): Promise<MapVoteStatusOutputRow> {
+    console.log(`toggle map vote resolver: map_id=${map_id} vote=${vote} `);
+
+    return this.mapVotesService.toggleVoteStatus(
+      +map_id,
+      is_original,
+      vote,
+      getBearer(req)! || '',
+      null,
+    );
+  }
+
+  // @Query(() => MapWithVoteOutput)
+  // async getMapWithVoteById(
+  //   @Args('map_id', { type: () => ID }) map_id: string,
+  //   @Args('is_original', { type: () => Boolean }) is_original: boolean,
+  // ): Promise<MapWithVoteOutput> {
+  //   console.log('getMapWithVoteById resolver', map_id);
+
+  //   return this.mapsService.getMapWithVoteById(+map_id, null);
+  // }
 }

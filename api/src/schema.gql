@@ -94,6 +94,7 @@ enum ErrorType {
   MapFilenameAlreadyExists
   MapInsertFailed
   MapNotFound
+  MapVoteNotFound
   NoError
   NotificationDeleteFailed
   NotificationInsertFailed
@@ -288,7 +289,7 @@ type GetDocumentOutput {
   error: ErrorType!
 }
 
-input GetMapContentInput {
+input GetMapDetailsInput {
   is_original: Boolean!
   map_id: ID!
 }
@@ -307,7 +308,7 @@ input GetOrigMapWordsAndPhrasesInput {
 }
 
 type GetOrigMapsListOutput {
-  mapList: [MapFileOutput!]!
+  mapList: [MapDetailsOutput!]!
 }
 
 type IFile {
@@ -383,7 +384,7 @@ type MapDeleteOutput {
   error: ErrorType!
 }
 
-type MapFileInfo {
+type MapDetailsInfo {
   content_file_id: ID!
   content_file_url: ID!
   created_at: String!
@@ -399,24 +400,56 @@ type MapFileInfo {
   translated_percent: String
 }
 
-type MapFileListConnection {
-  edges: [MapFileOutputEdge!]!
-  pageInfo: PageInfo!
-}
-
-type MapFileOutput {
+type MapDetailsOutput {
   error: ErrorType!
-  mapFileInfo: MapFileInfo
+  mapFileInfo: MapDetailsInfo
 }
 
-type MapFileOutputEdge {
+type MapDetailsOutputEdge {
   cursor: ID!
-  node: MapFileOutput!
+  node: MapDetailsOutput!
+}
+
+type MapFileListConnection {
+  edges: [MapDetailsOutputEdge!]!
+  pageInfo: PageInfo!
 }
 
 type MapUploadOutput {
   error: ErrorType!
-  mapFileOutput: MapFileOutput
+  mapFileOutput: MapDetailsOutput
+}
+
+type MapVote {
+  is_original: Boolean!
+  last_updated_at: DateTime!
+  map_id: ID!
+  maps_vote_id: ID!
+  user_id: ID!
+  vote: Boolean!
+}
+
+type MapVoteOutput {
+  error: ErrorType!
+  map_vote: MapVote
+}
+
+type MapVoteStatus {
+  downvotes: Int!
+  is_original: Boolean!
+  map_id: ID!
+  upvotes: Int!
+}
+
+type MapVoteStatusOutputRow {
+  error: ErrorType!
+  vote_status: MapVoteStatus
+}
+
+input MapVoteUpsertInput {
+  is_original: Boolean!
+  map_id: ID!
+  vote: Boolean!
 }
 
 type MapWordOrPhrase {
@@ -470,6 +503,7 @@ type Mutation {
   logout(input: LogoutInput!): LogoutOutput!
   mapDelete(input: MapDeleteInput!): MapDeleteOutput!
   mapUpload(file: Upload!, file_size: Int!, file_type: String!, previewFileId: String): MapUploadOutput!
+  mapVoteUpsert(input: MapVoteUpsertInput!): MapVoteOutput!
   mapsReTranslate(forLangTag: String): GenericOutput!
   mapsTranslationsReset: GenericOutput!
   markNotificationAsRead(input: MarkNotificationReadInput!): MarkNotificationReadOutput!
@@ -491,6 +525,7 @@ type Mutation {
   threadDelete(input: ThreadDeleteInput!): ThreadDeleteOutput!
   threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
+  toggleMapVoteStatus(is_original: Boolean!, map_id: ID!, vote: Boolean!): MapVoteStatusOutputRow!
   togglePhraseDefinitionVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
   togglePhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!, vote: Boolean!): PhraseToPhraseTranslationVoteStatusOutputRow!
   togglePhraseToWordTrVoteStatus(phrase_to_word_translation_id: ID!, vote: Boolean!): PhraseToWordTranslationVoteStatusOutputRow!
@@ -835,7 +870,8 @@ type Query {
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
   getDocument(input: GetDocumentInput!): GetDocumentOutput!
   getFlagsFromRef(parent_id: String!, parent_table: TableNameType!): FlagsOutput!
-  getMapDetails(input: GetMapContentInput!): MapFileOutput!
+  getMapDetails(input: GetMapDetailsInput!): MapDetailsOutput!
+  getMapVoteStatus(is_original: Boolean!, map_id: ID!): MapVoteStatusOutputRow!
   getMapWordOrPhraseAsOrigByDefinitionId(input: GetMapWordOrPhraseByDefinitionIdInput!): MapWordOrPhraseAsOrigOutput!
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
@@ -1094,8 +1130,10 @@ type Subscription {
 }
 
 enum TableNameType {
+  original_maps
   phrase_definitions
   phrases
+  translated_maps
   word_definitions
   words
 }

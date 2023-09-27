@@ -1,1 +1,0 @@
-export { VoteButtonsHerizontal } from './VoteButtonsHerizontal';
