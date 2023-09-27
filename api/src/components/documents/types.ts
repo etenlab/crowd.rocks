@@ -86,6 +86,6 @@ export class WordRangesOutput extends GenericOutput {
 
 @InputType()
 export class WordRangeUpsertInput {
-  @Field(() => String) begin_word: string;
-  @Field(() => String) end_word: string;
+  @Field(() => String) begin_document_word_entry_id: string;
+  @Field(() => String) end_document_word_entry_id: string;
 }

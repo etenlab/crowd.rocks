@@ -83,7 +83,9 @@ enum ErrorType {
   DocumentEntryReadError
   DocumentIdNotProvided
   DocumentNotFound
+  DocumentWordEntryAlreadyExists
   DocumentWordEntryInsertFailed
+  DocumentWordEntryNotFound
   ElectionNotFound
   EmailInvalid
   EmailIsBlocked
@@ -149,6 +151,7 @@ enum ErrorType {
   WordInsertFailed
   WordLikeStringInsertFailed
   WordNotFound
+  WordRangeInsertFailed
   WordToPhraseTranslationNotFound
   WordToWordTranslationNotFound
   WordVoteNotFound
@@ -568,6 +571,7 @@ type Mutation {
   upsertTranslation(from_definition_id: ID!, from_definition_type_is_word: Boolean!, to_definition_id: ID!, to_definition_type_is_word: Boolean!): TranslationOutput!
   upsertTranslationFromWordAndDefinitionlikeString(from_definition_id: ID!, from_definition_type_is_word: Boolean!, to_definition_input: ToDefinitionInput!): TranslationOutput!
   upsertWordDefinitionFromWordAndDefinitionlikeString(input: FromWordAndDefintionlikeStringUpsertInput!): WordDefinitionOutput!
+  upsertWordRanges(input: [WordRangeUpsertInput!]!): WordRangesOutput!
   versionCreateResolver(input: VersionCreateInput!): VersionCreateOutput!
   wordDefinitionUpsert(input: WordDefinitionUpsertInput!): WordDefinitionOutput!
   wordToPhraseTranslationUpsert(input: WordToPhraseTranslationUpsertInput!): WordToPhraseTranslationOutput!
@@ -906,6 +910,8 @@ type Query {
   getWordDefinitionsByFlag(after: ID, first: Int, flag_name: FlagType!): WordDefinitionListConnection!
   getWordDefinitionsByLanguage(input: LanguageInput!): WordDefinitionWithVoteListOutput!
   getWordDefinitionsByWordId(word_id: ID!): WordDefinitionWithVoteListOutput!
+  getWordRangesByBeginIds(ids: [ID!]!): WordRangesOutput!
+  getWordRangesByDocumentId(id: [ID!]!): WordRangesOutput!
   getWordToPhraseTrVoteStatus(word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   getWordToPhraseTranslationsByFromWordDefinitionId(from_word_definition_id: ID!, langInfo: LanguageInput!): WordToPhraseTranslationWithVoteListOutput!
   getWordToWordTrVoteStatus(word_to_word_translation_id: ID!): WordTrVoteStatusOutputRow!
@@ -922,6 +928,7 @@ type Query {
   phraseVoteRead(id: ID!): PhraseVoteOutput!
   postReadResolver(input: PostReadInput!): PostReadOutput!
   postsByParent(input: PostsByParentInput!): PostsByParentOutput!
+  readWordRanges(ids: [ID!]!): WordRangesOutput!
   siteTextPhraseDefinitionRead(id: String!): SiteTextPhraseDefinitionOutput!
   siteTextTranslationVoteRead(id: String!): SiteTextTranslationVoteOutput!
   siteTextWordDefinitionRead(id: String!): SiteTextWordDefinitionOutput!
@@ -1142,9 +1149,12 @@ type Subscription {
 }
 
 enum TableNameType {
+  document_word_entries
+  documents
   phrase_definitions
   phrases
   word_definitions
+  word_ranges
   words
 }
 
@@ -1359,6 +1369,22 @@ type WordDefinitionWithVoteListOutput {
 type WordOutput {
   error: ErrorType!
   word: Word
+}
+
+type WordRange {
+  begin: DocumentWordEntry!
+  end: DocumentWordEntry!
+  word_range_id: ID!
+}
+
+input WordRangeUpsertInput {
+  begin_document_word_entry_id: String!
+  end_document_word_entry_id: String!
+}
+
+type WordRangesOutput {
+  error: ErrorType!
+  word_ranges: [WordRange!]
 }
 
 input WordReadInput {

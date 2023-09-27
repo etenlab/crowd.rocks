@@ -13,7 +13,8 @@ import {
   callAnswerUpsertsProcedure,
   AnswerUpsertsProcedureOutput,
   getAnswersObjByIds,
-  GetAnswersObjectByIds,
+  getAnswersObjByQuestionIds,
+  GetAnswersObjectRow,
 } from './sql-string';
 import { QuestionItemsService } from './question-items.service';
 
@@ -24,21 +25,16 @@ export class AnswersService {
     private questionItemService: QuestionItemsService,
   ) {}
 
-  async reads(
-    ids: number[],
+  private async convertQueryResultToAnswers(
+    rows: GetAnswersObjectRow[],
     pgClient: PoolClient | null,
   ): Promise<AnswersOutput> {
     try {
-      const res = await pgClientOrPool({
-        client: pgClient,
-        pool: this.pg.pool,
-      }).query<GetAnswersObjectByIds>(...getAnswersObjByIds(ids));
-
-      const answersMap = new Map<string, GetAnswersObjectByIds>();
+      const answersMap = new Map<string, GetAnswersObjectRow>();
 
       const questionItemIds: number[] = [];
 
-      res.rows.forEach((row) => {
+      rows.forEach((row) => {
         answersMap.set(row.question_id, row);
         row.question_items.forEach((item) => questionItemIds.push(+item));
       });
@@ -63,14 +59,8 @@ export class AnswersService {
 
       return {
         error: ErrorType.NoError,
-        answers: ids.map((id) => {
-          const answerObj = answersMap.get(id + '');
-
-          if (!answerObj) {
-            return null;
-          }
-
-          const questionItems = answerObj.question_items
+        answers: rows.map((row) => {
+          const questionItems = row.question_items
             .map(
               (question_item_id) =>
                 questionItemsMap.get(question_item_id) || null,
@@ -78,11 +68,53 @@ export class AnswersService {
             .filter((questionItem) => questionItem) as QuestionItem[];
 
           return {
-            ...answerObj,
+            ...row,
             question_items: questionItems,
           };
         }),
       };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      answers: [],
+    };
+  }
+
+  async reads(
+    ids: number[],
+    pgClient: PoolClient | null,
+  ): Promise<AnswersOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetAnswersObjectRow>(...getAnswersObjByIds(ids));
+
+      return this.convertQueryResultToAnswers(res.rows, pgClient);
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      answers: [],
+    };
+  }
+
+  async getAnswersByQuestionIds(
+    ids: number[],
+    pgClient: PoolClient | null,
+  ): Promise<AnswersOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetAnswersObjectRow>(...getAnswersObjByQuestionIds(ids));
+
+      return this.convertQueryResultToAnswers(res.rows, pgClient);
     } catch (e) {
       console.error(e);
     }

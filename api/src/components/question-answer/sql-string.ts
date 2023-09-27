@@ -84,7 +84,7 @@ export function callQuestionUpsertsProcedure({
   ];
 }
 
-export type GetQuestionsObjectByIds = {
+export type GetQuestionsObjectRow = {
   question_id: string;
   parent_table: TableNameType;
   parent_id: string;
@@ -111,6 +111,36 @@ export function getQuestionsObjByIds(ids: number[]): [string, [number[]]] {
       where question_id = any($1)
     `,
     [ids],
+  ];
+}
+
+export function getQuestionsObjByRefs(
+  refs: {
+    parent_table: TableNameType;
+    parent_id: number;
+  }[],
+): [string, [TableNameType[], number[]]] {
+  return [
+    `
+      with paris (parent_table, parent_id) as (
+        select unnest($1::text[]), unnest($2::int[])
+      )
+      select 
+        question_id,
+        parent_table,
+        parent_id,
+        question_type_is_multiselect,
+        question,
+        question_items,
+        created_at,
+        created_by
+      from questions
+      where (parent_table, parent_id) in (
+        select parent_table, parent_id
+        from pairs
+      );
+    `,
+    [refs.map((ref) => ref.parent_table), refs.map((ref) => ref.parent_id)],
   ];
 }
 
@@ -150,7 +180,7 @@ export function callAnswerUpsertsProcedure({
   ];
 }
 
-export type GetAnswersObjectByIds = {
+export type GetAnswersObjectRow = {
   answer_id: string;
   question_id: string;
   answer: string;
@@ -171,6 +201,25 @@ export function getAnswersObjByIds(ids: number[]): [string, [number[]]] {
         created_by
       from answers
       where answer_id = any($1)
+    `,
+    [ids],
+  ];
+}
+
+export function getAnswersObjByQuestionIds(
+  ids: number[],
+): [string, [number[]]] {
+  return [
+    `
+      select 
+        answer_id,
+        question_id,
+        answer,
+        question_items,
+        created_at,
+        created_by
+      from answers
+      where question_id = any($1)
     `,
     [ids],
   ];

@@ -29,7 +29,7 @@ export class WordRangesService {
     private documentWordEntryService: DocumentWordEntriesService,
   ) {}
 
-  private async convertRowResultToWordRange(
+  private async convertQueryResultToWordRange(
     rows: GetWordRangeRow[],
     pgClient: PoolClient | null,
   ) {
@@ -105,7 +105,7 @@ export class WordRangesService {
         pool: this.pg.pool,
       }).query<GetWordRangeRow>(...getWordRangeByIds(ids));
 
-      return this.convertRowResultToWordRange(res.rows, pgClient);
+      return this.convertQueryResultToWordRange(res.rows, pgClient);
     } catch (e) {
       console.error(e);
     }
@@ -126,7 +126,7 @@ export class WordRangesService {
         pool: this.pg.pool,
       }).query<GetWordRangeRow>(...getWordRangeByBeginWordIds(ids));
 
-      return this.convertRowResultToWordRange(res.rows, pgClient);
+      return this.convertQueryResultToWordRange(res.rows, pgClient);
     } catch (e) {
       console.error(e);
     }
@@ -147,7 +147,7 @@ export class WordRangesService {
         pool: this.pg.pool,
       }).query<GetWordRangeRow>(...getWordRangeByDocumentId(id));
 
-      return this.convertRowResultToWordRange(res.rows, pgClient);
+      return this.convertQueryResultToWordRange(res.rows, pgClient);
     } catch (e) {
       console.error(e);
     }
@@ -176,8 +176,8 @@ export class WordRangesService {
         pool: this.pg.pool,
       }).query<WordRangeUpsertsProcedureOutputRow>(
         ...callWordRangeUpsertsProcedure({
-          begin_words: input.map((item) => +item.begin_word),
-          end_words: input.map((item) => +item.end_word),
+          begin_words: input.map((item) => +item.begin_document_word_entry_id),
+          end_words: input.map((item) => +item.end_document_word_entry_id),
           token,
         }),
       );
