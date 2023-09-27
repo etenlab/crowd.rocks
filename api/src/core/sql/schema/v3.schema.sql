@@ -1,3 +1,7 @@
+create index idx__begin_word__word_ranges on word_ranges (begin_word);
+create index idx__end_word__word_ranges on word_ranges (end_word);
+create index idx__created_by__word_ranges on word_ranges (created_by);
+
 create table question_items (
   question_item_id bigserial primary key,
   item text not null,

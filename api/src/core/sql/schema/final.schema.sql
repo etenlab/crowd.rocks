@@ -539,6 +539,9 @@ create table word_ranges (
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__begin_word__word_ranges on word_ranges (begin_word);
+create index idx__end_word__word_ranges on word_ranges (end_word);
+create index idx__created_by__word_ranges on word_ranges (created_by);
 
 -- tags
 create table document_tags (
