@@ -26,7 +26,7 @@ export class QuestionOnWordRange extends Question {
   @Field(() => DocumentWordEntry) end: DocumentWordEntry;
 }
 
-@InputType()
+@ObjectType()
 export class Answer {
   @Field(() => ID) answer_id: string;
   @Field(() => String) question_id: string;
@@ -60,7 +60,7 @@ export class AnswersOutput extends GenericOutput {
   answers: (Answer | null)[];
 }
 
-@ObjectType()
+@InputType()
 export class QuestionUpsertInput {
   @Field(() => TableNameType) parent_table: TableNameType;
   @Field(() => Int) parent_id: string;
@@ -69,7 +69,7 @@ export class QuestionUpsertInput {
   @Field(() => [String]) question_items: string[];
 }
 
-@ObjectType()
+@InputType()
 export class CreateQuestionOnWordRangeUpsertInput {
   @Field(() => ID) begin_document_word_entry_id: string;
   @Field(() => ID) end_document_word_entry_id: string;
@@ -78,9 +78,9 @@ export class CreateQuestionOnWordRangeUpsertInput {
   @Field(() => [String]) question_items: string[];
 }
 
-@ObjectType()
+@InputType()
 export class AnswerUpsertInput {
   @Field(() => ID) question_id: string;
   @Field(() => String) answer: string;
-  @Field(() => [String]) question_items: string[];
+  @Field(() => [String]) question_item_ids: string[];
 }

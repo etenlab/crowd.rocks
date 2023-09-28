@@ -22,6 +22,7 @@ import {
 } from '@ionic/react';
 import { NewDocumentForm } from './NewDocumentForm';
 import { DocumentsTools } from './DocumentsTools';
+import { BaseDocumentViewer } from './DocumentViewer/base';
 
 interface DocumentsPageProps
   extends RouteComponentProps<{
@@ -124,37 +125,40 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
   return (
     <PageLayout>
       <Caption>{tr('Documents')}</Caption>
-      <FilterContainer>
-        <LangSelector
-          title={tr('Select language')}
-          langSelectorId="mapsListLangSelector"
-          selected={sourceLang ?? undefined}
-          onChange={(_sourceLangTag, sourceLangInfo) => {
-            setSourceLanguage(sourceLangInfo);
-          }}
-          onClearClick={() => setSourceLanguage(null)}
-        />
-      </FilterContainer>
-      <DocumentsTools onAddClick={() => setIsOpenModal(true)} />
-      <DocumentsList
-        allDocuments={allDocuments?.getAllDocuments.documents || undefined}
-        match={match}
-      />
-      <IonModal isOpen={isOpenModal}>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('New Document')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          <NewDocumentForm
-            onSave={handleAddDocument}
-            onCancel={() => {
-              setIsOpenModal(false);
+      <BaseDocumentViewer />
+      <div style={{ display: 'none' }}>
+        <FilterContainer>
+          <LangSelector
+            title={tr('Select language')}
+            langSelectorId="mapsListLangSelector"
+            selected={sourceLang ?? undefined}
+            onChange={(_sourceLangTag, sourceLangInfo) => {
+              setSourceLanguage(sourceLangInfo);
             }}
+            onClearClick={() => setSourceLanguage(null)}
           />
-        </IonContent>
-      </IonModal>
+        </FilterContainer>
+        <DocumentsTools onAddClick={() => setIsOpenModal(true)} />
+        <DocumentsList
+          allDocuments={allDocuments?.getAllDocuments.documents || undefined}
+          match={match}
+        />
+        <IonModal isOpen={isOpenModal}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>{tr('New Document')}</IonTitle>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <NewDocumentForm
+              onSave={handleAddDocument}
+              onCancel={() => {
+                setIsOpenModal(false);
+              }}
+            />
+          </IonContent>
+        </IonModal>
+      </div>
     </PageLayout>
   );
 };

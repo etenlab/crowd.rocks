@@ -67,7 +67,7 @@ export class DocumentsResolver {
 
   @Query(() => DocumentWordEntriesOutput)
   async getDocumentWordEntriesByDocumentId(
-    @Args('document_id') document_id: string,
+    @Args('document_id', { type: () => ID }) document_id: string,
   ): Promise<DocumentWordEntriesOutput> {
     return this.documentWordEntriesService.getDocumentWordEntriesByDocumentId(
       +document_id,
@@ -101,7 +101,7 @@ export class DocumentsResolver {
 
   @Query(() => WordRangesOutput)
   async getWordRangesByDocumentId(
-    @Args('id', { type: () => [ID] }) id: string,
+    @Args('id', { type: () => ID }) id: string,
   ): Promise<WordRangesOutput> {
     console.log('getWordRangesByDocumentId, id:', id);
 

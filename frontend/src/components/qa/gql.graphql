@@ -1,0 +1,109 @@
+fragment QuestionItemFragment on QuestionItem {
+  question_item_id
+  item
+}
+
+fragment QuestionFragment on Question {
+  question_id
+  parent_table
+  parent_id
+  question
+  question_type_is_multiselect
+  question_items {
+    ...QuestionItemFragment
+  }
+  created_by
+  created_at
+}
+
+fragment AnswerFragment on Answer {
+  answer_id
+  question_id
+  answer
+  question_items {
+    ...QuestionItemFragment
+  }
+  created_by
+  created_at
+}
+
+fragment QuestionOnWordRangeFragment on QuestionOnWordRange {
+  question_id
+  parent_table
+  parent_id
+  question
+  question_type_is_multiselect
+  question_items {
+    ...QuestionItemFragment
+  }
+  created_by
+  created_at
+  begin {
+    ...DocumentWordEntryFragment
+  }
+  end {
+    ...DocumentWordEntryFragment
+  }
+}
+
+query GetQuestionOnWordRangesByDocumentId($document_id: ID!) {
+  getQuestionOnWordRangesByDocumentId(document_id: $document_id) {
+    error
+    questions {
+      ...QuestionOnWordRangeFragment
+    }
+  }
+}
+
+query GetAnswersByQuestionIds($ids: [ID!]!) {
+  getAnswersByQuestionIds(ids: $ids) {
+    error
+    answers {
+      ...AnswerFragment
+    }
+  }
+}
+
+mutation CreateQuestionOnWordRange(
+  $begin_document_word_entry_id: ID!
+  $end_document_word_entry_id: ID!
+  $question: String!
+  $question_items: [String!]!
+  $question_type_is_multiselect: Boolean!
+) {
+  createQuestionOnWordRange(
+    input: {
+      begin_document_word_entry_id: $begin_document_word_entry_id
+      end_document_word_entry_id: $end_document_word_entry_id
+      question: $question
+      question_items: $question_items
+      question_type_is_multiselect: $question_type_is_multiselect
+    }
+  ) {
+    error
+    questions {
+      ...QuestionFragment
+    }
+  }
+}
+
+mutation UpsertAnswer(
+  $answer: String!
+  $question_id: ID!
+  $question_item_ids: [String!]!
+) {
+  upsertAnswers(
+    input: [
+      {
+        answer: $answer
+        question_id: $question_id
+        question_item_ids: $question_item_ids
+      }
+    ]
+  ) {
+    error
+    answers {
+      ...AnswerFragment
+    }
+  }
+}

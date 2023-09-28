@@ -7,9 +7,10 @@ import { QuestionAndAnswersResolver } from './question-answer.resolver';
 import { QuestionItemsService } from './question-items.service';
 import { QuestionsService } from './questions.service';
 import { AnswersService } from './answers.service';
+import { DocumentsModule } from '../documents/documents.module';
 
 @Module({
-  imports: [forwardRef(() => CoreModule)],
+  imports: [forwardRef(() => CoreModule), forwardRef(() => DocumentsModule)],
   providers: [
     QuestionItemsService,
     QuestionsService,
