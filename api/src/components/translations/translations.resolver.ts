@@ -47,6 +47,8 @@ import {
   LanguageListForGoogleTranslateOutput,
   TranslateAllWordsAndPhrasesByGoogleOutput,
   TranslateAllWordsAndPhrasesByGoogleResult,
+  TranslatedLanguageInfoInput,
+  TranslatedLanguageInfoOutput,
 } from './types';
 import { ErrorType, GenericOutput } from '../../common/types';
 
@@ -396,6 +398,15 @@ export class TranslationsResolver {
     return this.translationService.languagesForGoogleTranslate();
   }
 
+  @Query(() => TranslatedLanguageInfoOutput)
+  async getLanguageTranslationInfo(
+    @Args('input')
+    input: TranslatedLanguageInfoInput,
+  ): Promise<TranslatedLanguageInfoOutput> {
+    console.log('getLanguageTranslationInfo resolver');
+    return this.translationService.getTranslationLanguageInfo(input, null);
+  }
+
   @Mutation(() => TranslateAllWordsAndPhrasesByGoogleOutput)
   async translateWordsAndPhrasesByGoogle(
     @Args('from_language', { type: () => LanguageInput })
@@ -413,6 +424,30 @@ export class TranslationsResolver {
     );
 
     return this.translationService.translateWordsAndPhrasesByGoogle(
+      from_language,
+      to_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @Mutation(() => TranslateAllWordsAndPhrasesByGoogleOutput)
+  async translateMissingWordsAndPhrasesByGoogle(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+    console.log(
+      'translateMissingWordsAndPhrasesByGoogle',
+      JSON.stringify({
+        from_language,
+        to_language,
+      }),
+    );
+
+    return this.translationService.translateMissingWordsAndPhrasesByGoogle(
       from_language,
       to_language,
       getBearer(req) || '',
