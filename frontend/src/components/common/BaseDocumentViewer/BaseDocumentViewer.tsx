@@ -2,18 +2,18 @@ import { useMemo, ReactNode, Fragment } from 'react';
 
 import { Word, Dot } from './styled';
 
-type WordlikeString = {
+export type WordlikeString = {
   id: string;
   wordlike_string: string;
 };
 
-type WordEntry = {
+export type WordEntry = {
   id: string;
   wordlike_string: WordlikeString;
-  parent_wordlike_string: WordlikeString;
+  parent_wordlike_string?: WordlikeString;
 };
 
-type ViewerProps = {
+export type BaseDocumentViewerProps = {
   entries: WordEntry[];
   mode: 'edit' | 'view';
   range: {
@@ -27,13 +27,13 @@ type ViewerProps = {
   onClickWord(entryId: string): void;
 };
 
-export function DocumentViewer({
+export function BaseDocumentViewer({
   entries,
   mode,
   range,
   dots,
   onClickWord,
-}: ViewerProps) {
+}: BaseDocumentViewerProps) {
   const com = useMemo(() => {
     const dotsMap = new Map<string, number>();
 

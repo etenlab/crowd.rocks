@@ -22,7 +22,6 @@ import {
 } from '@ionic/react';
 import { NewDocumentForm } from './NewDocumentForm';
 import { DocumentsTools } from './DocumentsTools';
-import { DocumentViewer } from '../common/DocumentViewer';
 
 interface DocumentsPageProps
   extends RouteComponentProps<{

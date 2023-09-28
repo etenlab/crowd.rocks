@@ -74,13 +74,13 @@ export class GetDocumentOutput extends GenericOutput {
 
 @ObjectType()
 export class DocumentWordEntriesOutput extends GenericOutput {
-  @Field(() => [DocumentWordEntry], { nullable: true })
+  @Field(() => [DocumentWordEntry], { nullable: 'items' })
   document_word_entries: (DocumentWordEntry | null)[];
 }
 
 @ObjectType()
 export class WordRangesOutput extends GenericOutput {
-  @Field(() => [WordRange], { nullable: true })
+  @Field(() => [WordRange], { nullable: 'items' })
   word_ranges: (WordRange | null)[];
 }
 

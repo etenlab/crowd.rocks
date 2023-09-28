@@ -103,7 +103,7 @@ export type DocumentUploadOutput = {
 
 export type DocumentWordEntriesOutput = {
   __typename?: 'DocumentWordEntriesOutput';
-  document_word_entries?: Maybe<Array<DocumentWordEntry>>;
+  document_word_entries: Array<Maybe<DocumentWordEntry>>;
   error: ErrorType;
 };
 
@@ -1856,7 +1856,7 @@ export type QuestionItem = {
 export type QuestionItemsOutput = {
   __typename?: 'QuestionItemsOutput';
   error: ErrorType;
-  question_items?: Maybe<Array<QuestionItem>>;
+  question_items: Array<Maybe<QuestionItem>>;
 };
 
 export type QuestionOnWordRange = {
@@ -2388,7 +2388,7 @@ export type WordRangeUpsertInput = {
 export type WordRangesOutput = {
   __typename?: 'WordRangesOutput';
   error: ErrorType;
-  word_ranges?: Maybe<Array<WordRange>>;
+  word_ranges: Array<Maybe<WordRange>>;
 };
 
 export type WordReadInput = {
@@ -2768,14 +2768,14 @@ export type GetDocumentWordEntriesByDocumentIdQueryVariables = Exact<{
 }>;
 
 
-export type GetDocumentWordEntriesByDocumentIdQuery = { __typename?: 'Query', getDocumentWordEntriesByDocumentId: { __typename?: 'DocumentWordEntriesOutput', error: ErrorType, document_word_entries?: Array<{ __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string }, parent_wordlike_string?: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } | null }> | null } };
+export type GetDocumentWordEntriesByDocumentIdQuery = { __typename?: 'Query', getDocumentWordEntriesByDocumentId: { __typename?: 'DocumentWordEntriesOutput', error: ErrorType, document_word_entries: Array<{ __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string }, parent_wordlike_string?: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } | null } | null> } };
 
 export type GetWordRangesByDocumentIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetWordRangesByDocumentIdQuery = { __typename?: 'Query', getWordRangesByDocumentId: { __typename?: 'WordRangesOutput', error: ErrorType, word_ranges?: Array<{ __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string }, parent_wordlike_string?: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } | null }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string }, parent_wordlike_string?: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } | null } }> | null } };
+export type GetWordRangesByDocumentIdQuery = { __typename?: 'Query', getWordRangesByDocumentId: { __typename?: 'WordRangesOutput', error: ErrorType, word_ranges: Array<{ __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string }, parent_wordlike_string?: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } | null }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string }, parent_wordlike_string?: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } | null } } | null> } };
 
 export type UpsertWordRangeMutationVariables = Exact<{
   begin_document_word_entry_id: Scalars['String']['input'];
@@ -2783,7 +2783,7 @@ export type UpsertWordRangeMutationVariables = Exact<{
 }>;
 
 
-export type UpsertWordRangeMutation = { __typename?: 'Mutation', upsertWordRanges: { __typename?: 'WordRangesOutput', error: ErrorType, word_ranges?: Array<{ __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string }, parent_wordlike_string?: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } | null }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string }, parent_wordlike_string?: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } | null } }> | null } };
+export type UpsertWordRangeMutation = { __typename?: 'Mutation', upsertWordRanges: { __typename?: 'WordRangesOutput', error: ErrorType, word_ranges: Array<{ __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string }, parent_wordlike_string?: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } | null }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string }, parent_wordlike_string?: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } | null } } | null> } };
 
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];

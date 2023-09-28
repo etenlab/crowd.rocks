@@ -81,7 +81,7 @@ type DocumentUploadOutput {
 }
 
 type DocumentWordEntriesOutput {
-  document_word_entries: [DocumentWordEntry!]
+  document_word_entries: [DocumentWordEntry]!
   error: ErrorType!
 }
 
@@ -1004,7 +1004,7 @@ type QuestionItem {
 
 type QuestionItemsOutput {
   error: ErrorType!
-  question_items: [QuestionItem!]
+  question_items: [QuestionItem]!
 }
 
 type QuestionOnWordRange {
@@ -1482,7 +1482,7 @@ input WordRangeUpsertInput {
 
 type WordRangesOutput {
   error: ErrorType!
-  word_ranges: [WordRange!]
+  word_ranges: [WordRange]!
 }
 
 input WordReadInput {

@@ -38,7 +38,7 @@ export class Answer {
 
 @ObjectType()
 export class QuestionItemsOutput extends GenericOutput {
-  @Field(() => [QuestionItem], { nullable: true })
+  @Field(() => [QuestionItem], { nullable: 'items' })
   question_items: (QuestionItem | null)[];
 }
 
