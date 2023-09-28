@@ -7,24 +7,33 @@ import {
   useIonRouter,
   useIonToast,
 } from '@ionic/react';
-import { chatbubbleEllipsesSharp, downloadOutline } from 'ionicons/icons';
+import {
+  addCircleOutline,
+  arrowBackOutline,
+  arrowDownOutline,
+  arrowForwardOutline,
+  arrowUpOutline,
+  chatbubbleEllipsesSharp,
+  downloadOutline,
+  refreshCircleOutline,
+  removeCircleOutline,
+} from 'ionicons/icons';
 import styled from 'styled-components';
-
 import { Caption } from '../../common/Caption/Caption';
-
 import {
   ErrorType,
-  // GetMapVoteStatusDocument,
   TableNameType,
   useGetMapDetailsQuery,
   useGetMapVoteStatusQuery,
 } from '../../../generated/graphql';
-
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 import { downloadFromUrl } from '../../../common/utility';
-
 import { useTr } from '../../../hooks/useTr';
-import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
+import {
+  ReactZoomPanPinchContentRef,
+  TransformComponent,
+  TransformWrapper,
+} from 'react-zoom-pan-pinch';
 import { OrigBadge } from '../MapList/styled';
 import { StChatIcon } from '../../common/styled';
 import { Flag } from '../../flags/Flag';
@@ -32,6 +41,7 @@ import { MAPS_FLAGS } from '../../flags/flagGroups';
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import { useToggleMapVoteStatusMutation } from '../../../hooks/useToggleMapVoteStatusMutation';
 
+const TRANSFORM_STEP = 200;
 interface MapDetailsProps
   extends RouteComponentProps<{
     id: string;
@@ -181,6 +191,87 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
     />
   );
 
+  const Controls = ({
+    zoomIn,
+    zoomOut,
+    resetTransform,
+    setTransform,
+    instance,
+  }: ReactZoomPanPinchContentRef) => {
+    const moveOn = (x: number, y: number): void => {
+      const os = instance.transformState.scale;
+      const ox = instance.transformState.positionX;
+      const oy = instance.transformState.positionY;
+      const newX = ox + x;
+      const newY = oy + y;
+      setTransform(newX, newY, os);
+    };
+
+    return (
+      <StControls>
+        <IonIcon
+          icon={addCircleOutline}
+          onClick={() => zoomIn()}
+          size="large"
+          color="primary"
+          className="clickable theme-icon"
+        />
+        <IonIcon
+          icon={removeCircleOutline}
+          onClick={() => zoomOut()}
+          size="large"
+          color="primary"
+          className="clickable theme-icon"
+        />
+        <IonIcon
+          icon={refreshCircleOutline}
+          onClick={() => {
+            resetTransform();
+          }}
+          size="large"
+          color="primary"
+          className="clickable theme-icon"
+        />
+        <IonIcon
+          icon={arrowUpOutline}
+          onClick={() => {
+            moveOn(0, TRANSFORM_STEP);
+          }}
+          size="large"
+          color="primary"
+          className="clickable theme-icon"
+        />
+        <IonIcon
+          icon={arrowDownOutline}
+          onClick={() => {
+            moveOn(0, -TRANSFORM_STEP);
+          }}
+          size="large"
+          color="primary"
+          className="clickable theme-icon"
+        />
+        <IonIcon
+          icon={arrowBackOutline}
+          onClick={() => {
+            moveOn(TRANSFORM_STEP, 0);
+          }}
+          size="large"
+          color="primary"
+          className="clickable theme-icon"
+        />
+        <IonIcon
+          icon={arrowForwardOutline}
+          onClick={() => {
+            moveOn(-TRANSFORM_STEP, 0);
+          }}
+          size="large"
+          color="primary"
+          className="clickable theme-icon"
+        />
+      </StControls>
+    );
+  };
+
   return (
     <>
       <Caption>
@@ -218,18 +309,25 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
               message={tr('Loading image')}
               isOpen={!imageLoaded && !imageError}
             />
+
             <TransformWrapper>
-              <TransformComponent>
-                <img
-                  width={`${windowWidth - 10}px`}
-                  height={'auto'}
-                  src={currMapContent.mapFileInfo.content_file_url}
-                  alt="Translated map"
-                  placeholder="asdf"
-                  onLoad={handleImageLoad}
-                  onError={handleImageError}
-                />
-              </TransformComponent>
+              {(utils) => (
+                <>
+                  <Controls {...utils} />
+                  <TransformComponent>
+                    <img
+                      style={{ userSelect: 'none' }}
+                      width={`${windowWidth - 10}px`}
+                      height={'auto'}
+                      src={currMapContent?.mapFileInfo?.content_file_url}
+                      alt="Translated map"
+                      placeholder="asdf"
+                      onLoad={handleImageLoad}
+                      onError={handleImageError}
+                    />
+                  </TransformComponent>
+                </>
+              )}
             </TransformWrapper>
           </>
         )}
@@ -251,4 +349,10 @@ const StButtonsSection = styled.div`
   align-items: center;
   flex-direction: row;
   justify-content: end;
+`;
+
+const StControls = styled('div')`
+  display: flex;
+  flex-wrap: nowrap;
+  z-index: 1000;
 `;
