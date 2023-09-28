@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps, useLocation } from 'react-router';
 import {
   IonBadge,
+  IonButton,
   IonIcon,
   IonLoading,
   useIonRouter,
@@ -209,65 +210,47 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
 
     return (
       <StControls>
-        <IonIcon
-          icon={addCircleOutline}
-          onClick={() => zoomIn()}
-          size="large"
-          color="primary"
-          className="clickable theme-icon"
-        />
-        <IonIcon
-          icon={removeCircleOutline}
-          onClick={() => zoomOut()}
-          size="large"
-          color="primary"
-          className="clickable theme-icon"
-        />
-        <IonIcon
-          icon={refreshCircleOutline}
+        <IonButton onClick={() => zoomIn()}>
+          <IonIcon icon={addCircleOutline} size="large" />
+        </IonButton>
+        <IonButton onClick={() => zoomOut()}>
+          <IonIcon icon={removeCircleOutline} size="large" />
+        </IonButton>
+        <IonButton
           onClick={() => {
             resetTransform();
           }}
-          size="large"
-          color="primary"
-          className="clickable theme-icon"
-        />
-        <IonIcon
-          icon={arrowUpOutline}
+        >
+          <IonIcon icon={refreshCircleOutline} size="large" />
+        </IonButton>
+        <IonButton
           onClick={() => {
             moveOn(0, TRANSFORM_STEP);
           }}
-          size="large"
-          color="primary"
-          className="clickable theme-icon"
-        />
-        <IonIcon
-          icon={arrowDownOutline}
+        >
+          <IonIcon icon={arrowUpOutline} size="large" />
+        </IonButton>
+        <IonButton
           onClick={() => {
             moveOn(0, -TRANSFORM_STEP);
           }}
-          size="large"
-          color="primary"
-          className="clickable theme-icon"
-        />
-        <IonIcon
-          icon={arrowBackOutline}
+        >
+          <IonIcon icon={arrowDownOutline} size="large" />
+        </IonButton>
+        <IonButton
           onClick={() => {
             moveOn(TRANSFORM_STEP, 0);
           }}
-          size="large"
-          color="primary"
-          className="clickable theme-icon"
-        />
-        <IonIcon
-          icon={arrowForwardOutline}
+        >
+          <IonIcon icon={arrowBackOutline} size="large" />
+        </IonButton>
+        <IonButton
           onClick={() => {
             moveOn(-TRANSFORM_STEP, 0);
           }}
-          size="large"
-          color="primary"
-          className="clickable theme-icon"
-        />
+        >
+          <IonIcon icon={arrowForwardOutline} size="large" />
+        </IonButton>
       </StControls>
     );
   };
