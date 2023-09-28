@@ -22,7 +22,7 @@ import {
 } from '@ionic/react';
 import { NewDocumentForm } from './NewDocumentForm';
 import { DocumentsTools } from './DocumentsTools';
-import { BaseDocumentViewer } from './DocumentViewer/base';
+import { DocumentViewer } from '../common/DocumentViewer';
 
 interface DocumentsPageProps
   extends RouteComponentProps<{
@@ -125,7 +125,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
   return (
     <PageLayout>
       <Caption>{tr('Documents')}</Caption>
-      <BaseDocumentViewer />
+
       <div style={{ display: 'none' }}>
         <FilterContainer>
           <LangSelector
