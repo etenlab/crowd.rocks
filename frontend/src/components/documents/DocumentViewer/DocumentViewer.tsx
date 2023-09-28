@@ -11,7 +11,7 @@ import {
   useGetDocumentWordEntriesByDocumentIdQuery,
 } from '../../../generated/graphql';
 
-type DocumentViewerProps = Omit<
+export type DocumentViewerProps = Omit<
   BaseDocumentViewerProps & {
     documentId: string;
   },

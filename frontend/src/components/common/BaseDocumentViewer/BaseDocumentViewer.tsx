@@ -2,6 +2,13 @@ import { useMemo, ReactNode, Fragment } from 'react';
 
 import { Word, Dot } from './styled';
 
+export type ViewMode = 'edit' | 'view';
+
+export type Range = {
+  beginEntry?: string;
+  endEntry?: string;
+};
+
 export type WordlikeString = {
   id: string;
   wordlike_string: string;
@@ -15,16 +22,13 @@ export type WordEntry = {
 
 export type BaseDocumentViewerProps = {
   entries: WordEntry[];
-  mode: 'edit' | 'view';
-  range: {
-    beginEntry?: string;
-    endEntry?: string;
-  };
+  mode: ViewMode;
+  range: Range;
   dots: {
-    entry: string;
+    entryId: string;
     component?: ReactNode;
   }[];
-  onClickWord(entryId: string): void;
+  onClickWord(entryId: string, index: number): void;
 };
 
 export function BaseDocumentViewer({
@@ -37,12 +41,12 @@ export function BaseDocumentViewer({
   const com = useMemo(() => {
     const dotsMap = new Map<string, number>();
 
-    dots.forEach((dot, index) => dotsMap.set(dot.entry, index));
+    dots.forEach((dot, index) => dotsMap.set(dot.entryId, index));
 
     let begin = false;
     let end = false;
 
-    return entries.map((entry) => {
+    return entries.map((entry, index) => {
       if (entry.id === range.beginEntry) {
         begin = true;
       }
@@ -58,9 +62,11 @@ export function BaseDocumentViewer({
       if (begin && !end) {
         return (
           <Fragment key={entry.id}>
-            <Word onClick={() => mode === 'edit' || onClickWord(entry.id)} />
+            <Word
+              onClick={() => mode === 'edit' || onClickWord(entry.id, index)}
+            />
             {isDot
-              ? dotCom || <Dot onClick={() => onClickWord(entry.id)} />
+              ? dotCom || <Dot onClick={() => onClickWord(entry.id, index)} />
               : null}
           </Fragment>
         );
