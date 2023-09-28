@@ -33,7 +33,6 @@ interface DiscussionPageProps
   extends RouteComponentProps<{
     parent: string;
     parent_id: string;
-    page_title: string;
   }> {}
 
 type PostKind = 'video' | 'audio' | 'text';
@@ -146,7 +145,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
           {tr('Discussion')}
         </Caption>
       </CaptionContainer>
-      <IonTitle>{match.params.page_title}</IonTitle>
+      <IonTitle>{postData?.postsByParent.title}</IonTitle>
       <AddListHeader
         title={tr('Posts')}
         onClick={() => {

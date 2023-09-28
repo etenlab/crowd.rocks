@@ -19,6 +19,7 @@ import {
   codeWorkingOutline,
   mapOutline,
   sendOutline,
+  logoGoogle,
 } from 'ionicons/icons';
 import { RouteComponentProps } from 'react-router';
 import './Home.css';
@@ -31,6 +32,7 @@ import {
 import { useTr } from '../../hooks/useTr';
 import { PageLayout } from '../common/PageLayout';
 import { ISettings, globals } from '../../services/globals';
+import { useIsAdminLoggedInQuery } from '../../generated/graphql';
 
 interface HomePageProps
   extends RouteComponentProps<{
@@ -62,6 +64,11 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
   const [show_legal_menu, set_show_legal_menu] = useState(false);
 
   const settings: ISettings = globals.get_settings();
+  const user_id = globals.get_user_id();
+
+  const { data: isAdminRes } = useIsAdminLoggedInQuery({
+    variables: { input: { user_id: String(user_id) } },
+  });
 
   useIonViewWillEnter(() => {
     document.title = tr('Home');
@@ -134,6 +141,14 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           title: tr('Fast Translation'),
           description: tr('Translate words and phrases into any language'),
           isShown: () => !!settings?.isBetaTools,
+        },
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/ai-controller`,
+          icon: logoGoogle,
+          title: tr('AI Controller'),
+          description: tr('Use our bots to translate words and phrases'),
+          isShown: () =>
+            !!settings?.isBetaTools && !!isAdminRes?.loggedInIsAdmin.isAdmin,
         },
       ],
     },
