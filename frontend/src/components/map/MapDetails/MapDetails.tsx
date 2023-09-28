@@ -211,45 +211,45 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
     return (
       <StControls>
         <IonButton onClick={() => zoomIn()}>
-          <IonIcon icon={addCircleOutline} size="large" />
+          <IonIcon icon={addCircleOutline} size="medium" />
         </IonButton>
         <IonButton onClick={() => zoomOut()}>
-          <IonIcon icon={removeCircleOutline} size="large" />
+          <IonIcon icon={removeCircleOutline} size="medium" />
         </IonButton>
         <IonButton
           onClick={() => {
             resetTransform();
           }}
         >
-          <IonIcon icon={refreshCircleOutline} size="large" />
+          <IonIcon icon={refreshCircleOutline} size="medium" />
         </IonButton>
         <IonButton
           onClick={() => {
             moveOn(0, TRANSFORM_STEP);
           }}
         >
-          <IonIcon icon={arrowUpOutline} size="large" />
+          <IonIcon icon={arrowUpOutline} size="medium" />
         </IonButton>
         <IonButton
           onClick={() => {
             moveOn(0, -TRANSFORM_STEP);
           }}
         >
-          <IonIcon icon={arrowDownOutline} size="large" />
+          <IonIcon icon={arrowDownOutline} size="medium" />
         </IonButton>
         <IonButton
           onClick={() => {
             moveOn(TRANSFORM_STEP, 0);
           }}
         >
-          <IonIcon icon={arrowBackOutline} size="large" />
+          <IonIcon icon={arrowBackOutline} size="medium" />
         </IonButton>
         <IonButton
           onClick={() => {
             moveOn(-TRANSFORM_STEP, 0);
           }}
         >
-          <IonIcon icon={arrowForwardOutline} size="large" />
+          <IonIcon icon={arrowForwardOutline} size="medium" />
         </IonButton>
       </StControls>
     );
@@ -335,7 +335,5 @@ const StButtonsSection = styled.div`
 `;
 
 const StControls = styled('div')`
-  display: flex;
-  flex-wrap: nowrap;
   z-index: 1000;
 `;
