@@ -461,6 +461,23 @@ export class LanguageListForGoogleTranslateOutput extends GenericOutput {
   languages: LanguageForGoogleTranslate[] | null;
 }
 
+@InputType()
+export class TranslatedLanguageInfoInput {
+  @Field(() => ID)
+  fromLanguageCode: string;
+  @Field(() => ID, { nullable: true })
+  toLanguageCode?: string;
+}
+
+@ObjectType()
+export class TranslatedLanguageInfoOutput extends GenericOutput {
+  @Field(() => Int) totalWordCount: number;
+  @Field(() => Int) totalPhraseCount: number;
+  @Field(() => Int, { nullable: true }) translatedMissingWordCount?: number;
+  @Field(() => Int, { nullable: true }) translatedMissingPhraseCount?: number;
+  @Field(() => Int) googleTranslateTotalLangCount: number;
+}
+
 @ObjectType()
 export class TranslateAllWordsAndPhrasesByGoogleResult {
   @Field(() => Int) requestedCharactors: number;

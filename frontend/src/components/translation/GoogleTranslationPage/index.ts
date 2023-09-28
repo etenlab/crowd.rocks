@@ -1,1 +1,0 @@
-export { GoogleTranslationPage } from './GoogleTranslationPage';

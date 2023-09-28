@@ -536,6 +536,7 @@ type Mutation {
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
   translateAllWordsAndPhrasesByGoogle(from_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
+  translateMissingWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
   translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionOutput!
   updateFile(file: Upload, file_size: Int, file_type: String, id: Int!): IFileOutput!
@@ -870,6 +871,7 @@ type Query {
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): SiteTextTranslationWithVoteListOutput!
   getDocument(input: GetDocumentInput!): GetDocumentOutput!
   getFlagsFromRef(parent_id: String!, parent_table: TableNameType!): FlagsOutput!
+  getLanguageTranslationInfo(input: TranslatedLanguageInfoInput!): TranslatedLanguageInfoOutput!
   getMapDetails(input: GetMapDetailsInput!): MapDetailsOutput!
   getMapVoteStatus(is_original: Boolean!, map_id: ID!): MapVoteStatusOutputRow!
   getMapWordOrPhraseAsOrigByDefinitionId(input: GetMapWordOrPhraseByDefinitionIdInput!): MapWordOrPhraseAsOrigOutput!
@@ -1223,6 +1225,20 @@ type TranslateAllWordsAndPhrasesByGoogleResult {
   totalWordCount: Int!
   translatedPhraseCount: Int!
   translatedWordCount: Int!
+}
+
+input TranslatedLanguageInfoInput {
+  fromLanguageCode: ID!
+  toLanguageCode: ID
+}
+
+type TranslatedLanguageInfoOutput {
+  error: ErrorType!
+  googleTranslateTotalLangCount: Int!
+  totalPhraseCount: Int!
+  totalWordCount: Int!
+  translatedMissingPhraseCount: Int
+  translatedMissingWordCount: Int
 }
 
 union Translation = PhraseToPhraseTranslation | PhraseToWordTranslation | WordToPhraseTranslation | WordToWordTranslation
