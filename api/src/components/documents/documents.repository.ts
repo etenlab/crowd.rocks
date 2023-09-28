@@ -13,27 +13,25 @@ import {
 export class DocumentsRepository {
   constructor(private pg: PostgresService) {}
 
-  /**
-   * dbPoolClient is optional. If providerd, then it will be used to run query (useful for SQL transactions)
-   * if not - then new client will be get from pg.pool
-   */
   async saveDocumentTrn(
     { file_id, language_code, dialect_code, geo_code }: TextyDocumentInput,
     token,
     dbPoolClient: PoolClient,
-  ): Promise<string> {
-    const res = await dbPoolClient.query(
+  ): Promise<{ document_id: string | null; error: ErrorType }> {
+    const res = await dbPoolClient.query<{
+      p_document_id: string | null;
+      p_error_type: ErrorType;
+    }>(
       `
         call document_create($1,$2,$3,$4,$5,null,null,null,null)
       `,
       [file_id, token, language_code, dialect_code, geo_code],
     );
 
-    if (!res.rows[0].p_document_id) {
-      throw new Error(res.rows[0].p_error_type);
-    }
-
-    return res.rows[0].document_id;
+    return {
+      document_id: res.rows[0].p_document_id,
+      error: res.rows[0].p_error_type,
+    };
   }
 
   async getAllDocuments(lang?: LanguageInput): Promise<GetAllDocumentsOutput> {
