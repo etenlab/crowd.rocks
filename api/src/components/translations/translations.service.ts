@@ -67,6 +67,12 @@ import {
   getLangConnectionsObjectMapAndTexts,
   validateTranslateByGoogleInput,
 } from './utility';
+import { LiltTranslateService } from './lilt-translate.service';
+
+export interface LanguageResult {
+  code: string;
+  name: string;
+}
 
 export function makeStr(
   word_definition_id: number,
@@ -100,6 +106,7 @@ export class TranslationsService {
     private wordsService: WordsService,
     private phrasesService: PhrasesService,
     private gTrService: GoogleTranslateService,
+    private lTrService: LiltTranslateService,
     private pg: PostgresService,
   ) {
     this.translationSubject = new Subject<number>();
@@ -1140,7 +1147,7 @@ export class TranslationsService {
       translation_vote_status: null,
     };
   }
-
+  //tmp: translated and missing words/phrases
   async getTranslationLanguageInfo(
     input: TranslatedLanguageInfoInput,
     pgClient: PoolClient | null,
@@ -1216,7 +1223,7 @@ export class TranslationsService {
         (+totalWordToWordRes.rows[0].count +
           +totalWordToPhraseRes.rows[0].count);
     }
-
+    //tmp: total possible 'to' languages googleTranslate can translate to.
     // total possible 'to' languages googleTranslate can translate to.
     const googleTranslateTotalLangCount = (await this.gTrService.getLanguages())
       .length;
@@ -1543,6 +1550,16 @@ export class TranslationsService {
     };
   }
 
+  async translateAllWordsAndPhrasesByLilt(
+    from_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<GenericOutput> {
+    //wip: stopped here 
+    //todo: make as translateAllWordsAndPhrasesByGoogle but for Lilt
+  }
+
+  //tmp: google translate publish pubsub
   async translateAllWordsAndPhrasesByGoogle(
     from_language: LanguageInput,
     token: string,
@@ -1689,6 +1706,7 @@ export class TranslationsService {
     };
   }
 
+  //todo rename to stopBotTranslation
   async stopGoogleTranslation(): Promise<GenericOutput> {
     this.translationSubject.complete();
     return {
@@ -1708,6 +1726,22 @@ export class TranslationsService {
       Logger.error(e);
     }
 
+    return {
+      error: ErrorType.UnknownError,
+      languages: null,
+    };
+  }
+
+  async languagesForLiltTranslate(): Promise<LanguageListForGoogleTranslateOutput> {
+    try {
+      const languages = await this.lTrService.getLanguages();
+      return {
+        error: ErrorType.NoError,
+        languages,
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
     return {
       error: ErrorType.UnknownError,
       languages: null,

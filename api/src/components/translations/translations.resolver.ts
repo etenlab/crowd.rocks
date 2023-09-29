@@ -584,6 +584,7 @@ export class TranslationsResolver {
     return this.translationService.stopGoogleTranslation();
   }
 
+  //tmp: note - subscription
   @Subscription(() => TranslateAllWordsAndPhrasesByGoogleResult, {
     name: SubscriptionToken.TranslationReport,
   })

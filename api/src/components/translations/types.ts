@@ -5,6 +5,7 @@ import {
   InputType,
   ObjectType,
   createUnionType,
+  extend,
 } from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
@@ -450,12 +451,14 @@ export class TranslationsOutput extends GenericOutput {
 }
 
 @ObjectType()
+//todo: rename class to LanguageForBotTranslate
 export class LanguageForGoogleTranslate {
   @Field(() => String) code: string;
   @Field(() => String) name: string;
 }
 
 @ObjectType()
+//todo: rename class to LanguageListForBotTranslateOutput
 export class LanguageListForGoogleTranslateOutput extends GenericOutput {
   @Field(() => [LanguageForGoogleTranslate], { nullable: true })
   languages: LanguageForGoogleTranslate[] | null;
@@ -499,4 +502,12 @@ export class TranslateAllWordsAndPhrasesByGoogleResult {
 export class TranslateAllWordsAndPhrasesByGoogleOutput extends GenericOutput {
   @Field(() => TranslateAllWordsAndPhrasesByGoogleResult, { nullable: true })
   result: TranslateAllWordsAndPhrasesByGoogleResult | null;
+}
+
+@ObjectType()
+export class TranslateAllWordsAndPhrasesByBotResult extends TranslateAllWordsAndPhrasesByGoogleResult {}
+@ObjectType()
+export class TranslateAllWordsAndPhrasesByBotOutput extends GenericOutput {
+  @Field(() => TranslateAllWordsAndPhrasesByBotResult, { nullable: true })
+  result: TranslateAllWordsAndPhrasesByBotResult | null;
 }

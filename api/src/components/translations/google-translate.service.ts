@@ -6,6 +6,7 @@ import { LanguageInput } from '../common/types';
 
 import { ConfigService } from 'src/core/config.service';
 import { substituteN, unSubstituteN } from '../../common/utility';
+import { LanguageResult } from './translations.service';
 
 const LIMITS = 6000000 - 1000000;
 
@@ -110,13 +111,18 @@ export class GoogleTranslateService {
     }
   }
 
-  async getLanguages() {
+  async getLanguages(): Promise<LanguageResult[]> {
     if (!this.gcpTranslateClient) {
       throw new Error('no translate client');
     }
 
-    const [languages] = await this.gcpTranslateClient!.getLanguages();
+    const [googleLanguageResults] =
+      await this.gcpTranslateClient!.getLanguages();
 
-    return languages;
+    // explisit cast just to be obvious that we return our LanguageResult interface, not google's v2.LanguageRsult
+    return googleLanguageResults.map((gl) => ({
+      code: gl.code,
+      name: gl.name,
+    }));
   }
 }

@@ -40,4 +40,6 @@ export class ConfigService {
   public readonly EMAIL_SERVER = process.env.EMAIL_SERVER;
   public readonly GCP_PROJECT_ID = process.env.GCP_PROJECT_ID;
   public readonly GCP_API_KEY = process.env.GCP_API_KEY;
+
+  public readonly LILT_KEY = process.env.LILT_KEY;
 }

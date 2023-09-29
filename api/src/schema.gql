@@ -1237,6 +1237,19 @@ input ToDefinitionInput {
   word_or_phrase: String!
 }
 
+type TranslateAllWordsAndPhrasesByBotResult {
+  completed: Int
+  errors: [String!]
+  message: String
+  requestedCharactors: Int!
+  status: String
+  total: Int
+  totalPhraseCount: Int!
+  totalWordCount: Int!
+  translatedPhraseCount: Int!
+  translatedWordCount: Int!
+}
+
 type TranslateAllWordsAndPhrasesByGoogleOutput {
   error: ErrorType!
   result: TranslateAllWordsAndPhrasesByGoogleResult
