@@ -66,7 +66,7 @@ import { PhraseListPage } from './components/phrase-book/PhraseListPage';
 import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
 
 import { TranslationPage } from './components/translation/TranslationPage';
-import { GoogleTranslationPage } from './components/translation/GoogleTranslationPage';
+import { AIControllerPage } from './components/translation/AIControllerPage';
 import { FastTranslationPage } from './components/translation/FastTranslationPage';
 
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
@@ -480,8 +480,8 @@ const Body: React.FC = () => {
           />
           <Route
             exact
-            path="/:nation_id/:language_id/:cluster_id/google-translate"
-            component={GoogleTranslationPage}
+            path="/:nation_id/:language_id/:cluster_id/ai-controller"
+            component={AIControllerPage}
           />
           <Route
             exact

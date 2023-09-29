@@ -186,6 +186,12 @@ export class DatabaseVersionControlService {
     );
     await this.registerUser('anonymous@crowd.rocks', 'Anonymous', 'asdfasdf');
 
+    await this.registerUser(
+      'googlebot@crowd.rocks',
+      'GoogleBot',
+      this.config.CR_GOOGLE_BOT_PASSWORD || 'asdfasdf',
+    );
+
     // load data
     await this.dataloader.loadSiteTextData();
   }
