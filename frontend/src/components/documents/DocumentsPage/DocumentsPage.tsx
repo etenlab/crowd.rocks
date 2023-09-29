@@ -1,17 +1,15 @@
-import { RouteComponentProps } from 'react-router';
-import { PageLayout } from '../common/PageLayout';
-import { Caption } from '../common/Caption/Caption';
-import { useTr } from '../../hooks/useTr';
-import { FilterContainer } from '../common/styled';
-import { LangSelector } from '../common/LangSelector/LangSelector';
-import { useAppContext } from '../../hooks/useAppContext';
+import { PageLayout } from '../../common/PageLayout';
+import { Caption } from '../../common/Caption/Caption';
+import { useTr } from '../../../hooks/useTr';
+import { FilterContainer } from '../../common/styled';
+import { LangSelector } from '../../common/LangSelector/LangSelector';
+import { useAppContext } from '../../../hooks/useAppContext';
 import { useCallback, useState } from 'react';
 import {
   useDocumentUploadMutation,
-  useGetAllDocumentsQuery,
   useUploadFileMutation,
-} from '../../generated/graphql';
-import { DocumentsList } from './DocumentsList';
+} from '../../../generated/graphql';
+import { DocumentList } from '../DocumentList/DocumentList';
 import {
   IonContent,
   IonHeader,
@@ -23,16 +21,7 @@ import {
 import { NewDocumentForm } from './NewDocumentForm';
 import { DocumentsTools } from './DocumentsTools';
 
-interface DocumentsPageProps
-  extends RouteComponentProps<{
-    nation_id: string;
-    language_id: string;
-    cluster_id: string;
-  }> {}
-
-export const DocumentsPage: React.FC<DocumentsPageProps> = ({
-  match,
-}: DocumentsPageProps) => {
+export function DocumentsPage() {
   const { tr } = useTr();
   const {
     states: {
@@ -48,19 +37,6 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
   const [isOpenModal, setIsOpenModal] = useState(false);
 
   const [present] = useIonToast();
-
-  const { data: allDocuments, refetch: refetchDocuments } =
-    useGetAllDocumentsQuery({
-      variables: {
-        languageInput: sourceLang
-          ? {
-              language_code: sourceLang?.lang.tag,
-              dialect_code: sourceLang?.dialect?.tag,
-              geo_code: sourceLang?.region?.tag,
-            }
-          : undefined,
-      },
-    });
 
   const handleAddDocument = useCallback(
     async (file: File | undefined) => {
@@ -106,13 +82,11 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
         },
       });
       console.log(`uploaded: `, res);
-      refetchDocuments();
       setIsOpenModal(false);
     },
     [
       documentUpload,
       present,
-      refetchDocuments,
       sourceLang?.dialect?.tag,
       sourceLang?.lang,
       sourceLang?.region?.tag,
@@ -137,12 +111,14 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
             onClearClick={() => setSourceLanguage(null)}
           />
         </FilterContainer>
+
         <DocumentsTools onAddClick={() => setIsOpenModal(true)} />
-        <DocumentsList
-          allDocuments={allDocuments?.getAllDocuments.documents || undefined}
-          match={match}
-        />
-        <IonModal isOpen={isOpenModal}>
+        <DocumentList />
+
+        <IonModal
+          isOpen={isOpenModal}
+          onDidDismiss={() => setIsOpenModal(false)}
+        >
           <IonHeader>
             <IonToolbar>
               <IonTitle>{tr('New Document')}</IonTitle>
@@ -160,4 +136,4 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
       </div>
     </PageLayout>
   );
-};
+}

@@ -1,30 +1,30 @@
-import { IonButton, IonIcon } from '@ionic/react';
-import { add, funnelOutline } from 'ionicons/icons';
 import React from 'react';
-import { styled } from 'styled-components';
-import { useTr } from '../../hooks/useTr';
+import { add, funnelOutline } from 'ionicons/icons';
 
-type TDocumentsToolsParams = {
+import { useTr } from '../../../hooks/useTr';
+
+import { StyledDocumentsToolsBox, StIonIcon, StIonButton } from './styled';
+
+type DocumentsToolsParams = {
   onFilterClick?: () => void;
   onTranslationsClick?: () => void;
   onResetClick?: () => void;
   onAddClick?: () => void;
 };
 
-export const DocumentsTools: React.FC<TDocumentsToolsParams> = ({
+export function DocumentsTools({
   onFilterClick,
   onTranslationsClick,
   onResetClick,
   onAddClick,
-}: TDocumentsToolsParams) => {
+}: DocumentsToolsParams) {
   const { tr } = useTr();
+
   return (
     <StyledDocumentsToolsBox>
       {onFilterClick ? (
         <StIonIcon icon={funnelOutline} onClick={() => onFilterClick()} />
-      ) : (
-        <div> </div>
-      )}
+      ) : null}
       {onTranslationsClick ? (
         <StIonButton onClick={() => onTranslationsClick()}>
           {tr('Translate')}
@@ -42,25 +42,7 @@ export const DocumentsTools: React.FC<TDocumentsToolsParams> = ({
             onAddClick();
           }}
         />
-      ) : (
-        <div> </div>
-      )}
+      ) : null}
     </StyledDocumentsToolsBox>
   );
-};
-
-const StyledDocumentsToolsBox = styled.div`
-  font-size: 30px;
-  justify-content: space-between;
-  margin-top: 20px;
-  width: 100%;
-  display: flex;
-`;
-
-const StIonButton = styled(IonButton)(() => ({
-  width: '200px',
-}));
-
-const StIonIcon = styled(IonIcon)(() => ({
-  cursor: 'pointer',
-}));
+}
