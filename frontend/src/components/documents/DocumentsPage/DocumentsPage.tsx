@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useHistory, useParams } from 'react-router';
 import {
   IonContent,
   IonHeader,
@@ -41,6 +42,11 @@ export function DocumentsPage() {
     },
     actions: { setSourceLanguage },
   } = useAppContext();
+  const { nation_id, language_id, cluster_id } = useParams<{
+    nation_id: string;
+    language_id: string;
+    cluster_id: string;
+  }>();
 
   const [uploadFile] = useUploadFileMutation();
   const [documentUpload] = useDocumentUploadMutation();
@@ -48,6 +54,7 @@ export function DocumentsPage() {
 
   const [toast] = useIonToast();
   const [loader, dismissLoader] = useIonLoading();
+  const history = useHistory();
 
   const handleAddDocument = useCallback(
     async (file: File | undefined) => {
@@ -134,6 +141,15 @@ export function DocumentsPage() {
     ],
   );
 
+  const handleGoToDocumentViewer = useCallback(
+    (documentId: string) => {
+      history.push(
+        `/${nation_id}/${language_id}/${cluster_id}/documents/${documentId}`,
+      );
+    },
+    [cluster_id, history, language_id, nation_id],
+  );
+
   return (
     <PageLayout>
       <CaptionContainer>
@@ -157,7 +173,8 @@ export function DocumentsPage() {
         <DocumentsTools onAddClick={() => setIsOpenModal(true)} />
       </RowStack>
 
-      <DocumentList />
+      <DocumentList onClickItem={handleGoToDocumentViewer} />
+
       <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>

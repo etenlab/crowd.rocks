@@ -8,7 +8,11 @@ import { useGetAllDocumentsQuery } from '../../../generated/graphql';
 
 import { DocumentItem } from './DocumentItem';
 
-export function DocumentList() {
+type DocumentListProps = {
+  onClickItem(documentId: string): void;
+};
+
+export function DocumentList({ onClickItem }: DocumentListProps) {
   const { tr } = useTr();
   const {
     states: {
@@ -37,8 +41,14 @@ export function DocumentList() {
 
     return [...data.getAllDocuments.documents]
       .sort((d1, d2) => d1.file_name.localeCompare(d2.file_name))
-      .map((d) => <DocumentItem document={d} key={d.document_id} />);
-  }, [data, error]);
+      .map((d) => (
+        <DocumentItem
+          document={d}
+          key={d.document_id}
+          onClickItem={onClickItem}
+        />
+      ));
+  }, [data, error, onClickItem]);
 
   if (documentItems.length === 0) {
     return <div> {tr('No documents yet...')} </div>;

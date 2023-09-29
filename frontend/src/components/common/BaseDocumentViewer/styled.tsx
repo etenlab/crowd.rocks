@@ -7,8 +7,15 @@ export const Container = styled.div`
   flex-wrap: wrap;
 `;
 
-export const Word = styled.div`
-  display: inline-block;
-  padding: 3px 4px;
-`;
+export const Word = styled('div')({
+  display: 'inline-block',
+  padding: '3px 4px',
+  '&.edit': {
+    cursor: 'pointer',
+  },
+  '&.edit:hover': {
+    background: '#eee',
+  },
+});
+
 export const Dot = styled.div``;

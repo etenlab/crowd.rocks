@@ -14,6 +14,7 @@ export const StItem = styled(IonItem)(() => ({
   alignItems: 'center',
   '--padding-start': 0,
   '--inner-padding-end': 0,
+  cursor: 'pointer',
 }));
 
 export const FileName = styled.div``;

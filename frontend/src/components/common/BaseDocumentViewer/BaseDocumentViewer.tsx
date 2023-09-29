@@ -1,5 +1,4 @@
 import { useMemo, ReactNode, Fragment } from 'react';
-
 import { Word, Dot, Container } from './styled';
 
 export type ViewMode = 'edit' | 'view';
@@ -55,7 +54,12 @@ export function BaseDocumentViewer({
       const isDot = dotIndex ? true : false;
       const dotCom = dotIndex ? dots[dotIndex].component : null;
 
-      const color = begin && !end ? 'red' : 'black';
+      const color =
+        (begin && !end && range.endEntry) ||
+        entry.id === range.beginEntry ||
+        entry.id === range.endEntry
+          ? 'red'
+          : 'black';
 
       if (entry.id === range.endEntry) {
         end = true;
@@ -64,7 +68,8 @@ export function BaseDocumentViewer({
       return (
         <Fragment key={entry.id}>
           <Word
-            onClick={() => mode === 'edit' || onClickWord(entry.id, index)}
+            className={`${mode}`}
+            onClick={() => mode === 'edit' && onClickWord(entry.id, index)}
             style={{ color }}
           >
             {entry.wordlike_string.wordlike_string}

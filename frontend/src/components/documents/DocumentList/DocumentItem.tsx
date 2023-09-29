@@ -1,4 +1,3 @@
-import { useParams } from 'react-router';
 import { IonBadge } from '@ionic/react';
 import { downloadOutline } from 'ionicons/icons';
 
@@ -11,15 +10,10 @@ import { StItem, FileName, IconRow, DownloadIcon } from './styled';
 
 type DocumentItemProps = {
   document: TextyDocument;
+  onClickItem(documentId: string): void;
 };
 
-export function DocumentItem({ document }: DocumentItemProps) {
-  const { nation_id, language_id, cluster_id } = useParams<{
-    nation_id: string;
-    language_id: string;
-    cluster_id: string;
-  }>();
-
+export function DocumentItem({ document, onClickItem }: DocumentItemProps) {
   const langInfo = subTags2LangInfo({
     lang: document.language_code,
     dialect: document.dialect_code || undefined,
@@ -30,10 +24,12 @@ export function DocumentItem({ document }: DocumentItemProps) {
     downloadFromUrl(document.file_name, document.file_url);
   };
 
-  const routerLink = `/${nation_id}/${language_id}/${cluster_id}/documents/${document.document_id}`;
-
   return (
-    <StItem routerLink={routerLink}>
+    <StItem
+      onClick={() => {
+        onClickItem(document.document_id);
+      }}
+    >
       <FileName>{document.file_name}</FileName>
       <IconRow slot="end">
         <IonBadge>{langInfo2String(langInfo)}</IonBadge>

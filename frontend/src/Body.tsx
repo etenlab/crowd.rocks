@@ -505,7 +505,7 @@ const Body: React.FC = () => {
           />
           <Route
             exact
-            path="/:nation_id/:language_id/:cluster_id/qa/:document_id"
+            path="/:nation_id/:language_id/:cluster_id/qa/documents/:document_id"
             component={QADocumentViewerPage}
           />
           <Route exact path="/">

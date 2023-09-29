@@ -1,4 +1,14 @@
-import { useMemo, useState, useCallback, ReactNode } from 'react';
+import { useMemo, useState, useCallback, useEffect, ReactNode } from 'react';
+import {
+  IonButton,
+  IonContent,
+  IonHeader,
+  IonModal,
+  IonTitle,
+  IonToolbar,
+  // useIonToast,
+  // useIonLoading,
+} from '@ionic/react';
 
 import { ViewMode, Dot } from '../../common/BaseDocumentViewer';
 import { DocumentViewer } from '../../documents/DocumentViewer';
@@ -8,6 +18,9 @@ import {
   QuestionOnWordRange,
   ErrorType,
 } from '../../../generated/graphql';
+
+import { useTr } from '../../../hooks/useTr';
+import { RowStack } from '../../common/Layout/styled';
 
 type RangeItem = {
   entryId: string;
@@ -20,16 +33,25 @@ type QADocumentViewerProps = {
 };
 
 export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
+  const { tr } = useTr();
+
   const { data, error, loading } = useGetQuestionOnWordRangesByDocumentIdQuery({
     variables: {
       document_id: documentId,
     },
   });
 
+  const [isOpenModal, setIsOpenModal] = useState(false);
   const [range, setRange] = useState<{
     begin?: RangeItem;
     end?: RangeItem;
   }>({});
+
+  useEffect(() => {
+    if (range.begin && range.end) {
+      setIsOpenModal(true);
+    }
+  }, [range.begin, range.end]);
 
   const { dots, questionsMap } = useMemo(() => {
     const questionsMap = new Map<string, QuestionOnWordRange[]>();
@@ -129,6 +151,7 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
                 entryId,
                 order: index,
               },
+              end: undefined,
             };
           }
 
@@ -139,6 +162,16 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
     [mode, questionsMap],
   );
 
+  const handleCancel = () => {
+    setIsOpenModal(false);
+    setRange({});
+  };
+
+  const handleSaveQuestion = () => {
+    setIsOpenModal(false);
+    setRange({});
+  };
+
   if (loading) {
     return <div>loading</div>;
   }
@@ -148,15 +181,33 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
   }
 
   return (
-    <DocumentViewer
-      mode={mode}
-      documentId={documentId}
-      range={{
-        beginEntry: range.begin?.entryId,
-        endEntry: range.end?.entryId,
-      }}
-      dots={dots}
-      onClickWord={handleWordClick}
-    />
+    <>
+      <DocumentViewer
+        mode={mode}
+        documentId={documentId}
+        range={{
+          beginEntry: range.begin?.entryId,
+          endEntry: range.end?.entryId,
+        }}
+        dots={dots}
+        onClickWord={handleWordClick}
+      />
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('New Document')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <div>Developing now</div>
+          <RowStack>
+            <IonButton fill="outline" onClick={handleCancel}>
+              {tr('Cancel')}
+            </IonButton>
+            <IonButton onClick={handleSaveQuestion}>{tr('Save')}</IonButton>
+          </RowStack>
+        </IonContent>
+      </IonModal>
+    </>
   );
 }
