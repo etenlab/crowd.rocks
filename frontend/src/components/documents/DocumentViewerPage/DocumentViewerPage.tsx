@@ -2,6 +2,7 @@ import { RouteComponentProps } from 'react-router';
 
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
+import { CaptionContainer } from '../../common/styled';
 
 import { useGetDocumentQuery } from '../../../generated/graphql';
 
@@ -31,7 +32,9 @@ export function DocumentViewerPage({
 
   return (
     <PageLayout>
-      <Caption>{file_name}</Caption>
+      <CaptionContainer>
+        <Caption>{file_name}</Caption>
+      </CaptionContainer>
       <DocumentViewer
         documentId={document_id}
         mode="view"

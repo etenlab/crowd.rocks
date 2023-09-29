@@ -12,12 +12,11 @@ import { IonIcon, IonItem } from '@ionic/react';
 export const StItem = styled(IonItem)(() => ({
   display: 'flex',
   alignItems: 'center',
+  '--padding-start': 0,
+  '--inner-padding-end': 0,
 }));
 
-export const FileName = styled.div`
-  display: flex;
-  margin-right: 1em;
-`;
+export const FileName = styled.div``;
 
 export const IconRow = styled.div`
   display: flex;

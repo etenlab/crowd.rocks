@@ -34,7 +34,7 @@ export function DocumentItem({ document }: DocumentItemProps) {
 
   return (
     <StItem routerLink={routerLink}>
-      <FileName slot="start">{document.file_name}</FileName>
+      <FileName>{document.file_name}</FileName>
       <IconRow slot="end">
         <IonBadge>{langInfo2String(langInfo)}</IonBadge>
         <DownloadIcon

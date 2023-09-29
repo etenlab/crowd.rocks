@@ -47,38 +47,53 @@ export function DocumentViewer({
             id: word_entry!.wordlike_string.wordlike_string_id,
             wordlike_string: word_entry!.wordlike_string.wordlike_string,
           },
-          parent_wordlike_string: word_entry!.parent_wordlike_string
-            ? {
-                id: word_entry!.parent_wordlike_string.wordlike_string_id,
-                wordlike_string:
-                  word_entry!.parent_wordlike_string.wordlike_string,
-              }
-            : undefined,
+          parent_document_word_entry_id:
+            word_entry!.parent_document_word_entry_id,
         }));
 
-    const entriesMap = new Map<string, WordEntry[]>();
+    const entriesMap = new Map<string, WordEntry>();
+    const childrenMap = new Map<string, string>();
+    const rootIds: string[] = [];
 
     for (const word_entry of word_entries) {
-      const currentKey = word_entry.wordlike_string.id;
-      const parentKey = word_entry?.parent_wordlike_string?.id;
+      entriesMap.set(word_entry.id, word_entry);
 
-      const parentEntries = parentKey ? entriesMap.get(parentKey) || [] : [];
-
-      entriesMap.set(currentKey, [...parentEntries, word_entry]);
-
-      if (parentKey) {
-        entriesMap.delete(parentKey);
+      if (word_entry.parent_document_word_entry_id) {
+        childrenMap.set(
+          word_entry.parent_document_word_entry_id,
+          word_entry.id,
+        );
+      } else {
+        rootIds.push(word_entry.id);
       }
+    }
+
+    for (const parentId of childrenMap.keys()) {
+      if (entriesMap.get(parentId)) {
+        continue;
+      }
+
+      rootIds.push(childrenMap.get(parentId)!);
     }
 
     const sortedEntries: WordEntry[][] = [];
 
-    for (const entries of entriesMap.values()) {
-      sortedEntries.push(entries);
+    for (const root of rootIds) {
+      const tempEntries: WordEntry[] = [];
+
+      let cur: string | undefined = root;
+
+      while (cur) {
+        tempEntries.push(entriesMap.get(cur)!);
+        cur = childrenMap.get(cur);
+      }
+
+      sortedEntries.push(tempEntries);
     }
 
     if (sortedEntries.length !== 1) {
-      alert('Error at fetching');
+      console.log(sortedEntries);
+      // alert('Error at fetching');
     }
 
     return sortedEntries.length > 0 ? sortedEntries[0] : [];

@@ -1,6 +1,6 @@
 import { useMemo, ReactNode, Fragment } from 'react';
 
-import { Word, Dot } from './styled';
+import { Word, Dot, Container } from './styled';
 
 export type ViewMode = 'edit' | 'view';
 
@@ -17,7 +17,7 @@ export type WordlikeString = {
 export type WordEntry = {
   id: string;
   wordlike_string: WordlikeString;
-  parent_wordlike_string?: WordlikeString;
+  parent_id?: string;
 };
 
 export type BaseDocumentViewerProps = {
@@ -51,28 +51,31 @@ export function BaseDocumentViewer({
         begin = true;
       }
 
-      if (entry.id === range.endEntry) {
-        end = true;
-      }
-
       const dotIndex = dotsMap.get(entry.id) || null;
       const isDot = dotIndex ? true : false;
       const dotCom = dotIndex ? dots[dotIndex].component : null;
 
-      if (begin && !end) {
-        return (
-          <Fragment key={entry.id}>
-            <Word
-              onClick={() => mode === 'edit' || onClickWord(entry.id, index)}
-            />
-            {isDot
-              ? dotCom || <Dot onClick={() => onClickWord(entry.id, index)} />
-              : null}
-          </Fragment>
-        );
+      const color = begin && !end ? 'red' : 'black';
+
+      if (entry.id === range.endEntry) {
+        end = true;
       }
+
+      return (
+        <Fragment key={entry.id}>
+          <Word
+            onClick={() => mode === 'edit' || onClickWord(entry.id, index)}
+            style={{ color }}
+          >
+            {entry.wordlike_string.wordlike_string}
+          </Word>
+          {isDot
+            ? dotCom || <Dot onClick={() => onClickWord(entry.id, index)} />
+            : null}
+        </Fragment>
+      );
     });
   }, [dots, entries, mode, onClickWord, range.beginEntry, range.endEntry]);
 
-  return <>{com}</>;
+  return <Container>{com}</Container>;
 }

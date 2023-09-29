@@ -810,12 +810,12 @@
             "deprecationReason": null
           },
           {
-            "name": "parent_wordlike_string",
+            "name": "parent_document_word_entry_id",
             "description": null,
             "args": [],
             "type": {
-              "kind": "OBJECT",
-              "name": "WordlikeString",
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,

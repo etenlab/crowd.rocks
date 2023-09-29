@@ -35,7 +35,7 @@ export function DocumentList() {
       return [];
     }
 
-    return data.getAllDocuments.documents
+    return [...data.getAllDocuments.documents]
       .sort((d1, d2) => d1.file_name.localeCompare(d2.file_name))
       .map((d) => <DocumentItem document={d} key={d.document_id} />);
   }, [data, error]);
@@ -44,5 +44,5 @@ export function DocumentList() {
     return <div> {tr('No documents yet...')} </div>;
   }
 
-  return <IonList lines="full">{documentItems}</IonList>;
+  return <IonList lines="inset">{documentItems}</IonList>;
 }

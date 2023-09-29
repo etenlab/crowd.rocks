@@ -1,9 +1,7 @@
 import React from 'react';
 import { add, funnelOutline } from 'ionicons/icons';
 
-import { useTr } from '../../../hooks/useTr';
-
-import { StyledDocumentsToolsBox, StIonIcon, StIonButton } from './styled';
+import { ToolContainer, FilterIcon, PlusIcon } from './styled';
 
 type DocumentsToolsParams = {
   onFilterClick?: () => void;
@@ -14,35 +12,26 @@ type DocumentsToolsParams = {
 
 export function DocumentsTools({
   onFilterClick,
-  onTranslationsClick,
-  onResetClick,
   onAddClick,
 }: DocumentsToolsParams) {
-  const { tr } = useTr();
-
   return (
-    <StyledDocumentsToolsBox>
+    <ToolContainer>
       {onFilterClick ? (
-        <StIonIcon icon={funnelOutline} onClick={() => onFilterClick()} />
-      ) : null}
-      {onTranslationsClick ? (
-        <StIonButton onClick={() => onTranslationsClick()}>
-          {tr('Translate')}
-        </StIonButton>
-      ) : null}
-      {onResetClick ? (
-        <StIonButton onClick={() => onResetClick()}>
-          {tr('Reset Data')}
-        </StIonButton>
+        <FilterIcon
+          icon={funnelOutline}
+          onClick={() => onFilterClick()}
+          color="primary"
+        />
       ) : null}
       {onAddClick ? (
-        <StIonIcon
+        <PlusIcon
           icon={add}
           onClick={() => {
             onAddClick();
           }}
+          color="primary"
         />
       ) : null}
-    </StyledDocumentsToolsBox>
+    </ToolContainer>
   );
 }

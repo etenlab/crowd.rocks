@@ -1,20 +1,22 @@
 import styled from 'styled-components';
-import { IonButton, IonIcon } from '@ionic/react';
+import { IonIcon } from '@ionic/react';
 
-export const StyledDocumentsToolsBox = styled.div`
-  font-size: 30px;
-  justify-content: space-between;
-  margin-top: 20px;
-  width: 100%;
+export const ToolContainer = styled.div`
   display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  font-size: 30px;
+  gap: 10px;
 `;
 
-export const StIonButton = styled(IonButton)(() => ({
-  width: '200px',
+export const PlusIcon = styled(IonIcon)(() => ({
+  cursor: 'pointer',
+  fontSize: '30px',
 }));
 
-export const StIonIcon = styled(IonIcon)(() => ({
+export const FilterIcon = styled(IonIcon)(() => ({
   cursor: 'pointer',
+  fontSize: '20px',
 }));
 
 export const Container = styled.div`

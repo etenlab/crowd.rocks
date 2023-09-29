@@ -1,15 +1,4 @@
-import { PageLayout } from '../../common/PageLayout';
-import { Caption } from '../../common/Caption/Caption';
-import { useTr } from '../../../hooks/useTr';
-import { FilterContainer } from '../../common/styled';
-import { LangSelector } from '../../common/LangSelector/LangSelector';
-import { useAppContext } from '../../../hooks/useAppContext';
 import { useCallback, useState } from 'react';
-import {
-  useDocumentUploadMutation,
-  useUploadFileMutation,
-} from '../../../generated/graphql';
-import { DocumentList } from '../DocumentList/DocumentList';
 import {
   IonContent,
   IonHeader,
@@ -17,7 +6,28 @@ import {
   IonTitle,
   IonToolbar,
   useIonToast,
+  useIonLoading,
 } from '@ionic/react';
+
+import { PageLayout } from '../../common/PageLayout';
+import { Caption } from '../../common/Caption/Caption';
+import { LangSelector } from '../../common/LangSelector/LangSelector';
+import {
+  FilterContainer,
+  CaptionContainer,
+  ListCaption,
+} from '../../common/styled';
+import { RowStack } from '../../common/Layout/styled';
+
+import { useTr } from '../../../hooks/useTr';
+import { useAppContext } from '../../../hooks/useAppContext';
+
+import {
+  useDocumentUploadMutation,
+  useUploadFileMutation,
+} from '../../../generated/graphql';
+
+import { DocumentList } from '../DocumentList/DocumentList';
 import { NewDocumentForm } from './NewDocumentForm';
 import { DocumentsTools } from './DocumentsTools';
 
@@ -36,12 +46,13 @@ export function DocumentsPage() {
   const [documentUpload] = useDocumentUploadMutation();
   const [isOpenModal, setIsOpenModal] = useState(false);
 
-  const [present] = useIonToast();
+  const [toast] = useIonToast();
+  const [loader, dismissLoader] = useIonLoading();
 
   const handleAddDocument = useCallback(
     async (file: File | undefined) => {
       if (!sourceLang?.lang) {
-        present({
+        toast({
           message: tr('Please select language first.'),
           duration: 1500,
           position: 'top',
@@ -50,7 +61,7 @@ export function DocumentsPage() {
         return;
       }
       if (!file) {
-        present({
+        toast({
           message: tr('Please choose file first.'),
           duration: 1500,
           position: 'top',
@@ -59,6 +70,10 @@ export function DocumentsPage() {
         return;
       }
 
+      loader({
+        message: `${tr('Uploading')} ${file.name}...`,
+      });
+
       const uploadResult = await uploadFile({
         variables: {
           file: file,
@@ -66,10 +81,23 @@ export function DocumentsPage() {
           file_type: file.type,
         },
       });
+
+      dismissLoader();
+
       if (!uploadResult.data?.uploadFile.file?.id) {
+        toast({
+          message: tr('Failed at file upload'),
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
         console.log(`S3 upload error `, uploadResult.data?.uploadFile.error);
         return;
       }
+
+      loader({
+        message: `${tr('Uploading document')} ${file.name}...`,
+      });
 
       const res = await documentUpload({
         variables: {
@@ -81,59 +109,70 @@ export function DocumentsPage() {
           },
         },
       });
+
+      dismissLoader();
+      toast({
+        message: tr('Document upload success!'),
+        duration: 1500,
+        position: 'top',
+        color: 'success',
+      });
+
       console.log(`uploaded: `, res);
       setIsOpenModal(false);
     },
     [
-      documentUpload,
-      present,
-      sourceLang?.dialect?.tag,
       sourceLang?.lang,
+      sourceLang?.dialect?.tag,
       sourceLang?.region?.tag,
+      loader,
       tr,
       uploadFile,
+      dismissLoader,
+      documentUpload,
+      toast,
     ],
   );
 
   return (
     <PageLayout>
-      <Caption>{tr('Documents')}</Caption>
+      <CaptionContainer>
+        <Caption>{tr('Documents')}</Caption>
+      </CaptionContainer>
 
-      <div style={{ display: 'none' }}>
-        <FilterContainer>
-          <LangSelector
-            title={tr('Select language')}
-            langSelectorId="mapsListLangSelector"
-            selected={sourceLang ?? undefined}
-            onChange={(_sourceLangTag, sourceLangInfo) => {
-              setSourceLanguage(sourceLangInfo);
-            }}
-            onClearClick={() => setSourceLanguage(null)}
-          />
-        </FilterContainer>
+      <FilterContainer>
+        <LangSelector
+          title={tr('Select language')}
+          langSelectorId="mapsListLangSelector"
+          selected={sourceLang ?? undefined}
+          onChange={(_sourceLangTag, sourceLangInfo) => {
+            setSourceLanguage(sourceLangInfo);
+          }}
+          onClearClick={() => setSourceLanguage(null)}
+        />
+      </FilterContainer>
 
+      <RowStack>
+        <ListCaption>{tr('Document List')}</ListCaption>
         <DocumentsTools onAddClick={() => setIsOpenModal(true)} />
-        <DocumentList />
+      </RowStack>
 
-        <IonModal
-          isOpen={isOpenModal}
-          onDidDismiss={() => setIsOpenModal(false)}
-        >
-          <IonHeader>
-            <IonToolbar>
-              <IonTitle>{tr('New Document')}</IonTitle>
-            </IonToolbar>
-          </IonHeader>
-          <IonContent className="ion-padding">
-            <NewDocumentForm
-              onSave={handleAddDocument}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
-            />
-          </IonContent>
-        </IonModal>
-      </div>
+      <DocumentList />
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('New Document')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <NewDocumentForm
+            onSave={handleAddDocument}
+            onCancel={() => {
+              setIsOpenModal(false);
+            }}
+          />
+        </IonContent>
+      </IonModal>
     </PageLayout>
   );
 }
