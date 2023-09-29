@@ -117,7 +117,7 @@ export function getWordlikeStringsObjByIds(
         wordlike_string_id,
         wordlike_string
       from wordlike_strings
-      where words.word_id = any($1)
+      where wordlike_string_id = any($1)
     `,
     [ids],
   ];

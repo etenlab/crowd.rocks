@@ -12,7 +12,6 @@ declare
   v_current_word_range_id bigint;
 
   v_document_word_entry_id bigint;
-  v_word_range_id bigint;
 begin
   p_error_type := 'UnknownError';
 
@@ -56,23 +55,23 @@ begin
     p_error_type := 'DocumentWordEntryNotFound';
   end if;
 
-  v_word_range_id := null;
+  p_word_range_id := null;
 
   insert into word_ranges (begin_word, end_word, created_by)
   values (p_begin_word, p_end_word, v_user_id)
   on conflict do nothing
   returning word_range_id
-  into v_word_range_id;
+  into p_word_range_id;
 
-  if v_word_range_id is null then
+  if p_word_range_id is null then
     select word_range_id
     from word_ranges
     where begin_word = p_begin_word
       and end_word = p_end_word
-    into v_word_range_id;
+    into p_word_range_id;
   end if;
 
-  if v_word_range_id is null then
+  if p_word_range_id is null then
     p_error_type := 'WordRangeInsertFailed';
     return;
   end if;

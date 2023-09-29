@@ -20,8 +20,8 @@ export class DocumentWordEntry {
   @Field(() => ID) document_word_entry_id: string;
   @Field(() => String) document_id: string;
   @Field(() => WordlikeString) wordlike_string: WordlikeString;
-  @Field(() => WordlikeString, { nullable: true })
-  parent_wordlike_string: WordlikeString | null;
+  @Field(() => String, { nullable: true })
+  parent_document_word_entry_id: string | null;
 }
 
 @ObjectType()

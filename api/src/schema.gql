@@ -88,7 +88,7 @@ type DocumentWordEntriesOutput {
 type DocumentWordEntry {
   document_id: String!
   document_word_entry_id: ID!
-  parent_wordlike_string: WordlikeString
+  parent_document_word_entry_id: String
   wordlike_string: WordlikeString!
 }
 

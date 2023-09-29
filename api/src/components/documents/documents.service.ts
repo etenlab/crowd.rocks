@@ -92,21 +92,21 @@ export class DocumentsService {
       const documentWordEntries: {
         document_id: number;
         wordlike_string_id: number;
-        parent_wordlike_string_id: number;
+        parent_document_word_entry_id: number | null;
       }[] = [];
 
       for (let i = 0; i < wordlike_strings.length; i++) {
         documentWordEntries.push({
           document_id: +document_id,
           wordlike_string_id: +wordlike_strings[i]!.wordlike_string_id,
-          parent_wordlike_string_id:
-            i > 0 ? +wordlike_strings[i - 1]!.wordlike_string_id : 0,
+          parent_document_word_entry_id: null,
         });
       }
 
       const { error: documentWordEntryError, document_word_entries } =
         await this.documentWordEntryService.upserts(
           documentWordEntries,
+          true,
           token,
           dbPoolClient,
         );
