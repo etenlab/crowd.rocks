@@ -14,12 +14,12 @@ type RangeItem = {
   order: number;
 };
 
-type QAViewerProps = {
+type QADocumentViewerProps = {
   documentId: string;
   mode: ViewMode;
 };
 
-export function QAViewer({ documentId, mode }: QAViewerProps) {
+export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
   const { data, error, loading } = useGetQuestionOnWordRangesByDocumentIdQuery({
     variables: {
       document_id: documentId,

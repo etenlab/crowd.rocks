@@ -19,6 +19,7 @@ import {
   codeWorkingOutline,
   mapOutline,
   sendOutline,
+  helpCircleOutline,
 } from 'ionicons/icons';
 import { RouteComponentProps } from 'react-router';
 import './Home.css';
@@ -84,6 +85,15 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           icon: mapOutline,
           title: tr('Documents'),
           description: tr('Documents'),
+          isShown: () => !!settings?.isBetaTools,
+        },
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/qa`,
+          icon: helpCircleOutline,
+          title: tr('Question & Answer '),
+          description: tr(
+            'Annotate a text with questions so other users can provide answers',
+          ),
           isShown: () => !!settings?.isBetaTools,
         },
       ],

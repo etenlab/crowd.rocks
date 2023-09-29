@@ -74,8 +74,10 @@ import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
 import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
 import { NotificationPage } from './components/notifications/NotificationPage';
 import { SettingsPage } from './components/settings/SettingsPage';
-import { DocumentsPage } from './components/documents/DocumentsPage';
-import { DocumentDetailsPage } from './components/documents/DocumentDetails/DocumentDetails';
+import { DocumentsPage } from './components/documents/DocumentsPage/DocumentsPage';
+import { DocumentViewerPage } from './components/documents/DocumentViewerPage/DocumentViewerPage';
+import { QADocumentListPage } from './components/qa/QADocumentListPage';
+import { QADocumentViewerPage } from './components/qa/QADocumentViewerPage';
 
 const Body: React.FC = () => {
   const {
@@ -494,7 +496,17 @@ const Body: React.FC = () => {
           <Route
             exact
             path="/:nation_id/:language_id/:cluster_id/documents/:document_id"
-            component={DocumentDetailsPage}
+            component={DocumentViewerPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/qa"
+            component={QADocumentListPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/qa/:document_id"
+            component={QADocumentViewerPage}
           />
           <Route exact path="/">
             <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />
