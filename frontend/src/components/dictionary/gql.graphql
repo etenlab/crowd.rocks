@@ -1,3 +1,8 @@
+fragment WordlikeStringFragment on WordlikeString {
+  wordlike_string_id
+  wordlike_string
+}
+
 fragment WordFragment on Word {
   word_id
   word

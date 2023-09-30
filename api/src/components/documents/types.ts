@@ -20,8 +20,8 @@ export class DocumentWordEntry {
   @Field(() => ID) document_word_entry_id: string;
   @Field(() => String) document_id: string;
   @Field(() => WordlikeString) wordlike_string: WordlikeString;
-  @Field(() => WordlikeString, { nullable: true })
-  parent_wordlike_string: WordlikeString | null;
+  @Field(() => String, { nullable: true })
+  parent_document_word_entry_id: string | null;
 }
 
 @ObjectType()
@@ -74,13 +74,13 @@ export class GetDocumentOutput extends GenericOutput {
 
 @ObjectType()
 export class DocumentWordEntriesOutput extends GenericOutput {
-  @Field(() => [DocumentWordEntry], { nullable: true })
+  @Field(() => [DocumentWordEntry], { nullable: 'items' })
   document_word_entries: (DocumentWordEntry | null)[];
 }
 
 @ObjectType()
 export class WordRangesOutput extends GenericOutput {
-  @Field(() => [WordRange], { nullable: true })
+  @Field(() => [WordRange], { nullable: 'items' })
   word_ranges: (WordRange | null)[];
 }
 

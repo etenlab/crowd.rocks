@@ -4,7 +4,7 @@ export type GetDocumentWordEntryRow = {
   document_word_entry_id: string;
   document_id: string;
   wordlike_string_id: string;
-  parent_wordlike_string_id: string;
+  parent_document_word_entry_id: string;
 };
 
 export function getDocumentWordEntryByIds(ids: number[]): [string, [number[]]] {
@@ -14,7 +14,7 @@ export function getDocumentWordEntryByIds(ids: number[]): [string, [number[]]] {
         document_word_entry_id,
         document_id,
         wordlike_string_id,
-        parent_wordlike_string_id
+        parent_document_word_entry_id
       from document_word_entries
       where document_word_entry_id = any($1)
     `,
@@ -31,7 +31,7 @@ export function getDocumentWordEntryByDocumentId(
         document_word_entry_id,
         document_id,
         wordlike_string_id,
-        parent_wordlike_string_id
+        parent_document_word_entry_id
       from document_word_entries
       where document_id = $1
     `,
@@ -48,19 +48,27 @@ export type DocumentWordEntryUpsertsProcedureOutputRow = {
 export function callDocumentWordEntryUpsertsProcedure({
   document_ids,
   wordlike_string_ids,
-  parent_wordlike_string_ids,
+  parent_document_word_entry_ids,
+  isSequentialUpsert,
   token,
 }: {
   document_ids: number[];
   wordlike_string_ids: number[];
-  parent_wordlike_string_ids: number[];
+  parent_document_word_entry_ids: (number | null)[];
+  isSequentialUpsert: boolean;
   token: string;
-}): [string, [number[], number[], number[], string]] {
+}): [string, [number[], number[], (number | null)[], boolean, string]] {
   return [
     `
-      call batch_document_word_entry_upsert($1::bigint[], $2::bigint[], $3::bigint[], $4, null, null, '');
+      call batch_document_word_entry_upsert($1::bigint[], $2::bigint[], $3::bigint[], $4, $5, null, null, '');
     `,
-    [document_ids, wordlike_string_ids, parent_wordlike_string_ids, token],
+    [
+      document_ids,
+      wordlike_string_ids,
+      parent_document_word_entry_ids,
+      isSequentialUpsert,
+      token,
+    ],
   ];
 }
 

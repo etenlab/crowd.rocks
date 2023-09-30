@@ -146,7 +146,7 @@ export class AnswersService {
           question_ids: input.map((item) => +item.question_id),
           answers: input.map((item) => item.answer),
           question_items_list: input.map((item) =>
-            item.question_items.map((id) => +id),
+            item.question_item_ids.map((id) => +id),
           ),
           token,
         }),
