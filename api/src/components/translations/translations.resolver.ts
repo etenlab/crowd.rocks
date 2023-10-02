@@ -44,11 +44,12 @@ import {
   TranslationOutput,
   ToDefinitionInput,
   TranslationWithVoteOutput,
-  LanguageListForGoogleTranslateOutput,
+  LanguageListForBotTranslateOutput,
   TranslateAllWordsAndPhrasesByGoogleOutput,
-  TranslateAllWordsAndPhrasesByGoogleResult,
+  TranslateAllWordsAndPhrasesByBotResult,
   TranslatedLanguageInfoInput,
   TranslatedLanguageInfoOutput,
+  TranslateAllWordsAndPhrasesByBotOutput,
 } from './types';
 import { ErrorType, GenericOutput } from '../../common/types';
 
@@ -391,11 +392,16 @@ export class TranslationsResolver {
     );
   }
 
-  @Query(() => LanguageListForGoogleTranslateOutput)
-  async languagesForGoogleTranslate(): Promise<LanguageListForGoogleTranslateOutput> {
+  @Query(() => LanguageListForBotTranslateOutput)
+  async languagesForGoogleTranslate(): Promise<LanguageListForBotTranslateOutput> {
     console.log('languagesForGoogleTranslate resolver');
-
     return this.translationService.languagesForGoogleTranslate();
+  }
+
+  @Query(() => LanguageListForBotTranslateOutput)
+  async languagesForLiltTranslate(): Promise<LanguageListForBotTranslateOutput> {
+    console.log('languagesForLiltTranslate resolver');
+    return this.translationService.languagesForLiltTranslate();
   }
 
   @Query(() => TranslatedLanguageInfoOutput)
@@ -423,7 +429,31 @@ export class TranslationsResolver {
       }),
     );
 
-    return this.translationService.translateWordsAndPhrasesByGoogle(
+    return this.translationService.translateWordsAndPhrasesWithGoogle(
+      from_language,
+      to_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
+  async translateWordsAndPhrasesByLilt(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    console.log(
+      'translateWordsAndPhrasesByLilt',
+      JSON.stringify({
+        from_language,
+        to_language,
+      }),
+    );
+
+    return this.translationService.translateWordsAndPhrasesByLilt(
       from_language,
       to_language,
       getBearer(req) || '',
@@ -455,7 +485,7 @@ export class TranslationsResolver {
     );
   }
 
-  @Mutation(() => TranslateAllWordsAndPhrasesByGoogleOutput)
+  @Mutation(() => GenericOutput)
   async translateAllWordsAndPhrasesByGoogle(
     @Args('from_language', { type: () => LanguageInput })
     from_language: LanguageInput,
@@ -469,6 +499,26 @@ export class TranslationsResolver {
     );
 
     return this.translationService.translateAllWordsAndPhrasesByGoogle(
+      from_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @Mutation(() => GenericOutput)
+  async translateAllWordsAndPhrasesByLilt(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<GenericOutput> {
+    console.log(
+      'translateAllWordsAndPhrasesByLilt',
+      JSON.stringify({
+        from_language,
+      }),
+    );
+
+    return this.translationService.translateAllWordsAndPhrasesByLilt(
       from_language,
       getBearer(req) || '',
       null,
@@ -581,11 +631,16 @@ export class TranslationsResolver {
   async stopGoogleTranslation(): Promise<GenericOutput> {
     console.log('stopGoogleTranslation');
 
-    return this.translationService.stopGoogleTranslation();
+    return this.translationService.stopBotTranslation();
   }
 
-  //tmp: note - subscription
-  @Subscription(() => TranslateAllWordsAndPhrasesByGoogleResult, {
+  @Mutation(() => GenericOutput)
+  async stopLiltTranslation(): Promise<GenericOutput> {
+    console.log('stopLiltTranslation');
+    return this.translationService.stopBotTranslation();
+  }
+
+  @Subscription(() => TranslateAllWordsAndPhrasesByBotResult, {
     name: SubscriptionToken.TranslationReport,
   })
   async subscribeToTranslationReport() {

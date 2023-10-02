@@ -3,7 +3,11 @@ import { Injectable } from '@nestjs/common';
 
 import { LanguageInput } from '../common/types';
 import { ConfigService } from 'src/core/config.service';
-import { LanguageResult } from './translations.service';
+import { ITranslator, LanguageResult } from './translations.service';
+import { PostgresService } from '../../core/postgres.service';
+import { createToken } from '../../common/utility';
+import { delay } from './utility';
+import { hash } from 'argon2';
 // import { substituteN, unSubstituteN } from '../../common/utility';
 
 const LIMIT_REQUESTS = 4000; // per LIMIT_TIME
@@ -12,17 +16,15 @@ const WAIT_TIMEOUT = 60 * 1000; // miliseconds; if limit_requests reached, need 
 const LIMIT_LENGTH = 5000; // characters of a source string per request
 const JOINER = '.<br/>'; // joins words or phrases before sending to lilt api
 
-function delay(time: number) {
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
+const LILT_BOT_EMAIL = 'liltbot@crowd.rocks';
 
 @Injectable()
-export class LiltTranslateService {
+export class LiltTranslateService implements ITranslator {
   private firstOperateTime: number;
   private lastOperateTime: number;
   private availableRequests: number;
 
-  constructor(private config: ConfigService) {
+  constructor(private config: ConfigService, private pg: PostgresService) {
     this.firstOperateTime = 0;
     this.lastOperateTime = 0;
     this.availableRequests = LIMIT_REQUESTS;
@@ -110,5 +112,42 @@ export class LiltTranslateService {
         name: 'Polish (mocked)',
       },
     ];
+  }
+
+  async getTranslatorToken(): Promise<{ id: string; token: string }> {
+    // // check if token for liltbot exists
+    const tokenRes = await this.pg.pool.query(
+      `select t.token, u.user_id
+            from users u
+            left join tokens t
+            on u.user_id = t.user_id
+            where u.email=$1;`,
+      [LILT_BOT_EMAIL],
+    );
+    let id = tokenRes.rows[0]?.user_id;
+    if (!id) {
+      const pash = await hash(this.config.CR_GOOGLE_BOT_PASSWORD);
+      const token = createToken();
+      const res = await this.pg.pool.query(
+        `
+        call authentication_register($1, $2, $3, $4, 0, '');
+        `,
+        [LILT_BOT_EMAIL, 'LiltBot', pash, token],
+      );
+      id = res.rows[0].p_user_id;
+    }
+
+    let token = tokenRes.rows[0]?.token;
+    if (!token) {
+      const res = await this.pg.pool.query(
+        `
+          insert into tokens(token, user_id) values($1, $2)
+          returning token
+        `,
+        [createToken(), id],
+      );
+      token = res.rows[0].token;
+    }
+    return { id, token };
   }
 }

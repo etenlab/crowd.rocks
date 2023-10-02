@@ -3,12 +3,12 @@ import { ErrorType } from 'src/common/types';
 import { LanguageInput } from '../common/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { WordsService } from '../words/words.service';
-import { TranslateAllWordsAndPhrasesByGoogleOutput } from './types';
+import { TranslateAllWordsAndPhrasesByBotOutput } from './types';
 
-export function validateTranslateByGoogleInput(
+export function validateTranslateByBotInput(
   from_language: LanguageInput,
   to_language: LanguageInput,
-): TranslateAllWordsAndPhrasesByGoogleOutput | undefined {
+): TranslateAllWordsAndPhrasesByBotOutput | undefined {
   if (
     from_language.language_code === to_language.language_code &&
     (from_language.dialect_code || null) ===
@@ -105,4 +105,8 @@ export async function getLangConnectionsObjectMapAndTexts(
     wordsConnection,
     phrasesConnection,
   };
+}
+
+export function delay(time: number) {
+  return new Promise((resolve) => setTimeout(resolve, time));
 }

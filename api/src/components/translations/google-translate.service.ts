@@ -5,22 +5,22 @@ import { convert } from 'html-to-text';
 import { LanguageInput } from '../common/types';
 
 import { ConfigService } from 'src/core/config.service';
-import { substituteN, unSubstituteN } from '../../common/utility';
-import { LanguageResult } from './translations.service';
+import { createToken, substituteN, unSubstituteN } from '../../common/utility';
+import { ITranslator, LanguageResult } from './translations.service';
+import { PostgresService } from '../../core/postgres.service';
+import { delay } from './utility';
 
 const LIMITS = 6000000 - 1000000;
 
-function delay(time: number) {
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
+const GOOGLE_BOT_EMAIL = 'googlebot@crowd.rocks';
 
 @Injectable()
-export class GoogleTranslateService {
+export class GoogleTranslateService implements ITranslator {
   private gcpTranslateClient: v2.Translate | null;
   private availableCharactors: number;
   private lastOperateTime: number;
 
-  constructor(private config: ConfigService) {
+  constructor(private config: ConfigService, private pg: PostgresService) {
     if (
       this.config.GCP_API_KEY &&
       this.config.GCP_API_KEY.trim().length > 0 &&
@@ -124,5 +124,29 @@ export class GoogleTranslateService {
       code: gl.code,
       name: gl.name,
     }));
+  }
+
+  async getTranslatorToken(): Promise<{ id: string; token: string }> {
+    // // check if token for googlebot exists
+    const tokenRes = await this.pg.pool.query(
+      `select t.token, u.user_id
+            from tokens t
+            join users u
+            on t.user_id = u.user_id
+            where u.email=$1;`,
+      [GOOGLE_BOT_EMAIL],
+    );
+    let token = tokenRes.rows[0].token;
+    const id = tokenRes.rows[0].user_id;
+    if (!token) {
+      token = createToken();
+      await this.pg.pool.query(
+        `
+          insert into tokens(token, user_id) values($1, $2);
+        `,
+        [token, id],
+      );
+    }
+    return { id, token };
   }
 }

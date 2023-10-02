@@ -39,4 +39,6 @@ export const AIActionsContainer = styled.div`
   gap: 30px;
 `;
 
-export const AIContainer = styled.div``;
+export const AIContainer = styled.div`
+  margin-top: 20px;
+`;

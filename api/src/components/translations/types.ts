@@ -451,17 +451,15 @@ export class TranslationsOutput extends GenericOutput {
 }
 
 @ObjectType()
-//todo: rename class to LanguageForBotTranslate
-export class LanguageForGoogleTranslate {
+export class LanguageForBotTranslate {
   @Field(() => String) code: string;
   @Field(() => String) name: string;
 }
 
 @ObjectType()
-//todo: rename class to LanguageListForBotTranslateOutput
-export class LanguageListForGoogleTranslateOutput extends GenericOutput {
-  @Field(() => [LanguageForGoogleTranslate], { nullable: true })
-  languages: LanguageForGoogleTranslate[] | null;
+export class LanguageListForBotTranslateOutput extends GenericOutput {
+  @Field(() => [LanguageForBotTranslate], { nullable: true })
+  languages: LanguageForBotTranslate[] | null;
 }
 
 @InputType()
@@ -479,11 +477,12 @@ export class TranslatedLanguageInfoOutput extends GenericOutput {
   @Field(() => Int, { nullable: true }) translatedMissingWordCount?: number;
   @Field(() => Int, { nullable: true }) translatedMissingPhraseCount?: number;
   @Field(() => Int) googleTranslateTotalLangCount: number;
+  @Field(() => Int) liltTranslateTotalLangCount: number;
 }
 
 @ObjectType()
-export class TranslateAllWordsAndPhrasesByGoogleResult {
-  @Field(() => Int) requestedCharactors: number;
+export class TranslateAllWordsAndPhrasesByBotResult {
+  @Field(() => Int) requestedCharacters: number;
   @Field(() => Int) totalWordCount: number;
   @Field(() => Int) totalPhraseCount: number;
   @Field(() => Int) translatedWordCount: number;
@@ -499,15 +498,9 @@ export class TranslateAllWordsAndPhrasesByGoogleResult {
 }
 
 @ObjectType()
-export class TranslateAllWordsAndPhrasesByGoogleOutput extends GenericOutput {
-  @Field(() => TranslateAllWordsAndPhrasesByGoogleResult, { nullable: true })
-  result: TranslateAllWordsAndPhrasesByGoogleResult | null;
-}
-
-@ObjectType()
-export class TranslateAllWordsAndPhrasesByBotResult extends TranslateAllWordsAndPhrasesByGoogleResult {}
-@ObjectType()
 export class TranslateAllWordsAndPhrasesByBotOutput extends GenericOutput {
   @Field(() => TranslateAllWordsAndPhrasesByBotResult, { nullable: true })
   result: TranslateAllWordsAndPhrasesByBotResult | null;
 }
+@ObjectType()
+export class TranslateAllWordsAndPhrasesByGoogleOutput extends TranslateAllWordsAndPhrasesByBotOutput {}
