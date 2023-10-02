@@ -1383,7 +1383,7 @@ export class TranslationsService {
     };
   }
 
-  async translateWordsAndPhrasesWithGoogle(
+  async translateWordsAndPhrasesByGoogle(
     from_language: LanguageInput,
     to_language: LanguageInput,
     token: string,
@@ -1587,7 +1587,7 @@ export class TranslationsService {
     return this.translateAllWordsAndPhrasesByBot(
       {
         getLanguages: this.languagesForGoogleTranslate,
-        translateWordsAndPhrases: this.translateWordsAndPhrasesWithGoogle,
+        translateWordsAndPhrases: this.translateWordsAndPhrasesByGoogle,
       },
       from_language,
       token,
@@ -1603,7 +1603,7 @@ export class TranslationsService {
     return this.translateAllWordsAndPhrasesByBot(
       {
         getLanguages: this.languagesForGoogleTranslate,
-        translateWordsAndPhrases: this.translateWordsAndPhrasesWithGoogle,
+        translateWordsAndPhrases: this.translateWordsAndPhrasesByGoogle,
       },
       from_language,
       token,

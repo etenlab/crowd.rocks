@@ -429,7 +429,7 @@ export class TranslationsResolver {
       }),
     );
 
-    return this.translationService.translateWordsAndPhrasesWithGoogle(
+    return this.translationService.translateWordsAndPhrasesByGoogle(
       from_language,
       to_language,
       getBearer(req) || '',
