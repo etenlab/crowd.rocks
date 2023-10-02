@@ -10,7 +10,6 @@ language plpgsql
 as $$
 declare
   v_user_id bigint;
-  v_answer_id bigint;
 begin
   p_error_type := 'UnknownError';
 
@@ -31,24 +30,38 @@ begin
     return;
   end if;
 
-  insert into answers (question_id, answer, question_items, created_by)
-  values (p_question_id, p_answer, p_question_items, v_user_id)
-  on conflict do nothing
-  returning answer_id
-  into v_answer_id;
+  p_answer_id := null;
 
-  if v_answer_id is null then
-    select answer_id
-    from answers
-    where question_id = p_parent_table
-      and answer = p_parent_id
-      and created_by = v_user_id
-    into v_answer_id;
-  end if;
+  select answer_id
+  from answers
+  where question_id = p_question_id
+    and created_by = v_user_id
+  into p_answer_id;
 
-  if v_answer_id is null then
-    p_error_type := 'AnswerInsertFailed';
-    return;
+  if p_answer_id is null then
+    insert into answers (question_id, answer, question_items, created_by)
+    values (p_question_id, p_answer, p_question_items, v_user_id)
+    on conflict do nothing
+    returning answer_id
+    into p_answer_id;
+
+    if p_answer_id is null then
+      select answer_id
+      from answers
+      where question_id = p_question_id
+        and answer = p_answer
+        and created_by = v_user_id
+      into p_answer_id;
+    end if;
+
+    if p_answer_id is null then
+      p_error_type := 'AnswerInsertFailed';
+      return;
+    end if;
+  else
+    update answers
+    set question_items = p_question_items, answer = p_answer
+    where answer_id = p_answer_id;
   end if;
 
   p_error_type := 'NoError';

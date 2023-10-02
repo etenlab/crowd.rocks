@@ -42,11 +42,10 @@ export class QuestionAndAnswersResolver {
   async upsertQuestionItems(
     @Args('items', { type: () => [String] })
     items: string[],
-    @Context() req: any,
   ): Promise<QuestionItemsOutput> {
     console.log('upsertQuestionItems: ', items);
 
-    return this.questionItemService.upserts(items, getBearer(req) || '', null);
+    return this.questionItemService.upserts(items, null);
   }
 
   @Query(() => QuestionsOutput)

@@ -28,7 +28,7 @@ create table answers (
   question_items bigint[] not null, -- references question_items(question_item_id)
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique (question_id, answer, created_by)
+  unique (question_id, created_by)
 );
 
 alter table document_word_entries
@@ -40,6 +40,7 @@ add constraint document_word_entries_parent_document_word_entry_id_fkey
 	foreign key (parent_document_word_entry_id) 
 	references document_word_entries(document_word_entry_id);
 
-alter table document_word_entries
-add constraint uq_document_word_entries_unique_columns
-unique (document_id, wordlike_string_id, parent_document_word_entry_id);
+create index idx__document_id__document_word_entries on document_word_entries (document_id);
+create index idx__wordlike_string_id__document_word_entries on document_word_entries (wordlike_string_id);
+create index idx__parent_document_word_entry_id__document_word_entries on document_word_entries (parent_document_word_entry_id);
+create index idx__created_by__document_word_entries on document_word_entries (created_by);

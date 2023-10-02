@@ -37,7 +37,7 @@ begin
   v_temp_parent_document_word_entry_id := null;
 
   for i in 1..v_document_ids_length loop
-    v_temp_document_word_entry_id := 0;
+    v_temp_document_word_entry_id := null;
     v_temp_error_type := 'NoError';
 
     if p_is_sequential_batch_upsert is true then
