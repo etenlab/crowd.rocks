@@ -1,0 +1,1 @@
+export { DocumentViewerPage } from './DocumentViewerPage';

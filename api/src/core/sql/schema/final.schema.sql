@@ -527,7 +527,7 @@ create table document_word_entries(
   document_word_entry_id bigserial primary key,
   document_id bigint not null references documents(document_id),
   wordlike_string_id bigint not null references wordlike_strings(wordlike_string_id),
-  parent_wordlike_string_id bigint references wordlike_strings(wordlike_string_id),
+  parent_document_word_entry_id bigint references document_word_entries(document_word_entry_id),
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );

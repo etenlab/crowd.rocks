@@ -1,10 +1,13 @@
 import { useRef, useState } from 'react';
-import { useTr } from '../../hooks/useTr';
-import { styled } from 'styled-components';
-import { ConfirmButtons } from '../common/ConfirmButtons';
-import { LangSelector } from '../common/LangSelector/LangSelector';
-import { useAppContext } from '../../hooks/useAppContext';
 import { IonButton } from '@ionic/react';
+
+import { ConfirmButtons } from '../../common/ConfirmButtons';
+import { LangSelector } from '../../common/LangSelector/LangSelector';
+
+import { useAppContext } from '../../../hooks/useAppContext';
+import { useTr } from '../../../hooks/useTr';
+
+import { Container } from './styled';
 
 const ACCEPT_EXT = '*';
 
@@ -65,9 +68,3 @@ export function NewDocumentForm({ onSave, onCancel }: NewDocumentFormProps) {
     </Container>
   );
 }
-
-export const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-`;

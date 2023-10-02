@@ -41,11 +41,7 @@ export class DocumentWordEntriesService {
       res.rows.forEach((row) => {
         documentWordEntriesMap.set(row.document_word_entry_id, row);
 
-        wordlikeStringIds.push(+row.document_word_entry_id);
-
-        if (+row.parent_wordlike_string_id !== 0) {
-          wordlikeStringIds.push(+row.parent_wordlike_string_id);
-        }
+        wordlikeStringIds.push(+row.wordlike_string_id);
       });
 
       const { error, wordlike_strings } =
@@ -76,10 +72,6 @@ export class DocumentWordEntriesService {
           const wordlike_string = wordlikeStringsMap.get(
             documentWordEntry.wordlike_string_id,
           );
-          const parent_wordlike_string =
-            wordlikeStringsMap.get(
-              documentWordEntry.parent_wordlike_string_id,
-            ) || null;
 
           if (!wordlike_string) {
             return null;
@@ -89,7 +81,8 @@ export class DocumentWordEntriesService {
             document_word_entry_id: documentWordEntry.document_word_entry_id,
             document_id: documentWordEntry.document_id,
             wordlike_string,
-            parent_wordlike_string,
+            parent_document_word_entry_id:
+              documentWordEntry.parent_document_word_entry_id,
           };
         }),
       };
@@ -107,8 +100,9 @@ export class DocumentWordEntriesService {
     input: {
       document_id: number;
       wordlike_string_id: number;
-      parent_wordlike_string_id: number;
+      parent_document_word_entry_id: number | null;
     }[],
+    isSequentialUpsert: boolean,
     token: string,
     pgClient: PoolClient | null,
   ): Promise<DocumentWordEntriesOutput> {
@@ -127,9 +121,10 @@ export class DocumentWordEntriesService {
         ...callDocumentWordEntryUpsertsProcedure({
           document_ids: input.map((item) => item.document_id),
           wordlike_string_ids: input.map((item) => item.wordlike_string_id),
-          parent_wordlike_string_ids: input.map(
-            (item) => item.parent_wordlike_string_id,
+          parent_document_word_entry_ids: input.map(
+            (item) => item.parent_document_word_entry_id,
           ),
+          isSequentialUpsert,
           token,
         }),
       );

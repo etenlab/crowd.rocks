@@ -30,3 +30,16 @@ create table answers (
   created_by bigint not null references users(user_id),
   unique (question_id, answer, created_by)
 );
+
+alter table document_word_entries
+rename column parent_wordlike_string_id to parent_document_word_entry_id;
+
+alter table document_word_entries
+drop constraint document_word_entries_parent_wordlike_string_id_fkey, 
+add constraint document_word_entries_parent_document_word_entry_id_fkey 
+	foreign key (parent_document_word_entry_id) 
+	references document_word_entries(document_word_entry_id);
+
+alter table document_word_entries
+add constraint uq_document_word_entries_unique_columns
+unique (document_id, wordlike_string_id, parent_document_word_entry_id);

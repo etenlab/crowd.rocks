@@ -89,3 +89,9 @@ export const StVoteButtonsDiv = styled.div`
   justify-content: flex-start;
   gap: 10px;
 `;
+
+export const ListCaption = styled.div`
+  text-transform: uppercase;
+  font-weight: 700;
+  opacity: 0.5;
+`;

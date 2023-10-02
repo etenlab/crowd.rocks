@@ -1,0 +1,1 @@
+export { QADocumentViewerPage } from './QADocumentViewerPage';
