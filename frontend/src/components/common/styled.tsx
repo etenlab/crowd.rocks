@@ -95,3 +95,13 @@ export const ListCaption = styled.div`
   font-weight: 700;
   opacity: 0.5;
 `;
+
+export const Icon = styled(IonIcon)`
+  padding: 3px;
+  margin: 2px;
+  cursor: pointer;
+  &:hover {
+    box-shadow: 0px 0px 4px 1px gray;
+    border-radius: 50%;
+  }
+`;
