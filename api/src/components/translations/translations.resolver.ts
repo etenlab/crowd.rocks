@@ -403,7 +403,9 @@ export class TranslationsResolver {
     @Args('input')
     input: TranslatedLanguageInfoInput,
   ): Promise<TranslatedLanguageInfoOutput> {
-    console.log('getLanguageTranslationInfo resolver');
+    console.log(
+      `getLanguageTranslationInfo resolver fromLang: ${input.fromLanguageCode} toLang: ${input.toLanguageCode}`,
+    );
     return this.translationService.getTranslationLanguageInfo(input, null);
   }
 

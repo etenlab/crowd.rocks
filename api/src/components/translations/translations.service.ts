@@ -1,6 +1,6 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
-import { from, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { ErrorType, GenericOutput } from 'src/common/types';
 import {
@@ -50,23 +50,20 @@ import { PoolClient } from 'pg';
 import { PhraseDefinition, WordDefinition } from '../definitions/types';
 import { PostgresService } from '../../core/postgres.service';
 import {
-  getTotalPhraseCountByLanguage,
-  getTotalPhraseToPhraseCountByUser,
-  getTotalPhraseToWordCountByUser,
-  getTotalWordCountByLanguage,
-  getTotalWordToPhraseCountByUser,
-  getTotalWordToWordCountByUser,
-  getTranslatedStringsPhraseToPhrase,
-  getTranslatedStringsPhraseToWord,
-  getTranslatedStringsWordToPhrase,
-  getTranslatedStringsWordToWord,
+  getTotalPhraseToPhraseCount,
+  getTotalPhraseToWordCount,
+  getTotalWordToPhraseCount,
+  getTotalWordToWordCount,
   getTranslationLangSqlStr,
-  IdToStringRow,
 } from './sql-string';
 import {
   getLangConnectionsObjectMapAndTexts,
   validateTranslateByGoogleInput,
 } from './utility';
+import {
+  getTranslatedStringsById,
+  getTranslationsNotByUser,
+} from './translations.repository';
 
 export function makeStr(
   word_definition_id: number,
@@ -1149,6 +1146,19 @@ export class TranslationsService {
       client: pgClient,
       pool: this.pg.pool,
     });
+    const fromLanguageInput = {
+      language_code: input.fromLanguageCode,
+      dialect_code: null,
+      geo_code: null,
+      filter: null,
+    };
+
+    const { strings } = await getLangConnectionsObjectMapAndTexts(
+      fromLanguageInput,
+      pgClient,
+      this.wordsService,
+      this.phrasesService,
+    );
 
     const userRes = await this.pg.pool.query(
       `select user_id
@@ -1159,32 +1169,34 @@ export class TranslationsService {
     const google_user_id = userRes.rows[0].user_id;
 
     // total words
-    const totalWordres = await pg.query(
-      ...getTotalWordCountByLanguage(input.fromLanguageCode),
-    );
-    const totalWordCount = totalWordres.rows[0].count;
-
-    // total phrases
-    const totalPhraseRes = await pg.query(
-      ...getTotalPhraseCountByLanguage(input.fromLanguageCode),
-    );
-    const totalPhraseCount = totalPhraseRes.rows[0].count;
-
+    let totalWordCount = 0;
+    let totalPhraseCount = 0;
+    for (let i = 0; i < strings.length; i++) {
+      const str = strings[i];
+      const is_type_word =
+        str
+          .trim()
+          .split(' ')
+          .filter((w) => w !== '').length === 1;
+      if (is_type_word) {
+        totalWordCount++;
+      } else {
+        totalPhraseCount++;
+      }
+    }
     let translatedMissingPhraseCount: number | undefined = undefined;
     // missing phrases
     if (input.toLanguageCode) {
       const totalPhraseToWordRes = await pg.query(
-        ...getTotalPhraseToWordCountByUser(
+        ...getTotalPhraseToWordCount(
           input.fromLanguageCode,
           input.toLanguageCode,
-          google_user_id,
         ),
       );
       const totalPhraseToPhraseRes = await pg.query(
-        ...getTotalPhraseToPhraseCountByUser(
+        ...getTotalPhraseToPhraseCount(
           input.fromLanguageCode,
           input.toLanguageCode,
-          google_user_id,
         ),
       );
       translatedMissingPhraseCount =
@@ -1193,22 +1205,20 @@ export class TranslationsService {
           +totalPhraseToPhraseRes.rows[0].count);
     }
 
-    // missing phrases
+    // missing words
     let translatedMissingWordCount: number | undefined = undefined;
     if (input.toLanguageCode) {
       const totalWordToWordRes = await pg.query(
-        ...getTotalWordToWordCountByUser(
+        ...getTotalWordToWordCount(
           input.fromLanguageCode,
           input.toLanguageCode,
-          google_user_id,
         ),
       );
 
       const totalWordToPhraseRes = await pg.query(
-        ...getTotalWordToPhraseCountByUser(
+        ...getTotalWordToPhraseCount(
           input.fromLanguageCode,
           input.toLanguageCode,
-          google_user_id,
         ),
       );
       translatedMissingWordCount =
@@ -1260,13 +1270,10 @@ export class TranslationsService {
         this.wordsService,
         this.phrasesService,
       );
+
+      // console.log(otherLangstrings);
       const pg = await pgClientOrPool({ client: pgClient, pool: this.pg.pool });
-      // const translatedTextsObjMap = new Map<
-      //   string,
-      //   { text: string; id: number }
-      // >();
-      // let uniqueId = 0;
-      const translatedStrs: string[] = [];
+
       // check if token for googlebot exists
       const tokenRes = await this.pg.pool.query(
         `select t.token, u.user_id
@@ -1288,68 +1295,214 @@ export class TranslationsService {
         );
       }
 
-      const trW2WRes = await pg.query<IdToStringRow>(
-        ...getTranslatedStringsWordToWord(
-          from_language.language_code,
-          to_language.language_code,
-          google_user_id,
-        ),
+      const translatedStrs = await getTranslatedStringsById(
+        from_language.language_code,
+        to_language.language_code,
+        google_user_id,
+        pg,
       );
 
-      for (let i = 0; i < trW2WRes.rowCount; i++) {
-        const { id, string } = trW2WRes.rows[i];
-        translatedStrs.push(string);
-      }
+      const textsToTranslateObjMap = new Map<
+        string,
+        { text: string; id: number }
+      >();
+      let uniqueId = 0;
 
-      const trW2PRes = await pg.query<IdToStringRow>(
-        ...getTranslatedStringsWordToPhrase(
-          from_language.language_code,
-          to_language.language_code,
-          google_user_id,
-        ),
-      );
-      for (let i = 0; i < trW2PRes.rowCount; i++) {
-        const { id, string } = trW2PRes.rows[i];
-        translatedStrs.push(string);
-      }
-
-      const trP2PRes = await pg.query<IdToStringRow>(
-        ...getTranslatedStringsPhraseToPhrase(
-          from_language.language_code,
-          to_language.language_code,
-          google_user_id,
-        ),
-      );
-      for (let i = 0; i < trP2PRes.rowCount; i++) {
-        const { id, string } = trP2PRes.rows[i];
-        translatedStrs.push(string);
-      }
-
-      const trP2WRes = await pg.query<IdToStringRow>(
-        ...getTranslatedStringsPhraseToWord(
-          from_language.language_code,
-          to_language.language_code,
-          google_user_id,
-        ),
-      );
-      for (let i = 0; i < trP2WRes.rowCount; i++) {
-        const { id, string } = trP2WRes.rows[i];
-        translatedStrs.push(string);
-      }
-
-      const allStrings: string[] = [];
-      wordsConnection.edges.map((c) => allStrings.push(c.node.word));
-      phrasesConnection.edges.map((p) => allStrings.push(p.node.phrase));
-
-      const missing = allStrings.filter((s) => {
-        return translatedStrs.indexOf(s) < 0;
+      originalTextsObjMap.forEach((obj) => {
+        if (translatedStrs.indexOf({ text: obj.text, type: 'text' }) < 0) {
+          textsToTranslateObjMap.set(obj.text, {
+            text: obj.text,
+            id: uniqueId++,
+          });
+        }
+        // we want the definitions even if they are common in both maps
+        if (
+          translatedStrs.indexOf({ text: obj.text, type: 'definition' }) > 0
+        ) {
+          textsToTranslateObjMap.set(obj.text, {
+            text: obj.text,
+            id: uniqueId++,
+          });
+        }
       });
 
+      const missingObj: { id: number; text: string }[] = [];
+      for (const obj of textsToTranslateObjMap.values()) {
+        missingObj.push(obj);
+      }
+
+      const missingTexts = missingObj
+        .sort((a, b) => a.id - b.id)
+        .map((obj) => obj.text);
+
       const translationTexts = await this.gTrService.translate(
-        missing,
+        missingTexts,
         from_language,
         to_language,
       );
+
+      const translationsByOthers = await getTranslationsNotByUser(
+        google_user_id,
+        pg,
+        to_language.language_code,
+        from_language.language_code,
+      );
+
+      const upsertInputs: {
+        from_definition_id: number;
+        from_definition_type_is_word: boolean;
+        to_definition_input: ToDefinitionInput;
+      }[] = [];
+
+      let translatedWordCount = 0;
+      let translatedPhraseCount = 0;
+      for (const edge of wordsConnection.edges) {
+        const { node } = edge;
+        const oWord = textsToTranslateObjMap.get(node.word);
+        if (oWord === undefined) {
+          continue;
+        }
+        const tWord = translationTexts[oWord.id];
+
+        const isTypeWord =
+          tWord
+            .trim()
+            .split(' ')
+            .filter((w) => w !== '').length === 1;
+
+        for (const oDef of node.definitions) {
+          const oDefObj = textsToTranslateObjMap.get(oDef.definition);
+          if (oDefObj === undefined) {
+            continue;
+          }
+          const tDef = translationTexts[oDefObj.id];
+          const otherSameTranslations = translationsByOthers.filter((t) => {
+            return (
+              t.fromDef == oDef.definition &&
+              t.fromText == oWord.text &&
+              t.toDef == tDef && //not sure whether to have translation of defs match...
+              t.toText == tWord
+            );
+          });
+          // not translated at all
+          if (
+            otherSameTranslations === undefined ||
+            otherSameTranslations.length == 0
+          ) {
+            upsertInputs.push({
+              from_definition_id: +oDef.word_definition_id,
+              from_definition_type_is_word: true,
+              to_definition_input: {
+                word_or_phrase: tWord,
+                is_type_word: isTypeWord,
+                definition: tDef,
+                language_code: to_language.language_code,
+                dialect_code: to_language.dialect_code,
+                geo_code: to_language.geo_code,
+              },
+            });
+            translatedWordCount++;
+            continue;
+          }
+          // same translation by someone else
+          else {
+            if (isTypeWord) {
+              this.phraseToWordTrService.toggleVoteStatus(
+                +otherSameTranslations[0].translationId, // just voting on first it finds for now
+                true,
+                token,
+                pgClient,
+              );
+            } else {
+              this.phraseToPhraseTrService.toggleVoteStatus(
+                +otherSameTranslations[0].translationId,
+                true,
+                token,
+                pgClient,
+              );
+            }
+          }
+
+          // reset votes all old translations
+          const oldTranslationIds = translationsByOthers
+            .filter(
+              (t) =>
+                t.fromDef == oDef.definition &&
+                t.fromText == oWord.text &&
+                (t.toDef !== tDef || t.toText !== tWord),
+            )
+            .map((t) => t.translationId);
+        }
+
+        // reset vote on all old translations
+      }
+
+      for (const edge of phrasesConnection.edges) {
+        const { node } = edge;
+        const oPhrase = textsToTranslateObjMap.get(node.phrase);
+        if (oPhrase === undefined) {
+          continue;
+        }
+        const tText = translationTexts[oPhrase.id];
+
+        const isTypeWord =
+          tText
+            .trim()
+            .split(' ')
+            .filter((w) => w !== '').length === 1;
+
+        for (const oDef of node.definitions) {
+          const oDefObj = textsToTranslateObjMap.get(oDef.definition);
+          if (oDefObj === undefined) {
+            continue;
+          }
+          const tDef = translationTexts[oDefObj.id];
+          const otherTranslations = await translationsByOthers.filter((t) => {
+            return (
+              t.fromDef == oDef.definition &&
+              t.fromText == oPhrase.text &&
+              t.toDef == tDef &&
+              t.toText == tText
+            );
+          });
+          if (
+            otherTranslations === undefined ||
+            otherTranslations.length == 0
+          ) {
+            upsertInputs.push({
+              from_definition_id: +oDef.phrase_definition_id,
+              from_definition_type_is_word: false,
+              to_definition_input: {
+                word_or_phrase: tText,
+                is_type_word: isTypeWord,
+                definition: tDef,
+                language_code: to_language.language_code,
+                dialect_code: to_language.dialect_code,
+                geo_code: to_language.geo_code,
+              },
+            });
+            translatedPhraseCount++;
+            continue;
+          } else {
+            // upvote other users' translation
+            if (isTypeWord) {
+              this.phraseToWordTrService.toggleVoteStatus(
+                +otherTranslations[0].translationId,
+                true,
+                token,
+                pgClient,
+              );
+            } else {
+              this.phraseToPhraseTrService.toggleVoteStatus(
+                +otherTranslations[0].translationId,
+                true,
+                token,
+                pgClient,
+              );
+            }
+          }
+        }
+      }
     } catch (err) {
       console.error(err);
     }
@@ -1512,17 +1665,13 @@ export class TranslationsService {
         );
       }
 
-      const { error, translations } =
+      const { error } =
         await this.batchUpsertTranslationFromWordAndDefinitionlikeString(
           upsertInputs,
           gtoken,
           pgClient,
         );
 
-      console.log('translations: ');
-      console.log(translations.filter((t) => t !== null).length);
-      console.log('null translations: ');
-      console.log(translations.filter((t) => t === null).length);
       return {
         error,
         result: {
