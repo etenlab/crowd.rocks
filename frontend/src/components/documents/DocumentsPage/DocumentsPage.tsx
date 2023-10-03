@@ -23,10 +23,8 @@ import { RowStack } from '../../common/Layout/styled';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-import {
-  useDocumentUploadMutation,
-  useUploadFileMutation,
-} from '../../../generated/graphql';
+import { useUploadFileMutation } from '../../../generated/graphql';
+import { useDocumentUploadMutation } from '../../../hooks/useDocumentUploadMutation';
 
 import { DocumentList } from '../DocumentList/DocumentList';
 import { NewDocumentForm } from './NewDocumentForm';
@@ -118,12 +116,6 @@ export function DocumentsPage() {
       });
 
       dismissLoader();
-      toast({
-        message: tr('Document upload success!'),
-        duration: 1500,
-        position: 'top',
-        color: 'success',
-      });
 
       console.log(`uploaded: `, res);
       setIsOpenModal(false);
