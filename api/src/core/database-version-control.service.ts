@@ -133,7 +133,7 @@ export class DatabaseVersionControlService {
 
     // translation
     await this.runSqlFile(
-      './src/core/sql/translatio/word_to_word/translation_upsert.sql',
+      './src/core/sql/translation/word_to_word/translation_upsert.sql',
     );
     await this.runSqlFile(
       './src/core/sql/translation/word_to_phrase/translation_upsert.sql',
@@ -354,6 +354,32 @@ export class DatabaseVersionControlService {
     );
     await this.runSqlFile(
       './src/core/sql/question-answer/batch-answer-upsert.sql',
+    );
+
+    // translation
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/batch_translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/batch_translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/batch_translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/batch_translation_vote_set.sql',
     );
 
     await this.setVersionNumber(4);

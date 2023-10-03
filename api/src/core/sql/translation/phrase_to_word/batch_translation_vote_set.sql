@@ -1,6 +1,7 @@
-create or replace procedure batch_phrase_to_word_translation_vote_reset(
+create or replace procedure batch_phrase_to_word_translation_vote_set(
   in p_phrase_to_word_translation_ids bigint[],
   in p_token varchar(512),
+  in p_vote boolean,
   inout p_phrase_to_word_translation_vote_ids bigint[],
   inout p_error_types varchar(32)[],
   inout p_error_type varchar(32)
@@ -22,13 +23,14 @@ begin
   p_phrase_to_word_translation_vote_ids := array[]::bigint[];
   p_error_types := array[]::varchar(32)[];
 
-  for i in 1..v_phrase_to_word_translations_ids_length loop
+  for i in 1..v_phrase_to_word_translation_ids_length loop
     v_temp_phrase_to_word_translation_vote_id := 0;
     v_temp_error_type := 'NoError';
 
-    call phrase_to_word_translation_vote_reset(
+    call phrase_to_word_translation_vote_set(
       p_phrase_to_word_translation_ids[i],
       p_token,
+      p_vote,
       v_temp_phrase_to_word_translation_vote_id,
       v_temp_error_type
     );

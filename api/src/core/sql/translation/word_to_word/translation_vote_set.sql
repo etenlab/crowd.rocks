@@ -1,6 +1,7 @@
-create or replace procedure word_to_word_translation_vote_reset(
+create or replace procedure word_to_word_translation_vote_set(
   in p_word_to_word_translation_id bigint,
   in p_token varchar(512),
+  in p_vote boolean,
   inout p_word_to_word_translations_vote_id bigint,
   inout p_error_type varchar(32)
 )
@@ -43,7 +44,7 @@ begin
   end if;
 
   insert into word_to_word_translations_votes(word_to_word_translation_id, user_id, vote)
-  values (p_word_to_word_translation_id, v_user_id, null)
+  values (p_word_to_word_translation_id, v_user_id, p_vote)
   on conflict (word_to_word_translation_id, user_id)
   do update set vote = EXCLUDED.vote
   returning word_to_word_translations_vote_id
