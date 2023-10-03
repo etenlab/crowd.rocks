@@ -82,7 +82,7 @@ mutation CreateQuestionOnWordRange(
   ) {
     error
     questions {
-      ...QuestionFragment
+      ...QuestionOnWordRangeFragment
     }
   }
 }

@@ -114,4 +114,13 @@ export const typePolicies: TypePolicies = {
   MapVoteStatus: {
     keyFields: ['map_id', 'is_original'],
   },
+  Question: {
+    keyFields: ['question_id'],
+  },
+  QuestionOnWordRange: {
+    keyFields: ['question_id'],
+  },
+  Answer: {
+    keyFields: ['answer_id'],
+  },
 };

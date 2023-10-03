@@ -30,7 +30,9 @@ fragment WordRangeFragment on WordRange {
 mutation DocumentUpload($document: TextyDocumentInput!) {
   documentUpload(input: { document: $document }) {
     error
-    document_id
+    document {
+      ...TextyDocumentFragment
+    }
   }
 }
 
