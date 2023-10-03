@@ -294,7 +294,8 @@ export function getTotalPhraseCountByLanguage(
 export function getTotalPhraseToWordCount(
   fromLanguageCode: string,
   toLanguageCode: string,
-): [string, [string, string]] {
+  translated_by: string[],
+): [string, [string, string, string[]]] {
   return [
     `
     select count (distinct from_phrase.phraselike_string) from words from_word
@@ -310,15 +311,18 @@ join words to_word
     on to_word_defs.word_id = to_word.word_id
 join wordlike_strings to_wls
     on to_wls.wordlike_string_id = to_word.wordlike_string_id
-where from_word.language_code = $1 and to_word.language_code = $2;    `,
-    [fromLanguageCode, toLanguageCode],
+where from_word.language_code = $1 and to_word.language_code = $2
+    and p2w.created_by = ANY($3);
+    `,
+    [fromLanguageCode, toLanguageCode, translated_by],
   ];
 }
 
 export function getTotalPhraseToPhraseCount(
   fromLanguageCode: string,
   toLanguageCode: string,
-): [string, [string, string]] {
+  translated_by: string[],
+): [string, [string, string, string[]]] {
   return [
     `
     select count(distinct from_phrase.phraselike_string) from words from_word
@@ -334,16 +338,18 @@ join phrases to_phrase
     on to_phrase_defs.phrase_id = to_phrase.phrase_id
 join words to_word
     on to_word.word_id = any(to_phrase.words)
-where from_word.language_code = $1 and to_word.language_code = $2;
+where from_word.language_code = $1 and to_word.language_code = $2
+    and p2p.created_by = ANY($3);
     `,
-    [fromLanguageCode, toLanguageCode],
+    [fromLanguageCode, toLanguageCode, translated_by],
   ];
 }
 
 export function getTotalWordToWordCount(
   fromLanguageCode: string,
   toLanguageCode: string,
-): [string, [string, string]] {
+  translated_by: string[],
+): [string, [string, string, string[]]] {
   return [
     `
     select count(from_word.word_id) from words from_word
@@ -355,16 +361,18 @@ join word_definitions to_word_defs
     on to_word_defs.word_definition_id = w2w.to_word_definition_id
 join words to_word
     on to_word_defs.word_id = to_word.word_id
-where from_word.language_code = $1 and to_word.language_code = $2;
+where from_word.language_code = $1 and to_word.language_code = $2
+    and w2w.created_by = ANY($3);
     `,
-    [fromLanguageCode, toLanguageCode],
+    [fromLanguageCode, toLanguageCode, translated_by],
   ];
 }
 
 export function getTotalWordToPhraseCount(
   fromLanguageCode: string,
   toLanguageCode: string,
-): [string, [string, string]] {
+  translated_by: string[],
+): [string, [string, string, string[]]] {
   return [
     `
     select count(distinct from_word.word_id) from words from_word
@@ -378,9 +386,10 @@ join phrases to_phrase
     on to_phrase_defs.phrase_id = to_phrase.phrase_id
 join words to_phrase_words
     on to_phrase_words.word_id = any(to_phrase.words)
-where from_word.language_code = $1 and to_phrase_words.language_code = $2;
+where from_word.language_code = $1 and to_phrase_words.language_code = $2
+    and w2p.created_by = ANY($3);
     `,
-    [fromLanguageCode, toLanguageCode],
+    [fromLanguageCode, toLanguageCode, translated_by],
   ];
 }
 

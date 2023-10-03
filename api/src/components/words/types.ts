@@ -12,6 +12,12 @@ export class Word {
   @Field(() => String, { nullable: true }) geo_code: string | null;
 }
 
+@ObjectType()
+export class WordlikeString {
+  @Field(() => ID) wordlike_string_id: string;
+  @Field(() => String) wordlike_string: string;
+}
+
 @InputType()
 export class WordUpsertInput {
   @Field(() => String) wordlike_string: string;
@@ -33,6 +39,12 @@ export class WordOutput extends GenericOutput {
 @ObjectType()
 export class WordsOutput extends GenericOutput {
   @Field(() => [Word], { nullable: 'items' }) words: (Word | null)[];
+}
+
+@ObjectType()
+export class WordlikeStringsOutput extends GenericOutput {
+  @Field(() => [WordlikeString], { nullable: 'items' })
+  wordlike_strings: (WordlikeString | null)[];
 }
 
 @ObjectType()

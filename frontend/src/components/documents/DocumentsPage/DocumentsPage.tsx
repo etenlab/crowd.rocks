@@ -1,17 +1,5 @@
-import { RouteComponentProps } from 'react-router';
-import { PageLayout } from '../common/PageLayout';
-import { Caption } from '../common/Caption/Caption';
-import { useTr } from '../../hooks/useTr';
-import { FilterContainer } from '../common/styled';
-import { LangSelector } from '../common/LangSelector/LangSelector';
-import { useAppContext } from '../../hooks/useAppContext';
 import { useCallback, useState } from 'react';
-import {
-  useDocumentUploadMutation,
-  useGetAllDocumentsQuery,
-  useUploadFileMutation,
-} from '../../generated/graphql';
-import { DocumentsList } from './DocumentsList';
+import { useHistory, useParams } from 'react-router';
 import {
   IonContent,
   IonHeader,
@@ -19,20 +7,32 @@ import {
   IonTitle,
   IonToolbar,
   useIonToast,
+  useIonLoading,
 } from '@ionic/react';
+
+import { PageLayout } from '../../common/PageLayout';
+import { Caption } from '../../common/Caption/Caption';
+import { LangSelector } from '../../common/LangSelector/LangSelector';
+import {
+  FilterContainer,
+  CaptionContainer,
+  ListCaption,
+} from '../../common/styled';
+import { RowStack } from '../../common/Layout/styled';
+
+import { useTr } from '../../../hooks/useTr';
+import { useAppContext } from '../../../hooks/useAppContext';
+
+import {
+  useDocumentUploadMutation,
+  useUploadFileMutation,
+} from '../../../generated/graphql';
+
+import { DocumentList } from '../DocumentList/DocumentList';
 import { NewDocumentForm } from './NewDocumentForm';
 import { DocumentsTools } from './DocumentsTools';
 
-interface DocumentsPageProps
-  extends RouteComponentProps<{
-    nation_id: string;
-    language_id: string;
-    cluster_id: string;
-  }> {}
-
-export const DocumentsPage: React.FC<DocumentsPageProps> = ({
-  match,
-}: DocumentsPageProps) => {
+export function DocumentsPage() {
   const { tr } = useTr();
   const {
     states: {
@@ -42,30 +42,24 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
     },
     actions: { setSourceLanguage },
   } = useAppContext();
+  const { nation_id, language_id, cluster_id } = useParams<{
+    nation_id: string;
+    language_id: string;
+    cluster_id: string;
+  }>();
 
   const [uploadFile] = useUploadFileMutation();
   const [documentUpload] = useDocumentUploadMutation();
   const [isOpenModal, setIsOpenModal] = useState(false);
 
-  const [present] = useIonToast();
-
-  const { data: allDocuments, refetch: refetchDocuments } =
-    useGetAllDocumentsQuery({
-      variables: {
-        languageInput: sourceLang
-          ? {
-              language_code: sourceLang?.lang.tag,
-              dialect_code: sourceLang?.dialect?.tag,
-              geo_code: sourceLang?.region?.tag,
-            }
-          : undefined,
-      },
-    });
+  const [toast] = useIonToast();
+  const [loader, dismissLoader] = useIonLoading();
+  const history = useHistory();
 
   const handleAddDocument = useCallback(
     async (file: File | undefined) => {
       if (!sourceLang?.lang) {
-        present({
+        toast({
           message: tr('Please select language first.'),
           duration: 1500,
           position: 'top',
@@ -74,7 +68,7 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
         return;
       }
       if (!file) {
-        present({
+        toast({
           message: tr('Please choose file first.'),
           duration: 1500,
           position: 'top',
@@ -83,6 +77,10 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
         return;
       }
 
+      loader({
+        message: `${tr('Uploading')} ${file.name}...`,
+      });
+
       const uploadResult = await uploadFile({
         variables: {
           file: file,
@@ -90,10 +88,23 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
           file_type: file.type,
         },
       });
+
+      dismissLoader();
+
       if (!uploadResult.data?.uploadFile.file?.id) {
+        toast({
+          message: tr('Failed at file upload'),
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
         console.log(`S3 upload error `, uploadResult.data?.uploadFile.error);
         return;
       }
+
+      loader({
+        message: `${tr('Uploading document')} ${file.name}...`,
+      });
 
       const res = await documentUpload({
         variables: {
@@ -105,25 +116,46 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
           },
         },
       });
+
+      dismissLoader();
+      toast({
+        message: tr('Document upload success!'),
+        duration: 1500,
+        position: 'top',
+        color: 'success',
+      });
+
       console.log(`uploaded: `, res);
-      refetchDocuments();
       setIsOpenModal(false);
     },
     [
-      documentUpload,
-      present,
-      refetchDocuments,
-      sourceLang?.dialect?.tag,
       sourceLang?.lang,
+      sourceLang?.dialect?.tag,
       sourceLang?.region?.tag,
+      loader,
       tr,
       uploadFile,
+      dismissLoader,
+      documentUpload,
+      toast,
     ],
+  );
+
+  const handleGoToDocumentViewer = useCallback(
+    (documentId: string) => {
+      history.push(
+        `/${nation_id}/${language_id}/${cluster_id}/documents/${documentId}`,
+      );
+    },
+    [cluster_id, history, language_id, nation_id],
   );
 
   return (
     <PageLayout>
-      <Caption>{tr('Documents')}</Caption>
+      <CaptionContainer>
+        <Caption>{tr('Documents')}</Caption>
+      </CaptionContainer>
+
       <FilterContainer>
         <LangSelector
           title={tr('Select language')}
@@ -135,12 +167,15 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
           onClearClick={() => setSourceLanguage(null)}
         />
       </FilterContainer>
-      <DocumentsTools onAddClick={() => setIsOpenModal(true)} />
-      <DocumentsList
-        allDocuments={allDocuments?.getAllDocuments.documents || undefined}
-        match={match}
-      />
-      <IonModal isOpen={isOpenModal}>
+
+      <RowStack>
+        <ListCaption>{tr('Document List')}</ListCaption>
+        <DocumentsTools onAddClick={() => setIsOpenModal(true)} />
+      </RowStack>
+
+      <DocumentList onClickItem={handleGoToDocumentViewer} />
+
+      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('New Document')}</IonTitle>
@@ -157,4 +192,4 @@ export const DocumentsPage: React.FC<DocumentsPageProps> = ({
       </IonModal>
     </PageLayout>
   );
-};
+}

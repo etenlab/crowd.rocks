@@ -34,9 +34,12 @@ import {
   useTranslateAllWordsAndPhrasesByGoogleMutation,
   useStopGoogleTranslationMutation,
   useSubscribeToTranslationReportSubscription,
-  TranslateAllWordsAndPhrasesByGoogleResult,
+  TranslateAllWordsAndPhrasesByBotResult,
   useMapsReTranslateMutation,
   useGetTranslationLanguageInfoLazyQuery,
+  useLanguagesForLiltTranslateQuery,
+  useTranslateWordsAndPhrasesByLiltMutation,
+  useTranslateAllWordsAndPhrasesByLiltMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, langInfo2tag } from '../../../common/langUtils';
@@ -79,14 +82,28 @@ export function AIControllerPage() {
   } = useAppContext();
 
   const {
-    data: languagesData,
-    error: languagesError,
-    loading: languagesLoading,
+    data: languagesGData,
+    error: languagesGError,
+    loading: languagesGLoading,
   } = useLanguagesForGoogleTranslateQuery();
+  const {
+    data: languagesLData,
+    error: languagesLError,
+    loading: languagesLLoading,
+  } = useLanguagesForLiltTranslateQuery();
+
   const [translateWordsAndPhrasesByGoogle] =
     useTranslateWordsAndPhrasesByGoogleMutation();
+
   const [translateAllWordsAndPhrasesByGoogle] =
     useTranslateAllWordsAndPhrasesByGoogleMutation();
+
+  const [translateWordsAndPhrasesByLilt] =
+    useTranslateWordsAndPhrasesByLiltMutation();
+
+  const [translateAllWordsAndPhrasesByLilt] =
+    useTranslateAllWordsAndPhrasesByLiltMutation();
+
   const { data: translationResult } =
     useSubscribeToTranslationReportSubscription();
 
@@ -104,7 +121,7 @@ export function AIControllerPage() {
     message: string;
   } | null>(null);
   const [result, setResult] =
-    useState<TranslateAllWordsAndPhrasesByGoogleResult | null>(null);
+    useState<TranslateAllWordsAndPhrasesByBotResult | null>(null);
   const [isStopPressed, setIsStopPressed] = useState<boolean>(false);
 
   useEffect(() => {
@@ -146,17 +163,41 @@ export function AIControllerPage() {
   }, [translationResult]);
 
   const enabledTags = useMemo(() => {
-    return !languagesError &&
-      !languagesLoading &&
-      languagesData &&
-      languagesData.languagesForGoogleTranslate.languages
-      ? languagesData.languagesForGoogleTranslate.languages.map(
-          (language) => language.code,
-        )
-      : [];
-  }, [languagesError, languagesLoading, languagesData]);
+    const langs =
+      !languagesGError &&
+      !languagesGLoading &&
+      languagesGData &&
+      languagesGData.languagesForGoogleTranslate.languages
+        ? languagesGData.languagesForGoogleTranslate.languages.map(
+            (language) => language.code,
+          )
+        : [];
 
-  const handleTranslate = async () => {
+    if (
+      !languagesLError &&
+      !languagesLLoading &&
+      languagesLData &&
+      languagesLData.languagesForLiltTranslate.languages
+    ) {
+      languagesLData.languagesForLiltTranslate.languages.forEach((l) => {
+        if (!langs.includes(l.code)) {
+          langs.push(l.code);
+        }
+      });
+    }
+
+    return langs;
+  }, [
+    languagesGError,
+    languagesGLoading,
+    languagesGData,
+    languagesLError,
+    languagesLLoading,
+    languagesLData,
+  ]);
+
+  // GOOGLE
+  const handleTranslateG = async () => {
     if (!source) {
       presentToast({
         message: `${tr('Please select source language!')}`,
@@ -169,7 +210,7 @@ export function AIControllerPage() {
     }
 
     if (!selectTarget) {
-      handleTranslateToAllLangs();
+      handleTranslateToAllLangsG();
       return;
     }
 
@@ -213,7 +254,7 @@ export function AIControllerPage() {
     }
   };
 
-  const handleTranslateToAllLangs = useCallback(async () => {
+  const handleTranslateToAllLangsG = useCallback(async () => {
     if (!source) {
       presentToast({
         message: `${tr('Please select source language!')}`,
@@ -236,6 +277,87 @@ export function AIControllerPage() {
     });
   }, [presentToast, source, tr, translateAllWordsAndPhrasesByGoogle]);
 
+  // LILT
+  const handleTranslateL = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      handleTranslateToAllLangsL();
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+
+    const { data } = await translateWordsAndPhrasesByLilt({
+      variables: {
+        from_language_code: source.lang.tag,
+        from_dialect_code: source.dialect?.tag,
+        from_geo_code: source.region?.tag,
+        to_language_code: target.lang.tag,
+        to_dialect_code: target.dialect?.tag,
+        to_geo_code: target.region?.tag,
+      },
+    });
+
+    dismiss();
+
+    if (data && data.translateWordsAndPhrasesByLilt.result) {
+      setResult(data.translateWordsAndPhrasesByLilt.result);
+      await mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
+  };
+
+  const handleTranslateToAllLangsL = useCallback(async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+      });
+
+      return;
+    }
+
+    setBatchTranslating(true);
+    batchTranslatingRef.current = true;
+
+    translateAllWordsAndPhrasesByLilt({
+      variables: {
+        from_language_code: source.lang.tag,
+        from_dialect_code: source.dialect?.tag,
+        from_geo_code: source.region?.tag,
+      },
+    });
+  }, [presentToast, source, tr, translateAllWordsAndPhrasesByLilt]);
+
   const handleCancelTranslateAll = async () => {
     setIsStopPressed(true);
     await stopGoogleTranslation();
@@ -244,7 +366,7 @@ export function AIControllerPage() {
   const resultCom = result ? (
     <ResultBoard>
       <span>{tr('Requested Total Charactors')}</span> :
-      <span>{result.requestedCharactors}</span>
+      <span>{result.requestedCharacters}</span>
       <br />
       <span>{tr('Total Words')}</span> :<span>{result.totalWordCount}</span>
       <br />
@@ -364,7 +486,7 @@ export function AIControllerPage() {
         </div>
 
         <AIActionsContainer>
-          <IonButton onClick={handleTranslate} disabled={disabled}>
+          <IonButton onClick={handleTranslateG} disabled={disabled}>
             {tr('Translate All')}
           </IonButton>
 
@@ -375,6 +497,24 @@ export function AIControllerPage() {
           >
             {tr('Translate All Words and Phrases')}
           </IonButton> */}
+        </AIActionsContainer>
+      </AIContainer>
+
+      <AIContainer>
+        <div style={{ display: 'flex' }}>
+          <IonTitle>Lilt</IonTitle>
+          <IonLabel>
+            {!selectTarget
+              ? languageData?.getLanguageTranslationInfo
+                  .liltTranslateTotalLangCount + ' languages'
+              : '1 language'}
+          </IonLabel>
+        </div>
+
+        <AIActionsContainer>
+          <IonButton onClick={handleTranslateL} disabled={disabled}>
+            {tr('Translate All')}
+          </IonButton>
         </AIActionsContainer>
       </AIContainer>
 

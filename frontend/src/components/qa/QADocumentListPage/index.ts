@@ -1,0 +1,1 @@
+export { QADocumentListPage } from './QADocumentListPage';

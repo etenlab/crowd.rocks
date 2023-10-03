@@ -40,6 +40,9 @@ export class DatabaseVersionControlService {
       case 2:
         console.log('Updating database to version 3');
         await this.loadVersion3();
+      case 3:
+        console.log('Updating database to version 4');
+        await this.loadVersion4();
       default:
         console.error('Database version is current');
     }
@@ -296,6 +299,7 @@ export class DatabaseVersionControlService {
 
     await this.setVersionNumber(2);
   }
+
   async loadVersion3(): Promise<void> {
     // schema
     await this.runSqlFile('./src/core/sql/schema/v3.schema.sql');
@@ -312,6 +316,47 @@ export class DatabaseVersionControlService {
 
     // set version
     await this.setVersionNumber(3);
+  }
+
+  async loadVersion4(): Promise<void> {
+    // schema
+    await this.runSqlFile('./src/core/sql/schema/v4.schema.sql');
+
+    // words
+    await this.runSqlFile('./src/core/sql/words/wordlike_string_upsert.sql');
+    await this.runSqlFile(
+      './src/core/sql/words/batch_wordlike_string_upsert.sql',
+    );
+
+    // document
+    await this.runSqlFile(
+      './src/core/sql/document/document_word_entry_upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/document/batch_document_word_entry_upsert.sql',
+    );
+    await this.runSqlFile('./src/core/sql/document/word_range_upsert.sql');
+    await this.runSqlFile(
+      './src/core/sql/document/batch_word_range_upsert.sql',
+    );
+
+    // question-answer
+    await this.runSqlFile(
+      './src/core/sql/question-answer/question-item-upsert.sql',
+    );
+    await this.runSqlFile('./src/core/sql/question-answer/question-upsert.sql');
+    await this.runSqlFile('./src/core/sql/question-answer/answer-upsert.sql');
+    await this.runSqlFile(
+      './src/core/sql/question-answer/batch-question-item-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/question-answer/batch-question-upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/question-answer/batch-answer-upsert.sql',
+    );
+
+    await this.setVersionNumber(4);
   }
 
   async registerUser(
