@@ -30,21 +30,21 @@ begin
     p_error_type := 'InvalidInputs';
     return;
   end if;
-
-  v_current_document_word_entry_id := null;
   
-  -- check for document word entry existence
-  select document_word_entry_id
-  from document_word_entries
-  where document_id = p_document_id
-    and wordlike_string_id = p_wordlike_string_id
-    and parent_document_word_entry_id = p_parent_document_word_entry_id
-  into v_current_document_word_entry_id;
-
   p_document_word_entry_id := null;
+  
+  if p_parent_document_word_entry_id is not null then
+    -- check for document word entry existence
+    select document_word_entry_id
+    from document_word_entries
+    where document_id = p_document_id
+      and wordlike_string_id = p_wordlike_string_id
+      and parent_document_word_entry_id = p_parent_document_word_entry_id
+    into p_document_word_entry_id;
+  end if;
 
   -- create document word entry if needed
-  if v_current_document_word_entry_id is null then
+  if p_document_word_entry_id is null then
     insert into document_word_entries (document_id, wordlike_string_id, parent_document_word_entry_id, created_by)
     values (p_document_id, p_wordlike_string_id, p_parent_document_word_entry_id, v_user_id)
     on conflict do nothing

@@ -725,5 +725,5 @@ create table answers (
   question_items bigint[] not null, -- references question_items(question_item_id)
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
-  unique (question_id, answer, created_by)
+  unique (question_id, created_by)
 );

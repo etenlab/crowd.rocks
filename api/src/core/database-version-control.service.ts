@@ -335,6 +335,10 @@ export class DatabaseVersionControlService {
     await this.runSqlFile(
       './src/core/sql/document/batch_document_word_entry_upsert.sql',
     );
+    await this.runSqlFile('./src/core/sql/document/word_range_upsert.sql');
+    await this.runSqlFile(
+      './src/core/sql/document/batch_word_range_upsert.sql',
+    );
 
     // question-answer
     await this.runSqlFile(

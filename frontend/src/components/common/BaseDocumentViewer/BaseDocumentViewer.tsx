@@ -1,4 +1,4 @@
-import { useMemo, ReactNode, Fragment } from 'react';
+import { useMemo, ReactNode, memo } from 'react';
 import { Word, Dot, Container } from './styled';
 
 export type ViewMode = 'edit' | 'view';
@@ -27,10 +27,10 @@ export type BaseDocumentViewerProps = {
     entryId: string;
     component?: ReactNode;
   }[];
-  onClickWord(entryId: string, index: number): void;
+  onClickWord(entryId: string, index: number, e?: unknown): void;
 };
 
-export function BaseDocumentViewer({
+export const BaseDocumentViewer = memo(function BaseDocumentViewerPure({
   entries,
   mode,
   range,
@@ -38,9 +38,15 @@ export function BaseDocumentViewer({
   onClickWord,
 }: BaseDocumentViewerProps) {
   const com = useMemo(() => {
-    const dotsMap = new Map<string, number>();
+    const dotsMap = new Map<
+      string,
+      {
+        entryId: string;
+        component?: ReactNode;
+      }
+    >();
 
-    dots.forEach((dot, index) => dotsMap.set(dot.entryId, index));
+    dots.forEach((dot) => dotsMap.set(dot.entryId, dot));
 
     let begin = false;
     let end = false;
@@ -50,9 +56,9 @@ export function BaseDocumentViewer({
         begin = true;
       }
 
-      const dotIndex = dotsMap.get(entry.id) || null;
-      const isDot = dotIndex ? true : false;
-      const dotCom = dotIndex ? dots[dotIndex].component : null;
+      const dot = dotsMap.get(entry.id) || null;
+      const isDot = dot ? true : false;
+      const dotCom = dot ? dot.component : null;
 
       const color =
         (begin && !end && range.endEntry) ||
@@ -61,26 +67,31 @@ export function BaseDocumentViewer({
           ? 'red'
           : 'black';
 
+      const cursor = isDot ? 'pointer' : 'default';
+
       if (entry.id === range.endEntry) {
         end = true;
       }
 
       return (
-        <Fragment key={entry.id}>
-          <Word
-            className={`${mode}`}
-            onClick={() => mode === 'edit' && onClickWord(entry.id, index)}
-            style={{ color }}
-          >
-            {entry.wordlike_string.wordlike_string}
-          </Word>
-          {isDot
-            ? dotCom || <Dot onClick={() => onClickWord(entry.id, index)} />
-            : null}
-        </Fragment>
+        <Word
+          key={entry.id}
+          className={`${mode}`}
+          onClick={(e) =>
+            mode === 'view'
+              ? isDot
+                ? onClickWord(entry.id, index, e)
+                : null
+              : onClickWord(entry.id, index)
+          }
+          style={{ color, cursor }}
+        >
+          {entry.wordlike_string.wordlike_string}
+          {isDot ? dotCom || <Dot /> : null}
+        </Word>
       );
     });
   }, [dots, entries, mode, onClickWord, range.beginEntry, range.endEntry]);
 
   return <Container>{com}</Container>;
-}
+});

@@ -8,16 +8,14 @@ export type QuestionItemUpsertsProcedureOutput = {
 
 export function callQuestionItemUpsertsProcedure({
   items,
-  token,
 }: {
   items: string[];
-  token: string;
-}): [string, [string[], string]] {
+}): [string, [string[]]] {
   return [
     `
-      call batch_question_item_upsert($1::text[], $2, null, null, '');
+      call batch_question_item_upsert($1::text[], null, null, '');
     `,
-    [items, token],
+    [items],
   ];
 }
 
@@ -122,7 +120,7 @@ export function getQuestionsObjByRefs(
 ): [string, [TableNameType[], number[]]] {
   return [
     `
-      with paris (parent_table, parent_id) as (
+      with pairs (parent_table, parent_id) as (
         select unnest($1::text[]), unnest($2::int[])
       )
       select 
@@ -163,7 +161,7 @@ export function callAnswerUpsertsProcedure({
 }): [string, [number[], string[], string[], string]] {
   return [
     `
-      call batch_answer_upsert($1::text[], $2::bigint[], $3::bool[], $4::text[], $5::jsonb[], $6, null, null, '');
+      call batch_answer_upsert($1::bigint[], $2::text[], $3::jsonb[], $4::text, null, null, '');
     `,
     [
       question_ids,

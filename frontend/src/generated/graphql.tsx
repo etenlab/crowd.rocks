@@ -3227,12 +3227,12 @@ export type GetQuestionOnWordRangesByDocumentIdQueryVariables = Exact<{
 
 export type GetQuestionOnWordRangesByDocumentIdQuery = { __typename?: 'Query', getQuestionOnWordRangesByDocumentId: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
 
-export type GetAnswersByQuestionIdsQueryVariables = Exact<{
-  ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+export type GetAnswersByQuestionIdQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
 }>;
 
 
-export type GetAnswersByQuestionIdsQuery = { __typename?: 'Query', getAnswersByQuestionIds: { __typename?: 'AnswersOutput', error: ErrorType, answers: Array<{ __typename?: 'Answer', answer_id: string, question_id: string, answer?: string | null, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }> } | null> } };
+export type GetAnswersByQuestionIdQuery = { __typename?: 'Query', getAnswersByQuestionIds: { __typename?: 'AnswersOutput', error: ErrorType, answers: Array<{ __typename?: 'Answer', answer_id: string, question_id: string, answer?: string | null, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }> } | null> } };
 
 export type CreateQuestionOnWordRangeMutationVariables = Exact<{
   begin_document_word_entry_id: Scalars['ID']['input'];
@@ -6789,9 +6789,9 @@ export function useGetQuestionOnWordRangesByDocumentIdLazyQuery(baseOptions?: Ap
 export type GetQuestionOnWordRangesByDocumentIdQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByDocumentIdQuery>;
 export type GetQuestionOnWordRangesByDocumentIdLazyQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByDocumentIdLazyQuery>;
 export type GetQuestionOnWordRangesByDocumentIdQueryResult = Apollo.QueryResult<GetQuestionOnWordRangesByDocumentIdQuery, GetQuestionOnWordRangesByDocumentIdQueryVariables>;
-export const GetAnswersByQuestionIdsDocument = gql`
-    query GetAnswersByQuestionIds($ids: [ID!]!) {
-  getAnswersByQuestionIds(ids: $ids) {
+export const GetAnswersByQuestionIdDocument = gql`
+    query GetAnswersByQuestionId($id: ID!) {
+  getAnswersByQuestionIds(ids: [$id]) {
     error
     answers {
       ...AnswerFragment
@@ -6801,32 +6801,32 @@ export const GetAnswersByQuestionIdsDocument = gql`
     ${AnswerFragmentFragmentDoc}`;
 
 /**
- * __useGetAnswersByQuestionIdsQuery__
+ * __useGetAnswersByQuestionIdQuery__
  *
- * To run a query within a React component, call `useGetAnswersByQuestionIdsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetAnswersByQuestionIdsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetAnswersByQuestionIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAnswersByQuestionIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetAnswersByQuestionIdsQuery({
+ * const { data, loading, error } = useGetAnswersByQuestionIdQuery({
  *   variables: {
- *      ids: // value for 'ids'
+ *      id: // value for 'id'
  *   },
  * });
  */
-export function useGetAnswersByQuestionIdsQuery(baseOptions: Apollo.QueryHookOptions<GetAnswersByQuestionIdsQuery, GetAnswersByQuestionIdsQueryVariables>) {
+export function useGetAnswersByQuestionIdQuery(baseOptions: Apollo.QueryHookOptions<GetAnswersByQuestionIdQuery, GetAnswersByQuestionIdQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetAnswersByQuestionIdsQuery, GetAnswersByQuestionIdsQueryVariables>(GetAnswersByQuestionIdsDocument, options);
+        return Apollo.useQuery<GetAnswersByQuestionIdQuery, GetAnswersByQuestionIdQueryVariables>(GetAnswersByQuestionIdDocument, options);
       }
-export function useGetAnswersByQuestionIdsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAnswersByQuestionIdsQuery, GetAnswersByQuestionIdsQueryVariables>) {
+export function useGetAnswersByQuestionIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAnswersByQuestionIdQuery, GetAnswersByQuestionIdQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetAnswersByQuestionIdsQuery, GetAnswersByQuestionIdsQueryVariables>(GetAnswersByQuestionIdsDocument, options);
+          return Apollo.useLazyQuery<GetAnswersByQuestionIdQuery, GetAnswersByQuestionIdQueryVariables>(GetAnswersByQuestionIdDocument, options);
         }
-export type GetAnswersByQuestionIdsQueryHookResult = ReturnType<typeof useGetAnswersByQuestionIdsQuery>;
-export type GetAnswersByQuestionIdsLazyQueryHookResult = ReturnType<typeof useGetAnswersByQuestionIdsLazyQuery>;
-export type GetAnswersByQuestionIdsQueryResult = Apollo.QueryResult<GetAnswersByQuestionIdsQuery, GetAnswersByQuestionIdsQueryVariables>;
+export type GetAnswersByQuestionIdQueryHookResult = ReturnType<typeof useGetAnswersByQuestionIdQuery>;
+export type GetAnswersByQuestionIdLazyQueryHookResult = ReturnType<typeof useGetAnswersByQuestionIdLazyQuery>;
+export type GetAnswersByQuestionIdQueryResult = Apollo.QueryResult<GetAnswersByQuestionIdQuery, GetAnswersByQuestionIdQueryVariables>;
 export const CreateQuestionOnWordRangeDocument = gql`
     mutation CreateQuestionOnWordRange($begin_document_word_entry_id: ID!, $end_document_word_entry_id: ID!, $question: String!, $question_items: [String!]!, $question_type_is_multiselect: Boolean!) {
   createQuestionOnWordRange(
@@ -8195,7 +8195,7 @@ export const namedOperations = {
     GetPhraseWithVoteById: 'GetPhraseWithVoteById',
     PostRead: 'PostRead',
     GetQuestionOnWordRangesByDocumentId: 'GetQuestionOnWordRangesByDocumentId',
-    GetAnswersByQuestionIds: 'GetAnswersByQuestionIds',
+    GetAnswersByQuestionId: 'GetAnswersByQuestionId',
     GetAllSiteTextDefinitions: 'GetAllSiteTextDefinitions',
     GetAllTranslationFromSiteTextDefinitionID: 'GetAllTranslationFromSiteTextDefinitionID',
     SiteTextWordDefinitionRead: 'SiteTextWordDefinitionRead',

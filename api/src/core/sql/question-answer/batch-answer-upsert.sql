@@ -36,7 +36,7 @@ begin
   p_error_types := array[]::varchar(32)[];
 
   for i in 1..v_questions_ids_length loop
-    v_temp_answer_id := 0;
+    v_temp_answer_id := null;
     v_temp_error_type := 'NoError';
 
     v_question_item_ids := array(

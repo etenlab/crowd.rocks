@@ -21,7 +21,7 @@ begin
   p_error_types := array[]::varchar(32)[];
 
   for i in 1..v_items_length loop
-    v_temp_question_item_id := 0;
+    v_temp_question_item_id := null;
     v_temp_error_type := 'NoError';
 
     call question_item_upsert(

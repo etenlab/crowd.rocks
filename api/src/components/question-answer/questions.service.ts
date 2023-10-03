@@ -220,11 +220,7 @@ export class QuestionsService {
       }
 
       const { error: questionItemError, question_items } =
-        await this.questionItemService.upserts(
-          input.question_items,
-          token,
-          pgClient,
-        );
+        await this.questionItemService.upserts(input.question_items, pgClient);
 
       if (questionItemError !== ErrorType.NoError) {
         return {

@@ -55,7 +55,6 @@ export class QuestionItemsService {
 
   async upserts(
     items: string[],
-    token: string,
     pgClient: PoolClient | null,
   ): Promise<QuestionItemsOutput> {
     if (items.length === 0) {
@@ -72,7 +71,6 @@ export class QuestionItemsService {
       }).query<QuestionItemUpsertsProcedureOutput>(
         ...callQuestionItemUpsertsProcedure({
           items,
-          token,
         }),
       );
 

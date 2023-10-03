@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, memo, useEffect } from 'react';
 
 import {
   BaseDocumentViewer,
@@ -14,28 +14,33 @@ import {
 export type DocumentViewerProps = Omit<
   BaseDocumentViewerProps & {
     documentId: string;
+    onChangeRange(sentence: string): void;
   },
   'entries'
 >;
 
-export function DocumentViewer({
+export const DocumentViewer = memo(function DocumentViewerPure({
   documentId,
   mode,
   range,
   dots,
   onClickWord,
+  onChangeRange,
 }: DocumentViewerProps) {
   const { data, error, loading } = useGetDocumentWordEntriesByDocumentIdQuery({
     variables: { document_id: documentId },
   });
 
-  const entries = useMemo(() => {
+  const { entries, sentence } = useMemo(() => {
     if (
       error ||
       !data ||
       data.getDocumentWordEntriesByDocumentId.error !== ErrorType.NoError
     ) {
-      return [];
+      return {
+        entries: [],
+        sentence: '',
+      };
     }
 
     const word_entries =
@@ -92,12 +97,37 @@ export function DocumentViewer({
     }
 
     if (sortedEntries.length !== 1) {
-      console.log(sortedEntries);
-      // alert('Error at fetching');
+      alert('Error at fetching');
     }
 
-    return sortedEntries.length > 0 ? sortedEntries[0] : [];
-  }, [data, error]);
+    let sentence: string = '';
+    let start = false;
+
+    if (range.beginEntry && range.endEntry && sortedEntries.length > 0) {
+      for (let i = 0; i < sortedEntries[0].length; i++) {
+        if (sortedEntries[0][i].id === range.beginEntry) {
+          start = true;
+        }
+
+        if (start) {
+          sentence = `${sentence} ${sortedEntries[0][i].wordlike_string.wordlike_string}`;
+        }
+
+        if (sortedEntries[0][i].id === range.endEntry) {
+          start = false;
+        }
+      }
+    }
+
+    return {
+      entries: sortedEntries.length > 0 ? sortedEntries[0] : [],
+      sentence,
+    };
+  }, [data, error, range.beginEntry, range.endEntry]);
+
+  useEffect(() => {
+    onChangeRange(sentence);
+  }, [onChangeRange, sentence]);
 
   if (loading) {
     return <div>loading</div>;
@@ -116,4 +146,4 @@ export function DocumentViewer({
       onClickWord={onClickWord}
     />
   );
-}
+});
