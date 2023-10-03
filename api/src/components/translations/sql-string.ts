@@ -460,6 +460,98 @@ export function callWordToWordTranslationUpsertsProcedure({
   ];
 }
 
+export type WordToWordTranslationVoteSetProcedureOutput = {
+  p_word_to_word_translation_vote_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callWordToWordTranslationVoteSetProcedure({
+  translationIds,
+  token,
+  vote,
+}: {
+  translationIds: number[];
+  token: string;
+  vote: boolean | null;
+}): [string, [number[], string, boolean | null]] {
+  return [
+    `
+      call batch_word_to_word_translation_vote_set($1::bigint[], $2, $3, null, null, '');
+    `,
+    [translationIds, token, vote],
+  ];
+}
+
+export type WordToPhraseTranslationVoteSetProcedureOutput = {
+  p_word_to_phrase_translation_vote_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callWordToPhraseTranslationVoteSetProcedure({
+  translationIds,
+  token,
+  vote,
+}: {
+  translationIds: number[];
+  token: string;
+  vote: boolean | null;
+}): [string, [number[], string, boolean | null]] {
+  return [
+    `
+      call batch_word_to_phrase_translation_vote_set($1::bigint[], $2, $3, null, null, '');
+    `,
+    [translationIds, token, vote],
+  ];
+}
+
+export type PhraseToPhraseTranslationVoteSetProcedureOutput = {
+  p_phrase_to_phrase_translation_vote_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callPhraseToPhraseTranslationVoteSetProcedure({
+  translationIds,
+  token,
+  vote,
+}: {
+  translationIds: number[];
+  token: string;
+  vote: boolean | null;
+}): [string, [number[], string, boolean | null]] {
+  return [
+    `
+      call batch_phrase_to_phrase_translation_vote_set($1::bigint[], $2, $3, null, null, '');
+    `,
+    [translationIds, token, vote],
+  ];
+}
+
+export type PhraseToWordTranslationVoteSetProcedureOutput = {
+  p_phrase_to_word_translation_vote_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callPhraseToWordTranslationVoteSetProcedure({
+  translationIds,
+  token,
+  vote,
+}: {
+  translationIds: number[];
+  token: string;
+  vote: boolean | null;
+}): [string, [number[], string, boolean | null]] {
+  return [
+    `
+      call batch_phrase_to_word_translation_vote_set($1::bigint[], $2, $3, null, null, '');
+    `,
+    [translationIds, token, vote],
+  ];
+}
+
 export type GetWordToPhraseTranslationObjectByIdRow = {
   word_to_phrase_translation_id: string;
   from_word_definition_id: string;

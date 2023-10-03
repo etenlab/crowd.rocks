@@ -1,5 +1,9 @@
 import { Pool, PoolClient } from 'pg';
 import {
+  callPhraseToPhraseTranslationVoteSetProcedure,
+  callPhraseToWordTranslationVoteSetProcedure,
+  callWordToPhraseTranslationVoteSetProcedure,
+  callWordToWordTranslationVoteSetProcedure,
   getPhraseToPhraseNotTranslatedById,
   getPhraseToWordNotTranslatedById,
   getStringsPhraseToPhraseTranslatedById,
@@ -195,4 +199,61 @@ export async function getTranslationsNotByUser(
     });
   }
   return translations;
+}
+
+export async function setTranslationsVotes(
+  fromTypeIsWord: boolean,
+  toTypeIsWord: boolean,
+  translationIds: number[],
+  token: string,
+  vote: boolean | null,
+  pgClient: PoolClient | Pool,
+) {
+  if (translationIds && translationIds.length > 0) {
+    if (fromTypeIsWord) {
+      if (toTypeIsWord) {
+        // call word to word procedure
+        console.log('w2w');
+        await pgClient.query(
+          ...callWordToWordTranslationVoteSetProcedure({
+            translationIds,
+            token,
+            vote,
+          }),
+        );
+      } else {
+        // call word to phrase reset procedure
+        console.log('w2p');
+        await pgClient.query(
+          ...callWordToPhraseTranslationVoteSetProcedure({
+            translationIds,
+            token,
+            vote,
+          }),
+        );
+      }
+    } else {
+      if (toTypeIsWord) {
+        // phrase to word reset procedure
+        console.log('p2w');
+        await pgClient.query(
+          ...callPhraseToWordTranslationVoteSetProcedure({
+            translationIds,
+            token,
+            vote,
+          }),
+        );
+      } else {
+        // phrase to phrase reset
+        console.log('p2p');
+        await pgClient.query(
+          ...callPhraseToPhraseTranslationVoteSetProcedure({
+            translationIds,
+            token,
+            vote,
+          }),
+        );
+      }
+    }
+  }
 }

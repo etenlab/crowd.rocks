@@ -66,6 +66,7 @@ import {
 import {
   getTranslatedStringsById,
   getTranslationsNotByUser,
+  setTranslationsVotes,
 } from './translations.repository';
 import { LiltTranslateService } from './lilt-translate.service';
 
@@ -98,6 +99,56 @@ export function makeStr(
   is_word_definition: boolean,
 ) {
   return `${word_definition_id}-${is_word_definition ? 'true' : 'false'}`;
+}
+function isWtoW(
+  translation:
+    | WordToWordTranslation
+    | WordToPhraseTranslation
+    | PhraseToPhraseTranslation
+    | PhraseToWordTranslation,
+): translation is WordToWordTranslation {
+  return (
+    (translation as WordToWordTranslation).word_to_word_translation_id !==
+    undefined
+  );
+}
+
+function isWtoP(
+  translation:
+    | WordToWordTranslation
+    | WordToPhraseTranslation
+    | PhraseToPhraseTranslation
+    | PhraseToWordTranslation,
+): translation is WordToPhraseTranslation {
+  return (
+    (translation as WordToPhraseTranslation).word_to_phrase_translation_id !==
+    undefined
+  );
+}
+
+function isPtoP(
+  translation:
+    | WordToWordTranslation
+    | WordToPhraseTranslation
+    | PhraseToPhraseTranslation
+    | PhraseToWordTranslation,
+): translation is PhraseToPhraseTranslation {
+  return (
+    (translation as PhraseToPhraseTranslation)
+      .phrase_to_phrase_translation_id !== undefined
+  );
+}
+function isPtoW(
+  translation:
+    | WordToWordTranslation
+    | WordToPhraseTranslation
+    | PhraseToPhraseTranslation
+    | PhraseToWordTranslation,
+): translation is PhraseToWordTranslation {
+  return (
+    (translation as PhraseToWordTranslation).phrase_to_word_translation_id !==
+    undefined
+  );
 }
 
 const makeKey = (
@@ -983,6 +1034,33 @@ export class TranslationsService {
           ),
           translations[i],
         );
+
+        let translationId: string;
+        if (isWtoW(translations[i]!)) {
+          translationId = (translations[i]! as WordToWordTranslation)
+            .word_to_word_translation_id!;
+        } else if (isWtoP(translations[i]!)) {
+          translationId = (translations[i]! as WordToPhraseTranslation)
+            .word_to_phrase_translation_id!;
+        } else if (isPtoP(translations[i]!)) {
+          translationId = (translations[i]! as PhraseToPhraseTranslation)
+            .phrase_to_phrase_translation_id!;
+        } else if (isPtoW(translations[i]!)) {
+          translationId = (translations[i]! as PhraseToWordTranslation)
+            .phrase_to_word_translation_id!;
+        } else {
+          continue;
+        }
+        console.log(`upvote: ${translationId}`);
+
+        await setTranslationsVotes(
+          upsertInput[i].from_definition_type_is_word,
+          upsertInput[i].to_definition_type_is_word,
+          [+translationId],
+          token,
+          true,
+          this.pg.pool,
+        );
       }
 
       return {
@@ -1254,8 +1332,6 @@ export class TranslationsService {
     };
   }
 
-  // for now, just returns an UnknownError result
-  // until it's finished.
   async translateMissingWordsAndPhrasesByGoogle(
     from_language: LanguageInput,
     to_language: LanguageInput,
@@ -1272,17 +1348,13 @@ export class TranslationsService {
     }
 
     try {
-      const {
-        strings,
-        originalTextsObjMap,
-        wordsConnection,
-        phrasesConnection,
-      } = await getLangConnectionsObjectMapAndTexts(
-        from_language,
-        pgClient,
-        this.wordsService,
-        this.phrasesService,
-      );
+      const { originalTextsObjMap, wordsConnection, phrasesConnection } =
+        await getLangConnectionsObjectMapAndTexts(
+          from_language,
+          pgClient,
+          this.wordsService,
+          this.phrasesService,
+        );
 
       // console.log(otherLangstrings);
       const pg = await pgClientOrPool({ client: pgClient, pool: this.pg.pool });
@@ -1367,8 +1439,11 @@ export class TranslationsService {
         to_definition_input: ToDefinitionInput;
       }[] = [];
 
+      const requestedCharactors = missingTexts.join('\n').length;
+
       let translatedWordCount = 0;
       let translatedPhraseCount = 0;
+      let upVoteCount = 0;
       for (const edge of wordsConnection.edges) {
         const { node } = edge;
         const oWord = textsToTranslateObjMap.get(node.word);
@@ -1397,7 +1472,7 @@ export class TranslationsService {
               t.toText == tWord
             );
           });
-          // not translated at all
+          // process the translation if not submitted
           if (
             otherSameTranslations === undefined ||
             otherSameTranslations.length == 0
@@ -1415,39 +1490,40 @@ export class TranslationsService {
               },
             });
             translatedWordCount++;
-            continue;
           }
-          // same translation by someone else
+          // process: the same translation was made by someone else
           else {
-            if (isTypeWord) {
-              this.phraseToWordTrService.toggleVoteStatus(
-                +otherSameTranslations[0].translationId, // just voting on first it finds for now
-                true,
-                token,
-                pgClient,
-              );
-            } else {
-              this.phraseToPhraseTrService.toggleVoteStatus(
-                +otherSameTranslations[0].translationId,
-                true,
-                token,
-                pgClient,
-              );
-            }
+            upVoteCount++;
+            console.log(`upvote ${otherSameTranslations[0].translationId}`);
+            await setTranslationsVotes(
+              true,
+              isTypeWord,
+              [+otherSameTranslations[0].translationId],
+              gtoken,
+              true,
+              pg,
+            );
           }
 
-          // reset votes all old translations
-          const oldTranslationIds = translationsByOthers
+          // reset votes any/all old/other translations (any translation that is different from current translation)
+          const otherTranslationIds = translationsByOthers
             .filter(
               (t) =>
                 t.fromDef == oDef.definition &&
                 t.fromText == oWord.text &&
                 (t.toDef !== tDef || t.toText !== tWord),
             )
-            .map((t) => t.translationId);
-        }
+            .map((t) => +t.translationId);
 
-        // reset vote on all old translations
+          await setTranslationsVotes(
+            true,
+            isTypeWord,
+            otherTranslationIds,
+            gtoken,
+            null,
+            pg,
+          );
+        }
       }
 
       for (const edge of phrasesConnection.edges) {
@@ -1495,7 +1571,6 @@ export class TranslationsService {
               },
             });
             translatedPhraseCount++;
-            continue;
           } else {
             // upvote other users' translation
             if (isTypeWord) {
@@ -1514,8 +1589,46 @@ export class TranslationsService {
               );
             }
           }
+          // reset votes any/all old/other translations (any translation that is different from current translation)
+          const otherTranslationIds = translationsByOthers
+            .filter(
+              (t) =>
+                t.fromDef == oDef.definition &&
+                t.fromText == oPhrase.text &&
+                (t.toDef !== tDef || t.toText !== tText),
+            )
+            .map((t) => +t.translationId);
+
+          await setTranslationsVotes(
+            false,
+            isTypeWord,
+            otherTranslationIds,
+            gtoken,
+            null,
+            pg,
+          );
         }
       }
+      // console.log('upvote others:');
+      // console.log(upVoteCount);
+
+      // upsert all of the unsubmitted translations and upvote
+      const { error } =
+        await this.batchUpsertTranslationFromWordAndDefinitionlikeString(
+          upsertInputs,
+          token,
+          pgClient,
+        );
+      return {
+        error,
+        result: {
+          requestedCharacters: requestedCharactors,
+          totalWordCount: wordsConnection.edges.length,
+          totalPhraseCount: phrasesConnection.edges.length,
+          translatedWordCount,
+          translatedPhraseCount,
+        },
+      };
     } catch (err) {
       console.error(err);
     }
