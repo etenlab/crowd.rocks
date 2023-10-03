@@ -40,6 +40,7 @@ import {
   useLanguagesForLiltTranslateQuery,
   useTranslateWordsAndPhrasesByLiltMutation,
   useTranslateAllWordsAndPhrasesByLiltMutation,
+  useTranslateMissingWordsAndPhrasesByGoogleMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, langInfo2tag } from '../../../common/langUtils';
@@ -94,6 +95,9 @@ export function AIControllerPage() {
 
   const [translateWordsAndPhrasesByGoogle] =
     useTranslateWordsAndPhrasesByGoogleMutation();
+
+  const [translateMissingWordsAndPhrasesByGoogle] =
+    useTranslateMissingWordsAndPhrasesByGoogleMutation();
 
   const [translateAllWordsAndPhrasesByGoogle] =
     useTranslateAllWordsAndPhrasesByGoogleMutation();
@@ -248,6 +252,59 @@ export function AIControllerPage() {
 
     if (data && data.translateWordsAndPhrasesByGoogle.result) {
       setResult(data.translateWordsAndPhrasesByGoogle.result);
+      await mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
+  };
+
+  const handleTranslateMissingG = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      handleTranslateToAllLangsG();
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+
+    const { data } = await translateMissingWordsAndPhrasesByGoogle({
+      variables: {
+        from_language_code: source.lang.tag,
+        to_language_code: target.lang.tag,
+      },
+    });
+
+    dismiss();
+
+    if (data && data.translateMissingWordsAndPhrasesByGoogle.result) {
+      setResult(data.translateMissingWordsAndPhrasesByGoogle.result);
       await mapsReTranslate({
         variables: { forLangTag: langInfo2tag(target) },
       });
@@ -488,6 +545,9 @@ export function AIControllerPage() {
         <AIActionsContainer>
           <IonButton onClick={handleTranslateG} disabled={disabled}>
             {tr('Translate All')}
+          </IonButton>
+          <IonButton onClick={handleTranslateMissingG} disabled={disabled}>
+            {tr('Translate Missing')}
           </IonButton>
 
           {/* <IonButton
