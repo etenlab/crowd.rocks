@@ -76,7 +76,7 @@ input DocumentUploadInput {
 }
 
 type DocumentUploadOutput {
-  document_id: String
+  document: TextyDocument
   error: ErrorType!
 }
 
@@ -541,7 +541,7 @@ type MarkNotificationReadOutput {
 type Mutation {
   addNotification(input: AddNotificationInput!): AddNotificationOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
-  createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionsOutput!
+  createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   forumDelete(input: ForumDeleteInput!): ForumDeleteOutput!

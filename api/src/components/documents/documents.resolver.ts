@@ -39,7 +39,7 @@ export class DocumentsResolver {
     if (!this.authenticationService.isAdmin(getBearer(req) || '')) {
       return {
         error: ErrorType.Unauthorized,
-        document_id: null,
+        document: null,
       };
     }
 
