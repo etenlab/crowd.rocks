@@ -1338,6 +1338,21 @@ export class TranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+    return this.translateWordsAndPhrasesByBot(
+      this.gTrService,
+      from_language,
+      to_language,
+      token,
+      pgClient,
+    );
+  }
+
+  async translateMissingWordsAndPhrasesByBot(
+    translator: ITranslator,
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
     const badInputResult = validateTranslateByBotInput(
       from_language,
       to_language,
@@ -1359,31 +1374,14 @@ export class TranslationsService {
       // console.log(otherLangstrings);
       const pg = await pgClientOrPool({ client: pgClient, pool: this.pg.pool });
 
-      // check if token for googlebot exists
-      const tokenRes = await this.pg.pool.query(
-        `select t.token, u.user_id
-      from tokens t 
-      join users u 
-      on t.user_id = u.user_id
-      where u.email=$1;`,
-        ['googlebot@crowd.rocks'],
-      );
-      let gtoken = tokenRes.rows[0].token;
-      const google_user_id = tokenRes.rows[0].user_id;
-      if (!gtoken) {
-        gtoken = createToken();
-        await this.pg.pool.query(
-          `
-          insert into tokens(token, user_id) values($1, $2);
-        `,
-          [gtoken, google_user_id],
-        );
-      }
+      const token = await translator.getTranslatorToken();
+      const botToken = token.token;
+      const botUserId = token.id;
 
       const translatedStrs = await getTranslatedStringsById(
         from_language.language_code,
         to_language.language_code,
-        google_user_id,
+        botUserId,
         pg,
       );
 
@@ -1420,14 +1418,14 @@ export class TranslationsService {
         .sort((a, b) => a.id - b.id)
         .map((obj) => obj.text);
 
-      const translationTexts = await this.gTrService.translate(
+      const translationTexts = await translator.translate(
         missingTexts,
         from_language,
         to_language,
       );
 
       const translationsByOthers = await getTranslationsNotByUser(
-        google_user_id,
+        botUserId,
         pg,
         to_language.language_code,
         from_language.language_code,
@@ -1499,7 +1497,7 @@ export class TranslationsService {
               true,
               isTypeWord,
               [+otherSameTranslations[0].translationId],
-              gtoken,
+              botToken,
               true,
               pg,
             );
@@ -1519,7 +1517,7 @@ export class TranslationsService {
             true,
             isTypeWord,
             otherTranslationIds,
-            gtoken,
+            botToken,
             null,
             pg,
           );
@@ -1577,14 +1575,14 @@ export class TranslationsService {
               this.phraseToWordTrService.toggleVoteStatus(
                 +otherTranslations[0].translationId,
                 true,
-                token,
+                botToken,
                 pgClient,
               );
             } else {
               this.phraseToPhraseTrService.toggleVoteStatus(
                 +otherTranslations[0].translationId,
                 true,
-                token,
+                botToken,
                 pgClient,
               );
             }
@@ -1603,7 +1601,7 @@ export class TranslationsService {
             false,
             isTypeWord,
             otherTranslationIds,
-            gtoken,
+            botToken,
             null,
             pg,
           );
@@ -1616,7 +1614,7 @@ export class TranslationsService {
       const { error } =
         await this.batchUpsertTranslationFromWordAndDefinitionlikeString(
           upsertInputs,
-          token,
+          botToken,
           pgClient,
         );
       return {
