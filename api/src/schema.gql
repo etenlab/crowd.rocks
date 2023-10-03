@@ -381,7 +381,7 @@ type IsAdminIdOutput {
   isAdmin: Boolean!
 }
 
-type LanguageForGoogleTranslate {
+type LanguageForBotTranslate {
   code: String!
   name: String!
 }
@@ -393,9 +393,9 @@ input LanguageInput {
   language_code: String!
 }
 
-type LanguageListForGoogleTranslateOutput {
+type LanguageListForBotTranslateOutput {
   error: ErrorType!
-  languages: [LanguageForGoogleTranslate!]
+  languages: [LanguageForBotTranslate!]
 }
 
 type LanguageOutput {
@@ -571,6 +571,7 @@ type Mutation {
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextDefinitionOutput!
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
   stopGoogleTranslation: GenericOutput!
+  stopLiltTranslation: GenericOutput!
   threadDelete(input: ThreadDeleteInput!): ThreadDeleteOutput!
   threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
@@ -584,9 +585,11 @@ type Mutation {
   toggleWordDefinitionVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
-  translateAllWordsAndPhrasesByGoogle(from_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
+  translateAllWordsAndPhrasesByGoogle(from_language: LanguageInput!): GenericOutput!
+  translateAllWordsAndPhrasesByLilt(from_language: LanguageInput!): GenericOutput!
   translateMissingWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
   translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
+  translateWordsAndPhrasesByLilt(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionOutput!
   updateFile(file: Upload, file_size: Int, file_type: String, id: Int!): IFileOutput!
   uploadFile(file: Upload!, file_size: Int!, file_type: String!): IFileOutput!
@@ -962,7 +965,8 @@ type Query {
   getWordVoteStatus(word_id: ID!): WordVoteStatusOutputRow!
   getWordWithVoteById(word_id: ID!): WordWithVoteOutput!
   getWordsByLanguage(after: ID, first: Int, input: LanguageInput!): WordWithVoteListConnection!
-  languagesForGoogleTranslate: LanguageListForGoogleTranslateOutput!
+  languagesForGoogleTranslate: LanguageListForBotTranslateOutput!
+  languagesForLiltTranslate: LanguageListForBotTranslateOutput!
   loggedInIsAdmin(input: IsAdminIdInput!): IsAdminIdOutput!
   notifications: NotificationListOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionOutput!
@@ -1243,7 +1247,7 @@ type SiteTextWordToWordTranslationWithVote {
 }
 
 type Subscription {
-  TranslationReport: TranslateAllWordsAndPhrasesByGoogleResult!
+  TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
 }
 
 enum TableNameType {
@@ -1327,22 +1331,27 @@ input ToDefinitionInput {
   word_or_phrase: String!
 }
 
-type TranslateAllWordsAndPhrasesByGoogleOutput {
+type TranslateAllWordsAndPhrasesByBotOutput {
   error: ErrorType!
-  result: TranslateAllWordsAndPhrasesByGoogleResult
+  result: TranslateAllWordsAndPhrasesByBotResult
 }
 
-type TranslateAllWordsAndPhrasesByGoogleResult {
+type TranslateAllWordsAndPhrasesByBotResult {
   completed: Int
   errors: [String!]
   message: String
-  requestedCharactors: Int!
+  requestedCharacters: Int!
   status: String
   total: Int
   totalPhraseCount: Int!
   totalWordCount: Int!
   translatedPhraseCount: Int!
   translatedWordCount: Int!
+}
+
+type TranslateAllWordsAndPhrasesByGoogleOutput {
+  error: ErrorType!
+  result: TranslateAllWordsAndPhrasesByBotResult
 }
 
 input TranslatedLanguageInfoInput {
@@ -1353,6 +1362,7 @@ input TranslatedLanguageInfoInput {
 type TranslatedLanguageInfoOutput {
   error: ErrorType!
   googleTranslateTotalLangCount: Int!
+  liltTranslateTotalLangCount: Int!
   totalPhraseCount: Int!
   totalWordCount: Int!
   translatedMissingPhraseCount: Int

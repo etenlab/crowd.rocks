@@ -5,6 +5,7 @@ import {
   InputType,
   ObjectType,
   createUnionType,
+  extend,
 } from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
@@ -450,15 +451,15 @@ export class TranslationsOutput extends GenericOutput {
 }
 
 @ObjectType()
-export class LanguageForGoogleTranslate {
+export class LanguageForBotTranslate {
   @Field(() => String) code: string;
   @Field(() => String) name: string;
 }
 
 @ObjectType()
-export class LanguageListForGoogleTranslateOutput extends GenericOutput {
-  @Field(() => [LanguageForGoogleTranslate], { nullable: true })
-  languages: LanguageForGoogleTranslate[] | null;
+export class LanguageListForBotTranslateOutput extends GenericOutput {
+  @Field(() => [LanguageForBotTranslate], { nullable: true })
+  languages: LanguageForBotTranslate[] | null;
 }
 
 @InputType()
@@ -476,11 +477,12 @@ export class TranslatedLanguageInfoOutput extends GenericOutput {
   @Field(() => Int, { nullable: true }) translatedMissingWordCount?: number;
   @Field(() => Int, { nullable: true }) translatedMissingPhraseCount?: number;
   @Field(() => Int) googleTranslateTotalLangCount: number;
+  @Field(() => Int) liltTranslateTotalLangCount: number;
 }
 
 @ObjectType()
-export class TranslateAllWordsAndPhrasesByGoogleResult {
-  @Field(() => Int) requestedCharactors: number;
+export class TranslateAllWordsAndPhrasesByBotResult {
+  @Field(() => Int) requestedCharacters: number;
   @Field(() => Int) totalWordCount: number;
   @Field(() => Int) totalPhraseCount: number;
   @Field(() => Int) translatedWordCount: number;
@@ -496,7 +498,9 @@ export class TranslateAllWordsAndPhrasesByGoogleResult {
 }
 
 @ObjectType()
-export class TranslateAllWordsAndPhrasesByGoogleOutput extends GenericOutput {
-  @Field(() => TranslateAllWordsAndPhrasesByGoogleResult, { nullable: true })
-  result: TranslateAllWordsAndPhrasesByGoogleResult | null;
+export class TranslateAllWordsAndPhrasesByBotOutput extends GenericOutput {
+  @Field(() => TranslateAllWordsAndPhrasesByBotResult, { nullable: true })
+  result: TranslateAllWordsAndPhrasesByBotResult | null;
 }
+@ObjectType()
+export class TranslateAllWordsAndPhrasesByGoogleOutput extends TranslateAllWordsAndPhrasesByBotOutput {}

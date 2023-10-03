@@ -1,6 +1,6 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
-import { from, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { ErrorType, GenericOutput } from 'src/common/types';
 import {
@@ -36,7 +36,7 @@ import {
   WordToPhraseTranslationWithVote,
   PhraseToWordTranslationWithVote,
   PhraseToPhraseTranslationWithVote,
-  LanguageListForGoogleTranslateOutput,
+  LanguageListForBotTranslateOutput,
   TranslateAllWordsAndPhrasesByGoogleOutput,
   WordToWordTranslation,
   WordToPhraseTranslation,
@@ -45,6 +45,7 @@ import {
   TranslationsOutput,
   TranslatedLanguageInfoInput,
   TranslatedLanguageInfoOutput,
+  TranslateAllWordsAndPhrasesByBotOutput,
 } from './types';
 import { PoolClient } from 'pg';
 import { PhraseDefinition, WordDefinition } from '../definitions/types';
@@ -65,8 +66,33 @@ import {
 } from './sql-string';
 import {
   getLangConnectionsObjectMapAndTexts,
-  validateTranslateByGoogleInput,
+  validateTranslateByBotInput,
 } from './utility';
+import { LiltTranslateService } from './lilt-translate.service';
+
+export interface ITranslationBot {
+  getLanguages: () => Promise<LanguageListForBotTranslateOutput>;
+  translateWordsAndPhrases: (
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient?: PoolClient | null,
+  ) => Promise<TranslateAllWordsAndPhrasesByBotOutput>;
+}
+
+export interface ITranslator {
+  translate: (
+    originalTexts: string[],
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+  ) => Promise<string[]>;
+  getTranslatorToken: () => Promise<{ id: string; token: string }>;
+}
+
+export interface LanguageResult {
+  code: string;
+  name: string;
+}
 
 export function makeStr(
   word_definition_id: number,
@@ -100,6 +126,7 @@ export class TranslationsService {
     private wordsService: WordsService,
     private phrasesService: PhrasesService,
     private gTrService: GoogleTranslateService,
+    private lTrService: LiltTranslateService,
     private pg: PostgresService,
   ) {
     this.translationSubject = new Subject<number>();
@@ -1150,15 +1177,9 @@ export class TranslationsService {
       pool: this.pg.pool,
     });
 
-    const userRes = await this.pg.pool.query(
-      `select user_id
-       from users 
-       where email=$1;`,
-      ['googlebot@crowd.rocks'],
-    );
-    const google_user_id = userRes.rows[0].user_id;
+    const { id: google_user_id } = await this.gTrService.getTranslatorToken();
+    const { id: lilt_user_id } = await this.lTrService.getTranslatorToken();
 
-    // total words
     const totalWordres = await pg.query(
       ...getTotalWordCountByLanguage(input.fromLanguageCode),
     );
@@ -1177,14 +1198,14 @@ export class TranslationsService {
         ...getTotalPhraseToWordCountByUser(
           input.fromLanguageCode,
           input.toLanguageCode,
-          google_user_id,
+          [google_user_id, lilt_user_id],
         ),
       );
       const totalPhraseToPhraseRes = await pg.query(
         ...getTotalPhraseToPhraseCountByUser(
           input.fromLanguageCode,
           input.toLanguageCode,
-          google_user_id,
+          [google_user_id, lilt_user_id],
         ),
       );
       translatedMissingPhraseCount =
@@ -1200,7 +1221,7 @@ export class TranslationsService {
         ...getTotalWordToWordCountByUser(
           input.fromLanguageCode,
           input.toLanguageCode,
-          google_user_id,
+          [google_user_id, lilt_user_id],
         ),
       );
 
@@ -1208,7 +1229,7 @@ export class TranslationsService {
         ...getTotalWordToPhraseCountByUser(
           input.fromLanguageCode,
           input.toLanguageCode,
-          google_user_id,
+          [google_user_id, lilt_user_id],
         ),
       );
       translatedMissingWordCount =
@@ -1217,8 +1238,10 @@ export class TranslationsService {
           +totalWordToPhraseRes.rows[0].count);
     }
 
-    // total possible 'to' languages googleTranslate can translate to.
+    // total possible 'to' languages bot Translators can translate to.
     const googleTranslateTotalLangCount = (await this.gTrService.getLanguages())
+      .length;
+    const liltTranslateTotalLangCount = (await this.lTrService.getLanguages())
       .length;
 
     return {
@@ -1228,6 +1251,7 @@ export class TranslationsService {
       translatedMissingPhraseCount,
       translatedMissingWordCount,
       googleTranslateTotalLangCount,
+      liltTranslateTotalLangCount,
     };
   }
 
@@ -1239,7 +1263,7 @@ export class TranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
-    const badInputResult = validateTranslateByGoogleInput(
+    const badInputResult = validateTranslateByBotInput(
       from_language,
       to_language,
     );
@@ -1365,7 +1389,38 @@ export class TranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
-    const badInputResult = validateTranslateByGoogleInput(
+    return this.translateWordsAndPhrasesByBot(
+      this.gTrService,
+      from_language,
+      to_language,
+      token,
+      pgClient,
+    );
+  }
+
+  async translateWordsAndPhrasesByLilt(
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    return this.translateWordsAndPhrasesByBot(
+      this.lTrService,
+      from_language,
+      to_language,
+      token,
+      pgClient,
+    );
+  }
+
+  async translateWordsAndPhrasesByBot(
+    translator: ITranslator,
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+    const badInputResult = validateTranslateByBotInput(
       from_language,
       to_language,
     );
@@ -1387,7 +1442,7 @@ export class TranslationsService {
         this.phrasesService,
       );
 
-      const translationTexts = await this.gTrService.translate(
+      const translationTexts = await translator.translate(
         originalTexts,
         from_language,
         to_language,
@@ -1491,31 +1546,12 @@ export class TranslationsService {
         }
       }
 
-      // check if token for googlebot exists
-      const tokenRes = await this.pg.pool.query(
-        `select t.token, u.user_id
-      from tokens t 
-      join users u 
-      on t.user_id = u.user_id
-      where u.email=$1;`,
-        ['googlebot@crowd.rocks'],
-      );
-      let gtoken = tokenRes.rows[0].token;
-      const google_user_id = tokenRes.rows[0].user_id;
-      if (!gtoken) {
-        gtoken = createToken();
-        await this.pg.pool.query(
-          `
-          insert into tokens(token, user_id) values($1, $2);
-        `,
-          [gtoken, google_user_id],
-        );
-      }
+      const { token } = await translator.getTranslatorToken();
 
       const { error, translations } =
         await this.batchUpsertTranslationFromWordAndDefinitionlikeString(
           upsertInputs,
-          gtoken,
+          token,
           pgClient,
         );
 
@@ -1526,7 +1562,7 @@ export class TranslationsService {
       return {
         error,
         result: {
-          requestedCharactors,
+          requestedCharacters: requestedCharactors,
           totalWordCount: wordsConnection.edges.length,
           totalPhraseCount: phrasesConnection.edges.length,
           translatedWordCount,
@@ -1543,7 +1579,40 @@ export class TranslationsService {
     };
   }
 
+  async translateAllWordsAndPhrasesByLilt(
+    from_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<GenericOutput> {
+    return this.translateAllWordsAndPhrasesByBot(
+      {
+        getLanguages: this.languagesForLiltTranslate,
+        translateWordsAndPhrases: this.translateWordsAndPhrasesByLilt,
+      },
+      from_language,
+      token,
+      pgClient,
+    );
+  }
+
   async translateAllWordsAndPhrasesByGoogle(
+    from_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<GenericOutput> {
+    return this.translateAllWordsAndPhrasesByBot(
+      {
+        getLanguages: this.languagesForGoogleTranslate,
+        translateWordsAndPhrases: this.translateWordsAndPhrasesByGoogle,
+      },
+      from_language,
+      token,
+      pgClient,
+    );
+  }
+
+  async translateAllWordsAndPhrasesByBot(
+    translationBot: ITranslationBot,
     from_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
@@ -1555,7 +1624,7 @@ export class TranslationsService {
 
       this.translationSubject = new Subject<number>();
 
-      const { error, languages } = await this.languagesForGoogleTranslate();
+      const { error, languages } = await translationBot.getLanguages();
 
       if (error !== ErrorType.NoError || !languages) {
         return { error };
@@ -1612,16 +1681,17 @@ export class TranslationsService {
             return;
           }
 
-          const { error, result } = await this.translateWordsAndPhrasesByGoogle(
-            from_language,
-            {
-              language_code: language.code,
-              dialect_code: null,
-              geo_code: null,
-            },
-            token,
-            pgClient,
-          );
+          const { error, result } =
+            await translationBot.translateWordsAndPhrases(
+              from_language,
+              {
+                language_code: language.code,
+                dialect_code: null,
+                geo_code: null,
+              },
+              token,
+              pgClient,
+            );
 
           if (error !== ErrorType.NoError) {
             hasErrors.push(
@@ -1636,7 +1706,7 @@ export class TranslationsService {
           if (result) {
             totalResult = {
               requestedCharactors:
-                totalResult.requestedCharactors + result.requestedCharactors,
+                totalResult.requestedCharactors + result.requestedCharacters,
               totalWordCount:
                 totalResult.totalWordCount + result.totalWordCount,
               totalPhraseCount:
@@ -1689,14 +1759,14 @@ export class TranslationsService {
     };
   }
 
-  async stopGoogleTranslation(): Promise<GenericOutput> {
+  async stopBotTranslation(): Promise<GenericOutput> {
     this.translationSubject.complete();
     return {
       error: ErrorType.NoError,
     };
   }
 
-  async languagesForGoogleTranslate(): Promise<LanguageListForGoogleTranslateOutput> {
+  async languagesForGoogleTranslate(): Promise<LanguageListForBotTranslateOutput> {
     try {
       const languages = await this.gTrService.getLanguages();
 
@@ -1708,6 +1778,22 @@ export class TranslationsService {
       Logger.error(e);
     }
 
+    return {
+      error: ErrorType.UnknownError,
+      languages: null,
+    };
+  }
+
+  async languagesForLiltTranslate(): Promise<LanguageListForBotTranslateOutput> {
+    try {
+      const languages = await this.lTrService.getLanguages();
+      return {
+        error: ErrorType.NoError,
+        languages,
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
     return {
       error: ErrorType.UnknownError,
       languages: null,

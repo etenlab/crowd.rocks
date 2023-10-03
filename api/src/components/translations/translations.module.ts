@@ -17,6 +17,7 @@ import { TranslationsService } from './translations.service';
 import { GoogleTranslateService } from './google-translate.service';
 
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
+import { LiltTranslateService } from './lilt-translate.service';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { WordToWordTranslationRepository } from './word-to-word-translation.repo
     PhraseToWordTranslationsService,
     PhraseToPhraseTranslationsService,
     GoogleTranslateService,
+    LiltTranslateService,
     TranslationsService,
   ],
   exports: [
@@ -43,6 +45,7 @@ import { WordToWordTranslationRepository } from './word-to-word-translation.repo
     PhraseToWordTranslationsService,
     PhraseToPhraseTranslationsService,
     GoogleTranslateService,
+    LiltTranslateService,
     TranslationsService,
   ],
 })

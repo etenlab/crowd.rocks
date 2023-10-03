@@ -3071,7 +3071,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "LanguageForGoogleTranslate",
+        "name": "LanguageForBotTranslate",
         "description": null,
         "fields": [
           {
@@ -3177,7 +3177,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "LanguageListForGoogleTranslateOutput",
+        "name": "LanguageListForBotTranslateOutput",
         "description": null,
         "fields": [
           {
@@ -3208,7 +3208,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "OBJECT",
-                  "name": "LanguageForGoogleTranslate",
+                  "name": "LanguageForBotTranslate",
                   "ofType": null
                 }
               }
@@ -5672,6 +5672,22 @@
             "deprecationReason": null
           },
           {
+            "name": "stopLiltTranslation",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "GenericOutput",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "threadDelete",
             "description": null,
             "args": [
@@ -6398,7 +6414,40 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "TranslateAllWordsAndPhrasesByGoogleOutput",
+                "name": "GenericOutput",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "translateAllWordsAndPhrasesByLilt",
+            "description": null,
+            "args": [
+              {
+                "name": "from_language",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "LanguageInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "GenericOutput",
                 "ofType": null
               }
             },
@@ -6497,6 +6546,55 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TranslateAllWordsAndPhrasesByGoogleOutput",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "translateWordsAndPhrasesByLilt",
+            "description": null,
+            "args": [
+              {
+                "name": "from_language",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "LanguageInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "to_language",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "LanguageInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "TranslateAllWordsAndPhrasesByBotOutput",
                 "ofType": null
               }
             },
@@ -12499,7 +12597,23 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "LanguageListForGoogleTranslateOutput",
+                "name": "LanguageListForBotTranslateOutput",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "languagesForLiltTranslate",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "LanguageListForBotTranslateOutput",
                 "ofType": null
               }
             },
@@ -15899,7 +16013,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "TranslateAllWordsAndPhrasesByGoogleResult",
+                "name": "TranslateAllWordsAndPhrasesByBotResult",
                 "ofType": null
               }
             },
@@ -16611,7 +16725,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TranslateAllWordsAndPhrasesByGoogleOutput",
+        "name": "TranslateAllWordsAndPhrasesByBotOutput",
         "description": null,
         "fields": [
           {
@@ -16636,7 +16750,7 @@
             "args": [],
             "type": {
               "kind": "OBJECT",
-              "name": "TranslateAllWordsAndPhrasesByGoogleResult",
+              "name": "TranslateAllWordsAndPhrasesByBotResult",
               "ofType": null
             },
             "isDeprecated": false,
@@ -16650,7 +16764,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TranslateAllWordsAndPhrasesByGoogleResult",
+        "name": "TranslateAllWordsAndPhrasesByBotResult",
         "description": null,
         "fields": [
           {
@@ -16698,7 +16812,7 @@
             "deprecationReason": null
           },
           {
-            "name": "requestedCharactors",
+            "name": "requestedCharacters",
             "description": null,
             "args": [],
             "type": {
@@ -16808,6 +16922,45 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "TranslateAllWordsAndPhrasesByGoogleOutput",
+        "description": null,
+        "fields": [
+          {
+            "name": "error",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "ErrorType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "result",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "TranslateAllWordsAndPhrasesByBotResult",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "TranslatedLanguageInfoInput",
         "description": null,
@@ -16869,6 +17022,22 @@
           },
           {
             "name": "googleTranslateTotalLangCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "liltTranslateTotalLangCount",
             "description": null,
             "args": [],
             "type": {
