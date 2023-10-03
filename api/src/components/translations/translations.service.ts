@@ -1586,8 +1586,8 @@ export class TranslationsService {
   ): Promise<GenericOutput> {
     return this.translateAllWordsAndPhrasesByBot(
       {
-        getLanguages: this.languagesForGoogleTranslate,
-        translateWordsAndPhrases: this.translateWordsAndPhrasesByGoogle,
+        getLanguages: this.languagesForLiltTranslate,
+        translateWordsAndPhrases: this.translateWordsAndPhrasesByLilt,
       },
       from_language,
       token,
