@@ -40,6 +40,7 @@ import { PAGE_SIZE } from '../../../const/commonConst';
 import { RouteComponentProps } from 'react-router';
 import { langInfo2tag, tag2langInfo } from '../../../common/langUtils';
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
+// import { updateCacheWithAddNewMap } from '../../../cacheUpdators/addNewMap';
 
 interface MapListProps
   extends RouteComponentProps<{
@@ -89,6 +90,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const [isMapDeleteModalOpen, setIsMapDeleteModalOpen] = useState(false);
   const [isMapResetModalOpen, setIsMapResetModalOpen] = useState(false);
   const candidateForDeletion = useRef<MapDetailsInfo | undefined>();
+  const [currUploads, setCurrUploads] = useState<Array<MapDetailsInfo>>([]);
 
   useEffect(() => {
     if (loadingSendMapFile || loadingUploadFile || loadingMapDelete) return;
@@ -234,7 +236,17 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const addMap = useCallback(
     async (file: File) => {
       if (!file) return;
+      let previewFileId: string | undefined;
       try {
+        present({
+          message: tr(
+            'Started map uploading and translation to known languages',
+          ),
+          duration: 2000,
+          position: 'top',
+          color: 'primary',
+        });
+
         const thumbnailFile = (await makeMapThumbnail(await file.text(), {
           toWidth: 100,
           toHeight: 100,
@@ -248,12 +260,29 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
             file_type: thumbnailFile.type,
           },
         });
-        const previewFileId = uploadPreviewResult.data?.uploadFile.file?.id
+        previewFileId = uploadPreviewResult.data?.uploadFile.file?.id
           ? String(uploadPreviewResult.data?.uploadFile.file.id)
           : undefined;
         if (uploadPreviewResult.data?.uploadFile.error !== ErrorType.NoError) {
           throw new Error(uploadPreviewResult.data?.uploadFile.error);
         }
+
+        setCurrUploads((cu) => [
+          ...cu,
+          {
+            preview_file_id: previewFileId,
+            content_file_id: `temp-${previewFileId}`,
+            content_file_url: 'assets/images/Spin-1s-200px.gif',
+            preview_file_url: 'assets/images/Spin-1s-200px.gif',
+            created_at: '',
+            created_by: '',
+            is_original: true,
+            language: { language_code: DEFAULT_MAP_LANGUAGE_CODE },
+            map_file_name: tr('Uploading') + ' ' + file.name,
+            map_file_name_with_langs: tr('Uploading') + ' ' + file.name,
+            original_map_id: `temp-map-id-${previewFileId}`,
+          } as MapDetailsInfo,
+        ]);
 
         const mapUploadResult = await sendMapFile({
           variables: {
@@ -271,19 +300,28 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
         ) {
           throw new Error(JSON.stringify(mapUploadResult.errors));
         }
+        const uploadedId =
+          mapUploadResult.data?.mapUpload.mapDetailsOutput?.mapDetails
+            ?.preview_file_id;
+
+        setCurrUploads((cus) =>
+          cus.filter((cu) => cu.preview_file_id !== uploadedId),
+        );
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
-        console.log(error);
         present({
-          message: error.message,
-          duration: 1500,
+          message: `${file.name}: ` + error.message,
+          duration: 3000,
           position: 'top',
           color: 'danger',
         });
+        setCurrUploads((cus) =>
+          cus.filter((cu) => cu.preview_file_id !== previewFileId),
+        );
       }
     },
-    [makeMapThumbnail, uploadFile, sendMapFile, present],
+    [makeMapThumbnail, uploadFile, sendMapFile, present, tr],
   );
 
   const deleteMap = <
@@ -319,19 +357,34 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     });
   };
 
+  const loadingMapItemComs = useMemo(
+    () =>
+      currUploads.length > 0
+        ? currUploads.map((uploadingMapDetails) => (
+            <MapItem
+              mapItem={uploadingMapDetails}
+              key={uploadingMapDetails.content_file_id}
+              showDelete={false}
+              showDownload={false}
+            />
+          ))
+        : null,
+    [currUploads],
+  );
+
   const mapItemComs = useMemo(
     () =>
       allMapsQuery?.getAllMapsList.edges?.length ? (
         allMapsQuery?.getAllMapsList.edges
           ?.filter((edge) => {
-            return (edge.node.mapFileInfo?.map_file_name_with_langs || '')
+            return (edge.node.mapDetails?.map_file_name_with_langs || '')
               .toLowerCase()
               .includes(filter.toLowerCase());
           })
           .map((edge) =>
-            edge.node.mapFileInfo ? (
+            edge.node.mapDetails ? (
               <MapItem
-                mapItem={edge.node.mapFileInfo}
+                mapItem={edge.node.mapDetails}
                 key={edge.cursor}
                 candidateForDeletionRef={candidateForDeletion}
                 setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
@@ -396,7 +449,10 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
       {loadingMapReset ? (
         <div>Resetting map data...</div>
       ) : (
-        <IonList lines="none">{mapItemComs}</IonList>
+        <>
+          <IonList lines="none">{loadingMapItemComs}</IonList>
+          <IonList lines="none">{mapItemComs}</IonList>
+        </>
       )}
 
       <IonInfiniteScroll onIonInfinite={handleInfinite}>

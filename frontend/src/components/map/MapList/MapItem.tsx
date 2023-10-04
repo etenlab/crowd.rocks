@@ -15,9 +15,10 @@ import { OrigBadge } from './styled';
 
 export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
   mapItem: MapDetailsInfo;
-  candidateForDeletionRef: React.MutableRefObject<MapDetailsInfo | undefined>;
-  setIsMapDeleteModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  candidateForDeletionRef?: React.MutableRefObject<MapDetailsInfo | undefined>;
+  setIsMapDeleteModalOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   showDelete: boolean;
+  showDownload?: boolean;
 };
 
 const NotStyledMapItem = ({
@@ -25,6 +26,7 @@ const NotStyledMapItem = ({
   setIsMapDeleteModalOpen,
   candidateForDeletionRef,
   showDelete,
+  showDownload = true,
   ...rest
 }: TMapItemProps) => {
   const {
@@ -68,11 +70,11 @@ const NotStyledMapItem = ({
     !mapContent.error &&
     !mapContent.loading &&
     downloadFlagRef.current === 'original' &&
-    mapContent.data.getMapDetails.mapFileInfo
+    mapContent.data.getMapDetails.mapDetails
   ) {
     downloadFromUrl(
-      mapContent.data.getMapDetails.mapFileInfo.map_file_name,
-      mapContent.data.getMapDetails.mapFileInfo.content_file_url,
+      mapContent.data.getMapDetails.mapDetails.map_file_name,
+      mapContent.data.getMapDetails.mapDetails.content_file_url,
     );
     downloadFlagRef.current = null;
   }
@@ -82,11 +84,11 @@ const NotStyledMapItem = ({
     !mapContent.error &&
     !mapContent.loading &&
     downloadFlagRef.current === 'translated' &&
-    mapContent.data.getMapDetails.mapFileInfo
+    mapContent.data.getMapDetails.mapDetails
   ) {
     downloadFromUrl(
-      mapContent.data.getMapDetails.mapFileInfo.map_file_name_with_langs,
-      mapContent.data.getMapDetails.mapFileInfo.content_file_url,
+      mapContent.data.getMapDetails.mapDetails.map_file_name_with_langs,
+      mapContent.data.getMapDetails.mapDetails.content_file_url,
     );
     downloadFlagRef.current = null;
   }
@@ -96,7 +98,7 @@ const NotStyledMapItem = ({
       <StItem>
         <PreviewBlock>
           {mapItem.preview_file_url ? (
-            <img src={mapItem.preview_file_url} />
+            <img src={mapItem.preview_file_url} width="100" height="100" />
           ) : null}
         </PreviewBlock>
 
@@ -116,14 +118,16 @@ const NotStyledMapItem = ({
                   : ' ? %')}
             </IonBadge>
           )}
-          <DownloadIcon
-            icon={downloadOutline}
-            onClick={handleDownloadSvg}
-            size="large"
-            color="primary"
-            className="clickable theme-icon"
-          />
-          {showDelete ? (
+          {showDownload && (
+            <DownloadIcon
+              icon={downloadOutline}
+              onClick={handleDownloadSvg}
+              size="large"
+              color="primary"
+              className="clickable theme-icon"
+            />
+          )}
+          {showDelete && candidateForDeletionRef && setIsMapDeleteModalOpen ? (
             <TrashIcon
               icon={trashBin}
               onClick={(e) => {

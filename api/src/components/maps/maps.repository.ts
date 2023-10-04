@@ -241,7 +241,7 @@ export class MapsRepository {
         content_file_url,
       }) => ({
         error: ErrorType.NoError,
-        mapFileInfo: {
+        mapDetails: {
           original_map_id,
           map_file_name,
           map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
@@ -337,7 +337,7 @@ export class MapsRepository {
         translated_percent,
       }) => ({
         error: ErrorType.NoError,
-        mapFileInfo: {
+        mapDetails: {
           translated_map_id,
           original_map_id,
           map_file_name,
@@ -403,7 +403,7 @@ export class MapsRepository {
         content_file_url,
       }) => ({
         error: ErrorType.NoError,
-        mapFileInfo: {
+        mapDetails: {
           original_map_id,
           map_file_name,
           map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
@@ -467,7 +467,7 @@ export class MapsRepository {
 
     return {
       error: ErrorType.NoError,
-      mapFileInfo: {
+      mapDetails: {
         original_map_id,
         map_file_name,
         map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
@@ -521,7 +521,7 @@ export class MapsRepository {
     if (!(resQ.rows.length > 0)) {
       return {
         error: ErrorType.MapNotFound,
-        mapFileInfo: null,
+        mapDetails: null,
       };
     }
 
@@ -543,7 +543,7 @@ export class MapsRepository {
 
     return {
       error: ErrorType.NoError,
-      mapFileInfo: {
+      mapDetails: {
         original_map_id,
         translated_map_id,
         map_file_name,
