@@ -198,7 +198,7 @@ export class QuestionsService {
     input: CreateQuestionOnWordRangeUpsertInput,
     token,
     pgClient: PoolClient | null,
-  ): Promise<QuestionsOutput> {
+  ): Promise<QuestionOnWordRangesOutput> {
     try {
       const { error: wordRangeError, word_ranges } =
         await this.wordRangesService.upserts(
@@ -229,7 +229,7 @@ export class QuestionsService {
         };
       }
 
-      return this.upserts(
+      const { error: questionError, questions } = await this.upserts(
         [
           {
             parent_table: TableNameType.word_ranges,
@@ -246,6 +246,24 @@ export class QuestionsService {
         token,
         pgClient,
       );
+
+      if (questionError !== ErrorType.NoError || questions.length === 0) {
+        return {
+          error: questionError,
+          questions: [],
+        };
+      }
+
+      return {
+        error: ErrorType.NoError,
+        questions: [
+          {
+            ...questions[0]!,
+            begin: word_ranges[0]!.begin,
+            end: word_ranges[0]!.end,
+          },
+        ],
+      };
     } catch (e) {
       console.error(e);
     }

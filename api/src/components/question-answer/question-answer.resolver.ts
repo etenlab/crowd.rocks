@@ -102,12 +102,12 @@ export class QuestionAndAnswersResolver {
     return this.questionService.upserts(input, getBearer(req) || '', null);
   }
 
-  @Mutation(() => QuestionsOutput)
+  @Mutation(() => QuestionOnWordRangesOutput)
   async createQuestionOnWordRange(
     @Args('input', { type: () => CreateQuestionOnWordRangeUpsertInput })
     input: CreateQuestionOnWordRangeUpsertInput,
     @Context() req: any,
-  ): Promise<QuestionsOutput> {
+  ): Promise<QuestionOnWordRangesOutput> {
     console.log('upsertQuestions: ', input);
 
     return this.questionService.createQuestionOnWordRange(

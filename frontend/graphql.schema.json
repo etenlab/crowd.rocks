@@ -692,12 +692,12 @@
         "description": null,
         "fields": [
           {
-            "name": "document_id",
+            "name": "document",
             "description": null,
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
+              "kind": "OBJECT",
+              "name": "TextyDocument",
               "ofType": null
             },
             "isDeprecated": false,
@@ -4653,7 +4653,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "QuestionsOutput",
+                "name": "QuestionOnWordRangesOutput",
                 "ofType": null
               }
             },

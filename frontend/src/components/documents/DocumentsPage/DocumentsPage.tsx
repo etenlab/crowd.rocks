@@ -23,10 +23,8 @@ import { RowStack } from '../../common/Layout/styled';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-import {
-  useDocumentUploadMutation,
-  useUploadFileMutation,
-} from '../../../generated/graphql';
+import { useUploadFileMutation } from '../../../generated/graphql';
+import { useDocumentUploadMutation } from '../../../hooks/useDocumentUploadMutation';
 
 import { DocumentList } from '../DocumentList/DocumentList';
 import { NewDocumentForm } from './NewDocumentForm';
@@ -89,8 +87,6 @@ export function DocumentsPage() {
         },
       });
 
-      dismissLoader();
-
       if (!uploadResult.data?.uploadFile.file?.id) {
         toast({
           message: tr('Failed at file upload'),
@@ -102,11 +98,7 @@ export function DocumentsPage() {
         return;
       }
 
-      loader({
-        message: `${tr('Uploading document')} ${file.name}...`,
-      });
-
-      const res = await documentUpload({
+      await documentUpload({
         variables: {
           document: {
             file_id: String(uploadResult.data.uploadFile.file.id),
@@ -118,14 +110,7 @@ export function DocumentsPage() {
       });
 
       dismissLoader();
-      toast({
-        message: tr('Document upload success!'),
-        duration: 1500,
-        position: 'top',
-        color: 'success',
-      });
 
-      console.log(`uploaded: `, res);
       setIsOpenModal(false);
     },
     [

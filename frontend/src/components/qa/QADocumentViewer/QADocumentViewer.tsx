@@ -22,11 +22,11 @@ import { DocumentViewer } from '../../documents/DocumentViewer';
 
 import {
   useGetQuestionOnWordRangesByDocumentIdQuery,
-  useCreateQuestionOnWordRangeMutation,
-  useUpsertAnswerMutation,
   QuestionOnWordRange,
   ErrorType,
 } from '../../../generated/graphql';
+import { useCreateQuestionOnWordRangeMutation } from '../../../hooks/useCreateQuestionOnWordRangeMutation';
+import { useUpsertAnswerMutation } from '../../../hooks/useUpsertAnswerMutation';
 
 import { useTr } from '../../../hooks/useTr';
 
@@ -223,10 +223,7 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
       },
     });
 
-    if (res.data?.createQuestionOnWordRange.error === ErrorType.NoError) {
-      alert('success');
-    } else {
-      alert('failed');
+    if (res.data?.createQuestionOnWordRange.error !== ErrorType.NoError) {
       return;
     }
 
@@ -239,8 +236,6 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
       return;
     }
 
-    console.log(answer, itemIds);
-
     const res = await upsertAnswer({
       variables: {
         question_id: selectedQuestion.question_id,
@@ -249,12 +244,7 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
       },
     });
 
-    console.log(res);
-
-    if (res.data?.upsertAnswers.error === ErrorType.NoError) {
-      alert('success');
-    } else {
-      alert('failed');
+    if (res.data?.upsertAnswers.error !== ErrorType.NoError) {
       return;
     }
 

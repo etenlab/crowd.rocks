@@ -97,7 +97,7 @@ export type DocumentUploadInput = {
 
 export type DocumentUploadOutput = {
   __typename?: 'DocumentUploadOutput';
-  document_id?: Maybe<Scalars['String']['output']>;
+  document?: Maybe<TextyDocument>;
   error: ErrorType;
 };
 
@@ -606,7 +606,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   addNotification: AddNotificationOutput;
   avatarUpdateResolver: AvatarUpdateOutput;
-  createQuestionOnWordRange: QuestionsOutput;
+  createQuestionOnWordRange: QuestionOnWordRangesOutput;
   documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
   forumDelete: ForumDeleteOutput;
@@ -2797,7 +2797,7 @@ export type DocumentUploadMutationVariables = Exact<{
 }>;
 
 
-export type DocumentUploadMutation = { __typename?: 'Mutation', documentUpload: { __typename?: 'DocumentUploadOutput', error: ErrorType, document_id?: string | null } };
+export type DocumentUploadMutation = { __typename?: 'Mutation', documentUpload: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
 
 export type GetAllDocumentsQueryVariables = Exact<{
   languageInput?: InputMaybe<LanguageInput>;
@@ -3265,7 +3265,7 @@ export type CreateQuestionOnWordRangeMutationVariables = Exact<{
 }>;
 
 
-export type CreateQuestionOnWordRangeMutation = { __typename?: 'Mutation', createQuestionOnWordRange: { __typename?: 'QuestionsOutput', error: ErrorType, questions: Array<{ __typename?: 'Question', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }> } | null> } };
+export type CreateQuestionOnWordRangeMutation = { __typename?: 'Mutation', createQuestionOnWordRange: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
 
 export type UpsertAnswerMutationVariables = Exact<{
   answer: Scalars['String']['input'];
@@ -4816,10 +4816,12 @@ export const DocumentUploadDocument = gql`
     mutation DocumentUpload($document: TextyDocumentInput!) {
   documentUpload(input: {document: $document}) {
     error
-    document_id
+    document {
+      ...TextyDocumentFragment
+    }
   }
 }
-    `;
+    ${TextyDocumentFragmentFragmentDoc}`;
 export type DocumentUploadMutationFn = Apollo.MutationFunction<DocumentUploadMutation, DocumentUploadMutationVariables>;
 
 /**
@@ -6882,11 +6884,11 @@ export const CreateQuestionOnWordRangeDocument = gql`
   ) {
     error
     questions {
-      ...QuestionFragment
+      ...QuestionOnWordRangeFragment
     }
   }
 }
-    ${QuestionFragmentFragmentDoc}`;
+    ${QuestionOnWordRangeFragmentFragmentDoc}`;
 export type CreateQuestionOnWordRangeMutationFn = Apollo.MutationFunction<CreateQuestionOnWordRangeMutation, CreateQuestionOnWordRangeMutationVariables>;
 
 /**
