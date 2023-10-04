@@ -12,7 +12,6 @@ language plpgsql
 as $$
 declare
   v_user_id bigint;
-  v_question_id bigint;
 begin
   p_error_type := 'UnknownError';
 
@@ -33,13 +32,15 @@ begin
     return;
   end if;
 
+  p_question_id := null;
+
   insert into questions (parent_table, parent_id, question_type_is_multiselect, question, question_items, created_by)
   values (p_parent_table, p_parent_id, p_question_type_is_multiselect, p_question, p_question_items, v_user_id)
   on conflict do nothing
   returning question_id
-  into v_question_id;
+  into p_question_id;
 
-  if v_question_id is null then
+  if p_question_id is null then
     select question_id
     from questions
     where parent_table = p_parent_table
@@ -47,10 +48,10 @@ begin
       and question_type_is_multiselect = p_question_type_is_multiselect
       and question = p_question
       and created_by = v_user_id
-    into v_question_id;
+    into p_question_id;
   end if;
 
-  if v_question_id is null then
+  if p_question_id is null then
     p_error_type := 'QuestionInsertFailed';
     return;
   end if;

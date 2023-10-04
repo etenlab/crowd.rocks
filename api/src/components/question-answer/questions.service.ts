@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
 import { pgClientOrPool } from 'src/common/utility';
@@ -85,7 +85,7 @@ export class QuestionsService {
         }),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -106,7 +106,7 @@ export class QuestionsService {
 
       return this.convertQueryResultToQuestions(res.rows, pgClient);
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -130,7 +130,7 @@ export class QuestionsService {
 
       return this.convertQueryResultToQuestions(res.rows, pgClient);
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -185,7 +185,7 @@ export class QuestionsService {
         pgClient,
       );
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -198,7 +198,7 @@ export class QuestionsService {
     input: CreateQuestionOnWordRangeUpsertInput,
     token,
     pgClient: PoolClient | null,
-  ): Promise<QuestionsOutput> {
+  ): Promise<QuestionOnWordRangesOutput> {
     try {
       const { error: wordRangeError, word_ranges } =
         await this.wordRangesService.upserts(
@@ -220,11 +220,7 @@ export class QuestionsService {
       }
 
       const { error: questionItemError, question_items } =
-        await this.questionItemService.upserts(
-          input.question_items,
-          token,
-          pgClient,
-        );
+        await this.questionItemService.upserts(input.question_items, pgClient);
 
       if (questionItemError !== ErrorType.NoError) {
         return {
@@ -233,7 +229,7 @@ export class QuestionsService {
         };
       }
 
-      return this.upserts(
+      const { error: questionError, questions } = await this.upserts(
         [
           {
             parent_table: TableNameType.word_ranges,
@@ -250,8 +246,26 @@ export class QuestionsService {
         token,
         pgClient,
       );
+
+      if (questionError !== ErrorType.NoError || questions.length === 0) {
+        return {
+          error: questionError,
+          questions: [],
+        };
+      }
+
+      return {
+        error: ErrorType.NoError,
+        questions: [
+          {
+            ...questions[0]!,
+            begin: word_ranges[0]!.begin,
+            end: word_ranges[0]!.end,
+          },
+        ],
+      };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -323,7 +337,7 @@ export class QuestionsService {
           .filter((question) => question) as QuestionOnWordRange[],
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
 import { pgClientOrPool } from 'src/common/utility';
@@ -44,7 +44,7 @@ export class QuestionItemsService {
         question_items: ids.map((id) => questionItemsMap.get(id + '') || null),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -55,7 +55,6 @@ export class QuestionItemsService {
 
   async upserts(
     items: string[],
-    token: string,
     pgClient: PoolClient | null,
   ): Promise<QuestionItemsOutput> {
     if (items.length === 0) {
@@ -72,7 +71,6 @@ export class QuestionItemsService {
       }).query<QuestionItemUpsertsProcedureOutput>(
         ...callQuestionItemUpsertsProcedure({
           items,
-          token,
         }),
       );
 
@@ -101,7 +99,7 @@ export class QuestionItemsService {
         }),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {

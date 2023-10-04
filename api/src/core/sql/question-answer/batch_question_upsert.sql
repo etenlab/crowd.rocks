@@ -44,7 +44,7 @@ begin
   p_error_types := array[]::varchar(32)[];
 
   for i in 1..v_parent_tables_length loop
-    v_temp_question_id := 0;
+    v_temp_question_id := null;
     v_temp_error_type := 'NoError';
 
     v_question_item_ids := array(

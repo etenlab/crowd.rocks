@@ -55,8 +55,8 @@ query GetQuestionOnWordRangesByDocumentId($document_id: ID!) {
   }
 }
 
-query GetAnswersByQuestionIds($ids: [ID!]!) {
-  getAnswersByQuestionIds(ids: $ids) {
+query GetAnswersByQuestionId($id: ID!) {
+  getAnswersByQuestionIds(ids: [$id]) {
     error
     answers {
       ...AnswerFragment
@@ -82,7 +82,7 @@ mutation CreateQuestionOnWordRange(
   ) {
     error
     questions {
-      ...QuestionFragment
+      ...QuestionOnWordRangeFragment
     }
   }
 }

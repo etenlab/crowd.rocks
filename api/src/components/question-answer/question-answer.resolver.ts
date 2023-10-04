@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
 import { getBearer } from 'src/common/utility';
 
@@ -30,7 +30,7 @@ export class QuestionAndAnswersResolver {
   async readQuestionItems(
     @Args('ids', { type: () => [ID] }) ids: string[],
   ): Promise<QuestionItemsOutput> {
-    console.log('readQuestionItems, ids:', ids);
+    Logger.log('readQuestionItems, ids:', ids);
 
     return this.questionItemService.reads(
       ids.map((id) => +id),
@@ -42,18 +42,17 @@ export class QuestionAndAnswersResolver {
   async upsertQuestionItems(
     @Args('items', { type: () => [String] })
     items: string[],
-    @Context() req: any,
   ): Promise<QuestionItemsOutput> {
-    console.log('upsertQuestionItems: ', items);
+    Logger.log('upsertQuestionItems: ', items);
 
-    return this.questionItemService.upserts(items, getBearer(req) || '', null);
+    return this.questionItemService.upserts(items, null);
   }
 
   @Query(() => QuestionsOutput)
   async readQuestions(
     @Args('ids', { type: () => [ID] }) ids: string[],
   ): Promise<QuestionsOutput> {
-    console.log('readQuestions, ids:', ids);
+    Logger.log('readQuestions, ids:', ids);
 
     return this.questionService.reads(
       ids.map((id) => +id),
@@ -68,7 +67,7 @@ export class QuestionAndAnswersResolver {
     @Args('parent_ids', { type: () => [ID] })
     parent_ids: string[],
   ): Promise<QuestionsOutput> {
-    console.log('getQuestionsByRefs', parent_tables, parent_ids);
+    Logger.log('getQuestionsByRefs', parent_tables, parent_ids);
 
     return this.questionService.getQuestionsByRefs(
       parent_tables.map((parent_table, index) => ({
@@ -84,7 +83,7 @@ export class QuestionAndAnswersResolver {
     @Args('document_id', { type: () => ID })
     document_id: string,
   ): Promise<QuestionOnWordRangesOutput> {
-    console.log('getQuestionOnWordRangesByDocumentId', document_id);
+    Logger.log('getQuestionOnWordRangesByDocumentId', document_id);
 
     return this.questionService.getQuestionOnWordRangesByDocumentId(
       +document_id,
@@ -98,18 +97,18 @@ export class QuestionAndAnswersResolver {
     input: QuestionUpsertInput[],
     @Context() req: any,
   ): Promise<QuestionsOutput> {
-    console.log('upsertQuestions: ', input);
+    Logger.log('upsertQuestions: ', input);
 
     return this.questionService.upserts(input, getBearer(req) || '', null);
   }
 
-  @Mutation(() => QuestionsOutput)
+  @Mutation(() => QuestionOnWordRangesOutput)
   async createQuestionOnWordRange(
     @Args('input', { type: () => CreateQuestionOnWordRangeUpsertInput })
     input: CreateQuestionOnWordRangeUpsertInput,
     @Context() req: any,
-  ): Promise<QuestionsOutput> {
-    console.log('upsertQuestions: ', input);
+  ): Promise<QuestionOnWordRangesOutput> {
+    Logger.log('upsertQuestions: ', input);
 
     return this.questionService.createQuestionOnWordRange(
       input,
@@ -122,7 +121,7 @@ export class QuestionAndAnswersResolver {
   async readAnswers(
     @Args('ids', { type: () => [ID] }) ids: string[],
   ): Promise<AnswersOutput> {
-    console.log('readAnswers, ids:', ids);
+    Logger.log('readAnswers, ids:', ids);
 
     return this.answerService.reads(
       ids.map((id) => +id),
@@ -134,7 +133,7 @@ export class QuestionAndAnswersResolver {
   async getAnswersByQuestionIds(
     @Args('ids', { type: () => [ID] }) ids: string[],
   ): Promise<AnswersOutput> {
-    console.log('getAnswersByQuestionIds, ids:', ids);
+    Logger.log('getAnswersByQuestionIds, ids:', ids);
 
     return this.answerService.getAnswersByQuestionIds(
       ids.map((id) => +id),
@@ -148,7 +147,7 @@ export class QuestionAndAnswersResolver {
     input: AnswerUpsertInput[],
     @Context() req: any,
   ): Promise<AnswersOutput> {
-    console.log('upsertAnswers: ', input);
+    Logger.log('upsertAnswers: ', input);
 
     return this.answerService.upserts(input, getBearer(req) || '', null);
   }

@@ -9,7 +9,8 @@ export const Container = styled.div`
 
 export const Word = styled('div')({
   display: 'inline-block',
-  padding: '3px 4px',
+  position: 'relative',
+  padding: '5px 4px',
   '&.edit': {
     cursor: 'pointer',
   },
@@ -18,4 +19,14 @@ export const Word = styled('div')({
   },
 });
 
-export const Dot = styled.div``;
+export const Dot = styled.div`
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: red;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+`;

@@ -41,6 +41,7 @@ export function DocumentViewerPage({
         range={{}}
         dots={[]}
         onClickWord={() => {}}
+        onChangeRange={() => {}}
       />
     </PageLayout>
   );

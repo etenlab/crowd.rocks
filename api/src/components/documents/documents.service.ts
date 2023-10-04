@@ -56,7 +56,7 @@ export class DocumentsService {
         if (wordlike_strings[i] === null) {
           return {
             error: ErrorType.WordLikeStringInsertFailed,
-            document_id: null,
+            document: null,
           };
         }
       }
@@ -66,7 +66,7 @@ export class DocumentsService {
 
         return {
           error: wordError,
-          document_id: null,
+          document: null,
         };
       }
 
@@ -85,7 +85,7 @@ export class DocumentsService {
 
         return {
           error,
-          document_id: null,
+          document: null,
         };
       }
 
@@ -117,7 +117,7 @@ export class DocumentsService {
 
         return {
           error,
-          document_id: null,
+          document: null,
         };
       }
 
@@ -128,7 +128,7 @@ export class DocumentsService {
 
           return {
             error: ErrorType.DocumentWordEntryInsertFailed,
-            document_id: null,
+            document: null,
           };
         }
       }
@@ -136,10 +136,7 @@ export class DocumentsService {
       await dbPoolClient.query('COMMIT');
       dbPoolClient.release();
 
-      return {
-        error: ErrorType.NoError,
-        document_id,
-      };
+      return this.getDocument(document_id);
     } catch (err) {
       Logger.log(err);
       await dbPoolClient.query('ROLLBACK');
@@ -148,7 +145,7 @@ export class DocumentsService {
 
     return {
       error: ErrorType.UnknownError,
-      document_id: null,
+      document: null,
     };
   }
 

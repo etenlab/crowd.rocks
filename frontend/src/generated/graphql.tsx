@@ -97,7 +97,7 @@ export type DocumentUploadInput = {
 
 export type DocumentUploadOutput = {
   __typename?: 'DocumentUploadOutput';
-  document_id?: Maybe<Scalars['String']['output']>;
+  document?: Maybe<TextyDocument>;
   error: ErrorType;
 };
 
@@ -606,7 +606,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   addNotification: AddNotificationOutput;
   avatarUpdateResolver: AvatarUpdateOutput;
-  createQuestionOnWordRange: QuestionsOutput;
+  createQuestionOnWordRange: QuestionOnWordRangesOutput;
   documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
   forumDelete: ForumDeleteOutput;
@@ -2797,7 +2797,7 @@ export type DocumentUploadMutationVariables = Exact<{
 }>;
 
 
-export type DocumentUploadMutation = { __typename?: 'Mutation', documentUpload: { __typename?: 'DocumentUploadOutput', error: ErrorType, document_id?: string | null } };
+export type DocumentUploadMutation = { __typename?: 'Mutation', documentUpload: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
 
 export type GetAllDocumentsQueryVariables = Exact<{
   languageInput?: InputMaybe<LanguageInput>;
@@ -3249,12 +3249,12 @@ export type GetQuestionOnWordRangesByDocumentIdQueryVariables = Exact<{
 
 export type GetQuestionOnWordRangesByDocumentIdQuery = { __typename?: 'Query', getQuestionOnWordRangesByDocumentId: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
 
-export type GetAnswersByQuestionIdsQueryVariables = Exact<{
-  ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+export type GetAnswersByQuestionIdQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
 }>;
 
 
-export type GetAnswersByQuestionIdsQuery = { __typename?: 'Query', getAnswersByQuestionIds: { __typename?: 'AnswersOutput', error: ErrorType, answers: Array<{ __typename?: 'Answer', answer_id: string, question_id: string, answer?: string | null, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }> } | null> } };
+export type GetAnswersByQuestionIdQuery = { __typename?: 'Query', getAnswersByQuestionIds: { __typename?: 'AnswersOutput', error: ErrorType, answers: Array<{ __typename?: 'Answer', answer_id: string, question_id: string, answer?: string | null, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }> } | null> } };
 
 export type CreateQuestionOnWordRangeMutationVariables = Exact<{
   begin_document_word_entry_id: Scalars['ID']['input'];
@@ -3265,7 +3265,7 @@ export type CreateQuestionOnWordRangeMutationVariables = Exact<{
 }>;
 
 
-export type CreateQuestionOnWordRangeMutation = { __typename?: 'Mutation', createQuestionOnWordRange: { __typename?: 'QuestionsOutput', error: ErrorType, questions: Array<{ __typename?: 'Question', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }> } | null> } };
+export type CreateQuestionOnWordRangeMutation = { __typename?: 'Mutation', createQuestionOnWordRange: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
 
 export type UpsertAnswerMutationVariables = Exact<{
   answer: Scalars['String']['input'];
@@ -3472,6 +3472,14 @@ export type TranslateWordsAndPhrasesByGoogleMutationVariables = Exact<{
 
 
 export type TranslateWordsAndPhrasesByGoogleMutation = { __typename?: 'Mutation', translateWordsAndPhrasesByGoogle: { __typename?: 'TranslateAllWordsAndPhrasesByGoogleOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
+
+export type TranslateMissingWordsAndPhrasesByGoogleMutationVariables = Exact<{
+  from_language_code: Scalars['String']['input'];
+  to_language_code: Scalars['String']['input'];
+}>;
+
+
+export type TranslateMissingWordsAndPhrasesByGoogleMutation = { __typename?: 'Mutation', translateMissingWordsAndPhrasesByGoogle: { __typename?: 'TranslateAllWordsAndPhrasesByGoogleOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
 
 export type TranslateWordsAndPhrasesByLiltMutationVariables = Exact<{
   from_language_code: Scalars['String']['input'];
@@ -4817,10 +4825,12 @@ export const DocumentUploadDocument = gql`
     mutation DocumentUpload($document: TextyDocumentInput!) {
   documentUpload(input: {document: $document}) {
     error
-    document_id
+    document {
+      ...TextyDocumentFragment
+    }
   }
 }
-    `;
+    ${TextyDocumentFragmentFragmentDoc}`;
 export type DocumentUploadMutationFn = Apollo.MutationFunction<DocumentUploadMutation, DocumentUploadMutationVariables>;
 
 /**
@@ -6838,9 +6848,9 @@ export function useGetQuestionOnWordRangesByDocumentIdLazyQuery(baseOptions?: Ap
 export type GetQuestionOnWordRangesByDocumentIdQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByDocumentIdQuery>;
 export type GetQuestionOnWordRangesByDocumentIdLazyQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByDocumentIdLazyQuery>;
 export type GetQuestionOnWordRangesByDocumentIdQueryResult = Apollo.QueryResult<GetQuestionOnWordRangesByDocumentIdQuery, GetQuestionOnWordRangesByDocumentIdQueryVariables>;
-export const GetAnswersByQuestionIdsDocument = gql`
-    query GetAnswersByQuestionIds($ids: [ID!]!) {
-  getAnswersByQuestionIds(ids: $ids) {
+export const GetAnswersByQuestionIdDocument = gql`
+    query GetAnswersByQuestionId($id: ID!) {
+  getAnswersByQuestionIds(ids: [$id]) {
     error
     answers {
       ...AnswerFragment
@@ -6850,32 +6860,32 @@ export const GetAnswersByQuestionIdsDocument = gql`
     ${AnswerFragmentFragmentDoc}`;
 
 /**
- * __useGetAnswersByQuestionIdsQuery__
+ * __useGetAnswersByQuestionIdQuery__
  *
- * To run a query within a React component, call `useGetAnswersByQuestionIdsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetAnswersByQuestionIdsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetAnswersByQuestionIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAnswersByQuestionIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetAnswersByQuestionIdsQuery({
+ * const { data, loading, error } = useGetAnswersByQuestionIdQuery({
  *   variables: {
- *      ids: // value for 'ids'
+ *      id: // value for 'id'
  *   },
  * });
  */
-export function useGetAnswersByQuestionIdsQuery(baseOptions: Apollo.QueryHookOptions<GetAnswersByQuestionIdsQuery, GetAnswersByQuestionIdsQueryVariables>) {
+export function useGetAnswersByQuestionIdQuery(baseOptions: Apollo.QueryHookOptions<GetAnswersByQuestionIdQuery, GetAnswersByQuestionIdQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetAnswersByQuestionIdsQuery, GetAnswersByQuestionIdsQueryVariables>(GetAnswersByQuestionIdsDocument, options);
+        return Apollo.useQuery<GetAnswersByQuestionIdQuery, GetAnswersByQuestionIdQueryVariables>(GetAnswersByQuestionIdDocument, options);
       }
-export function useGetAnswersByQuestionIdsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAnswersByQuestionIdsQuery, GetAnswersByQuestionIdsQueryVariables>) {
+export function useGetAnswersByQuestionIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAnswersByQuestionIdQuery, GetAnswersByQuestionIdQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetAnswersByQuestionIdsQuery, GetAnswersByQuestionIdsQueryVariables>(GetAnswersByQuestionIdsDocument, options);
+          return Apollo.useLazyQuery<GetAnswersByQuestionIdQuery, GetAnswersByQuestionIdQueryVariables>(GetAnswersByQuestionIdDocument, options);
         }
-export type GetAnswersByQuestionIdsQueryHookResult = ReturnType<typeof useGetAnswersByQuestionIdsQuery>;
-export type GetAnswersByQuestionIdsLazyQueryHookResult = ReturnType<typeof useGetAnswersByQuestionIdsLazyQuery>;
-export type GetAnswersByQuestionIdsQueryResult = Apollo.QueryResult<GetAnswersByQuestionIdsQuery, GetAnswersByQuestionIdsQueryVariables>;
+export type GetAnswersByQuestionIdQueryHookResult = ReturnType<typeof useGetAnswersByQuestionIdQuery>;
+export type GetAnswersByQuestionIdLazyQueryHookResult = ReturnType<typeof useGetAnswersByQuestionIdLazyQuery>;
+export type GetAnswersByQuestionIdQueryResult = Apollo.QueryResult<GetAnswersByQuestionIdQuery, GetAnswersByQuestionIdQueryVariables>;
 export const CreateQuestionOnWordRangeDocument = gql`
     mutation CreateQuestionOnWordRange($begin_document_word_entry_id: ID!, $end_document_word_entry_id: ID!, $question: String!, $question_items: [String!]!, $question_type_is_multiselect: Boolean!) {
   createQuestionOnWordRange(
@@ -6883,11 +6893,11 @@ export const CreateQuestionOnWordRangeDocument = gql`
   ) {
     error
     questions {
-      ...QuestionFragment
+      ...QuestionOnWordRangeFragment
     }
   }
 }
-    ${QuestionFragmentFragmentDoc}`;
+    ${QuestionOnWordRangeFragmentFragmentDoc}`;
 export type CreateQuestionOnWordRangeMutationFn = Apollo.MutationFunction<CreateQuestionOnWordRangeMutation, CreateQuestionOnWordRangeMutationVariables>;
 
 /**
@@ -7747,6 +7757,50 @@ export function useTranslateWordsAndPhrasesByGoogleMutation(baseOptions?: Apollo
 export type TranslateWordsAndPhrasesByGoogleMutationHookResult = ReturnType<typeof useTranslateWordsAndPhrasesByGoogleMutation>;
 export type TranslateWordsAndPhrasesByGoogleMutationResult = Apollo.MutationResult<TranslateWordsAndPhrasesByGoogleMutation>;
 export type TranslateWordsAndPhrasesByGoogleMutationOptions = Apollo.BaseMutationOptions<TranslateWordsAndPhrasesByGoogleMutation, TranslateWordsAndPhrasesByGoogleMutationVariables>;
+export const TranslateMissingWordsAndPhrasesByGoogleDocument = gql`
+    mutation TranslateMissingWordsAndPhrasesByGoogle($from_language_code: String!, $to_language_code: String!) {
+  translateMissingWordsAndPhrasesByGoogle(
+    from_language: {language_code: $from_language_code}
+    to_language: {language_code: $to_language_code}
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+    `;
+export type TranslateMissingWordsAndPhrasesByGoogleMutationFn = Apollo.MutationFunction<TranslateMissingWordsAndPhrasesByGoogleMutation, TranslateMissingWordsAndPhrasesByGoogleMutationVariables>;
+
+/**
+ * __useTranslateMissingWordsAndPhrasesByGoogleMutation__
+ *
+ * To run a mutation, you first call `useTranslateMissingWordsAndPhrasesByGoogleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTranslateMissingWordsAndPhrasesByGoogleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [translateMissingWordsAndPhrasesByGoogleMutation, { data, loading, error }] = useTranslateMissingWordsAndPhrasesByGoogleMutation({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      to_language_code: // value for 'to_language_code'
+ *   },
+ * });
+ */
+export function useTranslateMissingWordsAndPhrasesByGoogleMutation(baseOptions?: Apollo.MutationHookOptions<TranslateMissingWordsAndPhrasesByGoogleMutation, TranslateMissingWordsAndPhrasesByGoogleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TranslateMissingWordsAndPhrasesByGoogleMutation, TranslateMissingWordsAndPhrasesByGoogleMutationVariables>(TranslateMissingWordsAndPhrasesByGoogleDocument, options);
+      }
+export type TranslateMissingWordsAndPhrasesByGoogleMutationHookResult = ReturnType<typeof useTranslateMissingWordsAndPhrasesByGoogleMutation>;
+export type TranslateMissingWordsAndPhrasesByGoogleMutationResult = Apollo.MutationResult<TranslateMissingWordsAndPhrasesByGoogleMutation>;
+export type TranslateMissingWordsAndPhrasesByGoogleMutationOptions = Apollo.BaseMutationOptions<TranslateMissingWordsAndPhrasesByGoogleMutation, TranslateMissingWordsAndPhrasesByGoogleMutationVariables>;
 export const TranslateWordsAndPhrasesByLiltDocument = gql`
     mutation TranslateWordsAndPhrasesByLilt($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String, $to_language_code: String!, $to_dialect_code: String, $to_geo_code: String) {
   translateWordsAndPhrasesByLilt(
@@ -8368,7 +8422,7 @@ export const namedOperations = {
     GetPhraseWithVoteById: 'GetPhraseWithVoteById',
     PostRead: 'PostRead',
     GetQuestionOnWordRangesByDocumentId: 'GetQuestionOnWordRangesByDocumentId',
-    GetAnswersByQuestionIds: 'GetAnswersByQuestionIds',
+    GetAnswersByQuestionId: 'GetAnswersByQuestionId',
     GetAllSiteTextDefinitions: 'GetAllSiteTextDefinitions',
     GetAllTranslationFromSiteTextDefinitionID: 'GetAllTranslationFromSiteTextDefinitionID',
     SiteTextWordDefinitionRead: 'SiteTextWordDefinitionRead',
@@ -8430,6 +8484,7 @@ export const namedOperations = {
     ToggleSiteTextTranslationVoteStatus: 'ToggleSiteTextTranslationVoteStatus',
     SiteTextUpsert: 'SiteTextUpsert',
     TranslateWordsAndPhrasesByGoogle: 'TranslateWordsAndPhrasesByGoogle',
+    TranslateMissingWordsAndPhrasesByGoogle: 'TranslateMissingWordsAndPhrasesByGoogle',
     TranslateWordsAndPhrasesByLilt: 'TranslateWordsAndPhrasesByLilt',
     TranslateAllWordsAndPhrasesByGoogle: 'TranslateAllWordsAndPhrasesByGoogle',
     TranslateAllWordsAndPhrasesByLilt: 'TranslateAllWordsAndPhrasesByLilt',

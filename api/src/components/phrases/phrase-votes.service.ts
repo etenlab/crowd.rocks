@@ -161,13 +161,7 @@ export class PhraseVotesService {
 
       const voteStatusMap = new Map<string, PhraseVoteStatus>();
 
-      res.rows.forEach((row) =>
-        voteStatusMap.set(row.phrase_id, {
-          phrase_id: row.phrase_id + '',
-          upvotes: row.upvotes,
-          downvotes: row.downvotes,
-        }),
-      );
+      res.rows.forEach((row) => voteStatusMap.set(row.phrase_id, row));
 
       return {
         error: ErrorType.NoError,

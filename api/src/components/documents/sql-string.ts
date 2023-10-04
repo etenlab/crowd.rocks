@@ -145,7 +145,7 @@ export function callWordRangeUpsertsProcedure({
 }): [string, [number[], number[], string]] {
   return [
     `
-      call batch_word_range_upsert($1::bigint[], $2::bigint[], $3, null, null, '');
+      call batch_word_range_upsert($1::bigint[], $2::bigint[], $3::text, null, null, '');
     `,
     [begin_words, end_words, token],
   ];

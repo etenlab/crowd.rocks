@@ -133,33 +133,33 @@ export class DatabaseVersionControlService {
 
     // translation
     await this.runSqlFile(
-      './src/core/sql/translation/word_to_word_translation_upsert.sql',
+      './src/core/sql/translation/word_to_word/translation_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/word_to_phrase_translation_upsert.sql',
+      './src/core/sql/translation/word_to_phrase/translation_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/phrase_to_word_translation_upsert.sql',
+      './src/core/sql/translation/phrase_to_word/translation_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/phrase_to_phrase_translation_upsert.sql',
-    );
-
-    await this.runSqlFile(
-      './src/core/sql/translation/word_to_word_translation_votes_count.sql',
+      './src/core/sql/translation/phrase_to_phrase/translation_upsert.sql',
     );
 
     await this.runSqlFile(
-      './src/core/sql/translation/word_to_word_translation_vote_toggle.sql',
+      './src/core/sql/translation/word_to_word/translation_votes_count.sql',
+    );
+
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/translation_vote_toggle.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/word_to_phrase_translation_vote_toggle.sql',
+      './src/core/sql/translation/word_to_phrase/translation_vote_toggle.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/phrase_to_word_translation_vote_toggle.sql',
+      './src/core/sql/translation/phrase_to_word/translation_vote_toggle.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/phrase_to_phrase_translation_vote_toggle.sql',
+      './src/core/sql/translation/phrase_to_phrase/translation_vote_toggle.sql',
     );
 
     // data
@@ -185,12 +185,6 @@ export class DatabaseVersionControlService {
       this.config.ADMIN_PASSWORD || 'asdfasdf',
     );
     await this.registerUser('anonymous@crowd.rocks', 'Anonymous', 'asdfasdf');
-
-    await this.registerUser(
-      'googlebot@crowd.rocks',
-      'GoogleBot',
-      this.config.CR_GOOGLE_BOT_PASSWORD || 'asdfasdf',
-    );
 
     // load data
     await this.dataloader.loadSiteTextData();
@@ -218,25 +212,25 @@ export class DatabaseVersionControlService {
 
     // translation
     await this.runSqlFile(
-      './src/core/sql/translation/word_to_phrase_translation_votes_count.sql',
+      './src/core/sql/translation/word_to_phrase/translation_votes_count.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/phrase_to_word_translation_votes_count.sql',
+      './src/core/sql/translation/phrase_to_word/translation_votes_count.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/phrase_to_phrase_translation_votes_count.sql',
+      './src/core/sql/translation/phrase_to_phrase/translation_votes_count.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/batch_word_to_word_translation_upsert.sql',
+      './src/core/sql/translation/word_to_word/batch_translation_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/batch_word_to_phrase_translation_upsert.sql',
+      './src/core/sql/translation/word_to_phrase/batch_translation_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/batch_phrase_to_word_translation_upsert.sql',
+      './src/core/sql/translation/phrase_to_word/batch_translation_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/batch_phrase_to_phrase_translation_upsert.sql',
+      './src/core/sql/translation/phrase_to_phrase/batch_translation_upsert.sql',
     );
 
     // data
@@ -335,21 +329,64 @@ export class DatabaseVersionControlService {
     await this.runSqlFile(
       './src/core/sql/document/batch_document_word_entry_upsert.sql',
     );
+    await this.runSqlFile('./src/core/sql/document/word_range_upsert.sql');
+    await this.runSqlFile(
+      './src/core/sql/document/batch_word_range_upsert.sql',
+    );
 
     // question-answer
     await this.runSqlFile(
-      './src/core/sql/question-answer/question-item-upsert.sql',
+      './src/core/sql/question-answer/question_item_upsert.sql',
     );
-    await this.runSqlFile('./src/core/sql/question-answer/question-upsert.sql');
-    await this.runSqlFile('./src/core/sql/question-answer/answer-upsert.sql');
+    await this.runSqlFile('./src/core/sql/question-answer/question_upsert.sql');
+    await this.runSqlFile('./src/core/sql/question-answer/answer_upsert.sql');
     await this.runSqlFile(
-      './src/core/sql/question-answer/batch-question-item-upsert.sql',
-    );
-    await this.runSqlFile(
-      './src/core/sql/question-answer/batch-question-upsert.sql',
+      './src/core/sql/question-answer/batch_question_item_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/question-answer/batch-answer-upsert.sql',
+      './src/core/sql/question-answer/batch_question_upsert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/question-answer/batch_answer_upsert.sql',
+    );
+
+    // pericopies
+    await this.runSqlFile('./src/core/sql/pericopies/pericope_upsert.sql');
+    await this.runSqlFile(
+      './src/core/sql/pericopies/batch_pericope_upsert.sql',
+    );
+    await this.runSqlFile('./src/core/sql/pericopies/pericope_vote_toggle.sql');
+
+    // translation
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/batch_translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/batch_translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/batch_translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/batch_translation_vote_set.sql',
+    );
+
+    await this.registerUser(
+      'googlebot@crowd.rocks',
+      'GoogleBot',
+      this.config.CR_GOOGLE_BOT_PASSWORD || 'asdfasdf',
     );
 
     await this.setVersionNumber(4);
