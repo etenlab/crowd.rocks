@@ -31,7 +31,7 @@ export class MapDetailsInfo {
 @ObjectType()
 export class MapDetailsOutput extends GenericOutput {
   @Field(() => MapDetailsInfo, { nullable: true })
-  mapFileInfo?: MapDetailsInfo | null;
+  mapDetails?: MapDetailsInfo | null;
 }
 @InputType()
 export class GetOrigMapListInput {
@@ -40,7 +40,7 @@ export class GetOrigMapListInput {
 @ObjectType()
 export class MapUploadOutput extends GenericOutput {
   @Field(() => MapDetailsOutput, { nullable: true })
-  mapFileOutput?: MapDetailsOutput | null | undefined;
+  mapDetailsOutput?: MapDetailsOutput | null | undefined;
 }
 @InputType()
 export class MapDeleteInput {
@@ -71,7 +71,7 @@ export class MapDetailsOutputEdge {
 }
 
 @ObjectType()
-export class MapFileListConnection {
+export class MapListConnection {
   @Field(() => [MapDetailsOutputEdge]) edges: MapDetailsOutputEdge[];
   @Field(() => PageInfo) pageInfo: PageInfo;
 }

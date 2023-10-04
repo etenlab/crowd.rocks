@@ -68,11 +68,11 @@ const NotStyledMapItem = ({
     !mapContent.error &&
     !mapContent.loading &&
     downloadFlagRef.current === 'original' &&
-    mapContent.data.getMapDetails.mapFileInfo
+    mapContent.data.getMapDetails.mapDetails
   ) {
     downloadFromUrl(
-      mapContent.data.getMapDetails.mapFileInfo.map_file_name,
-      mapContent.data.getMapDetails.mapFileInfo.content_file_url,
+      mapContent.data.getMapDetails.mapDetails.map_file_name,
+      mapContent.data.getMapDetails.mapDetails.content_file_url,
     );
     downloadFlagRef.current = null;
   }
@@ -82,11 +82,11 @@ const NotStyledMapItem = ({
     !mapContent.error &&
     !mapContent.loading &&
     downloadFlagRef.current === 'translated' &&
-    mapContent.data.getMapDetails.mapFileInfo
+    mapContent.data.getMapDetails.mapDetails
   ) {
     downloadFromUrl(
-      mapContent.data.getMapDetails.mapFileInfo.map_file_name_with_langs,
-      mapContent.data.getMapDetails.mapFileInfo.content_file_url,
+      mapContent.data.getMapDetails.mapDetails.map_file_name_with_langs,
+      mapContent.data.getMapDetails.mapDetails.content_file_url,
     );
     downloadFlagRef.current = null;
   }

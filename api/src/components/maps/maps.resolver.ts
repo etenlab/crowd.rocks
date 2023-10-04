@@ -14,7 +14,7 @@ import { MapsService } from './maps.service';
 import { getBearer } from '../../common/utility';
 import {
   GetAllMapsListInput,
-  MapFileListConnection,
+  MapListConnection,
   GetOrigMapListInput,
   GetOrigMapsListOutput,
   MapDeleteInput,
@@ -84,19 +84,19 @@ export class MapsResolver {
     if (admin_id !== user_id) {
       return {
         error: ErrorType.Unauthorized,
-        mapFileOutput: null,
+        mapDetailsOutput: null,
       };
     }
     if (!uploadedContent?.file?.fileUrl) {
       return {
         error: ErrorType.FileSaveFailed,
-        mapFileOutput: null,
+        mapDetailsOutput: null,
       };
     }
     if (isNaN(Number(uploadedContent.file.id))) {
       return {
         error: ErrorType.FileSaveFailed,
-        mapFileOutput: null,
+        mapDetailsOutput: null,
       };
     }
     try {
@@ -106,24 +106,24 @@ export class MapsResolver {
         previewFileId: previewFileId!,
         token: bearer,
       });
-      if (!savedParsedMap.mapFileInfo?.original_map_id) {
+      if (!savedParsedMap.mapDetails?.original_map_id) {
         Logger.error(
-          `mapsResolver#mapUpload: savedParsedMap.mapFileInfo?.original_map_id is falsy`,
+          `mapsResolver#mapUpload: savedParsedMap.mapDetails?.original_map_id is falsy`,
         );
         throw new Error(ErrorType.MapNotFound);
       }
       await this.mapsService.translateOrigMapsByIds(
-        [savedParsedMap.mapFileInfo.original_map_id],
+        [savedParsedMap.mapDetails.original_map_id],
         bearer,
       );
       return {
         error: ErrorType.NoError,
-        mapFileOutput: savedParsedMap,
+        mapDetailsOutput: savedParsedMap,
       };
     } catch (error) {
       return {
         error: error,
-        mapFileOutput: null,
+        mapDetailsOutput: null,
       };
     }
   }
@@ -220,12 +220,12 @@ export class MapsResolver {
     return maps;
   }
 
-  @Query(() => MapFileListConnection)
+  @Query(() => MapListConnection)
   async getAllMapsList(
     @Args('input') input: GetAllMapsListInput,
     @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
-  ): Promise<MapFileListConnection> {
+  ): Promise<MapListConnection> {
     return this.mapsService.getAllMapsList({
       lang: input.lang,
       first,
@@ -300,14 +300,4 @@ export class MapsResolver {
       null,
     );
   }
-
-  // @Query(() => MapWithVoteOutput)
-  // async getMapWithVoteById(
-  //   @Args('map_id', { type: () => ID }) map_id: string,
-  //   @Args('is_original', { type: () => Boolean }) is_original: boolean,
-  // ): Promise<MapWithVoteOutput> {
-  //   console.log('getMapWithVoteById resolver', map_id);
-
-  //   return this.mapsService.getMapWithVoteById(+map_id, null);
-  // }
 }

@@ -1,6 +1,6 @@
 fragment MapDetailsOutputFragment on MapDetailsOutput {
   error
-  mapFileInfo {
+  mapDetails {
     is_original
     original_map_id
     translated_map_id
@@ -142,7 +142,7 @@ mutation MapUpload(
     file_size: $file_size
   ) {
     error
-    mapFileOutput {
+    mapDetailsOutput {
       ...MapDetailsOutputFragment
     }
   }

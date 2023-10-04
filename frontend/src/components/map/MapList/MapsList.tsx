@@ -23,12 +23,15 @@ import { MapTools } from './MapsTools';
 import {
   ErrorType,
   MapDetailsInfo,
+  MapUploadMutation,
   useGetAllMapsListLazyQuery,
   useIsAdminLoggedInLazyQuery,
   useMapDeleteMutation,
   useMapUploadMutation,
   useMapsTranslationsResetMutation,
   useUploadFileMutation,
+  GetAllMapsListDocument,
+  GetAllMapsListQuery,
 } from '../../../generated/graphql';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { useTr } from '../../../hooks/useTr';
@@ -40,6 +43,7 @@ import { PAGE_SIZE } from '../../../const/commonConst';
 import { RouteComponentProps } from 'react-router';
 import { langInfo2tag, tag2langInfo } from '../../../common/langUtils';
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
+// import { updateCacheWithAddNewMap } from '../../../cacheUpdators/addNewMap';
 
 interface MapListProps
   extends RouteComponentProps<{
@@ -235,6 +239,15 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     async (file: File) => {
       if (!file) return;
       try {
+        present({
+          message: tr(
+            'Started map uploading and translation to known languages',
+          ),
+          duration: 2000,
+          position: 'top',
+          color: 'primary',
+        });
+
         const thumbnailFile = (await makeMapThumbnail(await file.text(), {
           toWidth: 100,
           toHeight: 100,
@@ -263,6 +276,57 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
             file_type: file.type,
           },
           refetchQueries: ['GetAllMapsList'],
+          optimisticResponse: () => {
+            const loaderAsOptimisticRes: MapUploadMutation = {
+              __typename: 'Mutation',
+              mapUpload: {
+                __typename: 'MapUploadOutput',
+                mapDetailsOutput: {
+                  __typename: 'MapDetailsOutput',
+                  mapDetails: {
+                    __typename: `MapDetailsInfo`,
+                    content_file_id: `temp-file-id-${previewFileId}`,
+                    content_file_url: 'assets/images/Spin-1s-200px.gif',
+                    preview_file_url: 'assets/images/Spin-1s-200px.gif',
+                    created_at: '',
+                    created_by: '',
+                    is_original: true,
+                    language: { language_code: 'en' },
+                    map_file_name: '...Uploading...',
+                    map_file_name_with_langs: '...Uploading...',
+                    original_map_id: `temp-map-id-${previewFileId}`,
+                  },
+                  error: ErrorType.NoError,
+                },
+                error: ErrorType.NoError,
+              },
+            };
+            return loaderAsOptimisticRes;
+          },
+          update: (cache, { data, errors }) => {
+            if (errors) console.log(errors);
+            const newMapInfo: MapDetailsInfo =
+              data!.mapUpload.mapDetailsOutput!.mapDetails!;
+
+            const dataQ = {
+              ...cache.readQuery<GetAllMapsListQuery>({
+                query: GetAllMapsListDocument,
+              }),
+            };
+            dataQ?.getAllMapsList?.edges.push({
+              __typename: 'MapDetailsOutputEdge',
+              cursor: 'asdf',
+              node: {
+                __typename: 'MapDetailsOutput',
+                error: ErrorType.NoError,
+                mapDetails: newMapInfo,
+              },
+            });
+            cache.writeQuery({
+              query: GetAllMapsListDocument,
+              data: dataQ,
+            });
+          },
         });
 
         if (
@@ -283,7 +347,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
         });
       }
     },
-    [makeMapThumbnail, uploadFile, sendMapFile, present],
+    [makeMapThumbnail, uploadFile, sendMapFile, present, tr],
   );
 
   const deleteMap = <
@@ -324,14 +388,14 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
       allMapsQuery?.getAllMapsList.edges?.length ? (
         allMapsQuery?.getAllMapsList.edges
           ?.filter((edge) => {
-            return (edge.node.mapFileInfo?.map_file_name_with_langs || '')
+            return (edge.node.mapDetails?.map_file_name_with_langs || '')
               .toLowerCase()
               .includes(filter.toLowerCase());
           })
           .map((edge) =>
-            edge.node.mapFileInfo ? (
+            edge.node.mapDetails ? (
               <MapItem
-                mapItem={edge.node.mapFileInfo}
+                mapItem={edge.node.mapDetails}
                 key={edge.cursor}
                 candidateForDeletionRef={candidateForDeletion}
                 setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
