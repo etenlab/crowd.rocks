@@ -133,33 +133,33 @@ export class DatabaseVersionControlService {
 
     // translation
     await this.runSqlFile(
-      './src/core/sql/translation/word_to_word_translation_upsert.sql',
+      './src/core/sql/translation/word_to_word/translation_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/word_to_phrase_translation_upsert.sql',
+      './src/core/sql/translation/word_to_phrase/translation_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/phrase_to_word_translation_upsert.sql',
+      './src/core/sql/translation/phrase_to_word/translation_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/phrase_to_phrase_translation_upsert.sql',
-    );
-
-    await this.runSqlFile(
-      './src/core/sql/translation/word_to_word_translation_votes_count.sql',
+      './src/core/sql/translation/phrase_to_phrase/translation_upsert.sql',
     );
 
     await this.runSqlFile(
-      './src/core/sql/translation/word_to_word_translation_vote_toggle.sql',
+      './src/core/sql/translation/word_to_word/translation_votes_count.sql',
+    );
+
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/translation_vote_toggle.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/word_to_phrase_translation_vote_toggle.sql',
+      './src/core/sql/translation/word_to_phrase/translation_vote_toggle.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/phrase_to_word_translation_vote_toggle.sql',
+      './src/core/sql/translation/phrase_to_word/translation_vote_toggle.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/phrase_to_phrase_translation_vote_toggle.sql',
+      './src/core/sql/translation/phrase_to_phrase/translation_vote_toggle.sql',
     );
 
     // data
@@ -218,25 +218,25 @@ export class DatabaseVersionControlService {
 
     // translation
     await this.runSqlFile(
-      './src/core/sql/translation/word_to_phrase_translation_votes_count.sql',
+      './src/core/sql/translation/word_to_phrase/translation_votes_count.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/phrase_to_word_translation_votes_count.sql',
+      './src/core/sql/translation/phrase_to_word/translation_votes_count.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/phrase_to_phrase_translation_votes_count.sql',
+      './src/core/sql/translation/phrase_to_phrase/translation_votes_count.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/batch_word_to_word_translation_upsert.sql',
+      './src/core/sql/translation/word_to_word/batch_translation_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/batch_word_to_phrase_translation_upsert.sql',
+      './src/core/sql/translation/word_to_phrase/batch_translation_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/batch_phrase_to_word_translation_upsert.sql',
+      './src/core/sql/translation/phrase_to_word/batch_translation_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/translation/batch_phrase_to_phrase_translation_upsert.sql',
+      './src/core/sql/translation/phrase_to_phrase/batch_translation_upsert.sql',
     );
 
     // data
@@ -362,6 +362,32 @@ export class DatabaseVersionControlService {
       './src/core/sql/pericopies/batch_pericope_upsert.sql',
     );
     await this.runSqlFile('./src/core/sql/pericopies/pericope_vote_toggle.sql');
+
+    // translation
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/batch_translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/batch_translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/batch_translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/translation_vote_set.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/batch_translation_vote_set.sql',
+    );
 
     await this.setVersionNumber(4);
   }
