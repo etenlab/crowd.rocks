@@ -450,7 +450,7 @@ type MapDetailsInfo {
 
 type MapDetailsOutput {
   error: ErrorType!
-  mapFileInfo: MapDetailsInfo
+  mapDetails: MapDetailsInfo
 }
 
 type MapDetailsOutputEdge {
@@ -458,14 +458,14 @@ type MapDetailsOutputEdge {
   node: MapDetailsOutput!
 }
 
-type MapFileListConnection {
+type MapListConnection {
   edges: [MapDetailsOutputEdge!]!
   pageInfo: PageInfo!
 }
 
 type MapUploadOutput {
   error: ErrorType!
-  mapFileOutput: MapDetailsOutput
+  mapDetailsOutput: MapDetailsOutput
 }
 
 type MapVote {
@@ -918,7 +918,7 @@ type Query {
   forumRead(input: ForumReadInput!): ForumReadOutput!
   forums: ForumListOutput!
   getAllDocuments(input: GetAllDocumentsInput!): GetAllDocumentsOutput!
-  getAllMapsList(after: ID, first: Int, input: GetAllMapsListInput!): MapFileListConnection!
+  getAllMapsList(after: ID, first: Int, input: GetAllMapsListInput!): MapListConnection!
   getAllRecommendedSiteTextTranslationList: SiteTextTranslationWithVoteListByLanguageListOutput!
   getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): SiteTextTranslationWithVoteListByLanguageOutput!
   getAllSiteTextDefinitions(filter: String): SiteTextDefinitionListOutput!

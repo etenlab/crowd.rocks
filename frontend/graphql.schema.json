@@ -3716,7 +3716,7 @@
             "deprecationReason": null
           },
           {
-            "name": "mapFileInfo",
+            "name": "mapDetails",
             "description": null,
             "args": [],
             "type": {
@@ -3778,7 +3778,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "MapFileListConnection",
+        "name": "MapListConnection",
         "description": null,
         "fields": [
           {
@@ -3849,7 +3849,7 @@
             "deprecationReason": null
           },
           {
-            "name": "mapFileOutput",
+            "name": "mapDetailsOutput",
             "description": null,
             "args": [],
             "type": {
@@ -10622,7 +10622,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "MapFileListConnection",
+                "name": "MapListConnection",
                 "ofType": null
               }
             },
