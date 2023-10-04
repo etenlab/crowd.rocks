@@ -186,12 +186,6 @@ export class DatabaseVersionControlService {
     );
     await this.registerUser('anonymous@crowd.rocks', 'Anonymous', 'asdfasdf');
 
-    await this.registerUser(
-      'googlebot@crowd.rocks',
-      'GoogleBot',
-      this.config.CR_GOOGLE_BOT_PASSWORD || 'asdfasdf',
-    );
-
     // load data
     await this.dataloader.loadSiteTextData();
   }
@@ -387,6 +381,12 @@ export class DatabaseVersionControlService {
     );
     await this.runSqlFile(
       './src/core/sql/translation/word_to_phrase/batch_translation_vote_set.sql',
+    );
+
+    await this.registerUser(
+      'googlebot@crowd.rocks',
+      'GoogleBot',
+      this.config.CR_GOOGLE_BOT_PASSWORD || 'asdfasdf',
     );
 
     await this.setVersionNumber(4);
