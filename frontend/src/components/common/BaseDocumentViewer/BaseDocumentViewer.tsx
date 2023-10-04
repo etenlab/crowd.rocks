@@ -32,7 +32,7 @@ export type BaseDocumentViewerProps = {
   onClickWord(entryId: string, index: number, e?: unknown): void;
 };
 
-const pageSize = 1000;
+const pageSize = 200;
 
 export const BaseDocumentViewer = memo(function BaseDocumentViewerPure({
   mode,
