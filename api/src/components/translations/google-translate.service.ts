@@ -9,6 +9,7 @@ import { createToken, substituteN, unSubstituteN } from '../../common/utility';
 import { ITranslator, LanguageResult } from './translations.service';
 import { PostgresService } from '../../core/postgres.service';
 import { delay } from './utility';
+import { hash } from 'argon2';
 
 const LIMITS = 6000000 - 1000000;
 
@@ -136,17 +137,28 @@ export class GoogleTranslateService implements ITranslator {
             where u.email=$1;`,
       [GOOGLE_BOT_EMAIL],
     );
-    let token = tokenRes.rows[0].token;
-    const id = tokenRes.rows[0].user_id;
+    let gid = tokenRes.rows[0]?.user_id;
+    if (!gid) {
+      const pash = await hash(this.config.CR_GOOGLE_BOT_PASSWORD);
+      const token = createToken();
+      const res = await this.pg.pool.query(
+        `
+        call authentication_register($1, $2, $3, $4, 0, '');
+        `,
+        [GOOGLE_BOT_EMAIL, 'GoogleBot', pash, token],
+      );
+      gid = res.rows[0].p_user_id;
+    }
+    let token = tokenRes.rows[0]?.token;
     if (!token) {
       token = createToken();
       await this.pg.pool.query(
         `
           insert into tokens(token, user_id) values($1, $2);
         `,
-        [token, id],
+        [token, gid],
       );
     }
-    return { id, token };
+    return { id: gid, token };
   }
 }

@@ -383,12 +383,6 @@ export class DatabaseVersionControlService {
       './src/core/sql/translation/word_to_phrase/batch_translation_vote_set.sql',
     );
 
-    await this.registerUser(
-      'googlebot@crowd.rocks',
-      'GoogleBot',
-      this.config.CR_GOOGLE_BOT_PASSWORD || 'asdfasdf',
-    );
-
     await this.setVersionNumber(4);
   }
 
