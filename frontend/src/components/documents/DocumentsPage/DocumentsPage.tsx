@@ -87,8 +87,6 @@ export function DocumentsPage() {
         },
       });
 
-      dismissLoader();
-
       if (!uploadResult.data?.uploadFile.file?.id) {
         toast({
           message: tr('Failed at file upload'),
@@ -100,11 +98,7 @@ export function DocumentsPage() {
         return;
       }
 
-      loader({
-        message: `${tr('Uploading document')} ${file.name}...`,
-      });
-
-      const res = await documentUpload({
+      await documentUpload({
         variables: {
           document: {
             file_id: String(uploadResult.data.uploadFile.file.id),
@@ -117,7 +111,6 @@ export function DocumentsPage() {
 
       dismissLoader();
 
-      console.log(`uploaded: `, res);
       setIsOpenModal(false);
     },
     [

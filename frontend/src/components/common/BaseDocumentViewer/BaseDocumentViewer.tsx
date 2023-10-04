@@ -1,4 +1,6 @@
 import { useMemo, ReactNode, memo } from 'react';
+import { Virtuoso } from 'react-virtuoso';
+
 import { Word, Dot, Container } from './styled';
 
 export type ViewMode = 'edit' | 'view';
@@ -30,14 +32,16 @@ export type BaseDocumentViewerProps = {
   onClickWord(entryId: string, index: number, e?: unknown): void;
 };
 
+const pageSize = 1000;
+
 export const BaseDocumentViewer = memo(function BaseDocumentViewerPure({
-  entries,
   mode,
   range,
   dots,
   onClickWord,
+  entries,
 }: BaseDocumentViewerProps) {
-  const com = useMemo(() => {
+  const wordComs = useMemo(() => {
     const dotsMap = new Map<
       string,
       {
@@ -51,47 +55,69 @@ export const BaseDocumentViewer = memo(function BaseDocumentViewerPure({
     let begin = false;
     let end = false;
 
-    return entries.map((entry, index) => {
-      if (entry.id === range.beginEntry) {
-        begin = true;
-      }
+    return entries
+      .map((entry, index) => {
+        if (entry.id === range.beginEntry) {
+          begin = true;
+        }
 
-      const dot = dotsMap.get(entry.id) || null;
-      const isDot = dot ? true : false;
-      const dotCom = dot ? dot.component : null;
+        const dot = dotsMap.get(entry.id) || null;
+        const isDot = dot ? true : false;
+        const dotCom = dot ? dot.component : null;
 
-      const color =
-        (begin && !end && range.endEntry) ||
-        entry.id === range.beginEntry ||
-        entry.id === range.endEntry
-          ? 'red'
-          : 'black';
+        const color =
+          (begin && !end && range.endEntry) ||
+          entry.id === range.beginEntry ||
+          entry.id === range.endEntry
+            ? 'red'
+            : 'black';
 
-      const cursor = isDot ? 'pointer' : 'default';
+        const cursor = isDot ? 'pointer' : 'default';
 
-      if (entry.id === range.endEntry) {
-        end = true;
-      }
+        if (entry.id === range.endEntry) {
+          end = true;
+        }
 
-      return (
-        <Word
-          key={entry.id}
-          className={`${mode}`}
-          onClick={(e) =>
-            mode === 'view'
-              ? isDot
-                ? onClickWord(entry.id, index, e)
-                : null
-              : onClickWord(entry.id, index)
+        return (
+          <Word
+            key={entry.id}
+            className={`${mode}`}
+            onClick={(e) =>
+              mode === 'view'
+                ? isDot
+                  ? onClickWord(entry.id, index, e)
+                  : null
+                : onClickWord(entry.id, index)
+            }
+            style={{ color, cursor }}
+          >
+            {entry.wordlike_string.wordlike_string}
+            {isDot ? dotCom || <Dot /> : null}
+          </Word>
+        );
+      })
+      .reduce(
+        (sumOfArr: JSX.Element[][], item: JSX.Element) => {
+          const sizeOfLastElement = sumOfArr[sumOfArr.length - 1].length;
+          if (sizeOfLastElement < pageSize) {
+            sumOfArr[sumOfArr.length - 1].push(item);
+          } else {
+            sumOfArr.push([item]);
           }
-          style={{ color, cursor }}
-        >
-          {entry.wordlike_string.wordlike_string}
-          {isDot ? dotCom || <Dot /> : null}
-        </Word>
+
+          return sumOfArr;
+        },
+        [[]],
       );
-    });
   }, [dots, entries, mode, onClickWord, range.beginEntry, range.endEntry]);
 
-  return <Container>{com}</Container>;
+  return (
+    <Virtuoso
+      style={{
+        height: 'calc(100vh - 170px)',
+      }}
+      data={wordComs}
+      itemContent={(_index, com) => <Container>{com}</Container>}
+    />
+  );
 });
