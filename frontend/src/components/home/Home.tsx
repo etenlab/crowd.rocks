@@ -21,6 +21,7 @@ import {
   sendOutline,
   helpCircleOutline,
   logoGoogle,
+  brushOutline,
 } from 'ionicons/icons';
 import { RouteComponentProps } from 'react-router';
 import './Home.css';
@@ -99,10 +100,17 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/qa`,
           icon: helpCircleOutline,
-          title: tr('Question & Answer '),
+          title: tr('Question & Answer'),
           description: tr(
             'Annotate a text with questions so other users can provide answers',
           ),
+          isShown: () => !!settings?.isBetaTools,
+        },
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/pericopies`,
+          icon: brushOutline,
+          title: tr('Pericope Tool'),
+          description: tr('Pericope Tool'),
           isShown: () => !!settings?.isBetaTools,
         },
       ],
