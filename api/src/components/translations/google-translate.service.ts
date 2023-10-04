@@ -149,7 +149,7 @@ export class GoogleTranslateService implements ITranslator {
       );
       gid = res.rows[0].p_user_id;
     }
-    let token = tokenRes.rows[0].token;
+    let token = tokenRes.rows[0]?.token;
     if (!token) {
       token = createToken();
       await this.pg.pool.query(
