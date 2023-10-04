@@ -137,7 +137,7 @@ export class GoogleTranslateService implements ITranslator {
             where u.email=$1;`,
       [GOOGLE_BOT_EMAIL],
     );
-    let gid = tokenRes.rows[0].user_id;
+    let gid = tokenRes.rows[0]?.user_id;
     if (!gid) {
       const pash = await hash(this.config.CR_GOOGLE_BOT_PASSWORD);
       const token = createToken();
