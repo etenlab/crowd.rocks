@@ -213,7 +213,7 @@ export async function setTranslationsVotes(
     if (fromTypeIsWord) {
       if (toTypeIsWord) {
         // call word to word procedure
-        console.log('w2w');
+        //console.log('w2w');
         await pgClient.query(
           ...callWordToWordTranslationVoteSetProcedure({
             translationIds,
@@ -223,7 +223,7 @@ export async function setTranslationsVotes(
         );
       } else {
         // call word to phrase reset procedure
-        console.log('w2p');
+        //console.log('w2p');
         await pgClient.query(
           ...callWordToPhraseTranslationVoteSetProcedure({
             translationIds,
@@ -235,7 +235,7 @@ export async function setTranslationsVotes(
     } else {
       if (toTypeIsWord) {
         // phrase to word reset procedure
-        console.log('p2w');
+        //console.log('p2w');
         await pgClient.query(
           ...callPhraseToWordTranslationVoteSetProcedure({
             translationIds,
@@ -245,7 +245,7 @@ export async function setTranslationsVotes(
         );
       } else {
         // phrase to phrase reset
-        console.log('p2p');
+        // console.log('p2p');
         await pgClient.query(
           ...callPhraseToPhraseTranslationVoteSetProcedure({
             translationIds,
