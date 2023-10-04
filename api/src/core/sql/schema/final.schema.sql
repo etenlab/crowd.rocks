@@ -543,6 +543,23 @@ create index idx__begin_word__word_ranges on word_ranges (begin_word);
 create index idx__end_word__word_ranges on word_ranges (end_word);
 create index idx__created_by__word_ranges on word_ranges (created_by);
 
+create table pericopies(
+  pericope_id bigserial primary key,
+  start_word bigint not null references document_word_entries(document_word_entry_id),
+  created_at timestamp not null default CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id),
+  unique (start_word)
+);
+
+create table pericope_votes(
+  pericope_vote_id bigserial primary key,
+  user_id bigint not null references users(user_id),
+  pericope_id bigint not null references pericopies(pericope_id),
+  vote bool,
+  last_updated_at timestamp not null default CURRENT_TIMESTAMP,
+  unique (user_id, pericope_id)
+);
+
 -- tags
 create table document_tags (
   document_tag_id bigserial primary key,
