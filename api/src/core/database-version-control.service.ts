@@ -336,19 +336,26 @@ export class DatabaseVersionControlService {
 
     // question-answer
     await this.runSqlFile(
-      './src/core/sql/question-answer/question-item-upsert.sql',
+      './src/core/sql/question-answer/question_item_upsert.sql',
     );
-    await this.runSqlFile('./src/core/sql/question-answer/question-upsert.sql');
-    await this.runSqlFile('./src/core/sql/question-answer/answer-upsert.sql');
+    await this.runSqlFile('./src/core/sql/question-answer/question_upsert.sql');
+    await this.runSqlFile('./src/core/sql/question-answer/answer_upsert.sql');
     await this.runSqlFile(
-      './src/core/sql/question-answer/batch-question-item-upsert.sql',
-    );
-    await this.runSqlFile(
-      './src/core/sql/question-answer/batch-question-upsert.sql',
+      './src/core/sql/question-answer/batch_question_item_upsert.sql',
     );
     await this.runSqlFile(
-      './src/core/sql/question-answer/batch-answer-upsert.sql',
+      './src/core/sql/question-answer/batch_question_upsert.sql',
     );
+    await this.runSqlFile(
+      './src/core/sql/question-answer/batch_answer_upsert.sql',
+    );
+
+    // pericopies
+    await this.runSqlFile('./src/core/sql/pericopies/pericope_upsert.sql');
+    await this.runSqlFile(
+      './src/core/sql/pericopies/batch_pericope_upsert.sql',
+    );
+    await this.runSqlFile('./src/core/sql/pericopies/pericope_vote_toggle.sql');
 
     // translation
     await this.runSqlFile(

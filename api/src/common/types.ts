@@ -117,6 +117,10 @@ export enum ErrorType {
   QuestionItemInsertFailed = 'QuestionItemInsertFailed',
   QuestionInsertFailed = 'QuestionInsertFailed',
   AnswerInsertFailed = 'AnswerInsertFailed',
+
+  PericopeInsertFailed = 'PericopeInsertFailed',
+  PericopeNotFound = 'PericopeNotFound',
+  PericopeVoteToggleFailed = 'PericopeVoteToggleFailed',
 }
 
 registerEnumType(ErrorType, {

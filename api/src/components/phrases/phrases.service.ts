@@ -37,7 +37,7 @@ import {
   GetPhraseObjectByDefinitionId,
   getPhraseByDefinitionIdSql,
 } from './sql-string';
-import { PhraseWithDefinition, WordWithDefinition } from '../maps/types';
+import { PhraseWithDefinition } from '../maps/types';
 
 @Injectable()
 export class PhrasesService {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
 import { pgClientOrPool } from 'src/common/utility';
@@ -85,7 +85,7 @@ export class QuestionsService {
         }),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -106,7 +106,7 @@ export class QuestionsService {
 
       return this.convertQueryResultToQuestions(res.rows, pgClient);
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -130,7 +130,7 @@ export class QuestionsService {
 
       return this.convertQueryResultToQuestions(res.rows, pgClient);
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -185,7 +185,7 @@ export class QuestionsService {
         pgClient,
       );
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -265,7 +265,7 @@ export class QuestionsService {
         ],
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -337,7 +337,7 @@ export class QuestionsService {
           .filter((question) => question) as QuestionOnWordRange[],
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
