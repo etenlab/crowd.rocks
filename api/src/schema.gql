@@ -148,6 +148,7 @@ enum ErrorType {
   PasswordInvalid
   PasswordTooLong
   PasswordTooShort
+  PericopeInsertFailed
   PhraseDefinitionAlreadyExists
   PhraseDefinitionNotFound
   PhraseDefinitionVoteNotFound
