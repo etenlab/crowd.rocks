@@ -172,6 +172,9 @@ export enum ErrorType {
   PasswordInvalid = 'PasswordInvalid',
   PasswordTooLong = 'PasswordTooLong',
   PasswordTooShort = 'PasswordTooShort',
+  PericopeInsertFailed = 'PericopeInsertFailed',
+  PericopeNotFound = 'PericopeNotFound',
+  PericopeVoteToggleFailed = 'PericopeVoteToggleFailed',
   PhraseDefinitionAlreadyExists = 'PhraseDefinitionAlreadyExists',
   PhraseDefinitionNotFound = 'PhraseDefinitionNotFound',
   PhraseDefinitionVoteNotFound = 'PhraseDefinitionVoteNotFound',
@@ -641,6 +644,7 @@ export type Mutation = {
   threadUpsert: ThreadUpsertOutput;
   toggleFlagWithRef: FlagsOutput;
   toggleMapVoteStatus: MapVoteStatusOutputRow;
+  togglePericopeVoteStatus: PericopeVoteStatusOutput;
   togglePhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   togglePhraseToPhraseTrVoteStatus: PhraseToPhraseTranslationVoteStatusOutputRow;
   togglePhraseToWordTrVoteStatus: PhraseToWordTranslationVoteStatusOutputRow;
@@ -660,6 +664,7 @@ export type Mutation = {
   uploadFile: IFileOutput;
   upsertAnswers: AnswersOutput;
   upsertFromTranslationlikeString: TranslationOutput;
+  upsertPericopies: PericopiesOutput;
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString: PhraseDefinitionOutput;
   upsertQuestionItems: QuestionItemsOutput;
   upsertQuestions: QuestionsOutput;
@@ -857,6 +862,12 @@ export type MutationToggleMapVoteStatusArgs = {
 };
 
 
+export type MutationTogglePericopeVoteStatusArgs = {
+  pericope_id: Scalars['ID']['input'];
+  vote: Scalars['Boolean']['input'];
+};
+
+
 export type MutationTogglePhraseDefinitionVoteStatusArgs = {
   phrase_definition_id: Scalars['ID']['input'];
   vote: Scalars['Boolean']['input'];
@@ -974,6 +985,11 @@ export type MutationUpsertFromTranslationlikeStringArgs = {
 };
 
 
+export type MutationUpsertPericopiesArgs = {
+  startWords: Array<Scalars['String']['input']>;
+};
+
+
 export type MutationUpsertPhraseDefinitionFromPhraseAndDefinitionlikeStringArgs = {
   input: FromPhraseAndDefintionlikeStringUpsertInput;
 };
@@ -1087,6 +1103,48 @@ export type PageInfo = {
 export type PasswordResetFormInput = {
   password: Scalars['String']['input'];
   token: Scalars['String']['input'];
+};
+
+export type Pericope = {
+  __typename?: 'Pericope';
+  pericope_id: Scalars['ID']['output'];
+  start_word: Scalars['String']['output'];
+};
+
+export type PericopeVote = {
+  __typename?: 'PericopeVote';
+  last_updated_at: Scalars['DateTime']['output'];
+  pericope_id: Scalars['ID']['output'];
+  pericope_vote_id: Scalars['ID']['output'];
+  user_id: Scalars['ID']['output'];
+  vote: Scalars['Boolean']['output'];
+};
+
+export type PericopeVoteStatus = {
+  __typename?: 'PericopeVoteStatus';
+  downvotes: Scalars['Int']['output'];
+  pericope_id: Scalars['ID']['output'];
+  upvotes: Scalars['Int']['output'];
+};
+
+export type PericopeVoteStatusOutput = {
+  __typename?: 'PericopeVoteStatusOutput';
+  error: ErrorType;
+  vote_status?: Maybe<PericopeVoteStatus>;
+};
+
+export type PericopeWithVote = {
+  __typename?: 'PericopeWithVote';
+  downvotes: Scalars['Int']['output'];
+  pericope_id: Scalars['ID']['output'];
+  start_word: Scalars['String']['output'];
+  upvotes: Scalars['Int']['output'];
+};
+
+export type PericopiesOutput = {
+  __typename?: 'PericopiesOutput';
+  error: ErrorType;
+  pericopies: Array<Maybe<Pericope>>;
 };
 
 export type Phrase = {
@@ -1411,6 +1469,8 @@ export type Query = {
   getMapWordOrPhraseAsOrigByDefinitionId: MapWordOrPhraseAsOrigOutput;
   getOrigMapWordsAndPhrases: MapWordsAndPhrasesConnection;
   getOrigMapsList: GetOrigMapsListOutput;
+  getPericopeVoteStatus: PericopeVoteStatusOutput;
+  getPericopiesByDocumentId: PericopiesOutput;
   getPhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   getPhraseDefinitionsByFlag: PhraseDefinitionListConnection;
   getPhraseDefinitionsByLanguage: PhraseDefinitionWithVoteListOutput;
@@ -1452,6 +1512,7 @@ export type Query = {
   postReadResolver: PostReadOutput;
   postsByParent: PostsByParentOutput;
   readAnswers: AnswersOutput;
+  readPericopies: PericopiesOutput;
   readQuestionItems: QuestionItemsOutput;
   readQuestions: QuestionsOutput;
   readWordRanges: WordRangesOutput;
@@ -1578,6 +1639,16 @@ export type QueryGetOrigMapWordsAndPhrasesArgs = {
 
 export type QueryGetOrigMapsListArgs = {
   input: GetOrigMapListInput;
+};
+
+
+export type QueryGetPericopeVoteStatusArgs = {
+  pericope_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetPericopiesByDocumentIdArgs = {
+  document_id: Scalars['ID']['input'];
 };
 
 
@@ -1790,6 +1861,11 @@ export type QueryPostsByParentArgs = {
 
 
 export type QueryReadAnswersArgs = {
+  ids: Array<Scalars['ID']['input']>;
+};
+
+
+export type QueryReadPericopiesArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
 
@@ -2158,6 +2234,7 @@ export enum TableNameType {
   DocumentWordEntries = 'document_word_entries',
   Documents = 'documents',
   OriginalMaps = 'original_maps',
+  Pericopies = 'pericopies',
   PhraseDefinitions = 'phrase_definitions',
   Phrases = 'phrases',
   TranslatedMaps = 'translated_maps',
@@ -3135,6 +3212,39 @@ export type MarkNotificationReadMutationVariables = Exact<{
 
 export type MarkNotificationReadMutation = { __typename?: 'Mutation', markNotificationAsRead: { __typename?: 'MarkNotificationReadOutput', error: ErrorType, notification_id: string } };
 
+export type PericopeFragmentFragment = { __typename?: 'Pericope', pericope_id: string, start_word: string };
+
+export type PericopeVoteStatusFragmentFragment = { __typename?: 'PericopeVoteStatus', pericope_id: string, upvotes: number, downvotes: number };
+
+export type GetPericopiesByDocumentIdQueryVariables = Exact<{
+  document_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetPericopiesByDocumentIdQuery = { __typename?: 'Query', getPericopiesByDocumentId: { __typename?: 'PericopiesOutput', error: ErrorType, pericopies: Array<{ __typename?: 'Pericope', pericope_id: string, start_word: string } | null> } };
+
+export type GetPericopeVoteStatusQueryVariables = Exact<{
+  pericope_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetPericopeVoteStatusQuery = { __typename?: 'Query', getPericopeVoteStatus: { __typename?: 'PericopeVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'PericopeVoteStatus', pericope_id: string, upvotes: number, downvotes: number } | null } };
+
+export type TogglePericopeVoteStatusMutationVariables = Exact<{
+  pericope_id: Scalars['ID']['input'];
+  vote: Scalars['Boolean']['input'];
+}>;
+
+
+export type TogglePericopeVoteStatusMutation = { __typename?: 'Mutation', togglePericopeVoteStatus: { __typename?: 'PericopeVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'PericopeVoteStatus', pericope_id: string, upvotes: number, downvotes: number } | null } };
+
+export type UpsertPericopeMutationVariables = Exact<{
+  startWord: Scalars['String']['input'];
+}>;
+
+
+export type UpsertPericopeMutation = { __typename?: 'Mutation', upsertPericopies: { __typename?: 'PericopiesOutput', error: ErrorType, pericopies: Array<{ __typename?: 'Pericope', pericope_id: string, start_word: string } | null> } };
+
 export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
 export type PhraseDefinitionFragmentFragment = { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: string, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } };
@@ -3886,6 +3996,19 @@ export const MapVoteStatusFragmentFragmentDoc = gql`
   is_original
   downvotes
   upvotes
+}
+    `;
+export const PericopeFragmentFragmentDoc = gql`
+    fragment PericopeFragment on Pericope {
+  pericope_id
+  start_word
+}
+    `;
+export const PericopeVoteStatusFragmentFragmentDoc = gql`
+    fragment PericopeVoteStatusFragment on PericopeVoteStatus {
+  pericope_id
+  upvotes
+  downvotes
 }
     `;
 export const PhraseDefinitionWithVoteFragmentFragmentDoc = gql`
@@ -6411,6 +6534,155 @@ export function useMarkNotificationReadMutation(baseOptions?: Apollo.MutationHoo
 export type MarkNotificationReadMutationHookResult = ReturnType<typeof useMarkNotificationReadMutation>;
 export type MarkNotificationReadMutationResult = Apollo.MutationResult<MarkNotificationReadMutation>;
 export type MarkNotificationReadMutationOptions = Apollo.BaseMutationOptions<MarkNotificationReadMutation, MarkNotificationReadMutationVariables>;
+export const GetPericopiesByDocumentIdDocument = gql`
+    query GetPericopiesByDocumentId($document_id: ID!) {
+  getPericopiesByDocumentId(document_id: $document_id) {
+    error
+    pericopies {
+      ...PericopeFragment
+    }
+  }
+}
+    ${PericopeFragmentFragmentDoc}`;
+
+/**
+ * __useGetPericopiesByDocumentIdQuery__
+ *
+ * To run a query within a React component, call `useGetPericopiesByDocumentIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPericopiesByDocumentIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPericopiesByDocumentIdQuery({
+ *   variables: {
+ *      document_id: // value for 'document_id'
+ *   },
+ * });
+ */
+export function useGetPericopiesByDocumentIdQuery(baseOptions: Apollo.QueryHookOptions<GetPericopiesByDocumentIdQuery, GetPericopiesByDocumentIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPericopiesByDocumentIdQuery, GetPericopiesByDocumentIdQueryVariables>(GetPericopiesByDocumentIdDocument, options);
+      }
+export function useGetPericopiesByDocumentIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPericopiesByDocumentIdQuery, GetPericopiesByDocumentIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPericopiesByDocumentIdQuery, GetPericopiesByDocumentIdQueryVariables>(GetPericopiesByDocumentIdDocument, options);
+        }
+export type GetPericopiesByDocumentIdQueryHookResult = ReturnType<typeof useGetPericopiesByDocumentIdQuery>;
+export type GetPericopiesByDocumentIdLazyQueryHookResult = ReturnType<typeof useGetPericopiesByDocumentIdLazyQuery>;
+export type GetPericopiesByDocumentIdQueryResult = Apollo.QueryResult<GetPericopiesByDocumentIdQuery, GetPericopiesByDocumentIdQueryVariables>;
+export const GetPericopeVoteStatusDocument = gql`
+    query GetPericopeVoteStatus($pericope_id: ID!) {
+  getPericopeVoteStatus(pericope_id: $pericope_id) {
+    error
+    vote_status {
+      ...PericopeVoteStatusFragment
+    }
+  }
+}
+    ${PericopeVoteStatusFragmentFragmentDoc}`;
+
+/**
+ * __useGetPericopeVoteStatusQuery__
+ *
+ * To run a query within a React component, call `useGetPericopeVoteStatusQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPericopeVoteStatusQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPericopeVoteStatusQuery({
+ *   variables: {
+ *      pericope_id: // value for 'pericope_id'
+ *   },
+ * });
+ */
+export function useGetPericopeVoteStatusQuery(baseOptions: Apollo.QueryHookOptions<GetPericopeVoteStatusQuery, GetPericopeVoteStatusQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPericopeVoteStatusQuery, GetPericopeVoteStatusQueryVariables>(GetPericopeVoteStatusDocument, options);
+      }
+export function useGetPericopeVoteStatusLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPericopeVoteStatusQuery, GetPericopeVoteStatusQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPericopeVoteStatusQuery, GetPericopeVoteStatusQueryVariables>(GetPericopeVoteStatusDocument, options);
+        }
+export type GetPericopeVoteStatusQueryHookResult = ReturnType<typeof useGetPericopeVoteStatusQuery>;
+export type GetPericopeVoteStatusLazyQueryHookResult = ReturnType<typeof useGetPericopeVoteStatusLazyQuery>;
+export type GetPericopeVoteStatusQueryResult = Apollo.QueryResult<GetPericopeVoteStatusQuery, GetPericopeVoteStatusQueryVariables>;
+export const TogglePericopeVoteStatusDocument = gql`
+    mutation TogglePericopeVoteStatus($pericope_id: ID!, $vote: Boolean!) {
+  togglePericopeVoteStatus(pericope_id: $pericope_id, vote: $vote) {
+    error
+    vote_status {
+      ...PericopeVoteStatusFragment
+    }
+  }
+}
+    ${PericopeVoteStatusFragmentFragmentDoc}`;
+export type TogglePericopeVoteStatusMutationFn = Apollo.MutationFunction<TogglePericopeVoteStatusMutation, TogglePericopeVoteStatusMutationVariables>;
+
+/**
+ * __useTogglePericopeVoteStatusMutation__
+ *
+ * To run a mutation, you first call `useTogglePericopeVoteStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTogglePericopeVoteStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [togglePericopeVoteStatusMutation, { data, loading, error }] = useTogglePericopeVoteStatusMutation({
+ *   variables: {
+ *      pericope_id: // value for 'pericope_id'
+ *      vote: // value for 'vote'
+ *   },
+ * });
+ */
+export function useTogglePericopeVoteStatusMutation(baseOptions?: Apollo.MutationHookOptions<TogglePericopeVoteStatusMutation, TogglePericopeVoteStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TogglePericopeVoteStatusMutation, TogglePericopeVoteStatusMutationVariables>(TogglePericopeVoteStatusDocument, options);
+      }
+export type TogglePericopeVoteStatusMutationHookResult = ReturnType<typeof useTogglePericopeVoteStatusMutation>;
+export type TogglePericopeVoteStatusMutationResult = Apollo.MutationResult<TogglePericopeVoteStatusMutation>;
+export type TogglePericopeVoteStatusMutationOptions = Apollo.BaseMutationOptions<TogglePericopeVoteStatusMutation, TogglePericopeVoteStatusMutationVariables>;
+export const UpsertPericopeDocument = gql`
+    mutation UpsertPericope($startWord: String!) {
+  upsertPericopies(startWords: [$startWord]) {
+    error
+    pericopies {
+      ...PericopeFragment
+    }
+  }
+}
+    ${PericopeFragmentFragmentDoc}`;
+export type UpsertPericopeMutationFn = Apollo.MutationFunction<UpsertPericopeMutation, UpsertPericopeMutationVariables>;
+
+/**
+ * __useUpsertPericopeMutation__
+ *
+ * To run a mutation, you first call `useUpsertPericopeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertPericopeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertPericopeMutation, { data, loading, error }] = useUpsertPericopeMutation({
+ *   variables: {
+ *      startWord: // value for 'startWord'
+ *   },
+ * });
+ */
+export function useUpsertPericopeMutation(baseOptions?: Apollo.MutationHookOptions<UpsertPericopeMutation, UpsertPericopeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertPericopeMutation, UpsertPericopeMutationVariables>(UpsertPericopeDocument, options);
+      }
+export type UpsertPericopeMutationHookResult = ReturnType<typeof useUpsertPericopeMutation>;
+export type UpsertPericopeMutationResult = Apollo.MutationResult<UpsertPericopeMutation>;
+export type UpsertPericopeMutationOptions = Apollo.BaseMutationOptions<UpsertPericopeMutation, UpsertPericopeMutationVariables>;
 export const PhraseDefinitionReadDocument = gql`
     query PhraseDefinitionRead($id: ID!) {
   phraseDefinitionRead(id: $id) {
@@ -8415,6 +8687,8 @@ export const namedOperations = {
     IsAdminLoggedIn: 'IsAdminLoggedIn',
     GetMapVoteStatus: 'GetMapVoteStatus',
     ListNotifications: 'ListNotifications',
+    GetPericopiesByDocumentId: 'GetPericopiesByDocumentId',
+    GetPericopeVoteStatus: 'GetPericopeVoteStatus',
     PhraseDefinitionRead: 'PhraseDefinitionRead',
     GetPhrasesByLanguage: 'GetPhrasesByLanguage',
     GetPhraseDefinitionsByPhraseId: 'GetPhraseDefinitionsByPhraseId',
@@ -8472,6 +8746,8 @@ export const namedOperations = {
     AddNotification: 'AddNotification',
     DeleteNotification: 'DeleteNotification',
     MarkNotificationRead: 'MarkNotificationRead',
+    TogglePericopeVoteStatus: 'TogglePericopeVoteStatus',
+    UpsertPericope: 'UpsertPericope',
     PhraseDefinitionUpsert: 'PhraseDefinitionUpsert',
     TogglePhraseDefinitionVoteStatus: 'TogglePhraseDefinitionVoteStatus',
     TogglePhraseVoteStatus: 'TogglePhraseVoteStatus',
@@ -8527,6 +8803,8 @@ export const namedOperations = {
     WordWithDefinitionFragment: 'WordWithDefinitionFragment',
     PhraseWithDefinitionFragment: 'PhraseWithDefinitionFragment',
     MapVoteStatusFragment: 'MapVoteStatusFragment',
+    PericopeFragment: 'PericopeFragment',
+    PericopeVoteStatusFragment: 'PericopeVoteStatusFragment',
     PhraseFragment: 'PhraseFragment',
     PhraseDefinitionFragment: 'PhraseDefinitionFragment',
     PhraseWithDefinitionsFragment: 'PhraseWithDefinitionsFragment',
