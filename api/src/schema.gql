@@ -148,6 +148,9 @@ enum ErrorType {
   PasswordInvalid
   PasswordTooLong
   PasswordTooShort
+  PericopeInsertFailed
+  PericopeNotFound
+  PericopeVoteToggleFailed
   PhraseDefinitionAlreadyExists
   PhraseDefinitionNotFound
   PhraseDefinitionVoteNotFound
@@ -576,6 +579,7 @@ type Mutation {
   threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   toggleMapVoteStatus(is_original: Boolean!, map_id: ID!, vote: Boolean!): MapVoteStatusOutputRow!
+  togglePericopeVoteStatus(pericope_id: ID!, vote: Boolean!): PericopeVoteStatusOutput!
   togglePhraseDefinitionVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
   togglePhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!, vote: Boolean!): PhraseToPhraseTranslationVoteStatusOutputRow!
   togglePhraseToWordTrVoteStatus(phrase_to_word_translation_id: ID!, vote: Boolean!): PhraseToWordTranslationVoteStatusOutputRow!
@@ -595,6 +599,7 @@ type Mutation {
   uploadFile(file: Upload!, file_size: Int!, file_type: String!): IFileOutput!
   upsertAnswers(input: [AnswerUpsertInput!]!): AnswersOutput!
   upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): TranslationOutput!
+  upsertPericopies(startWords: [String!]!): PericopiesOutput!
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(input: FromPhraseAndDefintionlikeStringUpsertInput!): PhraseDefinitionOutput!
   upsertQuestionItems(items: [String!]!): QuestionItemsOutput!
   upsertQuestions(input: [QuestionUpsertInput!]!): QuestionsOutput!
@@ -646,6 +651,42 @@ type PageInfo {
 input PasswordResetFormInput {
   password: String!
   token: String!
+}
+
+type Pericope {
+  pericope_id: ID!
+  start_word: String!
+}
+
+type PericopeVote {
+  last_updated_at: DateTime!
+  pericope_id: ID!
+  pericope_vote_id: ID!
+  user_id: ID!
+  vote: Boolean!
+}
+
+type PericopeVoteStatus {
+  downvotes: Int!
+  pericope_id: ID!
+  upvotes: Int!
+}
+
+type PericopeVoteStatusOutput {
+  error: ErrorType!
+  vote_status: PericopeVoteStatus
+}
+
+type PericopeWithVote {
+  downvotes: Int!
+  pericope_id: ID!
+  start_word: String!
+  upvotes: Int!
+}
+
+type PericopiesOutput {
+  error: ErrorType!
+  pericopies: [Pericope]!
 }
 
 type Phrase {
@@ -935,6 +976,8 @@ type Query {
   getMapWordOrPhraseAsOrigByDefinitionId(input: GetMapWordOrPhraseByDefinitionIdInput!): MapWordOrPhraseAsOrigOutput!
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
+  getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
+  getPericopeWithVotesByDocumentId(document_id: ID!): PericopiesOutput!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getPhraseDefinitionsByFlag(after: ID, first: Int, flag_name: FlagType!): PhraseDefinitionListConnection!
   getPhraseDefinitionsByLanguage(input: LanguageInput!): PhraseDefinitionWithVoteListOutput!
@@ -976,6 +1019,7 @@ type Query {
   postReadResolver(input: PostReadInput!): PostReadOutput!
   postsByParent(input: PostsByParentInput!): PostsByParentOutput!
   readAnswers(ids: [ID!]!): AnswersOutput!
+  readPericopies(ids: [ID!]!): PericopiesOutput!
   readQuestionItems(ids: [ID!]!): QuestionItemsOutput!
   readQuestions(ids: [ID!]!): QuestionsOutput!
   readWordRanges(ids: [ID!]!): WordRangesOutput!

@@ -26,6 +26,7 @@ import { DocumentsModule } from './components/documents/documents.module';
 import { FlagsModule } from './components/flag/flags.module';
 import { FileModule } from './components/file/file.module';
 import { QuestionAndAnswersModule } from './components/question-answer/question-answer.module';
+import { PericopiesModule } from './components/pericopies/pericopies.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { QuestionAndAnswersModule } from './components/question-answer/question-
     FlagsModule,
     FileModule,
     QuestionAndAnswersModule,
+    PericopiesModule,
   ],
   controllers: [],
   providers: [],

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
 import { pgClientOrPool } from 'src/common/utility';
@@ -74,7 +74,7 @@ export class AnswersService {
         }),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -95,7 +95,7 @@ export class AnswersService {
 
       return this.convertQueryResultToAnswers(res.rows, pgClient);
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -116,7 +116,7 @@ export class AnswersService {
 
       return this.convertQueryResultToAnswers(res.rows, pgClient);
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -167,7 +167,7 @@ export class AnswersService {
         pgClient,
       );
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
