@@ -43,6 +43,25 @@ export function getPericopiesObjByIds({
   ];
 }
 
+export function getPericopiesObjByDocumentId(id: number): [string, [number]] {
+  return [
+    `
+      select
+        pericope_id,
+        start_word
+      from pericopies
+      join (
+        select 
+          document_word_entry_id
+        from document_word_entries
+        where document_word_entries.document_id = $1
+      ) as dwes
+      on pericopies.start_word = dwes.document_word_entry_id;
+    `,
+    [id],
+  ];
+}
+
 export type GetPericopeVoteStatus = {
   pericope_id: string;
   upvotes: number;

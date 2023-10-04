@@ -27,6 +27,18 @@ export class PericopiesResolver {
     );
   }
 
+  @Query(() => PericopiesOutput)
+  async getPericopeWithVotesByDocumentId(
+    @Args('document_id', { type: () => ID }) document_id: string,
+  ): Promise<PericopiesOutput> {
+    Logger.log('getPericopeWithVotesByDocumentId, document_id:', document_id);
+
+    return this.pericopiesService.getPericopeWithVotesByDocumentId(
+      +document_id,
+      null,
+    );
+  }
+
   @Mutation(() => PericopiesOutput)
   async upsertPericopies(
     @Args('startWords', { type: () => [String] })

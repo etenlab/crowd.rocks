@@ -6,18 +6,23 @@ import { pgClientOrPool } from 'src/common/utility';
 import { ErrorType } from 'src/common/types';
 
 import { PostgresService } from 'src/core/postgres.service';
-import { PericopiesOutput } from './types';
+import { PericopeVotesService } from './pericope-votes.service';
 
+import { PericopiesOutput } from './types';
 import {
   PericopeUpsertsProcedureOutput,
   callPericopeUpsertsProcedure,
   GetPericopiesObjectRow,
   getPericopiesObjByIds,
+  getPericopiesObjByDocumentId,
 } from './sql-string';
 
 @Injectable()
 export class PericopiesService {
-  constructor(private pg: PostgresService) {}
+  constructor(
+    private pg: PostgresService,
+    private pericopeVoteService: PericopeVotesService,
+  ) {}
 
   async reads(
     ids: number[],
@@ -89,6 +94,32 @@ export class PericopiesService {
             start_word: startWords[index] + '',
           };
         }),
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      pericopies: [],
+    };
+  }
+
+  async getPericopeWithVotesByDocumentId(
+    document_id: number,
+    pgClient,
+  ): Promise<PericopiesOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetPericopiesObjectRow>(
+        ...getPericopiesObjByDocumentId(document_id),
+      );
+
+      return {
+        error: ErrorType.NoError,
+        pericopies: res.rows,
       };
     } catch (e) {
       Logger.error(e);
