@@ -94,6 +94,7 @@ export function DocumentsPage() {
           position: 'top',
           color: 'danger',
         });
+        dismissLoader();
         console.log(`S3 upload error `, uploadResult.data?.uploadFile.error);
         return;
       }
