@@ -105,7 +105,7 @@ export class PericopiesService {
     };
   }
 
-  async getPericopeWithVotesByDocumentId(
+  async getPericopiesByDocumentId(
     document_id: number,
     pgClient,
   ): Promise<PericopiesOutput> {
