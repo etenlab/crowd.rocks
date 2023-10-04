@@ -87,7 +87,7 @@ export const BaseDocumentViewer = memo(function BaseDocumentViewerPure({
                 ? isDot
                   ? onClickWord(entry.id, index, e)
                   : null
-                : onClickWord(entry.id, index)
+                : onClickWord(entry.id, index, e)
             }
             style={{ color, cursor }}
           >

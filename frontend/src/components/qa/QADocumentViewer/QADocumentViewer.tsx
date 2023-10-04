@@ -34,7 +34,7 @@ import { QuestionForm } from './QuestionForm';
 import { AnswerList } from './AnswerList';
 import { QuestionsMenu } from './QuestionsMenu';
 
-type RangeItem = {
+export type RangeItem = {
   entryId: string;
   order: number;
 };

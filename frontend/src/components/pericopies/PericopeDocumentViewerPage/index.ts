@@ -1,0 +1,1 @@
+export { PericopeDocumentViewerPage } from './PericopeDocumentViewerPage';

@@ -147,6 +147,7 @@ export enum TableNameType {
   word_ranges = 'word_ranges',
   original_maps = 'original_maps',
   translated_maps = 'translated_maps',
+  pericopies = 'pericopies',
 }
 
 registerEnumType(TableNameType, {

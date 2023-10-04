@@ -28,15 +28,12 @@ export class PericopiesResolver {
   }
 
   @Query(() => PericopiesOutput)
-  async getPericopeWithVotesByDocumentId(
+  async getPericopiesByDocumentId(
     @Args('document_id', { type: () => ID }) document_id: string,
   ): Promise<PericopiesOutput> {
-    Logger.log('getPericopeWithVotesByDocumentId, document_id:', document_id);
+    Logger.log('getPericopiesByDocumentId, document_id:', document_id);
 
-    return this.pericopiesService.getPericopeWithVotesByDocumentId(
-      +document_id,
-      null,
-    );
+    return this.pericopiesService.getPericopiesByDocumentId(+document_id, null);
   }
 
   @Mutation(() => PericopiesOutput)
