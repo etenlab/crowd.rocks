@@ -558,8 +558,8 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
         <IonContent className="ion-padding">
           {tr(
             `You are about to reset map translation data. All original_map_words and translated_maps
-            will be deleted and then they will be recreated by reprocessing every map original map,
-            like each one of them was uploaded.`,
+            will be deleted and then they will be recreated by reprocessing every original map,
+            like each one of them was uploaded again.`,
           )}
         </IonContent>
       </IonModal>

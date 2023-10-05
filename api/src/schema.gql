@@ -355,6 +355,7 @@ input GetOrigMapListInput {
 }
 
 input GetOrigMapWordsAndPhrasesInput {
+  filter: String
   lang: LanguageInput!
 }
 

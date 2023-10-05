@@ -36,7 +36,7 @@ export class LiltTranslateService implements ITranslator {
     to: LanguageInput,
   ): Promise<string> {
     //todo
-    return origStr;
+    return '';
   }
 
   processApiCall = async (
