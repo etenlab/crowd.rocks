@@ -395,6 +395,7 @@ export type GetOrigMapListInput = {
 };
 
 export type GetOrigMapWordsAndPhrasesInput = {
+  filter?: InputMaybe<Scalars['String']['input']>;
   lang: LanguageInput;
 };
 
@@ -3097,6 +3098,7 @@ export type PhraseWithDefinitionFragmentFragment = { __typename?: 'PhraseWithDef
 
 export type GetOrigMapWordsAndPhrasesQueryVariables = Exact<{
   lang: LanguageInput;
+  filter?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -5967,8 +5969,12 @@ export type DeleteForumMutationHookResult = ReturnType<typeof useDeleteForumMuta
 export type DeleteForumMutationResult = Apollo.MutationResult<DeleteForumMutation>;
 export type DeleteForumMutationOptions = Apollo.BaseMutationOptions<DeleteForumMutation, DeleteForumMutationVariables>;
 export const GetOrigMapWordsAndPhrasesDocument = gql`
-    query GetOrigMapWordsAndPhrases($lang: LanguageInput!, $after: ID, $first: Int) {
-  getOrigMapWordsAndPhrases(input: {lang: $lang}, after: $after, first: $first) {
+    query GetOrigMapWordsAndPhrases($lang: LanguageInput!, $filter: String, $after: ID, $first: Int) {
+  getOrigMapWordsAndPhrases(
+    input: {lang: $lang, filter: $filter}
+    after: $after
+    first: $first
+  ) {
     edges {
       ...MapWordsAndPhrasesEdgeFragment
     }
@@ -5995,6 +6001,7 @@ export const GetOrigMapWordsAndPhrasesDocument = gql`
  * const { data, loading, error } = useGetOrigMapWordsAndPhrasesQuery({
  *   variables: {
  *      lang: // value for 'lang'
+ *      filter: // value for 'filter'
  *      after: // value for 'after'
  *      first: // value for 'first'
  *   },

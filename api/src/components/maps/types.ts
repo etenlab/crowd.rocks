@@ -85,6 +85,7 @@ export class GetMapDetailsInput {
 @InputType()
 export class GetOrigMapWordsAndPhrasesInput {
   @Field(() => LanguageInput) lang: LanguageInput;
+  @Field(() => String, { nullable: true }) filter: string | null;
 }
 
 @ObjectType()
