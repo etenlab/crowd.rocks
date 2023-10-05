@@ -56,6 +56,11 @@ export class PostReadOutput extends GenericOutput {
   @Field(() => Post, { nullable: true }) post: Post | null;
 }
 
+@ObjectType()
+export class PostCountOutput extends GenericOutput {
+  @Field(() => Number) total: number;
+}
+
 @InputType()
 export class VersionCreateInput {
   @Field(() => Int) post_id: number;

@@ -316,6 +316,8 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
                   translation.to_type_is_word ? 'words' : 'phrases'
                 }/${translation.to_word_or_phrase_id}`,
               ),
+            parent_id: translation.to_word_or_phrase_id,
+            parent_table: translation.to_type_is_word ? 'words' : 'phrases',
           }}
           flags={{
             parent_table: translation.to_type_is_word

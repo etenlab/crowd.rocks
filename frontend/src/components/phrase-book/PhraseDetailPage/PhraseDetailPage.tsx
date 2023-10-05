@@ -136,6 +136,8 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
           }}
           voteFor="description"
           discussion={{
+            parent_id: definition.phrase_definition_id,
+            parent_table: 'phrase_definitions',
             onChatClick: () =>
               router.push(
                 // TODO: maybe can extract the sender from the router in discussion page

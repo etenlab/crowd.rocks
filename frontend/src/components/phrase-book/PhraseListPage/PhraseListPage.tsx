@@ -204,6 +204,8 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
               },
             }}
             discussion={{
+              parent_id: phrase.phrase_id,
+              parent_table: 'phrases',
               onChatClick: () =>
                 router.push(
                   `/${match.params.nation_id}/${match.params.language_id}/1/discussion/phrases/${phrase.phrase_id}`,

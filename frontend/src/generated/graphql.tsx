@@ -1408,6 +1408,12 @@ export type Post = {
   post_id: Scalars['ID']['output'];
 };
 
+export type PostCountOutput = {
+  __typename?: 'PostCountOutput';
+  error: ErrorType;
+  total: Scalars['Float']['output'];
+};
+
 export type PostCreateInput = {
   content: Scalars['String']['input'];
   file_id?: InputMaybe<Scalars['ID']['input']>;
@@ -1488,6 +1494,7 @@ export type Query = {
   getRecommendedTranslationFromDefinitionID: TranslationWithVoteOutput;
   getRecommendedTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteOutput;
   getSiteTextTranslationVoteStatus: SiteTextTranslationVoteStatusOutputRow;
+  getTotalPosts: PostCountOutput;
   getTranslationsByFromDefinitionId: TranslationWithVoteListOutput;
   getWordDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   getWordDefinitionsByFlag: WordDefinitionListConnection;
@@ -1745,6 +1752,11 @@ export type QueryGetSiteTextTranslationVoteStatusArgs = {
   from_type_is_word: Scalars['Boolean']['input'];
   to_type_is_word: Scalars['Boolean']['input'];
   translation_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetTotalPostsArgs = {
+  input: PostsByParentInput;
 };
 
 
@@ -2717,6 +2729,14 @@ export type WordlikeString = {
 export type UserFieldsFragment = { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null };
 
 export type PostFieldsFragment = { __typename?: 'Post', post_id: string, content: string, created_at: any, file_url?: string | null, file_type?: string | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } };
+
+export type GetTotalPostsQueryVariables = Exact<{
+  parent_id: Scalars['ID']['input'];
+  parent_name: Scalars['String']['input'];
+}>;
+
+
+export type GetTotalPostsQuery = { __typename?: 'Query', getTotalPosts: { __typename?: 'PostCountOutput', error: ErrorType, total: number } };
 
 export type PostsByParentQueryVariables = Exact<{
   parent_id: Scalars['ID']['input'];
@@ -4367,6 +4387,43 @@ export const PhraseToPhraseTranslationVoteStatusFragmentFragmentDoc = gql`
   downvotes
 }
     `;
+export const GetTotalPostsDocument = gql`
+    query GetTotalPosts($parent_id: ID!, $parent_name: String!) {
+  getTotalPosts(input: {parent_name: $parent_name, parent_id: $parent_id}) {
+    error
+    total
+  }
+}
+    `;
+
+/**
+ * __useGetTotalPostsQuery__
+ *
+ * To run a query within a React component, call `useGetTotalPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetTotalPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetTotalPostsQuery({
+ *   variables: {
+ *      parent_id: // value for 'parent_id'
+ *      parent_name: // value for 'parent_name'
+ *   },
+ * });
+ */
+export function useGetTotalPostsQuery(baseOptions: Apollo.QueryHookOptions<GetTotalPostsQuery, GetTotalPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetTotalPostsQuery, GetTotalPostsQueryVariables>(GetTotalPostsDocument, options);
+      }
+export function useGetTotalPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTotalPostsQuery, GetTotalPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetTotalPostsQuery, GetTotalPostsQueryVariables>(GetTotalPostsDocument, options);
+        }
+export type GetTotalPostsQueryHookResult = ReturnType<typeof useGetTotalPostsQuery>;
+export type GetTotalPostsLazyQueryHookResult = ReturnType<typeof useGetTotalPostsLazyQuery>;
+export type GetTotalPostsQueryResult = Apollo.QueryResult<GetTotalPostsQuery, GetTotalPostsQueryVariables>;
 export const PostsByParentDocument = gql`
     query PostsByParent($parent_id: ID!, $parent_name: String!) {
   postsByParent(input: {parent_id: $parent_id, parent_name: $parent_name}) {
@@ -8670,6 +8727,7 @@ export type GetFileUploadUrlQueryResult = Apollo.QueryResult<GetFileUploadUrlQue
     
 export const namedOperations = {
   Query: {
+    GetTotalPosts: 'GetTotalPosts',
     PostsByParent: 'PostsByParent',
     WordDefinitionRead: 'WordDefinitionRead',
     GetWordsByLanguage: 'GetWordsByLanguage',

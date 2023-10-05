@@ -5,12 +5,11 @@ import {
   IonCardTitle,
 } from '@ionic/react';
 import { styled } from 'styled-components';
-import { StChatIcon } from '../common/styled';
-import { chatbubbleEllipsesSharp } from 'ionicons/icons';
 import { VoteButtonsVertical } from '../common/VoteButtonsVertical/VoteButtonsVertical';
 import { TableNameType } from '../../generated/graphql';
 import { Flag } from '../flags/Flag';
 import { FlagName } from '../flags/flagGroups';
+import { Chat } from '../chat/Chat';
 
 type TWordCardProps = {
   value?: string | null;
@@ -19,6 +18,8 @@ type TWordCardProps = {
   routerLink?: string;
   discussion?: {
     onChatClick: () => void;
+    parent_id: string;
+    parent_table: string;
   };
   vote?: {
     upVotes: number;
@@ -43,9 +44,10 @@ export const WordOrPhraseCard = ({
   flags,
 }: TWordCardProps) => {
   const chatButton = discussion ? (
-    <StChatIcon
-      icon={chatbubbleEllipsesSharp}
-      onClick={() => discussion.onChatClick && discussion.onChatClick()}
+    <Chat
+      parent_id={discussion.parent_id}
+      parent_table={discussion.parent_table}
+      onClick={discussion.onChatClick}
     />
   ) : null;
   const voteButtonCom = vote ? <VoteButtonsVertical {...vote} /> : null;
