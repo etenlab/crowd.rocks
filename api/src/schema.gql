@@ -571,7 +571,6 @@ type Mutation {
   register(input: RegisterInput!): RegisterOutput!
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
   siteTextPhraseDefinitionUpsert(phrase_definition_id: ID!): SiteTextPhraseDefinitionOutput!
-  siteTextTranslationVoteUpsert(from_type_is_word: Boolean!, to_type_is_word: Boolean!, translation_id: ID!, vote: Boolean!): SiteTextTranslationVoteOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextDefinitionOutput!
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
   stopGoogleTranslation: GenericOutput!
@@ -1025,7 +1024,6 @@ type Query {
   readQuestions(ids: [ID!]!): QuestionsOutput!
   readWordRanges(ids: [ID!]!): WordRangesOutput!
   siteTextPhraseDefinitionRead(id: String!): SiteTextPhraseDefinitionOutput!
-  siteTextTranslationVoteRead(id: String!): SiteTextTranslationVoteOutput!
   siteTextWordDefinitionRead(id: String!): SiteTextWordDefinitionOutput!
   threadRead(input: ThreadReadInput!): ThreadReadOutput!
   threads(input: ThreadListInput!): ThreadListOutput!
@@ -1185,21 +1183,6 @@ input SiteTextTranslationUpsertInput {
   language_code: String!
   site_text_id: ID!
   translationlike_string: String!
-}
-
-type SiteTextTranslationVote {
-  from_type_is_word: Boolean!
-  last_updated_at: DateTime!
-  site_text_translation_vote_id: ID!
-  to_type_is_word: Boolean!
-  translation_id: ID!
-  user_id: ID!
-  vote: Boolean!
-}
-
-type SiteTextTranslationVoteOutput {
-  error: ErrorType!
-  site_text_translation_vote: SiteTextTranslationVote
 }
 
 type SiteTextTranslationVoteStatus {

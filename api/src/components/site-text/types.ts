@@ -114,12 +114,6 @@ export class SiteTextTranslationVote {
 }
 
 @ObjectType()
-export class SiteTextTranslationVoteOutput extends GenericOutput {
-  @Field(() => SiteTextTranslationVote, { nullable: true })
-  site_text_translation_vote: SiteTextTranslationVote | null;
-}
-
-@ObjectType()
 export class SiteTextTranslationVoteStatus {
   @Field(() => ID) translation_id: string;
   @Field(() => Boolean) from_type_is_word: boolean;

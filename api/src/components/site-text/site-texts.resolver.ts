@@ -19,7 +19,6 @@ import {
   SiteTextTranslationsToInput,
   SiteTextDefinitionListOutput,
   SiteTextTranslationUpsertInput,
-  SiteTextTranslationVoteOutput,
   SiteTextTranslationVoteStatusOutputRow,
   SiteTextLanguageListOutput,
   SiteTextTranslationWithVoteListOutput,
@@ -145,15 +144,6 @@ export class SiteTextsResolver {
     );
   }
 
-  @Query(() => SiteTextTranslationVoteOutput)
-  async siteTextTranslationVoteRead(
-    @Args('id') id: string,
-  ): Promise<SiteTextTranslationVoteOutput> {
-    console.log('site text translation vote read resolver, id:', id);
-
-    return this.siteTextTranslationVoteService.read(+id, null);
-  }
-
   @Query(() => SiteTextTranslationVoteStatusOutputRow)
   async getSiteTextTranslationVoteStatus(
     @Args('translation_id', { type: () => ID })
@@ -191,42 +181,6 @@ export class SiteTextsResolver {
     console.log('toggleSiteTextTranslationVoteStatus resolver');
 
     return this.siteTextTranslationVoteService.toggleVoteStatus(
-      +translation_id,
-      from_type_is_word,
-      to_type_is_word,
-      vote,
-      getBearer(req) || '',
-      null,
-    );
-  }
-
-  @Mutation(() => SiteTextTranslationVoteOutput)
-  async siteTextTranslationVoteUpsert(
-    @Args('translation_id', { type: () => ID })
-    translation_id: string,
-    @Args('from_type_is_word', { type: () => Boolean })
-    from_type_is_word: boolean,
-    @Args('to_type_is_word', { type: () => Boolean })
-    to_type_is_word: boolean,
-    @Args('vote')
-    vote: boolean,
-    @Context() req: any,
-  ): Promise<SiteTextTranslationVoteOutput> {
-    console.log(
-      `site text translation vote upsert resolver`,
-      JSON.stringify(
-        {
-          translation_id,
-          from_type_is_word,
-          to_type_is_word,
-          vote,
-        },
-        null,
-        2,
-      ),
-    );
-
-    return this.siteTextTranslationVoteService.upsert(
       +translation_id,
       from_type_is_word,
       to_type_is_word,

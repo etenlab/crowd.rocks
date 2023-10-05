@@ -61,3 +61,5 @@ create table pericope_votes(
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, pericope_id)
 );
+
+drop table site_text_translation_votes;
