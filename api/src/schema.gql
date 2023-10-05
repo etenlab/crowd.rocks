@@ -355,6 +355,7 @@ input GetOrigMapListInput {
 }
 
 input GetOrigMapWordsAndPhrasesInput {
+  filter: String
   lang: LanguageInput!
 }
 
@@ -982,7 +983,7 @@ type Query {
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
-  getPericopeWithVotesByDocumentId(document_id: ID!): PericopiesOutput!
+  getPericopiesByDocumentId(document_id: ID!): PericopiesOutput!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getPhraseDefinitionsByFlag(after: ID, first: Int, flag_name: FlagType!): PhraseDefinitionListConnection!
   getPhraseDefinitionsByLanguage(input: LanguageInput!): PhraseDefinitionWithVoteListOutput!
@@ -1304,6 +1305,7 @@ enum TableNameType {
   document_word_entries
   documents
   original_maps
+  pericopies
   phrase_definitions
   phrases
   translated_maps

@@ -1,4 +1,4 @@
-create or replace procedure phrase_upsert(
+create or replace procedure pericope_upsert(
   in p_start_word bigint,
   in p_token varchar(512),
   inout p_pericope_id bigint,

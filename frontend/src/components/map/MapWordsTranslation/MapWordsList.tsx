@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -15,9 +15,12 @@ import {
 import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
+  InputCustomEvent,
+  InputChangeEventDetail,
   useIonRouter,
 } from '@ionic/react';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
+import { FilterContainer, Input } from '../../common/styled';
 
 interface MapWordsTranslationProps extends RouteComponentProps {}
 export type TWordOrPhraseId = { word_id: string } | { phrase_id: string };
@@ -25,6 +28,14 @@ export type TWordOrPhraseId = { word_id: string } | { phrase_id: string };
 export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
   const { tr } = useTr();
   const router = useIonRouter();
+  const [filter, setFilter] = useState<string>('');
+
+  const handleFilterChange = useCallback(
+    (event: InputCustomEvent<InputChangeEventDetail>) => {
+      setFilter(event.detail.value || '');
+    },
+    [setFilter],
+  );
 
   const {
     states: {
@@ -35,19 +46,21 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
     actions: { setTargetLanguage },
   } = useAppContext();
 
-  const [getWordAndPhrases, { data: wordsAndPhrases, fetchMore }] =
-    useGetOrigMapWordsAndPhrasesLazyQuery({});
+  const [getWordsAndPhrases, { data: wordsAndPhrases, fetchMore }] =
+    useGetOrigMapWordsAndPhrasesLazyQuery();
 
   useEffect(() => {
-    getWordAndPhrases({
+    getWordsAndPhrases({
       variables: {
         lang: {
           language_code: DEFAULT_MAP_LANGUAGE_CODE,
         },
+        filter,
         first: PAGE_SIZE,
       },
+      fetchPolicy: 'no-cache',
     });
-  }, [getWordAndPhrases, targetLang]);
+  }, [getWordsAndPhrases, targetLang, filter]);
 
   const handleInfinite = useCallback(
     async (ev: IonInfiniteScrollCustomEvent<void>) => {
@@ -90,7 +103,7 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
       {targetLang ? (
         <>
           <Caption>{tr('Map Translation')}</Caption>
-          <LangSelectorBox>
+          <FilterContainer>
             <LangSelector
               title={tr('Select target language')}
               langSelectorId="targetLangSelector"
@@ -99,7 +112,16 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
                 setTargetLanguage(targetLangInfo);
               }}
             />
-          </LangSelectorBox>
+            <Input
+              type="text"
+              label={tr('Search')}
+              labelPlacement="floating"
+              fill="outline"
+              debounce={500}
+              value={filter}
+              onIonInput={handleFilterChange}
+            />
+          </FilterContainer>
           <WordsDiv>
             {wordsAndPhrases &&
               wordsAndPhrases.getOrigMapWordsAndPhrases.edges.map((omw, i) => (
@@ -123,10 +145,6 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
     </>
   );
 };
-
-const LangSelectorBox = styled.div`
-  margin-top: 10px;
-`;
 
 const WordsDiv = styled.div`
   margin-top: 10px;

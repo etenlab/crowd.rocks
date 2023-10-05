@@ -1,0 +1,46 @@
+fragment PericopeFragment on Pericope {
+  pericope_id
+  start_word
+}
+
+fragment PericopeVoteStatusFragment on PericopeVoteStatus {
+  pericope_id
+  upvotes
+  downvotes
+}
+
+query GetPericopiesByDocumentId($document_id: ID!) {
+  getPericopiesByDocumentId(document_id: $document_id) {
+    error
+    pericopies {
+      ...PericopeFragment
+    }
+  }
+}
+
+query GetPericopeVoteStatus($pericope_id: ID!) {
+  getPericopeVoteStatus(pericope_id: $pericope_id) {
+    error
+    vote_status {
+      ...PericopeVoteStatusFragment
+    }
+  }
+}
+
+mutation TogglePericopeVoteStatus($pericope_id: ID!, $vote: Boolean!) {
+  togglePericopeVoteStatus(pericope_id: $pericope_id, vote: $vote) {
+    error
+    vote_status {
+      ...PericopeVoteStatusFragment
+    }
+  }
+}
+
+mutation UpsertPericope($startWord: String!) {
+  upsertPericopies(startWords: [$startWord]) {
+    error
+    pericopies {
+      ...PericopeFragment
+    }
+  }
+}

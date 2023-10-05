@@ -1,0 +1,1 @@
+export { PericopeDocumentListPage } from './PericopeDocumentListPage';

@@ -1051,7 +1051,7 @@ export class TranslationsService {
         } else {
           continue;
         }
-        console.log(`upvote: ${translationId}`);
+        //console.log(`upvote: ${translationId}`);
 
         await setTranslationsVotes(
           upsertInput[i].from_definition_type_is_word,
@@ -1492,7 +1492,7 @@ export class TranslationsService {
           // process: the same translation was made by someone else
           else {
             upVoteCount++;
-            console.log(`upvote ${otherSameTranslations[0].translationId}`);
+            //console.log(`upvote ${otherSameTranslations[0].translationId}`);
             await setTranslationsVotes(
               true,
               isTypeWord,

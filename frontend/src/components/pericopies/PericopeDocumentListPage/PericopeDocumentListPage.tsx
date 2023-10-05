@@ -16,7 +16,7 @@ import { RowStack } from '../../common/Layout/styled';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-export function QADocumentListPage() {
+export function PericopeDocumentListPage() {
   const { tr } = useTr();
   const {
     states: {
@@ -36,7 +36,7 @@ export function QADocumentListPage() {
   const handleGoToDocumentViewer = useCallback(
     (documentId: string) => {
       history.push(
-        `/${nation_id}/${language_id}/${cluster_id}/qa/documents/${documentId}`,
+        `/${nation_id}/${language_id}/${cluster_id}/pericopies/documents/${documentId}`,
       );
     },
     [cluster_id, history, language_id, nation_id],
@@ -45,12 +45,12 @@ export function QADocumentListPage() {
   return (
     <PageLayout>
       <CaptionContainer>
-        <Caption>{tr('Question & Answer')}</Caption>
+        <Caption>{tr('Pericope Tool')}</Caption>
       </CaptionContainer>
       <FilterContainer>
         <LangSelector
           title={tr('Select language')}
-          langSelectorId="qaDocumentListLangSelector"
+          langSelectorId="pericopeDocumentLangSelector"
           selected={sourceLang ?? undefined}
           onChange={(_sourceLangTag, sourceLangInfo) => {
             setSourceLanguage(sourceLangInfo);
