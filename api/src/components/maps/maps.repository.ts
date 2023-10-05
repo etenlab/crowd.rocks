@@ -241,7 +241,7 @@ export class MapsRepository {
         content_file_url,
       }) => ({
         error: ErrorType.NoError,
-        mapFileInfo: {
+        mapDetails: {
           original_map_id,
           map_file_name,
           map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
@@ -337,7 +337,7 @@ export class MapsRepository {
         translated_percent,
       }) => ({
         error: ErrorType.NoError,
-        mapFileInfo: {
+        mapDetails: {
           translated_map_id,
           original_map_id,
           map_file_name,
@@ -403,7 +403,7 @@ export class MapsRepository {
         content_file_url,
       }) => ({
         error: ErrorType.NoError,
-        mapFileInfo: {
+        mapDetails: {
           original_map_id,
           map_file_name,
           map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
@@ -467,7 +467,7 @@ export class MapsRepository {
 
     return {
       error: ErrorType.NoError,
-      mapFileInfo: {
+      mapDetails: {
         original_map_id,
         map_file_name,
         map_file_name_with_langs: putLangCodesToFileName(map_file_name, {
@@ -521,7 +521,7 @@ export class MapsRepository {
     if (!(resQ.rows.length > 0)) {
       return {
         error: ErrorType.MapNotFound,
-        mapFileInfo: null,
+        mapDetails: null,
       };
     }
 
@@ -543,7 +543,7 @@ export class MapsRepository {
 
     return {
       error: ErrorType.NoError,
-      mapFileInfo: {
+      mapDetails: {
         original_map_id,
         translated_map_id,
         map_file_name,
@@ -1042,25 +1042,29 @@ export class MapsRepository {
     },
   ): Promise<MapWordsAndPhrasesConnection> {
     const langParams: string[] = [];
-    let languagesRestrictionClause = '';
+    let languagesFiltersRestrictionClause = '';
     let pickDataClause = '';
     if (input.lang.language_code) {
       langParams.push(input.lang.language_code);
-      languagesRestrictionClause += ` and o_language_code =  $${langParams.length} `;
+      languagesFiltersRestrictionClause += ` and o_language_code =  $${langParams.length} `;
     }
     if (input.lang.dialect_code) {
       langParams.push(input.lang.dialect_code);
-      languagesRestrictionClause += ` and o_dialect_code =  $${langParams.length} `;
+      languagesFiltersRestrictionClause += ` and o_dialect_code =  $${langParams.length} `;
     }
     if (input.lang.geo_code) {
       langParams.push(input.lang.geo_code);
-      languagesRestrictionClause += ` and o_geo_code =  $${langParams.length} `;
+      languagesFiltersRestrictionClause += ` and o_geo_code =  $${langParams.length} `;
+    }
+    if (input.filter && input.filter.length > 0) {
+      langParams.push(input.filter);
+      languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${langParams.length}),'%')`;
     }
 
     const langAndPickParams: string[] = [...langParams];
     if (after) {
       langAndPickParams.push(String(after));
-      pickDataClause += `and cursor > $${langAndPickParams.length} `;
+      pickDataClause += ` and cursor > $${langAndPickParams.length} `;
     }
     pickDataClause += ` order by cursor `;
     if (first) {
@@ -1071,24 +1075,38 @@ export class MapsRepository {
     const sqlStr = `
       select * from v_map_words_and_phrases
       where true
-      ${languagesRestrictionClause}
+      ${languagesFiltersRestrictionClause}
       ${pickDataClause}
     `;
 
     const resQ = await dbPoolClient.query(sqlStr, langAndPickParams);
 
+    if (!(resQ.rows.length > 0)) {
+      return {
+        edges: [],
+        pageInfo: {
+          startCursor: null,
+          endCursor: null,
+          hasPreviousPage: false,
+          hasNextPage: false,
+        },
+      };
+    }
+
+    // just to know if there pages after the current selection
     const sqlAfter = `
       select count(*) as count_after from v_map_words_and_phrases
       where true
-      ${languagesRestrictionClause}
+      ${languagesFiltersRestrictionClause}
       and cursor>${dbPoolClient.escapeLiteral(resQ.rows.at(-1).cursor)}
     `;
     const resCheckAfter = await dbPoolClient.query(sqlAfter, langParams);
 
+    // just to know if there pages before the current selection
     const sqlBefore = `
       select count(*) as count_before from v_map_words_and_phrases
       where true
-      ${languagesRestrictionClause}
+      ${languagesFiltersRestrictionClause}
       and cursor<${dbPoolClient.escapeLiteral(resQ.rows[0].cursor)}
     `;
     const resCheckBefore = await dbPoolClient.query(sqlBefore, langParams);

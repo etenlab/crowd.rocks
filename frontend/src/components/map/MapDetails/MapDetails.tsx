@@ -102,30 +102,29 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   }, [currMapContent?.error, present]);
 
   const handleDownloadSvg = () => {
-    if (currMapContent?.mapFileInfo) {
+    if (currMapContent?.mapDetails) {
       downloadFromUrl(
-        currMapContent?.mapFileInfo.map_file_name_with_langs,
-        currMapContent?.mapFileInfo.content_file_url,
+        currMapContent?.mapDetails.map_file_name_with_langs,
+        currMapContent?.mapDetails.content_file_url,
       );
     }
   };
 
   const langInfo = useMemo(() => {
-    if (!currMapContent?.mapFileInfo?.language.language_code) {
+    if (!currMapContent?.mapDetails?.language.language_code) {
       return undefined;
     }
     return currentMapWithContent
       ? subTags2LangInfo({
-          lang: currMapContent.mapFileInfo.language.language_code,
-          dialect:
-            currMapContent.mapFileInfo.language.dialect_code || undefined,
-          region: currMapContent.mapFileInfo.language.geo_code || undefined,
+          lang: currMapContent.mapDetails.language.language_code,
+          dialect: currMapContent.mapDetails.language.dialect_code || undefined,
+          region: currMapContent.mapDetails.language.geo_code || undefined,
         })
       : undefined;
   }, [
-    currMapContent?.mapFileInfo?.language.dialect_code,
-    currMapContent?.mapFileInfo?.language.geo_code,
-    currMapContent?.mapFileInfo?.language.language_code,
+    currMapContent?.mapDetails?.language.dialect_code,
+    currMapContent?.mapDetails?.language.geo_code,
+    currMapContent?.mapDetails?.language.language_code,
     currentMapWithContent,
   ]);
 
@@ -259,14 +258,14 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
     <>
       <Caption>
         <>
-          {tr('Map')} - {currMapContent?.mapFileInfo?.map_file_name_with_langs}
-          {currMapContent?.mapFileInfo?.is_original ? (
+          {tr('Map')} - {currMapContent?.mapDetails?.map_file_name_with_langs}
+          {currMapContent?.mapDetails?.is_original ? (
             <OrigBadge>{tr('original')}</OrigBadge>
           ) : (
             <IonBadge>
               {tr('translated to')} {langInfo2String(langInfo)}
-              {currMapContent?.mapFileInfo?.translated_percent
-                ? ` [${currMapContent.mapFileInfo.translated_percent}%]`
+              {currMapContent?.mapDetails?.translated_percent
+                ? ` [${currMapContent.mapDetails.translated_percent}%]`
                 : ''}
             </IonBadge>
           )}
@@ -285,7 +284,7 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
         {voteButtonCom}
       </StButtonsSection>
       <StyledMapImg>
-        {currMapContent?.mapFileInfo && (
+        {currMapContent?.mapDetails && (
           <>
             {imageError && <p>{tr('Error loading image')}</p>}
             <IonLoading
@@ -302,7 +301,7 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
                       style={{ userSelect: 'none' }}
                       width={`${windowWidth - 10}px`}
                       height={'auto'}
-                      src={currMapContent?.mapFileInfo?.content_file_url}
+                      src={currMapContent?.mapDetails?.content_file_url}
                       alt="Translated map"
                       placeholder="asdf"
                       onLoad={handleImageLoad}
