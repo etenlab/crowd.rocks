@@ -13,12 +13,12 @@ import { PericopeReaction } from './PericopeReaction';
 import {
   useGetPericopiesByDocumentIdQuery,
   useGetPericopeVoteStatusLazyQuery,
-  useTogglePericopeVoteStatusMutation,
   Pericope,
   ErrorType,
-  useUpsertPericopeMutation,
   TableNameType,
 } from '../../../generated/graphql';
+import { useTogglePericopeVoteStatusMutation } from '../../../hooks/useTogglePericopeVoteStatusMutation';
+import { useUpsertPericopeMutation } from '../../../hooks/useUpsertPericopeMutation';
 
 type PericopeDocumentViewerProps = {
   documentId: string;
@@ -46,7 +46,7 @@ export function PericopeDocumentViewer({
     { data: voteStatusData, error: voteStatusError },
   ] = useGetPericopeVoteStatusLazyQuery();
   const [togglePericopeVoteStatus] = useTogglePericopeVoteStatusMutation();
-  const [upsertPericope] = useUpsertPericopeMutation();
+  const [upsertPericope] = useUpsertPericopeMutation(documentId);
 
   const popoverRef = useRef<HTMLIonPopoverElement>(null);
 

@@ -123,4 +123,10 @@ export const typePolicies: TypePolicies = {
   Answer: {
     keyFields: ['answer_id'],
   },
+  Pericope: {
+    keyFields: ['pericope_id'],
+  },
+  PericopeVoteStatus: {
+    keyFields: ['pericope_id'],
+  },
 };
