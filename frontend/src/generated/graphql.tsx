@@ -172,6 +172,9 @@ export enum ErrorType {
   PasswordInvalid = 'PasswordInvalid',
   PasswordTooLong = 'PasswordTooLong',
   PasswordTooShort = 'PasswordTooShort',
+  PericopeInsertFailed = 'PericopeInsertFailed',
+  PericopeNotFound = 'PericopeNotFound',
+  PericopeVoteToggleFailed = 'PericopeVoteToggleFailed',
   PhraseDefinitionAlreadyExists = 'PhraseDefinitionAlreadyExists',
   PhraseDefinitionNotFound = 'PhraseDefinitionNotFound',
   PhraseDefinitionVoteNotFound = 'PhraseDefinitionVoteNotFound',
@@ -641,6 +644,7 @@ export type Mutation = {
   threadUpsert: ThreadUpsertOutput;
   toggleFlagWithRef: FlagsOutput;
   toggleMapVoteStatus: MapVoteStatusOutputRow;
+  togglePericopeVoteStatus: PericopeVoteStatusOutput;
   togglePhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   togglePhraseToPhraseTrVoteStatus: PhraseToPhraseTranslationVoteStatusOutputRow;
   togglePhraseToWordTrVoteStatus: PhraseToWordTranslationVoteStatusOutputRow;
@@ -660,6 +664,7 @@ export type Mutation = {
   uploadFile: IFileOutput;
   upsertAnswers: AnswersOutput;
   upsertFromTranslationlikeString: TranslationOutput;
+  upsertPericopies: PericopiesOutput;
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString: PhraseDefinitionOutput;
   upsertQuestionItems: QuestionItemsOutput;
   upsertQuestions: QuestionsOutput;
@@ -857,6 +862,12 @@ export type MutationToggleMapVoteStatusArgs = {
 };
 
 
+export type MutationTogglePericopeVoteStatusArgs = {
+  pericope_id: Scalars['ID']['input'];
+  vote: Scalars['Boolean']['input'];
+};
+
+
 export type MutationTogglePhraseDefinitionVoteStatusArgs = {
   phrase_definition_id: Scalars['ID']['input'];
   vote: Scalars['Boolean']['input'];
@@ -974,6 +985,11 @@ export type MutationUpsertFromTranslationlikeStringArgs = {
 };
 
 
+export type MutationUpsertPericopiesArgs = {
+  startWords: Array<Scalars['String']['input']>;
+};
+
+
 export type MutationUpsertPhraseDefinitionFromPhraseAndDefinitionlikeStringArgs = {
   input: FromPhraseAndDefintionlikeStringUpsertInput;
 };
@@ -1087,6 +1103,48 @@ export type PageInfo = {
 export type PasswordResetFormInput = {
   password: Scalars['String']['input'];
   token: Scalars['String']['input'];
+};
+
+export type Pericope = {
+  __typename?: 'Pericope';
+  pericope_id: Scalars['ID']['output'];
+  start_word: Scalars['String']['output'];
+};
+
+export type PericopeVote = {
+  __typename?: 'PericopeVote';
+  last_updated_at: Scalars['DateTime']['output'];
+  pericope_id: Scalars['ID']['output'];
+  pericope_vote_id: Scalars['ID']['output'];
+  user_id: Scalars['ID']['output'];
+  vote: Scalars['Boolean']['output'];
+};
+
+export type PericopeVoteStatus = {
+  __typename?: 'PericopeVoteStatus';
+  downvotes: Scalars['Int']['output'];
+  pericope_id: Scalars['ID']['output'];
+  upvotes: Scalars['Int']['output'];
+};
+
+export type PericopeVoteStatusOutput = {
+  __typename?: 'PericopeVoteStatusOutput';
+  error: ErrorType;
+  vote_status?: Maybe<PericopeVoteStatus>;
+};
+
+export type PericopeWithVote = {
+  __typename?: 'PericopeWithVote';
+  downvotes: Scalars['Int']['output'];
+  pericope_id: Scalars['ID']['output'];
+  start_word: Scalars['String']['output'];
+  upvotes: Scalars['Int']['output'];
+};
+
+export type PericopiesOutput = {
+  __typename?: 'PericopiesOutput';
+  error: ErrorType;
+  pericopies: Array<Maybe<Pericope>>;
 };
 
 export type Phrase = {
@@ -1349,6 +1407,12 @@ export type Post = {
   post_id: Scalars['ID']['output'];
 };
 
+export type PostCountOutput = {
+  __typename?: 'PostCountOutput';
+  error: ErrorType;
+  total: Scalars['Float']['output'];
+};
+
 export type PostCreateInput = {
   content: Scalars['String']['input'];
   file_id?: InputMaybe<Scalars['ID']['input']>;
@@ -1411,6 +1475,8 @@ export type Query = {
   getMapWordOrPhraseAsOrigByDefinitionId: MapWordOrPhraseAsOrigOutput;
   getOrigMapWordsAndPhrases: MapWordsAndPhrasesConnection;
   getOrigMapsList: GetOrigMapsListOutput;
+  getPericopeVoteStatus: PericopeVoteStatusOutput;
+  getPericopeWithVotesByDocumentId: PericopiesOutput;
   getPhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   getPhraseDefinitionsByFlag: PhraseDefinitionListConnection;
   getPhraseDefinitionsByLanguage: PhraseDefinitionWithVoteListOutput;
@@ -1427,6 +1493,7 @@ export type Query = {
   getRecommendedTranslationFromDefinitionID: TranslationWithVoteOutput;
   getRecommendedTranslationFromSiteTextDefinitionID: SiteTextTranslationWithVoteOutput;
   getSiteTextTranslationVoteStatus: SiteTextTranslationVoteStatusOutputRow;
+  getTotalPosts: PostCountOutput;
   getTranslationsByFromDefinitionId: TranslationWithVoteListOutput;
   getWordDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   getWordDefinitionsByFlag: WordDefinitionListConnection;
@@ -1452,6 +1519,7 @@ export type Query = {
   postReadResolver: PostReadOutput;
   postsByParent: PostsByParentOutput;
   readAnswers: AnswersOutput;
+  readPericopies: PericopiesOutput;
   readQuestionItems: QuestionItemsOutput;
   readQuestions: QuestionsOutput;
   readWordRanges: WordRangesOutput;
@@ -1581,6 +1649,16 @@ export type QueryGetOrigMapsListArgs = {
 };
 
 
+export type QueryGetPericopeVoteStatusArgs = {
+  pericope_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetPericopeWithVotesByDocumentIdArgs = {
+  document_id: Scalars['ID']['input'];
+};
+
+
 export type QueryGetPhraseDefinitionVoteStatusArgs = {
   phrase_definition_id: Scalars['ID']['input'];
 };
@@ -1673,6 +1751,11 @@ export type QueryGetSiteTextTranslationVoteStatusArgs = {
   from_type_is_word: Scalars['Boolean']['input'];
   to_type_is_word: Scalars['Boolean']['input'];
   translation_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetTotalPostsArgs = {
+  input: PostsByParentInput;
 };
 
 
@@ -1790,6 +1873,11 @@ export type QueryPostsByParentArgs = {
 
 
 export type QueryReadAnswersArgs = {
+  ids: Array<Scalars['ID']['input']>;
+};
+
+
+export type QueryReadPericopiesArgs = {
   ids: Array<Scalars['ID']['input']>;
 };
 
@@ -2639,6 +2727,14 @@ export type WordlikeString = {
 export type UserFieldsFragment = { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null };
 
 export type PostFieldsFragment = { __typename?: 'Post', post_id: string, content: string, created_at: any, file_url?: string | null, file_type?: string | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } };
+
+export type GetTotalPostsQueryVariables = Exact<{
+  parent_id: Scalars['ID']['input'];
+  parent_name: Scalars['String']['input'];
+}>;
+
+
+export type GetTotalPostsQuery = { __typename?: 'Query', getTotalPosts: { __typename?: 'PostCountOutput', error: ErrorType, total: number } };
 
 export type PostsByParentQueryVariables = Exact<{
   parent_id: Scalars['ID']['input'];
@@ -4242,6 +4338,43 @@ export const PhraseToPhraseTranslationVoteStatusFragmentFragmentDoc = gql`
   downvotes
 }
     `;
+export const GetTotalPostsDocument = gql`
+    query GetTotalPosts($parent_id: ID!, $parent_name: String!) {
+  getTotalPosts(input: {parent_name: $parent_name, parent_id: $parent_id}) {
+    error
+    total
+  }
+}
+    `;
+
+/**
+ * __useGetTotalPostsQuery__
+ *
+ * To run a query within a React component, call `useGetTotalPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetTotalPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetTotalPostsQuery({
+ *   variables: {
+ *      parent_id: // value for 'parent_id'
+ *      parent_name: // value for 'parent_name'
+ *   },
+ * });
+ */
+export function useGetTotalPostsQuery(baseOptions: Apollo.QueryHookOptions<GetTotalPostsQuery, GetTotalPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetTotalPostsQuery, GetTotalPostsQueryVariables>(GetTotalPostsDocument, options);
+      }
+export function useGetTotalPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTotalPostsQuery, GetTotalPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetTotalPostsQuery, GetTotalPostsQueryVariables>(GetTotalPostsDocument, options);
+        }
+export type GetTotalPostsQueryHookResult = ReturnType<typeof useGetTotalPostsQuery>;
+export type GetTotalPostsLazyQueryHookResult = ReturnType<typeof useGetTotalPostsLazyQuery>;
+export type GetTotalPostsQueryResult = Apollo.QueryResult<GetTotalPostsQuery, GetTotalPostsQueryVariables>;
 export const PostsByParentDocument = gql`
     query PostsByParent($parent_id: ID!, $parent_name: String!) {
   postsByParent(input: {parent_id: $parent_id, parent_name: $parent_name}) {
@@ -8391,6 +8524,7 @@ export type GetFileUploadUrlQueryResult = Apollo.QueryResult<GetFileUploadUrlQue
     
 export const namedOperations = {
   Query: {
+    GetTotalPosts: 'GetTotalPosts',
     PostsByParent: 'PostsByParent',
     WordDefinitionRead: 'WordDefinitionRead',
     GetWordsByLanguage: 'GetWordsByLanguage',

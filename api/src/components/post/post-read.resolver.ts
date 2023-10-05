@@ -5,6 +5,7 @@ import { UserReadResolver } from '../user/user-read.resolver';
 import { PostService } from './post.service';
 import {
   Post,
+  PostCountOutput,
   PostReadInput,
   PostReadOutput,
   PostsByParentInput,
@@ -35,5 +36,15 @@ export class PostReadResolver {
     console.log('post read resolver, parent_id:', input.parent_id);
     console.log('post read resolver, parent_table:', input.parent_name);
     return await this.postService.getPostsByParent(input, req);
+  }
+
+  @Query(() => PostCountOutput)
+  async getTotalPosts(
+    @Args('input') input: PostsByParentInput,
+    @Context() req: any,
+  ): Promise<PostCountOutput> {
+    console.log('post count, parent_id:', input.parent_id);
+    console.log('post count, parent_table:', input.parent_name);
+    return await this.postService.getTotalPosts(input, req);
   }
 }

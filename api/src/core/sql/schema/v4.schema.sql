@@ -61,3 +61,5 @@ create table pericope_votes(
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, pericope_id)
 );
+
+create index idx__parent__parent_table on posts(parent_table, parent_id);
