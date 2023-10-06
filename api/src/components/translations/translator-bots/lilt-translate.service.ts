@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 // import { convert } from 'html-to-text';
-
-import { LanguageInput } from '../common/types';
-import { ConfigService } from 'src/core/config.service';
-import { ITranslator, LanguageResult } from './translations.service';
-import { PostgresService } from '../../core/postgres.service';
-import { createToken } from '../../common/utility';
-import { delay } from './utility';
 import { hash } from 'argon2';
+import { delay } from 'rxjs';
+import { createToken } from 'src/common/utility';
+import { LanguageInput } from 'src/components/common/types';
+import { ConfigService } from 'src/core/config.service';
+import { PostgresService } from 'src/core/postgres.service';
+import { ITranslator, LanguageResult } from './types';
 // import { substituteN, unSubstituteN } from '../../common/utility';
 
 const LIMIT_REQUESTS = 4000; // per LIMIT_TIME

@@ -2,18 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { v2 } from '@google-cloud/translate';
 import { convert } from 'html-to-text';
 
-import { LanguageInput } from '../common/types';
+import { LanguageInput } from '../../common/types';
 
 import { ConfigService } from 'src/core/config.service';
-import { createToken, substituteN, unSubstituteN } from '../../common/utility';
-import { ITranslator, LanguageResult } from './translations.service';
-import { PostgresService } from '../../core/postgres.service';
-import { delay } from './utility';
+import {
+  createToken,
+  substituteN,
+  unSubstituteN,
+} from '../../../common/utility';
+import { PostgresService } from '../../../core/postgres.service';
+import { delay } from '../utility';
 import { hash } from 'argon2';
-
-const LIMITS = 6000000 - 1000000;
-
-const GOOGLE_BOT_EMAIL = 'googlebot@crowd.rocks';
+import { GOOGLE_BOT_EMAIL, ITranslator, LanguageResult, LIMITS } from './types';
 
 @Injectable()
 export class GoogleTranslateService implements ITranslator {
