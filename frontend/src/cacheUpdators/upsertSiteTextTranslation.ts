@@ -2,10 +2,12 @@ import { ApolloCache } from '@apollo/client';
 
 import {
   Translation,
-  SiteTextTranslationWithVote,
+  TranslationWithVote,
   GetAllTranslationFromSiteTextDefinitionIdQuery,
 } from '../generated/graphql';
 import { GetAllTranslationFromSiteTextDefinitionIdDocument } from '../generated/graphql';
+
+import { updateCacheWithUpsertTranslation } from './upsertTranslation';
 
 export function updateCacheWithUpsertSiteTextTranslation(
   cache: ApolloCache<unknown>,
@@ -18,6 +20,8 @@ export function updateCacheWithUpsertSiteTextTranslation(
 ) {
   const { newTranslation, site_text_id, site_text_type_is_word, langInfo } =
     data;
+
+  updateCacheWithUpsertTranslation(cache, newTranslation);
 
   cache.updateQuery<GetAllTranslationFromSiteTextDefinitionIdQuery>(
     {
@@ -32,17 +36,17 @@ export function updateCacheWithUpsertSiteTextTranslation(
       if (
         data &&
         data.getAllTranslationFromSiteTextDefinitionID
-          .site_text_translation_with_vote_list
+          .translation_with_vote_list
       ) {
         const alreadyExists =
-          data.getAllTranslationFromSiteTextDefinitionID.site_text_translation_with_vote_list.filter(
-            (site_text_translation_with_vote) => {
-              if (site_text_translation_with_vote) {
-                switch (site_text_translation_with_vote.__typename) {
-                  case 'SiteTextWordToWordTranslationWithVote': {
+          data.getAllTranslationFromSiteTextDefinitionID.translation_with_vote_list.filter(
+            (translation_with_vote) => {
+              if (translation_with_vote) {
+                switch (translation_with_vote.__typename) {
+                  case 'WordToWordTranslationWithVote': {
                     if (
                       newTranslation.__typename === 'WordToWordTranslation' &&
-                      site_text_translation_with_vote.word_to_word_translation_id ===
+                      translation_with_vote.word_to_word_translation_id ===
                         newTranslation.word_to_word_translation_id
                     ) {
                       return true;
@@ -50,10 +54,10 @@ export function updateCacheWithUpsertSiteTextTranslation(
 
                     return false;
                   }
-                  case 'SiteTextWordToPhraseTranslationWithVote': {
+                  case 'WordToPhraseTranslationWithVote': {
                     if (
                       newTranslation.__typename === 'WordToPhraseTranslation' &&
-                      site_text_translation_with_vote.word_to_phrase_translation_id ===
+                      translation_with_vote.word_to_phrase_translation_id ===
                         newTranslation.word_to_phrase_translation_id
                     ) {
                       return true;
@@ -61,10 +65,10 @@ export function updateCacheWithUpsertSiteTextTranslation(
 
                     return false;
                   }
-                  case 'SiteTextPhraseToWordTranslationWithVote': {
+                  case 'PhraseToWordTranslationWithVote': {
                     if (
                       newTranslation.__typename === 'PhraseToWordTranslation' &&
-                      site_text_translation_with_vote.phrase_to_word_translation_id ===
+                      translation_with_vote.phrase_to_word_translation_id ===
                         newTranslation.phrase_to_word_translation_id
                     ) {
                       return true;
@@ -72,11 +76,11 @@ export function updateCacheWithUpsertSiteTextTranslation(
 
                     return false;
                   }
-                  case 'SiteTextPhraseToPhraseTranslationWithVote': {
+                  case 'PhraseToPhraseTranslationWithVote': {
                     if (
                       newTranslation.__typename ===
                         'PhraseToPhraseTranslation' &&
-                      site_text_translation_with_vote.phrase_to_phrase_translation_id ===
+                      translation_with_vote.phrase_to_phrase_translation_id ===
                         newTranslation.phrase_to_phrase_translation_id
                     ) {
                       return true;
@@ -95,27 +99,27 @@ export function updateCacheWithUpsertSiteTextTranslation(
         }
 
         let newTypeName:
-          | 'SiteTextWordToWordTranslationWithVote'
-          | 'SiteTextWordToPhraseTranslationWithVote'
-          | 'SiteTextPhraseToWordTranslationWithVote'
-          | 'SiteTextPhraseToPhraseTranslationWithVote'
+          | 'WordToWordTranslationWithVote'
+          | 'WordToPhraseTranslationWithVote'
+          | 'PhraseToWordTranslationWithVote'
+          | 'PhraseToPhraseTranslationWithVote'
           | undefined;
 
         switch (newTranslation.__typename) {
           case 'WordToWordTranslation': {
-            newTypeName = 'SiteTextWordToWordTranslationWithVote';
+            newTypeName = 'WordToWordTranslationWithVote';
             break;
           }
           case 'WordToPhraseTranslation': {
-            newTypeName = 'SiteTextWordToPhraseTranslationWithVote';
+            newTypeName = 'WordToPhraseTranslationWithVote';
             break;
           }
           case 'PhraseToWordTranslation': {
-            newTypeName = 'SiteTextPhraseToWordTranslationWithVote';
+            newTypeName = 'PhraseToWordTranslationWithVote';
             break;
           }
           case 'PhraseToPhraseTranslation': {
-            newTypeName = 'SiteTextPhraseToPhraseTranslationWithVote';
+            newTypeName = 'PhraseToPhraseTranslationWithVote';
             break;
           }
         }
@@ -128,15 +132,15 @@ export function updateCacheWithUpsertSiteTextTranslation(
           ...data,
           getAllTranslationFromSiteTextDefinitionID: {
             ...data.getAllTranslationFromSiteTextDefinitionID,
-            site_text_translation_with_vote_list: [
+            translation_with_vote_list: [
               ...data.getAllTranslationFromSiteTextDefinitionID
-                .site_text_translation_with_vote_list,
+                .translation_with_vote_list,
               {
                 ...newTranslation,
                 __typename: newTypeName,
                 upvotes: 0,
                 downvotes: 0,
-              } as SiteTextTranslationWithVote,
+              } as TranslationWithVote,
             ],
           },
         };

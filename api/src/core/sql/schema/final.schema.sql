@@ -640,18 +640,6 @@ create table site_text_phrase_definitions (
   unique (phrase_definition_id)
 );
 
-create table site_text_translation_votes(
-  site_text_translation_vote_id bigserial primary key,
-  translation_id bigint not null,
-  from_type_is_word bool not null, -- true = word, false = phrase
-  to_type_is_word bool not null, -- true = word, false = phrase
-  user_id bigint not null references users(user_id),
-  vote bool,
-  last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  unique (user_id, translation_id, from_type_is_word, to_type_is_word)
-);
-create index idx__translation_id__site_text_translation_votes on site_text_translation_votes (translation_id);
-
 create table site_text_translation_counts(
   site_text_translation_count_id bigserial primary key,
   site_text_id bigint not null,

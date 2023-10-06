@@ -215,6 +215,8 @@ export function WordListPage({ match }: WordListPageProps) {
             }}
             discussion={{
               onChatClick: () => handleGoToChat(word.word_id),
+              parent_id: word.word_id,
+              parent_table: 'words',
             }}
             flags={{
               parent_table: TableNameType.Words,

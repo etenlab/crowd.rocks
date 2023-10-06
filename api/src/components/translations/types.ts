@@ -5,7 +5,6 @@ import {
   InputType,
   ObjectType,
   createUnionType,
-  extend,
 } from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
