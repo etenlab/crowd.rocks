@@ -8,24 +8,43 @@ import { createToken } from '../../common/utility';
 import { hash } from 'argon2';
 import { parse } from 'node-html-parser';
 import fetch from 'node-fetch';
-
-type InSmartcatObj = Array<{
-  str: string;
-}>;
-type OutSmartcatObj = Array<{
-  str: string;
-}>;
+import { LanguageInput2tag } from '../../common/langUtils';
 
 const LIMIT_WORDS = 20; // for debugging purposes, not to exhaust free limit too quickly/
 const SMARTCAT_BOT_EMAIL = 'liltbot@crowd.rocks';
+const DEFAULT_CONTEXT = 'default';
+const DEFAULT_PROFILE = 'crowd.rocks profile';
+const DEFAULT_TAG = 'crowd.rocks tag';
+
+type InSmartcatObj = {
+  sourceLanguage: string;
+  targetLanguages: string[];
+  profile: string;
+  isHtml: boolean;
+  texts: Array<{
+    text: string;
+    context: string;
+  }>;
+  externalTag: string;
+};
+
+type OutSmartcatObj = {
+  translations: Array<{
+    [key: string]: Array<{
+      translation: string;
+      error: boolean;
+    }>;
+  }>;
+};
 
 @Injectable()
 export class SmartcatTranslateService implements ITranslator {
   constructor(private config: ConfigService, private pg: PostgresService) {}
 
   async smartcatTranslate(inObj: InSmartcatObj): Promise<OutSmartcatObj> {
+    const res: OutSmartcatObj = { translations: [] };
     //todo
-    return inObj;
+    return res;
   }
 
   async translate(
@@ -34,12 +53,22 @@ export class SmartcatTranslateService implements ITranslator {
     to: LanguageInput,
   ): Promise<string[]> {
     try {
-      const objForTranslation = texts.splice(0, LIMIT_WORDS).map((text) => ({
-        str: text,
-      }));
+      const objForTranslation: InSmartcatObj = {
+        sourceLanguage: LanguageInput2tag(from),
+        targetLanguages: [LanguageInput2tag(to)],
+        isHtml: false,
+        externalTag: DEFAULT_TAG,
+        profile: DEFAULT_PROFILE,
+        texts: texts.splice(0, LIMIT_WORDS).map((text) => ({
+          text,
+          context: DEFAULT_CONTEXT,
+        })),
+      };
 
       const translatedObj = await this.smartcatTranslate(objForTranslation);
-      const translatedTexts = translatedObj.map((obj) => obj.str);
+      const translatedTexts = translatedObj.translations[
+        LanguageInput2tag(to)
+      ].map((t) => t.translation);
 
       return translatedTexts;
     } catch (err) {
