@@ -8,7 +8,11 @@ import { SiteTextTranslationsService } from './site-text-translations.service';
 import { SiteTextWordDefinitionsService } from './site-text-word-definitions.service';
 import { SiteTextPhraseDefinitionsService } from './site-text-phrase-definitions.service';
 
-import { TranslationOutput } from 'src/components/translations/types';
+import {
+  TranslationOutput,
+  TranslationWithVoteOutput,
+  TranslationWithVoteListOutput,
+} from 'src/components/translations/types';
 
 import {
   SiteTextUpsertInput,
@@ -19,16 +23,11 @@ import {
   SiteTextTranslationsToInput,
   SiteTextDefinitionListOutput,
   SiteTextTranslationUpsertInput,
-  SiteTextTranslationVoteStatusOutputRow,
   SiteTextLanguageListOutput,
-  SiteTextTranslationWithVoteListOutput,
-  SiteTextTranslationWithVoteOutput,
-  SiteTextTranslationWithVoteListByLanguageOutput,
-  SiteTextTranslationWithVoteListByLanguageListOutput,
   SiteTextLanguageWithTranslationInfoListOutput,
+  TranslationWithVoteListByLanguageOutput,
+  TranslationWithVoteListByLanguageListOutput,
 } from './types';
-
-import { SiteTextTranslationVotesService } from './site-text-translation-votes.service';
 
 @Injectable()
 @Resolver()
@@ -36,7 +35,6 @@ export class SiteTextsResolver {
   constructor(
     private siteTextService: SiteTextsService,
     private siteTextTranslationService: SiteTextTranslationsService,
-    private siteTextTranslationVoteService: SiteTextTranslationVotesService,
     private siteTextWordDefinitionService: SiteTextWordDefinitionsService,
     private siteTextPhraseDefinitionService: SiteTextPhraseDefinitionsService,
   ) {}
@@ -144,53 +142,7 @@ export class SiteTextsResolver {
     );
   }
 
-  @Query(() => SiteTextTranslationVoteStatusOutputRow)
-  async getSiteTextTranslationVoteStatus(
-    @Args('translation_id', { type: () => ID })
-    translation_id: string,
-    @Args('from_type_is_word', { type: () => Boolean })
-    from_type_is_word: boolean,
-    @Args('to_type_is_word', { type: () => Boolean })
-    to_type_is_word: boolean,
-  ): Promise<SiteTextTranslationVoteStatusOutputRow> {
-    console.log(
-      'site text translation getVoteStatus resolver, translation_id:',
-      translation_id,
-    );
-
-    return this.siteTextTranslationVoteService.getVoteStatus(
-      +translation_id,
-      from_type_is_word,
-      to_type_is_word,
-      null,
-    );
-  }
-
-  @Mutation(() => SiteTextTranslationVoteStatusOutputRow)
-  async toggleSiteTextTranslationVoteStatus(
-    @Args('translation_id', { type: () => ID })
-    translation_id: string,
-    @Args('from_type_is_word', { type: () => Boolean })
-    from_type_is_word: boolean,
-    @Args('to_type_is_word', { type: () => Boolean })
-    to_type_is_word: boolean,
-    @Args('vote')
-    vote: boolean,
-    @Context() req: any,
-  ): Promise<SiteTextTranslationVoteStatusOutputRow> {
-    console.log('toggleSiteTextTranslationVoteStatus resolver');
-
-    return this.siteTextTranslationVoteService.toggleVoteStatus(
-      +translation_id,
-      from_type_is_word,
-      to_type_is_word,
-      vote,
-      getBearer(req) || '',
-      null,
-    );
-  }
-
-  @Query(() => SiteTextTranslationWithVoteListOutput)
+  @Query(() => TranslationWithVoteListOutput)
   async getAllTranslationFromSiteTextDefinitionID(
     @Args('site_text_id', { type: () => ID }) site_text_id: string,
     @Args('site_text_type_is_word', { type: () => Boolean })
@@ -200,7 +152,7 @@ export class SiteTextsResolver {
     dialect_code: string | null,
     @Args('geo_code', { type: () => String, nullable: true })
     geo_code: string | null,
-  ): Promise<SiteTextTranslationWithVoteListOutput> {
+  ): Promise<TranslationWithVoteListOutput> {
     console.log(
       'site text translation getAllTranslationFromSiteTextDefinitionID resolver',
     );
@@ -215,7 +167,7 @@ export class SiteTextsResolver {
     );
   }
 
-  @Query(() => SiteTextTranslationWithVoteOutput)
+  @Query(() => TranslationWithVoteOutput)
   async getRecommendedTranslationFromSiteTextDefinitionID(
     @Args('site_text_id', { type: () => ID }) site_text_id: string,
     @Args('site_text_type_is_word', { type: () => Boolean })
@@ -225,7 +177,7 @@ export class SiteTextsResolver {
     dialect_code: string | null,
     @Args('geo_code', { type: () => String, nullable: true })
     geo_code: string | null,
-  ): Promise<SiteTextTranslationWithVoteOutput> {
+  ): Promise<TranslationWithVoteOutput> {
     console.log(
       'site text translation getRecommendedTranslationFromSiteTextDefinitionID resolver',
     );
@@ -240,14 +192,14 @@ export class SiteTextsResolver {
     );
   }
 
-  @Query(() => SiteTextTranslationWithVoteListByLanguageOutput)
+  @Query(() => TranslationWithVoteListByLanguageOutput)
   async getAllRecommendedSiteTextTranslationListByLanguage(
     @Args('language_code') language_code: string,
     @Args('dialect_code', { type: () => String, nullable: true })
     dialect_code: string | null,
     @Args('geo_code', { type: () => String, nullable: true })
     geo_code: string | null,
-  ): Promise<SiteTextTranslationWithVoteListByLanguageOutput> {
+  ): Promise<TranslationWithVoteListByLanguageOutput> {
     console.log(
       'site text translation getAllRecommendedTranslationByLanguage resolver',
     );
@@ -260,8 +212,8 @@ export class SiteTextsResolver {
     );
   }
 
-  @Query(() => SiteTextTranslationWithVoteListByLanguageListOutput)
-  async getAllRecommendedSiteTextTranslationList(): Promise<SiteTextTranslationWithVoteListByLanguageListOutput> {
+  @Query(() => TranslationWithVoteListByLanguageListOutput)
+  async getAllRecommendedSiteTextTranslationList(): Promise<TranslationWithVoteListByLanguageListOutput> {
     console.log(
       'site text translation getAllRecommendedSiteTextTranslationList resolver',
     );
