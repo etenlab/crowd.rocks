@@ -1,5 +1,7 @@
 import { ApolloCache } from '@apollo/client';
 import {
+  GetTotalPostsDocument,
+  GetTotalPostsQuery,
   Post,
   PostsByParentDocument,
   PostsByParentQuery,
@@ -15,6 +17,28 @@ export function updateCacheWithCreatePost(
 ) {
   const { newPost, parent_id, parent_name } = data;
 
+  cache.updateQuery<GetTotalPostsQuery>(
+    {
+      query: GetTotalPostsDocument,
+      variables: {
+        parent_id: parent_id,
+        parent_name: parent_name,
+      },
+    },
+    (data) => {
+      if (data && data.getTotalPosts) {
+        const newtotal = data.getTotalPosts.total + 1;
+        return {
+          ...data,
+          getTotalPosts: {
+            ...data.getTotalPosts,
+            total: newtotal,
+          },
+        };
+      }
+      return data;
+    },
+  );
   cache.updateQuery<PostsByParentQuery>(
     {
       query: PostsByParentDocument,
