@@ -282,6 +282,8 @@ export const MapWordOrPhraseTranslation: React.FC<
             value={getOrig(wordOrPhraseQ).value}
             definition={getOrig(wordOrPhraseQ).definition}
             discussion={{
+              parent_id: getOrig(wordOrPhraseQ).id,
+              parent_table: getOrig(wordOrPhraseQ).isWord ? 'words' : 'phrases',
               onChatClick: () =>
                 router.push(
                   `/${nation_id}/${language_id}/1/discussion/${
@@ -309,6 +311,10 @@ export const MapWordOrPhraseTranslation: React.FC<
                   value={getTr(translation).value}
                   definition={getTr(translation).definition}
                   discussion={{
+                    parent_id: getTr(translation).id,
+                    parent_table: getOrig(wordOrPhraseQ).isWord
+                      ? 'words'
+                      : 'phrases',
                     onChatClick: () =>
                       router.push(
                         `/${nation_id}/${language_id}/1/discussion/${

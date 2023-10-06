@@ -26,7 +26,6 @@ import {
   CaptionContainer,
   CardListContainer,
   CardContainer,
-  StChatIcon,
 } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
@@ -36,9 +35,9 @@ import { useToggleWordDefinitionVoteStatusMutation } from '../../../hooks/useTog
 import { AddListHeader } from '../../common/ListHeader';
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import { NewWordDefinitionForm } from '../NewWordDefinitionForm';
-import { chatbubbleEllipsesSharp } from 'ionicons/icons';
 
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
+import { Chat } from '../../chat/Chat';
 
 interface WordDetailPageProps
   extends RouteComponentProps<{
@@ -136,6 +135,8 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
               router.push(
                 `/${match.params.nation_id}/${match.params.language_id}/1/discussion/word_definitions/${definition.word_definition_id}`,
               ),
+            parent_id: definition.word_definition_id,
+            parent_table: 'word_definitions',
           }}
           flags={{
             parent_table: TableNameType.WordDefinitions,
@@ -197,19 +198,23 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
           parent_id={wordWithVote.word_id}
           flag_names={WORD_AND_PHRASE_FLAGS}
         />
-        <StChatIcon
-          icon={chatbubbleEllipsesSharp}
-          onClick={() =>
-            router.push(
-              `/${match.params.nation_id}/${match.params.language_id}/1/discussion/words/${wordWithVote.word_id}`,
-            )
-          }
-        />
+        <div style={{ display: 'flex' }}>
+          <Chat
+            parent_id={match.params.word_id}
+            parent_table="words"
+            onClick={() =>
+              router.push(
+                `/${match.params.nation_id}/${match.params.language_id}/1/discussion/words/${wordWithVote.word_id}`,
+              )
+            }
+          />
+        </div>
       </div>
     );
   }, [
     match.params.language_id,
     match.params.nation_id,
+    match.params.word_id,
     router,
     toggleWordVoteStatus,
     wordData,
