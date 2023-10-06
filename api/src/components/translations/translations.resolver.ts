@@ -404,6 +404,12 @@ export class TranslationsResolver {
     return this.translationService.languagesForLiltTranslate();
   }
 
+  @Query(() => LanguageListForBotTranslateOutput)
+  async languagesForSmartcatTranslate(): Promise<LanguageListForBotTranslateOutput> {
+    console.log('languagesForSmartcatTranslate resolver');
+    return this.translationService.languagesForSmartcatTranslate();
+  }
+
   @Query(() => TranslatedLanguageInfoOutput)
   async getLanguageTranslationInfo(
     @Args('input')
@@ -456,6 +462,30 @@ export class TranslationsResolver {
     );
 
     return this.translationService.translateWordsAndPhrasesByLilt(
+      from_language,
+      to_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
+  async translateWordsAndPhrasesBySmartcat(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    console.log(
+      'translateWordsAndPhrasesBySmartcat',
+      JSON.stringify({
+        from_language,
+        to_language,
+      }),
+    );
+
+    return this.translationService.translateWordsAndPhrasesBySmartcat(
       from_language,
       to_language,
       getBearer(req) || '',
@@ -521,6 +551,26 @@ export class TranslationsResolver {
     );
 
     return this.translationService.translateAllWordsAndPhrasesByLilt(
+      from_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @Mutation(() => GenericOutput)
+  async translateAllWordsAndPhrasesBySmartcat(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<GenericOutput> {
+    console.log(
+      'translateAllWordsAndPhrasesBySmartcat',
+      JSON.stringify({
+        from_language,
+      }),
+    );
+
+    return this.translationService.translateAllWordsAndPhrasesBySmartcat(
       from_language,
       getBearer(req) || '',
       null,

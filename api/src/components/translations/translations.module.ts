@@ -18,6 +18,7 @@ import { GoogleTranslateService } from './google-translate.service';
 
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 import { LiltTranslateService } from './lilt-translate.service';
+import { SmartcatTranslateService } from './sc-translate.service';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { LiltTranslateService } from './lilt-translate.service';
     PhraseToPhraseTranslationsService,
     GoogleTranslateService,
     LiltTranslateService,
+    SmartcatTranslateService,
     TranslationsService,
   ],
   exports: [
@@ -46,6 +48,7 @@ import { LiltTranslateService } from './lilt-translate.service';
     PhraseToPhraseTranslationsService,
     GoogleTranslateService,
     LiltTranslateService,
+    SmartcatTranslateService,
     TranslationsService,
   ],
 })

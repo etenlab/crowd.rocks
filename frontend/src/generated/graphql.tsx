@@ -130,6 +130,7 @@ export enum ErrorType {
   AvatarTooLong = 'AvatarTooLong',
   AvatarTooShort = 'AvatarTooShort',
   AvatarUnavailable = 'AvatarUnavailable',
+  BotTranslationBotNotFound = 'BotTranslationBotNotFound',
   CandidateNotFound = 'CandidateNotFound',
   CandidateNotFoundInBallot = 'CandidateNotFoundInBallot',
   DocumentEntryReadError = 'DocumentEntryReadError',
@@ -657,9 +658,11 @@ export type Mutation = {
   toggleWordVoteStatus: WordVoteStatusOutputRow;
   translateAllWordsAndPhrasesByGoogle: GenericOutput;
   translateAllWordsAndPhrasesByLilt: GenericOutput;
+  translateAllWordsAndPhrasesBySmartcat: GenericOutput;
   translateMissingWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByGoogleOutput;
   translateWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByGoogleOutput;
   translateWordsAndPhrasesByLilt: TranslateAllWordsAndPhrasesByBotOutput;
+  translateWordsAndPhrasesBySmartcat: TranslateAllWordsAndPhrasesByBotOutput;
   updateDefinition: PhraseDefinitionOutput;
   updateFile: IFileOutput;
   uploadFile: IFileOutput;
@@ -937,6 +940,11 @@ export type MutationTranslateAllWordsAndPhrasesByLiltArgs = {
 };
 
 
+export type MutationTranslateAllWordsAndPhrasesBySmartcatArgs = {
+  from_language: LanguageInput;
+};
+
+
 export type MutationTranslateMissingWordsAndPhrasesByGoogleArgs = {
   from_language: LanguageInput;
   to_language: LanguageInput;
@@ -950,6 +958,12 @@ export type MutationTranslateWordsAndPhrasesByGoogleArgs = {
 
 
 export type MutationTranslateWordsAndPhrasesByLiltArgs = {
+  from_language: LanguageInput;
+  to_language: LanguageInput;
+};
+
+
+export type MutationTranslateWordsAndPhrasesBySmartcatArgs = {
   from_language: LanguageInput;
   to_language: LanguageInput;
 };
@@ -1511,6 +1525,7 @@ export type Query = {
   getWordsByLanguage: WordWithVoteListConnection;
   languagesForGoogleTranslate: LanguageListForBotTranslateOutput;
   languagesForLiltTranslate: LanguageListForBotTranslateOutput;
+  languagesForSmartcatTranslate: LanguageListForBotTranslateOutput;
   loggedInIsAdmin: IsAdminIdOutput;
   notifications: NotificationListOutput;
   phraseDefinitionRead: PhraseDefinitionOutput;
@@ -2367,6 +2382,7 @@ export type TranslatedLanguageInfoOutput = {
   error: ErrorType;
   googleTranslateTotalLangCount: Scalars['Int']['output'];
   liltTranslateTotalLangCount: Scalars['Int']['output'];
+  smartcatTranslateTotalLangCount: Scalars['Int']['output'];
   totalPhraseCount: Scalars['Int']['output'];
   totalWordCount: Scalars['Int']['output'];
   translatedMissingPhraseCount?: Maybe<Scalars['Int']['output']>;
@@ -3559,7 +3575,7 @@ export type GetTranslationLanguageInfoQueryVariables = Exact<{
 }>;
 
 
-export type GetTranslationLanguageInfoQuery = { __typename?: 'Query', getLanguageTranslationInfo: { __typename?: 'TranslatedLanguageInfoOutput', error: ErrorType, googleTranslateTotalLangCount: number, liltTranslateTotalLangCount: number, totalPhraseCount: number, totalWordCount: number, translatedMissingPhraseCount?: number | null, translatedMissingWordCount?: number | null } };
+export type GetTranslationLanguageInfoQuery = { __typename?: 'Query', getLanguageTranslationInfo: { __typename?: 'TranslatedLanguageInfoOutput', error: ErrorType, googleTranslateTotalLangCount: number, liltTranslateTotalLangCount: number, smartcatTranslateTotalLangCount: number, totalPhraseCount: number, totalWordCount: number, translatedMissingPhraseCount?: number | null, translatedMissingWordCount?: number | null } };
 
 export type GetTranslationsByFromDefinitionIdQueryVariables = Exact<{
   definition_id: Scalars['ID']['input'];
@@ -3593,6 +3609,11 @@ export type LanguagesForLiltTranslateQueryVariables = Exact<{ [key: string]: nev
 
 export type LanguagesForLiltTranslateQuery = { __typename?: 'Query', languagesForLiltTranslate: { __typename?: 'LanguageListForBotTranslateOutput', error: ErrorType, languages?: Array<{ __typename?: 'LanguageForBotTranslate', code: string, name: string }> | null } };
 
+export type LanguagesForSmartcatTranslateQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LanguagesForSmartcatTranslateQuery = { __typename?: 'Query', languagesForSmartcatTranslate: { __typename?: 'LanguageListForBotTranslateOutput', error: ErrorType, languages?: Array<{ __typename?: 'LanguageForBotTranslate', code: string, name: string }> | null } };
+
 export type TranslateWordsAndPhrasesByGoogleMutationVariables = Exact<{
   from_language_code: Scalars['String']['input'];
   from_dialect_code?: InputMaybe<Scalars['String']['input']>;
@@ -3625,6 +3646,18 @@ export type TranslateWordsAndPhrasesByLiltMutationVariables = Exact<{
 
 export type TranslateWordsAndPhrasesByLiltMutation = { __typename?: 'Mutation', translateWordsAndPhrasesByLilt: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
 
+export type TranslateWordsAndPhrasesBySmartcatMutationVariables = Exact<{
+  from_language_code: Scalars['String']['input'];
+  from_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  from_geo_code?: InputMaybe<Scalars['String']['input']>;
+  to_language_code: Scalars['String']['input'];
+  to_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  to_geo_code?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type TranslateWordsAndPhrasesBySmartcatMutation = { __typename?: 'Mutation', translateWordsAndPhrasesBySmartcat: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
+
 export type TranslateAllWordsAndPhrasesByGoogleMutationVariables = Exact<{
   from_language_code: Scalars['String']['input'];
   from_dialect_code?: InputMaybe<Scalars['String']['input']>;
@@ -3642,6 +3675,15 @@ export type TranslateAllWordsAndPhrasesByLiltMutationVariables = Exact<{
 
 
 export type TranslateAllWordsAndPhrasesByLiltMutation = { __typename?: 'Mutation', translateAllWordsAndPhrasesByLilt: { __typename?: 'GenericOutput', error: ErrorType } };
+
+export type TranslateAllWordsAndPhrasesBySmartcatMutationVariables = Exact<{
+  from_language_code: Scalars['String']['input'];
+  from_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  from_geo_code?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type TranslateAllWordsAndPhrasesBySmartcatMutation = { __typename?: 'Mutation', translateAllWordsAndPhrasesBySmartcat: { __typename?: 'GenericOutput', error: ErrorType } };
 
 export type StopGoogleTranslationMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -7829,6 +7871,7 @@ export const GetTranslationLanguageInfoDocument = gql`
     error
     googleTranslateTotalLangCount
     liltTranslateTotalLangCount
+    smartcatTranslateTotalLangCount
     totalPhraseCount
     totalWordCount
     translatedMissingPhraseCount
@@ -8045,6 +8088,44 @@ export function useLanguagesForLiltTranslateLazyQuery(baseOptions?: Apollo.LazyQ
 export type LanguagesForLiltTranslateQueryHookResult = ReturnType<typeof useLanguagesForLiltTranslateQuery>;
 export type LanguagesForLiltTranslateLazyQueryHookResult = ReturnType<typeof useLanguagesForLiltTranslateLazyQuery>;
 export type LanguagesForLiltTranslateQueryResult = Apollo.QueryResult<LanguagesForLiltTranslateQuery, LanguagesForLiltTranslateQueryVariables>;
+export const LanguagesForSmartcatTranslateDocument = gql`
+    query LanguagesForSmartcatTranslate {
+  languagesForSmartcatTranslate {
+    error
+    languages {
+      code
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useLanguagesForSmartcatTranslateQuery__
+ *
+ * To run a query within a React component, call `useLanguagesForSmartcatTranslateQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLanguagesForSmartcatTranslateQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLanguagesForSmartcatTranslateQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useLanguagesForSmartcatTranslateQuery(baseOptions?: Apollo.QueryHookOptions<LanguagesForSmartcatTranslateQuery, LanguagesForSmartcatTranslateQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LanguagesForSmartcatTranslateQuery, LanguagesForSmartcatTranslateQueryVariables>(LanguagesForSmartcatTranslateDocument, options);
+      }
+export function useLanguagesForSmartcatTranslateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LanguagesForSmartcatTranslateQuery, LanguagesForSmartcatTranslateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LanguagesForSmartcatTranslateQuery, LanguagesForSmartcatTranslateQueryVariables>(LanguagesForSmartcatTranslateDocument, options);
+        }
+export type LanguagesForSmartcatTranslateQueryHookResult = ReturnType<typeof useLanguagesForSmartcatTranslateQuery>;
+export type LanguagesForSmartcatTranslateLazyQueryHookResult = ReturnType<typeof useLanguagesForSmartcatTranslateLazyQuery>;
+export type LanguagesForSmartcatTranslateQueryResult = Apollo.QueryResult<LanguagesForSmartcatTranslateQuery, LanguagesForSmartcatTranslateQueryVariables>;
 export const TranslateWordsAndPhrasesByGoogleDocument = gql`
     mutation TranslateWordsAndPhrasesByGoogle($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String, $to_language_code: String!, $to_dialect_code: String, $to_geo_code: String) {
   translateWordsAndPhrasesByGoogle(
@@ -8185,6 +8266,54 @@ export function useTranslateWordsAndPhrasesByLiltMutation(baseOptions?: Apollo.M
 export type TranslateWordsAndPhrasesByLiltMutationHookResult = ReturnType<typeof useTranslateWordsAndPhrasesByLiltMutation>;
 export type TranslateWordsAndPhrasesByLiltMutationResult = Apollo.MutationResult<TranslateWordsAndPhrasesByLiltMutation>;
 export type TranslateWordsAndPhrasesByLiltMutationOptions = Apollo.BaseMutationOptions<TranslateWordsAndPhrasesByLiltMutation, TranslateWordsAndPhrasesByLiltMutationVariables>;
+export const TranslateWordsAndPhrasesBySmartcatDocument = gql`
+    mutation TranslateWordsAndPhrasesBySmartcat($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String, $to_language_code: String!, $to_dialect_code: String, $to_geo_code: String) {
+  translateWordsAndPhrasesBySmartcat(
+    from_language: {language_code: $from_language_code, dialect_code: $from_dialect_code, geo_code: $from_geo_code}
+    to_language: {language_code: $to_language_code, dialect_code: $to_dialect_code, geo_code: $to_geo_code}
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+    `;
+export type TranslateWordsAndPhrasesBySmartcatMutationFn = Apollo.MutationFunction<TranslateWordsAndPhrasesBySmartcatMutation, TranslateWordsAndPhrasesBySmartcatMutationVariables>;
+
+/**
+ * __useTranslateWordsAndPhrasesBySmartcatMutation__
+ *
+ * To run a mutation, you first call `useTranslateWordsAndPhrasesBySmartcatMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTranslateWordsAndPhrasesBySmartcatMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [translateWordsAndPhrasesBySmartcatMutation, { data, loading, error }] = useTranslateWordsAndPhrasesBySmartcatMutation({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      from_dialect_code: // value for 'from_dialect_code'
+ *      from_geo_code: // value for 'from_geo_code'
+ *      to_language_code: // value for 'to_language_code'
+ *      to_dialect_code: // value for 'to_dialect_code'
+ *      to_geo_code: // value for 'to_geo_code'
+ *   },
+ * });
+ */
+export function useTranslateWordsAndPhrasesBySmartcatMutation(baseOptions?: Apollo.MutationHookOptions<TranslateWordsAndPhrasesBySmartcatMutation, TranslateWordsAndPhrasesBySmartcatMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TranslateWordsAndPhrasesBySmartcatMutation, TranslateWordsAndPhrasesBySmartcatMutationVariables>(TranslateWordsAndPhrasesBySmartcatDocument, options);
+      }
+export type TranslateWordsAndPhrasesBySmartcatMutationHookResult = ReturnType<typeof useTranslateWordsAndPhrasesBySmartcatMutation>;
+export type TranslateWordsAndPhrasesBySmartcatMutationResult = Apollo.MutationResult<TranslateWordsAndPhrasesBySmartcatMutation>;
+export type TranslateWordsAndPhrasesBySmartcatMutationOptions = Apollo.BaseMutationOptions<TranslateWordsAndPhrasesBySmartcatMutation, TranslateWordsAndPhrasesBySmartcatMutationVariables>;
 export const TranslateAllWordsAndPhrasesByGoogleDocument = gql`
     mutation TranslateAllWordsAndPhrasesByGoogle($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String) {
   translateAllWordsAndPhrasesByGoogle(
@@ -8259,6 +8388,43 @@ export function useTranslateAllWordsAndPhrasesByLiltMutation(baseOptions?: Apoll
 export type TranslateAllWordsAndPhrasesByLiltMutationHookResult = ReturnType<typeof useTranslateAllWordsAndPhrasesByLiltMutation>;
 export type TranslateAllWordsAndPhrasesByLiltMutationResult = Apollo.MutationResult<TranslateAllWordsAndPhrasesByLiltMutation>;
 export type TranslateAllWordsAndPhrasesByLiltMutationOptions = Apollo.BaseMutationOptions<TranslateAllWordsAndPhrasesByLiltMutation, TranslateAllWordsAndPhrasesByLiltMutationVariables>;
+export const TranslateAllWordsAndPhrasesBySmartcatDocument = gql`
+    mutation TranslateAllWordsAndPhrasesBySmartcat($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String) {
+  translateAllWordsAndPhrasesBySmartcat(
+    from_language: {language_code: $from_language_code, dialect_code: $from_dialect_code, geo_code: $from_geo_code}
+  ) {
+    error
+  }
+}
+    `;
+export type TranslateAllWordsAndPhrasesBySmartcatMutationFn = Apollo.MutationFunction<TranslateAllWordsAndPhrasesBySmartcatMutation, TranslateAllWordsAndPhrasesBySmartcatMutationVariables>;
+
+/**
+ * __useTranslateAllWordsAndPhrasesBySmartcatMutation__
+ *
+ * To run a mutation, you first call `useTranslateAllWordsAndPhrasesBySmartcatMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTranslateAllWordsAndPhrasesBySmartcatMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [translateAllWordsAndPhrasesBySmartcatMutation, { data, loading, error }] = useTranslateAllWordsAndPhrasesBySmartcatMutation({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      from_dialect_code: // value for 'from_dialect_code'
+ *      from_geo_code: // value for 'from_geo_code'
+ *   },
+ * });
+ */
+export function useTranslateAllWordsAndPhrasesBySmartcatMutation(baseOptions?: Apollo.MutationHookOptions<TranslateAllWordsAndPhrasesBySmartcatMutation, TranslateAllWordsAndPhrasesBySmartcatMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TranslateAllWordsAndPhrasesBySmartcatMutation, TranslateAllWordsAndPhrasesBySmartcatMutationVariables>(TranslateAllWordsAndPhrasesBySmartcatDocument, options);
+      }
+export type TranslateAllWordsAndPhrasesBySmartcatMutationHookResult = ReturnType<typeof useTranslateAllWordsAndPhrasesBySmartcatMutation>;
+export type TranslateAllWordsAndPhrasesBySmartcatMutationResult = Apollo.MutationResult<TranslateAllWordsAndPhrasesBySmartcatMutation>;
+export type TranslateAllWordsAndPhrasesBySmartcatMutationOptions = Apollo.BaseMutationOptions<TranslateAllWordsAndPhrasesBySmartcatMutation, TranslateAllWordsAndPhrasesBySmartcatMutationVariables>;
 export const StopGoogleTranslationDocument = gql`
     mutation StopGoogleTranslation {
   stopGoogleTranslation {
@@ -8776,6 +8942,7 @@ export const namedOperations = {
     GetRecommendedTranslationFromDefinitionID: 'GetRecommendedTranslationFromDefinitionID',
     LanguagesForGoogleTranslate: 'LanguagesForGoogleTranslate',
     LanguagesForLiltTranslate: 'LanguagesForLiltTranslate',
+    LanguagesForSmartcatTranslate: 'LanguagesForSmartcatTranslate',
     UserRead: 'UserRead',
     GetFileUploadUrl: 'GetFileUploadUrl'
   },
@@ -8827,8 +8994,10 @@ export const namedOperations = {
     TranslateWordsAndPhrasesByGoogle: 'TranslateWordsAndPhrasesByGoogle',
     TranslateMissingWordsAndPhrasesByGoogle: 'TranslateMissingWordsAndPhrasesByGoogle',
     TranslateWordsAndPhrasesByLilt: 'TranslateWordsAndPhrasesByLilt',
+    TranslateWordsAndPhrasesBySmartcat: 'TranslateWordsAndPhrasesBySmartcat',
     TranslateAllWordsAndPhrasesByGoogle: 'TranslateAllWordsAndPhrasesByGoogle',
     TranslateAllWordsAndPhrasesByLilt: 'TranslateAllWordsAndPhrasesByLilt',
+    TranslateAllWordsAndPhrasesBySmartcat: 'TranslateAllWordsAndPhrasesBySmartcat',
     StopGoogleTranslation: 'StopGoogleTranslation',
     ToggleTranslationVoteStatus: 'ToggleTranslationVoteStatus',
     UpsertTranslation: 'UpsertTranslation',

@@ -5,6 +5,12 @@ export class GenericOutput {
   @Field(() => ErrorType) readonly error: ErrorType;
 }
 
+export enum BotType {
+  Google = 'Google',
+  Lilt = 'Lilt',
+  Smartcat = 'Smartcat',
+}
+
 export enum ErrorType {
   AvatarUnavailable = 'AvatarUnavailable',
   AvatarNotFound = 'AvatarNotFound',
@@ -121,6 +127,7 @@ export enum ErrorType {
   PericopeInsertFailed = 'PericopeInsertFailed',
   PericopeNotFound = 'PericopeNotFound',
   PericopeVoteToggleFailed = 'PericopeVoteToggleFailed',
+  BotTranslationBotNotFound = 'BotTranslationBotNotFound'
 }
 
 registerEnumType(ErrorType, {

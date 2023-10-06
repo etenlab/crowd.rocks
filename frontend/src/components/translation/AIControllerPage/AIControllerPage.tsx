@@ -41,6 +41,9 @@ import {
   useTranslateWordsAndPhrasesByLiltMutation,
   useTranslateAllWordsAndPhrasesByLiltMutation,
   useTranslateMissingWordsAndPhrasesByGoogleMutation,
+  useTranslateWordsAndPhrasesBySmartcatMutation,
+  useTranslateAllWordsAndPhrasesBySmartcatMutation,
+  useLanguagesForSmartcatTranslateQuery,
 } from '../../../generated/graphql';
 
 import { langInfo2String, langInfo2tag } from '../../../common/langUtils';
@@ -92,7 +95,13 @@ export function AIControllerPage() {
     error: languagesLError,
     loading: languagesLLoading,
   } = useLanguagesForLiltTranslateQuery();
+  const {
+    data: languagesScData,
+    error: languagesScError,
+    loading: languagesScLoading,
+  } = useLanguagesForSmartcatTranslateQuery();
 
+  //google
   const [translateWordsAndPhrasesByGoogle] =
     useTranslateWordsAndPhrasesByGoogleMutation();
 
@@ -102,11 +111,19 @@ export function AIControllerPage() {
   const [translateAllWordsAndPhrasesByGoogle] =
     useTranslateAllWordsAndPhrasesByGoogleMutation();
 
+  //lilt
   const [translateWordsAndPhrasesByLilt] =
     useTranslateWordsAndPhrasesByLiltMutation();
 
   const [translateAllWordsAndPhrasesByLilt] =
     useTranslateAllWordsAndPhrasesByLiltMutation();
+
+  //smartcat
+  const [translateWordsAndPhrasesBySmartcat] =
+    useTranslateWordsAndPhrasesBySmartcatMutation();
+
+  const [translateAllWordsAndPhrasesBySmartcat] =
+    useTranslateAllWordsAndPhrasesBySmartcatMutation();
 
   const { data: translationResult } =
     useSubscribeToTranslationReportSubscription();
@@ -189,6 +206,18 @@ export function AIControllerPage() {
         }
       });
     }
+    if (
+      !languagesScError &&
+      !languagesScLoading &&
+      languagesScData &&
+      languagesScData.languagesForSmartcatTranslate.languages
+    ) {
+      languagesScData.languagesForSmartcatTranslate.languages.forEach((l) => {
+        if (!langs.includes(l.code)) {
+          langs.push(l.code);
+        }
+      });
+    }
 
     return langs;
   }, [
@@ -198,6 +227,9 @@ export function AIControllerPage() {
     languagesLError,
     languagesLLoading,
     languagesLData,
+    languagesScError,
+    languagesScLoading,
+    languagesScData,
   ]);
 
   // GOOGLE
@@ -415,6 +447,87 @@ export function AIControllerPage() {
     });
   }, [presentToast, source, tr, translateAllWordsAndPhrasesByLilt]);
 
+  // SMARTCAT
+  const handleTranslateSC = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      handleTranslateToAllLangsSC();
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+
+    const { data } = await translateWordsAndPhrasesBySmartcat({
+      variables: {
+        from_language_code: source.lang.tag,
+        from_dialect_code: source.dialect?.tag,
+        from_geo_code: source.region?.tag,
+        to_language_code: target.lang.tag,
+        to_dialect_code: target.dialect?.tag,
+        to_geo_code: target.region?.tag,
+      },
+    });
+
+    dismiss();
+
+    if (data && data.translateWordsAndPhrasesBySmartcat.result) {
+      setResult(data.translateWordsAndPhrasesBySmartcat.result);
+      await mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
+  };
+
+  const handleTranslateToAllLangsSC = useCallback(async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+      });
+
+      return;
+    }
+
+    setBatchTranslating(true);
+    batchTranslatingRef.current = true;
+
+    translateAllWordsAndPhrasesBySmartcat({
+      variables: {
+        from_language_code: source.lang.tag,
+        from_dialect_code: source.dialect?.tag,
+        from_geo_code: source.region?.tag,
+      },
+    });
+  }, [presentToast, source, tr, translateAllWordsAndPhrasesBySmartcat]);
+
   const handleCancelTranslateAll = async () => {
     setIsStopPressed(true);
     await stopGoogleTranslation();
@@ -538,7 +651,10 @@ export function AIControllerPage() {
             {!selectTarget
               ? languageData?.getLanguageTranslationInfo
                   .googleTranslateTotalLangCount + ' languages'
-              : '1 language'}
+              : languagesGData &&
+                languagesGData!.languagesForGoogleTranslate.languages?.filter(
+                  (scl) => scl.code === langInfo2tag(target || undefined),
+                ).length + ' languages'}
           </IonLabel>
         </div>
 
@@ -567,12 +683,36 @@ export function AIControllerPage() {
             {!selectTarget
               ? languageData?.getLanguageTranslationInfo
                   .liltTranslateTotalLangCount + ' languages'
-              : '1 language'}
+              : languagesLData &&
+                languagesLData!.languagesForLiltTranslate.languages?.filter(
+                  (scl) => scl.code === langInfo2tag(target || undefined),
+                ).length + ' languages'}
           </IonLabel>
         </div>
 
         <AIActionsContainer>
           <IonButton onClick={handleTranslateL} disabled={disabled}>
+            {tr('Translate All')}
+          </IonButton>
+        </AIActionsContainer>
+      </AIContainer>
+
+      <AIContainer>
+        <div style={{ display: 'flex' }}>
+          <IonTitle>Smartcat</IonTitle>
+          <IonLabel>
+            {!selectTarget
+              ? languageData?.getLanguageTranslationInfo
+                  .smartcatTranslateTotalLangCount + ' languages'
+              : languagesScData &&
+                languagesScData!.languagesForSmartcatTranslate.languages?.filter(
+                  (scl) => scl.code === langInfo2tag(target || undefined),
+                ).length + ' languages'}
+          </IonLabel>
+        </div>
+
+        <AIActionsContainer>
+          <IonButton onClick={handleTranslateSC} disabled={disabled}>
             {tr('Translate All')}
           </IonButton>
         </AIActionsContainer>

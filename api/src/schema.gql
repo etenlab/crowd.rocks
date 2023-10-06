@@ -106,6 +106,7 @@ enum ErrorType {
   AvatarTooLong
   AvatarTooShort
   AvatarUnavailable
+  BotTranslationBotNotFound
   CandidateNotFound
   CandidateNotFoundInBallot
   DocumentEntryReadError
@@ -592,9 +593,11 @@ type Mutation {
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
   translateAllWordsAndPhrasesByGoogle(from_language: LanguageInput!): GenericOutput!
   translateAllWordsAndPhrasesByLilt(from_language: LanguageInput!): GenericOutput!
+  translateAllWordsAndPhrasesBySmartcat(from_language: LanguageInput!): GenericOutput!
   translateMissingWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
   translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
   translateWordsAndPhrasesByLilt(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateWordsAndPhrasesBySmartcat(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionOutput!
   updateFile(file: Upload, file_size: Int, file_type: String, id: Int!): IFileOutput!
   uploadFile(file: Upload!, file_size: Int!, file_type: String!): IFileOutput!
@@ -1017,6 +1020,7 @@ type Query {
   getWordsByLanguage(after: ID, first: Int, input: LanguageInput!): WordWithVoteListConnection!
   languagesForGoogleTranslate: LanguageListForBotTranslateOutput!
   languagesForLiltTranslate: LanguageListForBotTranslateOutput!
+  languagesForSmartcatTranslate: LanguageListForBotTranslateOutput!
   loggedInIsAdmin(input: IsAdminIdInput!): IsAdminIdOutput!
   notifications: NotificationListOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionOutput!
@@ -1415,6 +1419,7 @@ type TranslatedLanguageInfoOutput {
   error: ErrorType!
   googleTranslateTotalLangCount: Int!
   liltTranslateTotalLangCount: Int!
+  smartcatTranslateTotalLangCount: Int!
   totalPhraseCount: Int!
   totalWordCount: Int!
   translatedMissingPhraseCount: Int

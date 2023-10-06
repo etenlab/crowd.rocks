@@ -8,7 +8,7 @@ import {
   extend,
 } from '@nestjs/graphql';
 
-import { GenericOutput } from 'src/common/types';
+import { BotType, GenericOutput } from 'src/common/types';
 import { PartialVoteStatus } from 'src/components/common/types';
 
 import { WordDefinition } from 'src/components/definitions/types';
@@ -463,6 +463,11 @@ export class LanguageListForBotTranslateOutput extends GenericOutput {
 }
 
 @InputType()
+export class LanguageListForBotTranslateInput {
+  @Field(() => String) botType: BotType;
+}
+
+@InputType()
 export class TranslatedLanguageInfoInput {
   @Field(() => ID)
   fromLanguageCode: string;
@@ -478,6 +483,7 @@ export class TranslatedLanguageInfoOutput extends GenericOutput {
   @Field(() => Int, { nullable: true }) translatedMissingPhraseCount?: number;
   @Field(() => Int) googleTranslateTotalLangCount: number;
   @Field(() => Int) liltTranslateTotalLangCount: number;
+  @Field(() => Int) smartcatTranslateTotalLangCount: number;
 }
 
 @ObjectType()
