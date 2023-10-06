@@ -3,11 +3,7 @@ import { PubSub } from 'graphql-subscriptions';
 import { Subject } from 'rxjs';
 
 import { ErrorType, GenericOutput } from 'src/common/types';
-import {
-  calc_vote_weight,
-  createToken,
-  pgClientOrPool,
-} from 'src/common/utility';
+import { calc_vote_weight, pgClientOrPool } from 'src/common/utility';
 import { subTags2LangInfo, langInfo2String } from 'src/common/langUtils';
 import { LanguageInput } from 'src/components/common/types';
 
@@ -1441,7 +1437,7 @@ export class TranslationsService {
 
       let translatedWordCount = 0;
       let translatedPhraseCount = 0;
-      let upVoteCount = 0;
+      // let upVoteCount = 0;
       for (const edge of wordsConnection.edges) {
         const { node } = edge;
         const oWord = textsToTranslateObjMap.get(node.word);
@@ -1491,7 +1487,7 @@ export class TranslationsService {
           }
           // process: the same translation was made by someone else
           else {
-            upVoteCount++;
+            // upVoteCount++;
             //console.log(`upvote ${otherSameTranslations[0].translationId}`);
             await setTranslationsVotes(
               true,
