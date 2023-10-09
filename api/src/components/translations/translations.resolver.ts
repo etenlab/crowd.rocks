@@ -52,6 +52,7 @@ import {
 } from './types';
 import { ErrorType, GenericOutput } from '../../common/types';
 import { AiTranslationsService } from './translator-bots/ai-translations.service';
+import { Token } from 'graphql';
 
 @Injectable()
 @Resolver()
@@ -410,6 +411,12 @@ export class TranslationsResolver {
     console.log('languagesForSmartcatTranslate resolver');
     return this.aiTranslations.languagesForSmartcatTranslate();
   }
+  
+  @Query(() => LanguageListForBotTranslateOutput)
+  async languagesForChatGPT35Translate(): Promise<LanguageListForBotTranslateOutput> {
+    console.log('languagesForChatGPT35Translate resolver');
+    return this.aiTranslations.languagesForChatGPT35Translate();
+  }
 
   @Query(() => TranslatedLanguageInfoOutput)
   async getLanguageTranslationInfo(
@@ -440,6 +447,22 @@ export class TranslationsResolver {
     return this.aiTranslations.translateWordsAndPhrasesByGoogle(
       from_language,
       to_language,
+      null,
+    );
+  }
+
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
+  async translateWordsAndPhrasesByChatGPT35(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    return this.aiTranslations.translateWordsAndPhrasesByChatGPT35(
+      from_language,
+      to_language,
+      getBearer(req) || '',
       null,
     );
   }

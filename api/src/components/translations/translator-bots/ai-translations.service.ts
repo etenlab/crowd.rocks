@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
+import { Chat } from 'openai/resources';
 import { PoolClient } from 'pg';
 import { Subject } from 'rxjs';
 import { langInfo2String, subTags2LangInfo } from 'src/common/langUtils';
@@ -39,6 +40,7 @@ import {
   validateTranslateByBotInput,
   getLangConnectionsObjectMapAndTexts,
 } from '../utility';
+import { ChatGPTService } from './chatgpt.service';
 import { GoogleTranslateService } from './google-translate.service';
 import { LiltTranslateService } from './lilt-translate.service';
 import { SmartcatTranslateService } from './sc-translate.service';
@@ -58,6 +60,7 @@ interface ItranslateAllWordsAndPhrasesByBot {
 @Injectable()
 export class AiTranslationsService {
   private translationSubject: Subject<number>;
+  private chatgpt3Service: ChatGPTService;
   constructor(
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private wordsService: WordsService,
@@ -71,6 +74,7 @@ export class AiTranslationsService {
     private translationService: TranslationsService,
   ) {
     this.translationSubject = new Subject<number>();
+    this.chatgpt3Service = new ChatGPTService('gpt-3.5-turbo');
   }
   async getTranslationLanguageInfo(
     input: TranslatedLanguageInfoInput,
@@ -504,6 +508,19 @@ export class AiTranslationsService {
     );
   }
 
+  async translateWordsAndPhrasesByChatGPT35(
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    await this.chatgpt3Service.translate([''], from_language, to_language);
+    return {
+      error: ErrorType.UnknownError,
+      result: null,
+    };
+  }
+
   async translateWordsAndPhrasesByBot(
     translator: ITranslator,
     from_language: LanguageInput,
@@ -900,6 +917,22 @@ export class AiTranslationsService {
       language_code: resQ.rows[0].language_code,
       geo_code: resQ.rows[0].geo_code,
       dialect_code: resQ.rows[0].dialect_code,
+    };
+  }
+
+  async languagesForChatGPT35Translate(): Promise<LanguageListForBotTranslateOutput> {
+    try {
+      const languages = await this.chatgpt3Service.getLanguages();
+      return {
+        error: ErrorType.UnknownError,
+        languages,
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
+    return {
+      error: ErrorType.UnknownError,
+      languages: null,
     };
   }
 }
