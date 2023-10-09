@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
-import { LanguageInput } from '../common/types';
+import { LanguageInput } from '../../common/types';
 import { ConfigService } from 'src/core/config.service';
-import { ITranslator, LanguageResult } from './translations.service';
-import { PostgresService } from '../../core/postgres.service';
-import { createToken } from '../../common/utility';
+import { PostgresService } from '../../../core/postgres.service';
+import { createToken } from '../../../common/utility';
 import { hash } from 'argon2';
 import { parse } from 'node-html-parser';
 import fetch from 'node-fetch';
-import { LanguageInput2tag } from '../../common/langUtils';
+import { LanguageInput2tag } from '../../../common/langUtils';
+import { ITranslator, LanguageResult } from './types';
 
 const LIMIT_WORDS = 20; // for debugging purposes, not to exhaust free limit too quickly/
 const SMARTCAT_BOT_EMAIL = 'liltbot@crowd.rocks';

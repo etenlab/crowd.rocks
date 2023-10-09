@@ -409,7 +409,7 @@ export class TranslationsResolver {
   @Query(() => LanguageListForBotTranslateOutput)
   async languagesForSmartcatTranslate(): Promise<LanguageListForBotTranslateOutput> {
     console.log('languagesForSmartcatTranslate resolver');
-    return this.translationService.languagesForSmartcatTranslate();
+    return this.aiTranslations.languagesForSmartcatTranslate();
   }
 
   @Query(() => TranslatedLanguageInfoOutput)
@@ -487,7 +487,7 @@ export class TranslationsResolver {
       }),
     );
 
-    return this.translationService.translateWordsAndPhrasesBySmartcat(
+    return this.aiTranslations.translateWordsAndPhrasesBySmartcat(
       from_language,
       to_language,
       getBearer(req) || '',
@@ -572,7 +572,7 @@ export class TranslationsResolver {
       }),
     );
 
-    return this.translationService.translateAllWordsAndPhrasesBySmartcat(
+    return this.aiTranslations.translateAllWordsAndPhrasesBySmartcat(
       from_language,
       getBearer(req) || '',
       null,

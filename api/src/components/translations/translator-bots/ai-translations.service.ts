@@ -42,6 +42,7 @@ import {
 } from '../utility';
 import { GoogleTranslateService } from './google-translate.service';
 import { LiltTranslateService } from './lilt-translate.service';
+import { SmartcatTranslateService } from './sc-translate.service';
 import { ITranslationBot, ITranslator } from './types';
 
 @Injectable()
@@ -53,6 +54,7 @@ export class AiTranslationsService {
     private phrasesService: PhrasesService,
     private gTrService: GoogleTranslateService,
     private lTrService: LiltTranslateService,
+    private ScTrService: SmartcatTranslateService,
     private phraseToWordTrService: PhraseToWordTranslationsService,
     private phraseToPhraseTrService: PhraseToPhraseTranslationsService,
     private pg: PostgresService,
@@ -60,7 +62,6 @@ export class AiTranslationsService {
   ) {
     this.translationSubject = new Subject<number>();
   }
-
   async getTranslationLanguageInfo(
     input: TranslatedLanguageInfoInput,
     pgClient: PoolClient | null,
@@ -136,6 +137,9 @@ export class AiTranslationsService {
       .length;
     const liltTranslateTotalLangCount = (await this.lTrService.getLanguages())
       .length;
+    const smartcatTranslateTotalLangCount = (
+      await this.ScTrService.getLanguages()
+    ).length;
 
     return {
       error: ErrorType.NoError, // later
@@ -145,6 +149,7 @@ export class AiTranslationsService {
       translatedMissingWordCount,
       googleTranslateTotalLangCount,
       liltTranslateTotalLangCount,
+      smartcatTranslateTotalLangCount,
     };
   }
 
@@ -482,6 +487,21 @@ export class AiTranslationsService {
     );
   }
 
+  async translateWordsAndPhrasesBySmartcat(
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    return this.translateWordsAndPhrasesByBot(
+      this.ScTrService,
+      from_language,
+      to_language,
+      token,
+      pgClient,
+    );
+  }
+
   async translateWordsAndPhrasesByBot(
     translator: ITranslator,
     from_language: LanguageInput,
@@ -522,19 +542,6 @@ export class AiTranslationsService {
       let translatedWordCount = 0;
       let translatedPhraseCount = 0;
 
-      if (translationTexts.length === 0) {
-        return {
-          error: ErrorType.NoError,
-          result: {
-            requestedCharacters: requestedCharactors,
-            totalWordCount: wordsConnection.edges.length,
-            totalPhraseCount: phrasesConnection.edges.length,
-            translatedWordCount,
-            translatedPhraseCount,
-          },
-        };
-      }
-
       const upsertInputs: {
         from_definition_id: number;
         from_definition_type_is_word: boolean;
@@ -552,10 +559,6 @@ export class AiTranslationsService {
           }
 
           const translatedWord = translationTexts[obj.id];
-
-          if (translatedWord === undefined) {
-            continue;
-          }
           const is_type_word =
             translatedWord
               .trim()
@@ -599,10 +602,6 @@ export class AiTranslationsService {
           }
 
           const translatedPhrase = translationTexts[obj.id];
-
-          if (translatedPhrase === undefined) {
-            continue;
-          }
           const is_type_word =
             translatedPhrase
               .trim()
@@ -674,6 +673,22 @@ export class AiTranslationsService {
       {
         getLanguages: this.languagesForLiltTranslate,
         translateWordsAndPhrases: this.translateWordsAndPhrasesByLilt,
+      },
+      from_language,
+      token,
+      pgClient,
+    );
+  }
+
+  async translateAllWordsAndPhrasesBySmartcat(
+    from_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<GenericOutput> {
+    return this.translateAllWordsAndPhrasesByBot(
+      {
+        getLanguages: this.languagesForSmartcatTranslate,
+        translateWordsAndPhrases: this.translateWordsAndPhrasesBySmartcat,
       },
       from_language,
       token,
@@ -883,6 +898,56 @@ export class AiTranslationsService {
     return {
       error: ErrorType.UnknownError,
       languages: null,
+    };
+  }
+
+  async languagesForSmartcatTranslate(): Promise<LanguageListForBotTranslateOutput> {
+    try {
+      const languages = await this.ScTrService.getLanguages();
+      return {
+        error: ErrorType.NoError,
+        languages,
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
+    return {
+      error: ErrorType.UnknownError,
+      languages: null,
+    };
+  }
+
+  async getTranslationLanguage(
+    translation_id: string,
+    from_definition_type_is_word: boolean,
+    to_definition_type_is_word: boolean,
+  ): Promise<LanguageInput | null> {
+    if (isNaN(Number(translation_id))) {
+      Logger.error(
+        `translationsService#getTranslationLanguage: Number(${JSON.stringify(
+          translation_id,
+        )}) is NaN`,
+      );
+      return null;
+    }
+    const resQ = await this.pg.pool.query(
+      ...getTranslationLangSqlStr(
+        Number(translation_id),
+        from_definition_type_is_word,
+        to_definition_type_is_word,
+      ),
+    );
+
+    if (!resQ.rows[0].language_code || resQ.rows.length > 1) {
+      Logger.error(
+        `translationsService#getTranslationLanguage: translation language not found or several results are found`,
+      );
+      return null;
+    }
+    return {
+      language_code: resQ.rows[0].language_code,
+      geo_code: resQ.rows[0].geo_code,
+      dialect_code: resQ.rows[0].dialect_code,
     };
   }
 }

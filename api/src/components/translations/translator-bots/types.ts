@@ -22,6 +22,7 @@ export interface ITranslator {
     to_language: LanguageInput,
   ) => Promise<string[]>;
   getTranslatorToken: () => Promise<{ id: string; token: string }>;
+  getLanguages(): Promise<LanguageResult[]>;
 }
 
 export interface LanguageResult {
