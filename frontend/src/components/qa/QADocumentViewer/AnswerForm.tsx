@@ -7,6 +7,7 @@ import {
   IonRadio,
   IonCheckbox,
   IonRadioGroup,
+  useIonToast,
 } from '@ionic/react';
 
 import { RowStack } from '../../common/Layout/styled';
@@ -55,6 +56,7 @@ type AnswerFormProps = {
 
 export function AnswerForm({ onCancel, onSave, question }: AnswerFormProps) {
   const { tr } = useTr();
+  const [presentToast] = useIonToast();
 
   const textareaRef = useRef<HTMLIonTextareaElement>(null);
 
@@ -65,7 +67,13 @@ export function AnswerForm({ onCancel, onSave, question }: AnswerFormProps) {
     const answer = (textareaRef.current?.value || '').trim();
 
     if (answer === '') {
-      alert('Answer Not exists');
+      presentToast({
+        message: `${tr('Answer Not exists!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
       return;
     }
 
@@ -78,7 +86,13 @@ export function AnswerForm({ onCancel, onSave, question }: AnswerFormProps) {
     )?.question_item_id;
 
     if (!questionItemId) {
-      alert('Answer Not exists');
+      presentToast({
+        message: `${tr('Answer Not exists!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
       return;
     }
 
@@ -91,7 +105,13 @@ export function AnswerForm({ onCancel, onSave, question }: AnswerFormProps) {
     )?.question_item_id;
 
     if (!questionItemId) {
-      alert('Answer Not exists');
+      presentToast({
+        message: `${tr('Answer Not exists!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
       return;
     }
 
@@ -102,7 +122,13 @@ export function AnswerForm({ onCancel, onSave, question }: AnswerFormProps) {
     const answer = (textareaRef.current?.value || '').trim();
 
     if (answer === '' && questionItemIds.length === 0) {
-      alert('Answer Not exists');
+      presentToast({
+        message: `${tr('Answer Not exists!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
       return;
     }
 
@@ -113,12 +139,24 @@ export function AnswerForm({ onCancel, onSave, question }: AnswerFormProps) {
     const answer = (textareaRef.current?.value || '').trim();
 
     if (answer === '' && questionItemIds.length === 0) {
-      alert('Answer Not exists');
+      presentToast({
+        message: `${tr('Answer Not exists!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
       return;
     }
 
     if (questionItemIds.length !== 1) {
-      alert('Invalid Answer');
+      presentToast({
+        message: `${tr('Invalid Answer!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
       return;
     }
 

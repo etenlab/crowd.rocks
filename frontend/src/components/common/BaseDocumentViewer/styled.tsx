@@ -15,18 +15,24 @@ export const Word = styled('div')({
     cursor: 'pointer',
   },
   '&.edit:hover': {
-    background: '#eee',
+    background: '#E3EAF3',
+  },
+  '&.selected': {
+    background: '#E3EAF3',
+  },
+  '&.boundary': {
+    fontWeight: 700,
   },
 });
 
 export const Dot = styled.div`
   position: absolute;
-  top: -5px;
+  top: -3px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: red;
-  width: 10px;
-  height: 10px;
+  background-color: #1f77df;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   cursor: pointer;
 `;

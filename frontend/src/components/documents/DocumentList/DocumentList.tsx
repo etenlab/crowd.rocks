@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { IonList } from '@ionic/react';
+import { IonList, useIonToast } from '@ionic/react';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -14,6 +14,7 @@ type DocumentListProps = {
 
 export function DocumentList({ onClickItem }: DocumentListProps) {
   const { tr } = useTr();
+  const [presentToast] = useIonToast();
   const {
     states: {
       global: {
@@ -22,7 +23,7 @@ export function DocumentList({ onClickItem }: DocumentListProps) {
     },
   } = useAppContext();
 
-  const { data, error } = useGetAllDocumentsQuery({
+  const { data, error, loading } = useGetAllDocumentsQuery({
     variables: {
       languageInput: sourceLang
         ? {
@@ -35,6 +36,15 @@ export function DocumentList({ onClickItem }: DocumentListProps) {
   });
 
   const documentItems = useMemo(() => {
+    if (error) {
+      presentToast({
+        message: tr('Failed at fetching document list!'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+
     if (error || !data || !data.getAllDocuments.documents) {
       return [];
     }
@@ -48,10 +58,10 @@ export function DocumentList({ onClickItem }: DocumentListProps) {
           onClickItem={onClickItem}
         />
       ));
-  }, [data, error, onClickItem]);
+  }, [data, error, onClickItem, presentToast, tr]);
 
-  if (documentItems.length === 0) {
-    return <div> {tr('No documents yet...')} </div>;
+  if (documentItems.length === 0 && !loading) {
+    return <div>{`${tr('No documents yet')}...`} </div>;
   }
 
   return <IonList lines="inset">{documentItems}</IonList>;
