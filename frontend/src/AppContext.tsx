@@ -126,7 +126,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
 
       const siteTextTranslationListByLanguage =
         data.getAllRecommendedSiteTextTranslationListByLanguage
-          .site_text_translation_with_vote_list_by_language;
+          .translation_with_vote_list_by_language;
 
       const langInfo = subTags2LangInfo({
         lang: siteTextTranslationListByLanguage.language_code,
@@ -140,10 +140,8 @@ export function AppContextProvider({ children }: AppProviderProps) {
 
       const translationMap: Record<string, string> = {};
 
-      if (
-        siteTextTranslationListByLanguage.site_text_translation_with_vote_list
-      ) {
-        for (const translation of siteTextTranslationListByLanguage.site_text_translation_with_vote_list) {
+      if (siteTextTranslationListByLanguage.translation_with_vote_list) {
+        for (const translation of siteTextTranslationListByLanguage.translation_with_vote_list) {
           if (!translation) {
             continue;
           }
@@ -152,22 +150,22 @@ export function AppContextProvider({ children }: AppProviderProps) {
           let translatedText: string;
 
           switch (translation.__typename) {
-            case 'SiteTextWordToWordTranslationWithVote': {
+            case 'WordToWordTranslationWithVote': {
               siteText = translation.from_word_definition.word.word;
               translatedText = translation.to_word_definition.word.word;
               break;
             }
-            case 'SiteTextWordToPhraseTranslationWithVote': {
+            case 'WordToPhraseTranslationWithVote': {
               siteText = translation.from_word_definition.word.word;
               translatedText = translation.to_phrase_definition.phrase.phrase;
               break;
             }
-            case 'SiteTextPhraseToWordTranslationWithVote': {
+            case 'PhraseToWordTranslationWithVote': {
               siteText = translation.from_phrase_definition.phrase.phrase;
               translatedText = translation.to_word_definition.word.word;
               break;
             }
-            case 'SiteTextPhraseToPhraseTranslationWithVote': {
+            case 'PhraseToPhraseTranslationWithVote': {
               siteText = translation.from_phrase_definition.phrase.phrase;
               translatedText = translation.to_phrase_definition.phrase.phrase;
               break;

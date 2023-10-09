@@ -1,51 +1,3 @@
-fragment SiteTextWordToWordTranslationWithVoteFragment on SiteTextWordToWordTranslationWithVote {
-  word_to_word_translation_id
-  from_word_definition {
-    ...WordDefinitionFragment
-  }
-  to_word_definition {
-    ...WordDefinitionFragment
-  }
-  downvotes
-  upvotes
-}
-
-fragment SiteTextWordToPhraseTranslationWithVoteFragment on SiteTextWordToPhraseTranslationWithVote {
-  word_to_phrase_translation_id
-  from_word_definition {
-    ...WordDefinitionFragment
-  }
-  to_phrase_definition {
-    ...PhraseDefinitionFragment
-  }
-  downvotes
-  upvotes
-}
-
-fragment SiteTextPhraseToWordTranslationWithVoteFragment on SiteTextPhraseToWordTranslationWithVote {
-  phrase_to_word_translation_id
-  from_phrase_definition {
-    ...PhraseDefinitionFragment
-  }
-  to_word_definition {
-    ...WordDefinitionFragment
-  }
-  downvotes
-  upvotes
-}
-
-fragment SiteTextPhraseToPhraseTranslationWithVoteFragment on SiteTextPhraseToPhraseTranslationWithVote {
-  phrase_to_phrase_translation_id
-  from_phrase_definition {
-    ...PhraseDefinitionFragment
-  }
-  to_phrase_definition {
-    ...PhraseDefinitionFragment
-  }
-  downvotes
-  upvotes
-}
-
 fragment SiteTextPhraseDefinitionFragment on SiteTextPhraseDefinition {
   site_text_id
   phrase_definition {
@@ -60,29 +12,21 @@ fragment SiteTextWordDefinitionFragment on SiteTextWordDefinition {
   }
 }
 
-fragment SiteTextTranslationVoteStatusFragment on SiteTextTranslationVoteStatus {
-  translation_id
-  from_type_is_word
-  to_type_is_word
-  downvotes
-  upvotes
-}
-
 fragment SiteTextLanguageFragment on SiteTextLanguage {
   language_code
   dialect_code
   geo_code
 }
 
-fragment SiteTextTranslationWithVoteListByLanguageFragment on SiteTextTranslationWithVoteListByLanguage {
+fragment TranslationWithVoteListByLanguageFragment on TranslationWithVoteListByLanguage {
   dialect_code
   geo_code
   language_code
-  site_text_translation_with_vote_list {
-    ...SiteTextWordToWordTranslationWithVoteFragment
-    ...SiteTextWordToPhraseTranslationWithVoteFragment
-    ...SiteTextPhraseToWordTranslationWithVoteFragment
-    ...SiteTextPhraseToPhraseTranslationWithVoteFragment
+  translation_with_vote_list {
+    ...WordToWordTranslationWithVoteFragment
+    ...WordToPhraseTranslationWithVoteFragment
+    ...PhraseToWordTranslationWithVoteFragment
+    ...PhraseToPhraseTranslationWithVoteFragment
   }
 }
 
@@ -119,11 +63,11 @@ query GetAllTranslationFromSiteTextDefinitionID(
     geo_code: $geo_code
   ) {
     error
-    site_text_translation_with_vote_list {
-      ...SiteTextWordToWordTranslationWithVoteFragment
-      ...SiteTextWordToPhraseTranslationWithVoteFragment
-      ...SiteTextPhraseToWordTranslationWithVoteFragment
-      ...SiteTextPhraseToPhraseTranslationWithVoteFragment
+    translation_with_vote_list {
+      ...WordToWordTranslationWithVoteFragment
+      ...WordToPhraseTranslationWithVoteFragment
+      ...PhraseToWordTranslationWithVoteFragment
+      ...PhraseToPhraseTranslationWithVoteFragment
     }
   }
 }
@@ -176,25 +120,6 @@ mutation UpsertSiteTextTranslation(
   }
 }
 
-mutation ToggleSiteTextTranslationVoteStatus(
-  $translation_id: ID!
-  $from_type_is_word: Boolean!
-  $to_type_is_word: Boolean!
-  $vote: Boolean!
-) {
-  toggleSiteTextTranslationVoteStatus(
-    translation_id: $translation_id
-    from_type_is_word: $from_type_is_word
-    to_type_is_word: $to_type_is_word
-    vote: $vote
-  ) {
-    error
-    vote_status {
-      ...SiteTextTranslationVoteStatusFragment
-    }
-  }
-}
-
 query GetAllSiteTextLanguageList {
   getAllSiteTextLanguageList {
     error
@@ -219,11 +144,11 @@ query GetRecommendedTranslationFromSiteTextDefinitionID(
     geo_code: $geo_code
   ) {
     error
-    site_text_translation_with_vote {
-      ...SiteTextWordToWordTranslationWithVoteFragment
-      ...SiteTextWordToPhraseTranslationWithVoteFragment
-      ...SiteTextPhraseToWordTranslationWithVoteFragment
-      ...SiteTextPhraseToPhraseTranslationWithVoteFragment
+    translation_with_vote {
+      ...WordToWordTranslationWithVoteFragment
+      ...WordToPhraseTranslationWithVoteFragment
+      ...PhraseToWordTranslationWithVoteFragment
+      ...PhraseToPhraseTranslationWithVoteFragment
     }
   }
 }
@@ -239,8 +164,8 @@ query GetAllRecommendedSiteTextTranslationListByLanguage(
     geo_code: $geo_code
   ) {
     error
-    site_text_translation_with_vote_list_by_language {
-      ...SiteTextTranslationWithVoteListByLanguageFragment
+    translation_with_vote_list_by_language {
+      ...TranslationWithVoteListByLanguageFragment
     }
   }
 }
@@ -248,8 +173,8 @@ query GetAllRecommendedSiteTextTranslationListByLanguage(
 query GetAllRecommendedSiteTextTranslationList {
   getAllRecommendedSiteTextTranslationList {
     error
-    site_text_translation_with_vote_list_by_language_list {
-      ...SiteTextTranslationWithVoteListByLanguageFragment
+    translation_with_vote_list_by_language_list {
+      ...TranslationWithVoteListByLanguageFragment
     }
   }
 }

@@ -63,3 +63,5 @@ create table pericope_votes(
 );
 
 create index idx__parent__parent_table on posts(parent_table, parent_id);
+
+drop table site_text_translation_votes;

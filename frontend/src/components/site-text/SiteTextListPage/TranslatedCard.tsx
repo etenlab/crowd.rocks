@@ -44,44 +44,42 @@ export function TranslatedCard(props: TranslatedCardProps) {
   let siteTextlikeString = '';
   let definitionlikeString = '';
 
-  const siteTextTranslationWithVote =
+  const translationWithVote =
     !error &&
     !loading &&
     data &&
     data.getRecommendedTranslationFromSiteTextDefinitionID.error ===
       ErrorType.NoError
       ? data.getRecommendedTranslationFromSiteTextDefinitionID
-          .site_text_translation_with_vote
+          .translation_with_vote
       : null;
 
-  if (siteTextTranslationWithVote) {
-    switch (siteTextTranslationWithVote.__typename) {
-      case 'SiteTextWordToWordTranslationWithVote': {
-        siteTextlikeString =
-          siteTextTranslationWithVote.to_word_definition.word.word;
+  if (translationWithVote) {
+    switch (translationWithVote.__typename) {
+      case 'WordToWordTranslationWithVote': {
+        siteTextlikeString = translationWithVote.to_word_definition.word.word;
         definitionlikeString =
-          siteTextTranslationWithVote.to_word_definition.definition;
+          translationWithVote.to_word_definition.definition;
         break;
       }
-      case 'SiteTextWordToPhraseTranslationWithVote': {
+      case 'WordToPhraseTranslationWithVote': {
         siteTextlikeString =
-          siteTextTranslationWithVote.to_phrase_definition.phrase.phrase;
+          translationWithVote.to_phrase_definition.phrase.phrase;
         definitionlikeString =
-          siteTextTranslationWithVote.to_phrase_definition.definition;
+          translationWithVote.to_phrase_definition.definition;
         break;
       }
-      case 'SiteTextPhraseToWordTranslationWithVote': {
-        siteTextlikeString =
-          siteTextTranslationWithVote.to_word_definition.word.word;
+      case 'PhraseToWordTranslationWithVote': {
+        siteTextlikeString = translationWithVote.to_word_definition.word.word;
         definitionlikeString =
-          siteTextTranslationWithVote.to_word_definition.definition;
+          translationWithVote.to_word_definition.definition;
         break;
       }
-      case 'SiteTextPhraseToPhraseTranslationWithVote': {
+      case 'PhraseToPhraseTranslationWithVote': {
         siteTextlikeString =
-          siteTextTranslationWithVote.to_phrase_definition.phrase.phrase;
+          translationWithVote.to_phrase_definition.phrase.phrase;
         definitionlikeString =
-          siteTextTranslationWithVote.to_phrase_definition.definition;
+          translationWithVote.to_phrase_definition.definition;
         break;
       }
     }

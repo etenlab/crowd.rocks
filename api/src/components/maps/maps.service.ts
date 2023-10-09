@@ -272,7 +272,7 @@ export class MapsService {
     lang?: LanguageInput;
     first: number | null;
     after: string | null;
-    }): Promise<MapListConnection> {
+  }): Promise<MapListConnection> {
     try {
       const origMaps = await this.mapsRepository.getOrigMaps(lang);
       const translatedMaps = await this.mapsRepository.getTranslatedMaps({
