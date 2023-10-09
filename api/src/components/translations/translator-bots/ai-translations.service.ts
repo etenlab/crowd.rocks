@@ -48,12 +48,10 @@ interface ItranslateAllWordsAndPhrasesByBot {
   translateWordsAndPhrases: (
     from_language: LanguageInput,
     to_language: LanguageInput,
-    token: string,
     pgClient?: PoolClient | null,
   ) => Promise<TranslateAllWordsAndPhrasesByBotOutput>;
   translator: ITranslator;
   from_language: LanguageInput;
-  token: string;
   pgClient: PoolClient | null;
 }
 
@@ -174,7 +172,6 @@ export class AiTranslationsService {
       this.gTrService,
       from_language,
       to_language,
-      token,
       pgClient,
     );
   }
@@ -471,14 +468,12 @@ export class AiTranslationsService {
   async translateWordsAndPhrasesByGoogle(
     from_language: LanguageInput,
     to_language: LanguageInput,
-    token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.translateWordsAndPhrasesByBot(
       this.gTrService,
       from_language,
       to_language,
-      token,
       pgClient,
     );
   }
@@ -486,14 +481,12 @@ export class AiTranslationsService {
   async translateWordsAndPhrasesByLilt(
     from_language: LanguageInput,
     to_language: LanguageInput,
-    token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.translateWordsAndPhrasesByBot(
       this.lTrService,
       from_language,
       to_language,
-      token,
       pgClient,
     );
   }
@@ -501,14 +494,12 @@ export class AiTranslationsService {
   async translateWordsAndPhrasesBySmartcat(
     from_language: LanguageInput,
     to_language: LanguageInput,
-    token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.translateWordsAndPhrasesByBot(
       this.ScTrService,
       from_language,
       to_language,
-      token,
       pgClient,
     );
   }
@@ -517,7 +508,6 @@ export class AiTranslationsService {
     translator: ITranslator,
     from_language: LanguageInput,
     to_language: LanguageInput,
-    token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     const badInputResult = validateTranslateByBotInput(
@@ -684,7 +674,6 @@ export class AiTranslationsService {
       translateWordsAndPhrases: this.translateWordsAndPhrasesByLilt,
       translator: this.lTrService,
       from_language,
-      token,
       pgClient,
     });
   }
@@ -698,7 +687,6 @@ export class AiTranslationsService {
       translateWordsAndPhrases: this.translateWordsAndPhrasesBySmartcat,
       translator: this.ScTrService,
       from_language,
-      token,
       pgClient,
     });
   }
@@ -712,7 +700,6 @@ export class AiTranslationsService {
       translateWordsAndPhrases: this.translateWordsAndPhrasesByGoogle,
       translator: this.gTrService,
       from_language,
-      token,
       pgClient,
     });
   }
@@ -721,7 +708,6 @@ export class AiTranslationsService {
     translateWordsAndPhrases,
     translator,
     from_language,
-    token,
     pgClient,
   }: ItranslateAllWordsAndPhrasesByBot): Promise<GenericOutput> {
     try {
@@ -795,7 +781,6 @@ export class AiTranslationsService {
               dialect_code: null,
               geo_code: null,
             },
-            token,
             pgClient,
           );
 

@@ -441,7 +441,6 @@ export class TranslationsResolver {
     return this.aiTranslations.translateWordsAndPhrasesByGoogle(
       from_language,
       to_language,
-      getBearer(req) || '',
       null,
     );
   }
@@ -465,7 +464,6 @@ export class TranslationsResolver {
     return this.aiTranslations.translateWordsAndPhrasesByLilt(
       from_language,
       to_language,
-      getBearer(req) || '',
       null,
     );
   }
@@ -489,7 +487,6 @@ export class TranslationsResolver {
     return this.aiTranslations.translateWordsAndPhrasesBySmartcat(
       from_language,
       to_language,
-      getBearer(req) || '',
       null,
     );
   }
