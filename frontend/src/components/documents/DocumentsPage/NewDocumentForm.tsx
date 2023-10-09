@@ -18,7 +18,6 @@ type NewDocumentFormProps = {
 
 export function NewDocumentForm({ onSave, onCancel }: NewDocumentFormProps) {
   const { tr } = useTr();
-  // const [present] = useIonToast();
 
   const {
     states: {

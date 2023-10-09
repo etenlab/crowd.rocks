@@ -31,7 +31,7 @@ export function AnswerList({
 
   const [showAnswerForm, setShowAnswerForm] = useState<boolean>(false);
 
-  const { data, error, loading } = useGetAnswersByQuestionIdQuery({
+  const { data, error } = useGetAnswersByQuestionIdQuery({
     variables: {
       id: question.question_id,
     },
@@ -64,14 +64,6 @@ export function AnswerList({
     setShowAnswerForm(false);
     onCancel();
   };
-
-  if (loading) {
-    return <div>loading</div>;
-  }
-
-  if (error) {
-    return <div>error</div>;
-  }
 
   const answerForm = showAnswerForm ? (
     <AnswerForm
