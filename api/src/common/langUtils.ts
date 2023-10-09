@@ -1,3 +1,4 @@
+import { LanguageInput } from '../components/common/types';
 import { DESCRIPTIONS_JOINER, NOT_DEFINED_PLACEHOLDER } from './const';
 import { ITagInfo, LanguageInfo } from './types';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -110,6 +111,14 @@ export const subTags2LangInfo = ({
   dialect && (langTag += '-' + dialect);
   langTag = Tags(langTag).format();
   return tag2langInfo(langTag);
+};
+
+export const LanguageInput2tag = (languageInput: LanguageInput): string => {
+  return subTags2Tag({
+    lang: languageInput.language_code,
+    dialect: languageInput.dialect_code || undefined,
+    region: languageInput.geo_code || undefined,
+  });
 };
 
 export const compareLangInfo = (

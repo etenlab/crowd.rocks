@@ -31,7 +31,6 @@ import { TranslationsService } from '../translations.service';
 import {
   TranslatedLanguageInfoInput,
   TranslatedLanguageInfoOutput,
-  TranslateAllWordsAndPhrasesByGoogleOutput,
   ToDefinitionInput,
   TranslateAllWordsAndPhrasesByBotOutput,
   LanguageListForBotTranslateOutput,
@@ -42,7 +41,19 @@ import {
 } from '../utility';
 import { GoogleTranslateService } from './google-translate.service';
 import { LiltTranslateService } from './lilt-translate.service';
-import { ITranslationBot, ITranslator } from './types';
+import { SmartcatTranslateService } from './sc-translate.service';
+import { ITranslator } from './types';
+
+interface ItranslateAllWordsAndPhrasesByBot {
+  translateWordsAndPhrases: (
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    pgClient?: PoolClient | null,
+  ) => Promise<TranslateAllWordsAndPhrasesByBotOutput>;
+  translator: ITranslator;
+  from_language: LanguageInput;
+  pgClient: PoolClient | null;
+}
 
 @Injectable()
 export class AiTranslationsService {
@@ -53,6 +64,7 @@ export class AiTranslationsService {
     private phrasesService: PhrasesService,
     private gTrService: GoogleTranslateService,
     private lTrService: LiltTranslateService,
+    private ScTrService: SmartcatTranslateService,
     private phraseToWordTrService: PhraseToWordTranslationsService,
     private phraseToPhraseTrService: PhraseToPhraseTranslationsService,
     private pg: PostgresService,
@@ -60,7 +72,6 @@ export class AiTranslationsService {
   ) {
     this.translationSubject = new Subject<number>();
   }
-
   async getTranslationLanguageInfo(
     input: TranslatedLanguageInfoInput,
     pgClient: PoolClient | null,
@@ -132,10 +143,12 @@ export class AiTranslationsService {
     }
 
     // total possible 'to' languages bot Translators can translate to.
-    const googleTranslateTotalLangCount = (await this.gTrService.getLanguages())
-      .length;
-    const liltTranslateTotalLangCount = (await this.lTrService.getLanguages())
-      .length;
+    const googleTranslateTotalLangCount =
+      (await this.gTrService.getLanguages()).languages?.length || 0;
+    const liltTranslateTotalLangCount =
+      (await this.lTrService.getLanguages()).languages?.length || 0;
+    const smartcatTranslateTotalLangCount =
+      (await this.ScTrService.getLanguages()).languages?.length || 0;
 
     return {
       error: ErrorType.NoError, // later
@@ -145,6 +158,7 @@ export class AiTranslationsService {
       translatedMissingWordCount,
       googleTranslateTotalLangCount,
       liltTranslateTotalLangCount,
+      smartcatTranslateTotalLangCount,
     };
   }
 
@@ -153,12 +167,11 @@ export class AiTranslationsService {
     to_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.translateWordsAndPhrasesByBot(
       this.gTrService,
       from_language,
       to_language,
-      token,
       pgClient,
     );
   }
@@ -168,7 +181,7 @@ export class AiTranslationsService {
     from_language: LanguageInput,
     to_language: LanguageInput,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     const badInputResult = validateTranslateByBotInput(
       from_language,
       to_language,
@@ -455,14 +468,12 @@ export class AiTranslationsService {
   async translateWordsAndPhrasesByGoogle(
     from_language: LanguageInput,
     to_language: LanguageInput,
-    token: string,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.translateWordsAndPhrasesByBot(
       this.gTrService,
       from_language,
       to_language,
-      token,
       pgClient,
     );
   }
@@ -470,14 +481,25 @@ export class AiTranslationsService {
   async translateWordsAndPhrasesByLilt(
     from_language: LanguageInput,
     to_language: LanguageInput,
-    token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.translateWordsAndPhrasesByBot(
       this.lTrService,
       from_language,
       to_language,
-      token,
+      pgClient,
+    );
+  }
+
+  async translateWordsAndPhrasesBySmartcat(
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    return this.translateWordsAndPhrasesByBot(
+      this.ScTrService,
+      from_language,
+      to_language,
       pgClient,
     );
   }
@@ -486,9 +508,8 @@ export class AiTranslationsService {
     translator: ITranslator,
     from_language: LanguageInput,
     to_language: LanguageInput,
-    token: string,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     const badInputResult = validateTranslateByBotInput(
       from_language,
       to_language,
@@ -522,19 +543,6 @@ export class AiTranslationsService {
       let translatedWordCount = 0;
       let translatedPhraseCount = 0;
 
-      if (translationTexts.length === 0) {
-        return {
-          error: ErrorType.NoError,
-          result: {
-            requestedCharacters: requestedCharactors,
-            totalWordCount: wordsConnection.edges.length,
-            totalPhraseCount: phrasesConnection.edges.length,
-            translatedWordCount,
-            translatedPhraseCount,
-          },
-        };
-      }
-
       const upsertInputs: {
         from_definition_id: number;
         from_definition_type_is_word: boolean;
@@ -552,10 +560,6 @@ export class AiTranslationsService {
           }
 
           const translatedWord = translationTexts[obj.id];
-
-          if (translatedWord === undefined) {
-            continue;
-          }
           const is_type_word =
             translatedWord
               .trim()
@@ -599,10 +603,6 @@ export class AiTranslationsService {
           }
 
           const translatedPhrase = translationTexts[obj.id];
-
-          if (translatedPhrase === undefined) {
-            continue;
-          }
           const is_type_word =
             translatedPhrase
               .trim()
@@ -670,15 +670,25 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<GenericOutput> {
-    return this.translateAllWordsAndPhrasesByBot(
-      {
-        getLanguages: this.languagesForLiltTranslate,
-        translateWordsAndPhrases: this.translateWordsAndPhrasesByLilt,
-      },
+    return this.translateAllWordsAndPhrasesByBot({
+      translateWordsAndPhrases: this.translateWordsAndPhrasesByLilt,
+      translator: this.lTrService,
       from_language,
-      token,
       pgClient,
-    );
+    });
+  }
+
+  async translateAllWordsAndPhrasesBySmartcat(
+    from_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<GenericOutput> {
+    return this.translateAllWordsAndPhrasesByBot({
+      translateWordsAndPhrases: this.translateWordsAndPhrasesBySmartcat,
+      translator: this.ScTrService,
+      from_language,
+      pgClient,
+    });
   }
 
   async translateAllWordsAndPhrasesByGoogle(
@@ -686,23 +696,20 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<GenericOutput> {
-    return this.translateAllWordsAndPhrasesByBot(
-      {
-        getLanguages: this.languagesForGoogleTranslate,
-        translateWordsAndPhrases: this.translateWordsAndPhrasesByGoogle,
-      },
+    return this.translateAllWordsAndPhrasesByBot({
+      translateWordsAndPhrases: this.translateWordsAndPhrasesByGoogle,
+      translator: this.gTrService,
       from_language,
-      token,
       pgClient,
-    );
+    });
   }
 
-  async translateAllWordsAndPhrasesByBot(
-    translationBot: ITranslationBot,
-    from_language: LanguageInput,
-    token: string,
-    pgClient: PoolClient | null,
-  ): Promise<GenericOutput> {
+  async translateAllWordsAndPhrasesByBot({
+    translateWordsAndPhrases,
+    translator,
+    from_language,
+    pgClient,
+  }: ItranslateAllWordsAndPhrasesByBot): Promise<GenericOutput> {
     try {
       if (this.translationSubject) {
         this.translationSubject.complete();
@@ -710,7 +717,7 @@ export class AiTranslationsService {
 
       this.translationSubject = new Subject<number>();
 
-      const { error, languages } = await translationBot.getLanguages();
+      const { error, languages } = await translator.getLanguages();
 
       if (error !== ErrorType.NoError || !languages) {
         return { error };
@@ -767,17 +774,15 @@ export class AiTranslationsService {
             return;
           }
 
-          const { error, result } =
-            await translationBot.translateWordsAndPhrases(
-              from_language,
-              {
-                language_code: language.code,
-                dialect_code: null,
-                geo_code: null,
-              },
-              token,
-              pgClient,
-            );
+          const { error, result } = await translateWordsAndPhrases(
+            from_language,
+            {
+              language_code: language.code,
+              dialect_code: null,
+              geo_code: null,
+            },
+            pgClient,
+          );
 
           if (error !== ErrorType.NoError) {
             hasErrors.push(
@@ -853,36 +858,48 @@ export class AiTranslationsService {
   }
 
   async languagesForGoogleTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    try {
-      const languages = await this.gTrService.getLanguages();
-
-      return {
-        error: ErrorType.NoError,
-        languages,
-      };
-    } catch (e) {
-      Logger.error(e);
-    }
-
-    return {
-      error: ErrorType.UnknownError,
-      languages: null,
-    };
+    return this.gTrService.getLanguages();
   }
 
   async languagesForLiltTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    try {
-      const languages = await this.lTrService.getLanguages();
-      return {
-        error: ErrorType.NoError,
-        languages,
-      };
-    } catch (e) {
-      Logger.error(e);
+    return this.lTrService.getLanguages();
+  }
+
+  async languagesForSmartcatTranslate(): Promise<LanguageListForBotTranslateOutput> {
+    return this.ScTrService.getLanguages();
+  }
+
+  async getTranslationLanguage(
+    translation_id: string,
+    from_definition_type_is_word: boolean,
+    to_definition_type_is_word: boolean,
+  ): Promise<LanguageInput | null> {
+    if (isNaN(Number(translation_id))) {
+      Logger.error(
+        `translationsService#getTranslationLanguage: Number(${JSON.stringify(
+          translation_id,
+        )}) is NaN`,
+      );
+      return null;
+    }
+    const resQ = await this.pg.pool.query(
+      ...getTranslationLangSqlStr(
+        Number(translation_id),
+        from_definition_type_is_word,
+        to_definition_type_is_word,
+      ),
+    );
+
+    if (!resQ.rows[0].language_code || resQ.rows.length > 1) {
+      Logger.error(
+        `translationsService#getTranslationLanguage: translation language not found or several results are found`,
+      );
+      return null;
     }
     return {
-      error: ErrorType.UnknownError,
-      languages: null,
+      language_code: resQ.rows[0].language_code,
+      geo_code: resQ.rows[0].geo_code,
+      dialect_code: resQ.rows[0].dialect_code,
     };
   }
 }

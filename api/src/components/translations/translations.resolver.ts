@@ -45,7 +45,6 @@ import {
   ToDefinitionInput,
   TranslationWithVoteOutput,
   LanguageListForBotTranslateOutput,
-  TranslateAllWordsAndPhrasesByGoogleOutput,
   TranslateAllWordsAndPhrasesByBotResult,
   TranslatedLanguageInfoInput,
   TranslatedLanguageInfoOutput,
@@ -406,6 +405,12 @@ export class TranslationsResolver {
     return this.aiTranslations.languagesForLiltTranslate();
   }
 
+  @Query(() => LanguageListForBotTranslateOutput)
+  async languagesForSmartcatTranslate(): Promise<LanguageListForBotTranslateOutput> {
+    console.log('languagesForSmartcatTranslate resolver');
+    return this.aiTranslations.languagesForSmartcatTranslate();
+  }
+
   @Query(() => TranslatedLanguageInfoOutput)
   async getLanguageTranslationInfo(
     @Args('input')
@@ -417,14 +422,13 @@ export class TranslationsResolver {
     return this.aiTranslations.getTranslationLanguageInfo(input, null);
   }
 
-  @Mutation(() => TranslateAllWordsAndPhrasesByGoogleOutput)
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateWordsAndPhrasesByGoogle(
     @Args('from_language', { type: () => LanguageInput })
     from_language: LanguageInput,
     @Args('to_language', { type: () => LanguageInput })
     to_language: LanguageInput,
-    @Context() req: any,
-  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     console.log(
       'translateWordsAndPhrasesByGoogle',
       JSON.stringify({
@@ -436,7 +440,6 @@ export class TranslationsResolver {
     return this.aiTranslations.translateWordsAndPhrasesByGoogle(
       from_language,
       to_language,
-      getBearer(req) || '',
       null,
     );
   }
@@ -447,7 +450,6 @@ export class TranslationsResolver {
     from_language: LanguageInput,
     @Args('to_language', { type: () => LanguageInput })
     to_language: LanguageInput,
-    @Context() req: any,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     console.log(
       'translateWordsAndPhrasesByLilt',
@@ -460,19 +462,40 @@ export class TranslationsResolver {
     return this.aiTranslations.translateWordsAndPhrasesByLilt(
       from_language,
       to_language,
-      getBearer(req) || '',
       null,
     );
   }
 
-  @Mutation(() => TranslateAllWordsAndPhrasesByGoogleOutput)
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
+  async translateWordsAndPhrasesBySmartcat(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    console.log(
+      'translateWordsAndPhrasesBySmartcat',
+      JSON.stringify({
+        from_language,
+        to_language,
+      }),
+    );
+
+    return this.aiTranslations.translateWordsAndPhrasesBySmartcat(
+      from_language,
+      to_language,
+      null,
+    );
+  }
+
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateMissingWordsAndPhrasesByGoogle(
     @Args('from_language', { type: () => LanguageInput })
     from_language: LanguageInput,
     @Args('to_language', { type: () => LanguageInput })
     to_language: LanguageInput,
     @Context() req: any,
-  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     console.log(
       'translateMissingWordsAndPhrasesByGoogle',
       JSON.stringify({
@@ -523,6 +546,26 @@ export class TranslationsResolver {
     );
 
     return this.aiTranslations.translateAllWordsAndPhrasesByLilt(
+      from_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @Mutation(() => GenericOutput)
+  async translateAllWordsAndPhrasesBySmartcat(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<GenericOutput> {
+    console.log(
+      'translateAllWordsAndPhrasesBySmartcat',
+      JSON.stringify({
+        from_language,
+      }),
+    );
+
+    return this.aiTranslations.translateAllWordsAndPhrasesBySmartcat(
       from_language,
       getBearer(req) || '',
       null,

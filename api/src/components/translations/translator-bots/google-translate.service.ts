@@ -13,7 +13,9 @@ import {
 import { PostgresService } from '../../../core/postgres.service';
 import { delay } from '../utility';
 import { hash } from 'argon2';
-import { GOOGLE_BOT_EMAIL, ITranslator, LanguageResult, LIMITS } from './types';
+import { GOOGLE_BOT_EMAIL, ITranslator, LIMITS } from './types';
+import { LanguageListForBotTranslateOutput } from '../types';
+import { ErrorType } from '../../../common/types';
 
 @Injectable()
 export class GoogleTranslateService implements ITranslator {
@@ -112,19 +114,29 @@ export class GoogleTranslateService implements ITranslator {
     }
   }
 
-  async getLanguages(): Promise<LanguageResult[]> {
-    if (!this.gcpTranslateClient) {
-      throw new Error('no translate client');
+  async getLanguages(): Promise<LanguageListForBotTranslateOutput> {
+    try {
+      if (!this.gcpTranslateClient) {
+        throw new Error('no translate client');
+      }
+
+      const [googleLanguageResults] =
+        await this.gcpTranslateClient!.getLanguages();
+
+      const languages = googleLanguageResults.map((gl) => ({
+        code: gl.code,
+        name: gl.name,
+      }));
+      return {
+        languages,
+        error: ErrorType.NoError,
+      };
+    } catch {
+      return {
+        languages: null,
+        error: ErrorType.BotTranslationLanguagesListError,
+      };
     }
-
-    const [googleLanguageResults] =
-      await this.gcpTranslateClient!.getLanguages();
-
-    // explisit cast just to be obvious that we return our LanguageResult interface, not google's v2.LanguageRsult
-    return googleLanguageResults.map((gl) => ({
-      code: gl.code,
-      name: gl.name,
-    }));
   }
 
   async getTranslatorToken(): Promise<{ id: string; token: string }> {

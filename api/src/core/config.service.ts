@@ -34,6 +34,11 @@ export class ConfigService {
   public readonly CR_GOOGLE_BOT_PASSWORD =
     process.env.CR_GOOGLE_BOT_PASSWORD || 'asdfasdf';
 
+  public readonly SMARTCAT_USER = process.env.SMARTCAT_USER;
+  public readonly SMARTCAT_KEY = process.env.SMARTCAT_KEY;
+
+  public readonly LILT_KEY = process.env.LILT_KEY;
+
   public readonly AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
   public readonly AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
   public readonly AWS_REGION = process.env.AWS_REGION;
@@ -41,6 +46,4 @@ export class ConfigService {
   public readonly EMAIL_SERVER = process.env.EMAIL_SERVER;
   public readonly GCP_PROJECT_ID = process.env.GCP_PROJECT_ID;
   public readonly GCP_API_KEY = process.env.GCP_API_KEY;
-
-  public readonly LILT_KEY = process.env.LILT_KEY;
 }

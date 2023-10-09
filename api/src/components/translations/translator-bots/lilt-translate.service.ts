@@ -6,7 +6,9 @@ import { createToken } from 'src/common/utility';
 import { LanguageInput } from 'src/components/common/types';
 import { ConfigService } from 'src/core/config.service';
 import { PostgresService } from 'src/core/postgres.service';
-import { ITranslator, LanguageResult } from './types';
+import { ErrorType } from '../../../common/types';
+import { LanguageListForBotTranslateOutput } from '../types';
+import { ITranslator } from './types';
 // import { substituteN, unSubstituteN } from '../../common/utility';
 
 const LIMIT_REQUESTS = 4000; // per LIMIT_TIME
@@ -99,18 +101,21 @@ export class LiltTranslateService implements ITranslator {
     }
   }
 
-  async getLanguages(): Promise<LanguageResult[]> {
+  async getLanguages(): Promise<LanguageListForBotTranslateOutput> {
     //todo
-    return [
-      {
-        code: 'uk',
-        name: 'Ukrainian (mocked)',
-      },
-      {
-        code: 'pl',
-        name: 'Polish (mocked)',
-      },
-    ];
+    return {
+      languages: [
+        {
+          code: 'uk',
+          name: 'Ukrainian (mocked)',
+        },
+        {
+          code: 'pl',
+          name: 'Polish (mocked)',
+        },
+      ],
+      error: ErrorType.NoError,
+    };
   }
 
   async getTranslatorToken(): Promise<{ id: string; token: string }> {

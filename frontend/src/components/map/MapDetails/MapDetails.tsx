@@ -334,5 +334,8 @@ const StButtonsSection = styled.div`
 `;
 
 const StControls = styled('div')`
+  height: 0;
+  position: relative;
+  top: -55px;
   z-index: 1000;
 `;
