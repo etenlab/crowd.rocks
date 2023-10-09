@@ -428,7 +428,6 @@ export class TranslationsResolver {
     from_language: LanguageInput,
     @Args('to_language', { type: () => LanguageInput })
     to_language: LanguageInput,
-    @Context() req: any,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     console.log(
       'translateWordsAndPhrasesByGoogle',
@@ -451,7 +450,6 @@ export class TranslationsResolver {
     from_language: LanguageInput,
     @Args('to_language', { type: () => LanguageInput })
     to_language: LanguageInput,
-    @Context() req: any,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     console.log(
       'translateWordsAndPhrasesByLilt',
@@ -474,7 +472,6 @@ export class TranslationsResolver {
     from_language: LanguageInput,
     @Args('to_language', { type: () => LanguageInput })
     to_language: LanguageInput,
-    @Context() req: any,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     console.log(
       'translateWordsAndPhrasesBySmartcat',
