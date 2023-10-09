@@ -507,5 +507,3 @@ export class TranslateAllWordsAndPhrasesByBotOutput extends GenericOutput {
   @Field(() => TranslateAllWordsAndPhrasesByBotResult, { nullable: true })
   result: TranslateAllWordsAndPhrasesByBotResult | null;
 }
-@ObjectType()
-export class TranslateAllWordsAndPhrasesByGoogleOutput extends TranslateAllWordsAndPhrasesByBotOutput {}

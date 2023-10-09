@@ -107,6 +107,7 @@ enum ErrorType {
   AvatarTooShort
   AvatarUnavailable
   BotTranslationBotNotFound
+  BotTranslationLanguagesListError
   CandidateNotFound
   CandidateNotFoundInBallot
   DocumentEntryReadError
@@ -592,8 +593,8 @@ type Mutation {
   translateAllWordsAndPhrasesByGoogle(from_language: LanguageInput!): GenericOutput!
   translateAllWordsAndPhrasesByLilt(from_language: LanguageInput!): GenericOutput!
   translateAllWordsAndPhrasesBySmartcat(from_language: LanguageInput!): GenericOutput!
-  translateMissingWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
-  translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
+  translateMissingWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByLilt(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesBySmartcat(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionOutput!
@@ -1310,11 +1311,6 @@ type TranslateAllWordsAndPhrasesByBotResult {
   totalWordCount: Int!
   translatedPhraseCount: Int!
   translatedWordCount: Int!
-}
-
-type TranslateAllWordsAndPhrasesByGoogleOutput {
-  error: ErrorType!
-  result: TranslateAllWordsAndPhrasesByBotResult
 }
 
 input TranslatedLanguageInfoInput {

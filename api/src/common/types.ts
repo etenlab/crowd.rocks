@@ -127,7 +127,8 @@ export enum ErrorType {
   PericopeInsertFailed = 'PericopeInsertFailed',
   PericopeNotFound = 'PericopeNotFound',
   PericopeVoteToggleFailed = 'PericopeVoteToggleFailed',
-  BotTranslationBotNotFound = 'BotTranslationBotNotFound'
+  BotTranslationBotNotFound = 'BotTranslationBotNotFound',
+  BotTranslationLanguagesListError = 'BotTranslationLanguagesListError',
 }
 
 registerEnumType(ErrorType, {

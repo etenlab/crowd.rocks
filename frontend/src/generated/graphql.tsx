@@ -131,6 +131,7 @@ export enum ErrorType {
   AvatarTooShort = 'AvatarTooShort',
   AvatarUnavailable = 'AvatarUnavailable',
   BotTranslationBotNotFound = 'BotTranslationBotNotFound',
+  BotTranslationLanguagesListError = 'BotTranslationLanguagesListError',
   CandidateNotFound = 'CandidateNotFound',
   CandidateNotFoundInBallot = 'CandidateNotFoundInBallot',
   DocumentEntryReadError = 'DocumentEntryReadError',
@@ -657,8 +658,8 @@ export type Mutation = {
   translateAllWordsAndPhrasesByGoogle: GenericOutput;
   translateAllWordsAndPhrasesByLilt: GenericOutput;
   translateAllWordsAndPhrasesBySmartcat: GenericOutput;
-  translateMissingWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByGoogleOutput;
-  translateWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByGoogleOutput;
+  translateMissingWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByBotOutput;
+  translateWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByLilt: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesBySmartcat: TranslateAllWordsAndPhrasesByBotOutput;
   updateDefinition: PhraseDefinitionOutput;
@@ -2232,12 +2233,6 @@ export type TranslateAllWordsAndPhrasesByBotResult = {
   translatedWordCount: Scalars['Int']['output'];
 };
 
-export type TranslateAllWordsAndPhrasesByGoogleOutput = {
-  __typename?: 'TranslateAllWordsAndPhrasesByGoogleOutput';
-  error: ErrorType;
-  result?: Maybe<TranslateAllWordsAndPhrasesByBotResult>;
-};
-
 export type TranslatedLanguageInfoInput = {
   fromLanguageCode: Scalars['ID']['input'];
   toLanguageCode?: InputMaybe<Scalars['ID']['input']>;
@@ -3490,7 +3485,7 @@ export type TranslateWordsAndPhrasesByGoogleMutationVariables = Exact<{
 }>;
 
 
-export type TranslateWordsAndPhrasesByGoogleMutation = { __typename?: 'Mutation', translateWordsAndPhrasesByGoogle: { __typename?: 'TranslateAllWordsAndPhrasesByGoogleOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
+export type TranslateWordsAndPhrasesByGoogleMutation = { __typename?: 'Mutation', translateWordsAndPhrasesByGoogle: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
 
 export type TranslateMissingWordsAndPhrasesByGoogleMutationVariables = Exact<{
   from_language_code: Scalars['String']['input'];
@@ -3498,7 +3493,7 @@ export type TranslateMissingWordsAndPhrasesByGoogleMutationVariables = Exact<{
 }>;
 
 
-export type TranslateMissingWordsAndPhrasesByGoogleMutation = { __typename?: 'Mutation', translateMissingWordsAndPhrasesByGoogle: { __typename?: 'TranslateAllWordsAndPhrasesByGoogleOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
+export type TranslateMissingWordsAndPhrasesByGoogleMutation = { __typename?: 'Mutation', translateMissingWordsAndPhrasesByGoogle: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
 
 export type TranslateWordsAndPhrasesByLiltMutationVariables = Exact<{
   from_language_code: Scalars['String']['input'];

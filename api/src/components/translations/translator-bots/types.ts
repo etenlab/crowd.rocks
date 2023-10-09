@@ -1,19 +1,5 @@
-import { PoolClient } from 'pg';
 import { LanguageInput } from 'src/components/common/types';
-import {
-  LanguageListForBotTranslateOutput,
-  TranslateAllWordsAndPhrasesByBotOutput,
-} from '../types';
-
-export interface ITranslationBot {
-  getLanguages: () => Promise<LanguageListForBotTranslateOutput>;
-  translateWordsAndPhrases: (
-    from_language: LanguageInput,
-    to_language: LanguageInput,
-    token: string,
-    pgClient?: PoolClient | null,
-  ) => Promise<TranslateAllWordsAndPhrasesByBotOutput>;
-}
+import { LanguageListForBotTranslateOutput } from '../types';
 
 export interface ITranslator {
   translate: (
@@ -22,12 +8,7 @@ export interface ITranslator {
     to_language: LanguageInput,
   ) => Promise<string[]>;
   getTranslatorToken: () => Promise<{ id: string; token: string }>;
-  getLanguages(): Promise<LanguageResult[]>;
-}
-
-export interface LanguageResult {
-  code: string;
-  name: string;
+  getLanguages(): Promise<LanguageListForBotTranslateOutput>;
 }
 
 export const LIMITS = 6000000 - 1000000;

@@ -45,7 +45,6 @@ import {
   ToDefinitionInput,
   TranslationWithVoteOutput,
   LanguageListForBotTranslateOutput,
-  TranslateAllWordsAndPhrasesByGoogleOutput,
   TranslateAllWordsAndPhrasesByBotResult,
   TranslatedLanguageInfoInput,
   TranslatedLanguageInfoOutput,
@@ -423,14 +422,14 @@ export class TranslationsResolver {
     return this.aiTranslations.getTranslationLanguageInfo(input, null);
   }
 
-  @Mutation(() => TranslateAllWordsAndPhrasesByGoogleOutput)
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateWordsAndPhrasesByGoogle(
     @Args('from_language', { type: () => LanguageInput })
     from_language: LanguageInput,
     @Args('to_language', { type: () => LanguageInput })
     to_language: LanguageInput,
     @Context() req: any,
-  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     console.log(
       'translateWordsAndPhrasesByGoogle',
       JSON.stringify({
@@ -495,14 +494,14 @@ export class TranslationsResolver {
     );
   }
 
-  @Mutation(() => TranslateAllWordsAndPhrasesByGoogleOutput)
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateMissingWordsAndPhrasesByGoogle(
     @Args('from_language', { type: () => LanguageInput })
     from_language: LanguageInput,
     @Args('to_language', { type: () => LanguageInput })
     to_language: LanguageInput,
     @Context() req: any,
-  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     console.log(
       'translateMissingWordsAndPhrasesByGoogle',
       JSON.stringify({

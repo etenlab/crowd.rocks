@@ -8,7 +8,9 @@ import { hash } from 'argon2';
 import { parse } from 'node-html-parser';
 import fetch from 'node-fetch';
 import { LanguageInput2tag } from '../../../common/langUtils';
-import { ITranslator, LanguageResult } from './types';
+import { ITranslator } from './types';
+import { LanguageListForBotTranslateOutput } from '../types';
+import { ErrorType } from '../../../common/types';
 
 const LIMIT_WORDS = 20; // for debugging purposes, not to exhaust free limit too quickly/
 const SMARTCAT_BOT_EMAIL = 'liltbot@crowd.rocks';
@@ -77,30 +79,44 @@ export class SmartcatTranslateService implements ITranslator {
     }
   }
 
-  async getLanguages(): Promise<LanguageResult[]> {
-    const res = await fetch('https://smartcat.com/Home/Languages');
-    const text = await res.text();
-    const dom = parse(text);
-    const tds = dom.getElementsByTagName('td');
-    const languages: {
-      name: string;
-      tag: string;
-      script: string;
-      writingDirection: string;
-    }[] = [];
-    for (let i = 0; i < tds.length; i++) {
-      languages.push({
-        name: tds[i].innerText,
-        tag: tds[i + 1].innerText,
-        script: tds[i + 2].innerText,
-        writingDirection: tds[i + 3].innerText,
-      });
-      i = i + 3;
+  async getLanguages(): Promise<LanguageListForBotTranslateOutput> {
+    try {
+      const res = await fetch('https://smartcat.com/Home/Languages');
+      const text = await res.text();
+      const dom = parse(text);
+      const tds = dom.getElementsByTagName('td');
+      const scLangs: {
+        name: string;
+        tag: string;
+        script: string;
+        writingDirection: string;
+      }[] = [];
+      for (let i = 0; i < tds.length; i++) {
+        scLangs.push({
+          name: tds[i].innerText,
+          tag: tds[i + 1].innerText,
+          script: tds[i + 2].innerText,
+          writingDirection: tds[i + 3].innerText,
+        });
+        // Array `tds` repeats every 4 elements (for name, tag, script, direction).
+        // So while iterating, we increase counter `i` by 1 in the `for` clause, and here also increase by 3.
+        // Thus we can take the next 4 elements in the new iteration of the `for` cycle.
+        i = i + 3;
+      }
+      const languages = scLangs.map((l) => ({
+        code: l.tag,
+        name: l.name,
+      }));
+      return {
+        languages: languages,
+        error: ErrorType.NoError,
+      };
+    } catch (error) {
+      return {
+        languages: null,
+        error: ErrorType.BotTranslationLanguagesListError,
+      };
     }
-    return languages.map((l) => ({
-      code: l.tag,
-      name: l.name,
-    }));
   }
 
   async getTranslatorToken(): Promise<{ id: string; token: string }> {

@@ -31,7 +31,6 @@ import { TranslationsService } from '../translations.service';
 import {
   TranslatedLanguageInfoInput,
   TranslatedLanguageInfoOutput,
-  TranslateAllWordsAndPhrasesByGoogleOutput,
   ToDefinitionInput,
   TranslateAllWordsAndPhrasesByBotOutput,
   LanguageListForBotTranslateOutput,
@@ -43,7 +42,20 @@ import {
 import { GoogleTranslateService } from './google-translate.service';
 import { LiltTranslateService } from './lilt-translate.service';
 import { SmartcatTranslateService } from './sc-translate.service';
-import { ITranslationBot, ITranslator } from './types';
+import { ITranslator } from './types';
+
+interface ItranslateAllWordsAndPhrasesByBot {
+  translateWordsAndPhrases: (
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient?: PoolClient | null,
+  ) => Promise<TranslateAllWordsAndPhrasesByBotOutput>;
+  translator: ITranslator;
+  from_language: LanguageInput;
+  token: string;
+  pgClient: PoolClient | null;
+}
 
 @Injectable()
 export class AiTranslationsService {
@@ -133,13 +145,12 @@ export class AiTranslationsService {
     }
 
     // total possible 'to' languages bot Translators can translate to.
-    const googleTranslateTotalLangCount = (await this.gTrService.getLanguages())
-      .length;
-    const liltTranslateTotalLangCount = (await this.lTrService.getLanguages())
-      .length;
-    const smartcatTranslateTotalLangCount = (
-      await this.ScTrService.getLanguages()
-    ).length;
+    const googleTranslateTotalLangCount =
+      (await this.gTrService.getLanguages()).languages?.length || 0;
+    const liltTranslateTotalLangCount =
+      (await this.lTrService.getLanguages()).languages?.length || 0;
+    const smartcatTranslateTotalLangCount =
+      (await this.ScTrService.getLanguages()).languages?.length || 0;
 
     return {
       error: ErrorType.NoError, // later
@@ -158,7 +169,7 @@ export class AiTranslationsService {
     to_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.translateWordsAndPhrasesByBot(
       this.gTrService,
       from_language,
@@ -173,7 +184,7 @@ export class AiTranslationsService {
     from_language: LanguageInput,
     to_language: LanguageInput,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     const badInputResult = validateTranslateByBotInput(
       from_language,
       to_language,
@@ -462,7 +473,7 @@ export class AiTranslationsService {
     to_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.translateWordsAndPhrasesByBot(
       this.gTrService,
       from_language,
@@ -508,7 +519,7 @@ export class AiTranslationsService {
     to_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByGoogleOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     const badInputResult = validateTranslateByBotInput(
       from_language,
       to_language,
@@ -669,15 +680,13 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<GenericOutput> {
-    return this.translateAllWordsAndPhrasesByBot(
-      {
-        getLanguages: this.languagesForLiltTranslate,
-        translateWordsAndPhrases: this.translateWordsAndPhrasesByLilt,
-      },
+    return this.translateAllWordsAndPhrasesByBot({
+      translateWordsAndPhrases: this.translateWordsAndPhrasesByLilt,
+      translator: this.lTrService,
       from_language,
       token,
       pgClient,
-    );
+    });
   }
 
   async translateAllWordsAndPhrasesBySmartcat(
@@ -685,15 +694,13 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<GenericOutput> {
-    return this.translateAllWordsAndPhrasesByBot(
-      {
-        getLanguages: this.languagesForSmartcatTranslate,
-        translateWordsAndPhrases: this.translateWordsAndPhrasesBySmartcat,
-      },
+    return this.translateAllWordsAndPhrasesByBot({
+      translateWordsAndPhrases: this.translateWordsAndPhrasesBySmartcat,
+      translator: this.ScTrService,
       from_language,
       token,
       pgClient,
-    );
+    });
   }
 
   async translateAllWordsAndPhrasesByGoogle(
@@ -701,23 +708,22 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<GenericOutput> {
-    return this.translateAllWordsAndPhrasesByBot(
-      {
-        getLanguages: this.languagesForGoogleTranslate,
-        translateWordsAndPhrases: this.translateWordsAndPhrasesByGoogle,
-      },
+    return this.translateAllWordsAndPhrasesByBot({
+      translateWordsAndPhrases: this.translateWordsAndPhrasesByGoogle,
+      translator: this.gTrService,
       from_language,
       token,
       pgClient,
-    );
+    });
   }
 
-  async translateAllWordsAndPhrasesByBot(
-    translationBot: ITranslationBot,
-    from_language: LanguageInput,
-    token: string,
-    pgClient: PoolClient | null,
-  ): Promise<GenericOutput> {
+  async translateAllWordsAndPhrasesByBot({
+    translateWordsAndPhrases,
+    translator,
+    from_language,
+    token,
+    pgClient,
+  }: ItranslateAllWordsAndPhrasesByBot): Promise<GenericOutput> {
     try {
       if (this.translationSubject) {
         this.translationSubject.complete();
@@ -725,7 +731,7 @@ export class AiTranslationsService {
 
       this.translationSubject = new Subject<number>();
 
-      const { error, languages } = await translationBot.getLanguages();
+      const { error, languages } = await translator.getLanguages();
 
       if (error !== ErrorType.NoError || !languages) {
         return { error };
@@ -782,17 +788,16 @@ export class AiTranslationsService {
             return;
           }
 
-          const { error, result } =
-            await translationBot.translateWordsAndPhrases(
-              from_language,
-              {
-                language_code: language.code,
-                dialect_code: null,
-                geo_code: null,
-              },
-              token,
-              pgClient,
-            );
+          const { error, result } = await translateWordsAndPhrases(
+            from_language,
+            {
+              language_code: language.code,
+              dialect_code: null,
+              geo_code: null,
+            },
+            token,
+            pgClient,
+          );
 
           if (error !== ErrorType.NoError) {
             hasErrors.push(
@@ -868,53 +873,15 @@ export class AiTranslationsService {
   }
 
   async languagesForGoogleTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    try {
-      const languages = await this.gTrService.getLanguages();
-
-      return {
-        error: ErrorType.NoError,
-        languages,
-      };
-    } catch (e) {
-      Logger.error(e);
-    }
-
-    return {
-      error: ErrorType.UnknownError,
-      languages: null,
-    };
+    return this.gTrService.getLanguages();
   }
 
   async languagesForLiltTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    try {
-      const languages = await this.lTrService.getLanguages();
-      return {
-        error: ErrorType.NoError,
-        languages,
-      };
-    } catch (e) {
-      Logger.error(e);
-    }
-    return {
-      error: ErrorType.UnknownError,
-      languages: null,
-    };
+    return this.lTrService.getLanguages();
   }
 
   async languagesForSmartcatTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    try {
-      const languages = await this.ScTrService.getLanguages();
-      return {
-        error: ErrorType.NoError,
-        languages,
-      };
-    } catch (e) {
-      Logger.error(e);
-    }
-    return {
-      error: ErrorType.UnknownError,
-      languages: null,
-    };
+    return this.ScTrService.getLanguages();
   }
 
   async getTranslationLanguage(
