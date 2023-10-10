@@ -1,8 +1,6 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { Redirect, Route } from 'react-router';
 import {
-  IonBadge,
-  IonButton,
   IonContent,
   IonHeader,
   IonIcon,
@@ -13,13 +11,7 @@ import {
   useIonViewWillEnter,
   useIonViewWillLeave,
 } from '@ionic/react';
-import {
-  menu,
-  moon,
-  sunny,
-  languageOutline,
-  notificationsOutline,
-} from 'ionicons/icons';
+import { moon, sunny, languageOutline } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 
 import './Body.css';
@@ -83,6 +75,11 @@ import { QADocumentViewerPage } from './components/qa/QADocumentViewerPage';
 
 import { PericopeDocumentListPage } from './components/pericopies/PericopeDocumentListPage';
 import { PericopeDocumentViewerPage } from './components/pericopies/PericopeDocumentViewerPage';
+
+import { Icons } from './components/demo/Icons';
+import { Forms } from './components/demo/Forms';
+
+import { Header } from './components/common/Header';
 
 const Body: React.FC = () => {
   const {
@@ -280,12 +277,16 @@ const Body: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
-        <div className="page">
-          <div className="section">
-            <div className="header-content">
-              <div className="clickable brand" onClick={goHome}>
-                <span className="rocks">{tr('crowdrocks')}</span>
-              </div>
+        <Header
+          onClickAppName={goHome}
+          onClickMenu={toggleMenu}
+          onClickDiscussion={() => {}}
+          onClickNotification={click_notifications}
+          notificationCount={unreadNotificationCount || 0}
+        />
+        <div className="header-menu">
+          {show_menu && (
+            <div className="accordion-group">
               <div style={{ display: 'flex', gap: '20px' }}>
                 <IonIcon
                   id="open-language-modal"
@@ -306,78 +307,49 @@ const Body: React.FC = () => {
                     className="clickable theme-icon"
                   />
                 )}
-                <IonButton
-                  size="small"
-                  fill="clear"
-                  buttonType="string"
-                  className="notification"
-                  onClick={click_notifications}
-                >
-                  <IonIcon icon={notificationsOutline} className="theme-icon" />
-                  <IonBadge className="notification-badge">
-                    {unreadNotificationCount === 0
-                      ? undefined
-                      : unreadNotificationCount}
-                  </IonBadge>
-                </IonButton>
-
-                <IonIcon
-                  icon={menu}
-                  onClick={toggleMenu}
-                  className="clickable expand-icon"
-                />
               </div>
-            </div>
-            <div className="header-menu">
-              {show_menu && (
-                <div className="accordion-group">
-                  <div slot="content" className="header-menu-item-holder">
-                    <div
-                      className="clickable ion-text-end"
-                      onClick={click_settings}
-                    >
-                      Settings
-                    </div>
+              <div slot="content" className="header-menu-item-holder">
+                <div
+                  className="clickable ion-text-end"
+                  onClick={click_settings}
+                >
+                  Settings
+                </div>
+              </div>
+              {is_logged_in && (
+                <div slot="content" className="header-menu-item-holder">
+                  <div
+                    className="clickable ion-text-end"
+                    onClick={click_profile}
+                  >
+                    {globals.get_avatar()}
                   </div>
-                  {is_logged_in && (
-                    <div slot="content" className="header-menu-item-holder">
-                      <div
-                        className="clickable ion-text-end"
-                        onClick={click_profile}
-                      >
-                        {globals.get_avatar()}
-                      </div>
 
-                      <div
-                        className="clickable ion-text-end logout"
-                        onClick={click_logout}
-                      >
-                        {tr('Logout')}
-                      </div>
-                    </div>
-                  )}
+                  <div
+                    className="clickable ion-text-end logout"
+                    onClick={click_logout}
+                  >
+                    {tr('Logout')}
+                  </div>
+                </div>
+              )}
 
-                  {!is_logged_in && (
-                    <div slot="content" className="header-menu-item-holder">
-                      <div
-                        className="clickable ion-text-end"
-                        onClick={click_register}
-                      >
-                        {tr('Register')}
-                      </div>
+              {!is_logged_in && (
+                <div slot="content" className="header-menu-item-holder">
+                  <div
+                    className="clickable ion-text-end"
+                    onClick={click_register}
+                  >
+                    {tr('Register')}
+                  </div>
 
-                      <div
-                        className="clickable ion-text-end"
-                        onClick={click_login}
-                      >
-                        {tr('Login')}
-                      </div>
-                    </div>
-                  )}
+                  <div className="clickable ion-text-end" onClick={click_login}>
+                    {tr('Login')}
+                  </div>
                 </div>
               )}
             </div>
-          </div>
+          )}
         </div>
       </IonHeader>
       <IonContent>
@@ -523,6 +495,8 @@ const Body: React.FC = () => {
             path="/:nation_id/:language_id/:cluster_id/pericopies/documents/:document_id"
             component={PericopeDocumentViewerPage}
           />
+          <Route exact path="/demos/icons" component={Icons} />
+          <Route exact path="/demos/forms" component={Forms} />
           <Route exact path="/">
             <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />
           </Route>
