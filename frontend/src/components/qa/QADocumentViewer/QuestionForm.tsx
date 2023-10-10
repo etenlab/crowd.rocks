@@ -5,6 +5,7 @@ import {
   IonLabel,
   IonList,
   IonSelectOption,
+  useIonToast,
 } from '@ionic/react';
 import { trashOutline } from 'ionicons/icons';
 
@@ -32,6 +33,7 @@ export function QuestionForm({
   sentence,
 }: QuestionFormProps) {
   const { tr } = useTr();
+  const [presentToast] = useIonToast();
 
   const inputRef = useRef<HTMLIonInputElement>(null);
   const textareaRef = useRef<HTMLIonTextareaElement>(null);
@@ -68,7 +70,12 @@ export function QuestionForm({
 
   const handleSaveQuestion = () => {
     if (!questionType) {
-      alert('Not selected question type');
+      presentToast({
+        message: `${tr('Not selected question type!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
       return;
     }
 
@@ -77,7 +84,13 @@ export function QuestionForm({
       : '';
 
     if (question === '') {
-      alert('Please input question');
+      presentToast({
+        message: `${tr('Please input question!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
       return;
     }
 
@@ -108,7 +121,13 @@ export function QuestionForm({
     const tempQuestionItem = inputRef.current!.value + '';
 
     if (tempQuestionItem.trim() === '') {
-      alert('Cannot create Question Item with empty string');
+      presentToast({
+        message: `${tr('Cannot create Question Item with empty string!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
       return;
     }
 

@@ -13,8 +13,7 @@ import {
   IonTitle,
   IonToolbar,
   IonPopover,
-  // useIonToast,
-  // useIonLoading,
+  useIonToast,
 } from '@ionic/react';
 
 import { ViewMode, Dot } from '../../common/BaseDocumentViewer';
@@ -46,8 +45,9 @@ type QADocumentViewerProps = {
 
 export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
   const { tr } = useTr();
+  const [presetToast] = useIonToast();
 
-  const { data, error, loading } = useGetQuestionOnWordRangesByDocumentIdQuery({
+  const { data, error } = useGetQuestionOnWordRangesByDocumentIdQuery({
     variables: {
       document_id: documentId,
     },
@@ -82,6 +82,19 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
       !data ||
       data.getQuestionOnWordRangesByDocumentId.error !== ErrorType.NoError
     ) {
+      if (
+        data &&
+        data.getQuestionOnWordRangesByDocumentId.error !== ErrorType.NoError
+      ) {
+        presetToast({
+          message: `${tr('Failed at fetching questions!')} [${
+            data.getQuestionOnWordRangesByDocumentId.error
+          }]`,
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+      }
       return {
         dots: [],
         questionsMap,
@@ -121,7 +134,7 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
     }
 
     return { dots, questionsMap };
-  }, [data, error]);
+  }, [data, error, presetToast, tr]);
 
   const handleSelectQuestion = useCallback((question: QuestionOnWordRange) => {
     setRange({
@@ -209,7 +222,13 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
     isMultiselect: boolean,
   ) => {
     if (!range.begin?.entryId || !range.end?.entryId) {
-      alert('Not selected range');
+      presetToast({
+        message: `${tr('Not selected range!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
       return;
     }
 
@@ -232,7 +251,13 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
 
   const handleSaveAnswer = async (answer: string, itemIds: string[]) => {
     if (!selectedQuestion) {
-      alert('Not selected question');
+      presetToast({
+        message: `${tr('Not selected question!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
       return;
     }
 
@@ -259,15 +284,7 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
     [range],
   );
 
-  if (loading) {
-    return <div>loading</div>;
-  }
-
-  if (error) {
-    return <div>error</div>;
-  }
-
-  const modalTitle = mode === 'edit' ? tr('New Question') : tr('New Answer');
+  const modalTitle = mode === 'edit' ? tr('New Question') : tr('Answers');
 
   let modalContentCom =
     mode === 'edit' ? (
