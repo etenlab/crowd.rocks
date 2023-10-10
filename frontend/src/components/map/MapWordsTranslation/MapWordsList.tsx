@@ -113,7 +113,7 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
             />
             <Input
               type="text"
-              label={tr('Search')}
+              label={tr('Search original')}
               labelPlacement="floating"
               fill="outline"
               debounce={500}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { styled } from 'styled-components';
 import { TranslatedCards } from '../MapWordsTranslation/TranslatedCards';
 import { useTr } from '../../../hooks/useTr';
@@ -12,8 +12,11 @@ import {
 import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
+  InputCustomEvent,
+  InputChangeEventDetail,
   useIonRouter,
 } from '@ionic/react';
+import { Input } from '../../common/styled';
 
 export interface MapWordsProps {
   nation_id: string;
@@ -33,6 +36,28 @@ export const MapWords: React.FC<MapWordsProps> = ({
 
   const [getWordsAndPhrases, { data: wordsAndPhrases, fetchMore }] =
     useGetOrigMapWordsAndPhrasesLazyQuery();
+
+  const [filter, setFilter] = useState<string>('');
+  const handleFilterChange = useCallback(
+    (event: InputCustomEvent<InputChangeEventDetail>) => {
+      setFilter(event.detail.value || '');
+    },
+    [setFilter],
+  );
+
+  useEffect(() => {
+    getWordsAndPhrases({
+      variables: {
+        lang: {
+          language_code: DEFAULT_MAP_LANGUAGE_CODE,
+        },
+        original_map_id,
+        filter,
+        first: PAGE_SIZE,
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const handleInfinite = useCallback(
     async (ev: IonInfiniteScrollCustomEvent<void>) => {
@@ -86,6 +111,15 @@ export const MapWords: React.FC<MapWordsProps> = ({
     <>
       {targetLang ? (
         <>
+          <Input
+            type="text"
+            label={tr('Search original')}
+            labelPlacement="floating"
+            fill="outline"
+            debounce={500}
+            value={filter}
+            onIonInput={handleFilterChange}
+          />
           <WordsDiv>
             {wordsAndPhrases &&
               wordsAndPhrases.getOrigMapWordsAndPhrases.edges.map((omw, i) => (
