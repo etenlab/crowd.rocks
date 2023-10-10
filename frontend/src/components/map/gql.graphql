@@ -93,6 +93,30 @@ query GetOrigMapWordsAndPhrases(
   }
 }
 
+query GetSingleMapWordsAndPhrases(
+  $original_map_id: String!
+  $lang: LanguageInput!
+  $filter: String
+  $after: ID
+  $first: Int
+) {
+  getSingleMapWordsAndPhrases(
+    input: { lang: $lang, filter: $filter, original_map_id: $original_map_id }
+    after: $after
+    first: $first
+  ) {
+    edges {
+      ...MapWordsAndPhrasesEdgeFragment
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}
+
 query GetMapWordOrPhraseAsOrigByDefinitionId(
   $definition_id: ID!
   $is_word_definition: Boolean!

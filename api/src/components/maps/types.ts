@@ -87,6 +87,12 @@ export class GetOrigMapWordsAndPhrasesInput {
   @Field(() => LanguageInput) lang: LanguageInput;
   @Field(() => String, { nullable: true }) filter: string | null;
 }
+@InputType()
+export class GetSingleMapWordsAndPhrasesInput {
+  @Field(() => String) original_map_id: string;
+  @Field(() => LanguageInput) lang: LanguageInput;
+  @Field(() => String, { nullable: true }) filter: string | null;
+}
 
 @ObjectType()
 export class MapWordOrPhrase {
