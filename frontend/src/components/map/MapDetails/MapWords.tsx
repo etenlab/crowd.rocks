@@ -3,11 +3,11 @@ import { styled } from 'styled-components';
 import { TranslatedCards } from '../MapWordsTranslation/TranslatedCards';
 import { useTr } from '../../../hooks/useTr';
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
-// import { PAGE_SIZE } from '../../../const/commonConst';
+import { PAGE_SIZE } from '../../../const/commonConst';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 import {
   MapWordOrPhrase,
-  useGetSingleMapWordsAndPhrasesLazyQuery,
+  useGetOrigMapWordsAndPhrasesLazyQuery,
 } from '../../../generated/graphql';
 import {
   IonInfiniteScroll,
@@ -15,7 +15,6 @@ import {
   useIonRouter,
 } from '@ionic/react';
 
-const PAGE_SIZE = 5;
 export interface MapWordsProps {
   nation_id: string;
   language_id: string;
@@ -33,18 +32,17 @@ export const MapWords: React.FC<MapWordsProps> = ({
   const router = useIonRouter();
 
   const [getWordsAndPhrases, { data: wordsAndPhrases, fetchMore }] =
-    useGetSingleMapWordsAndPhrasesLazyQuery();
+    useGetOrigMapWordsAndPhrasesLazyQuery();
 
   const handleInfinite = useCallback(
     async (ev: IonInfiniteScrollCustomEvent<void>) => {
-      if (wordsAndPhrases?.getSingleMapWordsAndPhrases.pageInfo.hasNextPage) {
+      if (wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.hasNextPage) {
         const variables = {
           lang: {
             language_code: DEFAULT_MAP_LANGUAGE_CODE,
           },
           first: PAGE_SIZE,
-          after:
-            wordsAndPhrases?.getSingleMapWordsAndPhrases.pageInfo.endCursor,
+          after: wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.endCursor,
           original_map_id,
         };
 
@@ -56,8 +54,8 @@ export const MapWords: React.FC<MapWordsProps> = ({
       setTimeout(() => ev.target.complete(), 500);
     },
     [
-      wordsAndPhrases?.getSingleMapWordsAndPhrases.pageInfo.hasNextPage,
-      wordsAndPhrases?.getSingleMapWordsAndPhrases.pageInfo.endCursor,
+      wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.hasNextPage,
+      wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.endCursor,
       original_map_id,
       fetchMore,
     ],
@@ -90,15 +88,13 @@ export const MapWords: React.FC<MapWordsProps> = ({
         <>
           <WordsDiv>
             {wordsAndPhrases &&
-              wordsAndPhrases.getSingleMapWordsAndPhrases.edges.map(
-                (omw, i) => (
-                  <TranslatedCards
-                    key={i}
-                    wordOrPhrase={omw.node}
-                    onClick={() => handleWordOrPhraseSelect(omw.node)}
-                  />
-                ),
-              )}
+              wordsAndPhrases.getOrigMapWordsAndPhrases.edges.map((omw, i) => (
+                <TranslatedCards
+                  key={i}
+                  wordOrPhrase={omw.node}
+                  onClick={() => handleWordOrPhraseSelect(omw.node)}
+                />
+              ))}
           </WordsDiv>
           <IonInfiniteScroll onIonInfinite={handleInfinite}>
             <IonInfiniteScrollContent

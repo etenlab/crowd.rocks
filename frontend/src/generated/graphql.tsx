@@ -399,6 +399,7 @@ export type GetOrigMapListInput = {
 export type GetOrigMapWordsAndPhrasesInput = {
   filter?: InputMaybe<Scalars['String']['input']>;
   lang: LanguageInput;
+  original_map_id?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GetOrigMapsListOutput = {
@@ -3028,6 +3029,7 @@ export type WordWithDefinitionFragmentFragment = { __typename?: 'WordWithDefinit
 export type PhraseWithDefinitionFragmentFragment = { __typename?: 'PhraseWithDefinition', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null };
 
 export type GetOrigMapWordsAndPhrasesQueryVariables = Exact<{
+  original_map_id?: InputMaybe<Scalars['String']['input']>;
   lang: LanguageInput;
   filter?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['ID']['input']>;
@@ -5891,9 +5893,9 @@ export type DeleteForumMutationHookResult = ReturnType<typeof useDeleteForumMuta
 export type DeleteForumMutationResult = Apollo.MutationResult<DeleteForumMutation>;
 export type DeleteForumMutationOptions = Apollo.BaseMutationOptions<DeleteForumMutation, DeleteForumMutationVariables>;
 export const GetOrigMapWordsAndPhrasesDocument = gql`
-    query GetOrigMapWordsAndPhrases($lang: LanguageInput!, $filter: String, $after: ID, $first: Int) {
+    query GetOrigMapWordsAndPhrases($original_map_id: String, $lang: LanguageInput!, $filter: String, $after: ID, $first: Int) {
   getOrigMapWordsAndPhrases(
-    input: {lang: $lang, filter: $filter}
+    input: {lang: $lang, filter: $filter, original_map_id: $original_map_id}
     after: $after
     first: $first
   ) {
@@ -5922,6 +5924,7 @@ export const GetOrigMapWordsAndPhrasesDocument = gql`
  * @example
  * const { data, loading, error } = useGetOrigMapWordsAndPhrasesQuery({
  *   variables: {
+ *      original_map_id: // value for 'original_map_id'
  *      lang: // value for 'lang'
  *      filter: // value for 'filter'
  *      after: // value for 'after'

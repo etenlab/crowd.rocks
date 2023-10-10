@@ -68,16 +68,14 @@ fragment PhraseWithDefinitionFragment on PhraseWithDefinition {
 }
 
 query GetOrigMapWordsAndPhrases(
+  $original_map_id: String
   $lang: LanguageInput!
   $filter: String
   $after: ID
   $first: Int
 ) {
   getOrigMapWordsAndPhrases(
-    input: { 
-      lang: $lang
-      filter: $filter 
-    }
+    input: { lang: $lang, filter: $filter, original_map_id: $original_map_id }
     after: $after
     first: $first
   ) {

@@ -84,16 +84,10 @@ export class GetMapDetailsInput {
 
 @InputType()
 export class GetOrigMapWordsAndPhrasesInput {
+  @Field(() => String, { nullable: true }) original_map_id: string | null;
   @Field(() => LanguageInput) lang: LanguageInput;
   @Field(() => String, { nullable: true }) filter: string | null;
 }
-@InputType()
-export class GetSingleMapWordsAndPhrasesInput {
-  @Field(() => String) original_map_id: string;
-  @Field(() => LanguageInput) lang: LanguageInput;
-  @Field(() => String, { nullable: true }) filter: string | null;
-}
-
 @ObjectType()
 export class MapWordOrPhrase {
   @Field(() => ID) id: string;

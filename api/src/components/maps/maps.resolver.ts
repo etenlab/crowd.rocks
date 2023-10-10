@@ -29,7 +29,6 @@ import {
   MapVoteOutput,
   MapVoteUpsertInput,
   MapVoteStatusOutputRow,
-  GetSingleMapWordsAndPhrasesInput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
@@ -246,16 +245,6 @@ export class MapsResolver {
   @Query(() => MapWordsAndPhrasesConnection)
   async getOrigMapWordsAndPhrases(
     @Args('input') input: GetOrigMapWordsAndPhrasesInput,
-    @Args('first', { type: () => Int, nullable: true }) first?: number | null,
-    @Args('after', { type: () => ID, nullable: true })
-    after?: string | null,
-  ): Promise<MapWordsAndPhrasesConnection | undefined> {
-    return this.mapsService.getOrigMapWordsAndPhrases({ input, first, after });
-  }
-
-  @Query(() => MapWordsAndPhrasesConnection)
-  async getSingleMapWordsAndPhrases(
-    @Args('input') input: GetSingleMapWordsAndPhrasesInput,
     @Args('first', { type: () => Int, nullable: true }) first?: number | null,
     @Args('after', { type: () => ID, nullable: true })
     after?: string | null,

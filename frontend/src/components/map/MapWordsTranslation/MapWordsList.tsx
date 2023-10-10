@@ -58,7 +58,6 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
         filter,
         first: PAGE_SIZE,
       },
-      // fetchPolicy: 'no-cache',
     });
   }, [getWordsAndPhrases, targetLang, filter]);
 

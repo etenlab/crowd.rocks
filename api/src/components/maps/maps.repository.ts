@@ -18,7 +18,6 @@ import {
   GetOrigMapWordsAndPhrasesInput,
   MapWordsAndPhrasesEdge,
   MapWordOrPhrase,
-  GetSingleMapWordsAndPhrasesInput,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
 
@@ -1037,7 +1036,7 @@ export class MapsRepository {
       first,
       after,
     }: {
-        input: GetOrigMapWordsAndPhrasesInput | GetSingleMapWordsAndPhrasesInput;
+        input: GetOrigMapWordsAndPhrasesInput;
       first?: number | null;
       after?: string | null;
     },
@@ -1061,10 +1060,8 @@ export class MapsRepository {
       filterParams.push(input.filter);
       languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${filterParams.length}),'%')`;
     }
-    if ((input as GetSingleMapWordsAndPhrasesInput).original_map_id) {
-      filterParams.push(
-        (input as GetSingleMapWordsAndPhrasesInput).original_map_id,
-      );
+    if (input.original_map_id) {
+      filterParams.push(input.original_map_id);
       languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;
     }
 

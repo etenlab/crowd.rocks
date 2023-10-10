@@ -359,16 +359,11 @@ input GetOrigMapListInput {
 input GetOrigMapWordsAndPhrasesInput {
   filter: String
   lang: LanguageInput!
+  original_map_id: String
 }
 
 type GetOrigMapsListOutput {
   mapList: [MapDetailsOutput!]!
-}
-
-input GetSingleMapWordsAndPhrasesInput {
-  filter: String
-  lang: LanguageInput!
-  original_map_id: String!
 }
 
 type IFile {
@@ -1007,7 +1002,6 @@ type Query {
   getQuestionsByRefs(parent_ids: [ID!]!, parent_tables: [TableNameType!]!): QuestionsOutput!
   getRecommendedTranslationFromDefinitionID(from_definition_id: ID!, from_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteOutput!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): TranslationWithVoteOutput!
-  getSingleMapWordsAndPhrases(after: ID, first: Int, input: GetSingleMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getTotalPosts(input: PostsByParentInput!): PostCountOutput!
   getTranslationsByFromDefinitionId(definition_id: ID!, from_definition_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteListOutput!
   getWordDefinitionVoteStatus(word_definition_id: ID!): DefinitionVoteStatusOutputRow!
