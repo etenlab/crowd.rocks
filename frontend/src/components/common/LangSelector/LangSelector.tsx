@@ -1,26 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { IonIcon, IonItem, IonLabel, IonModal } from '@ionic/react';
+import { useCallback, useEffect, useState } from 'react';
 
 import tags from 'language-tags';
 
 import { langInfo2tag, getLangsRegistry } from '../../../common/langUtils';
 
-import AppTypeahead from './TypeAhead';
-
 import {
   DESCRIPTIONS_JOINER,
   LOADING_TAG_PLACEHOLDER,
 } from '../../../const/langConst';
-import { styled } from 'styled-components';
-import { removeCircleOutline } from 'ionicons/icons';
+
+import { Autocomplete, OptionItem } from '../forms/Autocomplete';
 
 export type LangSelectorProps = {
   title?: string;
-  langSelectorId: string;
-  selected: LanguageInfo | undefined;
-  onChange(langTag: string | null, selected: LanguageInfo): void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setLoadingState?(isLoading: boolean): any;
+  selected: LanguageInfo | null;
+  onChange(langTag: string | null, selected: LanguageInfo | null): void;
+  setLoadingState?(isLoading: boolean): unknown;
   onClearClick?: () => void;
   enabledTags?: string[];
   disabled?: boolean;
@@ -40,7 +35,6 @@ const emptyLangsRegistry: LangsRegistry = {
 
 export function LangSelector({
   title = 'Select language',
-  langSelectorId,
   selected,
   onChange,
   setLoadingState,
@@ -50,8 +44,6 @@ export function LangSelector({
 }: LangSelectorProps) {
   const [langsRegistry, setLangsRegistry] =
     useState<LangsRegistry>(emptyLangsRegistry);
-
-  const modal = useRef<HTMLIonModalElement>(null);
 
   useEffect(() => {
     if (setLoadingState) {
@@ -66,82 +58,54 @@ export function LangSelector({
     });
   }, [setLoadingState, enabledTags]);
 
-  const handleSetLanguage = useCallback(
-    (tag: string | undefined) => {
-      if (!tag) return;
-      const lang = langsRegistry.langs.find((lr) => lr.tag === tag);
+  const handleChange = useCallback(
+    (value: OptionItem | null) => {
+      if (!value) {
+        onChange(null, null);
+        return;
+      }
+
+      const lang = langsRegistry.langs.find((lr) => lr.tag === value.value);
       if (!lang) return;
 
       const langTag = lang.tag;
 
       const langTagFormatted = tags(langTag).format();
 
-      if (langInfo2tag(selected) === langTagFormatted) return;
+      if ((selected && langInfo2tag(selected)) === langTagFormatted) return;
 
       onChange(langTagFormatted, {
         lang: lang,
         dialect: undefined,
         region: undefined,
       });
-
-      modal.current?.dismiss();
     },
     [langsRegistry.langs, onChange, selected],
   );
 
-  const selectedLangValue =
-    selected?.lang?.descriptions?.join(DESCRIPTIONS_JOINER) || title;
-
   return (
-    <>
-      <StSelectorDiv>
-        <StIonItem
-          button={true}
-          detail={false}
-          id={langSelectorId}
-          disabled={disabled}
-        >
-          <IonLabel>{selectedLangValue}</IonLabel>
-        </StIonItem>
-        {onClearClick && selectedLangValue !== title && (
-          <StIonIcon
-            icon={removeCircleOutline}
-            onClick={() => {
-              onClearClick();
-            }}
-          />
-        )}
-      </StSelectorDiv>
-      <IonModal trigger={langSelectorId} ref={modal}>
-        <AppTypeahead
-          title={title}
-          items={langsRegistry.langs.map((l) => ({
-            text: l.descriptions
-              ? l.descriptions.join(DESCRIPTIONS_JOINER)
-              : l.tag,
-            value: l.tag,
-          }))}
-          selectedItem={selected?.lang?.tag ? selected?.lang?.tag : undefined}
-          onSelectionCancel={() => modal.current?.dismiss()}
-          onSelectionChange={(tag) => handleSetLanguage(tag)}
-        />
-      </IonModal>
-    </>
+    <Autocomplete
+      label={title}
+      placeholder={title}
+      options={langsRegistry.langs.map((l) => ({
+        label: l.descriptions
+          ? l.descriptions.join(DESCRIPTIONS_JOINER)
+          : l.tag,
+        value: l.tag,
+      }))}
+      value={
+        selected
+          ? {
+              label: selected.lang.descriptions
+                ? selected.lang.descriptions.join(DESCRIPTIONS_JOINER)
+                : selected.lang.tag,
+              value: selected.lang.tag,
+            }
+          : null
+      }
+      onChange={handleChange}
+      onClear={onClearClick}
+      disabled={disabled}
+    />
   );
 }
-
-const StIonIcon = styled(IonIcon)(() => ({
-  cursor: 'pointer',
-  fontSize: '30px',
-}));
-
-const StSelectorDiv = styled('div')(() => ({
-  display: 'flex',
-  width: '100%',
-  alignItems: 'center',
-}));
-
-const StIonItem = styled(IonItem)(() => ({
-  '--padding-start': '0px',
-  width: '100%',
-}));
