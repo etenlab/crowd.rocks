@@ -383,6 +383,9 @@ export class DatabaseVersionControlService {
       './src/core/sql/translation/word_to_phrase/batch_translation_vote_set.sql',
     );
 
+    //maps
+    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v4.sql');
+
     await this.setVersionNumber(4);
   }
 

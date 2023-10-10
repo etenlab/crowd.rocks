@@ -359,6 +359,7 @@ input GetOrigMapListInput {
 input GetOrigMapWordsAndPhrasesInput {
   filter: String
   lang: LanguageInput!
+  original_map_id: String
 }
 
 type GetOrigMapsListOutput {

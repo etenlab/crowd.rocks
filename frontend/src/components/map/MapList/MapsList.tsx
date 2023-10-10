@@ -84,7 +84,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   ] = useMapsTranslationsResetMutation();
 
   const [getAllMapsList, { data: allMapsQuery, fetchMore }] =
-    useGetAllMapsListLazyQuery({ fetchPolicy: 'no-cache' });
+    useGetAllMapsListLazyQuery();
 
   const { makeMapThumbnail } = useMapTranslationTools();
   const [isMapDeleteModalOpen, setIsMapDeleteModalOpen] = useState(false);
