@@ -1,0 +1,19 @@
+POST https://us.smartcat.ai/api/integration/v1/smartTranslation/translate
+Authorization: Basic MDgzM2UxYWQtMDI5NS00NDg2LTlmODctZTgyYmE1OGMxMDA2OjFfcGdMczhNd2lkWVZXcTlmVHhhTk44RFc1VA==
+Content-Type: application/json-patch+json
+Accept: text/plain
+
+{
+  "sourceLanguage": "en",
+  "targetLanguages": [
+    "uk"
+  ],
+  "profile": "crowd_rocks_profile",
+  "isHtml": false,
+  "texts": [
+    {
+      "text": "some string",
+    }
+  ],
+  "externalTag": "crowd_rocks_tag"
+}

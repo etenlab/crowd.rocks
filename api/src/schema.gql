@@ -107,6 +107,7 @@ enum ErrorType {
   AvatarTooShort
   AvatarUnavailable
   BotTranslationBotNotFound
+  BotTranslationError
   BotTranslationLanguagesListError
   CandidateNotFound
   CandidateNotFoundInBallot

@@ -7,6 +7,7 @@ import { createToken } from '../../../common/utility';
 import { hash } from 'argon2';
 import { parse } from 'node-html-parser';
 import fetch from 'node-fetch';
+import { Headers } from 'node-fetch';
 import { LanguageInput2tag } from '../../../common/langUtils';
 import { ITranslator } from './types';
 import { LanguageListForBotTranslateOutput } from '../types';
@@ -14,9 +15,8 @@ import { ErrorType } from '../../../common/types';
 
 const LIMIT_WORDS = 20; // for debugging purposes, not to exhaust free limit too quickly/
 const SMARTCAT_BOT_EMAIL = 'liltbot@crowd.rocks';
-const DEFAULT_CONTEXT = 'default';
-const DEFAULT_PROFILE = 'crowd.rocks profile';
-const DEFAULT_TAG = 'crowd.rocks tag';
+const SMARTTRANSLATION_PROFILE = 'crowd_rocks_profile';
+const PROJECT_TAG = 'crowd_rocks_tag';
 
 type InSmartcatObj = {
   sourceLanguage: string;
@@ -25,7 +25,7 @@ type InSmartcatObj = {
   isHtml: boolean;
   texts: Array<{
     text: string;
-    context: string;
+    context?: string;
   }>;
   externalTag: string;
 };
@@ -44,9 +44,40 @@ export class SmartcatTranslateService implements ITranslator {
   constructor(private config: ConfigService, private pg: PostgresService) {}
 
   async smartcatTranslate(inObj: InSmartcatObj): Promise<OutSmartcatObj> {
-    const res: OutSmartcatObj = { translations: [] };
-    //todo
-    return res;
+    if (!this.config.SMARTCAT_KEY || !this.config.SMARTCAT_ID) {
+      throw new Error(`No credentials for smartcat are found.`);
+    }
+    const url =
+      'https://us.smartcat.ai/api/integration/v1/smartTranslation/translate';
+    const username = this.config.SMARTCAT_ID;
+    const password = this.config.SMARTCAT_KEY;
+
+    const headers = new Headers();
+    // headers.append('Content-Type', 'text/json');
+    console.log(Buffer.from(username + ':' + password).toString('base64'));
+    headers.append(
+      'Authorization',
+      `Basic ${Buffer.from(username + ':' + password).toString('base64')}`,
+    );
+    headers.append('Content-Type', 'application/json-patch+json');
+    headers.append('Accept', 'text/plain');
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(inObj),
+    });
+    let resS = '';
+    for await (const b of res.body) {
+      resS += b;
+    }
+    let resJ: any = {};
+    try {
+      resJ = JSON.parse(resS);
+    } catch {
+      throw new Error(`Error from Smartcat API, responce:  ${resS}`);
+    }
+    return resJ;
   }
 
   async translate(
@@ -59,11 +90,10 @@ export class SmartcatTranslateService implements ITranslator {
         sourceLanguage: LanguageInput2tag(from),
         targetLanguages: [LanguageInput2tag(to)],
         isHtml: false,
-        externalTag: DEFAULT_TAG,
-        profile: DEFAULT_PROFILE,
+        externalTag: PROJECT_TAG,
+        profile: SMARTTRANSLATION_PROFILE,
         texts: texts.splice(0, LIMIT_WORDS).map((text) => ({
           text,
-          context: DEFAULT_CONTEXT,
         })),
       };
 
@@ -74,7 +104,7 @@ export class SmartcatTranslateService implements ITranslator {
 
       return translatedTexts;
     } catch (err) {
-      console.log(err);
+      console.log(`sc-translate.service Error: ${JSON.stringify(err)}`);
       throw err;
     }
   }

@@ -460,7 +460,7 @@ export class AiTranslationsService {
       console.error(err);
     }
     return {
-      error: ErrorType.UnknownError,
+      error: ErrorType.BotTranslationError,
       result: null,
     };
   }
