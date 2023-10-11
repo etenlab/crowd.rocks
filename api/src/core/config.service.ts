@@ -36,6 +36,7 @@ export class ConfigService {
 
   public readonly SMARTCAT_ID = process.env.SMARTCAT_ID;
   public readonly SMARTCAT_KEY = process.env.SMARTCAT_KEY;
+  public readonly SMARTCAT_PROFILE = process.env.SMARTCAT_PROFILE;
 
   public readonly LILT_KEY = process.env.LILT_KEY;
 

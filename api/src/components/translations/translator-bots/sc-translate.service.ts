@@ -15,7 +15,6 @@ import { ErrorType } from '../../../common/types';
 
 const LIMIT_WORDS = 20; // for debugging purposes, not to exhaust free limit too quickly/
 const SMARTCAT_BOT_EMAIL = 'liltbot@crowd.rocks';
-const SMARTTRANSLATION_PROFILE = 'crowd_rocks_profile';
 const PROJECT_TAG = 'crowd_rocks_tag';
 
 type InSmartcatObj = {
@@ -71,11 +70,17 @@ export class SmartcatTranslateService implements ITranslator {
     for await (const b of res.body) {
       resS += b;
     }
+    if (!res.ok) {
+      throw new Error(
+        `Error from Smartcat API, responce:  ${JSON.stringify(resS)}`,
+      );
+    }
+
     let resJ: any = {};
     try {
       resJ = JSON.parse(resS);
     } catch {
-      throw new Error(`Error from Smartcat API, responce:  ${resS}`);
+      throw new Error(`Can't parse Smartcat API responce:  ${resS}`);
     }
     return resJ;
   }
@@ -91,7 +96,7 @@ export class SmartcatTranslateService implements ITranslator {
         targetLanguages: [LanguageInput2tag(to)],
         isHtml: false,
         externalTag: PROJECT_TAG,
-        profile: SMARTTRANSLATION_PROFILE,
+        profile: this.config.SMARTCAT_PROFILE || '',
         texts: texts.splice(0, LIMIT_WORDS).map((text) => ({
           text,
         })),
