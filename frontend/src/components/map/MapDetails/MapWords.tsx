@@ -1,13 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { RouteComponentProps } from 'react-router';
-import { Caption } from '../../common/Caption/Caption';
-import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { styled } from 'styled-components';
-import { TranslatedCards } from './TranslatedCards';
+import { TranslatedCards } from '../MapWordsTranslation/TranslatedCards';
 import { useTr } from '../../../hooks/useTr';
-import { useAppContext } from '../../../hooks/useAppContext';
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
 import { PAGE_SIZE } from '../../../const/commonConst';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 import {
   MapWordOrPhrase,
   useGetOrigMapWordsAndPhrasesLazyQuery,
@@ -19,17 +16,28 @@ import {
   InputChangeEventDetail,
   useIonRouter,
 } from '@ionic/react';
-import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
-import { FilterContainer, Input } from '../../common/styled';
+import { Input } from '../../common/styled';
 
-interface MapWordsTranslationProps extends RouteComponentProps {}
-export type TWordOrPhraseId = { word_id: string } | { phrase_id: string };
+export interface MapWordsProps {
+  nation_id: string;
+  language_id: string;
+  original_map_id: string;
+  targetLang: LanguageInfo;
+}
 
-export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
+export const MapWords: React.FC<MapWordsProps> = ({
+  nation_id,
+  language_id,
+  original_map_id,
+  targetLang,
+}: MapWordsProps) => {
   const { tr } = useTr();
   const router = useIonRouter();
-  const [filter, setFilter] = useState<string>('');
 
+  const [getWordsAndPhrases, { data: wordsAndPhrases, fetchMore }] =
+    useGetOrigMapWordsAndPhrasesLazyQuery();
+
+  const [filter, setFilter] = useState<string>('');
   const handleFilterChange = useCallback(
     (event: InputCustomEvent<InputChangeEventDetail>) => {
       setFilter(event.detail.value || '');
@@ -37,29 +45,19 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
     [setFilter],
   );
 
-  const {
-    states: {
-      global: {
-        langauges: { targetLang },
-      },
-    },
-    actions: { setTargetLanguage },
-  } = useAppContext();
-
-  const [getWordsAndPhrases, { data: wordsAndPhrases, fetchMore }] =
-    useGetOrigMapWordsAndPhrasesLazyQuery();
-
   useEffect(() => {
     getWordsAndPhrases({
       variables: {
         lang: {
           language_code: DEFAULT_MAP_LANGUAGE_CODE,
         },
+        original_map_id,
         filter,
         first: PAGE_SIZE,
       },
     });
-  }, [getWordsAndPhrases, targetLang, filter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const handleInfinite = useCallback(
     async (ev: IonInfiniteScrollCustomEvent<void>) => {
@@ -70,6 +68,7 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
           },
           first: PAGE_SIZE,
           after: wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.endCursor,
+          original_map_id,
         };
 
         await fetchMore({
@@ -82,12 +81,23 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
     [
       wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.hasNextPage,
       wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.endCursor,
+      original_map_id,
       fetchMore,
     ],
   );
 
-  const nation_id = router.routeInfo.pathname.split('/')[1];
-  const language_id = router.routeInfo.pathname.split('/')[2];
+  useEffect(() => {
+    getWordsAndPhrases({
+      variables: {
+        lang: {
+          language_code: DEFAULT_MAP_LANGUAGE_CODE,
+        },
+        original_map_id,
+        first: PAGE_SIZE,
+      },
+    });
+  }, [getWordsAndPhrases, original_map_id, targetLang]);
+
   const handleWordOrPhraseSelect = useCallback(
     (wordOrPhrase: MapWordOrPhrase) => {
       router.push(
@@ -101,26 +111,15 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
     <>
       {targetLang ? (
         <>
-          <Caption>{tr('Map Translation')}</Caption>
-          <FilterContainer>
-            <LangSelector
-              title={tr('Select target language')}
-              langSelectorId="targetLangSelector"
-              selected={targetLang ?? undefined}
-              onChange={(_targetLangTag, targetLangInfo) => {
-                setTargetLanguage(targetLangInfo);
-              }}
-            />
-            <Input
-              type="text"
-              label={tr('Search original')}
-              labelPlacement="floating"
-              fill="outline"
-              debounce={500}
-              value={filter}
-              onIonInput={handleFilterChange}
-            />
-          </FilterContainer>
+          <Input
+            type="text"
+            label={tr('Search original')}
+            labelPlacement="floating"
+            fill="outline"
+            debounce={500}
+            value={filter}
+            onIonInput={handleFilterChange}
+          />
           <WordsDiv>
             {wordsAndPhrases &&
               wordsAndPhrases.getOrigMapWordsAndPhrases.edges.map((omw, i) => (
