@@ -595,10 +595,9 @@ type Mutation {
   translateAllWordsAndPhrasesBySmartcat(from_language: LanguageInput!): GenericOutput!
   translateMissingWordsAndPhrasesByChatGpt(from_language: LanguageInput!, to_language: LanguageInput!, version: String!): TranslateAllWordsAndPhrasesByBotOutput!
   translateMissingWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
-  translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
-  translateMissingWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
+  translateWordsAndPhrasesByChatGPT4(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByChatGPT35(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
-  translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByGoogleOutput!
+  translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByLilt(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesBySmartcat(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionOutput!
@@ -1020,6 +1019,7 @@ type Query {
   getWordVoteStatus(word_id: ID!): WordVoteStatusOutputRow!
   getWordWithVoteById(word_id: ID!): WordWithVoteOutput!
   getWordsByLanguage(after: ID, first: Int, input: LanguageInput!): WordWithVoteListConnection!
+  languagesForChatGPT4Translate: LanguageListForBotTranslateOutput!
   languagesForChatGPT35Translate: LanguageListForBotTranslateOutput!
   languagesForGoogleTranslate: LanguageListForBotTranslateOutput!
   languagesForLiltTranslate: LanguageListForBotTranslateOutput!
