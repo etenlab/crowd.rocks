@@ -1192,7 +1192,6 @@ export class MapsRepository {
     const sqlStr = `
       select count(distinct "cursor") count
         from v_map_words_and_phrases
-        where true
       where true
       ${languagesFiltersRestrictionClause}
     `;
@@ -1242,11 +1241,11 @@ export class MapsRepository {
 
     if (offset) {
       filterParams.push(offset);
-      languagesFiltersRestrictionClause += ` offset = $${offset} `;
+      languagesFiltersRestrictionClause += ` offset $${filterParams.length} `;
     }
     if (limit) {
       filterParams.push(limit);
-      languagesFiltersRestrictionClause += ` limit = $${limit}`;
+      languagesFiltersRestrictionClause += ` limit $${filterParams.length}`;
     }
 
     const sqlStr = `
