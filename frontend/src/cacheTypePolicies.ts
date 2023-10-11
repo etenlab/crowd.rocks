@@ -10,6 +10,7 @@ export const typePolicies: TypePolicies = {
       getPhraseDefinitionsByFlag: relayStylePagination(['flag_name']),
       getAllMapsList: relayStylePagination(['input']),
       getOrigMapWordsAndPhrases: relayStylePagination(['input']),
+      getSingleMapWordsAndPhrases: relayStylePagination(['input']),
     },
   },
   WordWithDefinitions: {
@@ -60,18 +61,6 @@ export const typePolicies: TypePolicies = {
   SiteTextWordDefinition: {
     keyFields: ['site_text_id'],
   },
-  SiteTextWordToWordTranslationWithVote: {
-    keyFields: ['word_to_word_translation_id'],
-  },
-  SiteTextWordToPhraseTranslationWithVote: {
-    keyFields: ['word_to_phrase_translation_id'],
-  },
-  SiteTextPhraseToWordTranslationWithVote: {
-    keyFields: ['phrase_to_word_translation_id'],
-  },
-  SiteTextPhraseToPhraseTranslationWithVote: {
-    keyFields: ['phrase_to_phrase_translation_id'],
-  },
   WordToWordTranslationWithVote: {
     keyFields: ['word_to_word_translation_id'],
   },
@@ -113,5 +102,20 @@ export const typePolicies: TypePolicies = {
   },
   MapVoteStatus: {
     keyFields: ['map_id', 'is_original'],
+  },
+  Question: {
+    keyFields: ['question_id'],
+  },
+  QuestionOnWordRange: {
+    keyFields: ['question_id'],
+  },
+  Answer: {
+    keyFields: ['answer_id'],
+  },
+  Pericope: {
+    keyFields: ['pericope_id'],
+  },
+  PericopeVoteStatus: {
+    keyFields: ['pericope_id'],
   },
 };

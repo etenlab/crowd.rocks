@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useState } from 'react';
 import { IonIcon, IonInput } from '@ionic/react';
-import { chatbubbleEllipsesSharp, checkmark, pencil } from 'ionicons/icons';
+import { checkmark, pencil } from 'ionicons/icons';
 
 import {
   CustomCard,
@@ -11,11 +11,9 @@ import {
 
 import { VoteButtonsHorizontal } from '../VoteButtonsHorizontal';
 import { Flag } from '../../flags/Flag';
-
-import { StChatIcon } from '../styled';
-
 import { FlagName } from '../../flags/flagGroups';
 import { TableNameType } from '../../../generated/graphql';
+import { Chat } from '../../chat/Chat';
 
 type CardProps = {
   content?: string;
@@ -30,6 +28,8 @@ type CardProps = {
   };
   discussion?: {
     onChatClick: () => void;
+    parent_table: string;
+    parent_id: string;
   };
   flags?: {
     parent_table: TableNameType;
@@ -89,12 +89,10 @@ export function Card({
   ) : null;
 
   const discussionCom = discussion ? (
-    <StChatIcon
-      icon={chatbubbleEllipsesSharp}
-      onClick={(e) => {
-        e.stopPropagation();
-        discussion.onChatClick && discussion.onChatClick();
-      }}
+    <Chat
+      parent_table={discussion.parent_table}
+      parent_id={discussion.parent_id}
+      onClick={discussion.onChatClick}
     />
   ) : null;
 

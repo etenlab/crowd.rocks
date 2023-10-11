@@ -2,36 +2,48 @@ import { useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps, useLocation } from 'react-router';
 import {
   IonBadge,
+  IonButton,
   IonIcon,
   IonLoading,
   useIonRouter,
   useIonToast,
 } from '@ionic/react';
-import { chatbubbleEllipsesSharp, downloadOutline } from 'ionicons/icons';
+import {
+  addCircleOutline,
+  arrowBackOutline,
+  arrowDownOutline,
+  arrowForwardOutline,
+  arrowUpOutline,
+  chatbubbleEllipsesSharp,
+  downloadOutline,
+  refreshCircleOutline,
+  removeCircleOutline,
+} from 'ionicons/icons';
 import styled from 'styled-components';
-
 import { Caption } from '../../common/Caption/Caption';
-
 import {
   ErrorType,
-  // GetMapVoteStatusDocument,
   TableNameType,
   useGetMapDetailsQuery,
   useGetMapVoteStatusQuery,
 } from '../../../generated/graphql';
-
 import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
 import { downloadFromUrl } from '../../../common/utility';
-
 import { useTr } from '../../../hooks/useTr';
-import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
+import {
+  ReactZoomPanPinchContentRef,
+  TransformComponent,
+  TransformWrapper,
+} from 'react-zoom-pan-pinch';
 import { OrigBadge } from '../MapList/styled';
 import { StChatIcon } from '../../common/styled';
 import { Flag } from '../../flags/Flag';
 import { MAPS_FLAGS } from '../../flags/flagGroups';
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import { useToggleMapVoteStatusMutation } from '../../../hooks/useToggleMapVoteStatusMutation';
+import { MapWords } from './MapWords';
 
+const TRANSFORM_STEP = 200;
 interface MapDetailsProps
   extends RouteComponentProps<{
     id: string;
@@ -49,6 +61,7 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isWoPShown, setIsWoPShown] = useState(false);
 
   const isOriginal = useMemo(() => {
     return new URLSearchParams(search).get('is_original') === 'true';
@@ -91,30 +104,29 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
   }, [currMapContent?.error, present]);
 
   const handleDownloadSvg = () => {
-    if (currMapContent?.mapFileInfo) {
+    if (currMapContent?.mapDetails) {
       downloadFromUrl(
-        currMapContent?.mapFileInfo.map_file_name_with_langs,
-        currMapContent?.mapFileInfo.content_file_url,
+        currMapContent?.mapDetails.map_file_name_with_langs,
+        currMapContent?.mapDetails.content_file_url,
       );
     }
   };
 
   const langInfo = useMemo(() => {
-    if (!currMapContent?.mapFileInfo?.language.language_code) {
+    if (!currMapContent?.mapDetails?.language.language_code) {
       return undefined;
     }
     return currentMapWithContent
       ? subTags2LangInfo({
-          lang: currMapContent.mapFileInfo.language.language_code,
-          dialect:
-            currMapContent.mapFileInfo.language.dialect_code || undefined,
-          region: currMapContent.mapFileInfo.language.geo_code || undefined,
+          lang: currMapContent.mapDetails.language.language_code,
+          dialect: currMapContent.mapDetails.language.dialect_code || undefined,
+          region: currMapContent.mapDetails.language.geo_code || undefined,
         })
       : undefined;
   }, [
-    currMapContent?.mapFileInfo?.language.dialect_code,
-    currMapContent?.mapFileInfo?.language.geo_code,
-    currMapContent?.mapFileInfo?.language.language_code,
+    currMapContent?.mapDetails?.language.dialect_code,
+    currMapContent?.mapDetails?.language.geo_code,
+    currMapContent?.mapDetails?.language.language_code,
     currentMapWithContent,
   ]);
 
@@ -126,6 +138,10 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
 
   const handleImageError = () => {
     setImageError(true);
+  };
+
+  const handleShowWordsPhrases = () => {
+    setIsWoPShown((shown) => !shown);
   };
 
   const chatButton = (
@@ -181,18 +197,81 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
     />
   );
 
+  const Controls = ({
+    zoomIn,
+    zoomOut,
+    resetTransform,
+    setTransform,
+    instance,
+  }: ReactZoomPanPinchContentRef) => {
+    const moveOn = (x: number, y: number): void => {
+      const os = instance.transformState.scale;
+      const ox = instance.transformState.positionX;
+      const oy = instance.transformState.positionY;
+      const newX = ox + x;
+      const newY = oy + y;
+      setTransform(newX, newY, os);
+    };
+
+    return (
+      <StControls>
+        <IonButton onClick={() => zoomIn()}>
+          <IonIcon icon={addCircleOutline} size="medium" />
+        </IonButton>
+        <IonButton onClick={() => zoomOut()}>
+          <IonIcon icon={removeCircleOutline} size="medium" />
+        </IonButton>
+        <IonButton
+          onClick={() => {
+            resetTransform();
+          }}
+        >
+          <IonIcon icon={refreshCircleOutline} size="medium" />
+        </IonButton>
+        <IonButton
+          onClick={() => {
+            moveOn(0, TRANSFORM_STEP);
+          }}
+        >
+          <IonIcon icon={arrowUpOutline} size="medium" />
+        </IonButton>
+        <IonButton
+          onClick={() => {
+            moveOn(0, -TRANSFORM_STEP);
+          }}
+        >
+          <IonIcon icon={arrowDownOutline} size="medium" />
+        </IonButton>
+        <IonButton
+          onClick={() => {
+            moveOn(TRANSFORM_STEP, 0);
+          }}
+        >
+          <IonIcon icon={arrowBackOutline} size="medium" />
+        </IonButton>
+        <IonButton
+          onClick={() => {
+            moveOn(-TRANSFORM_STEP, 0);
+          }}
+        >
+          <IonIcon icon={arrowForwardOutline} size="medium" />
+        </IonButton>
+      </StControls>
+    );
+  };
+
   return (
     <>
       <Caption>
         <>
-          {tr('Map')} - {currMapContent?.mapFileInfo?.map_file_name_with_langs}
-          {currMapContent?.mapFileInfo?.is_original ? (
+          {tr('Map')} - {currMapContent?.mapDetails?.map_file_name_with_langs}
+          {currMapContent?.mapDetails?.is_original ? (
             <OrigBadge>{tr('original')}</OrigBadge>
           ) : (
             <IonBadge>
               {tr('translated to')} {langInfo2String(langInfo)}
-              {currMapContent?.mapFileInfo?.translated_percent
-                ? ` [${currMapContent.mapFileInfo.translated_percent}%]`
+              {currMapContent?.mapDetails?.translated_percent
+                ? ` [${currMapContent.mapDetails.translated_percent}%]`
                 : ''}
             </IonBadge>
           )}
@@ -211,29 +290,49 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
         {voteButtonCom}
       </StButtonsSection>
       <StyledMapImg>
-        {currMapContent?.mapFileInfo && (
+        {currMapContent?.mapDetails && (
           <>
             {imageError && <p>{tr('Error loading image')}</p>}
             <IonLoading
               message={tr('Loading image')}
               isOpen={!imageLoaded && !imageError}
             />
+
             <TransformWrapper>
-              <TransformComponent>
-                <img
-                  width={`${windowWidth - 10}px`}
-                  height={'auto'}
-                  src={currMapContent.mapFileInfo.content_file_url}
-                  alt="Translated map"
-                  placeholder="asdf"
-                  onLoad={handleImageLoad}
-                  onError={handleImageError}
-                />
-              </TransformComponent>
+              {(utils) => (
+                <>
+                  <Controls {...utils} />
+                  <TransformComponent>
+                    <img
+                      style={{ userSelect: 'none' }}
+                      width={`${windowWidth - 10}px`}
+                      height={'auto'}
+                      src={currMapContent?.mapDetails?.content_file_url}
+                      alt="Translated map"
+                      placeholder="asdf"
+                      onLoad={handleImageLoad}
+                      onError={handleImageError}
+                    />
+                  </TransformComponent>
+                </>
+              )}
             </TransformWrapper>
           </>
         )}
       </StyledMapImg>
+      <IonButton onClick={handleShowWordsPhrases}>
+        {isWoPShown
+          ? tr('Hide words and phrases')
+          : tr('Show words and phrases')}
+      </IonButton>
+      {isWoPShown && langInfo && currMapContent?.mapDetails?.original_map_id ? (
+        <MapWords
+          language_id={language_id}
+          nation_id={nation_id}
+          targetLang={langInfo}
+          original_map_id={currMapContent?.mapDetails?.original_map_id}
+        />
+      ) : null}
     </>
   );
 };
@@ -251,4 +350,11 @@ const StButtonsSection = styled.div`
   align-items: center;
   flex-direction: row;
   justify-content: end;
+`;
+
+const StControls = styled('div')`
+  height: 0;
+  position: relative;
+  top: -55px;
+  z-index: 1000;
 `;

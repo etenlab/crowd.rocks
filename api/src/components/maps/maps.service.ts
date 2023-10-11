@@ -1,7 +1,7 @@
 import { Injectable, Inject, forwardRef, Logger } from '@nestjs/common';
 
 import {
-  MapFileListConnection,
+  MapListConnection,
   GetOrigMapPhrasesInput,
   GetOrigMapPhrasesOutput,
   GetOrigMapsListOutput,
@@ -15,6 +15,8 @@ import {
   MapWordsAndPhrasesConnection,
   MapWordOrPhraseAsOrigOutput,
   GetMapWordOrPhraseByDefinitionIdInput,
+  MapWordsAndPhrasesCountOutput,
+  OrigMapWordsAndPhrasesOutput,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
@@ -36,6 +38,7 @@ import { putLangCodesToFileName } from '../../common/utility';
 import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
 import { Readable } from 'stream';
+import { error } from 'console';
 
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
@@ -122,14 +125,14 @@ export class MapsService {
     const origMapInfo = await this.mapsRepository.getOrigMapWithContentUrl(
       map_id,
     );
-    if (origMapInfo.error !== ErrorType.NoError || !origMapInfo.mapFileInfo) {
+    if (origMapInfo.error !== ErrorType.NoError || !origMapInfo.mapDetails) {
       return {
         error: origMapInfo.error,
-        mapFileInfo: null,
+        mapDetails: null,
       };
     }
     const {
-      mapFileInfo: { language, content_file_id },
+      mapDetails: { language, content_file_id },
     } = origMapInfo;
     const { language_code, dialect_code, geo_code } = language;
     const origMapString = await this.fileService.getFileContentAsString(
@@ -171,7 +174,7 @@ export class MapsService {
 
     return {
       error: ErrorType.NoError,
-      mapFileInfo: origMapInfo.mapFileInfo,
+      mapDetails: origMapInfo.mapDetails,
     };
   }
 
@@ -272,7 +275,7 @@ export class MapsService {
     lang?: LanguageInput;
     first: number | null;
     after: string | null;
-  }): Promise<MapFileListConnection> {
+  }): Promise<MapListConnection> {
     try {
       const origMaps = await this.mapsRepository.getOrigMaps(lang);
       const translatedMaps = await this.mapsRepository.getTranslatedMaps({
@@ -280,8 +283,8 @@ export class MapsService {
       });
       const allMapsList = [...origMaps.mapList, ...translatedMaps.mapList].sort(
         (map1, map2) =>
-          map1.mapFileInfo!.map_file_name_with_langs.localeCompare(
-            map2.mapFileInfo!.map_file_name_with_langs,
+          map1.mapDetails!.map_file_name_with_langs.localeCompare(
+            map2.mapDetails!.map_file_name_with_langs,
           ),
       );
 
@@ -290,7 +293,7 @@ export class MapsService {
       let startCursor: string | null = null;
       let endCursor: string | null = null;
 
-      const mapFileOutputEdge: MapDetailsOutputEdge[] = [];
+      const mapDetailsOutputEdge: MapDetailsOutputEdge[] = [];
 
       const makeCursorStr = (id: string, is_original: boolean) => {
         return `${id}-${is_original ? 'true' : 'false'}`;
@@ -299,10 +302,10 @@ export class MapsService {
       for (let i = 0; i < allMapsList.length; i++) {
         const tempMap = allMapsList[i];
         const tempCursor = makeCursorStr(
-          tempMap.mapFileInfo?.is_original
-            ? tempMap.mapFileInfo!.original_map_id
-            : tempMap.mapFileInfo!.translated_map_id!,
-          tempMap.mapFileInfo!.is_original,
+          tempMap.mapDetails?.is_original
+            ? tempMap.mapDetails!.original_map_id
+            : tempMap.mapDetails!.translated_map_id!,
+          tempMap.mapDetails!.is_original,
         );
 
         if (after === null && offset === null) {
@@ -327,7 +330,7 @@ export class MapsService {
           break;
         }
 
-        mapFileOutputEdge.push({
+        mapDetailsOutputEdge.push({
           cursor: tempCursor,
           node: tempMap,
         });
@@ -337,7 +340,7 @@ export class MapsService {
       }
 
       return {
-        edges: mapFileOutputEdge,
+        edges: mapDetailsOutputEdge,
         pageInfo: {
           hasNextPage,
           hasPreviousPage: false,
@@ -365,9 +368,10 @@ export class MapsService {
   }
 
   async getTranslatedMapWithContentUrl(id: string): Promise<MapDetailsOutput> {
-    const mapFileInfo =
-      await this.mapsRepository.getTranslatedMapWithContentUrl(id);
-    return mapFileInfo;
+    const mapDetails = await this.mapsRepository.getTranslatedMapWithContentUrl(
+      id,
+    );
+    return mapDetails;
   }
 
   /**
@@ -483,6 +487,52 @@ export class MapsService {
       return res;
     } catch (e) {
       Logger.error(`mapsService#getOrigMapWordsAndPhrases: ${e}`);
+    } finally {
+      dbPoolClient.release();
+    }
+  }
+
+  async getOrigMapWordsAndPhrasesCount(
+    params: GetOrigMapWordsAndPhrasesInput,
+  ): Promise<MapWordsAndPhrasesCountOutput> {
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      const res = this.mapsRepository.getOrigMapWordsAndPhrasesCount(
+        dbPoolClient,
+        params,
+      );
+      return res;
+    } catch (e) {
+      Logger.error(`mapsService#getOrigMapWordsAndPhrases: ${e}`);
+      return {
+        count: null,
+        error: ErrorType.PaginationError,
+      };
+    } finally {
+      dbPoolClient.release();
+    }
+  }
+
+  async getOrigMapWordsAndPhrasesPaginated(
+    params: GetOrigMapWordsAndPhrasesInput,
+    offset?: number | null,
+    limit?: number | null,
+  ): Promise<OrigMapWordsAndPhrasesOutput> {
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      const res = this.mapsRepository.getOrigMapWordsAndPhrasesPaginated(
+        dbPoolClient,
+        params,
+        offset,
+        limit,
+      );
+      return res;
+    } catch (e) {
+      Logger.error(`mapsService#getOrigMapWordsAndPhrases: ${e}`);
+      return {
+        error: ErrorType.PaginationError,
+        mapWordsOrPhrases: null,
+      };
     } finally {
       dbPoolClient.release();
     }
@@ -654,13 +704,13 @@ export class MapsService {
     const origMap = await this.mapsRepository.getOrigMapWithContentUrl(
       origMapId,
     );
-    if (!origMap.mapFileInfo) {
+    if (!origMap.mapDetails) {
       Logger.error(
         `mapsService#translateMapAndSaveTranslatedTrn: origMap witn id ${origMapId} not found.`,
       );
       return [];
     }
-    const { content_file_id, map_file_name } = origMap.mapFileInfo;
+    const { content_file_id, map_file_name } = origMap.mapDetails;
 
     const { origMapWords } = await this.getOrigMapWords({
       original_map_id: origMapId,
@@ -829,17 +879,17 @@ export class MapsService {
     });
 
     for (const translatedMap of translatedMaps.mapList) {
-      translatedMap.mapFileInfo?.translated_map_id &&
+      translatedMap.mapDetails?.translated_map_id &&
         (await this.deleteTranslatedMap(
-          translatedMap.mapFileInfo.translated_map_id,
+          translatedMap.mapDetails.translated_map_id,
         ));
     }
 
     const deletedMapId = await this.mapsRepository.deleteOriginalMap(mapId);
-    mapInfo.mapFileInfo?.preview_file_id &&
-      (await this.fileService.deleteFile(mapInfo.mapFileInfo.preview_file_id));
-    mapInfo.mapFileInfo?.content_file_id &&
-      (await this.fileService.deleteFile(mapInfo.mapFileInfo.content_file_id));
+    mapInfo.mapDetails?.preview_file_id &&
+      (await this.fileService.deleteFile(mapInfo.mapDetails.preview_file_id));
+    mapInfo.mapDetails?.content_file_id &&
+      (await this.fileService.deleteFile(mapInfo.mapDetails.content_file_id));
     return deletedMapId;
   }
 
@@ -848,8 +898,8 @@ export class MapsService {
       mapId,
     );
     const deletedMapId = await this.mapsRepository.deleteTranslatedMap(mapId);
-    mapInfo.mapFileInfo?.content_file_id &&
-      (await this.fileService.deleteFile(mapInfo.mapFileInfo.content_file_id));
+    mapInfo.mapDetails?.content_file_id &&
+      (await this.fileService.deleteFile(mapInfo.mapDetails.content_file_id));
     return deletedMapId;
   }
 
@@ -861,19 +911,19 @@ export class MapsService {
       await this.mapsRepository.deleteAllTranslatedMapsTrn(dbPoolClient);
       const allOriginalMaps = await this.mapsRepository.getOrigMaps();
       for (const origMap of allOriginalMaps.mapList) {
-        if (!origMap.mapFileInfo?.original_map_id) {
+        if (!origMap.mapDetails?.original_map_id) {
           Logger.error(
-            `mapsService#translationsReset: origMap.mapFileInfo?.original_map_id is falsy`,
+            `mapsService#translationsReset: origMap.mapDetails?.original_map_id is falsy`,
           );
           continue;
         }
         await this.parseOrigMapTrn({
-          map_id: origMap.mapFileInfo.original_map_id,
+          map_id: origMap.mapDetails.original_map_id,
           token,
           dbPoolClient,
         });
         await this.translateMapAndSaveTranslatedTrn(
-          origMap.mapFileInfo.original_map_id,
+          origMap.mapDetails.original_map_id,
           token,
           dbPoolClient,
         );
@@ -895,7 +945,7 @@ export class MapsService {
     const originalMaps = await this.mapsRepository.getOrigMaps();
     if (!(originalMaps.mapList?.length > 0)) return;
     const origMapIds = originalMaps.mapList.map(
-      (m) => m.mapFileInfo?.original_map_id,
+      (m) => m.mapDetails?.original_map_id,
     );
     const dbPoolClient = await this.pg.pool.connect();
     try {

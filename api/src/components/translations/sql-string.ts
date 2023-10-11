@@ -1,5 +1,398 @@
 import { ErrorType } from 'src/common/types';
 
+export type TranslatedStringRow = {
+  id: string;
+  string: string;
+  definition: string;
+};
+
+export function getStringsPhraseToWordTranslatedById(
+  from_language: string,
+  to_language: string,
+  created_by: string,
+): [string, [string, string, string]] {
+  return [
+    `
+    select distinct from_phrase.phraselike_string as string, 
+    from_phrase.phrase_id as id, 
+    from_phrase_def.definition
+    from words from_word
+join phrases from_phrase
+    on from_word.word_id = any(from_phrase.words)
+join phrase_definitions from_phrase_def
+    on from_phrase.phrase_id = from_phrase_def.phrase_id
+join phrase_to_word_translations p2w
+    on from_phrase_def.phrase_definition_id = p2w.from_phrase_definition_id
+join word_definitions to_word_defs
+    on to_word_defs.word_definition_id = p2w.to_word_definition_id
+join words to_word
+    on to_word_defs.word_id = to_word.word_id
+join wordlike_strings to_wls
+    on to_wls.wordlike_string_id = to_word.wordlike_string_id
+where from_word.language_code = $1 and to_word.language_code = $2
+    and p2w.created_by = $3;
+    `,
+    [from_language, to_language, created_by],
+  ];
+}
+
+export function getStringsPhraseToPhraseTranslatedById(
+  from_language: string,
+  to_language: string,
+  created_by: string,
+): [string, [string, string, string]] {
+  return [
+    `
+    select distinct from_phrase.phraselike_string as string, 
+      from_phrase.phrase_id as id,
+      from_phrase_def.definition
+from words from_word
+join phrases from_phrase
+    on from_word.word_id = any(from_phrase.words)
+join phrase_definitions from_phrase_def
+    on from_phrase.phrase_id = from_phrase_def.phrase_id
+join phrase_to_phrase_translations p2p
+    on from_phrase_def.phrase_definition_id = p2p.from_phrase_definition_id
+join phrase_definitions to_phrase_defs
+    on to_phrase_defs.phrase_definition_id = p2p.to_phrase_definition_id
+join phrases to_phrase
+    on to_phrase_defs.phrase_id = to_phrase.phrase_id
+join words to_word
+    on to_word.word_id = any(to_phrase.words)
+where from_word.language_code = $1 and to_word.language_code = $2
+    and p2p.created_by = $3;
+    `,
+    [from_language, to_language, created_by],
+  ];
+}
+
+export function getStringsWordToWordTranslatedById(
+  from_language: string,
+  to_language: string,
+  created_by: string,
+): [string, [string, string, string]] {
+  return [
+    `
+    select from_word.word_id as id, 
+           wls.wordlike_string as string,
+           from_word_defs.definition 
+    from wordlike_strings wls
+join words from_word
+    on wls.wordlike_string_id=from_word.wordlike_string_id
+join word_definitions from_word_defs
+    on from_word.word_id = from_word_defs.word_id
+join word_to_word_translations w2w
+    on from_word_defs.word_definition_id = w2w.from_word_definition_id
+join word_definitions to_word_defs
+    on to_word_defs.word_definition_id = w2w.to_word_definition_id
+join words to_word
+    on to_word_defs.word_id = to_word.word_id
+where from_word.language_code = $1 and to_word.language_code = $2
+    and w2w.created_by = $3;
+    `,
+    [from_language, to_language, created_by],
+  ];
+}
+
+export type TranslationRow = {
+  translation_id: string;
+  created_by: string;
+  from_text: string;
+  from_def: string;
+  to_text: string;
+  to_def: string;
+};
+
+export function getWordToWordNotTranslatedById(
+  from_language: string,
+  to_language: string,
+  not_created_by: string,
+): [string, [string, string, string]] {
+  return [
+    `
+    select  w2w.created_by as created_by, 
+		w2w.word_to_word_translation_id as translation_id, 
+		from_wls.wordlike_string as from_text,
+		from_word_defs.definition as from_def, 
+		to_wls.wordlike_string as to_text,
+		to_word_defs.definition as to_def
+		from wordlike_strings from_wls
+	join words from_words
+		on from_wls.wordlike_string_id = from_words.wordlike_string_id
+	join word_definitions from_word_defs
+		on from_word_defs.word_id = from_words.word_id
+	join word_to_word_translations w2w 
+		on from_word_defs.word_definition_id = w2w.from_word_definition_id
+	join word_definitions to_word_defs
+		on w2w.to_word_definition_id = to_word_defs.word_definition_id
+	join words to_words
+		on to_word_defs.word_id = to_words.word_id
+	join wordlike_strings to_wls
+		on to_words.wordlike_string_id = to_wls.wordlike_string_id
+	where 
+		from_words.language_code = $1 and to_words.language_code=$2 and w2w.created_by != $3;
+    `,
+    [from_language, to_language, not_created_by],
+  ];
+}
+
+export function getWordToPhraseNotTranslatedById(
+  from_language: string,
+  to_language: string,
+  not_created_by: string,
+): [string, [string, string, string]] {
+  return [
+    `
+ select  w2p.created_by as created_by, 
+		w2p.word_to_phrase_translation_id as translation_id, 
+		from_wls.wordlike_string as from_text,
+		from_word_defs.definition as from_def, 
+		to_phrase.phraselike_string as to_text,
+		to_phrase_defs.definition as to_def
+	from wordlike_strings from_wls
+	join words from_words
+		on from_wls.wordlike_string_id = from_words.wordlike_string_id
+	join word_definitions from_word_defs
+		on from_word_defs.word_id = from_words.word_id
+	join word_to_phrase_translations w2p
+		on from_word_defs.word_definition_id = w2p.from_word_definition_id
+	join phrase_definitions to_phrase_defs
+		on w2p.to_phrase_definition_id = to_phrase_defs.phrase_definition_id
+	join phrases to_phrase
+		on to_phrase_defs.phrase_id = to_phrase.phrase_id
+	join words to_words
+		on to_words.word_id = any(to_phrase.words)
+	where 
+		from_words.language_code = $1 and to_words.language_code=$2 and w2p.created_by != $3;
+    `,
+    [from_language, to_language, not_created_by],
+  ];
+}
+
+export function getPhraseToPhraseNotTranslatedById(
+  from_language: string,
+  to_language: string,
+  not_created_by: string,
+): [string, [string, string, string]] {
+  return [
+    `
+select distinct p2p.created_by as created_by, 
+		p2p.phrase_to_phrase_translation_id as translation_id, 
+		from_phrase.phraselike_string as from_text,
+		from_phrase_def.definition as from_def, 
+		to_phrase.phraselike_string as to_text,
+		to_phrase_defs.definition as to_def
+	from words from_word
+join phrases from_phrase
+    on from_word.word_id = any(from_phrase.words)
+join phrase_definitions from_phrase_def
+    on from_phrase.phrase_id = from_phrase_def.phrase_id
+left join phrase_to_phrase_translations p2p
+    on from_phrase_def.phrase_definition_id = p2p.from_phrase_definition_id
+join phrase_definitions to_phrase_defs
+    on to_phrase_defs.phrase_definition_id = p2p.to_phrase_definition_id
+join phrases to_phrase
+    on to_phrase_defs.phrase_id = to_phrase.phrase_id
+join words to_word
+    on to_word.word_id = any(to_phrase.words)
+where from_word.language_code = $1 and to_word.language_code = $2 and p2p.created_by != $3;
+    `,
+    [from_language, to_language, not_created_by],
+  ];
+}
+
+export function getPhraseToWordNotTranslatedById(
+  from_language: string,
+  to_language: string,
+  not_created_by: string,
+): [string, [string, string, string]] {
+  return [
+    `
+select p2w.created_by as created_by, 
+		p2w.phrase_to_word_translation_id as translation_id, 
+		from_phrase.phraselike_string as from_text,
+		from_phrase_def.definition as from_def, 
+		to_wls.wordlike_string as to_text,
+		to_word_defs.definition as to_def
+from words from_word
+join phrases from_phrase
+    on from_word.word_id = any(from_phrase.words)
+join phrase_definitions from_phrase_def
+    on from_phrase.phrase_id = from_phrase_def.phrase_id
+join phrase_to_word_translations p2w
+    on from_phrase_def.phrase_definition_id = p2w.from_phrase_definition_id
+join word_definitions to_word_defs
+    on to_word_defs.word_definition_id = p2w.to_word_definition_id
+join words to_word
+    on to_word_defs.word_id = to_word.word_id
+join wordlike_strings to_wls
+    on to_wls.wordlike_string_id = to_word.wordlike_string_id
+where from_word.language_code = $1 and to_word.language_code = $2 and p2w.created_by != $3;
+    `,
+    [from_language, to_language, not_created_by],
+  ];
+}
+
+export function getStringsWordToPhraseTranslatedById(
+  from_language: string,
+  to_language: string,
+  created_by: string,
+): [string, [string, string, string]] {
+  return [
+    `
+    select wls.wordlike_string as string, 
+    from_word.word_id as id,
+    from_word_defs.definition
+    from wordlike_strings wls
+join words from_word
+    on wls.wordlike_string_id = from_word.wordlike_string_id
+join word_definitions from_word_defs
+    on from_word.word_id = from_word_defs.word_id
+join word_to_phrase_translations w2p
+    on from_word_defs.word_definition_id = w2p.from_word_definition_id
+join phrase_definitions to_phrase_defs
+    on to_phrase_defs.phrase_definition_id = w2p.to_phrase_definition_id
+join phrases to_phrase
+    on to_phrase_defs.phrase_id = to_phrase.phrase_id
+join words to_phrase_words
+    on to_phrase_words.word_id = any(to_phrase.words)
+where from_word.language_code = $1 and to_phrase_words.language_code = $2
+    and w2p.created_by = $3;
+
+    `,
+    [from_language, to_language, created_by],
+  ];
+}
+
+export function getTotalWordCountByLanguage(
+  languageCode: string,
+): [string, [string]] {
+  return [
+    `
+    select count(wordlike_string) from words w 
+      join wordlike_strings wls 
+      on w.wordlike_string_id = wls.wordlike_string_id
+      where w.language_code = $1;
+    `,
+    [languageCode],
+  ];
+}
+
+export function getTotalPhraseCountByLanguage(
+  languageCode: string,
+): [string, [string]] {
+  return [
+    `
+    select count(distinct p.phraselike_string) from phrases p
+      join words w on w.word_id = any(p.words)
+      where w.language_code = $1;
+    `,
+    [languageCode],
+  ];
+}
+
+export function getTotalPhraseToWordCount(
+  fromLanguageCode: string,
+  toLanguageCode: string,
+  translated_by: string[],
+): [string, [string, string, string[]]] {
+  return [
+    `
+    select count (distinct from_phrase.phraselike_string) from words from_word
+join phrases from_phrase
+    on from_word.word_id = any(from_phrase.words)
+join phrase_definitions from_phrase_def
+    on from_phrase.phrase_id = from_phrase_def.phrase_id
+join phrase_to_word_translations p2w
+    on from_phrase_def.phrase_definition_id = p2w.from_phrase_definition_id
+join word_definitions to_word_defs
+    on to_word_defs.word_definition_id = p2w.to_word_definition_id
+join words to_word
+    on to_word_defs.word_id = to_word.word_id
+join wordlike_strings to_wls
+    on to_wls.wordlike_string_id = to_word.wordlike_string_id
+where from_word.language_code = $1 and to_word.language_code = $2
+    and p2w.created_by = ANY($3);
+    `,
+    [fromLanguageCode, toLanguageCode, translated_by],
+  ];
+}
+
+export function getTotalPhraseToPhraseCount(
+  fromLanguageCode: string,
+  toLanguageCode: string,
+  translated_by: string[],
+): [string, [string, string, string[]]] {
+  return [
+    `
+    select count(distinct from_phrase.phraselike_string) from words from_word
+join phrases from_phrase
+    on from_word.word_id = any(from_phrase.words)
+join phrase_definitions from_phrase_def
+    on from_phrase.phrase_id = from_phrase_def.phrase_id
+join phrase_to_phrase_translations p2p
+    on from_phrase_def.phrase_definition_id = p2p.from_phrase_definition_id
+join phrase_definitions to_phrase_defs
+    on to_phrase_defs.phrase_definition_id = p2p.to_phrase_definition_id
+join phrases to_phrase
+    on to_phrase_defs.phrase_id = to_phrase.phrase_id
+join words to_word
+    on to_word.word_id = any(to_phrase.words)
+where from_word.language_code = $1 and to_word.language_code = $2
+    and p2p.created_by = ANY($3);
+    `,
+    [fromLanguageCode, toLanguageCode, translated_by],
+  ];
+}
+
+export function getTotalWordToWordCount(
+  fromLanguageCode: string,
+  toLanguageCode: string,
+  translated_by: string[],
+): [string, [string, string, string[]]] {
+  return [
+    `
+    select count(from_word.word_id) from words from_word
+join word_definitions from_word_defs
+    on from_word.word_id = from_word_defs.word_id
+join word_to_word_translations w2w
+    on from_word_defs.word_definition_id = w2w.from_word_definition_id
+join word_definitions to_word_defs
+    on to_word_defs.word_definition_id = w2w.to_word_definition_id
+join words to_word
+    on to_word_defs.word_id = to_word.word_id
+where from_word.language_code = $1 and to_word.language_code = $2
+    and w2w.created_by = ANY($3);
+    `,
+    [fromLanguageCode, toLanguageCode, translated_by],
+  ];
+}
+
+export function getTotalWordToPhraseCount(
+  fromLanguageCode: string,
+  toLanguageCode: string,
+  translated_by: string[],
+): [string, [string, string, string[]]] {
+  return [
+    `
+    select count(distinct from_word.word_id) from words from_word
+join word_definitions from_word_defs
+    on from_word.word_id = from_word_defs.word_id
+join word_to_phrase_translations w2p
+    on from_word_defs.word_definition_id = w2p.from_word_definition_id
+join phrase_definitions to_phrase_defs
+    on to_phrase_defs.phrase_definition_id = w2p.to_phrase_definition_id
+join phrases to_phrase
+    on to_phrase_defs.phrase_id = to_phrase.phrase_id
+join words to_phrase_words
+    on to_phrase_words.word_id = any(to_phrase.words)
+where from_word.language_code = $1 and to_phrase_words.language_code = $2
+    and w2p.created_by = ANY($3);
+    `,
+    [fromLanguageCode, toLanguageCode, translated_by],
+  ];
+}
+
 export type GetWordToWordTranslationObjectByIdRow = {
   word_to_word_translation_id: string;
   from_word_definition_id: string;
@@ -64,6 +457,98 @@ export function callWordToWordTranslationUpsertsProcedure({
       call batch_word_to_word_translation_upsert($1::bigint[], $2::bigint[], $3, null, null, '');
     `,
     [fromWordDefinitionIds, toWordDefinitionIds, token],
+  ];
+}
+
+export type WordToWordTranslationVoteSetProcedureOutput = {
+  p_word_to_word_translation_vote_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callWordToWordTranslationVoteSetProcedure({
+  translationIds,
+  token,
+  vote,
+}: {
+  translationIds: number[];
+  token: string;
+  vote: boolean | null;
+}): [string, [number[], string, boolean | null]] {
+  return [
+    `
+      call batch_word_to_word_translation_vote_set($1::bigint[], $2, $3, null, null, '');
+    `,
+    [translationIds, token, vote],
+  ];
+}
+
+export type WordToPhraseTranslationVoteSetProcedureOutput = {
+  p_word_to_phrase_translation_vote_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callWordToPhraseTranslationVoteSetProcedure({
+  translationIds,
+  token,
+  vote,
+}: {
+  translationIds: number[];
+  token: string;
+  vote: boolean | null;
+}): [string, [number[], string, boolean | null]] {
+  return [
+    `
+      call batch_word_to_phrase_translation_vote_set($1::bigint[], $2, $3, null, null, '');
+    `,
+    [translationIds, token, vote],
+  ];
+}
+
+export type PhraseToPhraseTranslationVoteSetProcedureOutput = {
+  p_phrase_to_phrase_translation_vote_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callPhraseToPhraseTranslationVoteSetProcedure({
+  translationIds,
+  token,
+  vote,
+}: {
+  translationIds: number[];
+  token: string;
+  vote: boolean | null;
+}): [string, [number[], string, boolean | null]] {
+  return [
+    `
+      call batch_phrase_to_phrase_translation_vote_set($1::bigint[], $2, $3, null, null, '');
+    `,
+    [translationIds, token, vote],
+  ];
+}
+
+export type PhraseToWordTranslationVoteSetProcedureOutput = {
+  p_phrase_to_word_translation_vote_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callPhraseToWordTranslationVoteSetProcedure({
+  translationIds,
+  token,
+  vote,
+}: {
+  translationIds: number[];
+  token: string;
+  vote: boolean | null;
+}): [string, [number[], string, boolean | null]] {
+  return [
+    `
+      call batch_phrase_to_word_translation_vote_set($1::bigint[], $2, $3, null, null, '');
+    `,
+    [translationIds, token, vote],
   ];
 }
 

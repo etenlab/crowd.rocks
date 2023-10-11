@@ -527,7 +527,7 @@ create table document_word_entries(
   document_word_entry_id bigserial primary key,
   document_id bigint not null references documents(document_id),
   wordlike_string_id bigint not null references wordlike_strings(wordlike_string_id),
-  parent_wordlike_string_id bigint references wordlike_strings(wordlike_string_id),
+  parent_document_word_entry_id bigint references document_word_entries(document_word_entry_id),
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
@@ -538,6 +538,26 @@ create table word_ranges (
   end_word bigint not null references document_word_entries(document_word_entry_id),
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
+);
+create index idx__begin_word__word_ranges on word_ranges (begin_word);
+create index idx__end_word__word_ranges on word_ranges (end_word);
+create index idx__created_by__word_ranges on word_ranges (created_by);
+
+create table pericopies(
+  pericope_id bigserial primary key,
+  start_word bigint not null references document_word_entries(document_word_entry_id),
+  created_at timestamp not null default CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id),
+  unique (start_word)
+);
+
+create table pericope_votes(
+  pericope_vote_id bigserial primary key,
+  user_id bigint not null references users(user_id),
+  pericope_id bigint not null references pericopies(pericope_id),
+  vote bool,
+  last_updated_at timestamp not null default CURRENT_TIMESTAMP,
+  unique (user_id, pericope_id)
 );
 
 -- tags
@@ -620,18 +640,6 @@ create table site_text_phrase_definitions (
   unique (phrase_definition_id)
 );
 
-create table site_text_translation_votes(
-  site_text_translation_vote_id bigserial primary key,
-  translation_id bigint not null,
-  from_type_is_word bool not null, -- true = word, false = phrase
-  to_type_is_word bool not null, -- true = word, false = phrase
-  user_id bigint not null references users(user_id),
-  vote bool,
-  last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  unique (user_id, translation_id, from_type_is_word, to_type_is_word)
-);
-create index idx__translation_id__site_text_translation_votes on site_text_translation_votes (translation_id);
-
 create table site_text_translation_counts(
   site_text_translation_count_id bigserial primary key,
   site_text_id bigint not null,
@@ -695,3 +703,32 @@ create table translated_maps(
 create index idx__original_map_id__translated_maps on translated_maps (original_map_id);
 create index idx__preview_file_id__translated_maps on translated_maps (preview_file_id);
 create index idx__language_codes__translated_maps on translated_maps (language_code, dialect_code, geo_code);
+
+create table question_items (
+  question_item_id bigserial primary key,
+  item text not null,
+  created_at timestamp not null default CURRENT_TIMESTAMP,
+  unique (item)
+);
+
+create table questions (
+  question_id bigserial primary key,
+  parent_table varchar(64) not null,
+  parent_id bigint not null,
+  question_type_is_multiselect bool not null,
+  question text not null,
+  question_items bigint[] not null, -- references question_items(question_item_id)
+  created_at timestamp not null default CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id),
+  unique (parent_table, parent_id, question_type_is_multiselect, question, created_by)
+);
+
+create table answers (
+  answer_id bigserial primary key,
+  question_id bigint not null references questions(question_id),
+  answer text,
+  question_items bigint[] not null, -- references question_items(question_item_id)
+  created_at timestamp not null default CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id),
+  unique (question_id, created_by)
+);

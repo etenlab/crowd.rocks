@@ -8,10 +8,31 @@ fragment TextyDocumentFragment on TextyDocument {
   geo_code
 }
 
+fragment DocumentWordEntryFragment on DocumentWordEntry {
+  document_word_entry_id
+  document_id
+  wordlike_string {
+    ...WordlikeStringFragment
+  }
+  parent_document_word_entry_id
+}
+
+fragment WordRangeFragment on WordRange {
+  word_range_id
+  begin {
+    ...DocumentWordEntryFragment
+  }
+  end {
+    ...DocumentWordEntryFragment
+  }
+}
+
 mutation DocumentUpload($document: TextyDocumentInput!) {
   documentUpload(input: { document: $document }) {
     error
-    document_id
+    document {
+      ...TextyDocumentFragment
+    }
   }
 }
 
@@ -27,6 +48,43 @@ query GetDocument($document_id: String!) {
   getDocument(input: { document_id: $document_id }) {
     document {
       ...TextyDocumentFragment
+    }
+  }
+}
+
+query GetDocumentWordEntriesByDocumentId($document_id: ID!) {
+  getDocumentWordEntriesByDocumentId(document_id: $document_id) {
+    error
+    document_word_entries {
+      ...DocumentWordEntryFragment
+    }
+  }
+}
+
+query GetWordRangesByDocumentId($id: ID!) {
+  getWordRangesByDocumentId(id: $id) {
+    error
+    word_ranges {
+      ...WordRangeFragment
+    }
+  }
+}
+
+mutation UpsertWordRange(
+  $begin_document_word_entry_id: String!
+  $end_document_word_entry_id: String!
+) {
+  upsertWordRanges(
+    input: [
+      {
+        begin_document_word_entry_id: $begin_document_word_entry_id
+        end_document_word_entry_id: $end_document_word_entry_id
+      }
+    ]
+  ) {
+    error
+    word_ranges {
+      ...WordRangeFragment
     }
   }
 }

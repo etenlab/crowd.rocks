@@ -31,7 +31,7 @@ export class MapDetailsInfo {
 @ObjectType()
 export class MapDetailsOutput extends GenericOutput {
   @Field(() => MapDetailsInfo, { nullable: true })
-  mapFileInfo?: MapDetailsInfo | null;
+  mapDetails?: MapDetailsInfo | null;
 }
 @InputType()
 export class GetOrigMapListInput {
@@ -40,7 +40,7 @@ export class GetOrigMapListInput {
 @ObjectType()
 export class MapUploadOutput extends GenericOutput {
   @Field(() => MapDetailsOutput, { nullable: true })
-  mapFileOutput?: MapDetailsOutput | null | undefined;
+  mapDetailsOutput?: MapDetailsOutput | null | undefined;
 }
 @InputType()
 export class MapDeleteInput {
@@ -71,7 +71,7 @@ export class MapDetailsOutputEdge {
 }
 
 @ObjectType()
-export class MapFileListConnection {
+export class MapListConnection {
   @Field(() => [MapDetailsOutputEdge]) edges: MapDetailsOutputEdge[];
   @Field(() => PageInfo) pageInfo: PageInfo;
 }
@@ -84,9 +84,10 @@ export class GetMapDetailsInput {
 
 @InputType()
 export class GetOrigMapWordsAndPhrasesInput {
+  @Field(() => String, { nullable: true }) original_map_id: string | null;
   @Field(() => LanguageInput) lang: LanguageInput;
+  @Field(() => String, { nullable: true }) filter: string | null;
 }
-
 @ObjectType()
 export class MapWordOrPhrase {
   @Field(() => ID) id: string;
@@ -138,6 +139,16 @@ const MapWordOrPhraseAsOrig = createUnionType({
 export class MapWordOrPhraseAsOrigOutput extends GenericOutput {
   @Field(() => MapWordOrPhraseAsOrig, { nullable: true })
   wordOrPhrase: WordWithDefinition | PhraseWithDefinition | null;
+}
+@ObjectType()
+export class MapWordsAndPhrasesCountOutput extends GenericOutput {
+  @Field(() => Number, { nullable: true })
+  count: number | null;
+}
+@ObjectType()
+export class OrigMapWordsAndPhrasesOutput extends GenericOutput {
+  @Field(() => [MapWordOrPhrase], { nullable: true })
+  mapWordsOrPhrases: MapWordOrPhrase[] | null;
 }
 
 @InputType()

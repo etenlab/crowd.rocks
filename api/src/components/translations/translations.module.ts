@@ -14,9 +14,12 @@ import { WordToPhraseTranslationsService } from './word-to-phrase-translations.s
 import { PhraseToPhraseTranslationsService } from './phrase-to-phrase-translations.service';
 import { PhraseToWordTranslationsService } from './phrase-to-word-translations.service';
 import { TranslationsService } from './translations.service';
-import { GoogleTranslateService } from './google-translate.service';
+import { GoogleTranslateService } from './translator-bots/google-translate.service';
 
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
+import { SmartcatTranslateService } from './translator-bots/sc-translate.service';
+import { LiltTranslateService } from './translator-bots/lilt-translate.service';
+import { AiTranslationsService } from './translator-bots/ai-translations.service';
 
 @Module({
   imports: [
@@ -35,7 +38,10 @@ import { WordToWordTranslationRepository } from './word-to-word-translation.repo
     PhraseToWordTranslationsService,
     PhraseToPhraseTranslationsService,
     GoogleTranslateService,
+    LiltTranslateService,
+    SmartcatTranslateService,
     TranslationsService,
+    AiTranslationsService,
   ],
   exports: [
     WordToWordTranslationsService,
@@ -43,7 +49,10 @@ import { WordToWordTranslationRepository } from './word-to-word-translation.repo
     PhraseToWordTranslationsService,
     PhraseToPhraseTranslationsService,
     GoogleTranslateService,
+    LiltTranslateService,
+    SmartcatTranslateService,
     TranslationsService,
+    AiTranslationsService,
   ],
 })
 export class TranslationsModule {}

@@ -25,6 +25,8 @@ import { NotificationModule } from './components/notifications/notification.modu
 import { DocumentsModule } from './components/documents/documents.module';
 import { FlagsModule } from './components/flag/flags.module';
 import { FileModule } from './components/file/file.module';
+import { QuestionAndAnswersModule } from './components/question-answer/question-answer.module';
+import { PericopiesModule } from './components/pericopies/pericopies.module';
 
 @Module({
   imports: [
@@ -58,6 +60,8 @@ import { FileModule } from './components/file/file.module';
     DocumentsModule,
     FlagsModule,
     FileModule,
+    QuestionAndAnswersModule,
+    PericopiesModule,
   ],
   controllers: [],
   providers: [],

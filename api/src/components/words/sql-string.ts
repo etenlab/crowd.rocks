@@ -82,6 +82,47 @@ export function callWordUpsertsProcedure({
   ];
 }
 
+export type WordlikeStringUpsertsProcedureOutput = {
+  p_wordlike_string_ids: string[];
+  p_error_types: ErrorType[];
+  p_error_type: ErrorType;
+};
+
+export function callWordlikeStringUpsertsProcedure({
+  wordlike_strings,
+  token,
+}: {
+  wordlike_strings: string[];
+  token: string;
+}): [string, [string[], string]] {
+  return [
+    `
+      call batch_wordlike_string_upsert($1::text[], $2, null, null, '');
+    `,
+    [wordlike_strings, token],
+  ];
+}
+
+export type GetWordlikeStringsObjectByIds = {
+  wordlike_string_id: string;
+  wordlike_string: string;
+};
+
+export function getWordlikeStringsObjByIds(
+  ids: number[],
+): [string, [number[]]] {
+  return [
+    `
+      select 
+        wordlike_string_id,
+        wordlike_string
+      from wordlike_strings
+      where wordlike_string_id = any($1)
+    `,
+    [ids],
+  ];
+}
+
 export type GetWordVoteObjectById = {
   words_vote_id: string;
   word_id: string;

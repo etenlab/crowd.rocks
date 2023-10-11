@@ -66,7 +66,7 @@ import { PhraseListPage } from './components/phrase-book/PhraseListPage';
 import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
 
 import { TranslationPage } from './components/translation/TranslationPage';
-import { GoogleTranslationPage } from './components/translation/GoogleTranslationPage';
+import { AIControllerPage } from './components/translation/AIControllerPage';
 import { FastTranslationPage } from './components/translation/FastTranslationPage';
 
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
@@ -74,8 +74,15 @@ import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
 import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
 import { NotificationPage } from './components/notifications/NotificationPage';
 import { SettingsPage } from './components/settings/SettingsPage';
-import { DocumentsPage } from './components/documents/DocumentsPage';
-import { DocumentDetailsPage } from './components/documents/DocumentDetails/DocumentDetails';
+
+import { DocumentsPage } from './components/documents/DocumentsPage/DocumentsPage';
+import { DocumentViewerPage } from './components/documents/DocumentViewerPage/DocumentViewerPage';
+
+import { QADocumentListPage } from './components/qa/QADocumentListPage';
+import { QADocumentViewerPage } from './components/qa/QADocumentViewerPage';
+
+import { PericopeDocumentListPage } from './components/pericopies/PericopeDocumentListPage';
+import { PericopeDocumentViewerPage } from './components/pericopies/PericopeDocumentViewerPage';
 
 const Body: React.FC = () => {
   const {
@@ -478,8 +485,8 @@ const Body: React.FC = () => {
           />
           <Route
             exact
-            path="/:nation_id/:language_id/:cluster_id/google-translate"
-            component={GoogleTranslationPage}
+            path="/:nation_id/:language_id/:cluster_id/ai-controller"
+            component={AIControllerPage}
           />
           <Route
             exact
@@ -494,7 +501,27 @@ const Body: React.FC = () => {
           <Route
             exact
             path="/:nation_id/:language_id/:cluster_id/documents/:document_id"
-            component={DocumentDetailsPage}
+            component={DocumentViewerPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/qa"
+            component={QADocumentListPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/qa/documents/:document_id"
+            component={QADocumentViewerPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/pericopies"
+            component={PericopeDocumentListPage}
+          />
+          <Route
+            exact
+            path="/:nation_id/:language_id/:cluster_id/pericopies/documents/:document_id"
+            component={PericopeDocumentViewerPage}
           />
           <Route exact path="/">
             <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />

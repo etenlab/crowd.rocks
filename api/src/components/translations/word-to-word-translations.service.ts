@@ -8,7 +8,6 @@ import { PostgresService } from 'src/core/postgres.service';
 import { WordDefinitionsService } from 'src/components/definitions/word-definitions.service';
 
 import {
-  AddWordAsTranslationForWordOutput,
   WordToWordTranslationOutput,
   WordToWordTranslationsOutput,
   WordTrVoteStatusOutputRow,
@@ -33,7 +32,7 @@ import {
   getWordToWordTranslationListByFromWordDefinitionIds,
 } from './sql-string';
 import { WordsService } from '../words/words.service';
-import { WordUpsertInput } from '../words/types';
+
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 import { LanguageInput } from 'src/components/common/types';
 import {

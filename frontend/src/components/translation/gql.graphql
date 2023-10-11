@@ -110,6 +110,27 @@ fragment PhraseToPhraseTranslationVoteStatusFragment on PhraseToPhraseTranslatio
   downvotes
 }
 
+query GetTranslationLanguageInfo(
+  $from_language_code: ID!
+  $to_language_code: ID
+) {
+  getLanguageTranslationInfo(
+    input: {
+      fromLanguageCode: $from_language_code
+      toLanguageCode: $to_language_code
+    }
+  ) {
+    error
+    googleTranslateTotalLangCount
+    liltTranslateTotalLangCount
+    smartcatTranslateTotalLangCount
+    totalPhraseCount
+    totalWordCount
+    translatedMissingPhraseCount
+    translatedMissingWordCount
+  }
+}
+
 query GetTranslationsByFromDefinitionId(
   $definition_id: ID!
   $from_definition_type_is_word: Boolean!
@@ -171,6 +192,25 @@ query LanguagesForGoogleTranslate {
     }
   }
 }
+query LanguagesForLiltTranslate {
+  languagesForLiltTranslate {
+    error
+    languages {
+      code
+      name
+    }
+  }
+}
+
+query LanguagesForSmartcatTranslate {
+  languagesForSmartcatTranslate {
+    error
+    languages {
+      code
+      name
+    }
+  }
+}
 
 mutation TranslateWordsAndPhrasesByGoogle(
   $from_language_code: String!
@@ -194,7 +234,88 @@ mutation TranslateWordsAndPhrasesByGoogle(
   ) {
     error
     result {
-      requestedCharactors
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+
+mutation TranslateMissingWordsAndPhrasesByGoogle(
+  $from_language_code: String!
+  $to_language_code: String!
+) {
+  translateMissingWordsAndPhrasesByGoogle(
+    from_language: { language_code: $from_language_code }
+    to_language: { language_code: $to_language_code }
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+
+mutation TranslateWordsAndPhrasesByLilt(
+  $from_language_code: String!
+  $from_dialect_code: String
+  $from_geo_code: String
+  $to_language_code: String!
+  $to_dialect_code: String
+  $to_geo_code: String
+) {
+  translateWordsAndPhrasesByLilt(
+    from_language: {
+      language_code: $from_language_code
+      dialect_code: $from_dialect_code
+      geo_code: $from_geo_code
+    }
+    to_language: {
+      language_code: $to_language_code
+      dialect_code: $to_dialect_code
+      geo_code: $to_geo_code
+    }
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+
+mutation TranslateWordsAndPhrasesBySmartcat(
+  $from_language_code: String!
+  $from_dialect_code: String
+  $from_geo_code: String
+  $to_language_code: String!
+  $to_dialect_code: String
+  $to_geo_code: String
+) {
+  translateWordsAndPhrasesBySmartcat(
+    from_language: {
+      language_code: $from_language_code
+      dialect_code: $from_dialect_code
+      geo_code: $from_geo_code
+    }
+    to_language: {
+      language_code: $to_language_code
+      dialect_code: $to_dialect_code
+      geo_code: $to_geo_code
+    }
+  ) {
+    error
+    result {
+      requestedCharacters
       totalPhraseCount
       totalWordCount
       translatedPhraseCount
@@ -209,6 +330,37 @@ mutation TranslateAllWordsAndPhrasesByGoogle(
   $from_geo_code: String
 ) {
   translateAllWordsAndPhrasesByGoogle(
+    from_language: {
+      language_code: $from_language_code
+      dialect_code: $from_dialect_code
+      geo_code: $from_geo_code
+    }
+  ) {
+    error
+  }
+}
+
+mutation TranslateAllWordsAndPhrasesByLilt(
+  $from_language_code: String!
+  $from_dialect_code: String
+  $from_geo_code: String
+) {
+  translateAllWordsAndPhrasesByLilt(
+    from_language: {
+      language_code: $from_language_code
+      dialect_code: $from_dialect_code
+      geo_code: $from_geo_code
+    }
+  ) {
+    error
+  }
+}
+mutation TranslateAllWordsAndPhrasesBySmartcat(
+  $from_language_code: String!
+  $from_dialect_code: String
+  $from_geo_code: String
+) {
+  translateAllWordsAndPhrasesBySmartcat(
     from_language: {
       language_code: $from_language_code
       dialect_code: $from_dialect_code
@@ -349,7 +501,7 @@ mutation UpsertPhraseDefinitionFromPhraseAndDefinitionlikeString(
 
 subscription SubscribeToTranslationReport {
   TranslationReport {
-    requestedCharactors
+    requestedCharacters
     totalPhraseCount
     totalWordCount
     translatedPhraseCount

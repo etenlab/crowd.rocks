@@ -12,6 +12,7 @@ import { UserService } from '../user/user.service';
 import { WordsService } from '../words/words.service';
 import {
   Post,
+  PostCountOutput,
   PostCreateInput,
   PostCreateOutput,
   PostReadInput,
@@ -197,6 +198,38 @@ export class PostService {
     return {
       error: ErrorType.UnknownError,
       post: null,
+    };
+  }
+
+  async getTotalPosts(
+    input: PostsByParentInput,
+    req: any,
+  ): Promise<PostCountOutput> {
+    try {
+      const res = await this.pg.pool.query(
+        `
+        select
+	        count(p.post_id)
+	        from posts p
+	        where
+	          true
+	          and p.parent_table = $1
+	          and p.parent_id = $2;
+        `,
+        [input.parent_name, input.parent_id],
+      );
+      if (res.rowCount > 0) {
+        return {
+          error: ErrorType.NoError,
+          total: res.rows[0].count,
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return {
+      error: ErrorType.UnknownError,
+      total: 0,
     };
   }
 

@@ -13,10 +13,11 @@ import {
   PhraseDefinition,
 } from 'src/components/definitions/types';
 import {
-  WordToWordTranslation,
-  WordToPhraseTranslation,
-  PhraseToWordTranslation,
-  PhraseToPhraseTranslation,
+  WordToWordTranslationWithVote,
+  WordToPhraseTranslationWithVote,
+  PhraseToWordTranslationWithVote,
+  PhraseToPhraseTranslationWithVote,
+  TranslationWithVote,
 } from 'src/components/translations/types';
 
 @ObjectType()
@@ -103,56 +104,6 @@ export class SiteTextTranslationsToInput {
 }
 
 @ObjectType()
-export class SiteTextTranslationVote {
-  @Field(() => ID) site_text_translation_vote_id: string;
-  @Field(() => ID) translation_id: string;
-  @Field(() => Boolean) from_type_is_word: boolean;
-  @Field(() => Boolean) to_type_is_word: boolean;
-  @Field(() => ID) user_id: string;
-  @Field(() => Boolean) vote: boolean;
-  @Field(() => Date) last_updated_at: Date;
-}
-
-@ObjectType()
-export class SiteTextTranslationVoteOutput extends GenericOutput {
-  @Field(() => SiteTextTranslationVote, { nullable: true })
-  site_text_translation_vote: SiteTextTranslationVote | null;
-}
-
-@ObjectType()
-export class SiteTextTranslationVoteStatus {
-  @Field(() => ID) translation_id: string;
-  @Field(() => Boolean) from_type_is_word: boolean;
-  @Field(() => Boolean) to_type_is_word: boolean;
-  @Field(() => Int) upvotes: number;
-  @Field(() => Int) downvotes: number;
-}
-
-@ObjectType()
-export class SiteTextTranslationVoteStatusOutputRow extends GenericOutput {
-  @Field(() => SiteTextTranslationVoteStatus, { nullable: true })
-  vote_status: SiteTextTranslationVoteStatus | null;
-}
-
-@ObjectType()
-export class SiteTextTranslationVoteStatusOutput extends GenericOutput {
-  @Field(() => [SiteTextTranslationVoteStatus])
-  vote_status_list: SiteTextTranslationVoteStatus[];
-}
-
-@InputType()
-export class SiteTextPhraseDefinitionUpdateInput {
-  @Field(() => ID) phrase_definition_id: string;
-  @Field(() => String) definitionlike_string: string;
-}
-
-@InputType()
-export class SiteTextWordDefinitionUpdateInput {
-  @Field(() => ID) word_definition_id: string;
-  @Field(() => String) definitionlike_string: string;
-}
-
-@ObjectType()
 export class SiteTextPhraseDefinitionListOutput extends GenericOutput {
   @Field(() => [SiteTextPhraseDefinition], { nullable: 'items' })
   site_text_phrase_definition_list: SiteTextPhraseDefinition[];
@@ -208,101 +159,14 @@ export class SiteTextLanguageWithTranslationInfoListOutput extends GenericOutput
 }
 
 @ObjectType()
-export class SiteTextWordToWordTranslationWithVote extends WordToWordTranslation {
-  @Field(() => Int) upvotes: number;
-  @Field(() => Int) downvotes: number;
-}
-
-@ObjectType()
-export class SiteTextWordToPhraseTranslationWithVote extends WordToPhraseTranslation {
-  @Field(() => Int) upvotes: number;
-  @Field(() => Int) downvotes: number;
-}
-
-@ObjectType()
-export class SiteTextPhraseToWordTranslationWithVote extends PhraseToWordTranslation {
-  @Field(() => Int) upvotes: number;
-  @Field(() => Int) downvotes: number;
-}
-
-@ObjectType()
-export class SiteTextPhraseToPhraseTranslationWithVote extends PhraseToPhraseTranslation {
-  @Field(() => Int) upvotes: number;
-  @Field(() => Int) downvotes: number;
-}
-
-export const SiteTextTranslationWithVote = createUnionType({
-  name: 'SiteTextTranslationWithVote',
-  types: () =>
-    [
-      SiteTextWordToWordTranslationWithVote,
-      SiteTextWordToPhraseTranslationWithVote,
-      SiteTextPhraseToWordTranslationWithVote,
-      SiteTextPhraseToPhraseTranslationWithVote,
-    ] as const,
-  resolveType(value) {
-    if (value.word_to_word_translation_id) {
-      return SiteTextWordToWordTranslationWithVote;
-    }
-    if (value.word_to_phrase_translation_id) {
-      return SiteTextWordToPhraseTranslationWithVote;
-    }
-    if (value.phrase_to_word_translation_id) {
-      return SiteTextPhraseToWordTranslationWithVote;
-    }
-    if (value.phrase_to_phrase_translation_id) {
-      return SiteTextPhraseToPhraseTranslationWithVote;
-    }
-    return null;
-  },
-});
-
-@ObjectType()
-export class SiteTextTranslationWithVoteOutput extends GenericOutput {
-  @Field(() => SiteTextTranslationWithVote, { nullable: true })
-  site_text_translation_with_vote:
-    | SiteTextWordToWordTranslationWithVote
-    | SiteTextWordToPhraseTranslationWithVote
-    | SiteTextPhraseToWordTranslationWithVote
-    | SiteTextPhraseToPhraseTranslationWithVote
-    | null;
-}
-
-@ObjectType()
-export class SiteTextTranslationWithVoteListOutput extends GenericOutput {
-  @Field(() => [SiteTextTranslationWithVote], { nullable: 'items' })
-  site_text_translation_with_vote_list:
+export class TranslationWithVoteListByLanguage {
+  @Field(() => [TranslationWithVote], { nullable: 'items' })
+  translation_with_vote_list:
     | (
-        | SiteTextWordToWordTranslationWithVote
-        | SiteTextWordToPhraseTranslationWithVote
-        | SiteTextPhraseToWordTranslationWithVote
-        | SiteTextPhraseToPhraseTranslationWithVote
-        | null
-      )[];
-}
-
-@ObjectType()
-export class SiteTextTranslationWithVoteListFromIdsOutput extends GenericOutput {
-  @Field(() => [[SiteTextTranslationWithVote]])
-  site_text_translation_with_vote_list:
-    | (
-        | SiteTextWordToWordTranslationWithVote
-        | SiteTextWordToPhraseTranslationWithVote
-        | SiteTextPhraseToWordTranslationWithVote
-        | SiteTextPhraseToPhraseTranslationWithVote
-        | null
-      )[][];
-}
-
-@ObjectType()
-export class SiteTextTranslationWithVoteListByLanguage {
-  @Field(() => [SiteTextTranslationWithVote], { nullable: 'items' })
-  site_text_translation_with_vote_list:
-    | (
-        | SiteTextWordToWordTranslationWithVote
-        | SiteTextWordToPhraseTranslationWithVote
-        | SiteTextPhraseToWordTranslationWithVote
-        | SiteTextPhraseToPhraseTranslationWithVote
+        | WordToWordTranslationWithVote
+        | WordToPhraseTranslationWithVote
+        | PhraseToWordTranslationWithVote
+        | PhraseToPhraseTranslationWithVote
         | null
       )[];
   @Field(() => String) language_code: string;
@@ -311,15 +175,15 @@ export class SiteTextTranslationWithVoteListByLanguage {
 }
 
 @ObjectType()
-export class SiteTextTranslationWithVoteListByLanguageOutput extends GenericOutput {
-  @Field(() => SiteTextTranslationWithVoteListByLanguage)
-  site_text_translation_with_vote_list_by_language: SiteTextTranslationWithVoteListByLanguage;
+export class TranslationWithVoteListByLanguageOutput extends GenericOutput {
+  @Field(() => TranslationWithVoteListByLanguage)
+  translation_with_vote_list_by_language: TranslationWithVoteListByLanguage;
 }
 
 @ObjectType()
-export class SiteTextTranslationWithVoteListByLanguageListOutput extends GenericOutput {
-  @Field(() => [SiteTextTranslationWithVoteListByLanguage], { nullable: true })
-  site_text_translation_with_vote_list_by_language_list:
-    | SiteTextTranslationWithVoteListByLanguage[]
+export class TranslationWithVoteListByLanguageListOutput extends GenericOutput {
+  @Field(() => [TranslationWithVoteListByLanguage], { nullable: true })
+  translation_with_vote_list_by_language_list:
+    | TranslationWithVoteListByLanguage[]
     | null;
 }
