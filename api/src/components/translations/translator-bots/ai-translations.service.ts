@@ -39,6 +39,7 @@ import {
   validateTranslateByBotInput,
   getLangConnectionsObjectMapAndTexts,
 } from '../utility';
+import { DeepLTranslateService } from './deepl-translate.service';
 import { GoogleTranslateService } from './google-translate.service';
 import { LiltTranslateService } from './lilt-translate.service';
 import { SmartcatTranslateService } from './sc-translate.service';
@@ -65,6 +66,7 @@ export class AiTranslationsService {
     private gTrService: GoogleTranslateService,
     private lTrService: LiltTranslateService,
     private ScTrService: SmartcatTranslateService,
+    private DeepLTrService: DeepLTranslateService,
     private phraseToWordTrService: PhraseToWordTranslationsService,
     private phraseToPhraseTrService: PhraseToPhraseTranslationsService,
     private pg: PostgresService,
@@ -498,6 +500,18 @@ export class AiTranslationsService {
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.translateWordsAndPhrasesByBot(
       this.ScTrService,
+      from_language,
+      to_language,
+      pgClient,
+    );
+  }
+  async translateWordsAndPhrasesByDeepL(
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    return this.translateWordsAndPhrasesByBot(
+      this.DeepLTrService,
       from_language,
       to_language,
       pgClient,

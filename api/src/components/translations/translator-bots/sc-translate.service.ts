@@ -8,7 +8,7 @@ import { hash } from 'argon2';
 import { parse } from 'node-html-parser';
 import fetch from 'node-fetch';
 import { Headers } from 'node-fetch';
-import { LanguageInput2tag } from '../../../common/langUtils';
+import { languageInput2tag } from '../../../common/langUtils';
 import { ITranslator } from './types';
 import { LanguageListForBotTranslateOutput } from '../types';
 import { ErrorType } from '../../../common/types';
@@ -92,8 +92,8 @@ export class SmartcatTranslateService implements ITranslator {
   ): Promise<string[]> {
     try {
       const objForTranslation: InSmartcatObj = {
-        sourceLanguage: LanguageInput2tag(from),
-        targetLanguages: [LanguageInput2tag(to)],
+        sourceLanguage: languageInput2tag(from),
+        targetLanguages: [languageInput2tag(to)],
         isHtml: false,
         externalTag: PROJECT_TAG,
         profile: this.config.SMARTCAT_PROFILE || '',
@@ -104,7 +104,7 @@ export class SmartcatTranslateService implements ITranslator {
 
       const translatedObj = await this.smartcatTranslate(objForTranslation);
       const translatedTexts = translatedObj.translations[
-        LanguageInput2tag(to)
+        languageInput2tag(to)
       ].map((t) => t.translation);
 
       return translatedTexts;

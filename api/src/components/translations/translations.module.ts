@@ -20,6 +20,7 @@ import { WordToWordTranslationRepository } from './word-to-word-translation.repo
 import { SmartcatTranslateService } from './translator-bots/sc-translate.service';
 import { LiltTranslateService } from './translator-bots/lilt-translate.service';
 import { AiTranslationsService } from './translator-bots/ai-translations.service';
+import { DeepLTranslateService } from './translator-bots/deepl-translate.service';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { AiTranslationsService } from './translator-bots/ai-translations.service
     GoogleTranslateService,
     LiltTranslateService,
     SmartcatTranslateService,
+    DeepLTranslateService,
     TranslationsService,
     AiTranslationsService,
   ],
@@ -51,6 +53,7 @@ import { AiTranslationsService } from './translator-bots/ai-translations.service
     GoogleTranslateService,
     LiltTranslateService,
     SmartcatTranslateService,
+    DeepLTranslateService,
     TranslationsService,
     AiTranslationsService,
   ],
