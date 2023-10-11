@@ -3600,17 +3600,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node-fetch@npm:^2.6.1":
-  version: 2.6.6
-  resolution: "@types/node-fetch@npm:2.6.6"
-  dependencies:
-    "@types/node": "*"
-    form-data: ^4.0.0
-  checksum: ac66389d9d597ab91f5e5d3724e594965b9f80ae5841ab5da9f0c3bd54ceac084591cfe69b1c413f18bb7efdd97002d05bd7651d58ba0c6c10f804f4fd85e598
-  languageName: node
-  linkType: hard
-
-"@types/node-fetch@npm:^2.6.4":
+"@types/node-fetch@npm:^2.6.1, @types/node-fetch@npm:^2.6.4":
   version: 2.6.6
   resolution: "@types/node-fetch@npm:2.6.6"
   dependencies:
@@ -4321,7 +4311,7 @@ __metadata:
     nanoid: ^3.3.0
     node-fetch: 2
     node-html-parser: ^6.1.10
-    openai: ^4.11.1
+    openai: ^4.12.0
     pg: ^8.11.1
     prettier: ^2.3.2
     reflect-metadata: ^0.1.13
@@ -5387,10 +5377,6 @@ __metadata:
   version: 6.1.0
   resolution: "css-what@npm:6.1.0"
   checksum: b975e547e1e90b79625918f84e67db5d33d896e6de846c9b584094e529f0c63e2ab85ee33b9daffd05bff3a146a1916bec664e18bb76dd5f66cbff9fc13b2bbe
-"crypt@npm:0.0.2":
-  version: 0.0.2
-  resolution: "crypt@npm:0.0.2"
-  checksum: baf4c7bbe05df656ec230018af8cf7dbe8c14b36b98726939cef008d473f6fe7a4fad906cfea4062c93af516f1550a3f43ceb4d6615329612c6511378ed9fe34
   languageName: node
   linkType: hard
 
@@ -8902,9 +8888,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openai@npm:^4.11.1":
-  version: 4.11.1
-  resolution: "openai@npm:4.11.1"
+"openai@npm:^4.12.0":
+  version: 4.12.0
+  resolution: "openai@npm:4.12.0"
   dependencies:
     "@types/node": ^18.11.18
     "@types/node-fetch": ^2.6.4
@@ -8916,7 +8902,7 @@ __metadata:
     node-fetch: ^2.6.7
   bin:
     openai: bin/cli
-  checksum: b737ef7686dd533a34183e4832be367937cb7e527271fbdf90a708e24e00864e5fd28bb2fddc70fea016662212a9a432d911601904bbda1560da3d8eeaa6f6f8
+  checksum: 11fc6a6e279bbf7069ce84b0086caa66976743ba15be0ce34a2552938667a185ed8b5db53af5726972045aa9a11868e0ab4f1ba3dd39d6026e5df5081a3ccbcf
   languageName: node
   linkType: hard
 
