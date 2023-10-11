@@ -178,7 +178,13 @@ export const MapWordsListPaginated: React.FC<MapWordsTranslationProps> = () => {
           </WordsDiv>
           <div>
             {pageParams.pages.map((page) => (
-              <IonButton key={page} onClick={() => handleChangePage(page)}>
+              <IonButton
+                color={
+                  page === pageParams.currentPage ? 'secondary' : 'primary'
+                }
+                key={page}
+                onClick={() => handleChangePage(page)}
+              >
                 {page}
               </IonButton>
             ))}
