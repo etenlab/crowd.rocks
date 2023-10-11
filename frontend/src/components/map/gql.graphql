@@ -91,26 +91,32 @@ query GetOrigMapWordsAndPhrases(
   }
 }
 
-query GetSingleMapWordsAndPhrases(
-  $original_map_id: String!
+query GetOrigMapWordsAndPhrasesCount(
+  $original_map_id: String
   $lang: LanguageInput!
   $filter: String
-  $after: ID
-  $first: Int
 ) {
-  getSingleMapWordsAndPhrases(
+  getOrigMapWordsAndPhrasesCount(
     input: { lang: $lang, filter: $filter, original_map_id: $original_map_id }
-    after: $after
-    first: $first
   ) {
-    edges {
-      ...MapWordsAndPhrasesEdgeFragment
-    }
-    pageInfo {
-      startCursor
-      endCursor
-      hasNextPage
-      hasPreviousPage
+    count
+  }
+}
+
+query GetOrigMapWordsAndPhrasesPaginated(
+  $original_map_id: String
+  $lang: LanguageInput!
+  $filter: String
+  $offset: Int
+  $limit: Int
+) {
+  getOrigMapWordsAndPhrasesPaginated(
+    input: { lang: $lang, filter: $filter, original_map_id: $original_map_id }
+    offset: $offset
+    limit: $limit
+  ) {
+    mapWordsOrPhrases {
+      ...MapWordOrPhraseFragment
     }
   }
 }

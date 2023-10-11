@@ -15,6 +15,8 @@ import {
   MapWordsAndPhrasesConnection,
   MapWordOrPhraseAsOrigOutput,
   GetMapWordOrPhraseByDefinitionIdInput,
+  MapWordsAndPhrasesCountOutput,
+  OrigMapWordsAndPhrasesOutput,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
@@ -36,6 +38,7 @@ import { putLangCodesToFileName } from '../../common/utility';
 import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
 import { Readable } from 'stream';
+import { error } from 'console';
 
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
@@ -484,6 +487,52 @@ export class MapsService {
       return res;
     } catch (e) {
       Logger.error(`mapsService#getOrigMapWordsAndPhrases: ${e}`);
+    } finally {
+      dbPoolClient.release();
+    }
+  }
+
+  async getOrigMapWordsAndPhrasesCount(
+    params: GetOrigMapWordsAndPhrasesInput,
+  ): Promise<MapWordsAndPhrasesCountOutput> {
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      const res = this.mapsRepository.getOrigMapWordsAndPhrasesCount(
+        dbPoolClient,
+        params,
+      );
+      return res;
+    } catch (e) {
+      Logger.error(`mapsService#getOrigMapWordsAndPhrases: ${e}`);
+      return {
+        count: null,
+        error: ErrorType.PaginationError,
+      };
+    } finally {
+      dbPoolClient.release();
+    }
+  }
+
+  async getOrigMapWordsAndPhrasesPaginated(
+    params: GetOrigMapWordsAndPhrasesInput,
+    offset?: number | null,
+    limit?: number | null,
+  ): Promise<OrigMapWordsAndPhrasesOutput> {
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      const res = this.mapsRepository.getOrigMapWordsAndPhrasesPaginated(
+        dbPoolClient,
+        params,
+        offset,
+        limit,
+      );
+      return res;
+    } catch (e) {
+      Logger.error(`mapsService#getOrigMapWordsAndPhrases: ${e}`);
+      return {
+        error: ErrorType.PaginationError,
+        mapWordsOrPhrases: null,
+      };
     } finally {
       dbPoolClient.release();
     }

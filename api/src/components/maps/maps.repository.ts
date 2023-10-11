@@ -18,6 +18,8 @@ import {
   GetOrigMapWordsAndPhrasesInput,
   MapWordsAndPhrasesEdge,
   MapWordOrPhrase,
+  MapWordsAndPhrasesCountOutput,
+  OrigMapWordsAndPhrasesOutput,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
 
@@ -1157,6 +1159,137 @@ export class MapsRepository {
     return {
       edges,
       pageInfo,
+    };
+  }
+
+  async getOrigMapWordsAndPhrasesCount(
+    dbPoolClient: PoolClient,
+    input: GetOrigMapWordsAndPhrasesInput,
+  ): Promise<MapWordsAndPhrasesCountOutput> {
+    const filterParams: string[] = [];
+    let languagesFiltersRestrictionClause = '';
+    if (input.lang.language_code) {
+      filterParams.push(input.lang.language_code);
+      languagesFiltersRestrictionClause += ` and o_language_code =  $${filterParams.length} `;
+    }
+    if (input.lang.dialect_code) {
+      filterParams.push(input.lang.dialect_code);
+      languagesFiltersRestrictionClause += ` and o_dialect_code =  $${filterParams.length} `;
+    }
+    if (input.lang.geo_code) {
+      filterParams.push(input.lang.geo_code);
+      languagesFiltersRestrictionClause += ` and o_geo_code =  $${filterParams.length} `;
+    }
+    if (input.filter && input.filter.length > 0) {
+      filterParams.push(input.filter);
+      languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${filterParams.length}),'%')`;
+    }
+    if (input.original_map_id) {
+      filterParams.push(input.original_map_id);
+      languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;
+    }
+
+    const sqlStr = `
+      select count(distinct "cursor") count
+        from v_map_words_and_phrases
+      where true
+      ${languagesFiltersRestrictionClause}
+    `;
+
+    const resQ = await dbPoolClient.query(sqlStr, filterParams);
+
+    if (!(resQ.rows.length > 0)) {
+      return {
+        error: ErrorType.PaginationError,
+        count: null,
+      };
+    }
+    return {
+      error: ErrorType.NoError,
+      count: resQ.rows[0].count,
+    };
+  }
+
+  async getOrigMapWordsAndPhrasesPaginated(
+    dbPoolClient: PoolClient,
+    input: GetOrigMapWordsAndPhrasesInput,
+    offset,
+    limit,
+  ): Promise<OrigMapWordsAndPhrasesOutput> {
+    const filterParams: string[] = [];
+    let languagesFiltersRestrictionClause = '';
+    if (input.lang.language_code) {
+      filterParams.push(input.lang.language_code);
+      languagesFiltersRestrictionClause += ` and o_language_code =  $${filterParams.length} `;
+    }
+    if (input.lang.dialect_code) {
+      filterParams.push(input.lang.dialect_code);
+      languagesFiltersRestrictionClause += ` and o_dialect_code =  $${filterParams.length} `;
+    }
+    if (input.lang.geo_code) {
+      filterParams.push(input.lang.geo_code);
+      languagesFiltersRestrictionClause += ` and o_geo_code =  $${filterParams.length} `;
+    }
+    if (input.filter && input.filter.length > 0) {
+      filterParams.push(input.filter);
+      languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${filterParams.length}),'%')`;
+    }
+    if (input.original_map_id) {
+      filterParams.push(input.original_map_id);
+      languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;
+    }
+
+    if (offset) {
+      filterParams.push(offset);
+      languagesFiltersRestrictionClause += ` offset $${filterParams.length} `;
+    }
+    if (limit) {
+      filterParams.push(limit);
+      languagesFiltersRestrictionClause += ` limit $${filterParams.length}`;
+    }
+
+    const sqlStr = `
+      select distinct 
+        cursor,
+        type,
+        o_id,
+        o_like_string,
+        o_definition,
+        o_definition_id,
+        o_language_code,
+        o_dialect_code,
+        o_geo_code
+      from v_map_words_and_phrases
+      where true
+      ${languagesFiltersRestrictionClause}
+      
+    `;
+
+    const resQ = await dbPoolClient.query(sqlStr, filterParams);
+
+    if (!(resQ.rows.length > 0)) {
+      return {
+        error: ErrorType.PaginationError,
+        mapWordsOrPhrases: null,
+      };
+    }
+
+    const mapWordsOrPhrases: MapWordOrPhrase[] = resQ.rows.map((r) => {
+      return {
+        id: r.cursor,
+        type: r.type,
+        o_id: r.o_id,
+        o_like_string: r.o_like_string,
+        o_definition: r.o_definition,
+        o_definition_id: r.o_definition_id,
+        o_language_code: r.o_language_code,
+        o_dialect_code: r.o_dialect_code,
+        o_geo_code: r.o_geo_code,
+      };
+    });
+    return {
+      error: ErrorType.NoError,
+      mapWordsOrPhrases,
     };
   }
 

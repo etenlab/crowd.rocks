@@ -1,3 +1,5 @@
+// todo: deprecated in favor of MapWordsListPaginated. Check usability of the new one and then delete this file.
+
 import { useCallback, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { Caption } from '../../common/Caption/Caption';

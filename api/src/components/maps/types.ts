@@ -140,6 +140,16 @@ export class MapWordOrPhraseAsOrigOutput extends GenericOutput {
   @Field(() => MapWordOrPhraseAsOrig, { nullable: true })
   wordOrPhrase: WordWithDefinition | PhraseWithDefinition | null;
 }
+@ObjectType()
+export class MapWordsAndPhrasesCountOutput extends GenericOutput {
+  @Field(() => Number, { nullable: true })
+  count: number | null;
+}
+@ObjectType()
+export class OrigMapWordsAndPhrasesOutput extends GenericOutput {
+  @Field(() => [MapWordOrPhrase], { nullable: true })
+  mapWordsOrPhrases: MapWordOrPhrase[] | null;
+}
 
 @InputType()
 export class GetMapWordOrPhraseByDefinitionIdInput {
