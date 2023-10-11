@@ -1,18 +1,7 @@
-import { Injectable, Inject } from '@nestjs/common';
-import {
-  Args,
-  Query,
-  Mutation,
-  Subscription,
-  Resolver,
-  Context,
-  ID,
-} from '@nestjs/graphql';
-import { PubSub } from 'graphql-subscriptions';
+import { Injectable } from '@nestjs/common';
+import { Args, Query, Mutation, Resolver, Context, ID } from '@nestjs/graphql';
 
-import { PUB_SUB } from 'src/pubSub.module';
 import { getBearer } from 'src/common/utility';
-import { SubscriptionToken } from 'src/common/subscription-token';
 
 import { LanguageInput } from 'src/components/common/types';
 
@@ -44,11 +33,6 @@ import {
   TranslationOutput,
   ToDefinitionInput,
   TranslationWithVoteOutput,
-  LanguageListForBotTranslateOutput,
-  TranslateAllWordsAndPhrasesByBotResult,
-  TranslatedLanguageInfoInput,
-  TranslatedLanguageInfoOutput,
-  TranslateAllWordsAndPhrasesByBotOutput,
 } from './types';
 import { ErrorType, GenericOutput } from '../../common/types';
 import { AiTranslationsService } from './translator-bots/ai-translations.service';
@@ -58,14 +42,12 @@ import { Token } from 'graphql';
 @Resolver()
 export class TranslationsResolver {
   constructor(
-    @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private translationService: TranslationsService,
     private wordToWordTranslationService: WordToWordTranslationsService,
     private wordToPhraseTranslationService: WordToPhraseTranslationsService,
     private phraseToWordTranslationService: PhraseToWordTranslationsService,
     private phraseToPhraseTranslationService: PhraseToPhraseTranslationsService,
     private mapsService: MapsService,
-    private aiTranslations: AiTranslationsService,
   ) {}
 
   @Query(() => WordToWordTranslationOutput)
@@ -695,26 +677,5 @@ export class TranslationsResolver {
       });
     }
     return res;
-  }
-
-  @Mutation(() => GenericOutput)
-  async stopGoogleTranslation(): Promise<GenericOutput> {
-    console.log('stopGoogleTranslation');
-
-    return this.aiTranslations.stopBotTranslation();
-  }
-
-  @Mutation(() => GenericOutput)
-  async stopLiltTranslation(): Promise<GenericOutput> {
-    console.log('stopLiltTranslation');
-    return this.aiTranslations.stopBotTranslation();
-  }
-
-  @Subscription(() => TranslateAllWordsAndPhrasesByBotResult, {
-    name: SubscriptionToken.TranslationReport,
-  })
-  async subscribeToTranslationReport() {
-    console.log('subscribeToTranslationReport');
-    return this.pubSub.asyncIterator(SubscriptionToken.TranslationReport);
   }
 }

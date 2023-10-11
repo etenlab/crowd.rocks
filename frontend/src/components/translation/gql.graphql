@@ -212,6 +212,24 @@ query LanguagesForSmartcatTranslate {
   }
 }
 
+query LanguagesForChatGPT35Translate { languagesForChatGPT35Translate {
+    error
+    languages {
+      code
+      name
+    }
+  }
+}
+
+query LanguagesForChatGPT4Translate { languagesForChatGPT4Translate {
+    error
+    languages {
+      code
+      name
+    }
+  }
+}
+
 mutation TranslateWordsAndPhrasesByGoogle(
   $from_language_code: String!
   $from_dialect_code: String
@@ -221,6 +239,130 @@ mutation TranslateWordsAndPhrasesByGoogle(
   $to_geo_code: String
 ) {
   translateWordsAndPhrasesByGoogle(
+    from_language: {
+      language_code: $from_language_code
+      dialect_code: $from_dialect_code
+      geo_code: $from_geo_code
+    }
+    to_language: {
+      language_code: $to_language_code
+      dialect_code: $to_dialect_code
+      geo_code: $to_geo_code
+    }
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+
+mutation TranslateWordsAndPhrasesByChatGPT35(
+$from_language_code: String!
+$from_dialect_code: String
+$from_geo_code: String
+$to_language_code: String!
+$to_dialect_code: String
+$to_geo_code: String
+) {
+    translateWordsAndPhrasesByChatGPT35(
+    from_language: {
+      language_code: $from_language_code
+      dialect_code: $from_dialect_code
+      geo_code: $from_geo_code
+    }
+    to_language: {
+      language_code: $to_language_code
+      dialect_code: $to_dialect_code
+      geo_code: $to_geo_code
+    }
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+
+mutation TranslateWordsAndPhrasesByChatGPT4(
+$from_language_code: String!
+$from_dialect_code: String
+$from_geo_code: String
+$to_language_code: String!
+$to_dialect_code: String
+$to_geo_code: String
+) {
+    translateWordsAndPhrasesByChatGPT4(
+    from_language: {
+      language_code: $from_language_code
+      dialect_code: $from_dialect_code
+      geo_code: $from_geo_code
+    }
+    to_language: {
+      language_code: $to_language_code
+      dialect_code: $to_dialect_code
+      geo_code: $to_geo_code
+    }
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+} 
+
+  mutation TranslateMissingWordsAndPhrasesByChatGPT(
+$from_language_code: String!
+$from_dialect_code: String
+$from_geo_code: String
+$to_language_code: String!
+$to_dialect_code: String
+$to_geo_code: String
+) {
+    translateMissingWordsAndPhrasesByChatGpt(
+    from_language: {
+      language_code: $from_language_code
+      dialect_code: $from_dialect_code
+      geo_code: $from_geo_code
+    }
+    to_language: {
+      language_code: $to_language_code
+      dialect_code: $to_dialect_code
+      geo_code: $to_geo_code
+    }
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+
+  mutation TranslateMissingWordsAndPhrasesByChatGPT4(
+$from_language_code: String!
+$from_dialect_code: String
+$from_geo_code: String
+$to_language_code: String!
+$to_dialect_code: String
+$to_geo_code: String
+) {
+        translateMissingWordsAndPhrasesByChatGpt4(
     from_language: {
       language_code: $from_language_code
       dialect_code: $from_dialect_code

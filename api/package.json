@@ -54,12 +54,9 @@
     "jsonwebtoken": "^9.0.1",
     "language-tags": "^1.0.8",
     "nanoid": "^3.3.0",
-<<<<<<< Updated upstream
     "node-fetch": "2",
     "node-html-parser": "^6.1.10",
-=======
     "openai": "^4.11.1",
->>>>>>> Stashed changes
     "pg": "^8.11.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^5.0.1",

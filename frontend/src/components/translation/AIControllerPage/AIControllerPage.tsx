@@ -574,6 +574,45 @@ export function AIControllerPage() {
 
   const disabled = batchTranslating;
 
+  const AiMenu = [
+    {
+      handleTranslateFunc: handleTranslateG,
+      handleTranslateMissingFunc: handleTranslateMissingG,
+      botTitle: 'Google Translate',
+      languageLabel: !selectTarget
+        ? languageData?.getLanguageTranslationInfo
+            .googleTranslateTotalLangCount + ' languages'
+        : languagesGData &&
+          languagesGData!.languagesForGoogleTranslate.languages?.filter(
+            (scl) => scl.code === langInfo2tag(target || undefined),
+          ).length + ' languages',
+    },
+    {
+      handleTranslateFunc: handleTranslateL,
+      handleTranslateMissingFunc: null,
+      botTitle: 'Lilt',
+      languageLabel: !selectTarget
+        ? languageData?.getLanguageTranslationInfo.liltTranslateTotalLangCount +
+          ' languages'
+        : languagesLData &&
+          languagesLData!.languagesForLiltTranslate.languages?.filter(
+            (scl) => scl.code === langInfo2tag(target || undefined),
+          ).length + ' languages',
+    },
+    {
+      handleTranslateFunc: handleTranslateSC,
+      handleTranslateMissingFunc: null,
+      botTitle: 'Smartcat',
+      languageLabel: !selectTarget
+        ? languageData?.getLanguageTranslationInfo
+            .smartcatTranslateTotalLangCount + ' languages'
+        : languagesScData &&
+          languagesScData!.languagesForSmartcatTranslate.languages?.filter(
+            (scl) => scl.code === langInfo2tag(target || undefined),
+          ).length + ' languages',
+    },
+  ];
+
   return (
     <PageLayout>
       <CaptionContainer>
@@ -644,79 +683,31 @@ export function AIControllerPage() {
       </FilterContainer>
       <br />
 
-      <AIContainer>
-        <div style={{ display: 'flex' }}>
-          <IonTitle>Google Translate</IonTitle>
-          <IonLabel>
-            {!selectTarget
-              ? languageData?.getLanguageTranslationInfo
-                  .googleTranslateTotalLangCount + ' languages'
-              : languagesGData &&
-                languagesGData!.languagesForGoogleTranslate.languages?.filter(
-                  (scl) => scl.code === langInfo2tag(target || undefined),
-                ).length + ' languages'}
-          </IonLabel>
-        </div>
+      {AiMenu.map((item) => (
+        <AIContainer key={item.botTitle}>
+          <div style={{ display: 'flex' }}>
+            <IonTitle>{item.botTitle}</IonTitle>
+            <IonLabel>{item.languageLabel}</IonLabel>
+          </div>
 
-        <AIActionsContainer>
-          <IonButton onClick={handleTranslateG} disabled={disabled}>
-            {tr('Translate All')}
-          </IonButton>
-          <IonButton onClick={handleTranslateMissingG} disabled={disabled}>
-            {tr('Translate Missing')}
-          </IonButton>
-
-          {/* <IonButton
-            color="warning"
-            onClick={handleTranslateAll}
-            disabled={disabled}
-          >
-            {tr('Translate All Words and Phrases')}
-          </IonButton> */}
-        </AIActionsContainer>
-      </AIContainer>
-
-      <AIContainer>
-        <div style={{ display: 'flex' }}>
-          <IonTitle>Lilt</IonTitle>
-          <IonLabel>
-            {!selectTarget
-              ? languageData?.getLanguageTranslationInfo
-                  .liltTranslateTotalLangCount + ' languages'
-              : languagesLData &&
-                languagesLData!.languagesForLiltTranslate.languages?.filter(
-                  (scl) => scl.code === langInfo2tag(target || undefined),
-                ).length + ' languages'}
-          </IonLabel>
-        </div>
-
-        <AIActionsContainer>
-          <IonButton onClick={handleTranslateL} disabled={disabled}>
-            {tr('Translate All')}
-          </IonButton>
-        </AIActionsContainer>
-      </AIContainer>
-
-      <AIContainer>
-        <div style={{ display: 'flex' }}>
-          <IonTitle>Smartcat</IonTitle>
-          <IonLabel>
-            {!selectTarget
-              ? languageData?.getLanguageTranslationInfo
-                  .smartcatTranslateTotalLangCount + ' languages'
-              : languagesScData &&
-                languagesScData!.languagesForSmartcatTranslate.languages?.filter(
-                  (scl) => scl.code === langInfo2tag(target || undefined),
-                ).length + ' languages'}
-          </IonLabel>
-        </div>
-
-        <AIActionsContainer>
-          <IonButton onClick={handleTranslateSC} disabled={disabled}>
-            {tr('Translate All')}
-          </IonButton>
-        </AIActionsContainer>
-      </AIContainer>
+          <AIActionsContainer>
+            <IonButton
+              onClick={() => item.handleTranslateFunc()}
+              disabled={disabled}
+            >
+              {tr('Translate All')}
+            </IonButton>
+            {item.handleTranslateMissingFunc && (
+              <IonButton
+                onClick={() => item.handleTranslateMissingFunc()}
+                disabled={disabled}
+              >
+                {tr('Translate Missing')}
+              </IonButton>
+            )}
+          </AIActionsContainer>
+        </AIContainer>
+      ))}
 
       {loadingCom}
 

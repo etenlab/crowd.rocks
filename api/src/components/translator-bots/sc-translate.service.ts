@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
-import { LanguageInput } from '../../common/types';
+import { LanguageInput } from '../common/types';
 import { ConfigService } from 'src/core/config.service';
-import { PostgresService } from '../../../core/postgres.service';
-import { createToken } from '../../../common/utility';
+import { PostgresService } from '../../core/postgres.service';
+import { createToken } from '../../common/utility';
 import { hash } from 'argon2';
 import { parse } from 'node-html-parser';
 import fetch from 'node-fetch';
-import { LanguageInput2tag } from '../../../common/langUtils';
-import { ITranslator } from './types';
-import { LanguageListForBotTranslateOutput } from '../types';
-import { ErrorType } from '../../../common/types';
+import { LanguageInput2tag } from '../../common/langUtils';
+import { ITranslator, LanguageListForBotTranslateOutput } from './types';
+import { ErrorType } from '../../common/types';
 
 const LIMIT_WORDS = 20; // for debugging purposes, not to exhaust free limit too quickly/
 const SMARTCAT_BOT_EMAIL = 'liltbot@crowd.rocks';
@@ -119,7 +118,7 @@ export class SmartcatTranslateService implements ITranslator {
     }
   }
 
-  async getTranslatorToken(): Promise<{ id: string; token: string }> {
+  getTranslatorToken = async (): Promise<{ id: string; token: string }> => {
     // // check if token for liltbot exists
     const tokenRes = await this.pg.pool.query(
       `select t.token, u.user_id
@@ -154,5 +153,5 @@ export class SmartcatTranslateService implements ITranslator {
       token = res.rows[0].token;
     }
     return { id, token };
-  }
+  };
 }

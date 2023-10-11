@@ -2,20 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { v2 } from '@google-cloud/translate';
 import { convert } from 'html-to-text';
 
-import { LanguageInput } from '../../common/types';
+import { LanguageInput } from '../common/types';
 
 import { ConfigService } from 'src/core/config.service';
-import {
-  createToken,
-  substituteN,
-  unSubstituteN,
-} from '../../../common/utility';
-import { PostgresService } from '../../../core/postgres.service';
-import { delay } from '../utility';
+import { createToken, substituteN, unSubstituteN } from '../../common/utility';
+import { PostgresService } from '../../core/postgres.service';
 import { hash } from 'argon2';
-import { GOOGLE_BOT_EMAIL, ITranslator, LIMITS } from './types';
-import { LanguageListForBotTranslateOutput } from '../types';
-import { ErrorType } from '../../../common/types';
+import {
+  GOOGLE_BOT_EMAIL,
+  ITranslator,
+  LanguageListForBotTranslateOutput,
+  LIMITS,
+} from './types';
+import { ErrorType } from '../../common/types';
+import { delay } from './utility';
 
 @Injectable()
 export class GoogleTranslateService implements ITranslator {
@@ -139,7 +139,7 @@ export class GoogleTranslateService implements ITranslator {
     }
   }
 
-  async getTranslatorToken(): Promise<{ id: string; token: string }> {
+  getTranslatorToken = async (): Promise<{ id: string; token: string }> => {
     // // check if token for googlebot exists
     const tokenRes = await this.pg.pool.query(
       `select t.token, u.user_id
@@ -172,5 +172,5 @@ export class GoogleTranslateService implements ITranslator {
       );
     }
     return { id: gid, token };
-  }
+  };
 }
