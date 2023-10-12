@@ -23,6 +23,7 @@ services:
       CR_DB: crowdrocks
       ADMIN_PASSWORD: asdfasdf
       MODE: DEV
+      OPENAI_API_KEY: asdf
     ports:
       - 3000:3000
     depends_on:
