@@ -18,12 +18,12 @@ import { SourceLanguageCode, TargetLanguageCode } from 'deepl-node';
 const LIMIT_WORDS = 20; // for debugging purposes, not to exhaust free limit too quickly/
 const DEEPL_BOT_EMAIL = 'deeplbot@crowd.rocks';
 
-const authKey = '31ad65ea-4c61-543a-60b3-6e4c0319ba3c:fx'; // Replace with your key
-const translator = new deepl.Translator(authKey);
-
 @Injectable()
 export class DeepLTranslateService implements ITranslator {
-  constructor(private config: ConfigService, private pg: PostgresService) {}
+  private deepLTranslator;
+  constructor(private config: ConfigService, private pg: PostgresService) {
+    this.deepLTranslator = new deepl.Translator(config.DEEPL_KEY);
+  }
 
   async translate(
     texts: string[],
@@ -35,7 +35,7 @@ export class DeepLTranslateService implements ITranslator {
       const targetLangTag = languageInput2tag(to);
       const wordsCountRequested = texts.length;
       if (
-        (await translator.getSourceLanguages()).findIndex(
+        (await this.deepLTranslator.getSourceLanguages()).findIndex(
           (sl) => sl.code === sourceLangTag,
         ) === -1
       ) {
@@ -45,7 +45,7 @@ export class DeepLTranslateService implements ITranslator {
       }
 
       if (
-        (await translator.getTargetLanguages()).findIndex(
+        (await this.deepLTranslator.getTargetLanguages()).findIndex(
           (sl) => sl.code === targetLangTag,
         ) === -1
       ) {
@@ -55,7 +55,7 @@ export class DeepLTranslateService implements ITranslator {
       }
 
       const textsForTranslate = texts.splice(0, LIMIT_WORDS);
-      const translated = await translator.translateText(
+      const translated = await this.deepLTranslator.translateText(
         textsForTranslate,
         sourceLangTag as SourceLanguageCode,
         targetLangTag as TargetLanguageCode,
@@ -75,7 +75,7 @@ export class DeepLTranslateService implements ITranslator {
 
   async getLanguages(): Promise<LanguageListForBotTranslateOutput> {
     try {
-      const deepLLangs = await translator.getTargetLanguages();
+      const deepLLangs = await this.deepLTranslator.getTargetLanguages();
       const languages: LanguageForBotTranslate[] = deepLLangs.map((dl) => {
         return {
           code: dl.code,
