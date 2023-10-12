@@ -40,7 +40,6 @@ export class BotsResolver {
     return this.aiTranslations.languagesForBotTranslate(botType);
   }
 
-
   @Query(() => TranslatedLanguageInfoOutput)
   async getLanguageTranslationInfo(
     @Args('input')
@@ -151,6 +150,28 @@ export class BotsResolver {
   }
 
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
+  async translateWordsAndPhrasesByDeepL(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    console.log(
+      'translateWordsAndPhrasesByDeepl',
+      JSON.stringify({
+        from_language,
+        to_language,
+      }),
+    );
+
+    return this.aiTranslations.translateWordsAndPhrasesByDeepL(
+      from_language,
+      to_language,
+      null,
+    );
+  }
+
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateMissingWordsAndPhrasesByGoogle(
     @Args('from_language', { type: () => LanguageInput })
     from_language: LanguageInput,
@@ -169,6 +190,26 @@ export class BotsResolver {
     return this.aiTranslations.translateMissingWordsAndPhrasesByGoogle(
       from_language,
       to_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @Mutation(() => GenericOutput)
+  async translateAllWordsAndPhrasesByDeepL(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<GenericOutput> {
+    console.log(
+      'translateAllWordsAndPhrasesByDeepL',
+      JSON.stringify({
+        from_language,
+      }),
+    );
+
+    return this.aiTranslations.translateAllWordsAndPhrasesByDeepL(
+      from_language,
       getBearer(req) || '',
       null,
     );
@@ -263,15 +304,8 @@ export class BotsResolver {
   }
 
   @Mutation(() => GenericOutput)
-  async stopGoogleTranslation(): Promise<GenericOutput> {
-    console.log('stopGoogleTranslation');
-
-    return this.aiTranslations.stopBotTranslation();
-  }
-
-  @Mutation(() => GenericOutput)
-  async stopLiltTranslation(): Promise<GenericOutput> {
-    console.log('stopLiltTranslation');
+  async stopBotTranslation(): Promise<GenericOutput> {
+    console.log('stopBotTranslation');
     return this.aiTranslations.stopBotTranslation();
   }
 

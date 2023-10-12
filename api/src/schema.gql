@@ -43,6 +43,8 @@ type AvatarUpdateOutput {
 
 enum BotType {
   DeepL
+  GPT4
+  GPT35
   Google
   Lilt
   Smartcat
@@ -591,7 +593,6 @@ type Mutation {
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextDefinitionOutput!
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
   stopBotTranslation: GenericOutput!
-  stopLiltTranslation: GenericOutput!
   threadDelete(input: ThreadDeleteInput!): ThreadDeleteOutput!
   threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
@@ -609,7 +610,10 @@ type Mutation {
   translateAllWordsAndPhrasesByGoogle(from_language: LanguageInput!): GenericOutput!
   translateAllWordsAndPhrasesByLilt(from_language: LanguageInput!): GenericOutput!
   translateAllWordsAndPhrasesBySmartcat(from_language: LanguageInput!): GenericOutput!
+  translateMissingWordsAndPhrasesByChatGpt(from_language: LanguageInput!, to_language: LanguageInput!, version: String!): TranslateAllWordsAndPhrasesByBotOutput!
   translateMissingWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateWordsAndPhrasesByChatGPT4(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateWordsAndPhrasesByChatGPT35(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByDeepL(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByLilt(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!

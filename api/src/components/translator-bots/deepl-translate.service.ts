@@ -6,11 +6,11 @@ import { PostgresService } from '../../core/postgres.service';
 import { createToken } from '../../common/utility';
 import { hash } from 'argon2';
 import { languageInput2tag } from '../../common/langUtils';
-import { ITranslator } from './types';
 import {
+  ITranslator,
   LanguageForBotTranslate,
   LanguageListForBotTranslateOutput,
-} from '../translations/types';
+} from './types';
 import { ErrorType } from '../../common/types';
 import * as deepl from 'deepl-node';
 import { SourceLanguageCode, TargetLanguageCode } from 'deepl-node';

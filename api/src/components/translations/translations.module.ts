@@ -13,14 +13,9 @@ import { WordToWordTranslationsService } from './word-to-word-translations.servi
 import { WordToPhraseTranslationsService } from './word-to-phrase-translations.service';
 import { PhraseToPhraseTranslationsService } from './phrase-to-phrase-translations.service';
 import { PhraseToWordTranslationsService } from './phrase-to-word-translations.service';
-import { TranslationsService } from './translations.service';
-import { GoogleTranslateService } from './translator-bots/google-translate.service';
 
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
-import { SmartcatTranslateService } from './translator-bots/sc-translate.service';
-import { LiltTranslateService } from './translator-bots/lilt-translate.service';
-import { AiTranslationsService } from './translator-bots/ai-translations.service';
-import { DeepLTranslateService } from './translator-bots/deepl-translate.service';
+import { TranslationsService } from './translations.service';
 
 @Module({
   imports: [
@@ -33,29 +28,20 @@ import { DeepLTranslateService } from './translator-bots/deepl-translate.service
   ],
   providers: [
     TranslationsResolver,
+    TranslationsService,
     WordToWordTranslationRepository,
     WordToWordTranslationsService,
     WordToPhraseTranslationsService,
     PhraseToWordTranslationsService,
     PhraseToPhraseTranslationsService,
-    GoogleTranslateService,
-    LiltTranslateService,
-    SmartcatTranslateService,
-    DeepLTranslateService,
-    TranslationsService,
-    AiTranslationsService,
   ],
   exports: [
+    TranslationsService,
     WordToWordTranslationsService,
     WordToPhraseTranslationsService,
     PhraseToWordTranslationsService,
     PhraseToPhraseTranslationsService,
-    GoogleTranslateService,
-    LiltTranslateService,
-    SmartcatTranslateService,
-    DeepLTranslateService,
-    TranslationsService,
-    AiTranslationsService,
+    WordToWordTranslationRepository,
   ],
 })
 export class TranslationsModule {}

@@ -10,6 +10,8 @@ export enum BotType {
   Lilt = 'Lilt',
   Smartcat = 'Smartcat',
   DeepL = 'DeepL',
+  GPT35 = 'GPT35',
+  GPT4 = 'GPT4',
 }
 
 export enum ErrorType {

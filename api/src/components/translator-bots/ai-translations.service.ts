@@ -625,6 +625,19 @@ export class AiTranslationsService {
     });
   }
 
+  async translateAllWordsAndPhrasesByDeepL(
+    from_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<GenericOutput> {
+    return this.translateWordsAndPhrasesToAllLangsByBot({
+      translateWordsAndPhrases: this.translateWordsAndPhrasesByDeepL,
+      translator: this.DeepLTrService,
+      from_language,
+      pgClient,
+    });
+  }
+
   async translateWordsAndPhrasesToAllLangsBySmartcat(
     from_language: LanguageInput,
     token: string,
