@@ -463,7 +463,7 @@ export class LanguageListForBotTranslateOutput extends GenericOutput {
 
 @InputType()
 export class LanguageListForBotTranslateInput {
-  @Field(() => String) botType: BotType;
+  @Field(() => BotType) botType: BotType;
 }
 
 @InputType()
@@ -483,6 +483,7 @@ export class TranslatedLanguageInfoOutput extends GenericOutput {
   @Field(() => Int) googleTranslateTotalLangCount: number;
   @Field(() => Int) liltTranslateTotalLangCount: number;
   @Field(() => Int) smartcatTranslateTotalLangCount: number;
+  @Field(() => Int) deeplTranslateTotalLangCount: number;
 }
 
 @ObjectType()

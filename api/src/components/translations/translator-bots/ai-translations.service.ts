@@ -4,7 +4,7 @@ import { PoolClient } from 'pg';
 import { Subject } from 'rxjs';
 import { langInfo2String, subTags2LangInfo } from 'src/common/langUtils';
 import { SubscriptionToken } from 'src/common/subscription-token';
-import { ErrorType, GenericOutput } from 'src/common/types';
+import { BotType, ErrorType, GenericOutput } from 'src/common/types';
 import { pgClientOrPool } from 'src/common/utility';
 import { LanguageInput } from 'src/components/common/types';
 import { PhrasesService } from 'src/components/phrases/phrases.service';
@@ -74,6 +74,7 @@ export class AiTranslationsService {
   ) {
     this.translationSubject = new Subject<number>();
   }
+
   async getTranslationLanguageInfo(
     input: TranslatedLanguageInfoInput,
     pgClient: PoolClient | null,
@@ -151,6 +152,8 @@ export class AiTranslationsService {
       (await this.lTrService.getLanguages()).languages?.length || 0;
     const smartcatTranslateTotalLangCount =
       (await this.ScTrService.getLanguages()).languages?.length || 0;
+    const deeplTranslateTotalLangCount =
+      (await this.DeepLTrService.getLanguages()).languages?.length || 0;
 
     return {
       error: ErrorType.NoError, // later
@@ -161,6 +164,7 @@ export class AiTranslationsService {
       googleTranslateTotalLangCount,
       liltTranslateTotalLangCount,
       smartcatTranslateTotalLangCount,
+      deeplTranslateTotalLangCount,
     };
   }
 
@@ -552,7 +556,7 @@ export class AiTranslationsService {
         to_language,
       );
 
-      const requestedCharactors = originalTexts.join('\n').length;
+      // const requestedCharacters = originalTexts.join('\n').length;
 
       let translatedWordCount = 0;
       let translatedPhraseCount = 0;
@@ -662,7 +666,7 @@ export class AiTranslationsService {
       return {
         error,
         result: {
-          requestedCharacters: requestedCharactors,
+          requestedCharacters: originalTexts.length,
           totalWordCount: wordsConnection.edges.length,
           totalPhraseCount: phrasesConnection.edges.length,
           translatedWordCount,
@@ -700,6 +704,19 @@ export class AiTranslationsService {
     return this.translateAllWordsAndPhrasesByBot({
       translateWordsAndPhrases: this.translateWordsAndPhrasesBySmartcat,
       translator: this.ScTrService,
+      from_language,
+      pgClient,
+    });
+  }
+
+  async translateAllWordsAndPhrasesByDeepL(
+    from_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<GenericOutput> {
+    return this.translateAllWordsAndPhrasesByBot({
+      translateWordsAndPhrases: this.translateWordsAndPhrasesByDeepL,
+      translator: this.DeepLTrService,
       from_language,
       pgClient,
     });
@@ -871,16 +888,21 @@ export class AiTranslationsService {
     };
   }
 
-  async languagesForGoogleTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    return this.gTrService.getLanguages();
-  }
-
-  async languagesForLiltTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    return this.lTrService.getLanguages();
-  }
-
-  async languagesForSmartcatTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    return this.ScTrService.getLanguages();
+  async languagesForBotTranslate(
+    botType: BotType,
+  ): Promise<LanguageListForBotTranslateOutput> {
+    switch (botType) {
+      case BotType.Google:
+        return this.gTrService.getLanguages();
+      case BotType.Lilt:
+        return this.lTrService.getLanguages();
+      case BotType.Smartcat:
+        return this.ScTrService.getLanguages();
+      case BotType.DeepL:
+        return this.DeepLTrService.getLanguages();
+      default:
+        throw new Error(ErrorType.BotTranslationBotNotFound);
+    }
   }
 
   async getTranslationLanguage(

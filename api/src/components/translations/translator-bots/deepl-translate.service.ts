@@ -33,6 +33,7 @@ export class DeepLTranslateService implements ITranslator {
     try {
       const sourceLangTag = languageInput2tag(from);
       const targetLangTag = languageInput2tag(to);
+      const wordsCountRequested = texts.length;
       if (
         (await translator.getSourceLanguages()).findIndex(
           (sl) => sl.code === sourceLangTag,
@@ -59,8 +60,11 @@ export class DeepLTranslateService implements ITranslator {
         sourceLangTag as SourceLanguageCode,
         targetLangTag as TargetLanguageCode,
       );
-
       const translatedTexts = translated.map((t) => t.text);
+      //fill the rest with ''
+      for (let i = 0; i < wordsCountRequested - translated.length; i++) {
+        translatedTexts.push('');
+      }
 
       return translatedTexts;
     } catch (err) {

@@ -9,6 +9,7 @@ export enum BotType {
   Google = 'Google',
   Lilt = 'Lilt',
   Smartcat = 'Smartcat',
+  DeepL = 'DeepL',
 }
 
 export enum ErrorType {
@@ -163,6 +164,10 @@ export enum TableNameType {
 
 registerEnumType(TableNameType, {
   name: 'TableNameType',
+});
+
+registerEnumType(BotType, {
+  name: 'BotType',
 });
 
 export interface ITagInfo {
