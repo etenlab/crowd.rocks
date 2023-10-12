@@ -538,18 +538,19 @@ export class AiTranslationsService {
     );
   };
 
-  async translateWordsAndPhrasesByLilt(
+  translateWordsAndPhrasesByLilt = (
     from_language: LanguageInput,
     to_language: LanguageInput,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     return this.translateWordsAndPhrasesByBot(
       this.lTrService,
       from_language,
       to_language,
       pgClient,
+      undefined,
     );
-  }
+  };
 
   async translateWordsAndPhrasesBySmartcat(
     from_language: LanguageInput,
