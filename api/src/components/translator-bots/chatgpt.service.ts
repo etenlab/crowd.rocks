@@ -12,7 +12,7 @@ import { PostgresService } from 'src/core/postgres.service';
 import { ConfigService } from 'src/core/config.service';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  // apiKey: process.env.OPENAI_API_KEY,// defaults to process.env["OPENAI_API_KEY"]
 });
 
 const CHAT_GPT_3_EMAIL = 'chatgpt-3@crowd.rocks';
