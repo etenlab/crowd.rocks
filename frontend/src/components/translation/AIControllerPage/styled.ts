@@ -41,4 +41,5 @@ export const AIActionsContainer = styled.div`
 
 export const AIContainer = styled.div`
   margin-top: 20px;
+  margin-bottom: 20px;
 `;

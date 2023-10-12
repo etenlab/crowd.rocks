@@ -66,6 +66,8 @@ export type AvatarUpdateOutput = {
 
 export enum BotType {
   DeepL = 'DeepL',
+  Gpt4 = 'GPT4',
+  Gpt35 = 'GPT35',
   Google = 'Google',
   Lilt = 'Lilt',
   Smartcat = 'Smartcat'
@@ -657,7 +659,6 @@ export type Mutation = {
   siteTextUpsert: SiteTextDefinitionOutput;
   siteTextWordDefinitionUpsert: SiteTextWordDefinitionOutput;
   stopBotTranslation: GenericOutput;
-  stopLiltTranslation: GenericOutput;
   threadDelete: ThreadDeleteOutput;
   threadUpsert: ThreadUpsertOutput;
   toggleFlagWithRef: FlagsOutput;
@@ -675,7 +676,10 @@ export type Mutation = {
   translateAllWordsAndPhrasesByGoogle: GenericOutput;
   translateAllWordsAndPhrasesByLilt: GenericOutput;
   translateAllWordsAndPhrasesBySmartcat: GenericOutput;
+  translateMissingWordsAndPhrasesByChatGpt: TranslateAllWordsAndPhrasesByBotOutput;
   translateMissingWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByBotOutput;
+  translateWordsAndPhrasesByChatGPT4: TranslateAllWordsAndPhrasesByBotOutput;
+  translateWordsAndPhrasesByChatGPT35: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByDeepL: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByLilt: TranslateAllWordsAndPhrasesByBotOutput;
@@ -951,7 +955,26 @@ export type MutationTranslateAllWordsAndPhrasesBySmartcatArgs = {
 };
 
 
+export type MutationTranslateMissingWordsAndPhrasesByChatGptArgs = {
+  from_language: LanguageInput;
+  to_language: LanguageInput;
+  version: Scalars['String']['input'];
+};
+
+
 export type MutationTranslateMissingWordsAndPhrasesByGoogleArgs = {
+  from_language: LanguageInput;
+  to_language: LanguageInput;
+};
+
+
+export type MutationTranslateWordsAndPhrasesByChatGpt4Args = {
+  from_language: LanguageInput;
+  to_language: LanguageInput;
+};
+
+
+export type MutationTranslateWordsAndPhrasesByChatGpt35Args = {
   from_language: LanguageInput;
   to_language: LanguageInput;
 };
@@ -3552,6 +3575,43 @@ export type TranslateWordsAndPhrasesByGoogleMutationVariables = Exact<{
 
 
 export type TranslateWordsAndPhrasesByGoogleMutation = { __typename?: 'Mutation', translateWordsAndPhrasesByGoogle: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
+
+export type TranslateWordsAndPhrasesByChatGpt35MutationVariables = Exact<{
+  from_language_code: Scalars['String']['input'];
+  from_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  from_geo_code?: InputMaybe<Scalars['String']['input']>;
+  to_language_code: Scalars['String']['input'];
+  to_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  to_geo_code?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type TranslateWordsAndPhrasesByChatGpt35Mutation = { __typename?: 'Mutation', translateWordsAndPhrasesByChatGPT35: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
+
+export type TranslateWordsAndPhrasesByChatGpt4MutationVariables = Exact<{
+  from_language_code: Scalars['String']['input'];
+  from_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  from_geo_code?: InputMaybe<Scalars['String']['input']>;
+  to_language_code: Scalars['String']['input'];
+  to_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  to_geo_code?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type TranslateWordsAndPhrasesByChatGpt4Mutation = { __typename?: 'Mutation', translateWordsAndPhrasesByChatGPT4: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
+
+export type TranslateMissingWordsAndPhrasesByChatGptMutationVariables = Exact<{
+  from_language_code: Scalars['String']['input'];
+  from_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  from_geo_code?: InputMaybe<Scalars['String']['input']>;
+  to_language_code: Scalars['String']['input'];
+  to_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  to_geo_code?: InputMaybe<Scalars['String']['input']>;
+  version: Scalars['String']['input'];
+}>;
+
+
+export type TranslateMissingWordsAndPhrasesByChatGptMutation = { __typename?: 'Mutation', translateMissingWordsAndPhrasesByChatGpt: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
 
 export type TranslateMissingWordsAndPhrasesByGoogleMutationVariables = Exact<{
   from_language_code: Scalars['String']['input'];
@@ -8026,6 +8086,152 @@ export function useTranslateWordsAndPhrasesByGoogleMutation(baseOptions?: Apollo
 export type TranslateWordsAndPhrasesByGoogleMutationHookResult = ReturnType<typeof useTranslateWordsAndPhrasesByGoogleMutation>;
 export type TranslateWordsAndPhrasesByGoogleMutationResult = Apollo.MutationResult<TranslateWordsAndPhrasesByGoogleMutation>;
 export type TranslateWordsAndPhrasesByGoogleMutationOptions = Apollo.BaseMutationOptions<TranslateWordsAndPhrasesByGoogleMutation, TranslateWordsAndPhrasesByGoogleMutationVariables>;
+export const TranslateWordsAndPhrasesByChatGpt35Document = gql`
+    mutation TranslateWordsAndPhrasesByChatGPT35($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String, $to_language_code: String!, $to_dialect_code: String, $to_geo_code: String) {
+  translateWordsAndPhrasesByChatGPT35(
+    from_language: {language_code: $from_language_code, dialect_code: $from_dialect_code, geo_code: $from_geo_code}
+    to_language: {language_code: $to_language_code, dialect_code: $to_dialect_code, geo_code: $to_geo_code}
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+    `;
+export type TranslateWordsAndPhrasesByChatGpt35MutationFn = Apollo.MutationFunction<TranslateWordsAndPhrasesByChatGpt35Mutation, TranslateWordsAndPhrasesByChatGpt35MutationVariables>;
+
+/**
+ * __useTranslateWordsAndPhrasesByChatGpt35Mutation__
+ *
+ * To run a mutation, you first call `useTranslateWordsAndPhrasesByChatGpt35Mutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTranslateWordsAndPhrasesByChatGpt35Mutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [translateWordsAndPhrasesByChatGpt35Mutation, { data, loading, error }] = useTranslateWordsAndPhrasesByChatGpt35Mutation({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      from_dialect_code: // value for 'from_dialect_code'
+ *      from_geo_code: // value for 'from_geo_code'
+ *      to_language_code: // value for 'to_language_code'
+ *      to_dialect_code: // value for 'to_dialect_code'
+ *      to_geo_code: // value for 'to_geo_code'
+ *   },
+ * });
+ */
+export function useTranslateWordsAndPhrasesByChatGpt35Mutation(baseOptions?: Apollo.MutationHookOptions<TranslateWordsAndPhrasesByChatGpt35Mutation, TranslateWordsAndPhrasesByChatGpt35MutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TranslateWordsAndPhrasesByChatGpt35Mutation, TranslateWordsAndPhrasesByChatGpt35MutationVariables>(TranslateWordsAndPhrasesByChatGpt35Document, options);
+      }
+export type TranslateWordsAndPhrasesByChatGpt35MutationHookResult = ReturnType<typeof useTranslateWordsAndPhrasesByChatGpt35Mutation>;
+export type TranslateWordsAndPhrasesByChatGpt35MutationResult = Apollo.MutationResult<TranslateWordsAndPhrasesByChatGpt35Mutation>;
+export type TranslateWordsAndPhrasesByChatGpt35MutationOptions = Apollo.BaseMutationOptions<TranslateWordsAndPhrasesByChatGpt35Mutation, TranslateWordsAndPhrasesByChatGpt35MutationVariables>;
+export const TranslateWordsAndPhrasesByChatGpt4Document = gql`
+    mutation TranslateWordsAndPhrasesByChatGPT4($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String, $to_language_code: String!, $to_dialect_code: String, $to_geo_code: String) {
+  translateWordsAndPhrasesByChatGPT4(
+    from_language: {language_code: $from_language_code, dialect_code: $from_dialect_code, geo_code: $from_geo_code}
+    to_language: {language_code: $to_language_code, dialect_code: $to_dialect_code, geo_code: $to_geo_code}
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+    `;
+export type TranslateWordsAndPhrasesByChatGpt4MutationFn = Apollo.MutationFunction<TranslateWordsAndPhrasesByChatGpt4Mutation, TranslateWordsAndPhrasesByChatGpt4MutationVariables>;
+
+/**
+ * __useTranslateWordsAndPhrasesByChatGpt4Mutation__
+ *
+ * To run a mutation, you first call `useTranslateWordsAndPhrasesByChatGpt4Mutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTranslateWordsAndPhrasesByChatGpt4Mutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [translateWordsAndPhrasesByChatGpt4Mutation, { data, loading, error }] = useTranslateWordsAndPhrasesByChatGpt4Mutation({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      from_dialect_code: // value for 'from_dialect_code'
+ *      from_geo_code: // value for 'from_geo_code'
+ *      to_language_code: // value for 'to_language_code'
+ *      to_dialect_code: // value for 'to_dialect_code'
+ *      to_geo_code: // value for 'to_geo_code'
+ *   },
+ * });
+ */
+export function useTranslateWordsAndPhrasesByChatGpt4Mutation(baseOptions?: Apollo.MutationHookOptions<TranslateWordsAndPhrasesByChatGpt4Mutation, TranslateWordsAndPhrasesByChatGpt4MutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TranslateWordsAndPhrasesByChatGpt4Mutation, TranslateWordsAndPhrasesByChatGpt4MutationVariables>(TranslateWordsAndPhrasesByChatGpt4Document, options);
+      }
+export type TranslateWordsAndPhrasesByChatGpt4MutationHookResult = ReturnType<typeof useTranslateWordsAndPhrasesByChatGpt4Mutation>;
+export type TranslateWordsAndPhrasesByChatGpt4MutationResult = Apollo.MutationResult<TranslateWordsAndPhrasesByChatGpt4Mutation>;
+export type TranslateWordsAndPhrasesByChatGpt4MutationOptions = Apollo.BaseMutationOptions<TranslateWordsAndPhrasesByChatGpt4Mutation, TranslateWordsAndPhrasesByChatGpt4MutationVariables>;
+export const TranslateMissingWordsAndPhrasesByChatGptDocument = gql`
+    mutation TranslateMissingWordsAndPhrasesByChatGPT($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String, $to_language_code: String!, $to_dialect_code: String, $to_geo_code: String, $version: String!) {
+  translateMissingWordsAndPhrasesByChatGpt(
+    version: $version
+    from_language: {language_code: $from_language_code, dialect_code: $from_dialect_code, geo_code: $from_geo_code}
+    to_language: {language_code: $to_language_code, dialect_code: $to_dialect_code, geo_code: $to_geo_code}
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+    `;
+export type TranslateMissingWordsAndPhrasesByChatGptMutationFn = Apollo.MutationFunction<TranslateMissingWordsAndPhrasesByChatGptMutation, TranslateMissingWordsAndPhrasesByChatGptMutationVariables>;
+
+/**
+ * __useTranslateMissingWordsAndPhrasesByChatGptMutation__
+ *
+ * To run a mutation, you first call `useTranslateMissingWordsAndPhrasesByChatGptMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTranslateMissingWordsAndPhrasesByChatGptMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [translateMissingWordsAndPhrasesByChatGptMutation, { data, loading, error }] = useTranslateMissingWordsAndPhrasesByChatGptMutation({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      from_dialect_code: // value for 'from_dialect_code'
+ *      from_geo_code: // value for 'from_geo_code'
+ *      to_language_code: // value for 'to_language_code'
+ *      to_dialect_code: // value for 'to_dialect_code'
+ *      to_geo_code: // value for 'to_geo_code'
+ *      version: // value for 'version'
+ *   },
+ * });
+ */
+export function useTranslateMissingWordsAndPhrasesByChatGptMutation(baseOptions?: Apollo.MutationHookOptions<TranslateMissingWordsAndPhrasesByChatGptMutation, TranslateMissingWordsAndPhrasesByChatGptMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TranslateMissingWordsAndPhrasesByChatGptMutation, TranslateMissingWordsAndPhrasesByChatGptMutationVariables>(TranslateMissingWordsAndPhrasesByChatGptDocument, options);
+      }
+export type TranslateMissingWordsAndPhrasesByChatGptMutationHookResult = ReturnType<typeof useTranslateMissingWordsAndPhrasesByChatGptMutation>;
+export type TranslateMissingWordsAndPhrasesByChatGptMutationResult = Apollo.MutationResult<TranslateMissingWordsAndPhrasesByChatGptMutation>;
+export type TranslateMissingWordsAndPhrasesByChatGptMutationOptions = Apollo.BaseMutationOptions<TranslateMissingWordsAndPhrasesByChatGptMutation, TranslateMissingWordsAndPhrasesByChatGptMutationVariables>;
 export const TranslateMissingWordsAndPhrasesByGoogleDocument = gql`
     mutation TranslateMissingWordsAndPhrasesByGoogle($from_language_code: String!, $to_language_code: String!) {
   translateMissingWordsAndPhrasesByGoogle(
@@ -8922,6 +9128,9 @@ export const namedOperations = {
     UpsertSiteTextTranslation: 'UpsertSiteTextTranslation',
     SiteTextUpsert: 'SiteTextUpsert',
     TranslateWordsAndPhrasesByGoogle: 'TranslateWordsAndPhrasesByGoogle',
+    TranslateWordsAndPhrasesByChatGPT35: 'TranslateWordsAndPhrasesByChatGPT35',
+    TranslateWordsAndPhrasesByChatGPT4: 'TranslateWordsAndPhrasesByChatGPT4',
+    TranslateMissingWordsAndPhrasesByChatGPT: 'TranslateMissingWordsAndPhrasesByChatGPT',
     TranslateMissingWordsAndPhrasesByGoogle: 'TranslateMissingWordsAndPhrasesByGoogle',
     TranslateWordsAndPhrasesByLilt: 'TranslateWordsAndPhrasesByLilt',
     TranslateWordsAndPhrasesBySmartcat: 'TranslateWordsAndPhrasesBySmartcat',

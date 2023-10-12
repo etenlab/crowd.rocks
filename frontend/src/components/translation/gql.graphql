@@ -225,6 +225,101 @@ mutation TranslateWordsAndPhrasesByGoogle(
   }
 }
 
+mutation TranslateWordsAndPhrasesByChatGPT35(
+  $from_language_code: String!
+  $from_dialect_code: String
+  $from_geo_code: String
+  $to_language_code: String!
+  $to_dialect_code: String
+  $to_geo_code: String
+) {
+  translateWordsAndPhrasesByChatGPT35(
+    from_language: {
+      language_code: $from_language_code
+      dialect_code: $from_dialect_code
+      geo_code: $from_geo_code
+    }
+    to_language: {
+      language_code: $to_language_code
+      dialect_code: $to_dialect_code
+      geo_code: $to_geo_code
+    }
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+
+mutation TranslateWordsAndPhrasesByChatGPT4(
+  $from_language_code: String!
+  $from_dialect_code: String
+  $from_geo_code: String
+  $to_language_code: String!
+  $to_dialect_code: String
+  $to_geo_code: String
+) {
+  translateWordsAndPhrasesByChatGPT4(
+    from_language: {
+      language_code: $from_language_code
+      dialect_code: $from_dialect_code
+      geo_code: $from_geo_code
+    }
+    to_language: {
+      language_code: $to_language_code
+      dialect_code: $to_dialect_code
+      geo_code: $to_geo_code
+    }
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+
+mutation TranslateMissingWordsAndPhrasesByChatGPT(
+  $from_language_code: String!
+  $from_dialect_code: String
+  $from_geo_code: String
+  $to_language_code: String!
+  $to_dialect_code: String
+  $to_geo_code: String
+  $version: String!
+) {
+  translateMissingWordsAndPhrasesByChatGpt(
+    version: $version
+    from_language: {
+      language_code: $from_language_code
+      dialect_code: $from_dialect_code
+      geo_code: $from_geo_code
+    }
+    to_language: {
+      language_code: $to_language_code
+      dialect_code: $to_dialect_code
+      geo_code: $to_geo_code
+    }
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+
 mutation TranslateMissingWordsAndPhrasesByGoogle(
   $from_language_code: String!
   $to_language_code: String!
