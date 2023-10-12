@@ -1,4 +1,5 @@
-drop view if exists v_map_words_and_phrases;
+-- public.v_map_words_and_phrases source
+
 CREATE OR REPLACE VIEW public.v_map_words_and_phrases
 AS SELECT DISTINCT concat(ws.wordlike_string, owd.word_definition_id) AS cursor,
     'word'::text AS type,
@@ -8,7 +9,8 @@ AS SELECT DISTINCT concat(ws.wordlike_string, owd.word_definition_id) AS cursor,
     owd.word_definition_id AS o_definition_id,
     ow.language_code AS o_language_code,
     ow.dialect_code AS o_dialect_code,
-    ow.geo_code AS o_geo_code
+    ow.geo_code AS o_geo_code,
+    omw.original_map_id
    FROM words ow
      LEFT JOIN wordlike_strings ws ON ow.wordlike_string_id = ws.wordlike_string_id
      LEFT JOIN word_definitions owd ON ow.word_id = owd.word_id
@@ -22,7 +24,8 @@ UNION ALL
     ophd.phrase_definition_id AS o_definition_id,
     ow.language_code AS o_language_code,
     ow.dialect_code AS o_dialect_code,
-    ow.geo_code AS o_geo_code 
+    ow.geo_code AS o_geo_code,
+    omph.original_map_id
    FROM phrases oph
      LEFT JOIN phrase_definitions ophd ON oph.phrase_id = ophd.phrase_id
      JOIN original_map_phrases omph ON oph.phrase_id = omph.phrase_id

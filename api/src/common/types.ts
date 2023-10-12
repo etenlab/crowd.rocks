@@ -113,6 +113,7 @@ export enum ErrorType {
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
   ProvidedIdIsMalformed = 'ProvidedIdIsMalformed',
+  PaginationError = 'PaginationError',
 
   DocumentEntryReadError = 'DocumentEntryReadError',
   DocumentWordEntryInsertFailed = 'DocumentWordEntryInsertFailed',
@@ -128,6 +129,7 @@ export enum ErrorType {
   PericopeNotFound = 'PericopeNotFound',
   PericopeVoteToggleFailed = 'PericopeVoteToggleFailed',
   BotTranslationError = 'BotTranslationError',
+
   BotTranslationBotNotFound = 'BotTranslationBotNotFound',
   BotTranslationLanguagesListError = 'BotTranslationLanguagesListError',
 }
