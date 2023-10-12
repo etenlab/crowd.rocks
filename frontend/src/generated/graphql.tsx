@@ -170,6 +170,7 @@ export enum ErrorType {
   NotificationDeleteFailed = 'NotificationDeleteFailed',
   NotificationInsertFailed = 'NotificationInsertFailed',
   OffsetInvalid = 'OffsetInvalid',
+  PaginationError = 'PaginationError',
   ParentElectionNotFound = 'ParentElectionNotFound',
   PasswordInvalid = 'PasswordInvalid',
   PasswordTooLong = 'PasswordTooLong',
@@ -399,6 +400,7 @@ export type GetOrigMapListInput = {
 export type GetOrigMapWordsAndPhrasesInput = {
   filter?: InputMaybe<Scalars['String']['input']>;
   lang: LanguageInput;
+  original_map_id?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GetOrigMapsListOutput = {
@@ -590,6 +592,12 @@ export type MapWordsAndPhrasesConnection = {
   __typename?: 'MapWordsAndPhrasesConnection';
   edges: Array<MapWordsAndPhrasesEdge>;
   pageInfo: PageInfo;
+};
+
+export type MapWordsAndPhrasesCountOutput = {
+  __typename?: 'MapWordsAndPhrasesCountOutput';
+  count?: Maybe<Scalars['Float']['output']>;
+  error: ErrorType;
 };
 
 export type MapWordsAndPhrasesEdge = {
@@ -1112,6 +1120,12 @@ export type NotifyUsersInput = {
   user_ids: Array<Scalars['ID']['input']>;
 };
 
+export type OrigMapWordsAndPhrasesOutput = {
+  __typename?: 'OrigMapWordsAndPhrasesOutput';
+  error: ErrorType;
+  mapWordsOrPhrases?: Maybe<Array<MapWordOrPhrase>>;
+};
+
 export type PageInfo = {
   __typename?: 'PageInfo';
   endCursor?: Maybe<Scalars['ID']['output']>;
@@ -1494,6 +1508,8 @@ export type Query = {
   getMapVoteStatus: MapVoteStatusOutputRow;
   getMapWordOrPhraseAsOrigByDefinitionId: MapWordOrPhraseAsOrigOutput;
   getOrigMapWordsAndPhrases: MapWordsAndPhrasesConnection;
+  getOrigMapWordsAndPhrasesCount: MapWordsAndPhrasesCountOutput;
+  getOrigMapWordsAndPhrasesPaginated: OrigMapWordsAndPhrasesOutput;
   getOrigMapsList: GetOrigMapsListOutput;
   getPericopeVoteStatus: PericopeVoteStatusOutput;
   getPericopiesByDocumentId: PericopiesOutput;
@@ -1662,6 +1678,18 @@ export type QueryGetOrigMapWordsAndPhrasesArgs = {
   after?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   input: GetOrigMapWordsAndPhrasesInput;
+};
+
+
+export type QueryGetOrigMapWordsAndPhrasesCountArgs = {
+  input: GetOrigMapWordsAndPhrasesInput;
+};
+
+
+export type QueryGetOrigMapWordsAndPhrasesPaginatedArgs = {
+  input: GetOrigMapWordsAndPhrasesInput;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3038,6 +3066,7 @@ export type WordWithDefinitionFragmentFragment = { __typename?: 'WordWithDefinit
 export type PhraseWithDefinitionFragmentFragment = { __typename?: 'PhraseWithDefinition', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null };
 
 export type GetOrigMapWordsAndPhrasesQueryVariables = Exact<{
+  original_map_id?: InputMaybe<Scalars['String']['input']>;
   lang: LanguageInput;
   filter?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['ID']['input']>;
@@ -3046,6 +3075,26 @@ export type GetOrigMapWordsAndPhrasesQueryVariables = Exact<{
 
 
 export type GetOrigMapWordsAndPhrasesQuery = { __typename?: 'Query', getOrigMapWordsAndPhrases: { __typename?: 'MapWordsAndPhrasesConnection', edges: Array<{ __typename?: 'MapWordsAndPhrasesEdge', cursor: string, node: { __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null } }>, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } };
+
+export type GetOrigMapWordsAndPhrasesCountQueryVariables = Exact<{
+  original_map_id?: InputMaybe<Scalars['String']['input']>;
+  lang: LanguageInput;
+  filter?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetOrigMapWordsAndPhrasesCountQuery = { __typename?: 'Query', getOrigMapWordsAndPhrasesCount: { __typename?: 'MapWordsAndPhrasesCountOutput', count?: number | null } };
+
+export type GetOrigMapWordsAndPhrasesPaginatedQueryVariables = Exact<{
+  original_map_id?: InputMaybe<Scalars['String']['input']>;
+  lang: LanguageInput;
+  filter?: InputMaybe<Scalars['String']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetOrigMapWordsAndPhrasesPaginatedQuery = { __typename?: 'Query', getOrigMapWordsAndPhrasesPaginated: { __typename?: 'OrigMapWordsAndPhrasesOutput', mapWordsOrPhrases?: Array<{ __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null }> | null } };
 
 export type GetMapWordOrPhraseAsOrigByDefinitionIdQueryVariables = Exact<{
   definition_id: Scalars['ID']['input'];
@@ -5937,9 +5986,9 @@ export type DeleteForumMutationHookResult = ReturnType<typeof useDeleteForumMuta
 export type DeleteForumMutationResult = Apollo.MutationResult<DeleteForumMutation>;
 export type DeleteForumMutationOptions = Apollo.BaseMutationOptions<DeleteForumMutation, DeleteForumMutationVariables>;
 export const GetOrigMapWordsAndPhrasesDocument = gql`
-    query GetOrigMapWordsAndPhrases($lang: LanguageInput!, $filter: String, $after: ID, $first: Int) {
+    query GetOrigMapWordsAndPhrases($original_map_id: String, $lang: LanguageInput!, $filter: String, $after: ID, $first: Int) {
   getOrigMapWordsAndPhrases(
-    input: {lang: $lang, filter: $filter}
+    input: {lang: $lang, filter: $filter, original_map_id: $original_map_id}
     after: $after
     first: $first
   ) {
@@ -5968,6 +6017,7 @@ export const GetOrigMapWordsAndPhrasesDocument = gql`
  * @example
  * const { data, loading, error } = useGetOrigMapWordsAndPhrasesQuery({
  *   variables: {
+ *      original_map_id: // value for 'original_map_id'
  *      lang: // value for 'lang'
  *      filter: // value for 'filter'
  *      after: // value for 'after'
@@ -5986,6 +6036,90 @@ export function useGetOrigMapWordsAndPhrasesLazyQuery(baseOptions?: Apollo.LazyQ
 export type GetOrigMapWordsAndPhrasesQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesQuery>;
 export type GetOrigMapWordsAndPhrasesLazyQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesLazyQuery>;
 export type GetOrigMapWordsAndPhrasesQueryResult = Apollo.QueryResult<GetOrigMapWordsAndPhrasesQuery, GetOrigMapWordsAndPhrasesQueryVariables>;
+export const GetOrigMapWordsAndPhrasesCountDocument = gql`
+    query GetOrigMapWordsAndPhrasesCount($original_map_id: String, $lang: LanguageInput!, $filter: String) {
+  getOrigMapWordsAndPhrasesCount(
+    input: {lang: $lang, filter: $filter, original_map_id: $original_map_id}
+  ) {
+    count
+  }
+}
+    `;
+
+/**
+ * __useGetOrigMapWordsAndPhrasesCountQuery__
+ *
+ * To run a query within a React component, call `useGetOrigMapWordsAndPhrasesCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOrigMapWordsAndPhrasesCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOrigMapWordsAndPhrasesCountQuery({
+ *   variables: {
+ *      original_map_id: // value for 'original_map_id'
+ *      lang: // value for 'lang'
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useGetOrigMapWordsAndPhrasesCountQuery(baseOptions: Apollo.QueryHookOptions<GetOrigMapWordsAndPhrasesCountQuery, GetOrigMapWordsAndPhrasesCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetOrigMapWordsAndPhrasesCountQuery, GetOrigMapWordsAndPhrasesCountQueryVariables>(GetOrigMapWordsAndPhrasesCountDocument, options);
+      }
+export function useGetOrigMapWordsAndPhrasesCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOrigMapWordsAndPhrasesCountQuery, GetOrigMapWordsAndPhrasesCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetOrigMapWordsAndPhrasesCountQuery, GetOrigMapWordsAndPhrasesCountQueryVariables>(GetOrigMapWordsAndPhrasesCountDocument, options);
+        }
+export type GetOrigMapWordsAndPhrasesCountQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesCountQuery>;
+export type GetOrigMapWordsAndPhrasesCountLazyQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesCountLazyQuery>;
+export type GetOrigMapWordsAndPhrasesCountQueryResult = Apollo.QueryResult<GetOrigMapWordsAndPhrasesCountQuery, GetOrigMapWordsAndPhrasesCountQueryVariables>;
+export const GetOrigMapWordsAndPhrasesPaginatedDocument = gql`
+    query GetOrigMapWordsAndPhrasesPaginated($original_map_id: String, $lang: LanguageInput!, $filter: String, $offset: Int, $limit: Int) {
+  getOrigMapWordsAndPhrasesPaginated(
+    input: {lang: $lang, filter: $filter, original_map_id: $original_map_id}
+    offset: $offset
+    limit: $limit
+  ) {
+    mapWordsOrPhrases {
+      ...MapWordOrPhraseFragment
+    }
+  }
+}
+    ${MapWordOrPhraseFragmentFragmentDoc}`;
+
+/**
+ * __useGetOrigMapWordsAndPhrasesPaginatedQuery__
+ *
+ * To run a query within a React component, call `useGetOrigMapWordsAndPhrasesPaginatedQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOrigMapWordsAndPhrasesPaginatedQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOrigMapWordsAndPhrasesPaginatedQuery({
+ *   variables: {
+ *      original_map_id: // value for 'original_map_id'
+ *      lang: // value for 'lang'
+ *      filter: // value for 'filter'
+ *      offset: // value for 'offset'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useGetOrigMapWordsAndPhrasesPaginatedQuery(baseOptions: Apollo.QueryHookOptions<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>(GetOrigMapWordsAndPhrasesPaginatedDocument, options);
+      }
+export function useGetOrigMapWordsAndPhrasesPaginatedLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>(GetOrigMapWordsAndPhrasesPaginatedDocument, options);
+        }
+export type GetOrigMapWordsAndPhrasesPaginatedQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesPaginatedQuery>;
+export type GetOrigMapWordsAndPhrasesPaginatedLazyQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesPaginatedLazyQuery>;
+export type GetOrigMapWordsAndPhrasesPaginatedQueryResult = Apollo.QueryResult<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>;
 export const GetMapWordOrPhraseAsOrigByDefinitionIdDocument = gql`
     query GetMapWordOrPhraseAsOrigByDefinitionId($definition_id: ID!, $is_word_definition: Boolean!) {
   getMapWordOrPhraseAsOrigByDefinitionId(
@@ -8954,6 +9088,8 @@ export const namedOperations = {
     GetForumById: 'GetForumById',
     GetForums: 'GetForums',
     GetOrigMapWordsAndPhrases: 'GetOrigMapWordsAndPhrases',
+    GetOrigMapWordsAndPhrasesCount: 'GetOrigMapWordsAndPhrasesCount',
+    GetOrigMapWordsAndPhrasesPaginated: 'GetOrigMapWordsAndPhrasesPaginated',
     GetMapWordOrPhraseAsOrigByDefinitionId: 'GetMapWordOrPhraseAsOrigByDefinitionId',
     GetAllMapsList: 'GetAllMapsList',
     GetMapDetails: 'GetMapDetails',

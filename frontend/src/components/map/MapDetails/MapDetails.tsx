@@ -41,6 +41,7 @@ import { Flag } from '../../flags/Flag';
 import { MAPS_FLAGS } from '../../flags/flagGroups';
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import { useToggleMapVoteStatusMutation } from '../../../hooks/useToggleMapVoteStatusMutation';
+import { MapWords } from './MapWords';
 
 const TRANSFORM_STEP = 200;
 interface MapDetailsProps
@@ -60,6 +61,7 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isWoPShown, setIsWoPShown] = useState(false);
 
   const isOriginal = useMemo(() => {
     return new URLSearchParams(search).get('is_original') === 'true';
@@ -136,6 +138,10 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
 
   const handleImageError = () => {
     setImageError(true);
+  };
+
+  const handleShowWordsPhrases = () => {
+    setIsWoPShown((shown) => !shown);
   };
 
   const chatButton = (
@@ -314,6 +320,19 @@ export const MapDetails: React.FC<MapDetailsProps> = ({
           </>
         )}
       </StyledMapImg>
+      <IonButton onClick={handleShowWordsPhrases}>
+        {isWoPShown
+          ? tr('Hide words and phrases')
+          : tr('Show words and phrases')}
+      </IonButton>
+      {isWoPShown && langInfo && currMapContent?.mapDetails?.original_map_id ? (
+        <MapWords
+          language_id={language_id}
+          nation_id={nation_id}
+          targetLang={langInfo}
+          original_map_id={currMapContent?.mapDetails?.original_map_id}
+        />
+      ) : null}
     </>
   );
 };

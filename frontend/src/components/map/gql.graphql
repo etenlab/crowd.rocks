@@ -68,16 +68,14 @@ fragment PhraseWithDefinitionFragment on PhraseWithDefinition {
 }
 
 query GetOrigMapWordsAndPhrases(
+  $original_map_id: String
   $lang: LanguageInput!
   $filter: String
   $after: ID
   $first: Int
 ) {
   getOrigMapWordsAndPhrases(
-    input: { 
-      lang: $lang
-      filter: $filter 
-    }
+    input: { lang: $lang, filter: $filter, original_map_id: $original_map_id }
     after: $after
     first: $first
   ) {
@@ -89,6 +87,36 @@ query GetOrigMapWordsAndPhrases(
       endCursor
       hasNextPage
       hasPreviousPage
+    }
+  }
+}
+
+query GetOrigMapWordsAndPhrasesCount(
+  $original_map_id: String
+  $lang: LanguageInput!
+  $filter: String
+) {
+  getOrigMapWordsAndPhrasesCount(
+    input: { lang: $lang, filter: $filter, original_map_id: $original_map_id }
+  ) {
+    count
+  }
+}
+
+query GetOrigMapWordsAndPhrasesPaginated(
+  $original_map_id: String
+  $lang: LanguageInput!
+  $filter: String
+  $offset: Int
+  $limit: Int
+) {
+  getOrigMapWordsAndPhrasesPaginated(
+    input: { lang: $lang, filter: $filter, original_map_id: $original_map_id }
+    offset: $offset
+    limit: $limit
+  ) {
+    mapWordsOrPhrases {
+      ...MapWordOrPhraseFragment
     }
   }
 }

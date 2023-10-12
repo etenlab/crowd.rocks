@@ -334,12 +334,7 @@ export class TranslationsResolver {
     from_definition_type_is_word: boolean,
     @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
   ): Promise<TranslationWithVoteListOutput> {
-    console.log(
-      'getTranslationsByFromDefinitionId resolver',
-      definition_id,
-      from_definition_type_is_word,
-      JSON.stringify(langInfo, null, 2),
-    );
+    console.log('getTranslationsByFromDefinitionId resolver');
 
     return this.translationService.getTranslationsByFromDefinitionId(
       +definition_id,

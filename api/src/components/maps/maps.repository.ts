@@ -18,6 +18,8 @@ import {
   GetOrigMapWordsAndPhrasesInput,
   MapWordsAndPhrasesEdge,
   MapWordOrPhrase,
+  MapWordsAndPhrasesCountOutput,
+  OrigMapWordsAndPhrasesOutput,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
 
@@ -1036,32 +1038,36 @@ export class MapsRepository {
       first,
       after,
     }: {
-      input: GetOrigMapWordsAndPhrasesInput;
+        input: GetOrigMapWordsAndPhrasesInput;
       first?: number | null;
       after?: string | null;
     },
   ): Promise<MapWordsAndPhrasesConnection> {
-    const langParams: string[] = [];
+    const filterParams: string[] = [];
     let languagesFiltersRestrictionClause = '';
     let pickDataClause = '';
     if (input.lang.language_code) {
-      langParams.push(input.lang.language_code);
-      languagesFiltersRestrictionClause += ` and o_language_code =  $${langParams.length} `;
+      filterParams.push(input.lang.language_code);
+      languagesFiltersRestrictionClause += ` and o_language_code =  $${filterParams.length} `;
     }
     if (input.lang.dialect_code) {
-      langParams.push(input.lang.dialect_code);
-      languagesFiltersRestrictionClause += ` and o_dialect_code =  $${langParams.length} `;
+      filterParams.push(input.lang.dialect_code);
+      languagesFiltersRestrictionClause += ` and o_dialect_code =  $${filterParams.length} `;
     }
     if (input.lang.geo_code) {
-      langParams.push(input.lang.geo_code);
-      languagesFiltersRestrictionClause += ` and o_geo_code =  $${langParams.length} `;
+      filterParams.push(input.lang.geo_code);
+      languagesFiltersRestrictionClause += ` and o_geo_code =  $${filterParams.length} `;
     }
     if (input.filter && input.filter.length > 0) {
-      langParams.push(input.filter);
-      languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${langParams.length}),'%')`;
+      filterParams.push(input.filter);
+      languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${filterParams.length}),'%')`;
+    }
+    if (input.original_map_id) {
+      filterParams.push(input.original_map_id);
+      languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;
     }
 
-    const langAndPickParams: string[] = [...langParams];
+    const langAndPickParams: string[] = [...filterParams];
     if (after) {
       langAndPickParams.push(String(after));
       pickDataClause += ` and cursor > $${langAndPickParams.length} `;
@@ -1073,7 +1079,17 @@ export class MapsRepository {
     }
 
     const sqlStr = `
-      select * from v_map_words_and_phrases
+      select distinct 
+        cursor,
+        type,
+        o_id,
+        o_like_string,
+        o_definition,
+        o_definition_id,
+        o_language_code,
+        o_dialect_code,
+        o_geo_code
+      from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
       ${pickDataClause}
@@ -1100,7 +1116,7 @@ export class MapsRepository {
       ${languagesFiltersRestrictionClause}
       and cursor>${dbPoolClient.escapeLiteral(resQ.rows.at(-1).cursor)}
     `;
-    const resCheckAfter = await dbPoolClient.query(sqlAfter, langParams);
+    const resCheckAfter = await dbPoolClient.query(sqlAfter, filterParams);
 
     // just to know if there pages before the current selection
     const sqlBefore = `
@@ -1109,7 +1125,7 @@ export class MapsRepository {
       ${languagesFiltersRestrictionClause}
       and cursor<${dbPoolClient.escapeLiteral(resQ.rows[0].cursor)}
     `;
-    const resCheckBefore = await dbPoolClient.query(sqlBefore, langParams);
+    const resCheckBefore = await dbPoolClient.query(sqlBefore, filterParams);
 
     const edges: MapWordsAndPhrasesEdge[] = resQ.rows.map((r) => {
       const node: MapWordOrPhrase = {
@@ -1143,6 +1159,137 @@ export class MapsRepository {
     return {
       edges,
       pageInfo,
+    };
+  }
+
+  async getOrigMapWordsAndPhrasesCount(
+    dbPoolClient: PoolClient,
+    input: GetOrigMapWordsAndPhrasesInput,
+  ): Promise<MapWordsAndPhrasesCountOutput> {
+    const filterParams: string[] = [];
+    let languagesFiltersRestrictionClause = '';
+    if (input.lang.language_code) {
+      filterParams.push(input.lang.language_code);
+      languagesFiltersRestrictionClause += ` and o_language_code =  $${filterParams.length} `;
+    }
+    if (input.lang.dialect_code) {
+      filterParams.push(input.lang.dialect_code);
+      languagesFiltersRestrictionClause += ` and o_dialect_code =  $${filterParams.length} `;
+    }
+    if (input.lang.geo_code) {
+      filterParams.push(input.lang.geo_code);
+      languagesFiltersRestrictionClause += ` and o_geo_code =  $${filterParams.length} `;
+    }
+    if (input.filter && input.filter.length > 0) {
+      filterParams.push(input.filter);
+      languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${filterParams.length}),'%')`;
+    }
+    if (input.original_map_id) {
+      filterParams.push(input.original_map_id);
+      languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;
+    }
+
+    const sqlStr = `
+      select count(distinct "cursor") count
+        from v_map_words_and_phrases
+      where true
+      ${languagesFiltersRestrictionClause}
+    `;
+
+    const resQ = await dbPoolClient.query(sqlStr, filterParams);
+
+    if (!(resQ.rows.length > 0)) {
+      return {
+        error: ErrorType.PaginationError,
+        count: null,
+      };
+    }
+    return {
+      error: ErrorType.NoError,
+      count: resQ.rows[0].count,
+    };
+  }
+
+  async getOrigMapWordsAndPhrasesPaginated(
+    dbPoolClient: PoolClient,
+    input: GetOrigMapWordsAndPhrasesInput,
+    offset,
+    limit,
+  ): Promise<OrigMapWordsAndPhrasesOutput> {
+    const filterParams: string[] = [];
+    let languagesFiltersRestrictionClause = '';
+    if (input.lang.language_code) {
+      filterParams.push(input.lang.language_code);
+      languagesFiltersRestrictionClause += ` and o_language_code =  $${filterParams.length} `;
+    }
+    if (input.lang.dialect_code) {
+      filterParams.push(input.lang.dialect_code);
+      languagesFiltersRestrictionClause += ` and o_dialect_code =  $${filterParams.length} `;
+    }
+    if (input.lang.geo_code) {
+      filterParams.push(input.lang.geo_code);
+      languagesFiltersRestrictionClause += ` and o_geo_code =  $${filterParams.length} `;
+    }
+    if (input.filter && input.filter.length > 0) {
+      filterParams.push(input.filter);
+      languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${filterParams.length}),'%')`;
+    }
+    if (input.original_map_id) {
+      filterParams.push(input.original_map_id);
+      languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;
+    }
+
+    if (offset) {
+      filterParams.push(offset);
+      languagesFiltersRestrictionClause += ` offset $${filterParams.length} `;
+    }
+    if (limit) {
+      filterParams.push(limit);
+      languagesFiltersRestrictionClause += ` limit $${filterParams.length}`;
+    }
+
+    const sqlStr = `
+      select distinct 
+        cursor,
+        type,
+        o_id,
+        o_like_string,
+        o_definition,
+        o_definition_id,
+        o_language_code,
+        o_dialect_code,
+        o_geo_code
+      from v_map_words_and_phrases
+      where true
+      ${languagesFiltersRestrictionClause}
+      
+    `;
+
+    const resQ = await dbPoolClient.query(sqlStr, filterParams);
+
+    if (!(resQ.rows.length > 0)) {
+      return {
+        error: ErrorType.PaginationError,
+        mapWordsOrPhrases: null,
+      };
+    }
+
+    const mapWordsOrPhrases: MapWordOrPhrase[] = resQ.rows.map((r) => {
+      return {
+        id: r.cursor,
+        type: r.type,
+        o_id: r.o_id,
+        o_like_string: r.o_like_string,
+        o_definition: r.o_definition,
+        o_definition_id: r.o_definition_id,
+        o_language_code: r.o_language_code,
+        o_dialect_code: r.o_dialect_code,
+        o_geo_code: r.o_geo_code,
+      };
+    });
+    return {
+      error: ErrorType.NoError,
+      mapWordsOrPhrases,
     };
   }
 

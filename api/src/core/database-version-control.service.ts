@@ -43,6 +43,9 @@ export class DatabaseVersionControlService {
       case 3:
         console.log('Updating database to version 4');
         await this.loadVersion4();
+      case 4:
+        console.log('Updating database to version 5');
+        await this.loadVersion5();
       default:
         console.error('Database version is current');
     }
@@ -383,7 +386,15 @@ export class DatabaseVersionControlService {
       './src/core/sql/translation/word_to_phrase/batch_translation_vote_set.sql',
     );
 
+    //maps
+    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v4.sql');
+
     await this.setVersionNumber(4);
+  }
+
+  async loadVersion5(): Promise<void> {
+    // set version
+    await this.setVersionNumber(5);
   }
 
   async registerUser(

@@ -36,7 +36,7 @@ export function PericopeDocumentViewer({
     cluster_id: string;
   }>();
 
-  const { data, error, loading } = useGetPericopiesByDocumentIdQuery({
+  const { data, error } = useGetPericopiesByDocumentIdQuery({
     variables: {
       document_id: documentId,
     },
@@ -207,14 +207,6 @@ export function PericopeDocumentViewer({
     }),
     [selectedWordEntryId],
   );
-
-  if (loading) {
-    return <div>loading</div>;
-  }
-
-  if (error) {
-    return <div>error</div>;
-  }
 
   return (
     <>

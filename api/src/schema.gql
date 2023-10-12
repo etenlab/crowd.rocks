@@ -146,6 +146,7 @@ enum ErrorType {
   NotificationDeleteFailed
   NotificationInsertFailed
   OffsetInvalid
+  PaginationError
   ParentElectionNotFound
   PasswordInvalid
   PasswordTooLong
@@ -359,6 +360,7 @@ input GetOrigMapListInput {
 input GetOrigMapWordsAndPhrasesInput {
   filter: String
   lang: LanguageInput!
+  original_map_id: String
 }
 
 type GetOrigMapsListOutput {
@@ -530,6 +532,11 @@ type MapWordsAndPhrasesConnection {
   pageInfo: PageInfo!
 }
 
+type MapWordsAndPhrasesCountOutput {
+  count: Float
+  error: ErrorType!
+}
+
 type MapWordsAndPhrasesEdge {
   cursor: ID!
   node: MapWordOrPhrase!
@@ -645,6 +652,11 @@ type NotificationListOutput {
 input NotifyUsersInput {
   text: String!
   user_ids: [ID!]!
+}
+
+type OrigMapWordsAndPhrasesOutput {
+  error: ErrorType!
+  mapWordsOrPhrases: [MapWordOrPhrase!]
 }
 
 type PageInfo {
@@ -986,6 +998,8 @@ type Query {
   getMapVoteStatus(is_original: Boolean!, map_id: ID!): MapVoteStatusOutputRow!
   getMapWordOrPhraseAsOrigByDefinitionId(input: GetMapWordOrPhraseByDefinitionIdInput!): MapWordOrPhraseAsOrigOutput!
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
+  getOrigMapWordsAndPhrasesCount(input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesCountOutput!
+  getOrigMapWordsAndPhrasesPaginated(input: GetOrigMapWordsAndPhrasesInput!, limit: Int, offset: Int): OrigMapWordsAndPhrasesOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
   getPericopiesByDocumentId(document_id: ID!): PericopiesOutput!
