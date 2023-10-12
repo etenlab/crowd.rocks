@@ -44,6 +44,9 @@ import {
   useTranslateWordsAndPhrasesBySmartcatMutation,
   useTranslateAllWordsAndPhrasesBySmartcatMutation,
   useLanguagesForSmartcatTranslateQuery,
+  useTranslateWordsAndPhrasesByChatGpt35Mutation,
+  useTranslateWordsAndPhrasesByChatGpt4Mutation,
+  useTranslateMissingWordsAndPhrasesByChatGptMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, langInfo2tag } from '../../../common/langUtils';
@@ -124,6 +127,16 @@ export function AIControllerPage() {
 
   const [translateAllWordsAndPhrasesBySmartcat] =
     useTranslateAllWordsAndPhrasesBySmartcatMutation();
+
+  //chatgpt
+  const [translateWordsAndPhrasesByChatGpt35] =
+    useTranslateWordsAndPhrasesByChatGpt35Mutation();
+
+  const [translateWordsAndPhrasesByChatGpt4] =
+    useTranslateWordsAndPhrasesByChatGpt4Mutation();
+
+  const [translateMissingWordsAndPhrasesByGpt] =
+    useTranslateMissingWordsAndPhrasesByChatGptMutation();
 
   const { data: translationResult } =
     useSubscribeToTranslationReportSubscription();
@@ -366,6 +379,230 @@ export function AIControllerPage() {
     });
   }, [presentToast, source, tr, translateAllWordsAndPhrasesByGoogle]);
 
+  // ChatGPT3.5
+  const handleTranslateChatGpt3 = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      // handleTranslateToAllLangsG();   //later
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+
+    const { data } = await translateWordsAndPhrasesByChatGpt35({
+      variables: {
+        from_language_code: source.lang.tag,
+        from_dialect_code: source.dialect?.tag,
+        from_geo_code: source.region?.tag,
+        to_language_code: target.lang.tag,
+        to_dialect_code: target.dialect?.tag,
+        to_geo_code: target.region?.tag,
+      },
+    });
+
+    dismiss();
+
+    if (data && data.translateWordsAndPhrasesByChatGPT35.result) {
+      setResult(data.translateWordsAndPhrasesByChatGPT35.result);
+      await mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
+  };
+
+  const handleTranslateMissingChatGpt3 = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      //handleTranslateToAllLangsG(); //later
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+
+    const { data } = await translateMissingWordsAndPhrasesByGpt({
+      variables: {
+        from_language_code: source.lang.tag,
+        to_language_code: target.lang.tag,
+        version: 'gpt-3.5-turbo',
+      },
+    });
+
+    dismiss();
+
+    if (data && data.translateMissingWordsAndPhrasesByChatGpt.result) {
+      setResult(data.translateMissingWordsAndPhrasesByChatGpt.result);
+      await mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
+  };
+
+  //ChatGPT 4
+  const handleTranslateChatGpt4 = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      // handleTranslateToAllLangsG();   //later
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+
+    const { data } = await translateWordsAndPhrasesByChatGpt4({
+      variables: {
+        from_language_code: source.lang.tag,
+        from_dialect_code: source.dialect?.tag,
+        from_geo_code: source.region?.tag,
+        to_language_code: target.lang.tag,
+        to_dialect_code: target.dialect?.tag,
+        to_geo_code: target.region?.tag,
+      },
+    });
+
+    dismiss();
+
+    if (data && data.translateWordsAndPhrasesByChatGPT4.result) {
+      setResult(data.translateWordsAndPhrasesByChatGPT4.result);
+      await mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
+  };
+
+  const handleTranslateMissingChatGpt4 = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      //handleTranslateToAllLangsG(); //later
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+
+    const { data } = await translateMissingWordsAndPhrasesByGpt({
+      variables: {
+        from_language_code: source.lang.tag,
+        to_language_code: target.lang.tag,
+        version: 'gpt-4',
+      },
+    });
+
+    dismiss();
+
+    if (data && data.translateMissingWordsAndPhrasesByChatGpt.result) {
+      setResult(data.translateMissingWordsAndPhrasesByChatGpt.result);
+      await mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
+  };
+
   // LILT
   const handleTranslateL = async () => {
     if (!source) {
@@ -588,6 +825,20 @@ export function AIControllerPage() {
           ).length + ' languages',
     },
     {
+      handleTranslateFunc: handleTranslateChatGpt3,
+      handleTranslateMissingFunc: handleTranslateMissingChatGpt3,
+      botTitle: 'Chat GPT 3.5',
+      languageLabel: !selectTarget ? '∞ languages' : '1 language', //maybe later can ask gpt 'can you translate to xyz language'
+      disabledActions: disabled || !selectTarget,
+    },
+    {
+      handleTranslateFunc: handleTranslateChatGpt4,
+      handleTranslateMissingFunc: handleTranslateMissingChatGpt4,
+      botTitle: 'Chat GPT 4',
+      languageLabel: !selectTarget ? '∞ languages' : '1 language', //maybe later can ask gpt 'can you translate to xyz language'
+      disabledActions: disabled || !selectTarget,
+    },
+    {
       handleTranslateFunc: handleTranslateL,
       handleTranslateMissingFunc: null,
       botTitle: 'Lilt',
@@ -693,19 +944,22 @@ export function AIControllerPage() {
           <AIActionsContainer>
             <IonButton
               onClick={() => item.handleTranslateFunc()}
-              disabled={disabled}
+              disabled={item.disabledActions ? item.disabledActions : disabled}
             >
               {tr('Translate All')}
             </IonButton>
             {item.handleTranslateMissingFunc && (
               <IonButton
                 onClick={() => item.handleTranslateMissingFunc()}
-                disabled={disabled}
+                disabled={
+                  item.disabledActions ? item.disabledActions : disabled
+                }
               >
                 {tr('Translate Missing')}
               </IonButton>
             )}
           </AIActionsContainer>
+          <hr />
         </AIContainer>
       ))}
 
