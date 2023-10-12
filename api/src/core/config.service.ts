@@ -29,8 +29,10 @@ export class ConfigService {
   public readonly CR_DB_PORT = +(process.env.CR_DB_PORT || 5432);
   public readonly CR_DB_USER = process.env.CR_DB_USER;
   public readonly CR_DB_PASSWORD = process.env.CR_DB_PASSWORD;
-  public readonly CR_GPT_3_PASSWORD = process.env.CR_GPT_3_PASSWORD || 'asdfasdf';
-  public readonly CR_GPT_4_PASSWORD = process.env.CR_GPT_4_PASSWORD || 'asdfasdf';
+  public readonly CR_GPT_3_PASSWORD =
+    process.env.CR_GPT_3_PASSWORD || 'asdfasdf';
+  public readonly CR_GPT_4_PASSWORD =
+    process.env.CR_GPT_4_PASSWORD || 'asdfasdf';
 
   public readonly ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
   public readonly CR_GOOGLE_BOT_PASSWORD =

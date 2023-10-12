@@ -9,7 +9,6 @@ import { pgClientOrPool } from 'src/common/utility';
 import { LanguageInput } from 'src/components/common/types';
 import { PhrasesService } from 'src/components/phrases/phrases.service';
 import { WordsService } from 'src/components/words/words.service';
-import { ConfigService } from 'src/core/config.service';
 import { PostgresService } from 'src/core/postgres.service';
 import { PUB_SUB } from 'src/pubSub.module';
 import { PhraseToPhraseTranslationsService } from '../translations/phrase-to-phrase-translations.service';

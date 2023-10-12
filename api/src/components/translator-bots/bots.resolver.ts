@@ -20,7 +20,6 @@ import {
   TranslatedLanguageInfoInput,
   TranslateAllWordsAndPhrasesByBotOutput,
   TranslateAllWordsAndPhrasesByBotResult,
-  ChatGPTVersionInput,
   ChatGPTVersion,
 } from './types';
 
