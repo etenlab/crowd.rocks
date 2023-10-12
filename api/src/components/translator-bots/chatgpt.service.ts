@@ -69,12 +69,12 @@ export class ChatGPTService implements IGPTTranslator {
     return translatedChunks;
   };
 
-  async translate(
+  translate = async (
     texts: string[],
     from: LanguageInput,
     to: LanguageInput,
     version: ChatGPTVersion,
-  ): Promise<string[]> {
+  ): Promise<string[]> => {
     try {
       texts.forEach((text) => {
         if (text.length >= LIMIT_LENGTH - JOINER.length) {
@@ -105,7 +105,7 @@ export class ChatGPTService implements IGPTTranslator {
       console.log(err);
       throw err;
     }
-  }
+  };
 
   async chatTranslate(
     origStr,
@@ -130,6 +130,7 @@ export class ChatGPTService implements IGPTTranslator {
 
     const translateCmd = `Translate '${origStr}' ${fromLangPhrase} ${toLangPhrase} ${formatPhrase}`;
     console.log(translateCmd);
+    console.log(version);
 
     const params: OpenAI.Chat.ChatCompletionCreateParams = {
       messages: [

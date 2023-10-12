@@ -61,7 +61,6 @@ interface ItranslateAllWordsAndPhrasesByBot {
 @Injectable()
 export class AiTranslationsService {
   private translationSubject: Subject<number>;
-  private chatgptService: ChatGPTService;
   constructor(
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private wordsService: WordsService,
@@ -73,7 +72,7 @@ export class AiTranslationsService {
     private phraseToPhraseTrService: PhraseToPhraseTranslationsService,
     private pg: PostgresService,
     private translationService: TranslationsService,
-    private configService: ConfigService,
+    private chatgptService: ChatGPTService,
   ) {
     this.translationSubject = new Subject<number>();
   }
@@ -176,11 +175,12 @@ export class AiTranslationsService {
   async translateMissingWordsAndPhrasesByGoogle(
     from_language: LanguageInput,
     to_language: LanguageInput,
-    token: string,
+    token: string, //later
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.translateMissingWordsAndPhrasesByBot(
-      this.gTrService,
+      this.gTrService.translate,
+      this.gTrService.getTranslatorToken,
       from_language,
       to_language,
       pgClient,
@@ -190,12 +190,13 @@ export class AiTranslationsService {
   async translateMissingWordsAndPhrasesByGpt35(
     from_language: LanguageInput,
     to_language: LanguageInput,
-    token: string,
+    token: string, //later
     pgClient: PoolClient | null,
     version: ChatGPTVersion,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.translateMissingWordsAndPhrasesByBot(
-      this.chatgptService,
+      this.chatgptService.translate,
+      this.chatgptService.getTranslatorToken,
       from_language,
       to_language,
       pgClient,
@@ -211,7 +212,8 @@ export class AiTranslationsService {
     version: ChatGPTVersion,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.translateMissingWordsAndPhrasesByBot(
-      this.chatgptService,
+      this.chatgptService.translate,
+      this.chatgptService.getTranslatorToken,
       from_language,
       to_language,
       pgClient,
@@ -220,7 +222,10 @@ export class AiTranslationsService {
   }
 
   async translateMissingWordsAndPhrasesByBot<T extends ITranslator>(
-    translator: T,
+    translateF: (...args: any[]) => Promise<string[]>,
+    getTranslatorToken: (
+      ...args: any[]
+    ) => Promise<{ id: string; token: string }>,
     from_language: LanguageInput,
     to_language: LanguageInput,
     pgClient: PoolClient | null,
@@ -248,10 +253,8 @@ export class AiTranslationsService {
       const pg = await pgClientOrPool({ client: pgClient, pool: this.pg.pool });
 
       const token = translatorVersion
-        ? await (translator as IGPTTranslator).getTranslatorToken(
-            translatorVersion,
-          )
-        : await translator.getTranslatorToken();
+        ? await getTranslatorToken(translatorVersion)
+        : await getTranslatorToken();
 
       const botToken = token.token;
       const botUserId = token.id;
@@ -296,12 +299,14 @@ export class AiTranslationsService {
         .sort((a, b) => a.id - b.id)
         .map((obj) => obj.text);
 
-      const translationTexts = await translator.translate(
-        missingTexts,
-        from_language,
-        to_language,
-        translatorVersion,
-      );
+      const translationTexts = translatorVersion
+        ? await translateF(
+            missingTexts,
+            from_language,
+            to_language,
+            translatorVersion,
+          )
+        : await translateF(missingTexts, from_language, to_language);
 
       const translationsByOthers = await getTranslationsNotByUser(
         botUserId,
@@ -328,6 +333,9 @@ export class AiTranslationsService {
           continue;
         }
         const tWord = translationTexts[oWord.id];
+        if (tWord === undefined) {
+          continue;
+        }
 
         const isTypeWord =
           tWord
@@ -410,6 +418,9 @@ export class AiTranslationsService {
           continue;
         }
         const tText = translationTexts[oPhrase.id];
+        if (tText === undefined) {
+          continue;
+        }
 
         const isTypeWord =
           tText

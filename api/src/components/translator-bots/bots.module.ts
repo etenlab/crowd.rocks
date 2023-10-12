@@ -16,6 +16,7 @@ import { WordToWordTranslationsService } from '../translations/word-to-word-tran
 import { WordsModule } from '../words/words.module';
 import { AiTranslationsService } from './ai-translations.service';
 import { BotsResolver } from './bots.resolver';
+import { ChatGPTService } from './chatgpt.service';
 import { GoogleTranslateService } from './google-translate.service';
 import { LiltTranslateService } from './lilt-translate.service';
 import { SmartcatTranslateService } from './sc-translate.service';
@@ -46,6 +47,7 @@ import { SmartcatTranslateService } from './sc-translate.service';
     WordDefinitionVotesService,
     PhraseDefinitionsService,
     PhraseDefinitionVotesService,
+    ChatGPTService,
   ],
   exports: [
     GoogleTranslateService,

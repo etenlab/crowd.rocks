@@ -39,11 +39,11 @@ export class GoogleTranslateService implements ITranslator {
     }
   }
 
-  async translate(
+  translate = async (
     texts: string[],
     from: LanguageInput,
     to: LanguageInput,
-  ): Promise<string[]> {
+  ): Promise<string[]> => {
     try {
       if (!this.gcpTranslateClient) {
         throw new Error('no translation client');
@@ -112,7 +112,7 @@ export class GoogleTranslateService implements ITranslator {
       console.log(err);
       throw err;
     }
-  }
+  };
 
   async getLanguages(): Promise<LanguageListForBotTranslateOutput> {
     try {
