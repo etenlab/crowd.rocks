@@ -53,7 +53,7 @@ jobs:
         with:
           node-version: 16
 
-      - run: cd api && yarn install
+      - run: cd api && cp .env.example .env && yarn install
 
       - name: Test
         run: cd api && yarn test:e2e

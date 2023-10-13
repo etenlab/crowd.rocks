@@ -6,9 +6,8 @@ import { createToken } from 'src/common/utility';
 import { LanguageInput } from 'src/components/common/types';
 import { ConfigService } from 'src/core/config.service';
 import { PostgresService } from 'src/core/postgres.service';
-import { ErrorType } from '../../../common/types';
-import { LanguageListForBotTranslateOutput } from '../types';
-import { ITranslator } from './types';
+import { ErrorType } from '../../common/types';
+import { ITranslator, LanguageListForBotTranslateOutput } from './types';
 // import { substituteN, unSubstituteN } from '../../common/utility';
 
 const LIMIT_REQUESTS = 4000; // per LIMIT_TIME
@@ -118,7 +117,7 @@ export class LiltTranslateService implements ITranslator {
     };
   }
 
-  async getTranslatorToken(): Promise<{ id: string; token: string }> {
+  getTranslatorToken = async (): Promise<{ id: string; token: string }> => {
     // // check if token for liltbot exists
     const tokenRes = await this.pg.pool.query(
       `select t.token, u.user_id
@@ -153,5 +152,5 @@ export class LiltTranslateService implements ITranslator {
       token = res.rows[0].token;
     }
     return { id, token };
-  }
+  };
 }
