@@ -52,52 +52,80 @@ export function Autocomplete({
           {label}
         </Typography>
       ) : null}
-      <MuiAutocomplete
-        disabled={disabled}
-        options={options}
-        getOptionLabel={(option) => option.label}
-        fullWidth={true}
-        value={value}
-        open={open}
-        onBlur={() => {
-          setOpen(false);
-        }}
-        onFocus={() => {
-          setOpen(true);
-        }}
-        onChange={handleChangeValue}
-        PopperComponent={StyledPopper}
-        renderInput={(params) => (
-          <StyledPaper variant="outlined" ref={params.InputProps.ref}>
-            <StyledInput {...params.inputProps} placeholder={placeholder} />
-            <Divider
-              orientation="vertical"
-              variant="middle"
-              sx={{ height: '24px', marginTop: 0, marginBottom: 0 }}
-            />
-            <IconButton sx={{ padding: 0 }}>
-              {value === null ? (
-                <NavArrowDown
-                  sx={{ fontSize: 24 }}
-                  color="dark"
-                  onClick={() => {
+      {options.length > 1 ? (
+        <MuiAutocomplete
+          disabled={disabled}
+          options={options}
+          fullWidth={true}
+          value={value}
+          open={open}
+          onBlur={() => {
+            setOpen(false);
+          }}
+          onFocus={() => {
+            setOpen(true);
+          }}
+          onChange={handleChangeValue}
+          getOptionLabel={(option) => option.label}
+          isOptionEqualToValue={(option, value) => {
+            return option && value && option.value === value.value;
+          }}
+          PopperComponent={StyledPopper}
+          renderInput={(params) => (
+            <StyledPaper variant="outlined" ref={params.InputProps.ref}>
+              <StyledInput {...params.inputProps} placeholder={placeholder} />
+              <Divider
+                orientation="vertical"
+                variant="middle"
+                sx={{ height: '24px', marginTop: 0, marginBottom: 0 }}
+              />
+              <IconButton
+                sx={{ padding: 0 }}
+                onClick={() => {
+                  if (value === null) {
                     setOpen(true);
-                  }}
-                />
-              ) : (
-                <Cancel
-                  sx={{ fontSize: 24 }}
-                  color="red"
-                  onClick={() => {
+                  } else {
                     onChange(null);
                     onClear && onClear();
-                  }}
-                />
-              )}
-            </IconButton>
-          </StyledPaper>
-        )}
-      />
+                  }
+                }}
+              >
+                {value === null ? (
+                  <NavArrowDown sx={{ fontSize: 24 }} color="dark" />
+                ) : (
+                  <Cancel sx={{ fontSize: 24 }} color="red" />
+                )}
+              </IconButton>
+            </StyledPaper>
+          )}
+        />
+      ) : (
+        <StyledPaper variant="outlined">
+          <StyledInput placeholder={placeholder} />
+          <Divider
+            orientation="vertical"
+            variant="middle"
+            sx={{ height: '24px', marginTop: 0, marginBottom: 0 }}
+          />
+          <IconButton
+            sx={{ padding: 0 }}
+            onClick={() => {
+              if (value === null) {
+                setOpen(true);
+              } else {
+                onChange(null);
+                onClear && onClear();
+              }
+            }}
+          >
+            {value === null ? (
+              <NavArrowDown sx={{ fontSize: 24 }} color="dark" />
+            ) : (
+              <Cancel sx={{ fontSize: 24 }} color="red" />
+            )}
+          </IconButton>
+        </StyledPaper>
+      )}
     </Stack>
   );
 }
