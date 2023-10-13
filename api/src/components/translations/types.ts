@@ -7,7 +7,7 @@ import {
   createUnionType,
 } from '@nestjs/graphql';
 
-import { BotType, GenericOutput } from 'src/common/types';
+import { GenericOutput } from 'src/common/types';
 import { PartialVoteStatus } from 'src/components/common/types';
 
 import { WordDefinition } from 'src/components/definitions/types';

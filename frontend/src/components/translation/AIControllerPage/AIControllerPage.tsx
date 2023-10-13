@@ -29,24 +29,26 @@ import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 import {
-  useLanguagesForGoogleTranslateQuery,
   useTranslateWordsAndPhrasesByGoogleMutation,
   useTranslateAllWordsAndPhrasesByGoogleMutation,
-  useStopGoogleTranslationMutation,
   useSubscribeToTranslationReportSubscription,
   TranslateAllWordsAndPhrasesByBotResult,
   useMapsReTranslateMutation,
   useGetTranslationLanguageInfoLazyQuery,
-  useLanguagesForLiltTranslateQuery,
   useTranslateWordsAndPhrasesByLiltMutation,
   useTranslateAllWordsAndPhrasesByLiltMutation,
   useTranslateMissingWordsAndPhrasesByGoogleMutation,
   useTranslateWordsAndPhrasesBySmartcatMutation,
   useTranslateAllWordsAndPhrasesBySmartcatMutation,
-  useLanguagesForSmartcatTranslateQuery,
+  BotType,
+  useLanguagesForBotTranslateQuery,
+  useStopBotTranslationMutation,
+  useTranslateWordsAndPhrasesByDeepLMutation,
+  useTranslateAllWordsAndPhrasesByDeepLMutation,
   useTranslateWordsAndPhrasesByChatGpt35Mutation,
   useTranslateWordsAndPhrasesByChatGpt4Mutation,
   useTranslateMissingWordsAndPhrasesByChatGptMutation,
+  useTranslateMissingWordsAndPhrasesByDeepLMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, langInfo2tag } from '../../../common/langUtils';
@@ -92,17 +94,30 @@ export function AIControllerPage() {
     data: languagesGData,
     error: languagesGError,
     loading: languagesGLoading,
-  } = useLanguagesForGoogleTranslateQuery();
+  } = useLanguagesForBotTranslateQuery({
+    variables: { botType: BotType.Google },
+  });
   const {
     data: languagesLData,
     error: languagesLError,
     loading: languagesLLoading,
-  } = useLanguagesForLiltTranslateQuery();
+  } = useLanguagesForBotTranslateQuery({
+    variables: { botType: BotType.Lilt },
+  });
   const {
     data: languagesScData,
     error: languagesScError,
     loading: languagesScLoading,
-  } = useLanguagesForSmartcatTranslateQuery();
+  } = useLanguagesForBotTranslateQuery({
+    variables: { botType: BotType.Smartcat },
+  });
+  const {
+    data: languagesDLData,
+    error: languagesDLError,
+    loading: languagesDLLoading,
+  } = useLanguagesForBotTranslateQuery({
+    variables: { botType: BotType.DeepL },
+  });
 
   //google
   const [translateWordsAndPhrasesByGoogle] =
@@ -128,6 +143,16 @@ export function AIControllerPage() {
   const [translateAllWordsAndPhrasesBySmartcat] =
     useTranslateAllWordsAndPhrasesBySmartcatMutation();
 
+  //deepL
+  const [translateWordsAndPhrasesByDeepL] =
+    useTranslateWordsAndPhrasesByDeepLMutation();
+
+  const [translateAllWordsAndPhrasesByDeepL] =
+    useTranslateAllWordsAndPhrasesByDeepLMutation();
+
+  const [translateMissingWordsAndPhrasesByDeepL] =
+    useTranslateMissingWordsAndPhrasesByDeepLMutation();
+
   //chatgpt
   const [translateWordsAndPhrasesByChatGpt35] =
     useTranslateWordsAndPhrasesByChatGpt35Mutation();
@@ -138,6 +163,8 @@ export function AIControllerPage() {
   const [translateMissingWordsAndPhrasesByGpt] =
     useTranslateMissingWordsAndPhrasesByChatGptMutation();
 
+  //
+
   const { data: translationResult } =
     useSubscribeToTranslationReportSubscription();
 
@@ -145,7 +172,7 @@ export function AIControllerPage() {
     useGetTranslationLanguageInfoLazyQuery();
 
   const [mapsReTranslate] = useMapsReTranslateMutation();
-  const [stopGoogleTranslation] = useStopGoogleTranslationMutation();
+  const [stopBotTranslation] = useStopBotTranslationMutation();
 
   const batchTranslatingRef = useRef<boolean>(false);
   const [batchTranslating, setBatchTranslating] = useState<boolean>(false);
@@ -171,6 +198,7 @@ export function AIControllerPage() {
   }, [getLangInfo, source, target?.lang.tag]);
 
   useEffect(() => {
+    console.log('subscriber translationResult', translationResult);
     if (translationResult && translationResult.TranslationReport) {
       const report = translationResult.TranslationReport;
 
@@ -194,15 +222,15 @@ export function AIControllerPage() {
 
       setResult(report);
     }
-  }, [translationResult]);
+  }, [translationResult, translationResult?.TranslationReport]);
 
   const enabledTags = useMemo(() => {
     const langs =
       !languagesGError &&
       !languagesGLoading &&
       languagesGData &&
-      languagesGData.languagesForGoogleTranslate.languages
-        ? languagesGData.languagesForGoogleTranslate.languages.map(
+      languagesGData.languagesForBotTranslate.languages
+        ? languagesGData.languagesForBotTranslate.languages.map(
             (language) => language.code,
           )
         : [];
@@ -211,9 +239,9 @@ export function AIControllerPage() {
       !languagesLError &&
       !languagesLLoading &&
       languagesLData &&
-      languagesLData.languagesForLiltTranslate.languages
+      languagesLData.languagesForBotTranslate.languages
     ) {
-      languagesLData.languagesForLiltTranslate.languages.forEach((l) => {
+      languagesLData.languagesForBotTranslate.languages.forEach((l) => {
         if (!langs.includes(l.code)) {
           langs.push(l.code);
         }
@@ -223,9 +251,21 @@ export function AIControllerPage() {
       !languagesScError &&
       !languagesScLoading &&
       languagesScData &&
-      languagesScData.languagesForSmartcatTranslate.languages
+      languagesScData.languagesForBotTranslate.languages
     ) {
-      languagesScData.languagesForSmartcatTranslate.languages.forEach((l) => {
+      languagesScData.languagesForBotTranslate.languages.forEach((l) => {
+        if (!langs.includes(l.code)) {
+          langs.push(l.code);
+        }
+      });
+    }
+    if (
+      !languagesDLError &&
+      !languagesDLLoading &&
+      languagesDLData &&
+      languagesDLData.languagesForBotTranslate.languages
+    ) {
+      languagesDLData.languagesForBotTranslate.languages.forEach((l) => {
         if (!langs.includes(l.code)) {
           langs.push(l.code);
         }
@@ -243,6 +283,9 @@ export function AIControllerPage() {
     languagesScError,
     languagesScLoading,
     languagesScData,
+    languagesDLError,
+    languagesDLLoading,
+    languagesDLData,
   ]);
 
   // GOOGLE
@@ -765,9 +808,143 @@ export function AIControllerPage() {
     });
   }, [presentToast, source, tr, translateAllWordsAndPhrasesBySmartcat]);
 
+  // DeepL
+  const handleTranslateDL = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      handleTranslateToAllLangsDL();
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+
+    const { data } = await translateWordsAndPhrasesByDeepL({
+      variables: {
+        from_language_code: source.lang.tag,
+        from_dialect_code: source.dialect?.tag,
+        from_geo_code: source.region?.tag,
+        to_language_code: target.lang.tag,
+        to_dialect_code: target.dialect?.tag,
+        to_geo_code: target.region?.tag,
+      },
+    });
+
+    dismiss();
+
+    if (data && data.translateWordsAndPhrasesByDeepL.result) {
+      setResult(data.translateWordsAndPhrasesByDeepL.result);
+      await mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
+  };
+
+  const handleTranslateToAllLangsDL = useCallback(async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+      });
+
+      return;
+    }
+
+    setBatchTranslating(true);
+    batchTranslatingRef.current = true;
+
+    translateAllWordsAndPhrasesByDeepL({
+      variables: {
+        from_language_code: source.lang.tag,
+        from_dialect_code: source.dialect?.tag,
+        from_geo_code: source.region?.tag,
+      },
+    });
+  }, [presentToast, source, tr, translateAllWordsAndPhrasesByDeepL]);
+
+  const handleTranslateMissingDL = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      handleTranslateToAllLangsDL();
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+
+    const { data } = await translateMissingWordsAndPhrasesByDeepL({
+      variables: {
+        from_language_code: source.lang.tag,
+        to_language_code: target.lang.tag,
+      },
+    });
+
+    dismiss();
+
+    if (data && data.translateMissingWordsAndPhrasesByDeepL.result) {
+      setResult(data.translateMissingWordsAndPhrasesByDeepL.result);
+      await mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
+  };
+
   const handleCancelTranslateAll = async () => {
     setIsStopPressed(true);
-    await stopGoogleTranslation();
+    await stopBotTranslation();
   };
 
   const resultCom = result ? (
@@ -820,7 +997,7 @@ export function AIControllerPage() {
         ? languageData?.getLanguageTranslationInfo
             .googleTranslateTotalLangCount + ' languages'
         : languagesGData &&
-          languagesGData!.languagesForGoogleTranslate.languages?.filter(
+          languagesGData!.languagesForBotTranslate.languages?.filter(
             (scl) => scl.code === langInfo2tag(target || undefined),
           ).length + ' languages',
     },
@@ -846,9 +1023,10 @@ export function AIControllerPage() {
         ? languageData?.getLanguageTranslationInfo.liltTranslateTotalLangCount +
           ' languages'
         : languagesLData &&
-          languagesLData!.languagesForLiltTranslate.languages?.filter(
+          languagesLData!.languagesForBotTranslate.languages?.filter(
             (scl) => scl.code === langInfo2tag(target || undefined),
           ).length + ' languages',
+      disabledActions: true,
     },
     {
       handleTranslateFunc: handleTranslateSC,
@@ -858,7 +1036,20 @@ export function AIControllerPage() {
         ? languageData?.getLanguageTranslationInfo
             .smartcatTranslateTotalLangCount + ' languages'
         : languagesScData &&
-          languagesScData!.languagesForSmartcatTranslate.languages?.filter(
+          languagesScData!.languagesForBotTranslate.languages?.filter(
+            (scl) => scl.code === langInfo2tag(target || undefined),
+          ).length + ' languages',
+      disabledActions: true,
+    },
+    {
+      handleTranslateFunc: handleTranslateDL,
+      handleTranslateMissingFunc: handleTranslateMissingDL,
+      botTitle: 'DeepL',
+      languageLabel: !selectTarget
+        ? languageData?.getLanguageTranslationInfo
+            .deeplTranslateTotalLangCount + ' languages'
+        : languagesDLData &&
+          languagesDLData!.languagesForBotTranslate.languages?.filter(
             (scl) => scl.code === langInfo2tag(target || undefined),
           ).length + ' languages',
     },

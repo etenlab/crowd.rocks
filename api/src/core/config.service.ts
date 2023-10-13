@@ -38,10 +38,13 @@ export class ConfigService {
   public readonly CR_GOOGLE_BOT_PASSWORD =
     process.env.CR_GOOGLE_BOT_PASSWORD || 'asdfasdf';
 
-  public readonly SMARTCAT_USER = process.env.SMARTCAT_USER;
+  public readonly SMARTCAT_ID = process.env.SMARTCAT_ID;
   public readonly SMARTCAT_KEY = process.env.SMARTCAT_KEY;
+  public readonly SMARTCAT_PROFILE = process.env.SMARTCAT_PROFILE;
 
-  public readonly LILT_KEY = process.env.LILT_KEY;
+  public readonly LILT_KEY = process.env.LILT_KEY || '';
+
+  public readonly DEEPL_KEY = process.env.DEEPL_KEY || '';
 
   public readonly OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'asdfasdf';
 

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionToken } from 'src/common/subscription-token';
-import { GenericOutput } from 'src/common/types';
+import { BotType, GenericOutput } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
 import { PUB_SUB } from 'src/pubSub.module';
 import { LanguageInput } from '../common/types';
@@ -32,33 +32,11 @@ export class BotsResolver {
   ) {}
 
   @Query(() => LanguageListForBotTranslateOutput)
-  async languagesForGoogleTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    console.log('languagesForGoogleTranslate resolver');
-    return this.aiTranslations.languagesForGoogleTranslate();
-  }
-
-  @Query(() => LanguageListForBotTranslateOutput)
-  async languagesForLiltTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    console.log('languagesForLiltTranslate resolver');
-    return this.aiTranslations.languagesForLiltTranslate();
-  }
-
-  @Query(() => LanguageListForBotTranslateOutput)
-  async languagesForSmartcatTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    console.log('languagesForSmartcatTranslate resolver');
-    return this.aiTranslations.languagesForSmartcatTranslate();
-  }
-
-  @Query(() => LanguageListForBotTranslateOutput)
-  async languagesForChatGPT35Translate(): Promise<LanguageListForBotTranslateOutput> {
-    console.log('languagesForChatGPT35Translate resolver');
-    return this.aiTranslations.languagesForChatGPT35Translate();
-  }
-
-  @Query(() => LanguageListForBotTranslateOutput)
-  async languagesForChatGPT4Translate(): Promise<LanguageListForBotTranslateOutput> {
-    console.log('languagesForChatGPT4Translate resolver');
-    return this.aiTranslations.languagesForChatGPT4Translate();
+  async languagesForBotTranslate(
+    @Args('botType', { type: () => BotType }) botType,
+  ): Promise<LanguageListForBotTranslateOutput> {
+    console.log('languagesForBotTranslate resolver');
+    return this.aiTranslations.languagesForBotTranslate(botType);
   }
 
   @Query(() => TranslatedLanguageInfoOutput)
@@ -171,6 +149,28 @@ export class BotsResolver {
   }
 
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
+  async translateWordsAndPhrasesByDeepL(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    console.log(
+      'translateWordsAndPhrasesByDeepl',
+      JSON.stringify({
+        from_language,
+        to_language,
+      }),
+    );
+
+    return this.aiTranslations.translateWordsAndPhrasesByDeepL(
+      from_language,
+      to_language,
+      null,
+    );
+  }
+
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateMissingWordsAndPhrasesByGoogle(
     @Args('from_language', { type: () => LanguageInput })
     from_language: LanguageInput,
@@ -189,6 +189,50 @@ export class BotsResolver {
     return this.aiTranslations.translateMissingWordsAndPhrasesByGoogle(
       from_language,
       to_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
+  async translateMissingWordsAndPhrasesByDeepL(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    console.log(
+      'translateMissingWordsAndPhrasesByDeepL',
+      JSON.stringify({
+        from_language,
+        to_language,
+      }),
+    );
+
+    return this.aiTranslations.translateMissingWordsAndPhrasesByDeepL(
+      from_language,
+      to_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @Mutation(() => GenericOutput)
+  async translateAllWordsAndPhrasesByDeepL(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<GenericOutput> {
+    console.log(
+      'translateAllWordsAndPhrasesByDeepL',
+      JSON.stringify({
+        from_language,
+      }),
+    );
+
+    return this.aiTranslations.translateAllWordsAndPhrasesByDeepL(
+      from_language,
       getBearer(req) || '',
       null,
     );
@@ -283,15 +327,8 @@ export class BotsResolver {
   }
 
   @Mutation(() => GenericOutput)
-  async stopGoogleTranslation(): Promise<GenericOutput> {
-    console.log('stopGoogleTranslation');
-
-    return this.aiTranslations.stopBotTranslation();
-  }
-
-  @Mutation(() => GenericOutput)
-  async stopLiltTranslation(): Promise<GenericOutput> {
-    console.log('stopLiltTranslation');
+  async stopBotTranslation(): Promise<GenericOutput> {
+    console.log('stopBotTranslation');
     return this.aiTranslations.stopBotTranslation();
   }
 

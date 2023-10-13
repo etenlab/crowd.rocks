@@ -24,6 +24,7 @@ services:
       ADMIN_PASSWORD: asdfasdf
       MODE: DEV
       OPENAI_API_KEY: asdf
+      DEEPL_KEY: asdf
     ports:
       - 3000:3000
     depends_on:

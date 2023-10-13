@@ -1,10 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
 import { PoolClient } from 'pg';
 import { Subject } from 'rxjs';
 import { langInfo2String, subTags2LangInfo } from 'src/common/langUtils';
 import { SubscriptionToken } from 'src/common/subscription-token';
-import { ErrorType, GenericOutput } from 'src/common/types';
+import { BotType, ErrorType, GenericOutput } from 'src/common/types';
 import { pgClientOrPool } from 'src/common/utility';
 import { LanguageInput } from 'src/components/common/types';
 import { PhrasesService } from 'src/components/phrases/phrases.service';
@@ -29,9 +29,6 @@ import {
 import { TranslationsService } from '../translations/translations.service';
 import { ToDefinitionInput } from '../translations/types';
 import { ChatGPTService } from './chatgpt.service';
-import { GoogleTranslateService } from './google-translate.service';
-import { LiltTranslateService } from './lilt-translate.service';
-import { SmartcatTranslateService } from './sc-translate.service';
 import {
   ChatGPTVersion,
   IGPTTranslator,
@@ -41,9 +38,13 @@ import {
   TranslatedLanguageInfoInput,
   TranslatedLanguageInfoOutput,
 } from './types';
+import { GoogleTranslateService } from './google-translate.service';
+import { LiltTranslateService } from './lilt-translate.service';
+import { SmartcatTranslateService } from './sc-translate.service';
+import { DeepLTranslateService } from './deepl-translate.service';
 import {
-  validateTranslateByBotInput,
   getLangConnectionsObjectMapAndTexts,
+  validateTranslateByBotInput,
 } from './utility';
 
 interface ItranslateAllWordsAndPhrasesByBot {
@@ -66,7 +67,8 @@ export class AiTranslationsService {
     private phrasesService: PhrasesService,
     private gTrService: GoogleTranslateService,
     private lTrService: LiltTranslateService,
-    private ScTrService: SmartcatTranslateService,
+    private scTrService: SmartcatTranslateService,
+    private deepLTrService: DeepLTranslateService,
     private phraseToWordTrService: PhraseToWordTranslationsService,
     private phraseToPhraseTrService: PhraseToPhraseTranslationsService,
     private pg: PostgresService,
@@ -75,6 +77,7 @@ export class AiTranslationsService {
   ) {
     this.translationSubject = new Subject<number>();
   }
+
   async getTranslationLanguageInfo(
     input: TranslatedLanguageInfoInput,
     pgClient: PoolClient | null,
@@ -157,7 +160,9 @@ export class AiTranslationsService {
     const liltTranslateTotalLangCount =
       (await this.lTrService.getLanguages()).languages?.length || 0;
     const smartcatTranslateTotalLangCount =
-      (await this.ScTrService.getLanguages()).languages?.length || 0;
+      (await this.scTrService.getLanguages()).languages?.length || 0;
+    const deeplTranslateTotalLangCount =
+      (await this.deepLTrService.getLanguages()).languages?.length || 0;
 
     return {
       error: ErrorType.NoError, // later
@@ -168,6 +173,7 @@ export class AiTranslationsService {
       googleTranslateTotalLangCount,
       liltTranslateTotalLangCount,
       smartcatTranslateTotalLangCount,
+      deeplTranslateTotalLangCount,
     };
   }
 
@@ -217,6 +223,21 @@ export class AiTranslationsService {
       to_language,
       pgClient,
       version,
+    );
+  }
+
+  async translateMissingWordsAndPhrasesByDeepL(
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    return this.translateMissingWordsAndPhrasesByBot(
+      this.deepLTrService.translate,
+      this.deepLTrService.getTranslatorToken,
+      from_language,
+      to_language,
+      pgClient,
     );
   }
 
@@ -320,7 +341,7 @@ export class AiTranslationsService {
         to_definition_input: ToDefinitionInput;
       }[] = [];
 
-      const requestedCharactors = missingTexts.join('\n').length;
+      const requestedCharacters = missingTexts.join('\n').length;
 
       let translatedWordCount = 0;
       let translatedPhraseCount = 0;
@@ -509,7 +530,7 @@ export class AiTranslationsService {
       return {
         error,
         result: {
-          requestedCharacters: requestedCharactors,
+          requestedCharacters: requestedCharacters,
           totalWordCount: wordsConnection.edges.length,
           totalPhraseCount: phrasesConnection.edges.length,
           translatedWordCount,
@@ -520,11 +541,12 @@ export class AiTranslationsService {
       console.error(err);
     }
     return {
-      error: ErrorType.UnknownError,
+      error: ErrorType.BotTranslationError,
       result: null,
     };
   }
 
+  // use arrow function declaration here to provide proper 'this' context!
   translateWordsAndPhrasesByGoogle = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
@@ -538,7 +560,8 @@ export class AiTranslationsService {
     );
   };
 
-  translateWordsAndPhrasesByLilt = (
+  // use arrow function declaration here to provide proper 'this' context!
+  translateWordsAndPhrasesByLilt = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
     pgClient: PoolClient | null,
@@ -552,25 +575,40 @@ export class AiTranslationsService {
     );
   };
 
-  async translateWordsAndPhrasesBySmartcat(
+  // use arrow function declaration here to provide proper 'this' context!
+  translateWordsAndPhrasesBySmartcat = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     return this.translateWordsAndPhrasesByBot(
-      this.ScTrService,
+      this.scTrService,
       from_language,
       to_language,
       pgClient,
     );
-  }
+  };
 
-  async translateWordsAndPhrasesByChatGPT35(
+  // use arrow function declaration here to provide proper 'this' context!
+  translateWordsAndPhrasesByDeepL = async (
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
+    return this.translateWordsAndPhrasesByBot(
+      this.deepLTrService,
+      from_language,
+      to_language,
+      pgClient,
+    );
+  };
+
+  translateWordsAndPhrasesByChatGPT4 = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     return this.translateWordsAndPhrasesByBot(
       this.chatgptService,
       from_language,
@@ -578,14 +616,15 @@ export class AiTranslationsService {
       pgClient,
       ChatGPTVersion.Three,
     );
-  }
+  };
 
-  async translateWordsAndPhrasesByChatGPT4(
+  // use arrow function declaration here to provide proper 'this' context!
+  translateWordsAndPhrasesByChatGPT35 = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     return this.translateWordsAndPhrasesByBot(
       this.chatgptService,
       from_language,
@@ -593,20 +632,35 @@ export class AiTranslationsService {
       pgClient,
       ChatGPTVersion.Four,
     );
-  }
+  };
 
-  async translateWordsAndPhrasesToAllLangsByLilt(
+  // use arrow function declaration here to provide proper 'this' context!
+  translateWordsAndPhrasesToAllLangsByLilt = async (
     from_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
-  ): Promise<GenericOutput> {
+  ): Promise<GenericOutput> => {
     return this.translateWordsAndPhrasesToAllLangsByBot({
       translateWordsAndPhrases: this.translateWordsAndPhrasesByLilt,
       translator: this.lTrService,
       from_language,
       pgClient,
     });
-  }
+  };
+
+  // use arrow function declaration here to provide proper 'this' context!
+  translateAllWordsAndPhrasesByDeepL = async (
+    from_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<GenericOutput> => {
+    return this.translateWordsAndPhrasesToAllLangsByBot({
+      translateWordsAndPhrases: this.translateWordsAndPhrasesByDeepL,
+      translator: this.deepLTrService,
+      from_language,
+      pgClient,
+    });
+  };
 
   async translateWordsAndPhrasesToAllLangsBySmartcat(
     from_language: LanguageInput,
@@ -615,7 +669,7 @@ export class AiTranslationsService {
   ): Promise<GenericOutput> {
     return this.translateWordsAndPhrasesToAllLangsByBot({
       translateWordsAndPhrases: this.translateWordsAndPhrasesBySmartcat,
-      translator: this.ScTrService,
+      translator: this.scTrService,
       from_language,
       pgClient,
     });
@@ -654,7 +708,7 @@ export class AiTranslationsService {
       }
 
       let totalResult = {
-        requestedCharactors: 0,
+        requestedCharacters: 0,
         totalWordCount: 0,
         totalPhraseCount: 0,
         translatedWordCount: 0,
@@ -694,10 +748,12 @@ export class AiTranslationsService {
         next: async (step) => {
           if (step >= languages.length) {
             this.translationSubject.complete();
+            console.log(`completed`);
             return;
           }
 
           const language = languages[step];
+          console.log(`starting step ${step} language ${language.code}`);
 
           if (language.code === from_language.language_code) {
             this.translationSubject.next(step + 1);
@@ -726,8 +782,8 @@ export class AiTranslationsService {
 
           if (result) {
             totalResult = {
-              requestedCharactors:
-                totalResult.requestedCharactors + result.requestedCharacters,
+              requestedCharacters:
+                totalResult.requestedCharacters + result.requestedCharacters,
               totalWordCount:
                 totalResult.totalWordCount + result.totalWordCount,
               totalPhraseCount:
@@ -772,11 +828,14 @@ export class AiTranslationsService {
 
       this.translationSubject.next(0);
     } catch (err) {
-      console.error(err);
+      Logger.error(`Error while translating to all languages ${err}`);
+      return {
+        error: ErrorType.BotTranslationError,
+      };
     }
 
     return {
-      error: ErrorType.UnknownError,
+      error: ErrorType.NoError,
     };
   };
 
@@ -787,16 +846,21 @@ export class AiTranslationsService {
     };
   }
 
-  async languagesForGoogleTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    return this.gTrService.getLanguages();
-  }
-
-  async languagesForLiltTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    return this.lTrService.getLanguages();
-  }
-
-  async languagesForSmartcatTranslate(): Promise<LanguageListForBotTranslateOutput> {
-    return this.ScTrService.getLanguages();
+  async languagesForBotTranslate(
+    botType: BotType,
+  ): Promise<LanguageListForBotTranslateOutput> {
+    switch (botType) {
+      case BotType.Google:
+        return this.gTrService.getLanguages();
+      case BotType.Lilt:
+        return this.lTrService.getLanguages();
+      case BotType.Smartcat:
+        return this.scTrService.getLanguages();
+      case BotType.DeepL:
+        return this.deepLTrService.getLanguages();
+      default:
+        throw new Error(ErrorType.BotTranslationBotNotFound);
+    }
   }
 
   async languagesForChatGPT35Translate(): Promise<LanguageListForBotTranslateOutput> {
@@ -844,7 +908,7 @@ export class AiTranslationsService {
         translatorVersion,
       );
 
-      const requestedCharactors = originalTexts.join('\n').length;
+      const requestedCharacters = originalTexts.join('\n').length;
 
       let translatedWordCount = 0;
       let translatedPhraseCount = 0;
@@ -962,7 +1026,7 @@ export class AiTranslationsService {
       return {
         error,
         result: {
-          requestedCharacters: requestedCharactors,
+          requestedCharacters: requestedCharacters,
           totalWordCount: wordsConnection.edges.length,
           totalPhraseCount: phrasesConnection.edges.length,
           translatedWordCount,

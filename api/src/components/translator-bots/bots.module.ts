@@ -17,6 +17,7 @@ import { WordsModule } from '../words/words.module';
 import { AiTranslationsService } from './ai-translations.service';
 import { BotsResolver } from './bots.resolver';
 import { ChatGPTService } from './chatgpt.service';
+import { DeepLTranslateService } from './deepl-translate.service';
 import { GoogleTranslateService } from './google-translate.service';
 import { LiltTranslateService } from './lilt-translate.service';
 import { SmartcatTranslateService } from './sc-translate.service';
@@ -33,9 +34,9 @@ import { SmartcatTranslateService } from './sc-translate.service';
     GoogleTranslateService,
     LiltTranslateService,
     SmartcatTranslateService,
+    DeepLTranslateService,
     TranslationsService,
     AiTranslationsService,
-    BotsModule,
     TranslationsService,
     WordToWordTranslationsService,
     WordDefinitionsService,
@@ -49,13 +50,6 @@ import { SmartcatTranslateService } from './sc-translate.service';
     PhraseDefinitionVotesService,
     ChatGPTService,
   ],
-  exports: [
-    GoogleTranslateService,
-    LiltTranslateService,
-    SmartcatTranslateService,
-    TranslationsService,
-    AiTranslationsService,
-    BotsModule,
-  ],
+  exports: [AiTranslationsService],
 })
 export class BotsModule {}
