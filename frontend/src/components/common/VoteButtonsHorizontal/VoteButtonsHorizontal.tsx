@@ -1,5 +1,14 @@
-import { thumbsDown, thumbsUp } from 'ionicons/icons';
-import { StIonVoteIcon, StThumbDiv, StVoteButtonsDiv } from '../styled';
+import { Stack, Button, styled } from '@mui/material';
+
+import { ThumbsUp } from '../icons/ThumbsUp';
+import { ThumbsDown } from '../icons/ThumbsDown';
+
+const VoteButton = styled(Button)({
+  padding: '4px 10px',
+  borderRadius: '6px',
+  fontSize: '13px',
+  letterSpacing: '-0.26px',
+});
 
 export type VoteButtonsHerizontalProps = {
   onVoteUpClick: () => void;
@@ -15,29 +24,33 @@ export function VoteButtonsHorizontal({
   downVotes,
 }: VoteButtonsHerizontalProps) {
   return (
-    <StVoteButtonsDiv style={{ flexDirection: 'row' }}>
-      <StThumbDiv>
-        <StIonVoteIcon
-          color="success"
-          icon={thumbsUp}
-          onClick={(e) => {
-            e.stopPropagation();
-            onVoteUpClick();
-          }}
-        />
+    <Stack direction="row" gap="16px">
+      <VoteButton
+        variant="contained"
+        color="green"
+        startIcon={<ThumbsUp sx={{ fontSize: 24 }} />}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+
+          onVoteUpClick();
+        }}
+      >
         {upVotes}
-      </StThumbDiv>
-      <StThumbDiv>
-        <StIonVoteIcon
-          color="danger"
-          icon={thumbsDown}
-          onClick={(e) => {
-            e.stopPropagation();
-            onVoteDownClick();
-          }}
-        />
+      </VoteButton>
+      <VoteButton
+        variant="contained"
+        color="red"
+        startIcon={<ThumbsDown sx={{ fontSize: 24 }} />}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+
+          onVoteDownClick();
+        }}
+      >
         {downVotes}
-      </StThumbDiv>
-    </StVoteButtonsDiv>
+      </VoteButton>
+    </Stack>
   );
 }

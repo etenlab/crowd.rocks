@@ -30,7 +30,7 @@ export const Caption = ({ handleBackClick, children }: TCaptionProps) => {
       <IconButton onClick={onClickAction} sx={{ padding: 0 }}>
         <NavArrowLeft color="dark" />
       </IconButton>
-      <Typography variant="h1" color="dark">
+      <Typography variant="h2" color="dark">
         {children}
       </Typography>
     </Stack>

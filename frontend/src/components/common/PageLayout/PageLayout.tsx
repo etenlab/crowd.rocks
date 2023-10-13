@@ -38,10 +38,11 @@ export function PageLayout({ children, header }: PageLayoutProps) {
               setModal(null);
             }}
             sx={{
-              '& .MuiPaper-root': {
+              '& .MuiDialog-paper': {
                 padding: '40px 20px',
                 borderRadius: '20px',
                 margin: '15px',
+                width: '100vw',
               },
             }}
           >
