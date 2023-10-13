@@ -48,6 +48,7 @@ import {
   useTranslateWordsAndPhrasesByChatGpt35Mutation,
   useTranslateWordsAndPhrasesByChatGpt4Mutation,
   useTranslateMissingWordsAndPhrasesByChatGptMutation,
+  useTranslateMissingWordsAndPhrasesByDeepLMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, langInfo2tag } from '../../../common/langUtils';
@@ -148,6 +149,9 @@ export function AIControllerPage() {
 
   const [translateAllWordsAndPhrasesByDeepL] =
     useTranslateAllWordsAndPhrasesByDeepLMutation();
+
+  const [translateMissingWordsAndPhrasesByDeepL] =
+    useTranslateMissingWordsAndPhrasesByDeepLMutation();
 
   //chatgpt
   const [translateWordsAndPhrasesByChatGpt35] =
@@ -885,6 +889,59 @@ export function AIControllerPage() {
     });
   }, [presentToast, source, tr, translateAllWordsAndPhrasesByDeepL]);
 
+  const handleTranslateMissingDL = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      handleTranslateToAllLangsDL();
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+
+    const { data } = await translateMissingWordsAndPhrasesByDeepL({
+      variables: {
+        from_language_code: source.lang.tag,
+        to_language_code: target.lang.tag,
+      },
+    });
+
+    dismiss();
+
+    if (data && data.translateMissingWordsAndPhrasesByDeepL.result) {
+      setResult(data.translateMissingWordsAndPhrasesByDeepL.result);
+      await mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
+  };
+
   const handleCancelTranslateAll = async () => {
     setIsStopPressed(true);
     await stopBotTranslation();
@@ -986,7 +1043,7 @@ export function AIControllerPage() {
     },
     {
       handleTranslateFunc: handleTranslateDL,
-      handleTranslateMissingFunc: null,
+      handleTranslateMissingFunc: handleTranslateMissingDL,
       botTitle: 'DeepL',
       languageLabel: !selectTarget
         ? languageData?.getLanguageTranslationInfo

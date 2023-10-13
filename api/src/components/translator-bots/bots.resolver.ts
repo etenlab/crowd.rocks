@@ -195,6 +195,30 @@ export class BotsResolver {
     );
   }
 
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
+  async translateMissingWordsAndPhrasesByDeepL(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    console.log(
+      'translateMissingWordsAndPhrasesByDeepL',
+      JSON.stringify({
+        from_language,
+        to_language,
+      }),
+    );
+
+    return this.aiTranslations.translateMissingWordsAndPhrasesByDeepL(
+      from_language,
+      to_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
   @Mutation(() => GenericOutput)
   async translateAllWordsAndPhrasesByDeepL(
     @Args('from_language', { type: () => LanguageInput })

@@ -94,7 +94,7 @@ export class DeepLTranslateService implements ITranslator {
     }
   }
 
-  async getTranslatorToken(): Promise<{ id: string; token: string }> {
+  getTranslatorToken = async (): Promise<{ id: string; token: string }> => {
     // // check if token for bot exists
     const tokenRes = await this.pg.pool.query(
       `select t.token, u.user_id
@@ -129,5 +129,5 @@ export class DeepLTranslateService implements ITranslator {
       token = res.rows[0].token;
     }
     return { id, token };
-  }
+  };
 }

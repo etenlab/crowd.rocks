@@ -611,6 +611,7 @@ type Mutation {
   translateAllWordsAndPhrasesByLilt(from_language: LanguageInput!): GenericOutput!
   translateAllWordsAndPhrasesBySmartcat(from_language: LanguageInput!): GenericOutput!
   translateMissingWordsAndPhrasesByChatGpt(from_language: LanguageInput!, to_language: LanguageInput!, version: String!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateMissingWordsAndPhrasesByDeepL(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateMissingWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByChatGPT4(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByChatGPT35(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!

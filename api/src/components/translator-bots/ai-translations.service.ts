@@ -67,8 +67,8 @@ export class AiTranslationsService {
     private phrasesService: PhrasesService,
     private gTrService: GoogleTranslateService,
     private lTrService: LiltTranslateService,
-    private ScTrService: SmartcatTranslateService,
-    private DeepLTrService: DeepLTranslateService,
+    private scTrService: SmartcatTranslateService,
+    private deepLTrService: DeepLTranslateService,
     private phraseToWordTrService: PhraseToWordTranslationsService,
     private phraseToPhraseTrService: PhraseToPhraseTranslationsService,
     private pg: PostgresService,
@@ -160,9 +160,9 @@ export class AiTranslationsService {
     const liltTranslateTotalLangCount =
       (await this.lTrService.getLanguages()).languages?.length || 0;
     const smartcatTranslateTotalLangCount =
-      (await this.ScTrService.getLanguages()).languages?.length || 0;
+      (await this.scTrService.getLanguages()).languages?.length || 0;
     const deeplTranslateTotalLangCount =
-      (await this.DeepLTrService.getLanguages()).languages?.length || 0;
+      (await this.deepLTrService.getLanguages()).languages?.length || 0;
 
     return {
       error: ErrorType.NoError, // later
@@ -223,6 +223,21 @@ export class AiTranslationsService {
       to_language,
       pgClient,
       version,
+    );
+  }
+
+  async translateMissingWordsAndPhrasesByDeepL(
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    return this.translateMissingWordsAndPhrasesByBot(
+      this.deepLTrService.translate,
+      this.deepLTrService.getTranslatorToken,
+      from_language,
+      to_language,
+      pgClient,
     );
   }
 
@@ -566,7 +581,7 @@ export class AiTranslationsService {
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     return this.translateWordsAndPhrasesByBot(
-      this.ScTrService,
+      this.scTrService,
       from_language,
       to_language,
       pgClient,
@@ -580,7 +595,7 @@ export class AiTranslationsService {
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     return this.translateWordsAndPhrasesByBot(
-      this.DeepLTrService,
+      this.deepLTrService,
       from_language,
       to_language,
       pgClient,
@@ -641,7 +656,7 @@ export class AiTranslationsService {
   ): Promise<GenericOutput> => {
     return this.translateWordsAndPhrasesToAllLangsByBot({
       translateWordsAndPhrases: this.translateWordsAndPhrasesByDeepL,
-      translator: this.DeepLTrService,
+      translator: this.deepLTrService,
       from_language,
       pgClient,
     });
@@ -654,7 +669,7 @@ export class AiTranslationsService {
   ): Promise<GenericOutput> {
     return this.translateWordsAndPhrasesToAllLangsByBot({
       translateWordsAndPhrases: this.translateWordsAndPhrasesBySmartcat,
-      translator: this.ScTrService,
+      translator: this.scTrService,
       from_language,
       pgClient,
     });
@@ -840,9 +855,9 @@ export class AiTranslationsService {
       case BotType.Lilt:
         return this.lTrService.getLanguages();
       case BotType.Smartcat:
-        return this.ScTrService.getLanguages();
+        return this.scTrService.getLanguages();
       case BotType.DeepL:
-        return this.DeepLTrService.getLanguages();
+        return this.deepLTrService.getLanguages();
       default:
         throw new Error(ErrorType.BotTranslationBotNotFound);
     }
