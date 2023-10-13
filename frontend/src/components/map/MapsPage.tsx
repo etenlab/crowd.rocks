@@ -1,10 +1,17 @@
-import { MapList } from './MapList/MapsList';
 import { Redirect, Route, RouteComponentProps } from 'react-router-dom';
-import { MapWordsList } from './MapWordsTranslation/MapWordsList';
-import { MapDetails } from './MapDetails/MapDetails';
+
 import { PageLayout } from '../common/PageLayout';
+
+import { MapList } from './MapList/MapsList';
+import { MapDetails } from './MapDetails/MapDetails';
+import { MapView } from './MapDetails/MapView';
+
+import { MapWordsList } from './MapWordsTranslation/MapWordsList';
 import { MapWordOrPhraseTranslation } from './MapWordOrPhraseTranslation/MapWordOrPhraseTranslantion';
+import { MapNewTranslationConfirm } from './MapWordsTranslation/MapNewTranslationConfirm';
+
 import { useAppContext } from '../../hooks/useAppContext';
+
 import { langInfo2tag } from '../../common/langUtils';
 
 interface MapsPageProps
@@ -40,8 +47,18 @@ export const MapsPage: React.FC<MapsPageProps> = ({ match }: MapsPageProps) => {
       />
       <Route
         exact
+        path={`/:nation_id/:language_id/1/maps/translation_confirm/:definition_id/:type`}
+        component={MapNewTranslationConfirm}
+      />
+      <Route
+        exact
         path={`/:nation_id/:language_id/1/maps/details/:id`}
         component={MapDetails}
+      />
+      <Route
+        exact
+        path={`/:nation_id/:language_id/1/maps/detail_view/:id`}
+        component={MapView}
       />
       <Route exact path={`/:nation_id/:language_id/1/maps/`}>
         <Redirect
