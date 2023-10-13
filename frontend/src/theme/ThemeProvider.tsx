@@ -148,6 +148,8 @@ declare module '@mui/material/styles' {
     green: PaletteColorOptions;
     dark: PaletteColorOptions;
     gray_stroke: PaletteColorOptions;
+    gray_bg: PaletteColorOptions;
+    gray: PaletteColorOptions;
   }
 
   interface CustomTypeText {
@@ -160,6 +162,7 @@ declare module '@mui/material/styles' {
     gray: string;
     gray_text: string;
     gray_stroke: string;
+    gray_bg: string;
   }
 
   interface Palette extends CustomPalette {}
@@ -168,11 +171,13 @@ declare module '@mui/material/styles' {
 
   interface TypographyVariants {
     body3: React.CSSProperties;
+    body4: React.CSSProperties;
   }
 
   // allow configuration using `createTheme`
   interface TypographyVariantsOptions {
     body3?: React.CSSProperties;
+    body4?: React.CSSProperties;
   }
 
   interface TypeBackground {
@@ -185,6 +190,7 @@ declare module '@mui/material/styles' {
     gray: string;
     gray_text: string;
     gray_stroke: string;
+    gray_bg: string;
   }
 }
 
@@ -192,6 +198,7 @@ declare module '@mui/material/styles' {
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
     body3: true;
+    body4: true;
   }
 }
 
@@ -204,6 +211,22 @@ declare module '@mui/material/Button' {
     green: true;
     dark: true;
     gray_stroke: true;
+    gray: true;
+    gray_bg: true;
+  }
+}
+
+declare module '@mui/material/IconButton' {
+  interface IconButtonPropsColorOverrides {
+    blue: true;
+    orange: true;
+    red: true;
+    white: true;
+    green: true;
+    dark: true;
+    gray_stroke: true;
+    gray: true;
+    gray_bg: true;
   }
 }
 
@@ -216,6 +239,22 @@ declare module '@mui/material/Badge' {
     green: true;
     dark: true;
     gray_stroke: true;
+    gray: true;
+    gray_bg: true;
+  }
+}
+
+declare module '@mui/material/Checkbox' {
+  interface CheckboxPropsColorOverrides {
+    blue: true;
+    orange: true;
+    red: true;
+    white: true;
+    green: true;
+    dark: true;
+    gray_stroke: true;
+    gray: true;
+    gray_bg: true;
   }
 }
 
@@ -228,6 +267,22 @@ declare module '@mui/material/LinearProgress' {
     green: true;
     dark: true;
     gray_stroke: true;
+    gray: true;
+    gray_bg: true;
+  }
+}
+
+declare module '@mui/material/Chip' {
+  interface ChipPropsColorOverrides {
+    blue: true;
+    orange: true;
+    red: true;
+    white: true;
+    green: true;
+    dark: true;
+    gray_stroke: true;
+    gray: true;
+    gray_bg: true;
   }
 }
 
@@ -239,8 +294,9 @@ declare module '@mui/material/SvgIcon' {
     white: true;
     green: true;
     dark: true;
-    gray: string;
-    gray_text: string;
-    gray_stroke: string;
+    gray: true;
+    gray_text: true;
+    gray_stroke: true;
+    gray_bg: true;
   }
 }
