@@ -41,6 +41,15 @@ type AvatarUpdateOutput {
   user: User
 }
 
+enum BotType {
+  DeepL
+  GPT4
+  GPT35
+  Google
+  Lilt
+  Smartcat
+}
+
 input CreateQuestionOnWordRangeUpsertInput {
   begin_document_word_entry_id: ID!
   end_document_word_entry_id: ID!
@@ -107,6 +116,7 @@ enum ErrorType {
   AvatarTooShort
   AvatarUnavailable
   BotTranslationBotNotFound
+  BotTranslationError
   BotTranslationLanguagesListError
   CandidateNotFound
   CandidateNotFoundInBallot
@@ -146,6 +156,7 @@ enum ErrorType {
   NotificationDeleteFailed
   NotificationInsertFailed
   OffsetInvalid
+  PaginationError
   ParentElectionNotFound
   PasswordInvalid
   PasswordTooLong
@@ -359,6 +370,7 @@ input GetOrigMapListInput {
 input GetOrigMapWordsAndPhrasesInput {
   filter: String
   lang: LanguageInput!
+  original_map_id: String
 }
 
 type GetOrigMapsListOutput {
@@ -530,6 +542,11 @@ type MapWordsAndPhrasesConnection {
   pageInfo: PageInfo!
 }
 
+type MapWordsAndPhrasesCountOutput {
+  count: Float
+  error: ErrorType!
+}
+
 type MapWordsAndPhrasesEdge {
   cursor: ID!
   node: MapWordOrPhrase!
@@ -575,8 +592,7 @@ type Mutation {
   siteTextPhraseDefinitionUpsert(phrase_definition_id: ID!): SiteTextPhraseDefinitionOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextDefinitionOutput!
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
-  stopGoogleTranslation: GenericOutput!
-  stopLiltTranslation: GenericOutput!
+  stopBotTranslation: GenericOutput!
   threadDelete(input: ThreadDeleteInput!): ThreadDeleteOutput!
   threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
@@ -590,10 +606,16 @@ type Mutation {
   toggleWordDefinitionVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
+  translateAllWordsAndPhrasesByDeepL(from_language: LanguageInput!): GenericOutput!
   translateAllWordsAndPhrasesByGoogle(from_language: LanguageInput!): GenericOutput!
   translateAllWordsAndPhrasesByLilt(from_language: LanguageInput!): GenericOutput!
   translateAllWordsAndPhrasesBySmartcat(from_language: LanguageInput!): GenericOutput!
+  translateMissingWordsAndPhrasesByChatGpt(from_language: LanguageInput!, to_language: LanguageInput!, version: String!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateMissingWordsAndPhrasesByDeepL(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateMissingWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateWordsAndPhrasesByChatGPT4(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateWordsAndPhrasesByChatGPT35(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateWordsAndPhrasesByDeepL(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByLilt(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesBySmartcat(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
@@ -642,6 +664,11 @@ type NotificationListOutput {
 input NotifyUsersInput {
   text: String!
   user_ids: [ID!]!
+}
+
+type OrigMapWordsAndPhrasesOutput {
+  error: ErrorType!
+  mapWordsOrPhrases: [MapWordOrPhrase!]
 }
 
 type PageInfo {
@@ -983,6 +1010,8 @@ type Query {
   getMapVoteStatus(is_original: Boolean!, map_id: ID!): MapVoteStatusOutputRow!
   getMapWordOrPhraseAsOrigByDefinitionId(input: GetMapWordOrPhraseByDefinitionIdInput!): MapWordOrPhraseAsOrigOutput!
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
+  getOrigMapWordsAndPhrasesCount(input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesCountOutput!
+  getOrigMapWordsAndPhrasesPaginated(input: GetOrigMapWordsAndPhrasesInput!, limit: Int, offset: Int): OrigMapWordsAndPhrasesOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
   getPericopiesByDocumentId(document_id: ID!): PericopiesOutput!
@@ -1016,9 +1045,7 @@ type Query {
   getWordVoteStatus(word_id: ID!): WordVoteStatusOutputRow!
   getWordWithVoteById(word_id: ID!): WordWithVoteOutput!
   getWordsByLanguage(after: ID, first: Int, input: LanguageInput!): WordWithVoteListConnection!
-  languagesForGoogleTranslate: LanguageListForBotTranslateOutput!
-  languagesForLiltTranslate: LanguageListForBotTranslateOutput!
-  languagesForSmartcatTranslate: LanguageListForBotTranslateOutput!
+  languagesForBotTranslate(botType: BotType!): LanguageListForBotTranslateOutput!
   loggedInIsAdmin(input: IsAdminIdInput!): IsAdminIdOutput!
   notifications: NotificationListOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionOutput!
@@ -1319,6 +1346,7 @@ input TranslatedLanguageInfoInput {
 }
 
 type TranslatedLanguageInfoOutput {
+  deeplTranslateTotalLangCount: Int!
   error: ErrorType!
   googleTranslateTotalLangCount: Int!
   liltTranslateTotalLangCount: Int!

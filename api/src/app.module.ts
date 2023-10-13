@@ -27,6 +27,7 @@ import { FlagsModule } from './components/flag/flags.module';
 import { FileModule } from './components/file/file.module';
 import { QuestionAndAnswersModule } from './components/question-answer/question-answer.module';
 import { PericopiesModule } from './components/pericopies/pericopies.module';
+import { BotsModule } from './components/translator-bots/bots.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { PericopiesModule } from './components/pericopies/pericopies.module';
     FileModule,
     QuestionAndAnswersModule,
     PericopiesModule,
+    BotsModule,
   ],
   controllers: [],
   providers: [],

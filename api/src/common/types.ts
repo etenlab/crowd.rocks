@@ -9,6 +9,9 @@ export enum BotType {
   Google = 'Google',
   Lilt = 'Lilt',
   Smartcat = 'Smartcat',
+  DeepL = 'DeepL',
+  GPT35 = 'GPT35',
+  GPT4 = 'GPT4',
 }
 
 export enum ErrorType {
@@ -113,6 +116,7 @@ export enum ErrorType {
   Unauthorized = 'Unauthorized',
   UnknownError = 'UnknownError',
   ProvidedIdIsMalformed = 'ProvidedIdIsMalformed',
+  PaginationError = 'PaginationError',
 
   DocumentEntryReadError = 'DocumentEntryReadError',
   DocumentWordEntryInsertFailed = 'DocumentWordEntryInsertFailed',
@@ -127,6 +131,8 @@ export enum ErrorType {
   PericopeInsertFailed = 'PericopeInsertFailed',
   PericopeNotFound = 'PericopeNotFound',
   PericopeVoteToggleFailed = 'PericopeVoteToggleFailed',
+  BotTranslationError = 'BotTranslationError',
+
   BotTranslationBotNotFound = 'BotTranslationBotNotFound',
   BotTranslationLanguagesListError = 'BotTranslationLanguagesListError',
 }
@@ -160,6 +166,10 @@ export enum TableNameType {
 
 registerEnumType(TableNameType, {
   name: 'TableNameType',
+});
+
+registerEnumType(BotType, {
+  name: 'BotType',
 });
 
 export interface ITagInfo {

@@ -113,7 +113,7 @@ export const subTags2LangInfo = ({
   return tag2langInfo(langTag);
 };
 
-export const LanguageInput2tag = (languageInput: LanguageInput): string => {
+export const languageInput2tag = (languageInput: LanguageInput): string => {
   return subTags2Tag({
     lang: languageInput.language_code,
     dialect: languageInput.dialect_code || undefined,

@@ -67,7 +67,6 @@ export function MapWordsList() {
         filter,
         first: PAGE_SIZE,
       },
-      fetchPolicy: 'no-cache',
     });
   }, [getWordsAndPhrases, targetLang, filter]);
 

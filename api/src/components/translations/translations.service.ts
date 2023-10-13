@@ -1,11 +1,8 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
-import { PubSub } from 'graphql-subscriptions';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { ErrorType } from 'src/common/types';
 import { calc_vote_weight } from 'src/common/utility';
 import { LanguageInput } from 'src/components/common/types';
-
-import { PUB_SUB } from 'src/pubSub.module';
 
 import { DefinitionsService } from 'src/components/definitions/definitions.service';
 
@@ -108,7 +105,6 @@ const makeKey = (
 @Injectable()
 export class TranslationsService {
   constructor(
-    @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private wordToWordTrService: WordToWordTranslationsService,
     private wordToPhraseTrService: WordToPhraseTranslationsService,
     private phraseToWordTrService: PhraseToWordTranslationsService,

@@ -1,4 +1,4 @@
-import { useMemo, ReactNode, memo } from 'react';
+import { useMemo, ReactNode, memo, MouseEvent } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 
 import { Word, Dot, Container } from './styled';
@@ -65,12 +65,18 @@ export const BaseDocumentViewer = memo(function BaseDocumentViewerPure({
         const isDot = dot ? true : false;
         const dotCom = dot ? dot.component : null;
 
-        const color =
+        let classStr = `${mode} `;
+        classStr +=
           (begin && !end && range.endEntry) ||
           entry.id === range.beginEntry ||
           entry.id === range.endEntry
-            ? 'red'
-            : 'black';
+            ? 'selected'
+            : '';
+        classStr += ` ${
+          entry.id === range.beginEntry || entry.id === range.endEntry
+            ? 'boundary'
+            : ''
+        }`;
 
         const cursor = isDot ? 'pointer' : 'default';
 
@@ -78,18 +84,20 @@ export const BaseDocumentViewer = memo(function BaseDocumentViewerPure({
           end = true;
         }
 
+        const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+          if (mode === 'view' && !isDot) {
+            return;
+          }
+
+          onClickWord(entry.id, index, e);
+        };
+
         return (
           <Word
             key={entry.id}
-            className={`${mode}`}
-            onClick={(e) =>
-              mode === 'view'
-                ? isDot
-                  ? onClickWord(entry.id, index, e)
-                  : null
-                : onClickWord(entry.id, index, e)
-            }
-            style={{ color, cursor }}
+            className={classStr}
+            onClick={handleClick}
+            style={{ cursor }}
           >
             {entry.wordlike_string.wordlike_string}
             {isDot ? dotCom || <Dot /> : null}

@@ -1,22 +1,19 @@
 import { Injectable } from '@nestjs/common';
 
-import { LanguageInput } from '../../common/types';
+import { LanguageInput } from '../common/types';
 import { ConfigService } from 'src/core/config.service';
-import { PostgresService } from '../../../core/postgres.service';
-import { createToken } from '../../../common/utility';
+import { PostgresService } from '../../core/postgres.service';
+import { createToken } from '../../common/utility';
 import { hash } from 'argon2';
 import { parse } from 'node-html-parser';
-import fetch from 'node-fetch';
-import { LanguageInput2tag } from '../../../common/langUtils';
-import { ITranslator } from './types';
-import { LanguageListForBotTranslateOutput } from '../types';
-import { ErrorType } from '../../../common/types';
+import fetch, { Headers } from 'node-fetch';
+import { ITranslator, LanguageListForBotTranslateOutput } from './types';
+import { ErrorType } from '../../common/types';
+import { languageInput2tag } from '../../common/langUtils';
 
 const LIMIT_WORDS = 20; // for debugging purposes, not to exhaust free limit too quickly/
 const SMARTCAT_BOT_EMAIL = 'liltbot@crowd.rocks';
-const DEFAULT_CONTEXT = 'default';
-const DEFAULT_PROFILE = 'crowd.rocks profile';
-const DEFAULT_TAG = 'crowd.rocks tag';
+const PROJECT_TAG = 'crowd_rocks_tag';
 
 type InSmartcatObj = {
   sourceLanguage: string;
@@ -25,7 +22,7 @@ type InSmartcatObj = {
   isHtml: boolean;
   texts: Array<{
     text: string;
-    context: string;
+    context?: string;
   }>;
   externalTag: string;
 };
@@ -44,9 +41,46 @@ export class SmartcatTranslateService implements ITranslator {
   constructor(private config: ConfigService, private pg: PostgresService) {}
 
   async smartcatTranslate(inObj: InSmartcatObj): Promise<OutSmartcatObj> {
-    const res: OutSmartcatObj = { translations: [] };
-    //todo
-    return res;
+    if (!this.config.SMARTCAT_KEY || !this.config.SMARTCAT_ID) {
+      throw new Error(`No credentials for smartcat are found.`);
+    }
+    const url =
+      'https://us.smartcat.ai/api/integration/v1/smartTranslation/translate';
+    const username = this.config.SMARTCAT_ID;
+    const password = this.config.SMARTCAT_KEY;
+
+    const headers = new Headers();
+    // headers.append('Content-Type', 'text/json');
+    console.log(Buffer.from(username + ':' + password).toString('base64'));
+    headers.append(
+      'Authorization',
+      `Basic ${Buffer.from(username + ':' + password).toString('base64')}`,
+    );
+    headers.append('Content-Type', 'application/json-patch+json');
+    headers.append('Accept', 'text/plain');
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(inObj),
+    });
+    let resS = '';
+    for await (const b of res.body) {
+      resS += b;
+    }
+    if (!res.ok) {
+      throw new Error(
+        `Error from Smartcat API, responce:  ${JSON.stringify(resS)}`,
+      );
+    }
+
+    let resJ: any = {};
+    try {
+      resJ = JSON.parse(resS);
+    } catch {
+      throw new Error(`Can't parse Smartcat API responce:  ${resS}`);
+    }
+    return resJ;
   }
 
   async translate(
@@ -56,25 +90,24 @@ export class SmartcatTranslateService implements ITranslator {
   ): Promise<string[]> {
     try {
       const objForTranslation: InSmartcatObj = {
-        sourceLanguage: LanguageInput2tag(from),
-        targetLanguages: [LanguageInput2tag(to)],
+        sourceLanguage: languageInput2tag(from),
+        targetLanguages: [languageInput2tag(to)],
         isHtml: false,
-        externalTag: DEFAULT_TAG,
-        profile: DEFAULT_PROFILE,
+        externalTag: PROJECT_TAG,
+        profile: this.config.SMARTCAT_PROFILE || '',
         texts: texts.splice(0, LIMIT_WORDS).map((text) => ({
           text,
-          context: DEFAULT_CONTEXT,
         })),
       };
 
       const translatedObj = await this.smartcatTranslate(objForTranslation);
       const translatedTexts = translatedObj.translations[
-        LanguageInput2tag(to)
+        languageInput2tag(to)
       ].map((t) => t.translation);
 
       return translatedTexts;
     } catch (err) {
-      console.log(err);
+      console.log(`sc-translate.service Error: ${JSON.stringify(err)}`);
       throw err;
     }
   }
@@ -119,7 +152,7 @@ export class SmartcatTranslateService implements ITranslator {
     }
   }
 
-  async getTranslatorToken(): Promise<{ id: string; token: string }> {
+  getTranslatorToken = async (): Promise<{ id: string; token: string }> => {
     // // check if token for liltbot exists
     const tokenRes = await this.pg.pool.query(
       `select t.token, u.user_id
@@ -154,5 +187,5 @@ export class SmartcatTranslateService implements ITranslator {
       token = res.rows[0].token;
     }
     return { id, token };
-  }
+  };
 }

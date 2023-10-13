@@ -58,6 +58,27 @@ const databaseStack = new StorageStack(
 
 /** API service */
 const { apiService } = config;
+
+const dbSecrets = Object.entries(apiService.dbSecrets || {}).map(
+  ([key, value]) => {
+    return {
+      taskDefSecretName: key,
+      secretsManagerSecretName: config.dbCredentialSecret as string,
+      secretsMangerSecretField: value,
+    };
+  },
+);
+
+const appSecrets = Object.entries(apiService.appSecrets || {}).map(
+  ([key, value]) => {
+    return {
+      taskDefSecretName: key,
+      secretsManagerSecretName: config.appSecrets as string,
+      secretsMangerSecretField: value,
+    };
+  },
+);
+
 const apiServiceStack = new ApiServiceStack(
   app,
   `${config.environment}ApiServiceStack`,
@@ -115,53 +136,7 @@ const apiServiceStack = new ApiServiceStack(
         PORT: String(apiService.dockerPort),
       },
     ],
-    secrets: [
-      {
-        taskDefSecretName: 'ADMIN_PASSWORD',
-        secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/adminPassword`,
-        createNewSecret: true,
-      },
-      {
-        taskDefSecretName: 'CR_GOOGLE_BOT_PASSWORD',
-        secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/googleBotPassword`,
-        createNewSecret: true,
-      },
-      {
-        taskDefSecretName: 'GCP_PROJECT_ID',
-        secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/gcpProjectId`,
-        createNewSecret: true,
-      },
-      {
-        taskDefSecretName: 'GCP_API_KEY',
-        secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/gcpApiKey`,
-        createNewSecret: true,
-      },
-      {
-        taskDefSecretName: 'CR_DB_USER',
-        secretsManagerSecretName: config.dbCredentialSecret,
-        secretsMangerSecretField: 'username',
-      },
-      {
-        taskDefSecretName: 'CR_DB_PASSWORD',
-        secretsManagerSecretName: config.dbCredentialSecret,
-        secretsMangerSecretField: 'password',
-      },
-      {
-        taskDefSecretName: 'CR_DB',
-        secretsManagerSecretName: config.dbCredentialSecret,
-        secretsMangerSecretField: 'dbname',
-      },
-      {
-        taskDefSecretName: 'CR_DB_URL',
-        secretsManagerSecretName: config.dbCredentialSecret,
-        secretsMangerSecretField: 'host',
-      },
-      {
-        taskDefSecretName: 'CR_DB_PORT',
-        secretsManagerSecretName: config.dbCredentialSecret,
-        secretsMangerSecretField: 'port',
-      },
-    ],
+    secrets: [...dbSecrets, ...appSecrets],
   },
 );
 

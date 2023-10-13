@@ -16,6 +16,7 @@ export interface EnvConfig {
   albListenerSsmParam: string;
   dbSecurityGroupSsmParam: string;
   dbCredentialSecret: string;
+  appSecrets: string;
   dbPublicAccess: boolean;
   apiService: FargateServiceConfig;
   docsApp: AppConfig;
@@ -42,7 +43,8 @@ export interface FargateServiceConfig {
   taskCount: number;
   healthCheckPath: string;
   environment: Record<string, string>;
-  secrets: Record<string, string>;
+  dbSecrets: Record<string, string>;
+  appSecrets: Record<string, string>;
   priority: number;
   dockerLabels?: { [key: string]: string };
   command?: string[];

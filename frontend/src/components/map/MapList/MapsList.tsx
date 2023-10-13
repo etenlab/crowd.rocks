@@ -72,7 +72,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   } = useAppContext();
 
   const [getAllMapsList, { data: allMapsQuery, fetchMore }] =
-    useGetAllMapsListLazyQuery({ fetchPolicy: 'no-cache' });
+    useGetAllMapsListLazyQuery();
 
   useEffect(() => {
     if (

@@ -4,7 +4,7 @@ import { useTr } from '../../../hooks/useTr';
 import { RowStack } from '../../common/Layout/styled';
 
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
-// import { Flag } from '../../flags/Flag';
+
 import { StChatIcon } from '../../common/styled';
 
 type PericopeReaction = {
@@ -17,14 +17,13 @@ type PericopeReaction = {
   };
   onClickAddPericope(): void;
   onClickDiscussion?: () => void;
-  // onClickFlag?: () => void;
 };
 
 export function PericopeReaction({
   mode,
   vote,
   onClickAddPericope,
-  onClickDiscussion, // onClickFlag,
+  onClickDiscussion,
 }: PericopeReaction) {
   const { tr } = useTr();
 
@@ -36,13 +35,7 @@ export function PericopeReaction({
     );
   } else {
     const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
-    // const flagsCom = onClickFlag ? (
-    //   <Flag
-    //     parent_table={flags.parent_table}
-    //     parent_id={flags.parent_id}
-    //     flag_names={flags.flag_names}
-    //   />
-    // ) : null;
+
     const discussionCom = onClickDiscussion ? (
       <StChatIcon
         icon={chatbubbleEllipsesSharp}

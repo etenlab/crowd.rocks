@@ -29,6 +29,8 @@ import {
   MapVoteOutput,
   MapVoteUpsertInput,
   MapVoteStatusOutputRow,
+  MapWordsAndPhrasesCountOutput,
+  OrigMapWordsAndPhrasesOutput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
@@ -250,6 +252,26 @@ export class MapsResolver {
     after?: string | null,
   ): Promise<MapWordsAndPhrasesConnection | undefined> {
     return this.mapsService.getOrigMapWordsAndPhrases({ input, first, after });
+  }
+
+  @Query(() => MapWordsAndPhrasesCountOutput)
+  async getOrigMapWordsAndPhrasesCount(
+    @Args('input') input: GetOrigMapWordsAndPhrasesInput,
+  ): Promise<MapWordsAndPhrasesCountOutput | undefined> {
+    return this.mapsService.getOrigMapWordsAndPhrasesCount(input);
+  }
+
+  @Query(() => OrigMapWordsAndPhrasesOutput)
+  async getOrigMapWordsAndPhrasesPaginated(
+    @Args('input') input: GetOrigMapWordsAndPhrasesInput,
+    @Args('offset', { type: () => Int, nullable: true }) offset?: number | null,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number | null,
+  ): Promise<OrigMapWordsAndPhrasesOutput | undefined> {
+    return this.mapsService.getOrigMapWordsAndPhrasesPaginated(
+      input,
+      offset,
+      limit,
+    );
   }
 
   @Query(() => MapWordOrPhraseAsOrigOutput)

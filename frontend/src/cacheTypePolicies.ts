@@ -10,6 +10,7 @@ export const typePolicies: TypePolicies = {
       getPhraseDefinitionsByFlag: relayStylePagination(['flag_name']),
       getAllMapsList: relayStylePagination(['input']),
       getOrigMapWordsAndPhrases: relayStylePagination(['input']),
+      getSingleMapWordsAndPhrases: relayStylePagination(['input']),
     },
   },
   WordWithDefinitions: {

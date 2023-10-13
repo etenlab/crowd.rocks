@@ -1,14 +1,6 @@
 import { styled } from 'styled-components';
 import { IonIcon, IonItem } from '@ionic/react';
 
-// export const DocumentItemContainer = styled.div`
-//   display: flex;
-//   align-items: center;
-//   justify-content: space-between;
-//   padding: 0px;
-//   margin-top: 20px;
-// `;
-
 export const StItem = styled(IonItem)(() => ({
   display: 'flex',
   alignItems: 'center',
