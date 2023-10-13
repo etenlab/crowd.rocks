@@ -29,6 +29,7 @@ dbSecurityGroupSsmParam: '/dev/db-sg-id'
 
 # Secrets Manager params to create
 dbCredentialSecret: 'dev/db/credentials'
+appSecrets: 'dev/crowdrocksApiServer/secrets'
 
 # Whether database is accessible outside of VPC
 dbPublicAccess: true
@@ -48,6 +49,24 @@ apiService:
   cpu: 2048
   memory: 4096
   healthCheckPath: '/'
+  dbSecrets:
+    CR_DB_PASSWORD: password
+    CR_DB_USER: username
+    CR_DB_URL: host
+    CR_DB: dbname
+    CR_DB_PORT: port
+  appSecrets:
+    DEEPL_KEY: DEEPL_KEY
+    SMARTCAT_PROFILE: SMARTCAT_PROFILE
+    SMARTCAT_KEY: SMARTCAT_KEY
+    SMARTCAT_ID: SMARTCAT_ID
+    LILT_KEY: LILT_KEY
+    GCP_API_KEY: GCP_API_KEY
+    GCP_PROJECT_ID: GCP_PROJECT_ID
+    OPENAI_API_KEY: OPENAI_API_KEY
+    CR_GPT_4_PASSWORD: CR_GPT_4_PASSWORD
+    CR_GPT_3_PASSWORD: CR_GPT_3_PASSWORD
+    CR_GOOGLE_BOT_PASSWORD: CR_GOOGLE_BOT_PASSWORD
 
 docsApp:
   appId: docs
