@@ -968,6 +968,7 @@ export function AIControllerPage() {
           languagesLData!.languagesForBotTranslate.languages?.filter(
             (scl) => scl.code === langInfo2tag(target || undefined),
           ).length + ' languages',
+      disabledActions: true,
     },
     {
       handleTranslateFunc: handleTranslateSC,
@@ -980,6 +981,7 @@ export function AIControllerPage() {
           languagesScData!.languagesForBotTranslate.languages?.filter(
             (scl) => scl.code === langInfo2tag(target || undefined),
           ).length + ' languages',
+      disabledActions: true,
     },
     {
       handleTranslateFunc: handleTranslateDL,

@@ -25,11 +25,11 @@ export class DeepLTranslateService implements ITranslator {
     this.deepLTranslator = new deepl.Translator(config.DEEPL_KEY);
   }
 
-  async translate(
+  translate = async (
     texts: string[],
     from: LanguageInput,
     to: LanguageInput,
-  ): Promise<string[]> {
+  ): Promise<string[]> => {
     try {
       const sourceLangTag = languageInput2tag(from);
       const targetLangTag = languageInput2tag(to);
@@ -71,7 +71,7 @@ export class DeepLTranslateService implements ITranslator {
       console.log(`sc-translate.service Error: ${JSON.stringify(err)}`);
       throw err;
     }
-  }
+  };
 
   async getLanguages(): Promise<LanguageListForBotTranslateOutput> {
     try {

@@ -531,6 +531,7 @@ export class AiTranslationsService {
     };
   }
 
+  // use arrow function declaration here to provide proper 'this' context!
   translateWordsAndPhrasesByGoogle = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
@@ -544,50 +545,55 @@ export class AiTranslationsService {
     );
   };
 
-  async translateWordsAndPhrasesByLilt(
+  // use arrow function declaration here to provide proper 'this' context!
+  translateWordsAndPhrasesByLilt = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     return this.translateWordsAndPhrasesByBot(
       this.lTrService,
       from_language,
       to_language,
       pgClient,
     );
-  }
+  };
 
-  async translateWordsAndPhrasesBySmartcat(
+  // use arrow function declaration here to provide proper 'this' context!
+  translateWordsAndPhrasesBySmartcat = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     return this.translateWordsAndPhrasesByBot(
       this.ScTrService,
       from_language,
       to_language,
       pgClient,
     );
-  }
-  async translateWordsAndPhrasesByDeepL(
+  };
+
+  // use arrow function declaration here to provide proper 'this' context!
+  translateWordsAndPhrasesByDeepL = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     return this.translateWordsAndPhrasesByBot(
       this.DeepLTrService,
       from_language,
       to_language,
       pgClient,
     );
-  }
+  };
 
-  async translateWordsAndPhrasesByChatGPT35(
+  // use arrow function declaration here to provide proper 'this' context!
+  translateWordsAndPhrasesByChatGPT35 = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     return this.translateWordsAndPhrasesByBot(
       this.chatgptService,
       from_language,
@@ -595,14 +601,15 @@ export class AiTranslationsService {
       pgClient,
       ChatGPTVersion.Three,
     );
-  }
+  };
 
-  async translateWordsAndPhrasesByChatGPT4(
+  // use arrow function declaration here to provide proper 'this' context!
+  translateWordsAndPhrasesByChatGPT4 = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
-  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     return this.translateWordsAndPhrasesByBot(
       this.chatgptService,
       from_language,
@@ -610,33 +617,35 @@ export class AiTranslationsService {
       pgClient,
       ChatGPTVersion.Four,
     );
-  }
+  };
 
-  async translateWordsAndPhrasesToAllLangsByLilt(
+  // use arrow function declaration here to provide proper 'this' context!
+  translateWordsAndPhrasesToAllLangsByLilt = async (
     from_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
-  ): Promise<GenericOutput> {
+  ): Promise<GenericOutput> => {
     return this.translateWordsAndPhrasesToAllLangsByBot({
       translateWordsAndPhrases: this.translateWordsAndPhrasesByLilt,
       translator: this.lTrService,
       from_language,
       pgClient,
     });
-  }
+  };
 
-  async translateAllWordsAndPhrasesByDeepL(
+  // use arrow function declaration here to provide proper 'this' context!
+  translateAllWordsAndPhrasesByDeepL = async (
     from_language: LanguageInput,
     token: string,
     pgClient: PoolClient | null,
-  ): Promise<GenericOutput> {
+  ): Promise<GenericOutput> => {
     return this.translateWordsAndPhrasesToAllLangsByBot({
       translateWordsAndPhrases: this.translateWordsAndPhrasesByDeepL,
       translator: this.DeepLTrService,
       from_language,
       pgClient,
     });
-  }
+  };
 
   async translateWordsAndPhrasesToAllLangsBySmartcat(
     from_language: LanguageInput,
