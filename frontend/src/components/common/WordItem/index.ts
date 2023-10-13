@@ -1,0 +1,1 @@
+export { WordItem } from './WordItem';
