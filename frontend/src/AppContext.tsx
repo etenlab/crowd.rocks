@@ -40,6 +40,11 @@ export interface ContextType {
     setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
     setUpdatedTrDefinitionIds: (definitionIds: Array<string>) => void;
     setModal(com: ReactNode): void;
+    setTempTranslation(
+      key: string,
+      value: { translation: string; description: string },
+    ): void;
+    clearTempTranslation(key: string): void;
   };
 }
 
@@ -78,6 +83,8 @@ export function AppContextProvider({ children }: AppProviderProps) {
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
     setUpdatedTrDefinitionIds,
+    setTempTranslation,
+    clearTempTranslation,
   } = useGlobal({
     dispatch,
   });
@@ -328,6 +335,8 @@ export function AppContextProvider({ children }: AppProviderProps) {
       setTargetLanguage,
       setUpdatedTrDefinitionIds,
       setModal,
+      setTempTranslation,
+      clearTempTranslation,
     },
   };
 

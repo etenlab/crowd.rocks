@@ -10,6 +10,8 @@ export const actions = {
   SET_ORIGINAL_SITE_TEXT_MAP: 'SET_ORIGINAL_SITE_TEXT_MAP',
   SET_TRANSLATION_SITE_TEXT_MAP: 'SET_TRANSLATION_SITE_TEXT_MAP',
   SET_MAP_UPDATED_TR_DEFINITION_IDS: 'SET_MAP_UPDATED_TR_DEFINITION_IDS',
+  SET_TEMP_TRANSLATION: 'SET_TEMP_TRANSLATION',
+  CLEAR_TEMP_TRANSLATION: 'CLEAR_TEMP_TRANSLATION',
 };
 
 import { SiteTextLanguageWithTranslationInfo } from '../generated/graphql';
@@ -75,9 +77,30 @@ export function changeTranslationTargetLanguage(langInfo: LanguageInfo | null) {
     payload: langInfo,
   };
 }
+
 export function setUpdatedTrDefinitionIds(definitionIds: Array<string>) {
   return {
     type: actions.SET_MAP_UPDATED_TR_DEFINITION_IDS,
     payload: definitionIds,
+  };
+}
+
+export function setTempTranslation(
+  key: string,
+  value: { translation: string; description: string },
+) {
+  return {
+    type: actions.SET_TEMP_TRANSLATION,
+    payload: {
+      key,
+      value,
+    },
+  };
+}
+
+export function clearTempTranslation(key: string) {
+  return {
+    type: actions.SET_TEMP_TRANSLATION,
+    payload: key,
   };
 }
