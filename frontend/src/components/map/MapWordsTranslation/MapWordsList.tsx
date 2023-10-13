@@ -147,7 +147,7 @@ export function MapWordsList() {
       <Stack gap="14px">
         <LangSelector
           title={tr('Select target language')}
-          selected={targetLang || null}
+          selected={targetLang}
           onChange={(_targetLangTag, targetLangInfo) => {
             setTargetLanguage(targetLangInfo);
           }}

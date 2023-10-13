@@ -183,8 +183,7 @@ export function TranslationPage({ match }: TranslationPageProps) {
           <FullWidthContainer>
             <LangSelector
               title={tr('Source language')}
-              langSelectorId="translation-source-langSelector"
-              selected={source as LanguageInfo | undefined}
+              selected={source as LanguageInfo}
               onChange={(_sourceLangTag, sourceLangInfo) => {
                 changeTranslationSourceLanguage(sourceLangInfo);
               }}
@@ -204,8 +203,7 @@ export function TranslationPage({ match }: TranslationPageProps) {
           <FullWidthContainer>
             <LangSelector
               title={tr('Target language')}
-              langSelectorId="translation-target-langSelector"
-              selected={target as LanguageInfo | undefined}
+              selected={target as LanguageInfo}
               onChange={(_targetLangTag, targetLanguageInfo) => {
                 changeTranslationTargetLanguage(targetLanguageInfo);
               }}

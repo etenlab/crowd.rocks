@@ -50,8 +50,7 @@ export function QADocumentListPage() {
       <FilterContainer>
         <LangSelector
           title={tr('Select language')}
-          langSelectorId="qaDocumentListLangSelector"
-          selected={sourceLang ?? undefined}
+          selected={sourceLang}
           onChange={(_sourceLangTag, sourceLangInfo) => {
             setSourceLanguage(sourceLangInfo);
           }}

@@ -247,8 +247,7 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
           </label>
           <LangSelector
             title={tr('Select')}
-            langSelectorId="site-text-targetLangSelector"
-            selected={targetLang ?? undefined}
+            selected={targetLang}
             onChange={(_targetLangTag, targetLangInfo) => {
               setTargetLanguage(targetLangInfo);
             }}

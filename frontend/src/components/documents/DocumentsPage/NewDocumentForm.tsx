@@ -57,8 +57,7 @@ export function NewDocumentForm({ onSave, onCancel }: NewDocumentFormProps) {
       />
       <LangSelector
         title={tr('Select language')}
-        langSelectorId="documentsUploadLangSelector"
-        selected={sourceLang ?? undefined}
+        selected={sourceLang}
         onChange={(_sourceLangTag, sourceLangInfo) => {
           setSourceLanguage(sourceLangInfo);
         }}

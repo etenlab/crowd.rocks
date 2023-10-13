@@ -50,8 +50,7 @@ export function PericopeDocumentListPage() {
       <FilterContainer>
         <LangSelector
           title={tr('Select language')}
-          langSelectorId="pericopeDocumentLangSelector"
-          selected={sourceLang ?? undefined}
+          selected={sourceLang}
           onChange={(_sourceLangTag, sourceLangInfo) => {
             setSourceLanguage(sourceLangInfo);
           }}

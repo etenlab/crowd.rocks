@@ -245,8 +245,7 @@ export function WordListPage({ match }: WordListPageProps) {
       <FilterContainer>
         <LangSelector
           title={tr('Select language')}
-          langSelectorId="dictionary-langSelector"
-          selected={targetLang ?? undefined}
+          selected={targetLang}
           onChange={(_sourceLangTag, sourceLangInfo) => {
             setTargetLanguage(sourceLangInfo);
           }}

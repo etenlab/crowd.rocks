@@ -145,8 +145,7 @@ export function DocumentsPage() {
       <FilterContainer>
         <LangSelector
           title={tr('Select language')}
-          langSelectorId="mapsListLangSelector"
-          selected={sourceLang ?? undefined}
+          selected={sourceLang}
           onChange={(_sourceLangTag, sourceLangInfo) => {
             setSourceLanguage(sourceLangInfo);
           }}

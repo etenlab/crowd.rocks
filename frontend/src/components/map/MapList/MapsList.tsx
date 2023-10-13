@@ -243,7 +243,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
 
       <LangSelector
         title={tr('Select your language')}
-        selected={targetLang ?? null}
+        selected={targetLang}
         onChange={(langTag) => {
           if (langTag) {
             router.push(`/${nation_id}/${language_id}/1/maps/list/${langTag}`);

@@ -240,8 +240,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
       <FilterContainer>
         <LangSelector
           title={tr('Select language')}
-          langSelectorId="phrase-book-langSelector"
-          selected={targetLang ?? undefined}
+          selected={targetLang}
           onChange={(_sourceLangTag, sourceLangInfo) => {
             setTargetLanguage(sourceLangInfo);
           }}
