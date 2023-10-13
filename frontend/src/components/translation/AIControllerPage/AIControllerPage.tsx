@@ -14,7 +14,6 @@ import { Caption } from '../../common/Caption/Caption';
 
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 
-import { FilterContainer, CaptionContainer } from '../../common/styled';
 import {
   ResultBoard,
   LoadingBoard,
@@ -1057,72 +1056,66 @@ export function AIControllerPage() {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('AI Controller')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('AI Controller')}</Caption>
 
-      <FilterContainer>
-        <LanguageSectionContainer>
-          <LanguageSelectorContainer>
-            <IonLabel>Source</IonLabel>
-            <LangSelector
-              title={tr('Source language')}
-              langSelectorId="translation-g-source-langSelector"
-              selected={source as LanguageInfo | undefined}
-              onChange={(_sourceLangTag, sourceLangInfo) => {
-                changeTranslationSourceLanguage(sourceLangInfo);
-              }}
-              onClearClick={() => changeTranslationSourceLanguage(null)}
-              enabledTags={enabledTags}
-              disabled={disabled}
+      <LanguageSectionContainer>
+        <LanguageSelectorContainer>
+          <IonLabel>Source</IonLabel>
+          <LangSelector
+            title={tr('Source language')}
+            selected={source as LanguageInfo}
+            onChange={(_sourceLangTag, sourceLangInfo) => {
+              changeTranslationSourceLanguage(sourceLangInfo);
+            }}
+            onClearClick={() => changeTranslationSourceLanguage(null)}
+            enabledTags={enabledTags}
+            disabled={disabled}
+          />
+          <br />
+          <IonLabel>
+            Words: {languageData?.getLanguageTranslationInfo.totalWordCount}
+          </IonLabel>
+          <IonLabel>
+            Phrases: {languageData?.getLanguageTranslationInfo.totalPhraseCount}
+          </IonLabel>
+        </LanguageSelectorContainer>
+        <LanguageSelectorContainer>
+          <div>
+            <IonLabel>Target</IonLabel>
+            <IonToggle
+              checked={selectTarget}
+              onIonChange={() => setSelectTarget(!selectTarget)}
+              style={{ marginLeft: '10px' }}
             />
-            <br />
-            <IonLabel>
-              Words: {languageData?.getLanguageTranslationInfo.totalWordCount}
-            </IonLabel>
-            <IonLabel>
-              Phrases:{' '}
-              {languageData?.getLanguageTranslationInfo.totalPhraseCount}
-            </IonLabel>
-          </LanguageSelectorContainer>
-          <LanguageSelectorContainer>
-            <div>
-              <IonLabel>Target</IonLabel>
-              <IonToggle
-                checked={selectTarget}
-                onIonChange={() => setSelectTarget(!selectTarget)}
-                style={{ marginLeft: '10px' }}
-              />
-            </div>
-            <LangSelector
-              title={tr('Target language')}
-              langSelectorId="translation-g-target-langSelector"
-              selected={target as LanguageInfo | undefined}
-              onChange={(_targetLangTag, targetLanguageInfo) => {
-                changeTranslationTargetLanguage(targetLanguageInfo);
-              }}
-              onClearClick={() => changeTranslationTargetLanguage(null)}
-              enabledTags={enabledTags}
-              disabled={!selectTarget || batchTranslating}
-            />
-            <br />
-            <IonLabel>
-              Missing Words:{' '}
-              {selectTarget
-                ? languageData?.getLanguageTranslationInfo
-                    .translatedMissingWordCount
-                : '?'}
-            </IonLabel>
-            <IonLabel>
-              Missing Phrases:{' '}
-              {selectTarget
-                ? languageData?.getLanguageTranslationInfo
-                    .translatedMissingPhraseCount
-                : '?'}
-            </IonLabel>
-          </LanguageSelectorContainer>
-        </LanguageSectionContainer>
-      </FilterContainer>
+          </div>
+          <LangSelector
+            title={tr('Target language')}
+            selected={target as LanguageInfo}
+            onChange={(_targetLangTag, targetLanguageInfo) => {
+              changeTranslationTargetLanguage(targetLanguageInfo);
+            }}
+            onClearClick={() => changeTranslationTargetLanguage(null)}
+            enabledTags={enabledTags}
+            disabled={!selectTarget || batchTranslating}
+          />
+          <br />
+          <IonLabel>
+            Missing Words:{' '}
+            {selectTarget
+              ? languageData?.getLanguageTranslationInfo
+                  .translatedMissingWordCount
+              : '?'}
+          </IonLabel>
+          <IonLabel>
+            Missing Phrases:{' '}
+            {selectTarget
+              ? languageData?.getLanguageTranslationInfo
+                  .translatedMissingPhraseCount
+              : '?'}
+          </IonLabel>
+        </LanguageSelectorContainer>
+      </LanguageSectionContainer>
+
       <br />
 
       {AiMenu.map((item) => (

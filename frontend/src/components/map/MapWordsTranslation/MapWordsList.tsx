@@ -1,43 +1,50 @@
-// todo: deprecated in favor of MapWordsListPaginated. Check usability of the new one and then delete this file.
-
 import { useCallback, useEffect, useState } from 'react';
-import { RouteComponentProps } from 'react-router';
+import { useParams } from 'react-router';
+import {
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
+  useIonRouter,
+} from '@ionic/react';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
+import { Button, Stack, Typography } from '@mui/material';
+
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
-import { styled } from 'styled-components';
-import { TranslatedCards } from './TranslatedCards';
-import { useTr } from '../../../hooks/useTr';
-import { useAppContext } from '../../../hooks/useAppContext';
-import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
-import { PAGE_SIZE } from '../../../const/commonConst';
+import { SearchInput } from '../../common/forms/SearchInput';
+import { Search } from '../../common/icons/Search';
+import { FilterList } from '../../common/icons/FilterList';
+import { WordItem } from '../../common/WordItem';
+
 import {
   MapWordOrPhrase,
   useGetOrigMapWordsAndPhrasesLazyQuery,
 } from '../../../generated/graphql';
-import {
-  IonInfiniteScroll,
-  IonInfiniteScrollContent,
-  InputCustomEvent,
-  InputChangeEventDetail,
-  useIonRouter,
-} from '@ionic/react';
-import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
-import { FilterContainer, Input } from '../../common/styled';
+import { useTr } from '../../../hooks/useTr';
+import { useAppContext } from '../../../hooks/useAppContext';
 
-interface MapWordsTranslationProps extends RouteComponentProps {}
-export type TWordOrPhraseId = { word_id: string } | { phrase_id: string };
+import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
+import { PAGE_SIZE } from '../../../const/commonConst';
+import { MapFilterModal } from './MapFilterModal';
 
-export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
+export function MapWordsList() {
   const { tr } = useTr();
   const router = useIonRouter();
-  const [filter, setFilter] = useState<string>('');
+  const { nation_id, language_id } = useParams<{
+    nation_id: string;
+    language_id: string;
+    cluster_id: string;
+  }>();
 
-  const handleFilterChange = useCallback(
-    (event: InputCustomEvent<InputChangeEventDetail>) => {
-      setFilter(event.detail.value || '');
-    },
-    [setFilter],
-  );
+  const {
+    actions: { setTempTranslation, setModal },
+  } = useAppContext();
+
+  const [filter, setFilter] = useState<string>('');
+  const [showSearchInput, setShowSearchInput] = useState<boolean>(false);
+
+  const handleFilterChange = (value: string) => {
+    setFilter(value);
+  };
 
   const {
     states: {
@@ -88,8 +95,6 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
     ],
   );
 
-  const nation_id = router.routeInfo.pathname.split('/')[1];
-  const language_id = router.routeInfo.pathname.split('/')[2];
   const handleWordOrPhraseSelect = useCallback(
     (wordOrPhrase: MapWordOrPhrase) => {
       router.push(
@@ -99,54 +104,116 @@ export const MapWordsList: React.FC<MapWordsTranslationProps> = () => {
     [language_id, nation_id, router],
   );
 
+  const handleConfirm = useCallback(
+    (
+      translation: string,
+      description: string,
+      wordOrPhrase: MapWordOrPhrase,
+    ) => {
+      setTempTranslation(
+        `${wordOrPhrase.o_definition_id}:${wordOrPhrase.type}`,
+        { translation, description },
+      );
+      router.push(
+        `/${nation_id}/${language_id}/1/maps/translation_confirm/${wordOrPhrase.o_definition_id}/${wordOrPhrase.type}`,
+      );
+    },
+    [language_id, nation_id, router, setTempTranslation],
+  );
+
+  const handleOpenFilterModal = () => {
+    setModal(<MapFilterModal onChange={() => {}} />);
+  };
+
+  const toggleSearchInput = () => {
+    setShowSearchInput((value) => !value);
+  };
+
+  const searchInputCom = showSearchInput ? (
+    <SearchInput
+      value={filter}
+      onChange={handleFilterChange}
+      onClickSearchButton={() => {}}
+      placeholder={tr('Search by country/city...')}
+    />
+  ) : null;
+
   return (
     <>
-      {targetLang ? (
-        <>
-          <Caption>{tr('Map Translation')}</Caption>
-          <FilterContainer>
-            <LangSelector
-              title={tr('Select target language')}
-              langSelectorId="targetLangSelector"
-              selected={targetLang ?? undefined}
-              onChange={(_targetLangTag, targetLangInfo) => {
-                setTargetLanguage(targetLangInfo);
+      <Caption>{tr('Translation')}</Caption>
+
+      <Stack gap="14px">
+        <LangSelector
+          title={tr('Select target language')}
+          selected={targetLang}
+          onChange={(_targetLangTag, targetLangInfo) => {
+            setTargetLanguage(targetLangInfo);
+          }}
+        />
+
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Typography variant="h3" color="text.dark">
+            {tr('All Strings')}
+          </Typography>
+          <Stack
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center"
+            gap="14px"
+          >
+            <Button
+              variant="outlined"
+              color="blue"
+              sx={{ padding: '6px 12px' }}
+              startIcon={<FilterList sx={{ fontSize: 24 }} />}
+              onClick={handleOpenFilterModal}
+            >
+              {tr('Filter')}
+            </Button>
+            <Button
+              variant="contained"
+              onClick={toggleSearchInput}
+              color="gray_bg"
+              sx={{
+                padding: '6px',
+                minWidth: '20px',
+                border: (theme) =>
+                  `1px solid ${theme.palette.text.gray_stroke}`,
               }}
+            >
+              <Search sx={{ fontSize: 24 }} />
+            </Button>
+          </Stack>
+        </Stack>
+
+        {searchInputCom}
+      </Stack>
+
+      <Stack gap="16px">
+        {wordsAndPhrases &&
+          wordsAndPhrases.getOrigMapWordsAndPhrases.edges.map((omw) => (
+            <WordItem
+              key={omw.cursor}
+              word={omw.node.o_like_string}
+              description={omw.node.o_definition}
+              onConfirm={(translation, description) => {
+                handleConfirm(translation, description, omw.node);
+              }}
+              onDetail={() => handleWordOrPhraseSelect(omw.node)}
             />
-            <Input
-              type="text"
-              label={tr('Search original')}
-              labelPlacement="floating"
-              fill="outline"
-              debounce={500}
-              value={filter}
-              onIonInput={handleFilterChange}
-            />
-          </FilterContainer>
-          <WordsDiv>
-            {wordsAndPhrases &&
-              wordsAndPhrases.getOrigMapWordsAndPhrases.edges.map((omw, i) => (
-                <TranslatedCards
-                  key={i}
-                  wordOrPhrase={omw.node}
-                  onClick={() => handleWordOrPhraseSelect(omw.node)}
-                />
-              ))}
-          </WordsDiv>
-          <IonInfiniteScroll onIonInfinite={handleInfinite}>
-            <IonInfiniteScrollContent
-              loadingText={`${tr('Loading')}...`}
-              loadingSpinner="bubbles"
-            />
-          </IonInfiniteScroll>
-        </>
-      ) : (
-        <></>
-      )}
+          ))}
+      </Stack>
+
+      <IonInfiniteScroll onIonInfinite={handleInfinite}>
+        <IonInfiniteScrollContent
+          loadingText={`${tr('Loading')}...`}
+          loadingSpinner="bubbles"
+        />
+      </IonInfiniteScroll>
     </>
   );
-};
-
-const WordsDiv = styled.div`
-  margin-top: 10px;
-`;
+}

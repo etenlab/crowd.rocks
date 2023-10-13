@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { IonButton } from '@ionic/react';
+import { Stack } from '@mui/material';
 
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
-import { CaptionContainer } from '../../common/styled';
 
 import { useGetDocumentQuery } from '../../../generated/graphql';
 
@@ -46,12 +46,12 @@ export function PericopeDocumentViewerPage({
 
   return (
     <PageLayout>
-      <CaptionContainer>
+      <Stack direction="row" alignItems="center" justifyContent="center">
         <Caption>{file_name}</Caption>
         <IonButton fill="outline" onClick={handleToggleMode}>
           {mode}
         </IonButton>
-      </CaptionContainer>
+      </Stack>
 
       <PericopeDocumentViewer documentId={document_id} mode={mode} />
     </PageLayout>

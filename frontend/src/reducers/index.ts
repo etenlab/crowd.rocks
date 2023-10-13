@@ -3,6 +3,11 @@ import {
   initialState as globalInitialState,
   reducer as globalReducer,
 } from './global.reducer';
+import {
+  type StateType as ComponentsStateType,
+  initialState as componentsInitialState,
+  reducer as componentsReducer,
+} from './components.reducer';
 
 export interface ActionType<T> {
   type: string;
@@ -11,10 +16,12 @@ export interface ActionType<T> {
 
 export interface StateType {
   global: GlobalStateType;
+  components: ComponentsStateType;
 }
 
 export const initialState = {
   global: globalInitialState,
+  components: componentsInitialState,
 };
 
 const CROWD_ROCKS_STATE = 'CROWD_ROCKS_STATE';
@@ -52,6 +59,7 @@ export function loadPersistedStore(): StateType {
         ...initialState.global,
         ...newState.global,
       },
+      components: componentsInitialState,
     };
   } catch (err) {
     console.log(err);
@@ -66,6 +74,7 @@ export function reducer(
 ): StateType {
   const newState = {
     global: globalReducer(state.global, action),
+    components: componentsReducer(state.components, action),
   };
 
   persistStore(newState);

@@ -20,6 +20,10 @@ export interface StateType {
   };
   maps: {
     updatedTrDefinitionIds: Array<string>;
+    tempTranslations: Record<
+      string,
+      { translation: string; description: string } | undefined
+    >;
   };
 }
 
@@ -45,6 +49,7 @@ export const initialState: StateType = {
   },
   maps: {
     updatedTrDefinitionIds: [],
+    tempTranslations: {},
   },
 };
 
@@ -144,6 +149,35 @@ export function reducer(
         maps: {
           ...prevState.maps,
           updatedTrDefinitionIds: action.payload as Array<string>,
+        },
+      };
+    }
+    case actions.SET_TEMP_TRANSLATION: {
+      const { key, value } = action.payload as {
+        key: string;
+        value: { translation: string; description: string };
+      };
+      return {
+        ...prevState,
+        maps: {
+          ...prevState.maps,
+          tempTranslations: {
+            ...prevState.maps.tempTranslations,
+            [key]: value,
+          },
+        },
+      };
+    }
+    case actions.CLEAR_TEMP_TRANSLATION: {
+      const key = action.payload as string;
+      return {
+        ...prevState,
+        maps: {
+          ...prevState.maps,
+          tempTranslations: {
+            ...prevState.maps.tempTranslations,
+            [key]: undefined,
+          },
         },
       };
     }

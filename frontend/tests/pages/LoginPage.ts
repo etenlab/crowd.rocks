@@ -1,7 +1,7 @@
 import BasePage from './BasePage';
 import LoginDTO, { LoginDto } from '../data-objects/LoginDto';
 
-const headerText = '//div[@class="clickable brand"]/span[@class="rocks"]';
+const headerText = '#crowd-rock-app #app-name-text';
 const emailTextBox = '//ion-input[@inputmode="email"]/input';
 const passwordTextBox = '//ion-input[@type="password"]/input';
 const loginNowButton = '#login-login';
@@ -9,10 +9,10 @@ const goToRegisterButton = '#login-register';
 
 class LoginPage extends BasePage {
   async isHeaderTextPresent() {
-    await this.page.locator(headerText).last().waitFor();
+    await this.page.locator(headerText).first().waitFor();
     const headerTextPresnt = await this.page
       .locator(headerText)
-      .last()
+      .first()
       .isVisible();
     return headerTextPresnt;
   }
@@ -26,12 +26,12 @@ class LoginPage extends BasePage {
       .locator(passwordTextBox)
       .last()
       .fill(loginData.password || '');
-    await this.page.locator(loginNowButton).first().click();
+    await this.page.locator(loginNowButton).click();
   }
 
   async goToRegisterPage() {
-    await this.page.locator(goToRegisterButton).first().waitFor();
-    await this.page.locator(goToRegisterButton).first().click();
+    await this.page.locator(goToRegisterButton).waitFor();
+    await this.page.locator(goToRegisterButton).click();
   }
 
   async getLoginDetails() {

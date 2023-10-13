@@ -3571,16 +3571,6 @@ export type LanguagesForBotTranslateQueryVariables = Exact<{
 
 export type LanguagesForBotTranslateQuery = { __typename?: 'Query', languagesForBotTranslate: { __typename?: 'LanguageListForBotTranslateOutput', error: ErrorType, languages?: Array<{ __typename?: 'LanguageForBotTranslate', code: string, name: string }> | null } };
 
-export type LanguagesForChatGpt35TranslateQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LanguagesForChatGpt35TranslateQuery = { __typename?: 'Query', languagesForChatGPT35Translate: { __typename?: 'LanguageListForBotTranslateOutput', error: ErrorType, languages?: Array<{ __typename?: 'LanguageForBotTranslate', code: string, name: string }> | null } };
-
-export type LanguagesForChatGpt4TranslateQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LanguagesForChatGpt4TranslateQuery = { __typename?: 'Query', languagesForChatGPT4Translate: { __typename?: 'LanguageListForBotTranslateOutput', error: ErrorType, languages?: Array<{ __typename?: 'LanguageForBotTranslate', code: string, name: string }> | null } };
-
 export type TranslateWordsAndPhrasesByGoogleMutationVariables = Exact<{
   from_language_code: Scalars['String']['input'];
   from_dialect_code?: InputMaybe<Scalars['String']['input']>;

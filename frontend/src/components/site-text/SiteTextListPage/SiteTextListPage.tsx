@@ -31,11 +31,7 @@ import {
   CardListContainer,
 } from './styled';
 
-import {
-  Input,
-  CaptionContainer,
-  LanguageSelectorContainer,
-} from '../../common/styled';
+import { Input, LanguageSelectorContainer } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -229,9 +225,7 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Site Text')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Site Text')}</Caption>
 
       <LanguageSelectorContainer>
         <AppLanguageShowerContainer>
@@ -247,8 +241,7 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
           </label>
           <LangSelector
             title={tr('Select')}
-            langSelectorId="site-text-targetLangSelector"
-            selected={targetLang ?? undefined}
+            selected={targetLang}
             onChange={(_targetLangTag, targetLangInfo) => {
               setTargetLanguage(targetLangInfo);
             }}

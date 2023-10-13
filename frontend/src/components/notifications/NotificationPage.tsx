@@ -6,11 +6,7 @@ import {
   useListNotificationsLazyQuery,
 } from '../../generated/graphql';
 import { useTr } from '../../hooks/useTr';
-import {
-  CaptionContainer,
-  CardContainer,
-  CardListContainer,
-} from '../common/styled';
+import { CardContainer, CardListContainer } from '../common/styled';
 import {
   NotificationCard,
   NotificationInfo,
@@ -97,9 +93,7 @@ export function NotificationPage() {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Notifications')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Notifications')}</Caption>
 
       <CardListContainer>
         {cardListComs?.length ? cardListComs : 'No notifications at this time'}

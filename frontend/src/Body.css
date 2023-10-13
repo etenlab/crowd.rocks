@@ -1,17 +1,9 @@
 .light {
   color: var(--ca-menu-header-text);
-  background-color: var(--ca-menu-background-color);
 }
 
 ion-card {
   box-shadow: 1px 1px 3px;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: -10px;
 }
 
 .brand {
@@ -28,6 +20,7 @@ ion-card {
 
 .light .header-menu {
   --ion-background-color: var(--ca-menu-background-color);
+  background-color: var(--ca-menu-background-color);
 }
 
 .dark {
@@ -52,6 +45,10 @@ ion-card {
   --padding-end: 0px;
   --background-activated: var(--ca-menu-background-color);
   --ripple-color: var(--ca-menu-background-color);
+}
+
+.header-md {
+  box-shadow: none;
 }
 
 .notification-badge {
