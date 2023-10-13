@@ -127,6 +127,21 @@ const apiServiceStack = new ApiServiceStack(
         createNewSecret: true,
       },
       {
+        taskDefSecretName: 'CR_GPT_3_PASSWORD',
+        secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/gpt3Password`,
+        createNewSecret: true,
+      },
+      {
+        taskDefSecretName: 'CR_GPT_4_PASSWORD',
+        secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/gpt4Password`,
+        createNewSecret: true,
+      },
+      {
+        taskDefSecretName: 'OPENAI_API_KEY',
+        secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/openAiApiKey`,
+        createNewSecret: true,
+      },
+      {
         taskDefSecretName: 'GCP_PROJECT_ID',
         secretsManagerSecretName: `${config.environment}/${apiService.serviceName}/gcpProjectId`,
         createNewSecret: true,
