@@ -7,6 +7,7 @@ import {
   useIonToast,
   useIonRouter,
 } from '@ionic/react';
+import { Stack } from '@mui/material';
 
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
@@ -19,7 +20,6 @@ import { TranslationWordOrPhraseList } from '../TranslationWordOrPhraseList';
 import {
   Input,
   FilterContainer,
-  CaptionContainer,
   FullWidthContainer,
   LanguageSelectorContainer,
 } from '../../common/styled';
@@ -169,14 +169,14 @@ export function TranslationPage({ match }: TranslationPageProps) {
 
   return (
     <PageLayout>
-      <CaptionContainer>
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Caption>{tr('Translation')}</Caption>
         {isAdmin ? (
           <IonButton onClick={handleGoToGoogleTranslate}>
             {tr('Use Google Translate')}
           </IonButton>
         ) : null}
-      </CaptionContainer>
+      </Stack>
 
       <FilterContainer>
         <LanguageSelectorContainer>

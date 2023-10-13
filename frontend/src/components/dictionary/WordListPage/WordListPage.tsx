@@ -28,7 +28,6 @@ import { ErrorType, TableNameType } from '../../../generated/graphql';
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 import {
-  CaptionContainer,
   FilterContainer,
   CardListContainer,
   CardContainer,
@@ -238,9 +237,7 @@ export function WordListPage({ match }: WordListPageProps) {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Dictionary')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Dictionary')}</Caption>
 
       <FilterContainer>
         <LangSelector

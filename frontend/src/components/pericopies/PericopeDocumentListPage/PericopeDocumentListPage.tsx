@@ -6,11 +6,7 @@ import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 
 import { DocumentList } from '../../documents/DocumentList/DocumentList';
-import {
-  CaptionContainer,
-  FilterContainer,
-  ListCaption,
-} from '../../common/styled';
+import { ListCaption } from '../../common/styled';
 import { RowStack } from '../../common/Layout/styled';
 
 import { useTr } from '../../../hooks/useTr';
@@ -44,19 +40,15 @@ export function PericopeDocumentListPage() {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Pericope Tool')}</Caption>
-      </CaptionContainer>
-      <FilterContainer>
-        <LangSelector
-          title={tr('Select language')}
-          selected={sourceLang}
-          onChange={(_sourceLangTag, sourceLangInfo) => {
-            setSourceLanguage(sourceLangInfo);
-          }}
-          onClearClick={() => setSourceLanguage(null)}
-        />
-      </FilterContainer>
+      <Caption>{tr('Pericope Tool')}</Caption>
+      <LangSelector
+        title={tr('Select language')}
+        selected={sourceLang}
+        onChange={(_sourceLangTag, sourceLangInfo) => {
+          setSourceLanguage(sourceLangInfo);
+        }}
+        onClearClick={() => setSourceLanguage(null)}
+      />
 
       <RowStack>
         <ListCaption>{tr('Document List')}</ListCaption>

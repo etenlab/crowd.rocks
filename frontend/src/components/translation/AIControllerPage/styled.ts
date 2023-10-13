@@ -29,7 +29,7 @@ export const LanguageSectionContainer = styled.div`
 `;
 export const LanguageSelectorContainer = styled.div`
   display: flex;
-  width: 100%;
+  width: 50%;
   flex-direction: column;
 `;
 

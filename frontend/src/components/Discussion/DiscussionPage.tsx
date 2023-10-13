@@ -15,7 +15,7 @@ import { useTr } from '../../hooks/useTr';
 import { Caption } from '../common/Caption/Caption';
 import { AddListHeader } from '../common/ListHeader';
 import { PageLayout } from '../common/PageLayout';
-import { CaptionContainer, CardContainer } from '../common/styled';
+import { CardContainer } from '../common/styled';
 import {
   ErrorType,
   User,
@@ -140,11 +140,10 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption handleBackClick={() => router.goBack()}>
-          {tr('Discussion')}
-        </Caption>
-      </CaptionContainer>
+      <Caption handleBackClick={() => router.goBack()}>
+        {tr('Discussion')}
+      </Caption>
+
       <IonTitle>{postData?.postsByParent.title}</IonTitle>
       <AddListHeader
         title={tr('Posts')}

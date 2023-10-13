@@ -18,11 +18,7 @@ import { useGetForumsLazyQuery } from '../../../generated/graphql';
 
 import { ErrorType } from '../../../generated/graphql';
 
-import {
-  CaptionContainer,
-  CardListContainer,
-  CardContainer,
-} from '../../common/styled';
+import { CardListContainer, CardContainer } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { AddListHeader } from '../../common/ListHeader';
@@ -93,9 +89,7 @@ export function ForumListPage({ match }: ForumListPageProps) {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Community')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Community')}</Caption>
 
       <AddListHeader
         title={tr('Forums')}

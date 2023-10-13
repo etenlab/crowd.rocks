@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 import { PageLayout } from '../common/PageLayout';
 import { Caption } from '../common/Caption/Caption';
-import { CaptionContainer } from '../common/styled';
 
 import { SearchInput } from '../common/forms/SearchInput/SearchInput';
 import { Autocomplete } from '../common/forms/Autocomplete/Autocomplete';
@@ -56,9 +55,7 @@ export function Forms() {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>UI Forms</Caption>
-      </CaptionContainer>
+      <Caption>UI Forms</Caption>
 
       <SearchInput
         value={searchValue}

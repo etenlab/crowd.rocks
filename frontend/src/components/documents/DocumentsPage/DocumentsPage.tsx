@@ -13,11 +13,7 @@ import {
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
-import {
-  FilterContainer,
-  CaptionContainer,
-  ListCaption,
-} from '../../common/styled';
+import { ListCaption } from '../../common/styled';
 import { RowStack } from '../../common/Layout/styled';
 
 import { useTr } from '../../../hooks/useTr';
@@ -138,20 +134,16 @@ export function DocumentsPage() {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Documents')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Documents')}</Caption>
 
-      <FilterContainer>
-        <LangSelector
-          title={tr('Select language')}
-          selected={sourceLang}
-          onChange={(_sourceLangTag, sourceLangInfo) => {
-            setSourceLanguage(sourceLangInfo);
-          }}
-          onClearClick={() => setSourceLanguage(null)}
-        />
-      </FilterContainer>
+      <LangSelector
+        title={tr('Select language')}
+        selected={sourceLang}
+        onChange={(_sourceLangTag, sourceLangInfo) => {
+          setSourceLanguage(sourceLangInfo);
+        }}
+        onClearClick={() => setSourceLanguage(null)}
+      />
 
       <RowStack>
         <ListCaption>{tr('Document List')}</ListCaption>

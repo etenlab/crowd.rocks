@@ -24,7 +24,6 @@ import { ErrorType, Phrase, TableNameType } from '../../../generated/graphql';
 import { useTogglePhraseDefinitonVoteStatusMutation } from '../../../hooks/useTogglePhraseDefinitionVoteStatusMutation';
 
 import {
-  CaptionContainer,
   CardListContainer,
   CardContainer,
   StChatIcon,
@@ -228,9 +227,7 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Phrase Book')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Phrase Book')}</Caption>
 
       <CardContainer>{phraseCom}</CardContainer>
 

@@ -1,6 +1,5 @@
 import { PageLayout } from '../common/PageLayout';
 import { Caption } from '../common/Caption/Caption';
-import { CaptionContainer } from '../common/styled';
 
 import { AddCircle } from '../common/icons/AddCircle';
 import { AppNotification } from '../common/icons/AppNotification';
@@ -55,9 +54,8 @@ const icons = [
 export function Icons() {
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>UI Icons</Caption>
-      </CaptionContainer>
+      <Caption>UI Icons</Caption>
+
       <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
         {icons.map((Icon) => (
           <div key={Icon.name}>

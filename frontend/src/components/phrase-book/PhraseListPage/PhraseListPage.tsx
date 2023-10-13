@@ -27,12 +27,7 @@ import { ErrorType, TableNameType } from '../../../generated/graphql';
 
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
-import {
-  CaptionContainer,
-  FilterContainer,
-  CardListContainer,
-  CardContainer,
-} from '../../common/styled';
+import { CardListContainer, CardContainer } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -233,29 +228,25 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Phrase Book')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Phrase Book')}</Caption>
 
-      <FilterContainer>
-        <LangSelector
-          title={tr('Select language')}
-          selected={targetLang}
-          onChange={(_sourceLangTag, sourceLangInfo) => {
-            setTargetLanguage(sourceLangInfo);
-          }}
-          onClearClick={() => setTargetLanguage(null)}
-        />
-        <Input
-          type="text"
-          label={tr('Search')}
-          labelPlacement="floating"
-          fill="outline"
-          debounce={300}
-          value={filter}
-          onIonInput={handleFilterChange}
-        />
-      </FilterContainer>
+      <LangSelector
+        title={tr('Select language')}
+        selected={targetLang}
+        onChange={(_sourceLangTag, sourceLangInfo) => {
+          setTargetLanguage(sourceLangInfo);
+        }}
+        onClearClick={() => setTargetLanguage(null)}
+      />
+      <Input
+        type="text"
+        label={tr('Search')}
+        labelPlacement="floating"
+        fill="outline"
+        debounce={300}
+        value={filter}
+        onIonInput={handleFilterChange}
+      />
 
       <AddListHeader
         title={tr('All Phrases')}
