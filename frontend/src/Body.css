@@ -47,6 +47,10 @@ ion-card {
   --ripple-color: var(--ca-menu-background-color);
 }
 
+.header-md {
+  box-shadow: none;
+}
+
 .notification-badge {
   position: absolute;
   top: 0px;
