@@ -129,8 +129,8 @@ export class ChatGPTService implements IGPTTranslator {
       'format your answer as a string showing only translation';
 
     const translateCmd = `Translate '${origStr}' ${fromLangPhrase} ${toLangPhrase} ${formatPhrase}`;
-    console.log(translateCmd);
-    console.log(version);
+    //console.log(translateCmd);
+    //console.log(version);
 
     const params: OpenAI.Chat.ChatCompletionCreateParams = {
       messages: [
@@ -144,7 +144,7 @@ export class ChatGPTService implements IGPTTranslator {
     const chatCompletion: OpenAI.Chat.ChatCompletion =
       await this.openai.chat.completions.create(params);
 
-    console.log(chatCompletion.choices[0].message.content);
+    //console.log(chatCompletion.choices[0].message.content);
     this.availableTokens -= chatCompletion.usage?.total_tokens ?? 0;
     return chatCompletion.choices[0].message.content ?? '';
   }

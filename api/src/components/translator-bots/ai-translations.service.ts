@@ -878,7 +878,7 @@ export class AiTranslationsService {
     pgClient: PoolClient | null,
     translatorVersion?: ChatGPTVersion, //fix later
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
-    console.log('translating words and phrases by bot');
+    //console.log('translating words and phrases by bot');
     const badInputResult = validateTranslateByBotInput(
       from_language,
       to_language,
@@ -1022,7 +1022,7 @@ export class AiTranslationsService {
           pgClient,
         );
 
-      console.log('done');
+      ///console.log('done');
       return {
         error,
         result: {
