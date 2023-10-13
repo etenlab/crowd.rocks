@@ -194,6 +194,7 @@ export function AIControllerPage() {
   }, [getLangInfo, source, target?.lang.tag]);
 
   useEffect(() => {
+    console.log('subscriber translationResult', translationResult);
     if (translationResult && translationResult.TranslationReport) {
       const report = translationResult.TranslationReport;
 
@@ -217,7 +218,7 @@ export function AIControllerPage() {
 
       setResult(report);
     }
-  }, [translationResult]);
+  }, [translationResult, translationResult?.TranslationReport]);
 
   const enabledTags = useMemo(() => {
     const langs =

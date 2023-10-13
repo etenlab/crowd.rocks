@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
 import { PoolClient } from 'pg';
 import { Subject } from 'rxjs';
@@ -326,7 +326,7 @@ export class AiTranslationsService {
         to_definition_input: ToDefinitionInput;
       }[] = [];
 
-      const requestedCharactors = missingTexts.join('\n').length;
+      const requestedCharacters = missingTexts.join('\n').length;
 
       let translatedWordCount = 0;
       let translatedPhraseCount = 0;
@@ -515,7 +515,7 @@ export class AiTranslationsService {
       return {
         error,
         result: {
-          requestedCharacters: requestedCharactors,
+          requestedCharacters: requestedCharacters,
           totalWordCount: wordsConnection.edges.length,
           totalPhraseCount: phrasesConnection.edges.length,
           translatedWordCount,
@@ -693,7 +693,7 @@ export class AiTranslationsService {
       }
 
       let totalResult = {
-        requestedCharactors: 0,
+        requestedCharacters: 0,
         totalWordCount: 0,
         totalPhraseCount: 0,
         translatedWordCount: 0,
@@ -733,10 +733,12 @@ export class AiTranslationsService {
         next: async (step) => {
           if (step >= languages.length) {
             this.translationSubject.complete();
+            console.log(`completed`);
             return;
           }
 
           const language = languages[step];
+          console.log(`starting step ${step} language ${language.code}`);
 
           if (language.code === from_language.language_code) {
             this.translationSubject.next(step + 1);
@@ -765,8 +767,8 @@ export class AiTranslationsService {
 
           if (result) {
             totalResult = {
-              requestedCharactors:
-                totalResult.requestedCharactors + result.requestedCharacters,
+              requestedCharacters:
+                totalResult.requestedCharacters + result.requestedCharacters,
               totalWordCount:
                 totalResult.totalWordCount + result.totalWordCount,
               totalPhraseCount:
@@ -811,11 +813,14 @@ export class AiTranslationsService {
 
       this.translationSubject.next(0);
     } catch (err) {
-      console.error(err);
+      Logger.error(`Error while translating to all languages ${err}`);
+      return {
+        error: ErrorType.BotTranslationError,
+      };
     }
 
     return {
-      error: ErrorType.UnknownError,
+      error: ErrorType.NoError,
     };
   };
 
@@ -888,7 +893,7 @@ export class AiTranslationsService {
         translatorVersion,
       );
 
-      const requestedCharactors = originalTexts.join('\n').length;
+      const requestedCharacters = originalTexts.join('\n').length;
 
       let translatedWordCount = 0;
       let translatedPhraseCount = 0;
@@ -1006,7 +1011,7 @@ export class AiTranslationsService {
       return {
         error,
         result: {
-          requestedCharacters: requestedCharactors,
+          requestedCharacters: requestedCharacters,
           totalWordCount: wordsConnection.edges.length,
           totalPhraseCount: phrasesConnection.edges.length,
           translatedWordCount,
