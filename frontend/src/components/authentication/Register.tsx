@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   IonButton,
   IonInput,
@@ -7,7 +8,11 @@ import {
 } from '@ionic/react';
 import { FormEvent, useState } from 'react';
 import { useHistory } from 'react-router';
-import { ErrorType, useRegisterMutation } from '../../generated/graphql';
+import {
+  ErrorType,
+  useRegisterMutation,
+  useIsAdminLoggedInLazyQuery,
+} from '../../generated/graphql';
 import { globals } from '../../services/globals';
 import { login_change } from '../../services/subscriptions';
 import './Register.css';
@@ -46,8 +51,14 @@ const Register: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [is_unknown_error, set_is_unknown_error] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [registerMutation, { data, loading, error }] = useRegisterMutation();
+  const [registerMutation] = useRegisterMutation();
+  const [isAdmin, { data: isAdminRes }] = useIsAdminLoggedInLazyQuery();
+
+  useEffect(() => {
+    if (isAdminRes && isAdminRes.loggedInIsAdmin.isAdmin) {
+      globals.set_admin_user();
+    }
+  }, [isAdminRes]);
 
   async function handle_submit(event: FormEvent) {
     event.preventDefault();
@@ -90,6 +101,8 @@ const Register: React.FC = () => {
       if (session.avatar_url) {
         globals.set_profile_url(session.avatar_url);
       }
+
+      isAdmin({ variables: { input: { user_id: session.user_id } } });
 
       login_change.next(true);
       history.push(`/US/${appLanguage.lang.tag}/1/home`);
