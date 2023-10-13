@@ -21,6 +21,10 @@ import { Search } from '../common/icons/Search';
 import { ThumbsUp } from '../common/icons/ThumbsUp';
 import { ThumbsDown } from '../common/icons/ThumbsDown';
 import { FilledCheckCircle } from '../common/icons/FilledCheckCircle';
+import { WarningCircle } from '../common/icons/WarningCircle';
+import { FilterList } from '../common/icons/FilterList';
+import { InfoEmpty } from '../common/icons/InfoEmpty';
+import { InfoFill } from '../common/icons/InfoFill';
 
 const icons = [
   AddCircle,
@@ -42,6 +46,10 @@ const icons = [
   ThumbsUp,
   ThumbsDown,
   FilledCheckCircle,
+  WarningCircle,
+  FilterList,
+  InfoEmpty,
+  InfoFill,
 ];
 
 export function Icons() {
@@ -50,7 +58,6 @@ export function Icons() {
       <CaptionContainer>
         <Caption>UI Icons</Caption>
       </CaptionContainer>
-
       <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
         {icons.map((Icon) => (
           <div key={Icon.name}>
