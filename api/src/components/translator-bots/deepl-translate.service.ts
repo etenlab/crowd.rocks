@@ -15,7 +15,7 @@ import { ErrorType } from '../../common/types';
 import * as deepl from 'deepl-node';
 import { SourceLanguageCode, TargetLanguageCode } from 'deepl-node';
 
-const LIMIT_WORDS = 20; // for debugging purposes, not to exhaust free limit too quickly/
+const LIMIT_WORDS = undefined; // 20; // for debugging purposes, not to exhaust free limit too quickly/
 const DEEPL_BOT_EMAIL = 'deeplbot@crowd.rocks';
 
 @Injectable()
@@ -54,7 +54,9 @@ export class DeepLTranslateService implements ITranslator {
         );
       }
 
-      const textsForTranslate = texts.splice(0, LIMIT_WORDS);
+      const textsForTranslate = LIMIT_WORDS
+        ? texts.splice(0, LIMIT_WORDS)
+        : texts;
       const translated = await this.deepLTranslator.translateText(
         textsForTranslate,
         sourceLangTag as SourceLanguageCode,
