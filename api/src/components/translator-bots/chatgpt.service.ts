@@ -11,10 +11,6 @@ import { ErrorType } from '../../common/types';
 import { PostgresService } from 'src/core/postgres.service';
 import { ConfigService } from 'src/core/config.service';
 
-const openai = new OpenAI({
-  //   apiKey: 'my api key', // defaults to process.env["OPENAI_API_KEY"]
-});
-
 const CHAT_GPT_3_EMAIL = 'chatgpt-3@crowd.rocks';
 const CHAT_GPT_3_USERNAME = 'chatgpt-3.5';
 
@@ -35,6 +31,7 @@ export class ChatGPTService implements IGPTTranslator {
   private lastOperateTime: number;
   private availableRequests: number;
   private availableTokens: number;
+  private openai: OpenAI;
 
   constructor(pg: PostgresService, private config: ConfigService) {
     this.pg = pg;
@@ -42,6 +39,9 @@ export class ChatGPTService implements IGPTTranslator {
     this.lastOperateTime = 0;
     this.availableRequests = LIMIT_REQUESTS;
     this.availableTokens = LIMIT_TOKENS;
+    this.openai = new OpenAI({
+      apiKey: config.OPENAI_API_KEY,
+    });
   }
 
   processApiCall = async (
@@ -129,8 +129,8 @@ export class ChatGPTService implements IGPTTranslator {
       'format your answer as a string showing only translation';
 
     const translateCmd = `Translate '${origStr}' ${fromLangPhrase} ${toLangPhrase} ${formatPhrase}`;
-    console.log(translateCmd);
-    console.log(version);
+    //console.log(translateCmd);
+    //console.log(version);
 
     const params: OpenAI.Chat.ChatCompletionCreateParams = {
       messages: [
@@ -142,9 +142,9 @@ export class ChatGPTService implements IGPTTranslator {
       model: version,
     };
     const chatCompletion: OpenAI.Chat.ChatCompletion =
-      await openai.chat.completions.create(params);
+      await this.openai.chat.completions.create(params);
 
-    console.log(chatCompletion.choices[0].message.content);
+    //console.log(chatCompletion.choices[0].message.content);
     this.availableTokens -= chatCompletion.usage?.total_tokens ?? 0;
     return chatCompletion.choices[0].message.content ?? '';
   }

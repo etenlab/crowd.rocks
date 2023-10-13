@@ -194,6 +194,24 @@ query LanguagesForBotTranslate($botType: BotType!) {
   }
 }
 
+query LanguagesForChatGPT35Translate { languagesForChatGPT35Translate {
+    error
+    languages {
+      code
+      name
+    }
+  }
+}
+
+query LanguagesForChatGPT4Translate { languagesForChatGPT4Translate {
+    error
+    languages {
+      code
+      name
+    }
+  }
+}
+
 mutation TranslateWordsAndPhrasesByGoogle(
   $from_language_code: String!
   $from_dialect_code: String

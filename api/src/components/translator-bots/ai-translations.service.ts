@@ -571,6 +571,7 @@ export class AiTranslationsService {
       from_language,
       to_language,
       pgClient,
+      undefined,
     );
   };
 
@@ -602,8 +603,7 @@ export class AiTranslationsService {
     );
   };
 
-  // use arrow function declaration here to provide proper 'this' context!
-  translateWordsAndPhrasesByChatGPT35 = async (
+  translateWordsAndPhrasesByChatGPT4 = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
     token: string,
@@ -619,7 +619,7 @@ export class AiTranslationsService {
   };
 
   // use arrow function declaration here to provide proper 'this' context!
-  translateWordsAndPhrasesByChatGPT4 = async (
+  translateWordsAndPhrasesByChatGPT35 = async (
     from_language: LanguageInput,
     to_language: LanguageInput,
     token: string,
@@ -878,7 +878,7 @@ export class AiTranslationsService {
     pgClient: PoolClient | null,
     translatorVersion?: ChatGPTVersion, //fix later
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
-    console.log('translating words and phrases by bot');
+    //console.log('translating words and phrases by bot');
     const badInputResult = validateTranslateByBotInput(
       from_language,
       to_language,
@@ -1022,7 +1022,7 @@ export class AiTranslationsService {
           pgClient,
         );
 
-      console.log('done');
+      ///console.log('done');
       return {
         error,
         result: {
