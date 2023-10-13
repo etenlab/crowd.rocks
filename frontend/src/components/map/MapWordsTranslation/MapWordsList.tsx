@@ -122,7 +122,6 @@ export function MapWordsList() {
   );
 
   const handleOpenFilterModal = () => {
-    console.log('yes');
     setModal(<MapFilterModal onChange={() => {}} />);
   };
 

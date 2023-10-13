@@ -1,7 +1,7 @@
 import BasePage from './BasePage';
 import { RegisterDto } from '../data-objects/RegisterDto';
 
-const headerText = '//div[@class="clickable brand"]/span[@class="rocks"]';
+const headerText = '#crowd-rock-app #app-name-text';
 const emailTextBox = '//ion-input[@inputmode="email"]/input';
 const avatarTextBox = '//ion-input[@id="register-avatar"]/input';
 const passwordTextBox = '//ion-input[@type="password"]/input';
@@ -25,7 +25,7 @@ class RegistrationPage extends BasePage {
     await this.page.locator(headerText).first().waitFor();
     const headerTextPresnt = await this.page
       .locator(headerText)
-      .last()
+      .first()
       .isVisible();
     return headerTextPresnt;
   }

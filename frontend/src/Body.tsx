@@ -324,7 +324,7 @@ const Body: React.FC = () => {
                 <IonItem onClick={click_profile}>
                   <IonLabel>{globals.get_avatar()}</IonLabel>
                 </IonItem>
-                <IonItem onClick={click_logout}>
+                <IonItem onClick={click_logout} id="app-logout-button">
                   <IonLabel>Logout</IonLabel>
                 </IonItem>
               </>

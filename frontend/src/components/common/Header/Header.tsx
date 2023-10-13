@@ -38,7 +38,7 @@ export function Header({
   const username = globals.get_avatar();
 
   const avatarCom = !isMenuHeader ? (
-    <IconButton onClick={onClickMenu}>
+    <IconButton onClick={onClickMenu} id="app-menu-button">
       {username ? (
         <Avatar username={username} mini={false} />
       ) : (
@@ -93,6 +93,7 @@ export function Header({
     >
       {avatarCom}
       <Button
+        id="app-name-text"
         variant="text"
         onClick={onClickAppName}
         sx={{

@@ -147,8 +147,7 @@ export const MapWordsListPaginated: React.FC<MapWordsTranslationProps> = () => {
           <FilterContainer>
             <LangSelector
               title={tr('Select target language')}
-              langSelectorId="targetLangSelector"
-              selected={targetLang ?? undefined}
+              selected={targetLang}
               onChange={(_targetLangTag, targetLangInfo) => {
                 setTargetLanguage(targetLangInfo);
               }}
