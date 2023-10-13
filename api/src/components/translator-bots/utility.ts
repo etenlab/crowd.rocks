@@ -1,3 +1,7 @@
+import { hash } from 'argon2';
+import { createToken } from 'src/common/utility';
+import { PostgresService } from 'src/core/postgres.service';
+
 import { PoolClient } from 'pg';
 import { ErrorType } from 'src/common/types';
 import { LanguageInput } from '../common/types';
@@ -109,4 +113,47 @@ export async function getLangConnectionsObjectMapAndTexts(
 
 export function delay(time: number) {
   return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+export async function getTranslatorTokenByEmailAndUsername(
+  email: string,
+  username: string,
+  password: string,
+  pg: PostgresService,
+): Promise<{
+  id: string;
+  token: string;
+}> {
+  // // check if token for googlebot exists
+  const tokenRes = await pg.pool.query(
+    `select t.token, u.user_id
+            from tokens t
+            join users u
+            on t.user_id = u.user_id
+            where u.email=$1;`,
+    [email],
+  );
+  let gid = tokenRes.rows[0]?.user_id;
+  if (!gid) {
+    const pash = await hash(password);
+    const token = createToken();
+    const res = await pg.pool.query(
+      `
+        call authentication_register($1, $2, $3, $4, 0, '');
+        `,
+      [email, username, pash, token],
+    );
+    gid = res.rows[0].p_user_id;
+  }
+  let token = tokenRes.rows[0]?.token;
+  if (!token) {
+    token = createToken();
+    await pg.pool.query(
+      `
+          insert into tokens(token, user_id) values($1, $2);
+        `,
+      [token, gid],
+    );
+  }
+  return { id: gid, token };
 }
