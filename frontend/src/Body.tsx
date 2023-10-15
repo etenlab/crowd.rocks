@@ -86,6 +86,8 @@ import { Forms } from './components/demo/Forms';
 
 import { Header } from './components/common/Header';
 
+import { useColorModeContext } from './theme';
+
 interface ToggleChangeEventDetail<T = unknown> {
   value: T;
   checked: boolean;
@@ -106,6 +108,7 @@ const Body: React.FC = () => {
     },
     actions: { changeAppLanguage },
   } = useAppContext();
+  const { setColorMode } = useColorModeContext();
 
   const router = useIonRouter();
   const { tr } = useTr();
@@ -148,19 +151,23 @@ const Body: React.FC = () => {
       case null:
         set_show_dark_mode(false);
         localStorage.setItem('theme', 'light');
+        setColorMode('light');
         set_theme_classes(false);
         break;
       case 'light':
         set_show_dark_mode(false);
         set_theme_classes(false);
+        setColorMode('light');
         break;
       case 'dark':
         set_show_dark_mode(true);
         set_theme_classes(true);
+        setColorMode('dark');
         break;
       default:
         set_show_dark_mode(false);
         set_theme_classes(false);
+        setColorMode('light');
     }
 
     set_is_logged_in(globals.get_token() !== null);
@@ -235,8 +242,10 @@ const Body: React.FC = () => {
     set_show_dark_mode(event.detail.checked);
     if (!event.detail.checked) {
       localStorage.setItem('theme', 'light');
+      setColorMode('light');
     } else {
       localStorage.setItem('theme', 'dark');
+      setColorMode('dark');
     }
     set_theme_classes(event.detail.checked);
   };

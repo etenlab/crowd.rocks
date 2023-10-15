@@ -57,6 +57,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const timerRef = useRef<NodeJS.Timeout>();
   const singleClickTimerRef = useRef<NodeJS.Timeout>();
   const clickCountRef = useRef<number>(0);
+  const isFirstRendering = useRef<boolean>(true);
 
   const [viewMode, setViewMode] = useState<ViewMode>('normal');
   const [checkedMap, setCheckedMap] = useState<Record<string, boolean>>({});
@@ -75,19 +76,36 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     useGetAllMapsListLazyQuery();
 
   useEffect(() => {
-    if (
-      url_lang_tag &&
-      url_lang_tag !== langInfo2tag(targetLang || undefined)
-    ) {
-      const langInfo = tag2langInfo(url_lang_tag);
-      if (langInfo.lang.tag) {
-        setTargetLanguage(langInfo);
-      }
-      return;
-    }
+    if (isFirstRendering.current) {
+      if (
+        url_lang_tag &&
+        url_lang_tag !== langInfo2tag(targetLang || undefined)
+      ) {
+        const langInfo = tag2langInfo(url_lang_tag);
+        if (langInfo.lang.tag) {
+          setTargetLanguage(langInfo);
+        }
 
-    if (!targetLang) {
-      setTargetLanguage(tag2langInfo(DEFAULT_MAP_LANGUAGE_CODE));
+        isFirstRendering.current = false;
+        return;
+      }
+
+      if (!targetLang) {
+        setTargetLanguage(tag2langInfo(DEFAULT_MAP_LANGUAGE_CODE));
+      }
+    } else {
+      if (
+        isFirstRendering.current === false &&
+        url_lang_tag &&
+        targetLang &&
+        url_lang_tag !== langInfo2tag(targetLang)
+      ) {
+        router.push(
+          `/${nation_id}/${language_id}/1/maps/list/${langInfo2tag(
+            targetLang,
+          )}`,
+        );
+      }
     }
   }, [
     setTargetLanguage,
@@ -244,19 +262,25 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
       <LangSelector
         title={tr('Select your language')}
         selected={targetLang}
-        onChange={(langTag) => {
-          if (langTag) {
-            router.push(`/${nation_id}/${language_id}/1/maps/list/${langTag}`);
+        onChange={(_langTag, langInfo) => {
+          if (langInfo) {
+            setTargetLanguage(langInfo);
           } else {
-            router.push(
-              `/${nation_id}/${language_id}/1/maps/list/${DEFAULT_MAP_LANGUAGE_CODE}`,
-            );
+            setTargetLanguage({
+              lang: {
+                tag: 'en',
+                descriptions: ['English'],
+              },
+            });
           }
         }}
         onClearClick={() =>
-          router.push(
-            `/${nation_id}/${language_id}/1/maps/list/${DEFAULT_MAP_LANGUAGE_CODE}`,
-          )
+          setTargetLanguage({
+            lang: {
+              tag: 'en',
+              descriptions: ['English'],
+            },
+          })
         }
       />
 
