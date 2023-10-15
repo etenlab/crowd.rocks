@@ -28,7 +28,7 @@ export const colors = {
   },
   white: {
     light: designColors['white'],
-    dark: designColors['white'],
+    dark: designColors['dark'],
   },
   green: {
     light: designColors['green'],
@@ -36,23 +36,23 @@ export const colors = {
   },
   gray: {
     light: designColors['gray'],
-    dark: designColors['gray'],
+    dark: designColors['white'],
   },
   gray_stroke: {
     light: designColors['gray_stroke'],
-    dark: designColors['gray_stroke'],
+    dark: designColors['gray'],
   },
   gray_text: {
     light: designColors['gray_text'],
-    dark: designColors['gray_text'],
+    dark: designColors['white'],
   },
   dark: {
     light: designColors['dark'],
-    dark: designColors['dark'],
+    dark: designColors['white'],
   },
   gray_bg: {
     light: designColors['gray_bg'],
-    dark: designColors['gray_bg'],
+    dark: designColors['white'],
   },
 };
 

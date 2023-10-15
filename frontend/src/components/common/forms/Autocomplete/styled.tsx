@@ -29,4 +29,5 @@ export const StyledInput = styled('input')({
   flex: 1,
   outline: 'none',
   border: 'none',
+  background: 'transparent',
 });

@@ -8,7 +8,6 @@ export const OrigBadge = styled(IonBadge)(() => ({
 export const PreviewContainer = styled('div')(({ theme }) => ({
   position: 'relative',
   border: `1.5px solid ${theme.palette.text.gray_stroke}`,
-  background: theme.palette.text.gray_stroke,
   borderRadius: '10px',
   width: '162px',
   height: '165px',

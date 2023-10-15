@@ -41,6 +41,7 @@ export function Autocomplete({
   const handleChangeValue = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValue: OptionItem | null) => {
       onChange(newValue);
+      setOpen(false);
     },
     [onChange],
   );
@@ -73,7 +74,11 @@ export function Autocomplete({
           PopperComponent={StyledPopper}
           renderInput={(params) => (
             <StyledPaper variant="outlined" ref={params.InputProps.ref}>
-              <StyledInput {...params.inputProps} placeholder={placeholder} />
+              <StyledInput
+                {...params.inputProps}
+                placeholder={placeholder}
+                onClick={() => setOpen(true)}
+              />
               <Divider
                 orientation="vertical"
                 variant="middle"
@@ -85,6 +90,7 @@ export function Autocomplete({
                   if (value === null) {
                     setOpen(true);
                   } else {
+                    setOpen(false);
                     onChange(null);
                     onClear && onClear();
                   }

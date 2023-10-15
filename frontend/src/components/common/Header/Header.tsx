@@ -97,7 +97,6 @@ export function Header({
         variant="text"
         onClick={onClickAppName}
         sx={{
-          color: '#181818',
           fontSize: '18px',
           fontWeight: 600,
           lineHeight: '22px',
