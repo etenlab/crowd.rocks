@@ -48,6 +48,7 @@ import {
   useTranslateWordsAndPhrasesByChatGpt4Mutation,
   useTranslateMissingWordsAndPhrasesByChatGptMutation,
   useTranslateMissingWordsAndPhrasesByDeepLMutation,
+  useTranslateMissingWordsAndPhrasesBySmartcatMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, langInfo2tag } from '../../../common/langUtils';
@@ -141,6 +142,9 @@ export function AIControllerPage() {
 
   const [translateAllWordsAndPhrasesBySmartcat] =
     useTranslateAllWordsAndPhrasesBySmartcatMutation();
+
+  const [translateMissingWordsAndPhrasesBySC] =
+    useTranslateMissingWordsAndPhrasesBySmartcatMutation();
 
   //deepL
   const [translateWordsAndPhrasesByDeepL] =
@@ -807,6 +811,59 @@ export function AIControllerPage() {
     });
   }, [presentToast, source, tr, translateAllWordsAndPhrasesBySmartcat]);
 
+  const handleTranslateMissingSC = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      handleTranslateToAllLangsDL();
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+
+    const { data } = await translateMissingWordsAndPhrasesBySC({
+      variables: {
+        from_language_code: source.lang.tag,
+        to_language_code: target.lang.tag,
+      },
+    });
+
+    dismiss();
+
+    if (data && data.translateMissingWordsAndPhrasesBySmartcat.result) {
+      setResult(data.translateMissingWordsAndPhrasesBySmartcat.result);
+      await mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
+  };
+
   // DeepL
   const handleTranslateDL = async () => {
     if (!source) {
@@ -1015,21 +1072,8 @@ export function AIControllerPage() {
       disabledActions: disabled || !selectTarget,
     },
     {
-      handleTranslateFunc: handleTranslateL,
-      handleTranslateMissingFunc: null,
-      botTitle: 'Lilt',
-      languageLabel: !selectTarget
-        ? languageData?.getLanguageTranslationInfo.liltTranslateTotalLangCount +
-          ' languages'
-        : languagesLData &&
-          languagesLData!.languagesForBotTranslate.languages?.filter(
-            (scl) => scl.code === langInfo2tag(target || undefined),
-          ).length + ' languages',
-      disabledActions: true,
-    },
-    {
       handleTranslateFunc: handleTranslateSC,
-      handleTranslateMissingFunc: null,
+      handleTranslateMissingFunc: handleTranslateMissingSC,
       botTitle: 'Smartcat',
       languageLabel: !selectTarget
         ? languageData?.getLanguageTranslationInfo
@@ -1038,7 +1082,6 @@ export function AIControllerPage() {
           languagesScData!.languagesForBotTranslate.languages?.filter(
             (scl) => scl.code === langInfo2tag(target || undefined),
           ).length + ' languages',
-      disabledActions: true,
     },
     {
       handleTranslateFunc: handleTranslateDL,
@@ -1051,6 +1094,19 @@ export function AIControllerPage() {
           languagesDLData!.languagesForBotTranslate.languages?.filter(
             (scl) => scl.code === langInfo2tag(target || undefined),
           ).length + ' languages',
+    },
+    {
+      handleTranslateFunc: handleTranslateL,
+      handleTranslateMissingFunc: null,
+      botTitle: 'Lilt',
+      languageLabel: !selectTarget
+        ? languageData?.getLanguageTranslationInfo.liltTranslateTotalLangCount +
+          ' languages'
+        : languagesLData &&
+          languagesLData!.languagesForBotTranslate.languages?.filter(
+            (scl) => scl.code === langInfo2tag(target || undefined),
+          ).length + ' languages',
+      disabledActions: true,
     },
   ];
 
