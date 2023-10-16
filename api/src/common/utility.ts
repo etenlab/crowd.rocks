@@ -1,6 +1,7 @@
 import { PoolClient, Pool } from 'pg';
 import { LanguageInput } from '../components/common/types';
-const N_PLACEHOLDER = '-n-Qh_Q1A-';
+import fetch from 'node-fetch';
+import { writeFile } from 'fs/promises';
 
 export function createToken(length = 64): string {
   let result = '';
@@ -141,20 +142,20 @@ export async function getPgClient({
   };
 }
 
-export function substituteN<T extends string | Array<string>>(inStr: T): T {
-  if (Array.isArray(inStr)) {
-    return inStr.map((chunk) => chunk.replaceAll('\n', N_PLACEHOLDER)) as T;
-  } else {
-    return inStr.replaceAll('\n', N_PLACEHOLDER) as T;
-  }
-}
-export function unSubstituteN<T extends string | Array<string>>(inStr: T): T {
-  if (Array.isArray(inStr)) {
-    return inStr.map((chunk) => chunk.replaceAll(N_PLACEHOLDER, '\n')) as T;
-  } else {
-    return inStr.replaceAll(N_PLACEHOLDER, '\n') as T;
-  }
-}
+// export function substituteN<T extends string | Array<string>>(inStr: T): T {
+//   if (Array.isArray(inStr)) {
+//     return inStr.map((chunk) => chunk.replaceAll('\n', N_PLACEHOLDER)) as T;
+//   } else {
+//     return inStr.replaceAll('\n', N_PLACEHOLDER) as T;
+//   }
+// }
+// export function unSubstituteN<T extends string | Array<string>>(inStr: T): T {
+//   if (Array.isArray(inStr)) {
+//     return inStr.map((chunk) => chunk.replaceAll(N_PLACEHOLDER, '\n')) as T;
+//   } else {
+//     return inStr.replaceAll(N_PLACEHOLDER, '\n') as T;
+//   }
+// }
 
 export function compareObject(
   obj1: object | undefined | null,
@@ -191,3 +192,9 @@ export function compareObject(
 
   return true;
 }
+
+export const downloadFile = async (url, destination) => {
+  const response = await fetch(url);
+  const buffer = await response.buffer();
+  return writeFile(destination, buffer);
+};

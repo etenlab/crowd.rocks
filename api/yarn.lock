@@ -3740,6 +3740,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/temp@npm:^0.9.2":
+  version: 0.9.2
+  resolution: "@types/temp@npm:0.9.2"
+  dependencies:
+    "@types/node": "*"
+  checksum: 371d2e67ba86592332c5b59719806f4977eb84a8bbd469fb11064df6262c2115c2d99ee86f165e009c3dbd193ddc419b2cb5fe1036eb9135b65acb78d156d655
+  languageName: node
+  linkType: hard
+
 "@types/yargs-parser@npm:*":
   version: 21.0.1
   resolution: "@types/yargs-parser@npm:21.0.1"
@@ -4306,6 +4315,7 @@ __metadata:
     "@types/node": ^16.0.0
     "@types/pg": ^8.10.2
     "@types/supertest": ^2.0.11
+    "@types/temp": ^0.9.2
     "@typescript-eslint/eslint-plugin": ^5.0.0
     "@typescript-eslint/parser": ^5.0.0
     adm-zip: ^0.5.10

@@ -18,13 +18,19 @@ import {
   MapWordsAndPhrasesCountOutput,
   OrigMapWordsAndPhrasesOutput,
   StartZipMapOutput,
+  ZipMapResult,
+  StartZipMapDownloadInput,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
 import { WordsService } from '../words/words.service';
 import { MapsRepository } from './maps.repository';
 import { WordUpsertInput } from '../words/types';
-import { ErrorType, LanguageInfo } from '../../common/types';
+import {
+  ErrorType,
+  LanguageInfo,
+  SubscriptionStatus,
+} from '../../common/types';
 import { DEFAULT_NEW_MAP_LANGUAGE } from '../../common/const';
 import { PostgresService } from '../../core/postgres.service';
 import { WordDefinitionsService } from '../definitions/word-definitions.service';
@@ -35,11 +41,16 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
-import { putLangCodesToFileName } from '../../common/utility';
+import { downloadFile, putLangCodesToFileName } from '../../common/utility';
 import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
 import { Readable } from 'stream';
-import { error } from 'console';
+import { PUB_SUB } from '../../pubSub.module';
+import { PubSub } from 'graphql-subscriptions';
+import { SubscriptionToken } from '../../common/subscription-token';
+import * as temp from 'temp';
+import { nanoid } from 'nanoid';
+import path from 'path';
 
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
@@ -79,6 +90,7 @@ export class MapsService {
     private fileService: FileService,
     @Inject(forwardRef(() => TranslationsService))
     private translationsService: TranslationsService,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
   async saveAndParseNewMap({
@@ -1021,13 +1033,69 @@ export class MapsService {
     return foundLangs;
   }
 
-  async startZipMap(input): Promise<StartZipMapOutput> {
+  async startZipMap(
+    input: StartZipMapDownloadInput,
+  ): Promise<StartZipMapOutput> {
     try {
       console.log('startZipMap subscription input: ', JSON.stringify(input));
+      this.pubSub.publish(SubscriptionToken.ZipMapReport, {
+        [SubscriptionToken.ZipMapReport]: {
+          resultZipUrl: null,
+          status: SubscriptionStatus.Progressing,
+          errors: [],
+          message: 'Started maps downloading and packing',
+        } as ZipMapResult,
+      });
+      const maps = await this.getAllMapsList({
+        lang: input.language,
+        after: null,
+        first: null,
+      });
+
+      if (!(maps.edges.length > 0)) {
+        throw new Error(ErrorType.MapNotFound);
+      }
+
+      const fileDownloadsPromises: any[] = [];
+      temp.track();
+      temp.mkdir('map_zip', (err, dirPath) => {
+        if (err) {
+          Logger.error(`mapsService#startZipMap: ${JSON.stringify(err)}`);
+          throw new Error(ErrorType.MapZippingError);
+        }
+        for (const { node: map } of maps.edges) {
+          if (!map.mapDetails?.map_file_name_with_langs) {
+            Logger.error(
+              `mapsService#startZipMap: map_file_name_with_langs not found for map ${JSON.stringify(
+                map,
+              )}`,
+            );
+            continue;
+          }
+          this.pubSub.publish(SubscriptionToken.ZipMapReport, {
+            [SubscriptionToken.ZipMapReport]: {
+              resultZipUrl: null,
+              status: SubscriptionStatus.Progressing,
+              errors: [],
+              message: `Processing ${map.mapDetails?.map_file_name_with_langs}`,
+            } as ZipMapResult,
+          });
+          fileDownloadsPromises.push(
+            downloadFile(
+              map.mapDetails?.content_file_url,
+              path.resolve(dirPath, map.mapDetails?.map_file_name_with_langs),
+            ),
+          );
+
+          todo: stopped here
+        }
+      });
 
       return { error: ErrorType.NoError };
     } catch (error) {
-      return { error: ErrorType.MapZippingError };
+      return { error };
+    } finally {
+      temp.cleanup();
     }
   }
 }

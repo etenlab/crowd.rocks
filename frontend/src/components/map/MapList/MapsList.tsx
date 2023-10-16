@@ -27,7 +27,7 @@ import { Checkbox } from '../../common/buttons/Checkbox';
 import { MapItem, ViewMode } from './MapItem';
 
 import {
-  GetMapDetailsInput,
+  ErrorType,
   useGetAllMapsListLazyQuery,
   useStartZipMapDownloadMutation,
   useSubscribeToZipMapSubscription,
@@ -214,9 +214,23 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     setAllChecked(e.target.checked);
   };
 
-  const { data: mapZipResult } = useSubscribeToZipMapSubscription();
+  const { data: mapZipResult, error: mapZipError } =
+    useSubscribeToZipMapSubscription();
 
-  const handleDownloadZip = () => {
+  useEffect(() => {
+    if (mapZipError) {
+      present({
+        message: 'Maps zipping error',
+        duration: 3000,
+        position: 'top',
+        color: 'danger',
+      });
+      console.error(mapZipError);
+    }
+    console.log(mapZipResult);
+  }, [mapZipError, mapZipResult, present]);
+
+  const handleDownloadZip = useCallback(async () => {
     if (!targetLang) {
       present({
         message: `Please select language first`,
@@ -226,10 +240,26 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
       });
       return;
     }
-    const mapIds: Array<GetMapDetailsInput> = startZipMapDownload({
+    const { data, errors } = await startZipMapDownload({
       variables: { language: langInfo2langInput(targetLang) },
     });
-  };
+    if (data?.startZipMapDownload.error !== ErrorType.NoError) {
+      present({
+        message: data?.startZipMapDownload.error,
+        duration: 3000,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+    if (errors?.length && errors?.length > 0) {
+      present({
+        message: 'Errors: ' + JSON.stringify(errors),
+        duration: 3000,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+  }, [present, startZipMapDownload, targetLang]);
 
   const startTimer = () => {
     timerRef.current = setTimeout(handleLongPress, 2000);
@@ -324,10 +354,9 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
           <Typography variant="h3" color="dark">{`${
             allMapsQuery?.getAllMapsList.edges?.length || 0
           } ${tr('maps found')}`}</Typography>
-          <Button
-            startIcon={<DownloadCircle />}
-            onClick={handleDownloadZip}
-          ></Button>
+          <Button startIcon={<DownloadCircle />} onClick={handleDownloadZip}>
+            {tr('Dowlnoad all')}
+          </Button>
           {isAdminUser ? (
             <Button
               variant="text"
