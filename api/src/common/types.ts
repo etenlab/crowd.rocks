@@ -107,6 +107,7 @@ export enum ErrorType {
   MapDeletionError = 'MapDeletionError',
   MapNotFound = 'MapNotFound',
   MapVoteNotFound = 'MapVoteNotFound',
+  MapZippingError = 'MapZippingError',
 
   DocumentIdNotProvided = 'DocumentIdNotProvided',
   DocumentNotFound = 'DocumentNotFound',
@@ -170,6 +171,16 @@ registerEnumType(TableNameType, {
 
 registerEnumType(BotType, {
   name: 'BotType',
+});
+
+export enum SubscriptionStatus {
+  Completed = 'Completed',
+  Progressing = 'Progressing',
+  Error = 'Error',
+}
+
+registerEnumType(SubscriptionStatus, {
+  name: 'SubscriptionStatus',
 });
 
 export interface ITagInfo {

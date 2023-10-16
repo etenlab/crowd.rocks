@@ -176,6 +176,7 @@ export enum ErrorType {
   MapInsertFailed = 'MapInsertFailed',
   MapNotFound = 'MapNotFound',
   MapVoteNotFound = 'MapVoteNotFound',
+  MapZippingError = 'MapZippingError',
   NoError = 'NoError',
   NotificationDeleteFailed = 'NotificationDeleteFailed',
   NotificationInsertFailed = 'NotificationInsertFailed',
@@ -658,6 +659,7 @@ export type Mutation = {
   siteTextPhraseDefinitionUpsert: SiteTextPhraseDefinitionOutput;
   siteTextUpsert: SiteTextDefinitionOutput;
   siteTextWordDefinitionUpsert: SiteTextWordDefinitionOutput;
+  startZipMapDownload: StartZipMapOutput;
   stopBotTranslation: GenericOutput;
   threadDelete: ThreadDeleteOutput;
   threadUpsert: ThreadUpsertOutput;
@@ -853,6 +855,11 @@ export type MutationSiteTextUpsertArgs = {
 
 export type MutationSiteTextWordDefinitionUpsertArgs = {
   word_definition_id: Scalars['ID']['input'];
+};
+
+
+export type MutationStartZipMapDownloadArgs = {
+  input: StartZipMapDownloadInput;
 };
 
 
@@ -2202,10 +2209,26 @@ export type SiteTextWordDefinitionOutput = {
   site_text_word_definition?: Maybe<SiteTextWordDefinition>;
 };
 
+export type StartZipMapDownloadInput = {
+  language: LanguageInput;
+};
+
+export type StartZipMapOutput = {
+  __typename?: 'StartZipMapOutput';
+  error: ErrorType;
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult;
+  ZipMapReport: ZipMapResult;
 };
+
+export enum SubscriptionStatus {
+  Completed = 'Completed',
+  Error = 'Error',
+  Progressing = 'Progressing'
+}
 
 export enum TableNameType {
   DocumentWordEntries = 'document_word_entries',
@@ -2706,6 +2729,14 @@ export type WordlikeString = {
   wordlike_string_id: Scalars['ID']['output'];
 };
 
+export type ZipMapResult = {
+  __typename?: 'ZipMapResult';
+  errors?: Maybe<Array<Scalars['String']['output']>>;
+  message?: Maybe<Scalars['String']['output']>;
+  resultZipUrl: Scalars['String']['output'];
+  status: SubscriptionStatus;
+};
+
 export type UserFieldsFragment = { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null };
 
 export type PostFieldsFragment = { __typename?: 'Post', post_id: string, content: string, created_at: any, file_url?: string | null, file_type?: string | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null } };
@@ -3158,6 +3189,18 @@ export type IsAdminLoggedInQueryVariables = Exact<{
 
 
 export type IsAdminLoggedInQuery = { __typename?: 'Query', loggedInIsAdmin: { __typename?: 'IsAdminIdOutput', isAdmin: boolean } };
+
+export type StartZipMapDownloadMutationVariables = Exact<{
+  language: LanguageInput;
+}>;
+
+
+export type StartZipMapDownloadMutation = { __typename?: 'Mutation', startZipMapDownload: { __typename?: 'StartZipMapOutput', error: ErrorType } };
+
+export type SubscribeToZipMapSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToZipMapSubscription = { __typename?: 'Subscription', ZipMapReport: { __typename?: 'ZipMapResult', status: SubscriptionStatus, message?: string | null, errors?: Array<string> | null } };
 
 export type MapUploadMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
@@ -6319,6 +6362,70 @@ export function useIsAdminLoggedInLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type IsAdminLoggedInQueryHookResult = ReturnType<typeof useIsAdminLoggedInQuery>;
 export type IsAdminLoggedInLazyQueryHookResult = ReturnType<typeof useIsAdminLoggedInLazyQuery>;
 export type IsAdminLoggedInQueryResult = Apollo.QueryResult<IsAdminLoggedInQuery, IsAdminLoggedInQueryVariables>;
+export const StartZipMapDownloadDocument = gql`
+    mutation StartZipMapDownload($language: LanguageInput!) {
+  startZipMapDownload(input: {language: $language}) {
+    error
+  }
+}
+    `;
+export type StartZipMapDownloadMutationFn = Apollo.MutationFunction<StartZipMapDownloadMutation, StartZipMapDownloadMutationVariables>;
+
+/**
+ * __useStartZipMapDownloadMutation__
+ *
+ * To run a mutation, you first call `useStartZipMapDownloadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useStartZipMapDownloadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [startZipMapDownloadMutation, { data, loading, error }] = useStartZipMapDownloadMutation({
+ *   variables: {
+ *      language: // value for 'language'
+ *   },
+ * });
+ */
+export function useStartZipMapDownloadMutation(baseOptions?: Apollo.MutationHookOptions<StartZipMapDownloadMutation, StartZipMapDownloadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<StartZipMapDownloadMutation, StartZipMapDownloadMutationVariables>(StartZipMapDownloadDocument, options);
+      }
+export type StartZipMapDownloadMutationHookResult = ReturnType<typeof useStartZipMapDownloadMutation>;
+export type StartZipMapDownloadMutationResult = Apollo.MutationResult<StartZipMapDownloadMutation>;
+export type StartZipMapDownloadMutationOptions = Apollo.BaseMutationOptions<StartZipMapDownloadMutation, StartZipMapDownloadMutationVariables>;
+export const SubscribeToZipMapDocument = gql`
+    subscription SubscribeToZipMap {
+  ZipMapReport {
+    status
+    message
+    errors
+  }
+}
+    `;
+
+/**
+ * __useSubscribeToZipMapSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToZipMapSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToZipMapSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToZipMapSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToZipMapSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToZipMapSubscription, SubscribeToZipMapSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToZipMapSubscription, SubscribeToZipMapSubscriptionVariables>(SubscribeToZipMapDocument, options);
+      }
+export type SubscribeToZipMapSubscriptionHookResult = ReturnType<typeof useSubscribeToZipMapSubscription>;
+export type SubscribeToZipMapSubscriptionResult = Apollo.SubscriptionResult<SubscribeToZipMapSubscription>;
 export const MapUploadDocument = gql`
     mutation MapUpload($file: Upload!, $previewFileId: String, $file_type: String!, $file_size: Int!) {
   mapUpload(
@@ -9167,6 +9274,7 @@ export const namedOperations = {
     CreateForum: 'CreateForum',
     UpdateForum: 'UpdateForum',
     DeleteForum: 'DeleteForum',
+    StartZipMapDownload: 'StartZipMapDownload',
     MapUpload: 'MapUpload',
     MapDelete: 'MapDelete',
     MapsTranslationsReset: 'MapsTranslationsReset',
@@ -9208,6 +9316,7 @@ export const namedOperations = {
     AvatarUpdate: 'AvatarUpdate'
   },
   Subscription: {
+    SubscribeToZipMap: 'SubscribeToZipMap',
     SubscribeToTranslationReport: 'SubscribeToTranslationReport'
   },
   Fragment: {

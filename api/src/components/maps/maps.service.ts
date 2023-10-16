@@ -17,6 +17,7 @@ import {
   GetMapWordOrPhraseByDefinitionIdInput,
   MapWordsAndPhrasesCountOutput,
   OrigMapWordsAndPhrasesOutput,
+  StartZipMapOutput,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
@@ -1018,5 +1019,15 @@ export class MapsService {
       });
     });
     return foundLangs;
+  }
+
+  async startZipMap(input): Promise<StartZipMapOutput> {
+    try {
+      console.log('startZipMap subscription input: ', JSON.stringify(input));
+
+      return { error: ErrorType.NoError };
+    } catch (error) {
+      return { error: ErrorType.MapZippingError };
+    }
   }
 }
