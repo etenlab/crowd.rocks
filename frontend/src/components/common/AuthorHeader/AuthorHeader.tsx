@@ -13,9 +13,15 @@ export function AuthorHeader({
 }: AuthorHeaderProps) {
   return (
     <AuthorContainer>
-      {isCreatedByBot && <IonBadge>bot</IonBadge>}
       {createdBy}
       <TimestampContainer>| {createdAt}</TimestampContainer>
+      {isCreatedByBot && (
+        <IonBadge
+          style={{ fontSize: '12px', marginLeft: '5px', marginTop: '-2px' }}
+        >
+          bot
+        </IonBadge>
+      )}
     </AuthorContainer>
   );
 }
