@@ -43,6 +43,9 @@ export function TranslatedCard(props: TranslatedCardProps) {
 
   let siteTextlikeString = '';
   let definitionlikeString = '';
+  let username = '';
+  let isBot = false;
+  let createdAt = '';
 
   const translationWithVote =
     !error &&
@@ -60,6 +63,11 @@ export function TranslatedCard(props: TranslatedCardProps) {
         siteTextlikeString = translationWithVote.to_word_definition.word.word;
         definitionlikeString =
           translationWithVote.to_word_definition.definition;
+        username =
+          translationWithVote.to_word_definition.word.created_by_user.avatar;
+        isBot =
+          translationWithVote.to_word_definition.word.created_by_user.is_bot;
+        createdAt = translationWithVote.to_word_definition.word.created_at;
         break;
       }
       case 'WordToPhraseTranslationWithVote': {
@@ -67,12 +75,24 @@ export function TranslatedCard(props: TranslatedCardProps) {
           translationWithVote.to_phrase_definition.phrase.phrase;
         definitionlikeString =
           translationWithVote.to_phrase_definition.definition;
+        username =
+          translationWithVote.to_phrase_definition.phrase.created_by_user
+            .avatar;
+        isBot =
+          translationWithVote.to_phrase_definition.phrase.created_by_user
+            .is_bot;
+        createdAt = translationWithVote.to_phrase_definition.phrase.created_at;
         break;
       }
       case 'PhraseToWordTranslationWithVote': {
         siteTextlikeString = translationWithVote.to_word_definition.word.word;
         definitionlikeString =
           translationWithVote.to_word_definition.definition;
+        username =
+          translationWithVote.to_word_definition.word.created_by_user.avatar;
+        isBot =
+          translationWithVote.to_word_definition.word.created_by_user.is_bot;
+        createdAt = translationWithVote.to_word_definition.word.created_at;
         break;
       }
       case 'PhraseToPhraseTranslationWithVote': {
@@ -80,6 +100,13 @@ export function TranslatedCard(props: TranslatedCardProps) {
           translationWithVote.to_phrase_definition.phrase.phrase;
         definitionlikeString =
           translationWithVote.to_phrase_definition.definition;
+        username =
+          translationWithVote.to_phrase_definition.phrase.created_by_user
+            .avatar;
+        isBot =
+          translationWithVote.to_phrase_definition.phrase.created_by_user
+            .is_bot;
+        createdAt = translationWithVote.to_phrase_definition.phrase.created_at;
         break;
       }
     }
@@ -90,6 +117,11 @@ export function TranslatedCard(props: TranslatedCardProps) {
       content={siteTextlikeString}
       description={definitionlikeString}
       onClick={() => props.onClick()}
+      createdBy={{
+        username,
+        isBot,
+        createdAt: new Date(createdAt).toDateString(),
+      }}
     />
   );
 }

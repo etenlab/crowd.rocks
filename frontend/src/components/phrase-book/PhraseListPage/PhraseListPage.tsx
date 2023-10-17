@@ -132,6 +132,9 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
       definitionlike_strings: string[];
       downvotes: number;
       upvotes: number;
+      username: string;
+      isBot: boolean;
+      createdAt: string;
     }[] = [];
 
     if (error) {
@@ -159,6 +162,9 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
           ) as string[],
           upvotes: node.upvotes,
           downvotes: node.downvotes,
+          username: node.created_by_user.avatar,
+          createdAt: node.created_at,
+          isBot: node.created_by_user.is_bot,
         });
       }
     }
@@ -183,6 +189,11 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
                 ))}
               </ul>
             }
+            createdBy={{
+              username: phrase.username,
+              isBot: phrase.isBot,
+              createdAt: new Date(phrase.createdAt).toDateString(),
+            }}
             vote={{
               upVotes: phrase.upvotes,
               downVotes: phrase.downvotes,

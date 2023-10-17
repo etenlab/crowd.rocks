@@ -4,6 +4,10 @@ fragment PhraseFragment on Phrase {
   language_code
   dialect_code
   geo_code
+  created_at
+  created_by_user {
+    ...UserFields
+  }
 }
 
 fragment PhraseDefinitionFragment on PhraseDefinition {
@@ -13,6 +17,9 @@ fragment PhraseDefinitionFragment on PhraseDefinition {
     ...PhraseFragment
   }
   created_at
+  created_by_user {
+    ...UserFields
+  }
 }
 
 fragment PhraseWithDefinitionsFragment on PhraseWithDefinitions {
@@ -21,6 +28,10 @@ fragment PhraseWithDefinitionsFragment on PhraseWithDefinitions {
   language_code
   dialect_code
   geo_code
+  created_by_user {
+    ...UserFields
+  }
+  created_at
   definitions {
     ...PhraseDefinitionFragment
   }
@@ -37,6 +48,9 @@ fragment PhraseDefinitionWithVoteFragment on PhraseDefinitionWithVote {
   downvotes
   upvotes
   created_at
+  created_by_user {
+    ...UserFields
+  }
 }
 
 fragment PhraseWithVoteFragment on PhraseWithVote {
@@ -47,6 +61,10 @@ fragment PhraseWithVoteFragment on PhraseWithVote {
   geo_code
   downvotes
   upvotes
+  created_by_user {
+    ...UserFields
+  }
+  created_at
 }
 
 fragment PhraseVoteStatusFragment on PhraseVoteStatus {

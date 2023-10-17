@@ -139,6 +139,12 @@ export function WordListPage({ match }: WordListPageProps) {
       definitionlike_strings: string[];
       downvotes: number;
       upvotes: number;
+      created_at: Date;
+      created_by: {
+        user_id: string;
+        avatar: string;
+        is_bot: boolean;
+      };
     }[] = [];
 
     if (error) {
@@ -166,6 +172,8 @@ export function WordListPage({ match }: WordListPageProps) {
           ) as string[],
           upvotes: node.upvotes,
           downvotes: node.downvotes,
+          created_at: node.created_at,
+          created_by: node.created_by_user,
         });
       }
     }
@@ -185,6 +193,11 @@ export function WordListPage({ match }: WordListPageProps) {
         <CardContainer key={word.word_id}>
           <Card
             key={word.word_id}
+            createdBy={{
+              username: word.created_by.avatar,
+              isBot: word.created_by.is_bot,
+              createdAt: new Date(word.created_at).toDateString(),
+            }}
             content={word.word}
             description={
               <ul style={{ listStyleType: 'circle' }}>

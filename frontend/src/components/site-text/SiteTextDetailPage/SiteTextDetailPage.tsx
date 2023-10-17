@@ -127,6 +127,13 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
       <Card
         content={siteTextWordDefinition.word_definition.word.word}
         description={siteTextWordDefinition.word_definition.definition}
+        createdBy={{
+          username:
+            siteTextWordDefinition.word_definition.word.created_by_user.avatar,
+          isBot:
+            siteTextWordDefinition.word_definition.word.created_by_user.is_bot,
+          createdAt: siteTextWordDefinition.word_definition.word.created_at,
+        }}
       />
     );
   }, [wordData, wordError]);
@@ -154,6 +161,16 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
       <Card
         content={siteTextPhraseDefinition.phrase_definition.phrase.phrase}
         description={siteTextPhraseDefinition.phrase_definition.definition}
+        createdBy={{
+          username:
+            siteTextPhraseDefinition.phrase_definition.phrase.created_by_user
+              .avatar,
+          isBot:
+            siteTextPhraseDefinition.phrase_definition.phrase.created_by_user
+              .is_bot,
+          createdAt:
+            siteTextPhraseDefinition.phrase_definition.phrase.created_at,
+        }}
       />
     );
   }, [phraseData, phraseError]);
@@ -170,6 +187,11 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
       upvotes: number;
       downvotes: number;
       to_word_or_phrase_id: string;
+      created_at: string;
+      created_by_user: {
+        username: string;
+        is_bot: boolean;
+      };
     }[] = [];
 
     if (translationsError) {
@@ -214,6 +236,15 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
             downvotes: translationWithVote.downvotes,
             to_word_or_phrase_id:
               translationWithVote.to_word_definition.word.word_id,
+            created_at: translationWithVote.to_word_definition.word.created_at,
+            created_by_user: {
+              username:
+                translationWithVote.to_word_definition.word.created_by_user
+                  .avatar,
+              is_bot:
+                translationWithVote.to_word_definition.word.created_by_user
+                  .is_bot,
+            },
           });
           break;
         }
@@ -233,6 +264,15 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
             downvotes: translationWithVote.downvotes,
             to_word_or_phrase_id:
               translationWithVote.to_phrase_definition.phrase.phrase_id,
+            created_at: translationWithVote.to_phrase_definition.created_at,
+            created_by_user: {
+              username:
+                translationWithVote.to_phrase_definition.phrase.created_by_user
+                  .avatar,
+              is_bot:
+                translationWithVote.to_phrase_definition.phrase.created_by_user
+                  .is_bot,
+            },
           });
           break;
         }
@@ -252,6 +292,15 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
             downvotes: translationWithVote.downvotes,
             to_word_or_phrase_id:
               translationWithVote.to_word_definition.word.word_id,
+            created_at: translationWithVote.to_word_definition.created_at,
+            created_by_user: {
+              username:
+                translationWithVote.to_word_definition.word.created_by_user
+                  .avatar,
+              is_bot:
+                translationWithVote.to_word_definition.word.created_by_user
+                  .is_bot,
+            },
           });
           break;
         }
@@ -271,6 +320,15 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
             downvotes: translationWithVote.downvotes,
             to_word_or_phrase_id:
               translationWithVote.to_phrase_definition.phrase.phrase_id,
+            created_at: translationWithVote.to_phrase_definition.created_at,
+            created_by_user: {
+              username:
+                translationWithVote.to_phrase_definition.phrase.created_by_user
+                  .avatar,
+              is_bot:
+                translationWithVote.to_phrase_definition.phrase.created_by_user
+                  .is_bot,
+            },
           });
           break;
         }
@@ -282,6 +340,11 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
         <Card
           content={translation.siteTextlikeString}
           description={translation.definitionlikeString}
+          createdBy={{
+            username: translation.created_by_user.username,
+            createdAt: new Date(translation.created_at).toDateString(),
+            isBot: translation.created_by_user.is_bot,
+          }}
           vote={{
             upVotes: translation.upvotes,
             downVotes: translation.downvotes,
