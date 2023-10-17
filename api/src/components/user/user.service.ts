@@ -21,13 +21,24 @@ export class UserService {
         [input.user_id],
       );
 
-      if (res1.rowCount == 1) {
+      const res2 = await this.pg.pool.query(
+        `
+          select
+            is_bot
+          from users
+          where user_id = $1
+        `,
+        [input.user_id],
+      );
+
+      if (res1.rowCount == 1 && res2.rowCount == 1) {
         return {
           error: ErrorType.NoError,
           user: {
             avatar: res1.rows[0].avatar,
             avatar_url: get_avatar_image_url(res1.rows[0].url),
             user_id: input.user_id,
+            is_bot: res2.rows[0].is_bot,
           },
         };
       }

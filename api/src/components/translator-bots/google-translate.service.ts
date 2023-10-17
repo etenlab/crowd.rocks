@@ -155,7 +155,7 @@ export class GoogleTranslateService implements ITranslator {
       const token = createToken();
       const res = await this.pg.pool.query(
         `
-        call authentication_register($1, $2, $3, $4, 0, '');
+        call authentication_register_bot($1, $2, $3, $4, 0, '');
         `,
         [GOOGLE_BOT_EMAIL, 'GoogleBot', pash, token],
       );

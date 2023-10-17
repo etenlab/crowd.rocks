@@ -72,6 +72,13 @@ export class WordsService {
             language_code: res.rows[0].language_code,
             dialect_code: res.rows[0].dialect_code,
             geo_code: res.rows[0].geo_code,
+            created_at: res.rows[0].created_at,
+            created_by_user: {
+              user_id: res.rows[0].user_id,
+              avatar: res.rows[0].avatar,
+              avatar_url: res.rows[0].avatar_url,
+              is_bot: res.rows[0].is_bot,
+            },
           },
         };
       }
@@ -104,6 +111,13 @@ export class WordsService {
           language_code: row.language_code,
           dialect_code: row.dialect_code,
           geo_code: row.geo_code,
+          created_at: row.created_at,
+          created_by_user: {
+            user_id: row.user_id,
+            is_bot: row.is_bot,
+            avatar: row.avatar,
+            avatar_url: row.avatar_url,
+          },
         }),
       );
 
@@ -568,6 +582,13 @@ export class WordsService {
         geo_code: res.rows[0].geo_code,
         definition: res.rows[0].definition,
         definition_id: res.rows[0].definition_id,
+        created_at: res.rows[0].created_at,
+        created_by_user: {
+          user_id: res.rows[0].user_id,
+          avatar: res.rows[0].avatar,
+          avatar_url: res.rows[0].avatar_url,
+          is_bot: res.rows[0].is_bot,
+        },
       };
     } catch (error) {
       Logger.error(error);

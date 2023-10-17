@@ -118,6 +118,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
           <Post
             created_by={post.created_by_user.avatar}
             created_at={post.created_at}
+            is_created_by_bot={post.created_by_user.is_bot}
             chatContent={
               <div
                 dangerouslySetInnerHTML={{ __html: `${post.content}` }}

@@ -11,13 +11,15 @@ import { GenericOutput } from 'src/common/types';
 
 import { Word } from 'src/components/words/types';
 import { Phrase } from 'src/components/phrases/types';
+import { User } from '../user/types';
 
 @ObjectType()
 export class WordDefinition {
   @Field(() => ID) word_definition_id: string;
   @Field(() => String) definition: string;
   @Field(() => Word) word: Word;
-  @Field(() => String) created_at: string;
+  @Field(() => Date) created_at: Date;
+  @Field(() => User) created_by_user: User;
 }
 
 @ObjectType()
@@ -25,7 +27,8 @@ export class PhraseDefinition {
   @Field(() => ID) phrase_definition_id: string;
   @Field(() => String) definition: string;
   @Field(() => Phrase) phrase: Phrase;
-  @Field(() => String) created_at: string;
+  @Field(() => Date) created_at: Date;
+  @Field(() => User) created_by_user: User;
 }
 
 export const Definition = createUnionType({
@@ -125,14 +128,12 @@ export class DefinitionUpdateOutput extends GenericOutput {
 
 @ObjectType()
 export class WordDefinitionWithVote extends WordDefinition {
-  @Field(() => String) created_at: string;
   @Field(() => Int) upvotes: number;
   @Field(() => Int) downvotes: number;
 }
 
 @ObjectType()
 export class PhraseDefinitionWithVote extends PhraseDefinition {
-  @Field(() => String) created_at: string;
   @Field(() => Int) upvotes: number;
   @Field(() => Int) downvotes: number;
 }

@@ -393,6 +393,12 @@ export class DatabaseVersionControlService {
   }
 
   async loadVersion5(): Promise<void> {
+    //schema
+    await this.runSqlFile('./src/core/sql/schema/v5.schema.sql');
+
+    await this.runSqlFile('./src/core/sql/authentication/register-bot.sql');
+    await this.runSqlFile('./src/core/sql/user/avatar_update_v2.sql');
+
     // set version
     await this.setVersionNumber(5);
   }
