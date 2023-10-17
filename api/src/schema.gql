@@ -152,6 +152,7 @@ enum ErrorType {
   MapInsertFailed
   MapNotFound
   MapVoteNotFound
+  MapZippingError
   NoError
   NotificationDeleteFailed
   NotificationInsertFailed
@@ -592,6 +593,7 @@ type Mutation {
   siteTextPhraseDefinitionUpsert(phrase_definition_id: ID!): SiteTextPhraseDefinitionOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextDefinitionOutput!
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
+  startZipMapDownload(input: StartZipMapDownloadInput!): StartZipMapOutput!
   stopBotTranslation: GenericOutput!
   threadDelete(input: ThreadDeleteInput!): ThreadDeleteOutput!
   threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
@@ -1247,8 +1249,23 @@ type SiteTextWordDefinitionOutput {
   site_text_word_definition: SiteTextWordDefinition
 }
 
+input StartZipMapDownloadInput {
+  language: LanguageInput!
+}
+
+type StartZipMapOutput {
+  error: ErrorType!
+}
+
 type Subscription {
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
+  ZipMapReport: ZipMapResult!
+}
+
+enum SubscriptionStatus {
+  Completed
+  Error
+  Progressing
 }
 
 enum TableNameType {
@@ -1708,4 +1725,11 @@ type WordWithVoteOutput {
 type WordlikeString {
   wordlike_string: String!
   wordlike_string_id: ID!
+}
+
+type ZipMapResult {
+  errors: [String!]
+  message: String
+  resultZipUrl: String
+  status: SubscriptionStatus!
 }

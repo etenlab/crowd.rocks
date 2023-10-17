@@ -162,6 +162,21 @@ query IsAdminLoggedIn($input: IsAdminIdInput!) {
   }
 }
 
+mutation StartZipMapDownload($language: LanguageInput!) {
+  startZipMapDownload(input: { language: $language }) {
+    error
+  }
+}
+
+subscription SubscribeToZipMap {
+  ZipMapReport {
+    resultZipUrl
+    status
+    message
+    errors
+  }
+}
+
 mutation MapUpload(
   $file: Upload!
   $previewFileId: String

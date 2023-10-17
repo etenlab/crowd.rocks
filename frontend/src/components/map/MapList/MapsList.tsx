@@ -11,6 +11,8 @@ import {
   useIonRouter,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
+  useIonToast,
+  IonSpinner,
 } from '@ionic/react';
 import { useDebounce } from 'use-debounce';
 
@@ -25,7 +27,13 @@ import { Checkbox } from '../../common/buttons/Checkbox';
 
 import { MapItem, ViewMode } from './MapItem';
 
-import { useGetAllMapsListLazyQuery } from '../../../generated/graphql';
+import {
+  ErrorType,
+  SubscriptionStatus,
+  useGetAllMapsListLazyQuery,
+  useStartZipMapDownloadMutation,
+  useSubscribeToZipMapSubscription,
+} from '../../../generated/graphql';
 
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { useTr } from '../../../hooks/useTr';
@@ -34,11 +42,16 @@ import { globals } from '../../../services/globals';
 
 import { PAGE_SIZE } from '../../../const/commonConst';
 import { RouteComponentProps } from 'react-router';
-import { langInfo2tag, tag2langInfo } from '../../../common/langUtils';
+import {
+  langInfo2langInput,
+  langInfo2tag,
+  tag2langInfo,
+} from '../../../common/langUtils';
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
 import { MapUploadModal } from './MapUploadModal';
 import { MapResetModal } from './MapResetModal';
-
+import { DownloadCircle } from '../../common/icons/DownloadCircle';
+import { downloadFromUrl } from '../../../common/utility';
 interface MapListProps
   extends RouteComponentProps<{
     lang_full_tag: string;
@@ -50,6 +63,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const { lang_full_tag: url_lang_tag, nation_id, language_id } = match.params;
   const router = useIonRouter();
   const { tr } = useTr();
+  const [present] = useIonToast();
 
   const [filter, setFilter] = useState<string>('');
   const [bouncedFilter] = useDebounce(filter, 500);
@@ -62,6 +76,8 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('normal');
   const [checkedMap, setCheckedMap] = useState<Record<string, boolean>>({});
   const [allChecked, setAllChecked] = useState<boolean>(false);
+
+  const [startZipMapDownload] = useStartZipMapDownloadMutation();
 
   const {
     states: {
@@ -202,6 +218,60 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     setAllChecked(e.target.checked);
   };
 
+  const { data: mapZipResult, error: mapZipError } =
+    useSubscribeToZipMapSubscription();
+
+  useEffect(() => {
+    if (mapZipError) {
+      present({
+        message: 'Maps zipping error',
+        duration: 3000,
+        position: 'top',
+        color: 'danger',
+      });
+      console.error(mapZipError);
+    }
+    console.log(mapZipResult);
+  }, [mapZipError, mapZipResult, present]);
+
+  const handleStartZipMap = useCallback(async () => {
+    if (!targetLang) {
+      present({
+        message: `Please select language first`,
+        duration: 3000,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    const { data, errors } = await startZipMapDownload({
+      variables: { language: langInfo2langInput(targetLang) },
+    });
+    if (data?.startZipMapDownload.error !== ErrorType.NoError) {
+      present({
+        message: data?.startZipMapDownload.error,
+        duration: 3000,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+    if (errors?.length && errors?.length > 0) {
+      present({
+        message: 'Errors: ' + JSON.stringify(errors),
+        duration: 3000,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+  }, [present, startZipMapDownload, targetLang]);
+
+  useEffect(() => {
+    if (!mapZipResult?.ZipMapReport.resultZipUrl) {
+      return;
+    }
+    downloadFromUrl('maps', mapZipResult.ZipMapReport.resultZipUrl);
+  }, [mapZipResult?.ZipMapReport.resultZipUrl]);
+
   const startTimer = () => {
     timerRef.current = setTimeout(handleLongPress, 2000);
   };
@@ -288,6 +358,17 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
           <Typography variant="h3" color="dark">{`${
             allMapsQuery?.getAllMapsList.edges?.length || 0
           } ${tr('maps found')}`}</Typography>
+          {mapZipResult?.ZipMapReport.status ===
+          SubscriptionStatus.Progressing ? (
+            <>
+              {mapZipResult.ZipMapReport.message}
+              <IonSpinner color={'primary'} />
+            </>
+          ) : (
+            <Button startIcon={<DownloadCircle />} onClick={handleStartZipMap}>
+              {tr('Make zip and dowlnoad')}
+            </Button>
+          )}
           {isAdminUser ? (
             <Button
               variant="text"

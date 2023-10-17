@@ -17,13 +17,20 @@ import {
   GetMapWordOrPhraseByDefinitionIdInput,
   MapWordsAndPhrasesCountOutput,
   OrigMapWordsAndPhrasesOutput,
+  StartZipMapOutput,
+  ZipMapResult,
+  StartZipMapDownloadInput,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
 import { WordsService } from '../words/words.service';
 import { MapsRepository } from './maps.repository';
 import { WordUpsertInput } from '../words/types';
-import { ErrorType, LanguageInfo } from '../../common/types';
+import {
+  ErrorType,
+  LanguageInfo,
+  SubscriptionStatus,
+} from '../../common/types';
 import { DEFAULT_NEW_MAP_LANGUAGE } from '../../common/const';
 import { PostgresService } from '../../core/postgres.service';
 import { WordDefinitionsService } from '../definitions/word-definitions.service';
@@ -34,11 +41,17 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
-import { putLangCodesToFileName } from '../../common/utility';
+import { downloadFile, putLangCodesToFileName } from '../../common/utility';
 import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
 import { Readable } from 'stream';
-import { error } from 'console';
+import { PUB_SUB } from '../../pubSub.module';
+import { PubSub } from 'graphql-subscriptions';
+import { SubscriptionToken } from '../../common/subscription-token';
+import * as temp from 'temp';
+import * as path from 'path';
+import { createReadStream } from 'fs';
+import * as AdmZip from 'adm-zip';
 
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
@@ -46,6 +59,7 @@ const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Node
 const DEFAULT_MAP_WORD_DEFINITION = 'A geographical place';
 const DEFAULT_MAP_PHRASE_DEFINITION = 'A geographical place phrase';
 const SVG_MIME_TYPE = 'image/svg+xml';
+const ZIP_MIME_TYPE = 'application/zip';
 
 export type MapTranslationResult = {
   translatedMap: string;
@@ -78,6 +92,7 @@ export class MapsService {
     private fileService: FileService,
     @Inject(forwardRef(() => TranslationsService))
     private translationsService: TranslationsService,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
   async saveAndParseNewMap({
@@ -1018,5 +1033,98 @@ export class MapsService {
       });
     });
     return foundLangs;
+  }
+
+  async startZipMap(
+    input: StartZipMapDownloadInput,
+  ): Promise<StartZipMapOutput> {
+    try {
+      console.log('startZipMap subscription input: ', JSON.stringify(input));
+      this.pubSub.publish(SubscriptionToken.ZipMapReport, {
+        [SubscriptionToken.ZipMapReport]: {
+          resultZipUrl: null,
+          status: SubscriptionStatus.Progressing,
+          errors: [],
+          message: 'Started maps downloading and packing',
+        } as ZipMapResult,
+      });
+      const maps = await this.getAllMapsList({
+        lang: input.language,
+        after: null,
+        first: null,
+      });
+
+      if (!(maps.edges.length > 0)) {
+        throw new Error(ErrorType.MapNotFound);
+      }
+
+      const fileDownloadsPromises: any[] = [];
+      const fileNames: string[] = [];
+      temp.track();
+      const dirPath = temp.mkdirSync('map_zip');
+      if (!dirPath) {
+        Logger.error(`mapsService#startZipMap: can't create temporary folder`);
+        throw new Error(ErrorType.MapZippingError);
+      }
+      for (const { node: map } of maps.edges) {
+        if (!map.mapDetails?.map_file_name_with_langs) {
+          Logger.error(
+            `mapsService#startZipMap: map_file_name_with_langs not found for map ${JSON.stringify(
+              map,
+            )}`,
+          );
+          continue;
+        }
+        this.pubSub.publish(SubscriptionToken.ZipMapReport, {
+          [SubscriptionToken.ZipMapReport]: {
+            resultZipUrl: null,
+            status: SubscriptionStatus.Progressing,
+            errors: [],
+            message: `Processing ${map.mapDetails?.map_file_name_with_langs}`,
+          } as ZipMapResult,
+        });
+        const fileNameFull = path.resolve(
+          dirPath,
+          map.mapDetails?.map_file_name_with_langs,
+        );
+        fileDownloadsPromises.push(
+          downloadFile(map.mapDetails?.content_file_url, fileNameFull),
+        );
+        fileNames.push(fileNameFull);
+      }
+      await Promise.all(fileDownloadsPromises);
+      const zipFileName = `maps-${input.language.language_code}-${new Date().getMonth() + 1
+        }-${new Date().getDate()}.zip`;
+      this.pubSub.publish(SubscriptionToken.ZipMapReport, {
+        [SubscriptionToken.ZipMapReport]: {
+          resultZipUrl: null,
+          status: SubscriptionStatus.Progressing,
+          errors: [],
+          message: `Creating zip file ${zipFileName}`,
+        } as ZipMapResult,
+      });
+
+      const zip = new AdmZip();
+      zip.addLocalFolder(dirPath);
+      zip.writeZip(path.resolve(dirPath, zipFileName));
+      const tempFile = await this.fileService.uploadTemporaryFile(
+        createReadStream(path.resolve(dirPath, zipFileName)),
+        zipFileName,
+        ZIP_MIME_TYPE,
+      );
+      this.pubSub.publish(SubscriptionToken.ZipMapReport, {
+        [SubscriptionToken.ZipMapReport]: {
+          resultZipUrl: tempFile,
+          status: SubscriptionStatus.Completed,
+          errors: [],
+          message: `Zip file creation completed`,
+        } as ZipMapResult,
+      });
+      return { error: ErrorType.NoError };
+    } catch (error) {
+      return { error };
+    } finally {
+      temp.cleanup();
+    }
   }
 }

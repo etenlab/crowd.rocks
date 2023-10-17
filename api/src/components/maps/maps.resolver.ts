@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   Args,
   Resolver,
@@ -7,6 +7,7 @@ import {
   Context,
   Int,
   ID,
+  Subscription,
 } from '@nestjs/graphql';
 
 import { MapsService } from './maps.service';
@@ -31,12 +32,18 @@ import {
   MapVoteStatusOutputRow,
   MapWordsAndPhrasesCountOutput,
   OrigMapWordsAndPhrasesOutput,
+  StartZipMapOutput,
+  ZipMapResult,
+  StartZipMapDownloadInput,
 } from './types';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { ErrorType, GenericOutput } from 'src/common/types';
 import { FileService } from '../file/file.service';
 import { MapVotesService } from './map-votes.service';
+import { PUB_SUB } from '../../pubSub.module';
+import { PubSub } from 'graphql-subscriptions';
+import { SubscriptionToken } from '../../common/subscription-token';
 
 @Injectable()
 @Resolver(Map) // todo: wtf with paramenter, looks like `Map` is wrong and redundant here.
@@ -46,6 +53,7 @@ export class MapsResolver {
     private mapVotesService: MapVotesService,
     private authenticationService: AuthenticationService,
     private fileService: FileService,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
   @Mutation(() => MapUploadOutput)
@@ -321,5 +329,22 @@ export class MapsResolver {
       getBearer(req)! || '',
       null,
     );
+  }
+
+  @Mutation(() => StartZipMapOutput)
+  async startZipMapDownload(
+    @Args('input', { type: () => StartZipMapDownloadInput })
+    input: StartZipMapDownloadInput,
+  ): Promise<StartZipMapOutput> {
+    console.log(`startMapZipDownload, input:${JSON.stringify(input)}`);
+    return this.mapsService.startZipMap(input);
+  }
+
+  @Subscription(() => ZipMapResult, {
+    name: SubscriptionToken.ZipMapReport,
+  })
+  async subscribeToZipMap() {
+    console.log('subscribeToZipMap');
+    return this.pubSub.asyncIterator(SubscriptionToken.ZipMapReport);
   }
 }

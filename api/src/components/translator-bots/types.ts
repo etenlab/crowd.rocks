@@ -82,10 +82,8 @@ export class TranslateAllWordsAndPhrasesByBotResult {
   @Field(() => Int) totalPhraseCount: number;
   @Field(() => Int) translatedWordCount: number;
   @Field(() => Int) translatedPhraseCount: number;
-  @Field(() => String, { nullable: true }) status?:
-    | 'Completed'
-    | 'Progressing'
-    | 'Error';
+  @Field(() => String, { nullable: true }) status?: //todo switch to enum
+  'Completed' | 'Progressing' | 'Error';
   @Field(() => String, { nullable: true }) message?: string;
   @Field(() => [String], { nullable: true }) errors?: string[];
   @Field(() => Int, { nullable: true }) total?: number;
