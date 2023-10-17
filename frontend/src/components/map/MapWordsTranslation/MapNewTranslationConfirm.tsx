@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router';
-import { useIonRouter } from '@ionic/react';
+import { useIonRouter, useIonToast } from '@ionic/react';
 
 import { Stack, Typography, Button } from '@mui/material';
 
+import { typeOfString, StringContentTypes } from '../../../common/utility';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-import { useGetMapWordOrPhraseAsOrigByDefinitionIdQuery } from '../../../generated/graphql';
+import {
+  ErrorType,
+  useGetMapWordOrPhraseAsOrigByDefinitionIdQuery,
+  useUpsertTranslationFromWordAndDefinitionlikeStringMutation,
+} from '../../../generated/graphql';
 
 import { InfoFill } from '../../common/icons/InfoFill';
 import { AddCircle } from '../../common/icons/AddCircle';
@@ -17,6 +22,7 @@ import { MapWordOrPhraseTranslationList } from '../MapWordOrPhraseTranslation/Ma
 export function MapNewTranslationConfirm() {
   const { tr } = useTr();
   const router = useIonRouter();
+  const [present] = useIonToast();
   const {
     nation_id,
     language_id,
@@ -33,10 +39,11 @@ export function MapNewTranslationConfirm() {
   const {
     states: {
       global: {
-        maps: { tempTranslations },
+        langauges: { targetLang },
+        maps: { tempTranslations, updatedTrDefinitionIds },
       },
     },
-    actions: { clearTempTranslation },
+    actions: { clearTempTranslation, setUpdatedTrDefinitionIds },
   } = useAppContext();
 
   const wordOrPhraseQ = useGetMapWordOrPhraseAsOrigByDefinitionIdQuery({
@@ -45,6 +52,28 @@ export function MapNewTranslationConfirm() {
       is_word_definition: definition_type === 'word',
     },
   });
+
+  const [upsertTranslation, { data: upsertData, loading: upsertLoading }] =
+    useUpsertTranslationFromWordAndDefinitionlikeStringMutation({
+      refetchQueries: ['GetTranslationsByFromDefinitionId'],
+    });
+
+  useEffect(() => {
+    if (upsertLoading) return;
+    if (
+      upsertData &&
+      upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error !==
+        ErrorType.NoError
+    ) {
+      present({
+        message:
+          upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+  }, [present, upsertData, upsertLoading]);
 
   const original = useMemo(() => {
     const wordOrPhrase =
@@ -91,6 +120,61 @@ export function MapNewTranslationConfirm() {
   }, [tempTranslations, definition_id, definition_type, goToTranslation]);
 
   const handleUpsertTranslation = () => {
+    const currentData = tempTranslations[`${definition_id}:${definition_type}`];
+
+    if (!currentData) {
+      return;
+    }
+
+    const { translation, description } = currentData;
+
+    if (translation.trim() === '') {
+      present({
+        message: `${tr('New translation value is mandatory')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'warning',
+      });
+      return;
+    }
+
+    if (description.trim() === '') {
+      present({
+        message: `${tr('Translated value of definition is mandatory')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'warning',
+      });
+      return;
+    }
+
+    if (!targetLang?.lang) {
+      present({
+        message: `${tr('Target language must be selected')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'warning',
+      });
+      return;
+    }
+
+    upsertTranslation({
+      variables: {
+        language_code: targetLang?.lang.tag,
+        dialect_code: targetLang?.dialect?.tag,
+        geo_code: targetLang?.region?.tag,
+        word_or_phrase: translation,
+        definition: description,
+        from_definition_id: definition_id,
+        from_definition_type_is_word:
+          definition_type === StringContentTypes.WORD,
+        is_type_word: typeOfString(translation) === StringContentTypes.WORD,
+      },
+    });
+
+    setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]);
+
+    clearTempTranslation(`${definition_id}:${definition_type}`);
     goToTranslation();
   };
 
