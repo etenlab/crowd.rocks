@@ -13,8 +13,12 @@ export function Tag(props: ChipProps) {
         fontSize: '10px',
         fontWeight: 600,
         lineHeight: '18px',
+        minWidth: '10px',
         letterSpacing: '-0.2px',
         height: 'auto',
+        '& .MuiChip-label': {
+          padding: 0,
+        },
         ...props.sx,
       }}
     />

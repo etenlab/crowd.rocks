@@ -84,24 +84,26 @@ export function Header({
       direction="row"
       justifyContent={justify}
       alignItems="center"
-      sx={{
+      sx={(theme) => ({
         padding,
         borderBottom: '1px solid #DEE0E8',
         maxWidth: '777px',
         margin: 'auto',
-      }}
+        backgroundColor: theme.palette.text.white,
+      })}
     >
       {avatarCom}
       <Button
         id="app-name-text"
         variant="text"
         onClick={onClickAppName}
-        sx={{
+        sx={(theme) => ({
+          color: theme.palette.text.dark,
           fontSize: '18px',
           fontWeight: 600,
           lineHeight: '22px',
           letterSpacing: '-0.36px',
-        }}
+        })}
       >
         {title[0]}.<span style={{ color: '#476FFF' }}>{title[1]}</span>
       </Button>
