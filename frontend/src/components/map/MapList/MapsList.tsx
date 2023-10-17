@@ -29,6 +29,7 @@ import { MapItem, ViewMode } from './MapItem';
 
 import {
   ErrorType,
+  SubscriptionStatus,
   useGetAllMapsListLazyQuery,
   useStartZipMapDownloadMutation,
   useSubscribeToZipMapSubscription,
@@ -262,7 +263,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     }
   }, [present, startZipMapDownload, targetLang]);
 
-  const handleDownloadZip = useCallback(() => {
+  useEffect(() => {
     if (!mapZipResult?.ZipMapReport.resultZipUrl) {
       return;
     }
@@ -362,24 +363,15 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
           <Typography variant="h3" color="dark">{`${
             allMapsQuery?.getAllMapsList.edges?.length || 0
           } ${tr('maps found')}`}</Typography>
-
-          {mapZipResult ? (
-            mapZipResult.ZipMapReport.resultZipUrl ? (
-              <Button
-                startIcon={<DownloadCircle />}
-                onClick={handleDownloadZip}
-              >
-                {tr('Dowlnoad zip')}
-              </Button>
-            ) : (
-              <>
-                <IonSpinner />
-                {mapZipResult.ZipMapReport.message}
-              </>
-            )
+          {mapZipResult?.ZipMapReport.status ===
+          SubscriptionStatus.Progressing ? (
+            <>
+              {mapZipResult.ZipMapReport.message}
+              <IonSpinner color={'primary'} />
+            </>
           ) : (
             <Button startIcon={<DownloadCircle />} onClick={handleStartZipMap}>
-              {tr('Zip and prepare dowlnoad')}
+              {tr('Make zip and dowlnoad')}
             </Button>
           )}
           {isAdminUser ? (
