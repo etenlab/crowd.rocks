@@ -2,17 +2,17 @@ import { Stack, Typography, Divider, Button, IconButton } from '@mui/material';
 
 import { useTr } from '../../../hooks/useTr';
 
-import { useAppContext } from '../../../hooks/useAppContext';
 import { Cancel } from '../../common/icons/Cancel';
 
-export function MapNavigationModal() {
+type MapNavigationModalProps = {
+  onClose(): void;
+};
+
+export function MapNavigationModal({ onClose }: MapNavigationModalProps) {
   const { tr } = useTr();
-  const {
-    actions: { setModal },
-  } = useAppContext();
 
   const handleCancel = () => {
-    setModal(null);
+    onClose();
   };
 
   const chars = [...new Array(26)]

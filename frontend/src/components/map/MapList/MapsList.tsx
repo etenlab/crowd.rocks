@@ -69,8 +69,10 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
         langauges: { targetLang, appLanguage },
       },
     },
-    actions: { setTargetLanguage, setModal },
+    actions: { setTargetLanguage, createModal },
   } = useAppContext();
+
+  const { openModal, closeModal } = createModal();
 
   const [getAllMapsList, { data: allMapsQuery, fetchMore }] =
     useGetAllMapsListLazyQuery();
@@ -250,7 +252,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   );
 
   const handleClickNewMapButton = () => {
-    setModal(<MapUploadModal />);
+    openModal(<MapUploadModal onClose={closeModal} />);
   };
 
   const isAdminUser = globals.is_admin_user();
@@ -265,13 +267,6 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
         onChange={(_langTag, langInfo) => {
           if (langInfo) {
             setTargetLanguage(langInfo);
-          } else {
-            setTargetLanguage({
-              lang: {
-                tag: 'en',
-                descriptions: ['English'],
-              },
-            });
           }
         }}
         onClearClick={() =>
@@ -347,7 +342,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
             variant="text"
             color="red"
             onClick={() => {
-              setModal(<MapResetModal />);
+              openModal(<MapResetModal onClose={closeModal} />);
             }}
           >
             {tr('Reset Data')}
@@ -377,7 +372,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
         color="blue"
         sx={{
           position: 'fixed',
-          bottom: '137px',
+          bottom: '20px',
           width: 'calc(100% - 32px)',
           maxWidth: 'calc(777px - 32px)',
         }}

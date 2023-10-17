@@ -11,14 +11,12 @@ import {
   useMapsTranslationsResetMutation,
 } from '../../../generated/graphql';
 
-import { useAppContext } from '../../../hooks/useAppContext';
-
-export function MapResetModal() {
+type MapResetModalProps = {
+  onClose(): void;
+};
+export function MapResetModal({ onClose }: MapResetModalProps) {
   const { tr } = useTr();
   const [present] = useIonToast();
-  const {
-    actions: { setModal },
-  } = useAppContext();
 
   const [
     mapTranslationReset,
@@ -51,7 +49,7 @@ export function MapResetModal() {
 
   const resetTranslatedMaps = () => {
     mapTranslationReset();
-    setModal(null);
+    onClose();
   };
 
   return (
@@ -85,7 +83,7 @@ export function MapResetModal() {
         <Button
           variant="contained"
           color="gray_stroke"
-          onClick={() => setModal(null)}
+          onClick={() => onClose()}
         >
           {tr('Cancel')}
         </Button>

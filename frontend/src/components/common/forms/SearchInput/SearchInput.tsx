@@ -29,7 +29,11 @@ export function SearchInput({
       <IconButton sx={{ padding: 0 }} onClick={onClickSearchButton}>
         <Search sx={{ fontSize: 24 }} />
       </IconButton>
-      <Divider orientation="vertical" variant="middle" />
+      <Divider
+        orientation="vertical"
+        variant="middle"
+        sx={{ height: '24px', marginTop: 0, marginBottom: 0 }}
+      />
       <InputBase
         value={value}
         onChange={(e) => {

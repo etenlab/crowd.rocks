@@ -39,7 +39,11 @@ export interface ContextType {
     setSourceLanguage: (targetLanguage: LanguageInfo | null) => void;
     setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
     setUpdatedTrDefinitionIds: (definitionIds: Array<string>) => void;
-    setModal(com: ReactNode): void;
+    createModal(): {
+      openModal(component: ReactNode, mode?: 'standard' | 'full'): void;
+      closeModal(): void;
+    };
+    removeModal(id: string): void;
     setTempTranslation(
       key: string,
       value: { translation: string; description: string },
@@ -88,7 +92,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
   } = useGlobal({
     dispatch,
   });
-  const { setModal } = useGlobalComponents({ dispatch });
+  const { createModal, removeModal } = useGlobalComponents({ dispatch });
 
   useEffect(() => {
     getAllRecommendedSiteTextTranslationListByLanguage({
@@ -334,7 +338,8 @@ export function AppContextProvider({ children }: AppProviderProps) {
       setSourceLanguage,
       setTargetLanguage,
       setUpdatedTrDefinitionIds,
-      setModal,
+      createModal,
+      removeModal,
       setTempTranslation,
       clearTempTranslation,
     },

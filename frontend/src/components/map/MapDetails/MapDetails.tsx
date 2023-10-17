@@ -207,10 +207,16 @@ export function MapDetails() {
         {!imageLoaded && !imageError ? (
           <Skeleton
             variant="rounded"
-            width="calc(100vw - 34px)"
+            width="calc(100vw - 60px)"
             height="500px"
             animation="wave"
-            sx={{ borderRadius: '10px' }}
+            sx={{
+              marginTop: '15px',
+              borderRadius: '10px',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              maxWidth: 'calc(777px - 60px)',
+            }}
           />
         ) : null}
         {currMapContent?.mapDetails && (
@@ -218,7 +224,12 @@ export function MapDetails() {
             {imageError && <p>{tr('Error loading image')}</p>}
 
             <img
-              style={{ userSelect: 'none', width: '100vw', minHeight: '300px' }}
+              style={{
+                userSelect: 'none',
+                width: 'calc(100vw - 60px)',
+                maxWidth: 'calc(777px - 60px)',
+                minHeight: '300px',
+              }}
               src={currMapContent?.mapDetails?.content_file_url}
               alt="Translated map"
               placeholder="asdf"

@@ -39,6 +39,7 @@
     "apollo-upload-client": "^17.0.0",
     "ionicons": "^7.0.0",
     "language-tags": "^1.0.8",
+    "nanoid": "^5.0.2",
     "react": "^18.2.0",
     "react-cropper": "^2.3.3",
     "react-dom": "^18.2.0",
