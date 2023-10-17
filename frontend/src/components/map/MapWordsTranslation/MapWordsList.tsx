@@ -36,8 +36,10 @@ export function MapWordsList() {
   }>();
 
   const {
-    actions: { setTempTranslation, setModal },
+    actions: { setTempTranslation, createModal },
   } = useAppContext();
+
+  const { openModal, closeModal } = createModal();
 
   const [filter, setFilter] = useState<string>('');
   const [showSearchInput, setShowSearchInput] = useState<boolean>(false);
@@ -122,7 +124,7 @@ export function MapWordsList() {
   );
 
   const handleOpenFilterModal = () => {
-    setModal(<MapFilterModal onChange={() => {}} />);
+    openModal(<MapFilterModal onChange={() => {}} onClose={closeModal} />);
   };
 
   const toggleSearchInput = () => {
@@ -147,8 +149,18 @@ export function MapWordsList() {
           title={tr('Select target language')}
           selected={targetLang}
           onChange={(_targetLangTag, targetLangInfo) => {
-            setTargetLanguage(targetLangInfo);
+            if (targetLangInfo) {
+              setTargetLanguage(targetLangInfo);
+            }
           }}
+          onClearClick={() =>
+            setTargetLanguage({
+              lang: {
+                tag: 'en',
+                descriptions: ['English'],
+              },
+            })
+          }
         />
 
         <Stack

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router';
 import { useIonRouter } from '@ionic/react';
 
@@ -6,6 +6,8 @@ import { Stack, Typography, Button } from '@mui/material';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
+
+import { useGetMapWordOrPhraseAsOrigByDefinitionIdQuery } from '../../../generated/graphql';
 
 import { InfoFill } from '../../common/icons/InfoFill';
 import { AddCircle } from '../../common/icons/AddCircle';
@@ -37,6 +39,39 @@ export function MapNewTranslationConfirm() {
     actions: { clearTempTranslation },
   } = useAppContext();
 
+  const wordOrPhraseQ = useGetMapWordOrPhraseAsOrigByDefinitionIdQuery({
+    variables: {
+      definition_id,
+      is_word_definition: definition_type === 'word',
+    },
+  });
+
+  const original = useMemo(() => {
+    const wordOrPhrase =
+      wordOrPhraseQ.data?.getMapWordOrPhraseAsOrigByDefinitionId.wordOrPhrase;
+    const isWord = wordOrPhrase?.__typename === 'WordWithDefinition';
+    const isPhrase = wordOrPhrase?.__typename === 'PhraseWithDefinition';
+    const value = isWord
+      ? wordOrPhrase?.word
+      : isPhrase
+      ? wordOrPhrase?.phrase
+      : '';
+    const id = isWord
+      ? wordOrPhrase?.word_id
+      : isPhrase
+      ? wordOrPhrase?.phrase_id
+      : '';
+
+    return {
+      isWord,
+      isPhrase,
+      wordOrPhrase,
+      value,
+      id,
+      definition: wordOrPhrase?.definition,
+    };
+  }, [wordOrPhraseQ]);
+
   const goToTranslation = useCallback(() => {
     clearTempTranslation(`${definition_id}:${definition_type}`);
     router.push(`/${nation_id}/${language_id}/1/maps/translation`);
@@ -65,7 +100,7 @@ export function MapNewTranslationConfirm() {
         <Stack direction="row" gap="8px" alignItems="center">
           <InfoFill color="orange" />
           <Typography variant="h3">
-            {tr('Your translation already exists!')}
+            {tr('Your translation may exist!')}
           </Typography>
         </Stack>
 
@@ -77,8 +112,8 @@ export function MapNewTranslationConfirm() {
       </Stack>
 
       <WordItem
-        word="Asia"
-        description="A geographical place phrase"
+        word={original.value || ''}
+        description={original.definition || ''}
         viewData={tempTranslations[`${definition_id}:${definition_type}`]}
         onConfirm={() => {}}
         onDetail={() => {}}

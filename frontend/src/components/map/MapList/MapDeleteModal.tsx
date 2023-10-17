@@ -20,18 +20,14 @@ import {
   useMapDeleteMutation,
 } from '../../../generated/graphql';
 
-import { useAppContext } from '../../../hooks/useAppContext';
-
 export type MapDeleteModalProps = {
   mapInfo: MapDetailsInfo;
+  onClose(): void;
 };
 
-export function MapDeleteModal({ mapInfo }: MapDeleteModalProps) {
+export function MapDeleteModal({ mapInfo, onClose }: MapDeleteModalProps) {
   const { tr } = useTr();
   const [present] = useIonToast();
-  const {
-    actions: { setModal },
-  } = useAppContext();
 
   const [mapDelete, { loading, data }] = useMapDeleteMutation();
 
@@ -88,11 +84,7 @@ export function MapDeleteModal({ mapInfo }: MapDeleteModalProps) {
         {tr('Yes, delete map data')}
       </Button>
 
-      <Button
-        variant="contained"
-        color="gray_stroke"
-        onClick={() => setModal(null)}
-      >
+      <Button variant="contained" color="gray_stroke" onClick={onClose}>
         {tr('Cancel')}
       </Button>
     </Stack>
@@ -121,7 +113,7 @@ export function MapDeleteModal({ mapInfo }: MapDeleteModalProps) {
         <Button
           variant="contained"
           color="blue"
-          onClick={() => setModal(null)}
+          onClick={() => onClose}
           startIcon={<Check sx={{ fontSize: 24 }} />}
         >
           {tr('Go to Maps')}

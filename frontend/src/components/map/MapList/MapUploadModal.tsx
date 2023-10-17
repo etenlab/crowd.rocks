@@ -14,7 +14,6 @@ import { Check } from '../../common/icons/Check';
 import { FilledCheckCircle } from '../../common/icons/FilledCheckCircle';
 
 import { FileUpload } from '../../common/FileUploadBtn/FileUpload';
-import { useAppContext } from '../../../hooks/useAppContext';
 
 import {
   ErrorType,
@@ -22,12 +21,13 @@ import {
   useUploadFileMutation,
 } from '../../../generated/graphql';
 
-export function MapUploadModal() {
+type MapUploadModalProps = {
+  onClose(): void;
+};
+
+export function MapUploadModal({ onClose }: MapUploadModalProps) {
   const [present] = useIonToast();
   const { tr } = useTr();
-  const {
-    actions: { setModal },
-  } = useAppContext();
 
   const [sendMapFile, { loading, data }] = useMapUploadMutation();
   const [uploadFile, { loading: uploading }] = useUploadFileMutation();
@@ -87,7 +87,7 @@ export function MapUploadModal() {
 
   let title = tr('Add new map');
   let content = tr(
-    'Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing.',
+    'Click the button below to add a new map(s) to start translating them.',
   );
   let bottomCom = (
     <Stack gap="16px">
@@ -105,11 +105,7 @@ export function MapUploadModal() {
           </Button>
         }
       />
-      <Button
-        variant="contained"
-        color="gray_stroke"
-        onClick={() => setModal(null)}
-      >
+      <Button variant="contained" color="gray_stroke" onClick={onClose}>
         {tr('Cancel')}
       </Button>
     </Stack>
@@ -136,7 +132,7 @@ export function MapUploadModal() {
         <Button
           variant="contained"
           color="blue"
-          onClick={() => setModal(null)}
+          onClick={onClose}
           startIcon={<Check sx={{ fontSize: 24 }} />}
         >
           {tr('Go to Maps')}
