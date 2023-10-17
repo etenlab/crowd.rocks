@@ -1,21 +1,18 @@
-import { useCallback, useState, SyntheticEvent } from 'react';
-
-import {
-  Autocomplete as MuiAutocomplete,
-  Divider,
-  IconButton,
-  Typography,
-  Stack,
-} from '@mui/material';
+import { ReactNode } from 'react';
+import { Divider, IconButton, Typography, Stack } from '@mui/material';
 
 import { Cancel } from '../../icons/Cancel';
 import { NavArrowDown } from '../../icons/NavArrowDown';
+import { AutocompleteModal } from './AutocompleteModal';
 
-import { StyledPaper, StyledPopper, StyledInput } from './styled';
+import { StyledPaper } from './styled';
+
+import { useAppContext } from '../../../../hooks/useAppContext';
 
 export type OptionItem = {
   label: string;
   value: unknown;
+  endBadge?: ReactNode;
 };
 
 export type AutocompleteProps = {
@@ -37,13 +34,41 @@ export function Autocomplete({
   onChange,
   onClear,
 }: AutocompleteProps) {
-  const [open, setOpen] = useState<boolean>(false);
-  const handleChangeValue = useCallback(
-    (_event: SyntheticEvent<Element, Event>, newValue: OptionItem | null) => {
-      onChange(newValue);
-      setOpen(false);
-    },
-    [onChange],
+  const {
+    actions: { createModal },
+  } = useAppContext();
+
+  const { openModal, closeModal } = createModal();
+
+  const handleOpenModal = () => {
+    openModal(
+      <AutocompleteModal
+        options={options}
+        value={value}
+        onChange={onChange}
+        onClose={closeModal}
+      />,
+      'full',
+    );
+  };
+
+  const inputCom = disabled ? (
+    <Typography
+      variant="h4"
+      color="text.gray"
+      sx={{ flex: 1, opacity: value ? 1 : 0.5 }}
+    >
+      {value?.label || placeholder}
+    </Typography>
+  ) : (
+    <Typography
+      variant="h4"
+      color="text.dark"
+      sx={{ flex: 1, cursor: 'pointer', opacity: value ? 1 : 0.5 }}
+      onClick={handleOpenModal}
+    >
+      {value?.label || placeholder}
+    </Typography>
   );
 
   return (
@@ -53,85 +78,33 @@ export function Autocomplete({
           {label}
         </Typography>
       ) : null}
-      {options.length > 1 ? (
-        <MuiAutocomplete
-          disabled={disabled}
-          options={options}
-          fullWidth={true}
-          value={value}
-          open={open}
-          onBlur={() => {
-            setOpen(false);
-          }}
-          onFocus={() => {
-            setOpen(true);
-          }}
-          onChange={handleChangeValue}
-          getOptionLabel={(option) => option.label}
-          isOptionEqualToValue={(option, value) => {
-            return option && value && option.value === value.value;
-          }}
-          PopperComponent={StyledPopper}
-          renderInput={(params) => (
-            <StyledPaper variant="outlined" ref={params.InputProps.ref}>
-              <StyledInput
-                {...params.inputProps}
-                placeholder={placeholder}
-                onClick={() => setOpen(true)}
-              />
-              <Divider
-                orientation="vertical"
-                variant="middle"
-                sx={{ height: '24px', marginTop: 0, marginBottom: 0 }}
-              />
-              <IconButton
-                sx={{ padding: 0 }}
-                onClick={() => {
-                  if (value === null) {
-                    setOpen(true);
-                  } else {
-                    setOpen(false);
-                    onChange(null);
-                    onClear && onClear();
-                  }
-                }}
-              >
-                {value === null ? (
-                  <NavArrowDown sx={{ fontSize: 24 }} color="dark" />
-                ) : (
-                  <Cancel sx={{ fontSize: 24 }} color="red" />
-                )}
-              </IconButton>
-            </StyledPaper>
-          )}
+      <StyledPaper variant="outlined">
+        {inputCom}
+        <Divider
+          orientation="vertical"
+          variant="middle"
+          sx={{ height: '24px', marginTop: 0, marginBottom: 0 }}
         />
-      ) : (
-        <StyledPaper variant="outlined">
-          <StyledInput placeholder={placeholder} />
-          <Divider
-            orientation="vertical"
-            variant="middle"
-            sx={{ height: '24px', marginTop: 0, marginBottom: 0 }}
-          />
-          <IconButton
-            sx={{ padding: 0 }}
-            onClick={() => {
-              if (value === null) {
-                setOpen(true);
-              } else {
-                onChange(null);
-                onClear && onClear();
-              }
-            }}
-          >
-            {value === null ? (
-              <NavArrowDown sx={{ fontSize: 24 }} color="dark" />
-            ) : (
-              <Cancel sx={{ fontSize: 24 }} color="red" />
-            )}
-          </IconButton>
-        </StyledPaper>
-      )}
+        <IconButton
+          sx={{ padding: 0 }}
+          onClick={() => {
+            if (value === null) {
+              handleOpenModal();
+            } else {
+              closeModal();
+              onChange(null);
+              onClear && onClear();
+            }
+          }}
+          disabled={disabled}
+        >
+          {value === null ? (
+            <NavArrowDown sx={{ fontSize: 24 }} color="dark" />
+          ) : (
+            <Cancel sx={{ fontSize: 24 }} color="red" />
+          )}
+        </IconButton>
+      </StyledPaper>
     </Stack>
   );
 }
