@@ -187,7 +187,8 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
             createdBy={{
               username: phrase.username,
               isBot: phrase.isBot,
-              createdAt: new Date(phrase.createdAt).toDateString(),
+              createdAt:
+                phrase.createdAt && new Date(phrase.createdAt).toDateString(),
             }}
             vote={{
               upVotes: phrase.upvotes,

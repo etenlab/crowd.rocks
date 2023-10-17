@@ -119,7 +119,9 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
           description={definition.definition}
           createdBy={{
             username: definition.username,
-            createdAt: new Date(definition.created_at).toDateString(),
+            createdAt:
+              definition.created_at &&
+              new Date(definition.created_at).toDateString(),
             isBot: definition.isBot,
           }}
           vote={{

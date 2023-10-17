@@ -221,7 +221,9 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
             createdBy={{
               username: definition.created_by_user.avatar,
               isBot: definition.created_by_user.is_bot,
-              createdAt: new Date(definition.created_at).toDateString(),
+              createdAt:
+                definition.created_at &&
+                new Date(definition.created_at).toDateString(),
             }}
             onClick={() =>
               handleGoToDefinitionDetail(

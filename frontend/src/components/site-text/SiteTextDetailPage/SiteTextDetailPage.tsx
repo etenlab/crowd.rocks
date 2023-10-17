@@ -128,7 +128,11 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
             siteTextWordDefinition.word_definition.word.created_by_user.avatar,
           isBot:
             siteTextWordDefinition.word_definition.word.created_by_user.is_bot,
-          createdAt: siteTextWordDefinition.word_definition.word.created_at,
+          createdAt:
+            siteTextWordDefinition.word_definition.word.created_at &&
+            new Date(
+              siteTextWordDefinition.word_definition.word.created_at,
+            ).toDateString(),
         }}
       />
     );
@@ -165,7 +169,10 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
             siteTextPhraseDefinition.phrase_definition.phrase.created_by_user
               .is_bot,
           createdAt:
-            siteTextPhraseDefinition.phrase_definition.phrase.created_at,
+            siteTextPhraseDefinition.phrase_definition.phrase.created_at &&
+            new Date(
+              siteTextPhraseDefinition.phrase_definition.phrase.created_at,
+            ).toDateString(),
         }}
       />
     );
@@ -338,7 +345,9 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
           description={translation.definitionlikeString}
           createdBy={{
             username: translation.created_by_user.username,
-            createdAt: new Date(translation.created_at).toDateString(),
+            createdAt:
+              translation.created_at &&
+              new Date(translation.created_at).toDateString(),
             isBot: translation.created_by_user.is_bot,
           }}
           vote={{

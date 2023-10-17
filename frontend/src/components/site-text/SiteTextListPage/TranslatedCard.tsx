@@ -120,7 +120,7 @@ export function TranslatedCard(props: TranslatedCardProps) {
       createdBy={{
         username,
         isBot,
-        createdAt: new Date(createdAt).toDateString(),
+        createdAt: createdAt && new Date(createdAt).toDateString(),
       }}
     />
   );

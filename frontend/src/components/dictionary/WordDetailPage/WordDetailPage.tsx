@@ -113,7 +113,8 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
           createdBy={{
             username: definition.username,
             isBot: definition.isBot,
-            createdAt: definition.created_at.toDateString(),
+            createdAt:
+              definition.created_at && definition.created_at.toDateString(),
           }}
           vote={{
             upVotes: definition.upvotes,

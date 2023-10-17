@@ -195,7 +195,8 @@ export function WordListPage({ match }: WordListPageProps) {
             createdBy={{
               username: word.created_by.avatar,
               isBot: word.created_by.is_bot,
-              createdAt: new Date(word.created_at).toDateString(),
+              createdAt:
+                word.created_at && new Date(word.created_at).toDateString(),
             }}
             content={word.word}
             description={

@@ -128,7 +128,7 @@ export function Card({
       routerLink={routerLink}
       style={{ cursor: onClick ? 'pointer' : 'unset' }}
     >
-      {createdBy && (
+      {createdBy && createdBy.createdAt && (
         <AuthorHeader
           createdAt={createdBy.createdAt}
           createdBy={createdBy.username}
