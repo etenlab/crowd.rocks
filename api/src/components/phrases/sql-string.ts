@@ -6,21 +6,35 @@ export type GetPhraseObjByIdResultRow = {
   language_code: string;
   dialect_code: string | null;
   geo_code: string | null;
+  created_at: string;
+  user_id: string;
+  is_bot: boolean;
+  avatar: string;
+  avatar_url: string | null;
 };
 
 export function getPhraseObjByIds(ids: number[]): [string, [number[]]] {
   return [
     `
-      select 
-        phrases.phrase_id as phrase_id,
-        phrases.phraselike_string as phrase,
-        words.language_code as language_code,
-        words.dialect_code as dialect_code,
-        words.geo_code as geo_code
-      from phrases
-      join words
+    select 
+      phrases.phrase_id as phrase_id,
+      phrases.phraselike_string as phrase,
+      words.language_code as language_code,
+      words.dialect_code as dialect_code,
+      words.geo_code as geo_code,
+      phrases.created_at,
+      phrases.created_by as user_id,
+      u.is_bot,
+      a.avatar,
+      a.url as avatar_url
+    from phrases
+    join words
       on words.word_id = any(phrases.words)
-      where phrases.phrase_id = any($1)
+    join users u
+      on u.user_id = phrases.created_by
+    join avatars a
+      on u.user_id = a.user_id
+    where phrases.phrase_id = any($1)
     `,
     [ids],
   ];
@@ -267,28 +281,42 @@ export type GetPhraseObjectByDefinitionId = {
   geo_code: string | null;
   definition: string;
   definition_id: string;
+  created_at: string;
+  user_id: string;
+  is_bot: boolean;
+  avatar: string;
+  avatar_url: string | null;
 };
 
 export function getPhraseByDefinitionIdSql(id: number): [string, [number]] {
   return [
     `
-      select
-      	p.words,
-        p.phrase_id ,
-        p.phraselike_string as phrase,
-        w.language_code ,
-        w.dialect_code,
-        w.geo_code,
-        phd.phrase_definition_id,
-        phd.definition
-      from
-        phrases p
-      left join phrase_definitions phd on
-        p.phrase_id = phd.phrase_id
-      left join words w on 
-      	w.word_id = p.words[1]
-      where
-        phd.phrase_definition_id = $1
+  select
+    p.words,
+    p.phrase_id ,
+    p.phraselike_string as phrase,
+    w.language_code ,
+    w.dialect_code,
+    w.geo_code,
+    phd.phrase_definition_id,
+    phd.definition,
+    p.created_at,
+    p.created_by as user_id,
+    u.is_bot,
+    a.avatar,
+    a.url as avatar_url
+  from
+    phrases p
+  left join phrase_definitions phd on
+    p.phrase_id = phd.phrase_id
+  left join words w on 
+    w.word_id = p.words[1]
+  join users u
+    on u.user_id = p.created_by
+  join avatars a
+    on u.user_id = a.user_id
+  where
+    phd.phrase_definition_id = $1
     `,
     [id],
   ];

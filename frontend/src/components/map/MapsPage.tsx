@@ -37,7 +37,7 @@ export const MapsPage: React.FC<MapsPageProps> = ({ match }: MapsPageProps) => {
       />
       <Route
         exact
-        path={`/:nation_id/:language_id/1/maps/translation`}
+        path={`/:nation_id/:language_id/1/maps/translation/:id`}
         component={MapWordsList}
       />
       <Route

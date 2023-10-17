@@ -139,7 +139,7 @@ export async function getTranslatorTokenByEmailAndUsername(
     const token = createToken();
     const res = await pg.pool.query(
       `
-        call authentication_register($1, $2, $3, $4, 0, '');
+        call authentication_register_bot($1, $2, $3, $4, 0, '');
         `,
       [email, username, pash, token],
     );

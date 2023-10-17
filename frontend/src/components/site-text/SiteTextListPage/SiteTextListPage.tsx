@@ -129,6 +129,12 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
       siteTextlikeString: string;
       definitionlikeString: string;
       definition_id: string;
+      created_at: string;
+      created_by_user: {
+        user_id: string;
+        avatar: string;
+        is_bot: boolean;
+      };
     }[] = [];
 
     if (error) {
@@ -160,6 +166,15 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
             definitionlikeString: siteTextDefinition.word_definition.definition,
             definition_id:
               siteTextDefinition.word_definition.word_definition_id,
+            created_at: siteTextDefinition.word_definition.created_at,
+            created_by_user: {
+              user_id:
+                siteTextDefinition.word_definition.word.created_by_user.user_id,
+              avatar:
+                siteTextDefinition.word_definition.word.created_by_user.avatar,
+              is_bot:
+                siteTextDefinition.word_definition.word.created_by_user.is_bot,
+            },
           });
           break;
         }
@@ -173,6 +188,18 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
               siteTextDefinition.phrase_definition.definition,
             definition_id:
               siteTextDefinition.phrase_definition.phrase_definition_id,
+            created_at: siteTextDefinition.phrase_definition.created_at,
+            created_by_user: {
+              user_id:
+                siteTextDefinition.phrase_definition.phrase.created_by_user
+                  .user_id,
+              avatar:
+                siteTextDefinition.phrase_definition.phrase.created_by_user
+                  .avatar,
+              is_bot:
+                siteTextDefinition.phrase_definition.phrase.created_by_user
+                  .is_bot,
+            },
           });
           break;
         }
@@ -191,6 +218,13 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
           <Card
             content={definition.siteTextlikeString}
             description={definition.definitionlikeString}
+            createdBy={{
+              username: definition.created_by_user.avatar,
+              isBot: definition.created_by_user.is_bot,
+              createdAt:
+                definition.created_at &&
+                new Date(definition.created_at).toDateString(),
+            }}
             onClick={() =>
               handleGoToDefinitionDetail(
                 definition.siteTextId,

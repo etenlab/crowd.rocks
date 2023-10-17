@@ -14,12 +14,18 @@ import { Flag } from '../../flags/Flag';
 import { FlagName } from '../../flags/flagGroups';
 import { TableNameType } from '../../../generated/graphql';
 import { Chat } from '../../chat/Chat';
+import { AuthorHeader } from '../AuthorHeader';
 
 type CardProps = {
   content?: string;
   contentIcon?: string;
   description?: ReactNode;
   voteFor?: 'content' | 'description';
+  createdBy?: {
+    username: string;
+    isBot: boolean;
+    createdAt: string;
+  };
   vote?: {
     upVotes: number;
     downVotes: number;
@@ -52,6 +58,7 @@ export function Card({
   discussion,
   flags,
   onContentEdit,
+  createdBy,
 }: CardProps) {
   const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
   const [editing, setEditing] = useState(false);
@@ -121,6 +128,13 @@ export function Card({
       routerLink={routerLink}
       style={{ cursor: onClick ? 'pointer' : 'unset' }}
     >
+      {createdBy && createdBy.createdAt && (
+        <AuthorHeader
+          createdAt={createdBy.createdAt}
+          createdBy={createdBy.username}
+          isCreatedByBot={createdBy.isBot}
+        />
+      )}
       {content ? (
         <CustomCardHeader>
           <CustomCardTitle>
