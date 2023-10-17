@@ -679,6 +679,7 @@ export type Mutation = {
   translateMissingWordsAndPhrasesByChatGpt: TranslateAllWordsAndPhrasesByBotOutput;
   translateMissingWordsAndPhrasesByDeepL: TranslateAllWordsAndPhrasesByBotOutput;
   translateMissingWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByBotOutput;
+  translateMissingWordsAndPhrasesBySmartcat: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByChatGPT4: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByChatGPT35: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByDeepL: TranslateAllWordsAndPhrasesByBotOutput;
@@ -970,6 +971,12 @@ export type MutationTranslateMissingWordsAndPhrasesByDeepLArgs = {
 
 
 export type MutationTranslateMissingWordsAndPhrasesByGoogleArgs = {
+  from_language: LanguageInput;
+  to_language: LanguageInput;
+};
+
+
+export type MutationTranslateMissingWordsAndPhrasesBySmartcatArgs = {
   from_language: LanguageInput;
   to_language: LanguageInput;
 };
@@ -3656,6 +3663,14 @@ export type TranslateMissingWordsAndPhrasesByDeepLMutationVariables = Exact<{
 
 
 export type TranslateMissingWordsAndPhrasesByDeepLMutation = { __typename?: 'Mutation', translateMissingWordsAndPhrasesByDeepL: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
+
+export type TranslateMissingWordsAndPhrasesBySmartcatMutationVariables = Exact<{
+  from_language_code: Scalars['String']['input'];
+  to_language_code: Scalars['String']['input'];
+}>;
+
+
+export type TranslateMissingWordsAndPhrasesBySmartcatMutation = { __typename?: 'Mutation', translateMissingWordsAndPhrasesBySmartcat: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
 
 export type TranslateWordsAndPhrasesByLiltMutationVariables = Exact<{
   from_language_code: Scalars['String']['input'];
@@ -8399,6 +8414,50 @@ export function useTranslateMissingWordsAndPhrasesByDeepLMutation(baseOptions?: 
 export type TranslateMissingWordsAndPhrasesByDeepLMutationHookResult = ReturnType<typeof useTranslateMissingWordsAndPhrasesByDeepLMutation>;
 export type TranslateMissingWordsAndPhrasesByDeepLMutationResult = Apollo.MutationResult<TranslateMissingWordsAndPhrasesByDeepLMutation>;
 export type TranslateMissingWordsAndPhrasesByDeepLMutationOptions = Apollo.BaseMutationOptions<TranslateMissingWordsAndPhrasesByDeepLMutation, TranslateMissingWordsAndPhrasesByDeepLMutationVariables>;
+export const TranslateMissingWordsAndPhrasesBySmartcatDocument = gql`
+    mutation TranslateMissingWordsAndPhrasesBySmartcat($from_language_code: String!, $to_language_code: String!) {
+  translateMissingWordsAndPhrasesBySmartcat(
+    from_language: {language_code: $from_language_code}
+    to_language: {language_code: $to_language_code}
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+    `;
+export type TranslateMissingWordsAndPhrasesBySmartcatMutationFn = Apollo.MutationFunction<TranslateMissingWordsAndPhrasesBySmartcatMutation, TranslateMissingWordsAndPhrasesBySmartcatMutationVariables>;
+
+/**
+ * __useTranslateMissingWordsAndPhrasesBySmartcatMutation__
+ *
+ * To run a mutation, you first call `useTranslateMissingWordsAndPhrasesBySmartcatMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTranslateMissingWordsAndPhrasesBySmartcatMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [translateMissingWordsAndPhrasesBySmartcatMutation, { data, loading, error }] = useTranslateMissingWordsAndPhrasesBySmartcatMutation({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      to_language_code: // value for 'to_language_code'
+ *   },
+ * });
+ */
+export function useTranslateMissingWordsAndPhrasesBySmartcatMutation(baseOptions?: Apollo.MutationHookOptions<TranslateMissingWordsAndPhrasesBySmartcatMutation, TranslateMissingWordsAndPhrasesBySmartcatMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TranslateMissingWordsAndPhrasesBySmartcatMutation, TranslateMissingWordsAndPhrasesBySmartcatMutationVariables>(TranslateMissingWordsAndPhrasesBySmartcatDocument, options);
+      }
+export type TranslateMissingWordsAndPhrasesBySmartcatMutationHookResult = ReturnType<typeof useTranslateMissingWordsAndPhrasesBySmartcatMutation>;
+export type TranslateMissingWordsAndPhrasesBySmartcatMutationResult = Apollo.MutationResult<TranslateMissingWordsAndPhrasesBySmartcatMutation>;
+export type TranslateMissingWordsAndPhrasesBySmartcatMutationOptions = Apollo.BaseMutationOptions<TranslateMissingWordsAndPhrasesBySmartcatMutation, TranslateMissingWordsAndPhrasesBySmartcatMutationVariables>;
 export const TranslateWordsAndPhrasesByLiltDocument = gql`
     mutation TranslateWordsAndPhrasesByLilt($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String, $to_language_code: String!, $to_dialect_code: String, $to_geo_code: String) {
   translateWordsAndPhrasesByLilt(
@@ -9256,6 +9315,7 @@ export const namedOperations = {
     TranslateMissingWordsAndPhrasesByChatGPT: 'TranslateMissingWordsAndPhrasesByChatGPT',
     TranslateMissingWordsAndPhrasesByGoogle: 'TranslateMissingWordsAndPhrasesByGoogle',
     TranslateMissingWordsAndPhrasesByDeepL: 'TranslateMissingWordsAndPhrasesByDeepL',
+    TranslateMissingWordsAndPhrasesBySmartcat: 'TranslateMissingWordsAndPhrasesBySmartcat',
     TranslateWordsAndPhrasesByLilt: 'TranslateWordsAndPhrasesByLilt',
     TranslateWordsAndPhrasesBySmartcat: 'TranslateWordsAndPhrasesBySmartcat',
     TranslateWordsAndPhrasesByDeepL: 'TranslateWordsAndPhrasesByDeepL',

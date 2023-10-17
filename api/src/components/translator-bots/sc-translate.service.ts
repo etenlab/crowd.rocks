@@ -11,8 +11,8 @@ import { ITranslator, LanguageListForBotTranslateOutput } from './types';
 import { ErrorType } from '../../common/types';
 import { languageInput2tag } from '../../common/langUtils';
 
-const LIMIT_WORDS = 20; // for debugging purposes, not to exhaust free limit too quickly/
-const SMARTCAT_BOT_EMAIL = 'liltbot@crowd.rocks';
+const LIMIT_WORDS = undefined; //20; // for debugging purposes, not to exhaust free limit too quickly/
+const SMARTCAT_BOT_EMAIL = 'smartcatbot@crowd.rocks';
 const PROJECT_TAG = 'crowd_rocks_tag';
 
 type InSmartcatObj = {
@@ -51,7 +51,6 @@ export class SmartcatTranslateService implements ITranslator {
 
     const headers = new Headers();
     // headers.append('Content-Type', 'text/json');
-    console.log(Buffer.from(username + ':' + password).toString('base64'));
     headers.append(
       'Authorization',
       `Basic ${Buffer.from(username + ':' + password).toString('base64')}`,
@@ -83,19 +82,22 @@ export class SmartcatTranslateService implements ITranslator {
     return resJ;
   }
 
-  async translate(
+  translate = async (
     texts: string[],
     from: LanguageInput,
     to: LanguageInput,
-  ): Promise<string[]> {
+  ): Promise<string[]> => {
     try {
+      const textsForTranslate = LIMIT_WORDS
+        ? texts.splice(0, LIMIT_WORDS)
+        : texts;
       const objForTranslation: InSmartcatObj = {
         sourceLanguage: languageInput2tag(from),
         targetLanguages: [languageInput2tag(to)],
         isHtml: false,
         externalTag: PROJECT_TAG,
         profile: this.config.SMARTCAT_PROFILE || '',
-        texts: texts.splice(0, LIMIT_WORDS).map((text) => ({
+        texts: textsForTranslate.map((text) => ({
           text,
         })),
       };
@@ -110,7 +112,7 @@ export class SmartcatTranslateService implements ITranslator {
       console.log(`sc-translate.service Error: ${JSON.stringify(err)}`);
       throw err;
     }
-  }
+  };
 
   async getLanguages(): Promise<LanguageListForBotTranslateOutput> {
     try {

@@ -32,8 +32,6 @@ import { LangSelector } from '../../common/LangSelector/LangSelector';
 
 import {
   StChatIcon,
-  FilterContainer,
-  CaptionContainer,
   CardListContainer,
   FullWidthContainer,
   LanguageSelectorContainer,
@@ -612,37 +610,32 @@ export function FastTranslationPage() {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Fast Translation')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Fast Translation')}</Caption>
 
-      <FilterContainer>
-        <LanguageSelectorContainer>
-          <FullWidthContainer>
-            <LangSelector
-              title={tr('Source language')}
-              langSelectorId="translation-source-langSelector"
-              selected={source as LanguageInfo | undefined}
-              onChange={(_sourceLangTag, sourceLangInfo) => {
-                changeTranslationSourceLanguage(sourceLangInfo);
-              }}
-              onClearClick={() => changeTranslationSourceLanguage(null)}
-            />
-          </FullWidthContainer>
+      <LanguageSelectorContainer>
+        <FullWidthContainer>
+          <LangSelector
+            title={tr('Source language')}
+            selected={source as LanguageInfo}
+            onChange={(_sourceLangTag, sourceLangInfo) => {
+              changeTranslationSourceLanguage(sourceLangInfo);
+            }}
+            onClearClick={() => changeTranslationSourceLanguage(null)}
+          />
+        </FullWidthContainer>
 
-          <FullWidthContainer>
-            <LangSelector
-              title={tr('Target language')}
-              langSelectorId="translation-target-langSelector"
-              selected={target as LanguageInfo | undefined}
-              onChange={(_targetLangTag, targetLanguageInfo) => {
-                changeTranslationTargetLanguage(targetLanguageInfo);
-              }}
-              onClearClick={() => changeTranslationTargetLanguage(null)}
-            />
-          </FullWidthContainer>
-        </LanguageSelectorContainer>
-      </FilterContainer>
+        <FullWidthContainer>
+          <LangSelector
+            title={tr('Target language')}
+            selected={target as LanguageInfo}
+            onChange={(_targetLangTag, targetLanguageInfo) => {
+              changeTranslationTargetLanguage(targetLanguageInfo);
+            }}
+            onClearClick={() => changeTranslationTargetLanguage(null)}
+          />
+        </FullWidthContainer>
+      </LanguageSelectorContainer>
+
       <CardListContainer>{cardListCom}</CardListContainer>
 
       <IonInfiniteScroll onIonInfinite={handleInfinite}>

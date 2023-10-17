@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import {
   IonButton,
   IonInput,
@@ -12,7 +12,11 @@ import { useHistory } from 'react-router';
 import { PageLayout } from '../common/PageLayout';
 
 import { apollo_client } from '../../main';
-import { ErrorType, useLoginMutation } from '../../generated/graphql';
+import {
+  ErrorType,
+  useLoginMutation,
+  useIsAdminLoggedInLazyQuery,
+} from '../../generated/graphql';
 import { globals } from '../../services/globals';
 import { login_change } from '../../services/subscriptions';
 import './Login.css';
@@ -52,14 +56,19 @@ const Login: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [is_unknown_error, set_is_unknown_error] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [loginMutation, { data, loading, error }] = useLoginMutation();
+  const [loginMutation] = useLoginMutation();
+  const [isAdmin, { data: isAdminRes }] = useIsAdminLoggedInLazyQuery();
+
+  useEffect(() => {
+    if (isAdminRes && isAdminRes.loggedInIsAdmin.isAdmin) {
+      globals.set_admin_user();
+    }
+  }, [isAdminRes]);
 
   async function handle_submit(event: FormEvent) {
     event.preventDefault();
     event.stopPropagation();
     set_login_disable(true);
-    // present_loading({ message: tr('Logging in...') });
 
     let result;
     try {
@@ -70,8 +79,9 @@ const Login: React.FC = () => {
         },
         errorPolicy: 'all',
       });
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+    }
 
     const error = result?.data?.login.error;
 
@@ -92,6 +102,8 @@ const Login: React.FC = () => {
       if (session.avatar_url) {
         globals.set_profile_url(session.avatar_url);
       }
+
+      isAdmin({ variables: { input: { user_id: session.user_id } } });
 
       login_change.next(true);
 
@@ -132,7 +144,7 @@ const Login: React.FC = () => {
       set_is_unknown_error(true);
       console.error(error);
     }
-    // dismiss_loading();
+
     set_login_disable(false);
   }
 

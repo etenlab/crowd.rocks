@@ -205,6 +205,12 @@ export class PostService {
     input: PostsByParentInput,
     req: any,
   ): Promise<PostCountOutput> {
+    if (input.parent_id === '') {
+      return {
+        error: ErrorType.InvalidInputs,
+        total: 0,
+      };
+    }
     try {
       const res = await this.pg.pool.query(
         `

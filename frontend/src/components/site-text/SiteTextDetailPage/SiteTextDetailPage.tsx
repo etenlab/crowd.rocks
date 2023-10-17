@@ -20,11 +20,7 @@ import {
 
 import { ErrorType, TableNameType } from '../../../generated/graphql';
 
-import {
-  CaptionContainer,
-  CardListContainer,
-  CardContainer,
-} from '../../common/styled';
+import { CardListContainer, CardContainer } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -411,11 +407,9 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>
-          {tr('Site Text')} - {title}
-        </Caption>
-      </CaptionContainer>
+      <Caption>
+        {tr('Site Text')} - {title}
+      </Caption>
 
       <CardContainer>
         {wordCom}

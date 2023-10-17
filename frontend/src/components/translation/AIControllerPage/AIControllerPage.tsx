@@ -14,7 +14,6 @@ import { Caption } from '../../common/Caption/Caption';
 
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 
-import { FilterContainer, CaptionContainer } from '../../common/styled';
 import {
   ResultBoard,
   LoadingBoard,
@@ -49,6 +48,7 @@ import {
   useTranslateWordsAndPhrasesByChatGpt4Mutation,
   useTranslateMissingWordsAndPhrasesByChatGptMutation,
   useTranslateMissingWordsAndPhrasesByDeepLMutation,
+  useTranslateMissingWordsAndPhrasesBySmartcatMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, langInfo2tag } from '../../../common/langUtils';
@@ -142,6 +142,9 @@ export function AIControllerPage() {
 
   const [translateAllWordsAndPhrasesBySmartcat] =
     useTranslateAllWordsAndPhrasesBySmartcatMutation();
+
+  const [translateMissingWordsAndPhrasesBySC] =
+    useTranslateMissingWordsAndPhrasesBySmartcatMutation();
 
   //deepL
   const [translateWordsAndPhrasesByDeepL] =
@@ -808,6 +811,59 @@ export function AIControllerPage() {
     });
   }, [presentToast, source, tr, translateAllWordsAndPhrasesBySmartcat]);
 
+  const handleTranslateMissingSC = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      handleTranslateToAllLangsDL();
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+
+    const { data } = await translateMissingWordsAndPhrasesBySC({
+      variables: {
+        from_language_code: source.lang.tag,
+        to_language_code: target.lang.tag,
+      },
+    });
+
+    dismiss();
+
+    if (data && data.translateMissingWordsAndPhrasesBySmartcat.result) {
+      setResult(data.translateMissingWordsAndPhrasesBySmartcat.result);
+      await mapsReTranslate({
+        variables: { forLangTag: langInfo2tag(target) },
+      });
+    }
+  };
+
   // DeepL
   const handleTranslateDL = async () => {
     if (!source) {
@@ -1016,21 +1072,8 @@ export function AIControllerPage() {
       disabledActions: disabled || !selectTarget,
     },
     {
-      handleTranslateFunc: handleTranslateL,
-      handleTranslateMissingFunc: null,
-      botTitle: 'Lilt',
-      languageLabel: !selectTarget
-        ? languageData?.getLanguageTranslationInfo.liltTranslateTotalLangCount +
-          ' languages'
-        : languagesLData &&
-          languagesLData!.languagesForBotTranslate.languages?.filter(
-            (scl) => scl.code === langInfo2tag(target || undefined),
-          ).length + ' languages',
-      disabledActions: true,
-    },
-    {
       handleTranslateFunc: handleTranslateSC,
-      handleTranslateMissingFunc: null,
+      handleTranslateMissingFunc: handleTranslateMissingSC,
       botTitle: 'Smartcat',
       languageLabel: !selectTarget
         ? languageData?.getLanguageTranslationInfo
@@ -1039,7 +1082,6 @@ export function AIControllerPage() {
           languagesScData!.languagesForBotTranslate.languages?.filter(
             (scl) => scl.code === langInfo2tag(target || undefined),
           ).length + ' languages',
-      disabledActions: true,
     },
     {
       handleTranslateFunc: handleTranslateDL,
@@ -1053,76 +1095,83 @@ export function AIControllerPage() {
             (scl) => scl.code === langInfo2tag(target || undefined),
           ).length + ' languages',
     },
+    {
+      handleTranslateFunc: handleTranslateL,
+      handleTranslateMissingFunc: null,
+      botTitle: 'Lilt',
+      languageLabel: !selectTarget
+        ? languageData?.getLanguageTranslationInfo.liltTranslateTotalLangCount +
+          ' languages'
+        : languagesLData &&
+          languagesLData!.languagesForBotTranslate.languages?.filter(
+            (scl) => scl.code === langInfo2tag(target || undefined),
+          ).length + ' languages',
+      disabledActions: true,
+    },
   ];
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('AI Controller')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('AI Controller')}</Caption>
 
-      <FilterContainer>
-        <LanguageSectionContainer>
-          <LanguageSelectorContainer>
-            <IonLabel>Source</IonLabel>
-            <LangSelector
-              title={tr('Source language')}
-              langSelectorId="translation-g-source-langSelector"
-              selected={source as LanguageInfo | undefined}
-              onChange={(_sourceLangTag, sourceLangInfo) => {
-                changeTranslationSourceLanguage(sourceLangInfo);
-              }}
-              onClearClick={() => changeTranslationSourceLanguage(null)}
-              enabledTags={enabledTags}
-              disabled={disabled}
+      <LanguageSectionContainer>
+        <LanguageSelectorContainer>
+          <IonLabel>Source</IonLabel>
+          <LangSelector
+            title={tr('Source language')}
+            selected={source as LanguageInfo}
+            onChange={(_sourceLangTag, sourceLangInfo) => {
+              changeTranslationSourceLanguage(sourceLangInfo);
+            }}
+            onClearClick={() => changeTranslationSourceLanguage(null)}
+            enabledTags={enabledTags}
+            disabled={disabled}
+          />
+          <br />
+          <IonLabel>
+            Words: {languageData?.getLanguageTranslationInfo.totalWordCount}
+          </IonLabel>
+          <IonLabel>
+            Phrases: {languageData?.getLanguageTranslationInfo.totalPhraseCount}
+          </IonLabel>
+        </LanguageSelectorContainer>
+        <LanguageSelectorContainer>
+          <div>
+            <IonLabel>Target</IonLabel>
+            <IonToggle
+              checked={selectTarget}
+              onIonChange={() => setSelectTarget(!selectTarget)}
+              style={{ marginLeft: '10px' }}
             />
-            <br />
-            <IonLabel>
-              Words: {languageData?.getLanguageTranslationInfo.totalWordCount}
-            </IonLabel>
-            <IonLabel>
-              Phrases:{' '}
-              {languageData?.getLanguageTranslationInfo.totalPhraseCount}
-            </IonLabel>
-          </LanguageSelectorContainer>
-          <LanguageSelectorContainer>
-            <div>
-              <IonLabel>Target</IonLabel>
-              <IonToggle
-                checked={selectTarget}
-                onIonChange={() => setSelectTarget(!selectTarget)}
-                style={{ marginLeft: '10px' }}
-              />
-            </div>
-            <LangSelector
-              title={tr('Target language')}
-              langSelectorId="translation-g-target-langSelector"
-              selected={target as LanguageInfo | undefined}
-              onChange={(_targetLangTag, targetLanguageInfo) => {
-                changeTranslationTargetLanguage(targetLanguageInfo);
-              }}
-              onClearClick={() => changeTranslationTargetLanguage(null)}
-              enabledTags={enabledTags}
-              disabled={!selectTarget || batchTranslating}
-            />
-            <br />
-            <IonLabel>
-              Missing Words:{' '}
-              {selectTarget
-                ? languageData?.getLanguageTranslationInfo
-                    .translatedMissingWordCount
-                : '?'}
-            </IonLabel>
-            <IonLabel>
-              Missing Phrases:{' '}
-              {selectTarget
-                ? languageData?.getLanguageTranslationInfo
-                    .translatedMissingPhraseCount
-                : '?'}
-            </IonLabel>
-          </LanguageSelectorContainer>
-        </LanguageSectionContainer>
-      </FilterContainer>
+          </div>
+          <LangSelector
+            title={tr('Target language')}
+            selected={target as LanguageInfo}
+            onChange={(_targetLangTag, targetLanguageInfo) => {
+              changeTranslationTargetLanguage(targetLanguageInfo);
+            }}
+            onClearClick={() => changeTranslationTargetLanguage(null)}
+            enabledTags={enabledTags}
+            disabled={!selectTarget || batchTranslating}
+          />
+          <br />
+          <IonLabel>
+            Missing Words:{' '}
+            {selectTarget
+              ? languageData?.getLanguageTranslationInfo
+                  .translatedMissingWordCount
+              : '?'}
+          </IonLabel>
+          <IonLabel>
+            Missing Phrases:{' '}
+            {selectTarget
+              ? languageData?.getLanguageTranslationInfo
+                  .translatedMissingPhraseCount
+              : '?'}
+          </IonLabel>
+        </LanguageSelectorContainer>
+      </LanguageSectionContainer>
+
       <br />
 
       {AiMenu.map((item) => (

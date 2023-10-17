@@ -22,11 +22,7 @@ import {
 
 import { ErrorType, TableNameType } from '../../../generated/graphql';
 
-import {
-  CaptionContainer,
-  CardListContainer,
-  CardContainer,
-} from '../../common/styled';
+import { CardListContainer, CardContainer } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { useToggleWordVoteStatusMutation } from '../../../hooks/useToggleWordVoteStatusMutation';
@@ -232,9 +228,7 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Dictionary')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Dictionary')}</Caption>
 
       <CardContainer>{wordCom}</CardContainer>
 

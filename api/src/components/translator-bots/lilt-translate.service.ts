@@ -61,11 +61,11 @@ export class LiltTranslateService implements ITranslator {
     return translatedChunks;
   };
 
-  async translate(
+  translate = async (
     texts: string[],
     from: LanguageInput,
     to: LanguageInput,
-  ): Promise<string[]> {
+  ): Promise<string[]> => {
     try {
       texts.forEach((text) => {
         if (text.length >= LIMIT_LENGTH - JOINER.length) {
@@ -98,7 +98,7 @@ export class LiltTranslateService implements ITranslator {
       console.log(err);
       throw err;
     }
-  }
+  };
 
   async getLanguages(): Promise<LanguageListForBotTranslateOutput> {
     //todo

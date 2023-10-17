@@ -46,6 +46,8 @@ export class ConfigService {
 
   public readonly DEEPL_KEY = process.env.DEEPL_KEY || '';
 
+  public readonly OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'asdfasdf';
+
   public readonly AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
   public readonly AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
   public readonly AWS_REGION = process.env.AWS_REGION;

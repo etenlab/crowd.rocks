@@ -16,11 +16,7 @@ import { useGetForumFoldersLazyQuery } from '../../../generated/graphql';
 
 import { ErrorType } from '../../../generated/graphql';
 
-import {
-  CaptionContainer,
-  CardListContainer,
-  CardContainer,
-} from '../../common/styled';
+import { CardListContainer, CardContainer } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { AddListHeader } from '../../common/ListHeader';
@@ -113,9 +109,7 @@ export function ForumDetailPage({ match }: ForumDetailPageProps) {
 
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Forum Folders')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Forum Folders')}</Caption>
 
       <AddListHeader
         baseIcon={folderOutline}

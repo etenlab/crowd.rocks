@@ -55,9 +55,7 @@ const Profile: React.FC = () => {
 
   const [image_form_key, set_image_form_key] = useState(1);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [getData, { loading: loading2, error: error2, data: data2 }] =
-    useGetFileUploadUrlLazyQuery();
+  const [getData] = useGetFileUploadUrlLazyQuery();
 
   useIonViewWillEnter(() => {
     document.title = tr('Profile');
