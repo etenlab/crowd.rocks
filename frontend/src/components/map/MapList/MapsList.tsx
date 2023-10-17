@@ -12,6 +12,7 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
   useIonToast,
+  IonSpinner,
 } from '@ionic/react';
 import { useDebounce } from 'use-debounce';
 
@@ -49,7 +50,7 @@ import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
 import { MapUploadModal } from './MapUploadModal';
 import { MapResetModal } from './MapResetModal';
 import { DownloadCircle } from '../../common/icons/DownloadCircle';
-
+import { downloadFromUrl } from '../../../common/utility';
 interface MapListProps
   extends RouteComponentProps<{
     lang_full_tag: string;
@@ -230,7 +231,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     console.log(mapZipResult);
   }, [mapZipError, mapZipResult, present]);
 
-  const handleDownloadZip = useCallback(async () => {
+  const handleStartZipMap = useCallback(async () => {
     if (!targetLang) {
       present({
         message: `Please select language first`,
@@ -260,6 +261,13 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
       });
     }
   }, [present, startZipMapDownload, targetLang]);
+
+  const handleDownloadZip = useCallback(() => {
+    if (!mapZipResult?.ZipMapReport.resultZipUrl) {
+      return;
+    }
+    downloadFromUrl('maps', mapZipResult.ZipMapReport.resultZipUrl);
+  }, [mapZipResult?.ZipMapReport.resultZipUrl]);
 
   const startTimer = () => {
     timerRef.current = setTimeout(handleLongPress, 2000);
@@ -354,9 +362,26 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
           <Typography variant="h3" color="dark">{`${
             allMapsQuery?.getAllMapsList.edges?.length || 0
           } ${tr('maps found')}`}</Typography>
-          <Button startIcon={<DownloadCircle />} onClick={handleDownloadZip}>
-            {tr('Dowlnoad all')}
-          </Button>
+
+          {mapZipResult ? (
+            mapZipResult.ZipMapReport.resultZipUrl ? (
+              <Button
+                startIcon={<DownloadCircle />}
+                onClick={handleDownloadZip}
+              >
+                {tr('Dowlnoad zip')}
+              </Button>
+            ) : (
+              <>
+                <IonSpinner />
+                {mapZipResult.ZipMapReport.message}
+              </>
+            )
+          ) : (
+            <Button startIcon={<DownloadCircle />} onClick={handleStartZipMap}>
+              {tr('Zip and prepare dowlnoad')}
+            </Button>
+          )}
           {isAdminUser ? (
             <Button
               variant="text"

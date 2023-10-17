@@ -2733,7 +2733,7 @@ export type ZipMapResult = {
   __typename?: 'ZipMapResult';
   errors?: Maybe<Array<Scalars['String']['output']>>;
   message?: Maybe<Scalars['String']['output']>;
-  resultZipUrl: Scalars['String']['output'];
+  resultZipUrl?: Maybe<Scalars['String']['output']>;
   status: SubscriptionStatus;
 };
 
@@ -3200,7 +3200,7 @@ export type StartZipMapDownloadMutation = { __typename?: 'Mutation', startZipMap
 export type SubscribeToZipMapSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SubscribeToZipMapSubscription = { __typename?: 'Subscription', ZipMapReport: { __typename?: 'ZipMapResult', status: SubscriptionStatus, message?: string | null, errors?: Array<string> | null } };
+export type SubscribeToZipMapSubscription = { __typename?: 'Subscription', ZipMapReport: { __typename?: 'ZipMapResult', resultZipUrl?: string | null, status: SubscriptionStatus, message?: string | null, errors?: Array<string> | null } };
 
 export type MapUploadMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
@@ -6398,6 +6398,7 @@ export type StartZipMapDownloadMutationOptions = Apollo.BaseMutationOptions<Star
 export const SubscribeToZipMapDocument = gql`
     subscription SubscribeToZipMap {
   ZipMapReport {
+    resultZipUrl
     status
     message
     errors

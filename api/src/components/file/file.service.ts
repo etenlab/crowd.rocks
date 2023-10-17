@@ -26,14 +26,13 @@ export class FileService {
     readStream: ReadStream | Readable,
     fileName: string,
     fileType: string,
-  ) {
+  ): Promise<string> {
     const fileKey = `${nanoid()}-${fileName}`;
-    const s3Client = new S3Client(
-      this.makeS3Creds({ useTemporaryBucket: true }),
-    );
+    const s3Creds = this.makeS3Creds({ useTemporaryBucket: true });
+    const s3Client = new S3Client(s3Creds);
 
     const uploadParams: PutObjectCommandInput = {
-      Bucket: this.makeS3Creds({ useTemporaryBucket: true }).bucketName,
+      Bucket: s3Creds.bucketName,
       Key: fileKey,
       Body: readStream,
       ContentDisposition: `attachment; filename=${fileName}`,
@@ -49,7 +48,9 @@ export class FileService {
     });
 
     await parallelUploads3.done();
-    Logger.debug(`Saved temporary file, key ${uploadParams.Key}`);
+    const fileUrl = `https://${s3Creds.bucketName}.s3.${s3Creds.region}.amazonaws.com/${fileKey}`;
+    Logger.debug(`Saved temporary file, url ${fileUrl}`);
+    return fileUrl;
   }
 
   async uploadFile(

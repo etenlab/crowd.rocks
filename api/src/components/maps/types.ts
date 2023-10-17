@@ -302,7 +302,7 @@ export class StartZipMapOutput extends GenericOutput {}
 
 @ObjectType()
 export class ZipMapResult {
-  @Field(() => String) resultZipUrl: string | null;
+  @Field(() => String, { nullable: true }) resultZipUrl: string | null;
   @Field(() => SubscriptionStatus) status: SubscriptionStatus;
   @Field(() => String, { nullable: true }) message?: string;
   @Field(() => [String], { nullable: true }) errors?: string[];

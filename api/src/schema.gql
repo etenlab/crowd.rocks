@@ -1708,6 +1708,6 @@ type WordlikeString {
 type ZipMapResult {
   errors: [String!]
   message: String
-  resultZipUrl: String!
+  resultZipUrl: String
   status: SubscriptionStatus!
 }

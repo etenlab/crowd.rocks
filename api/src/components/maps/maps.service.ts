@@ -49,8 +49,9 @@ import { PUB_SUB } from '../../pubSub.module';
 import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionToken } from '../../common/subscription-token';
 import * as temp from 'temp';
-import { nanoid } from 'nanoid';
-import path from 'path';
+import * as path from 'path';
+import { createReadStream } from 'fs';
+import * as AdmZip from 'adm-zip';
 
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
@@ -58,6 +59,7 @@ const SKIP_INODE_NAMES = ['rect', 'style', 'clipPath', 'image', 'rect']; // Node
 const DEFAULT_MAP_WORD_DEFINITION = 'A geographical place';
 const DEFAULT_MAP_PHRASE_DEFINITION = 'A geographical place phrase';
 const SVG_MIME_TYPE = 'image/svg+xml';
+const ZIP_MIME_TYPE = 'application/zip';
 
 export type MapTranslationResult = {
   translatedMap: string;
@@ -1057,40 +1059,67 @@ export class MapsService {
       }
 
       const fileDownloadsPromises: any[] = [];
+      const fileNames: string[] = [];
       temp.track();
-      temp.mkdir('map_zip', (err, dirPath) => {
-        if (err) {
-          Logger.error(`mapsService#startZipMap: ${JSON.stringify(err)}`);
-          throw new Error(ErrorType.MapZippingError);
-        }
-        for (const { node: map } of maps.edges) {
-          if (!map.mapDetails?.map_file_name_with_langs) {
-            Logger.error(
-              `mapsService#startZipMap: map_file_name_with_langs not found for map ${JSON.stringify(
-                map,
-              )}`,
-            );
-            continue;
-          }
-          this.pubSub.publish(SubscriptionToken.ZipMapReport, {
-            [SubscriptionToken.ZipMapReport]: {
-              resultZipUrl: null,
-              status: SubscriptionStatus.Progressing,
-              errors: [],
-              message: `Processing ${map.mapDetails?.map_file_name_with_langs}`,
-            } as ZipMapResult,
-          });
-          fileDownloadsPromises.push(
-            downloadFile(
-              map.mapDetails?.content_file_url,
-              path.resolve(dirPath, map.mapDetails?.map_file_name_with_langs),
-            ),
+      const dirPath = temp.mkdirSync('map_zip');
+      if (!dirPath) {
+        Logger.error(`mapsService#startZipMap: can't create temporary folder`);
+        throw new Error(ErrorType.MapZippingError);
+      }
+      for (const { node: map } of maps.edges) {
+        if (!map.mapDetails?.map_file_name_with_langs) {
+          Logger.error(
+            `mapsService#startZipMap: map_file_name_with_langs not found for map ${JSON.stringify(
+              map,
+            )}`,
           );
-
-          todo: stopped here
+          continue;
         }
+        this.pubSub.publish(SubscriptionToken.ZipMapReport, {
+          [SubscriptionToken.ZipMapReport]: {
+            resultZipUrl: null,
+            status: SubscriptionStatus.Progressing,
+            errors: [],
+            message: `Processing ${map.mapDetails?.map_file_name_with_langs}`,
+          } as ZipMapResult,
+        });
+        const fileNameFull = path.resolve(
+          dirPath,
+          map.mapDetails?.map_file_name_with_langs,
+        );
+        fileDownloadsPromises.push(
+          downloadFile(map.mapDetails?.content_file_url, fileNameFull),
+        );
+        fileNames.push(fileNameFull);
+      }
+      await Promise.all(fileDownloadsPromises);
+      const zipFileName = `maps-${input.language.language_code}-${new Date().getMonth() + 1
+        }-${new Date().getDate()}.zip`;
+      this.pubSub.publish(SubscriptionToken.ZipMapReport, {
+        [SubscriptionToken.ZipMapReport]: {
+          resultZipUrl: null,
+          status: SubscriptionStatus.Progressing,
+          errors: [],
+          message: `Creating zip file ${zipFileName}`,
+        } as ZipMapResult,
       });
 
+      const zip = new AdmZip();
+      zip.addLocalFolder(dirPath);
+      zip.writeZip(path.resolve(dirPath, zipFileName));
+      const tempFile = await this.fileService.uploadTemporaryFile(
+        createReadStream(path.resolve(dirPath, zipFileName)),
+        zipFileName,
+        ZIP_MIME_TYPE,
+      );
+      this.pubSub.publish(SubscriptionToken.ZipMapReport, {
+        [SubscriptionToken.ZipMapReport]: {
+          resultZipUrl: tempFile,
+          status: SubscriptionStatus.Completed,
+          errors: [],
+          message: `Zip file creation completed`,
+        } as ZipMapResult,
+      });
       return { error: ErrorType.NoError };
     } catch (error) {
       return { error };

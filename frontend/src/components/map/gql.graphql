@@ -170,6 +170,7 @@ mutation StartZipMapDownload($language: LanguageInput!) {
 
 subscription SubscribeToZipMap {
   ZipMapReport {
+    resultZipUrl
     status
     message
     errors

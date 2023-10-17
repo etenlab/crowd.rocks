@@ -3338,6 +3338,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/adm-zip@npm:^0.5.2":
+  version: 0.5.2
+  resolution: "@types/adm-zip@npm:0.5.2"
+  dependencies:
+    "@types/node": "*"
+  checksum: c25ad926fdd38100e883fbd34e94541c7893f785feb2d9f3261dee837baaf29c161d8c9b44d436d937e11e6f20218f1496bdf1cc4f16262b319033aef495ecf8
+  languageName: node
+  linkType: hard
+
 "@types/argon2@npm:^0.15.0":
   version: 0.15.0
   resolution: "@types/argon2@npm:0.15.0"
@@ -4307,6 +4316,7 @@ __metadata:
     "@nestjs/schematics": ^10.0.1
     "@nestjs/serve-static": ^4.0.0
     "@nestjs/testing": ^10.1.0
+    "@types/adm-zip": ^0.5.2
     "@types/argon2": ^0.15.0
     "@types/express": ^4.17.13
     "@types/html-to-text": ^9.0.1
