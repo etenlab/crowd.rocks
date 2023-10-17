@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 155.138.138.222",
+    "dev": "vite",
     "build:test": "tsc && vite build --mode test",
     "build:local": "tsc && vite build --mode local-dev",
     "build:staging": "tsc && vite build --mode staging",

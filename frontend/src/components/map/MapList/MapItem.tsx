@@ -55,8 +55,9 @@ export function MapItem({
         langauges: { appLanguage },
       },
     },
-    actions: { setModal },
+    actions: { createModal },
   } = useAppContext();
+  const { openModal, closeModal } = createModal();
 
   const downloadFlagRef = useRef<'original' | 'translated' | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -109,7 +110,7 @@ export function MapItem({
   };
 
   const handleDeleteMap: MouseEventHandler<HTMLButtonElement> = (e) => {
-    setModal(<MapDeleteModal mapInfo={mapInfo} />);
+    openModal(<MapDeleteModal mapInfo={mapInfo} onClose={closeModal} />);
 
     e.preventDefault();
     e.stopPropagation();
