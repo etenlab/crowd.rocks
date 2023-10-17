@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
+import { ReactNode, useRef, useEffect } from 'react';
 
 import { IonPage, IonContent, IonHeader } from '@ionic/react';
-import { Dialog } from '@mui/material';
+import { Modal, FullModal } from '../modal';
 
 import { useAppContext } from '../../../hooks/useAppContext';
 
@@ -13,10 +13,15 @@ type PageLayoutProps = {
 export function PageLayout({ children, header }: PageLayoutProps) {
   const {
     states: {
-      components: { modal },
+      components: { modals },
     },
-    actions: { setModal },
+    actions: { removeModal },
   } = useAppContext();
+  const ref = useRef<HTMLElement | null>();
+
+  useEffect(() => {
+    ref.current = document.getElementById('crowd-rock-app');
+  }, []);
 
   return (
     <IonPage>
@@ -32,22 +37,23 @@ export function PageLayout({ children, header }: PageLayoutProps) {
         <div className="page">
           <div className="section">{children}</div>
 
-          <Dialog
-            open={!!modal}
-            onClose={() => {
-              setModal(null);
-            }}
-            sx={{
-              '& .MuiDialog-paper': {
-                padding: '40px 20px',
-                borderRadius: '20px',
-                margin: '15px',
-                width: '100vw',
-              },
-            }}
-          >
-            {modal}
-          </Dialog>
+          {modals.map((modal) =>
+            modal.mode === 'standard' ? (
+              <Modal
+                key={modal.id}
+                component={modal.component}
+                onClose={() => removeModal(modal.id)}
+                container={ref.current}
+              />
+            ) : (
+              <FullModal
+                key={modal.id}
+                component={modal.component}
+                onClose={() => removeModal(modal.id)}
+                container={ref.current}
+              />
+            ),
+          )}
         </div>
       </IonContent>
     </IonPage>
