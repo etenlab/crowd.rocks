@@ -4,11 +4,11 @@ import { actions } from './components.actions';
 import { type ActionType } from '.';
 
 export interface StateType {
-  modal: ReactNode | null;
+  modals: { id: string; mode: 'standard' | 'full'; component: ReactNode }[];
 }
 
 export const initialState: StateType = {
-  modal: null,
+  modals: [],
 };
 
 export function reducer(
@@ -19,10 +19,31 @@ export function reducer(
   const { type } = action;
 
   switch (type) {
-    case actions.SET_MODAL: {
+    case actions.ADD_MODAL: {
+      const payload = action.payload as {
+        id: string;
+        mode: 'standard' | 'full';
+        component: ReactNode;
+      };
+
       return {
         ...prevState,
-        modal: action.payload as ReactNode,
+        modals: prevState.modals
+          ? [
+              ...prevState.modals.filter((modal) => modal.id !== payload.id),
+              payload,
+            ]
+          : [payload],
+      };
+    }
+    case actions.REMOVE_MODAL: {
+      const id = action.payload as string;
+
+      return {
+        ...prevState,
+        modals: prevState.modals
+          ? [...prevState.modals.filter((modal) => modal.id !== id)]
+          : [],
       };
     }
     default: {

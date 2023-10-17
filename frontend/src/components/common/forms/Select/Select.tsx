@@ -1,21 +1,21 @@
-import { ReactNode } from 'react';
+import { useCallback, useMemo } from 'react';
+
 import { Divider, IconButton, Typography, Stack } from '@mui/material';
 
 import { Cancel } from '../../icons/Cancel';
 import { NavArrowDown } from '../../icons/NavArrowDown';
-import { AutocompleteModal } from './AutocompleteModal';
-
-import { StyledPaper } from './styled';
 
 import { useAppContext } from '../../../../hooks/useAppContext';
+
+import { StyledPaper } from './styled';
+import { SelectModal } from './SelectModal';
 
 export type OptionItem = {
   label: string;
   value: unknown;
-  endBadge?: ReactNode;
 };
 
-export type AutocompleteProps = {
+export type SelectProps = {
   options: OptionItem[];
   placeholder: string;
   label?: string;
@@ -25,32 +25,45 @@ export type AutocompleteProps = {
   disabled?: boolean;
 };
 
-export function Autocomplete({
-  options,
+export function Select({
   placeholder,
   label,
+  options,
   value,
   disabled,
   onChange,
   onClear,
-}: AutocompleteProps) {
+}: SelectProps) {
   const {
     actions: { createModal },
   } = useAppContext();
-
   const { openModal, closeModal } = createModal();
 
-  const handleOpenModal = () => {
+  const sortedOptions = useMemo(
+    () =>
+      options.sort((a, b) => {
+        if (a.label > b.label) {
+          return 1;
+        } else if (a.label < b.label) {
+          return -1;
+        } else {
+          return 0;
+        }
+      }),
+    [options],
+  );
+
+  const handleOpenModal = useCallback(() => {
     openModal(
-      <AutocompleteModal
-        options={options}
+      <SelectModal
+        options={sortedOptions}
         value={value}
-        onChange={onChange}
         onClose={closeModal}
+        onChange={onChange}
       />,
       'full',
     );
-  };
+  }, [closeModal, onChange, openModal, sortedOptions, value]);
 
   const inputCom = disabled ? (
     <Typography

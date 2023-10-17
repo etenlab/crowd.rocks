@@ -5,7 +5,6 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
-  IonModal,
   IonPage,
   IonRouterOutlet,
   useIonRouter,
@@ -18,6 +17,10 @@ import {
 } from '@ionic/react';
 import { languageOutline } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
+
+import { AutocompleteModal } from './components/common/forms/Autocomplete/AutocompleteModal';
+import { OptionItem } from './components/common/forms/Autocomplete';
+import { Tag } from './components/common/chips/Tag';
 
 import './Body.css';
 
@@ -40,9 +43,6 @@ import {
 } from './common/langUtils';
 
 import { useAppContext } from './hooks/useAppContext';
-import { useTr } from './hooks/useTr';
-
-import AppTypeahead from './components/common/LangSelector/TypeAhead';
 
 import Home from './components/home/Home';
 import Login from './components/authentication/Login';
@@ -87,6 +87,7 @@ import { Forms } from './components/demo/Forms';
 import { Header } from './components/common/Header';
 
 import { useColorModeContext } from './theme';
+import { useTr } from './hooks/useTr';
 
 interface ToggleChangeEventDetail<T = unknown> {
   value: T;
@@ -99,6 +100,7 @@ interface ToggleCustomEvent<T = unknown> extends CustomEvent {
 }
 
 const Body: React.FC = () => {
+  const { tr } = useTr();
   const {
     states: {
       global: {
@@ -106,12 +108,12 @@ const Body: React.FC = () => {
         siteTexts: { languages, originalMap },
       },
     },
-    actions: { changeAppLanguage },
+    actions: { changeAppLanguage, createModal },
   } = useAppContext();
   const { setColorMode } = useColorModeContext();
+  const { openModal, closeModal } = createModal();
 
   const router = useIonRouter();
-  const { tr } = useTr();
 
   const [show_menu, set_show_menu] = useState(false);
   const [is_logged_in, set_is_logged_in] = useState(false);
@@ -260,10 +262,10 @@ const Body: React.FC = () => {
   };
 
   const handleChangeAppLanguage = useCallback(
-    (value: string | undefined) => {
+    (value: OptionItem | null) => {
       if (value) {
-        changeAppLanguage(tag2langInfo(value));
-        router.push(`/US/${value}/1/home`);
+        changeAppLanguage(tag2langInfo(value.value as string));
+        router.push(`/US/${value.value}/1/home`);
       }
 
       modal.current?.dismiss();
@@ -286,25 +288,48 @@ const Body: React.FC = () => {
       const percent =
         originalCnt > 0 ? (translationCnt / originalCnt) * 100 : 100;
 
-      const badgeColor = percent === 100 ? 'green' : undefined;
+      const badgeColor = percent === 100 ? 'green' : 'blue';
 
       return {
-        text: `${langInfo2String(langInfo)}`,
+        label: `${langInfo2String(langInfo)}`,
         value: langInfo2tag(langInfo) || '',
-        endBadge: {
-          value: `${Math.round(percent)}%`,
-          color: badgeColor,
-        },
+        endBadge: (
+          <Tag
+            sx={{ minWidth: '40px' }}
+            label={`${Math.round(percent)}%`}
+            color={badgeColor}
+          />
+        ),
       };
     });
   }, [languages, originalMap]);
+
+  const handleOpenLangSelector = () => {
+    menuRef.current?.toggle();
+    openModal(
+      <AutocompleteModal
+        label={tr('Select app language')}
+        onClose={closeModal}
+        options={languageList}
+        value={{
+          label: langInfo2String(appLanguage),
+          value: langInfo2tag(appLanguage),
+        }}
+        onChange={handleChangeAppLanguage}
+      />,
+      'full',
+    );
+  };
 
   return (
     <>
       <IonMenu contentId="crowd-rock-app" ref={menuRef}>
         <IonHeader>
           <Header
-            onClickAppName={goHome}
+            onClickAppName={() => {
+              menuRef.current?.toggle();
+              goHome();
+            }}
             onClickMenu={toggleMenu}
             onClickDiscussion={() => {}}
             onClickNotification={click_notifications}
@@ -320,7 +345,7 @@ const Body: React.FC = () => {
                 Turn on dark mode
               </IonToggle>
             </IonItem>
-            <IonItem id="open-language-modal">
+            <IonItem onClick={handleOpenLangSelector}>
               <IonIcon aria-hidden="true" icon={languageOutline} slot="end" />
               <IonLabel>Change App Language</IonLabel>
             </IonItem>
@@ -361,21 +386,9 @@ const Body: React.FC = () => {
             onClickNotification={click_notifications}
             notificationCount={unreadNotificationCount || 0}
           />
-          <div className="header-menu">
-            {show_menu && <div className="accordion-group"></div>}
-          </div>
         </IonHeader>
 
         <IonContent>
-          <IonModal ref={modal} trigger="open-language-modal">
-            <AppTypeahead
-              title={tr('App Language')}
-              items={languageList}
-              selectedItem={langInfo2String(appLanguage)}
-              onSelectionCancel={() => modal.current?.dismiss()}
-              onSelectionChange={handleChangeAppLanguage}
-            />
-          </IonModal>
           <IonRouterOutlet>
             <Route
               path="/:nation_id/:language_id/:cluster_id/profile"

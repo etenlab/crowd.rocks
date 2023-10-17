@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Stack, Typography, Divider, Button, IconButton } from '@mui/material';
 
 import { Cancel } from '../../common/icons/Cancel';
-import { Autocomplete, OptionItem } from '../../common/forms/Autocomplete';
+import { Select, OptionItem } from '../../common/forms/Select';
 
 import { useTr } from '../../../hooks/useTr';
-import { useAppContext } from '../../../hooks/useAppContext';
+
 import { CheckCircle } from '../../common/icons/CheckCircle';
 
 export type StringFilter = 'all' | 'translated' | 'not translated';
@@ -13,16 +13,14 @@ export type SortFilter = 'a - z' | 'z - a';
 
 export type MapFilterModalProps = {
   onChange(filter: {
-    stringFilter: StringFilter;
-    sortFilter: SortFilter;
+    stringFilter: StringFilter | null;
+    sortFilter: SortFilter | null;
   }): void;
+  onClose(): void;
 };
 
-export function MapFilterModal({ onChange }: MapFilterModalProps) {
+export function MapFilterModal({ onChange, onClose }: MapFilterModalProps) {
   const { tr } = useTr();
-  const {
-    actions: { setModal },
-  } = useAppContext();
 
   const [stringFilter, setStringFilter] = useState<OptionItem>({
     label: tr('All'),
@@ -34,63 +32,59 @@ export function MapFilterModal({ onChange }: MapFilterModalProps) {
   });
 
   const handleCancel = () => {
-    setModal(null);
+    onClose();
   };
 
-  const stringOptions = [
-    {
-      label: tr('All'),
-      value: 'all',
-    },
-    {
-      label: tr('Translated'),
-      value: 'translated',
-    },
-    {
-      label: tr('Not Translated'),
-      value: 'not translated',
-    },
-  ];
-
-  const sortOptions = [
-    {
-      label: 'A - Z',
-      value: 'a - z',
-    },
-    {
-      label: 'Z - A',
-      value: 'z - a',
-    },
-  ];
-
-  const handleChangeStringFilter = (value: OptionItem | null) => {
-    if (value) {
-      setStringFilter(value);
-    } else {
-      setStringFilter({
+  const stringOptions = useMemo(
+    () => [
+      {
         label: tr('All'),
         value: 'all',
-      });
-    }
-  };
+      },
+      // {
+      //   label: tr('Translated'),
+      //   value: 'translated',
+      // },
+      // {
+      //   label: tr('Not Translated'),
+      //   value: 'not translated',
+      // },
+    ],
+    [tr],
+  );
 
-  const handleChangeOrderFilter = (value: OptionItem | null) => {
-    if (value) {
-      setSortFilter(value);
-    } else {
-      setSortFilter({
+  const sortOptions = useMemo(
+    () => [
+      {
         label: 'A - Z',
         value: 'a - z',
-      });
+      },
+      // {
+      //   label: 'Z - A',
+      //   value: 'z - a',
+      // },
+    ],
+    [],
+  );
+
+  const handleChangeStringFilter = useCallback((value: OptionItem | null) => {
+    if (value) {
+      setStringFilter(value);
     }
-  };
+  }, []);
+
+  const handleChangeOrderFilter = useCallback((value: OptionItem | null) => {
+    if (value) {
+      setSortFilter(value);
+    }
+  }, []);
 
   const handleSave = () => {
     onChange({
       stringFilter: stringFilter.value as StringFilter,
       sortFilter: sortFilter.value as SortFilter,
     });
-    setModal(null);
+    onClose();
   };
 
   return (
@@ -104,7 +98,7 @@ export function MapFilterModal({ onChange }: MapFilterModalProps) {
       <Divider />
       <Stack gap="16px">
         <Typography variant="h3">{tr('Strings')}:</Typography>
-        <Autocomplete
+        <Select
           placeholder={tr('Select string filter')}
           options={stringOptions}
           value={stringFilter}
@@ -114,7 +108,7 @@ export function MapFilterModal({ onChange }: MapFilterModalProps) {
       </Stack>
       <Stack gap="16px">
         <Typography variant="h3">{tr('Sort by')}:</Typography>
-        <Autocomplete
+        <Select
           placeholder={tr('Select sort filter')}
           options={sortOptions}
           value={sortFilter}

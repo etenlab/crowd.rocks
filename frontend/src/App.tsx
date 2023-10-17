@@ -45,7 +45,7 @@ setupIonicReact({
 const App: React.FC = () => (
   <IonApp>
     <AppContextProvider>
-      <ThemeProvider>
+      <ThemeProvider autoDetectPrefersDarkMode={false}>
         <IonReactRouter>
           <IonRouterOutlet>
             <Route path="/">

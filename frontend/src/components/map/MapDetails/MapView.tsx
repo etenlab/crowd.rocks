@@ -59,8 +59,13 @@ export function MapView() {
       <Box
         sx={(theme) => ({
           position: 'fixed',
-          bottom: 0,
-          left: 0,
+          top: '68px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '100vw',
+          maxWidth: '777px',
+          marginLeft: 'auto',
+          marginRight: 'auto',
           borderTop: `2px solid ${theme.palette.text.dark}`,
         })}
       >
@@ -70,7 +75,13 @@ export function MapView() {
             width="calc(100vw - 34px)"
             height="500px"
             animation="wave"
-            sx={{ borderRadius: '10px' }}
+            sx={{
+              marginTop: '30px',
+              borderRadius: '10px',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              maxWidth: '777px',
+            }}
           />
         ) : null}
         {currMapContent?.mapDetails && (
