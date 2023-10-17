@@ -29,7 +29,8 @@ import { MapFilterModal } from './MapFilterModal';
 export function MapWordsList() {
   const { tr } = useTr();
   const router = useIonRouter();
-  const { nation_id, language_id } = useParams<{
+  const { nation_id, language_id, id } = useParams<{
+    id: string;
     nation_id: string;
     language_id: string;
     cluster_id: string;
@@ -66,11 +67,12 @@ export function MapWordsList() {
         lang: {
           language_code: DEFAULT_MAP_LANGUAGE_CODE,
         },
+        original_map_id: id && id !== 'all' ? id : null,
         filter,
         first: PAGE_SIZE,
       },
     });
-  }, [getWordsAndPhrases, targetLang, filter]);
+  }, [getWordsAndPhrases, targetLang, filter, id]);
 
   const handleInfinite = useCallback(
     async (ev: IonInfiniteScrollCustomEvent<void>) => {

@@ -142,15 +142,19 @@ export function MapDetails() {
 
         <Divider />
 
-        <Button
-          variant="contained"
-          color="blue"
-          onClick={() => {
-            history.push(`/${nation_id}/${language_id}/1/maps/translation`);
-          }}
-        >
-          {tr('Translation Mode')}
-        </Button>
+        {isOriginal ? (
+          <Button
+            variant="contained"
+            color="blue"
+            onClick={() => {
+              history.push(
+                `/${nation_id}/${language_id}/1/maps/translation/${id}`,
+              );
+            }}
+          >
+            {tr('Translate This Map')}
+          </Button>
+        ) : null}
 
         <DiscussionButton
           parent_table={
