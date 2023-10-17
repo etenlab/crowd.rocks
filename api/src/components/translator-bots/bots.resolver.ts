@@ -326,6 +326,30 @@ export class BotsResolver {
     );
   }
 
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
+  async translateMissingWordsAndPhrasesBySmartcat(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    console.log(
+      'translateMissingWordsAndPhrasesBySmartcat',
+      JSON.stringify({
+        from_language,
+        to_language,
+      }),
+    );
+
+    return this.aiTranslations.translateMissingWordsAndPhrasesBySmartcat(
+      from_language,
+      to_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
   @Mutation(() => GenericOutput)
   async stopBotTranslation(): Promise<GenericOutput> {
     console.log('stopBotTranslation');

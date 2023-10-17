@@ -241,6 +241,21 @@ export class AiTranslationsService {
     );
   }
 
+  async translateMissingWordsAndPhrasesBySmartcat(
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    return this.translateMissingWordsAndPhrasesByBot(
+      this.scTrService.translate,
+      this.scTrService.getTranslatorToken,
+      from_language,
+      to_language,
+      pgClient,
+    );
+  }
+
   async translateMissingWordsAndPhrasesByBot<T extends ITranslator>(
     translateF: (...args: any[]) => Promise<string[]>,
     getTranslatorToken: (
