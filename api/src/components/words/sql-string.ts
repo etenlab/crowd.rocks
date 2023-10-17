@@ -6,21 +6,35 @@ export type GetWordObjectById = {
   language_code: string;
   dialect_code: string | null;
   geo_code: string | null;
+  created_at: string;
+  user_id: string;
+  is_bot: boolean;
+  avatar: string;
+  avatar_url: string | null;
 };
 
 export function getWordObjByIds(ids: number[]): [string, [number[]]] {
   return [
     `
-      select 
-        words.word_id as word_id,
-        wordlike_string as word,
-        language_code,
-        dialect_code, 
-        geo_code
-      from words
-      inner join wordlike_strings
-        on wordlike_strings.wordlike_string_id = words.wordlike_string_id
-      where words.word_id = any($1)
+    select 
+      words.word_id as word_id,
+      wordlike_string as word,
+      language_code,
+      dialect_code, 
+      geo_code,
+      words.created_at,
+      words.created_by as user_id,
+      u.is_bot,
+      a.avatar,
+      a.url as avatar_url
+    from words
+    inner join wordlike_strings
+      on wordlike_strings.wordlike_string_id = words.wordlike_string_id
+    join users u
+      on u.user_id = words.created_by
+    join avatars a
+      on u.user_id = a.user_id
+    where words.word_id = any($1)
     `,
     [ids],
   ];
@@ -309,27 +323,41 @@ export type GetWordObjectByDefinitionId = {
   language_code: string;
   dialect_code: string | null;
   geo_code: string | null;
+  created_at: string;
+  user_id: string;
+  is_bot: boolean;
+  avatar: string;
+  avatar_url: string | null;
 };
 
 export function getWordByDefinitionIdSql(id: number): [string, [number]] {
   return [
     `
-      select
-        w.word_id ,
-        ws.wordlike_string as word,
-        w.language_code ,
-        w.dialect_code,
-        w.geo_code,
-        wd.word_definition_id,
-        wd.definition
-      from
-        words w
-      left join word_definitions wd on
-        w.word_id = wd.word_id
-      left join wordlike_strings ws on
-        w.wordlike_string_id = ws.wordlike_string_id
-      where
-        wd.word_definition_id = $1
+    select
+      w.word_id ,
+      ws.wordlike_string as word,
+      w.language_code ,
+      w.dialect_code,
+      w.geo_code,
+      wd.word_definition_id,
+      wd.definition,
+      w.created_at,
+      w.created_by as user_id,
+      u.is_bot,
+      a.avatar,
+      a.url as avatar_url
+    from
+      words w
+    left join word_definitions wd on
+      w.word_id = wd.word_id
+    left join wordlike_strings ws on
+      w.wordlike_string_id = ws.wordlike_string_id
+    join users u
+      on u.user_id = w.created_by
+    join avatars a
+      on u.user_id = a.user_id
+    where
+      wd.word_definition_id = $1
     `,
     [id],
   ];

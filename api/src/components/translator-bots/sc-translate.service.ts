@@ -168,7 +168,7 @@ export class SmartcatTranslateService implements ITranslator {
       const token = createToken();
       const res = await this.pg.pool.query(
         `
-        call authentication_register($1, $2, $3, $4, 0, '');
+        call authentication_register_bot($1, $2, $3, $4, 0, '');
         `,
         [SMARTCAT_BOT_EMAIL, 'SmartcatBot', pash, token],
       );

@@ -2,6 +2,7 @@ import { Field, ID, InputType, ObjectType, Int } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
 import { PhraseDefinition } from 'src/components/definitions/types';
 import { PageInfo } from 'src/components/common/types';
+import { User } from '../user/types';
 
 @ObjectType()
 export class Phrase {
@@ -10,6 +11,8 @@ export class Phrase {
   @Field(() => String) language_code: string;
   @Field(() => String, { nullable: true }) dialect_code: string | null;
   @Field(() => String, { nullable: true }) geo_code: string | null;
+  @Field(() => User) created_by_user: User;
+  @Field(() => Date) created_at: string;
 }
 
 @InputType()

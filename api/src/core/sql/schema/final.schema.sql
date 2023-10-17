@@ -33,6 +33,7 @@ create table users (
   active BOOL not null default TRUE,
   email varchar(255) unique not null,
   is_email_verified bool not null default false,
+  is_bot bool not null default false,
   password varchar(128) not null,
   created_at timestamp not null default CURRENT_TIMESTAMP
 );

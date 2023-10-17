@@ -32,7 +32,7 @@ export class AvatarUpdateResolver {
 
       const res1 = await this.pg.pool.query(
         `
-        call user_avatar_update($1, $2, 0, '', '');
+        call user_avatar_update($1, $2, 0, null, '', '');
       `,
         [bearer, input.avatar],
       );
@@ -44,6 +44,7 @@ export class AvatarUpdateResolver {
             avatar: input.avatar,
             avatar_url: res1.rows[0].p_url,
             user_id: res1.rows[0].p_user_id,
+            is_bot: res1.rows[0].p_is_bot,
           },
         };
       }

@@ -86,7 +86,13 @@ export class PhraseDefinitionsService {
             phrase_definition_id: id + '',
             phrase: phraseOutput.phrase,
             definition: res.rows[0].definition,
-            created_at: res.rows[0].created_at,
+            created_at: new Date(res.rows[0].created_at),
+            created_by_user: {
+              user_id: res.rows[0].user_id,
+              avatar: res.rows[0].avatar,
+              avatar_url: res.rows[0].avatar_url,
+              is_bot: res.rows[0].is_bot,
+            },
           },
         };
       }
@@ -139,7 +145,13 @@ export class PhraseDefinitionsService {
             phrase_definition_id: row.phrase_definition_id + '',
             phrase: phrase!,
             definition: row.definition,
-            created_at: row.created_at,
+            created_at: new Date(row.created_at),
+            created_by_user: {
+              user_id: row.user_id,
+              avatar: row.avatar,
+              avatar_url: row.avatar_url,
+              is_bot: row.is_bot,
+            },
           });
         }
       });

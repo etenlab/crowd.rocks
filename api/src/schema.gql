@@ -720,6 +720,8 @@ type PericopiesOutput {
 }
 
 type Phrase {
+  created_at: DateTime!
+  created_by_user: User!
   dialect_code: String
   geo_code: String
   language_code: String!
@@ -728,7 +730,8 @@ type Phrase {
 }
 
 type PhraseDefinition {
-  created_at: String!
+  created_at: DateTime!
+  created_by_user: User!
   definition: String!
   phrase: Phrase!
   phrase_definition_id: ID!
@@ -764,7 +767,8 @@ type PhraseDefinitionVote {
 }
 
 type PhraseDefinitionWithVote {
-  created_at: String!
+  created_at: DateTime!
+  created_by_user: User!
   definition: String!
   downvotes: Int!
   phrase: Phrase!
@@ -893,6 +897,8 @@ input PhraseVoteUpsertInput {
 }
 
 type PhraseWithDefinition {
+  created_at: DateTime!
+  created_by_user: User!
   definition: String
   definition_id: String
   dialect_code: String
@@ -903,6 +909,8 @@ type PhraseWithDefinition {
 }
 
 type PhraseWithDefinitions {
+  created_at: DateTime!
+  created_by_user: User!
   definitions: [PhraseDefinition]!
   dialect_code: String
   downvotes: Int!
@@ -914,6 +922,8 @@ type PhraseWithDefinitions {
 }
 
 type PhraseWithVote {
+  created_at: DateTime!
+  created_by_user: User!
   dialect_code: String
   downvotes: Int!
   geo_code: String
@@ -1406,6 +1416,7 @@ scalar Upload
 type User {
   avatar: String!
   avatar_url: String
+  is_bot: Boolean!
   user_id: ID!
 }
 
@@ -1438,6 +1449,8 @@ type VersionCreateOutput {
 }
 
 type Word {
+  created_at: DateTime!
+  created_by_user: User!
   dialect_code: String
   geo_code: String
   language_code: String!
@@ -1446,7 +1459,8 @@ type Word {
 }
 
 type WordDefinition {
-  created_at: String!
+  created_at: DateTime!
+  created_by_user: User!
   definition: String!
   word: Word!
   word_definition_id: ID!
@@ -1482,7 +1496,8 @@ type WordDefinitionVote {
 }
 
 type WordDefinitionWithVote {
-  created_at: String!
+  created_at: DateTime!
+  created_by_user: User!
   definition: String!
   downvotes: Int!
   upvotes: Int!
@@ -1637,6 +1652,8 @@ input WordVoteUpsertInput {
 }
 
 type WordWithDefinition {
+  created_at: DateTime!
+  created_by_user: User!
   definition: String
   definition_id: String
   dialect_code: String
@@ -1647,6 +1664,8 @@ type WordWithDefinition {
 }
 
 type WordWithDefinitions {
+  created_at: DateTime!
+  created_by_user: User!
   definitions: [WordDefinition]!
   dialect_code: String
   downvotes: Int!
@@ -1658,6 +1677,8 @@ type WordWithDefinitions {
 }
 
 type WordWithVote {
+  created_at: DateTime!
+  created_by_user: User!
   dialect_code: String
   downvotes: Int!
   geo_code: String
