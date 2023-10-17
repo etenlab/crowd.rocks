@@ -315,7 +315,7 @@ export class MapsRepository {
       left join files f on
         om.preview_file_id = f.file_id
       left join files f2 on
-        om.content_file_id = f2.file_id
+        tm.content_file_id = f2.file_id
       where
         true
         ${languageClause}
