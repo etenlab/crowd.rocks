@@ -74,6 +74,13 @@ export const TranslatedCards = ({
 
   let tValue: string | undefined;
   let tDefinition: string | undefined;
+  let tCreatedByUser:
+    | {
+        username: string;
+        isBot: boolean;
+        createdAt: string;
+      }
+    | undefined;
   if (
     translationType === 'PhraseToPhraseTranslationWithVote' ||
     translationType === 'WordToPhraseTranslationWithVote'
@@ -84,6 +91,22 @@ export const TranslatedCards = ({
     tDefinition =
       translation.data?.getRecommendedTranslationFromDefinitionID
         .translation_with_vote?.to_phrase_definition.definition;
+    tCreatedByUser = translation.data?.getRecommendedTranslationFromDefinitionID
+      .translation_with_vote
+      ? {
+          username:
+            translation.data?.getRecommendedTranslationFromDefinitionID
+              .translation_with_vote?.to_phrase_definition.created_by_user
+              .avatar,
+          isBot:
+            translation.data?.getRecommendedTranslationFromDefinitionID
+              .translation_with_vote?.to_phrase_definition.created_by_user
+              .is_bot,
+          createdAt:
+            translation.data?.getRecommendedTranslationFromDefinitionID
+              .translation_with_vote?.to_phrase_definition.created_at,
+        }
+      : undefined;
   }
   if (
     translationType === 'PhraseToWordTranslationWithVote' ||
@@ -95,6 +118,20 @@ export const TranslatedCards = ({
     tDefinition =
       translation.data?.getRecommendedTranslationFromDefinitionID
         .translation_with_vote?.to_word_definition.definition;
+    tCreatedByUser = translation.data?.getRecommendedTranslationFromDefinitionID
+      .translation_with_vote
+      ? {
+          username:
+            translation.data?.getRecommendedTranslationFromDefinitionID
+              .translation_with_vote?.to_word_definition.created_by_user.avatar,
+          isBot:
+            translation.data?.getRecommendedTranslationFromDefinitionID
+              .translation_with_vote?.to_word_definition.created_by_user.is_bot,
+          createdAt:
+            translation.data?.getRecommendedTranslationFromDefinitionID
+              .translation_with_vote?.to_word_definition.created_at,
+        }
+      : undefined;
   }
 
   return (
@@ -113,6 +150,11 @@ export const TranslatedCards = ({
             parent_id: wordOrPhrase.o_id,
             flag_names: WORD_AND_PHRASE_FLAGS,
           }}
+          createdBy={{
+            username: wordOrPhrase.o_created_by_user.avatar,
+            isBot: wordOrPhrase.o_created_by_user.is_bot,
+            createdAt: wordOrPhrase.o_created_at,
+          }}
         />
       </StCard>
       <StCard>
@@ -121,6 +163,7 @@ export const TranslatedCards = ({
           definition={tDefinition}
           onClick={onClick}
           routerLink={routerLink}
+          createdBy={tCreatedByUser}
         />
       </StCard>
     </StCards>

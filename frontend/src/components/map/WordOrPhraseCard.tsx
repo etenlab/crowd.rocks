@@ -10,6 +10,7 @@ import { TableNameType } from '../../generated/graphql';
 import { Flag } from '../flags/Flag';
 import { FlagName } from '../flags/flagGroups';
 import { Chat } from '../chat/Chat';
+import { AuthorHeader } from '../common/AuthorHeader';
 
 type TWordCardProps = {
   value?: string | null;
@@ -32,6 +33,11 @@ type TWordCardProps = {
     parent_id: string;
     flag_names: FlagName[];
   };
+  createdBy?: {
+    username: string;
+    isBot: boolean;
+    createdAt: string;
+  };
 };
 
 export const WordOrPhraseCard = ({
@@ -42,6 +48,7 @@ export const WordOrPhraseCard = ({
   discussion,
   vote,
   flags,
+  createdBy,
 }: TWordCardProps) => {
   const chatButton = discussion ? (
     <Chat
@@ -63,6 +70,15 @@ export const WordOrPhraseCard = ({
     <StCard onClick={() => onClick && onClick()} routerLink={routerLink}>
       <IonCardHeader>
         <StHeaderContent>
+          {createdBy && createdBy.createdAt && (
+            <div>
+              <AuthorHeader
+                createdAt={createdBy.createdAt}
+                createdBy={createdBy.username}
+                isCreatedByBot={createdBy.isBot}
+              />
+            </div>
+          )}
           <div>
             <IonCardTitle>{value || ''}</IonCardTitle>
             <StCardSubtitle>

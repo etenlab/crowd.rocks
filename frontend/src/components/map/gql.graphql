@@ -38,6 +38,10 @@ fragment MapWordOrPhraseFragment on MapWordOrPhrase {
   o_language_code
   o_dialect_code
   o_geo_code
+  o_created_at
+  o_created_by_user {
+    ...UserFields
+  }
 }
 
 fragment MapWordsAndPhrasesEdgeFragment on MapWordsAndPhrasesEdge {

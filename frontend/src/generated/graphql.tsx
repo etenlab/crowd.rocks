@@ -581,6 +581,8 @@ export type MapVoteUpsertInput = {
 export type MapWordOrPhrase = {
   __typename?: 'MapWordOrPhrase';
   id: Scalars['ID']['output'];
+  o_created_at: Scalars['DateTime']['output'];
+  o_created_by_user: User;
   o_definition: Scalars['String']['output'];
   o_definition_id: Scalars['String']['output'];
   o_dialect_code?: Maybe<Scalars['String']['output']>;
@@ -3147,9 +3149,9 @@ export type MapDetailsOutputFragmentFragment = { __typename?: 'MapDetailsOutput'
 
 export type MapDetailsOutputEdgeFragmentFragment = { __typename?: 'MapDetailsOutputEdge', cursor: string, node: { __typename?: 'MapDetailsOutput', error: ErrorType, mapDetails?: { __typename?: 'MapDetailsInfo', is_original: boolean, original_map_id: string, translated_map_id?: string | null, map_file_name: string, translated_percent?: string | null, created_at: string, created_by: string, map_file_name_with_langs: string, preview_file_url?: string | null, preview_file_id?: string | null, content_file_url: string, content_file_id: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
 
-export type MapWordOrPhraseFragmentFragment = { __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null };
+export type MapWordOrPhraseFragmentFragment = { __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null, o_created_at: any, o_created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } };
 
-export type MapWordsAndPhrasesEdgeFragmentFragment = { __typename?: 'MapWordsAndPhrasesEdge', cursor: string, node: { __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null } };
+export type MapWordsAndPhrasesEdgeFragmentFragment = { __typename?: 'MapWordsAndPhrasesEdge', cursor: string, node: { __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null, o_created_at: any, o_created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } };
 
 export type WordWithDefinitionFragmentFragment = { __typename?: 'WordWithDefinition', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, definition?: string | null, definition_id?: string | null };
 
@@ -3164,7 +3166,7 @@ export type GetOrigMapWordsAndPhrasesQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapWordsAndPhrasesQuery = { __typename?: 'Query', getOrigMapWordsAndPhrases: { __typename?: 'MapWordsAndPhrasesConnection', edges: Array<{ __typename?: 'MapWordsAndPhrasesEdge', cursor: string, node: { __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null } }>, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } };
+export type GetOrigMapWordsAndPhrasesQuery = { __typename?: 'Query', getOrigMapWordsAndPhrases: { __typename?: 'MapWordsAndPhrasesConnection', edges: Array<{ __typename?: 'MapWordsAndPhrasesEdge', cursor: string, node: { __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null, o_created_at: any, o_created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } }>, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean } } };
 
 export type GetOrigMapWordsAndPhrasesCountQueryVariables = Exact<{
   original_map_id?: InputMaybe<Scalars['String']['input']>;
@@ -3184,7 +3186,7 @@ export type GetOrigMapWordsAndPhrasesPaginatedQueryVariables = Exact<{
 }>;
 
 
-export type GetOrigMapWordsAndPhrasesPaginatedQuery = { __typename?: 'Query', getOrigMapWordsAndPhrasesPaginated: { __typename?: 'OrigMapWordsAndPhrasesOutput', mapWordsOrPhrases?: Array<{ __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null }> | null } };
+export type GetOrigMapWordsAndPhrasesPaginatedQuery = { __typename?: 'Query', getOrigMapWordsAndPhrasesPaginated: { __typename?: 'OrigMapWordsAndPhrasesOutput', mapWordsOrPhrases?: Array<{ __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null, o_created_at: any, o_created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }> | null } };
 
 export type GetMapWordOrPhraseAsOrigByDefinitionIdQueryVariables = Exact<{
   definition_id: Scalars['ID']['input'];
@@ -4155,8 +4157,12 @@ export const MapWordOrPhraseFragmentFragmentDoc = gql`
   o_language_code
   o_dialect_code
   o_geo_code
+  o_created_at
+  o_created_by_user {
+    ...UserFields
+  }
 }
-    `;
+    ${UserFieldsFragmentDoc}`;
 export const MapWordsAndPhrasesEdgeFragmentFragmentDoc = gql`
     fragment MapWordsAndPhrasesEdgeFragment on MapWordsAndPhrasesEdge {
   cursor

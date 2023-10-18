@@ -105,30 +105,32 @@ export function Post({
   }
 
   return (
-    <CustomCard
-      onClick={() => onClick && onClick()}
-      routerLink={routerLink}
-      style={{ cursor: onClick ? 'pointer' : 'unset' }}
-    >
-      <CustomCardHeader>
-        <CustomCardTitle>
-          <AuthorHeader
-            isCreatedByBot={is_created_by_bot}
-            createdAt={created_at}
-            createdBy={created_by}
-          />
-          {voteFor === 'content' ? voteButtonCom : null}
-        </CustomCardTitle>
-      </CustomCardHeader>
+    <>
+      <AuthorHeader
+        isCreatedByBot={is_created_by_bot}
+        createdAt={created_at}
+        createdBy={created_by}
+      />
+      <CustomCard
+        onClick={() => onClick && onClick()}
+        routerLink={routerLink}
+        style={{ cursor: onClick ? 'pointer' : 'unset' }}
+      >
+        <CustomCardHeader>
+          <CustomCardTitle>
+            {voteFor === 'content' ? voteButtonCom : null}
+          </CustomCardTitle>
+        </CustomCardHeader>
 
-      <CustomCardContent>
-        {chatContent}
-        <div style={{ display: 'flex' }}>
-          {voteFor === 'description' ? voteButtonCom : null}
-          {chatButton}
-        </div>
-        {avComp}
-      </CustomCardContent>
-    </CustomCard>
+        <CustomCardContent>
+          {chatContent}
+          <div style={{ display: 'flex' }}>
+            {voteFor === 'description' ? voteButtonCom : null}
+            {chatButton}
+          </div>
+          {avComp}
+        </CustomCardContent>
+      </CustomCard>
+    </>
   );
 }
