@@ -1229,6 +1229,7 @@ export class MapsRepository {
     const resQ = await dbPoolClient.query(sqlStr, langAndPickParams);
 
     if (!(resQ.rows.length > 0)) {
+      console.log('no data');
       return {
         edges: [],
         pageInfo: {
