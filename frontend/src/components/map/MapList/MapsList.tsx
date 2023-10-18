@@ -46,7 +46,7 @@ import {
   langInfo2langInput,
   langInfo2tag,
   tag2langInfo,
-} from '../../../common/langUtils';
+} from '../../../../../utils/dist';
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
 import { MapUploadModal } from './MapUploadModal';
 import { MapResetModal } from './MapResetModal';

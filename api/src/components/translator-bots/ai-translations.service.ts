@@ -2,7 +2,6 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
 import { PoolClient } from 'pg';
 import { Subject } from 'rxjs';
-import { langInfo2String, subTags2LangInfo } from 'src/common/langUtils';
 import { SubscriptionToken } from 'src/common/subscription-token';
 import { BotType, ErrorType, GenericOutput } from 'src/common/types';
 import { pgClientOrPool } from 'src/common/utility';
@@ -46,6 +45,10 @@ import {
   getLangConnectionsObjectMapAndTexts,
   validateTranslateByBotInput,
 } from './utility';
+import {
+  langInfo2String,
+  subTags2LangInfo,
+} from '../../../../utils/dist/index';
 
 interface ItranslateAllWordsAndPhrasesByBot {
   translateWordsAndPhrases: (

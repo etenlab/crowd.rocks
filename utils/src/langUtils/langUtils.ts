@@ -1,9 +1,33 @@
-import {
-  DESCRIPTIONS_JOINER,
-  NOT_DEFINED_PLACEHOLDER,
-} from '../const/langConst';
+import { IDefinition, ITagInfo, LanguageInfo, LanguageInput, TDialect, TLang, TRegion } from "./types";
+
 import Tags from 'language-tags';
-import { LanguageInput } from '../generated/graphql';
+export const DESCRIPTIONS_JOINER = '/';
+export const NOT_DEFINED_PLACEHOLDER = '- not defined -';
+export const LOADING_TAG_PLACEHOLDER = {
+  tag: 'loading',
+  descriptions: ['Loading data...'],
+} as TDialect & TRegion & TLang;
+
+
+
+// X_LANG_TAGS is an array of private (x-...) subtags; they are used as additional language tags to represent languages
+// that are not present in the `language-tags` npm package (which refers to the IANA registry).
+// List of main language tags we get from the `language-tags` library will be extended with these x- tags.
+export const X_LANG_TAGS: Array<TLang> = [
+  { tag: 'x-senga', descriptions: ['Senga'] },
+  { tag: 'x-fungwe', descriptions: ['Fungwe'] },
+  { tag: 'x-tambo', descriptions: ['Tambo'] },
+  { tag: 'x-wandya', descriptions: ['Wandya'] },
+  { tag: 'x-lungu', descriptions: ['Lungu'] },
+  { tag: 'x-chikunda', descriptions: ['Chikunda'] },
+  { tag: 'x-kabdende', descriptions: ['Kabdende'] },
+  { tag: 'x-shila', descriptions: ['Shila'] },
+  { tag: 'x-mwenyi', descriptions: ['Mwenyi'] },
+  { tag: 'x-liuwa', descriptions: ['Liuwa'] },
+  // { tag: 'x-Lambya', descriptions: ['Lambya'] },
+  // { tag: 'x-Mukulu', descriptions: ['Mukulu'] },
+  // { tag: 'x-Kunda', descriptions: ['Kunda'] },
+];
 
 export const sortSiteTextFn = (d1: IDefinition, d2: IDefinition) => {
   if (
@@ -57,6 +81,9 @@ enum TagTypes {
 export const tag2langInfo = (tagGiven: string): LanguageInfo => {
   const complexTag = Tags(tagGiven);
 
+  // if (X_LANG_TAGS.findIndex(xTtag => xTtag.tag===tagGiven_ ){
+
+  // }
   const lang = complexTag.find(TagTypes.LANGUAGE);
   const region = complexTag.find(TagTypes.REGION);
   const dialect = complexTag.find(TagTypes.DIALECT);
@@ -92,8 +119,8 @@ export const langInfo2tag = (
 export const langInfo2langInput = (langInfo: LanguageInfo): LanguageInput => {
   return {
     language_code: langInfo.lang.tag,
-    dialect_code: langInfo.dialect?.tag,
-    geo_code: langInfo.region?.tag,
+    dialect_code: langInfo.dialect?.tag || null,
+    geo_code: langInfo.region?.tag || null,
   };
 };
 
@@ -163,16 +190,13 @@ export const getLangsRegistry = async (
 ): Promise<LangsRegistry> => {
   return new Promise((resolve) => {
     const allTags = Tags.search(/.*/);
-    const langs: Array<TLang> = [];
+    const langs: Array<TLang> = [...X_LANG_TAGS];
     const dialects: Array<TDialect> = [
       { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
     ];
     const regions: Array<TRegion> = [
       { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
     ];
-
-    // const strEnabledTags = enabledTags ? enabledTags.join(',') : null;
-    // console.log(allTags[0].format());
 
     for (const currTag of allTags) {
       if (enabledTags && !enabledTags.includes(currTag.format())) {
@@ -216,3 +240,60 @@ export const getLangsRegistry = async (
     });
   });
 };
+
+export const subTags2Tag = ({
+  lang,
+  region,
+  dialect,
+}: {
+  lang: string;
+  region?: string;
+  dialect?: string;
+}): string => {
+  let langTag = lang;
+  region && (langTag += '-' + region);
+  dialect && (langTag += '-' + dialect);
+  return Tags(langTag).format();
+};
+
+export const languageInput2tag = (languageInput: LanguageInput): string => {
+  return subTags2Tag({
+    lang: languageInput.language_code,
+    dialect: languageInput.dialect_code || undefined,
+    region: languageInput.geo_code || undefined,
+  });
+};
+
+
+(async function test() {
+  const lngs = await getLangsRegistry();
+  for (const xName of [
+    'Senga',
+    'Fungwe',
+    'Lambya',
+    'Tambo',
+    'Wandya',
+    'Lungu',
+    'Kunda',
+    'Chikunda',
+    'Mukulu',
+    'Kabdende',
+    'Shila',
+    'Mwenyi',
+    'Liuwa',
+  ]) {
+    const found = lngs.langs.findIndex((l) => {
+      for (const description of l.descriptions!) {
+        if (description.includes(xName)) {
+          return true;
+        }
+      }
+    });
+
+    if (found < 0) {
+      console.log('absent:', xName);
+    } else {
+      console.log(lngs.langs[found]);
+    }
+  }
+});

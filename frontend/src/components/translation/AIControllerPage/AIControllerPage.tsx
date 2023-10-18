@@ -51,7 +51,7 @@ import {
   useTranslateMissingWordsAndPhrasesBySmartcatMutation,
 } from '../../../generated/graphql';
 
-import { langInfo2String, langInfo2tag } from '../../../common/langUtils';
+import { langInfo2String, langInfo2tag } from '../../../../../utils/dist';
 
 function messageHTML({
   total,

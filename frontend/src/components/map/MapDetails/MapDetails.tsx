@@ -23,7 +23,7 @@ import {
   useGetMapVoteStatusQuery,
 } from '../../../generated/graphql';
 
-import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
+import { langInfo2String, subTags2LangInfo } from '../../../../../utils/dist';
 
 import { useTr } from '../../../hooks/useTr';
 import { useToggleMapVoteStatusMutation } from '../../../hooks/useToggleMapVoteStatusMutation';

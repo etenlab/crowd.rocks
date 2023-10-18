@@ -1,7 +1,7 @@
 import { IonBadge } from '@ionic/react';
 import { downloadOutline } from 'ionicons/icons';
 
-import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
+import { langInfo2String, subTags2LangInfo } from '../../../../../utils/dist';
 import { downloadFromUrl } from '../../../common/utility';
 
 import { TextyDocument } from '../../../generated/graphql';

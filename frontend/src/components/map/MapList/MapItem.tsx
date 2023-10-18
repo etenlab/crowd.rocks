@@ -14,7 +14,7 @@ import {
   useGetMapDetailsLazyQuery,
 } from '../../../generated/graphql';
 
-import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
+import { langInfo2String, subTags2LangInfo } from '../../../../../utils/dist';
 import { downloadFromUrl } from '../../../common/utility';
 import { MoreHoriz } from '../../common/icons/MoreHoriz';
 import { DownloadCircle } from '../../common/icons/DownloadCircle';

@@ -2,14 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 
 import tags from 'language-tags';
 
-import { langInfo2tag, getLangsRegistry } from '../../../common/langUtils';
-
+import { Autocomplete, OptionItem } from '../forms/Autocomplete';
 import {
   DESCRIPTIONS_JOINER,
   LOADING_TAG_PLACEHOLDER,
-} from '../../../const/langConst';
-
-import { Autocomplete, OptionItem } from '../forms/Autocomplete';
+  getLangsRegistry,
+  langInfo2tag,
+} from '../../../../../utils/dist';
 
 export type LangSelectorProps = {
   title?: string;
