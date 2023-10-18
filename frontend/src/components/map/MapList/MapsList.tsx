@@ -377,7 +377,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
           maxWidth: 'calc(777px - 32px)',
         }}
         onClick={() => {
-          router.push(`/US/${appLanguage.lang.tag}/1/maps/translation`);
+          router.push(`/US/${appLanguage.lang.tag}/1/maps/translation/all`);
         }}
       >
         {viewMode === 'normal' || allChecked
