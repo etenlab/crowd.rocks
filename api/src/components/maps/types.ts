@@ -11,6 +11,7 @@ import { GenericOutput, SubscriptionStatus } from '../../common/types';
 import { PageInfo } from 'src/components/common/types';
 import { Phrase } from '../phrases/types';
 import { Word } from '../words/types';
+import { User } from '../user/types';
 
 @ObjectType()
 export class MapDetailsInfo {
@@ -99,6 +100,8 @@ export class MapWordOrPhrase {
   @Field(() => String) o_language_code: string;
   @Field(() => String, { nullable: true }) o_dialect_code?: string | null;
   @Field(() => String, { nullable: true }) o_geo_code?: string | null;
+  @Field(() => Date) o_created_at: string;
+  @Field(() => User) o_created_by_user: User;
 }
 @ObjectType()
 export class MapWordsAndPhrasesEdge {

@@ -521,6 +521,8 @@ input MapVoteUpsertInput {
 
 type MapWordOrPhrase {
   id: ID!
+  o_created_at: DateTime!
+  o_created_by_user: User!
   o_definition: String!
   o_definition_id: String!
   o_dialect_code: String

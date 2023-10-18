@@ -399,6 +399,9 @@ export class DatabaseVersionControlService {
     await this.runSqlFile('./src/core/sql/authentication/register-bot.sql');
     await this.runSqlFile('./src/core/sql/user/avatar_update_v2.sql');
 
+    //maps
+    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v4.sql');
+
     // set version
     await this.setVersionNumber(5);
   }
