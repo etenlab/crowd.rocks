@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+// import { useEffect } from 'react';
 import {
   IonButton,
   IonInput,
@@ -11,7 +11,7 @@ import { useHistory } from 'react-router';
 import {
   ErrorType,
   useRegisterMutation,
-  useIsAdminLoggedInLazyQuery,
+  // useIsAdminLoggedInLazyQuery,
 } from '../../generated/graphql';
 import { globals } from '../../services/globals';
 import { login_change } from '../../services/subscriptions';
@@ -52,13 +52,13 @@ const Register: React.FC = () => {
   const [is_unknown_error, set_is_unknown_error] = useState(false);
 
   const [registerMutation] = useRegisterMutation();
-  const [isAdmin, { data: isAdminRes }] = useIsAdminLoggedInLazyQuery();
+  // const [isAdmin, { data: isAdminRes }] = useIsAdminLoggedInLazyQuery();
 
-  useEffect(() => {
-    if (isAdminRes && isAdminRes.loggedInIsAdmin.isAdmin) {
-      globals.set_admin_user();
-    }
-  }, [isAdminRes]);
+  // useEffect(() => {
+  //   if (isAdminRes && isAdminRes.loggedInIsAdmin.isAdmin) {
+  //     globals.set_admin_user();
+  //   }
+  // }, [isAdminRes]);
 
   async function handle_submit(event: FormEvent) {
     event.preventDefault();
@@ -102,7 +102,7 @@ const Register: React.FC = () => {
         globals.set_profile_url(session.avatar_url);
       }
 
-      isAdmin({ variables: { input: { user_id: session.user_id } } });
+      // isAdmin({ variables: { input: { user_id: session.user_id } } });
 
       login_change.next(true);
       history.push(`/US/${appLanguage.lang.tag}/1/home`);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   IonCardContent,
   IonCardHeader,
@@ -34,7 +34,7 @@ import {
 import { useTr } from '../../hooks/useTr';
 import { PageLayout } from '../common/PageLayout';
 import { ISettings, globals } from '../../services/globals';
-import { useIsAdminLoggedInQuery } from '../../generated/graphql';
+import { useIsAdminLoggedInLazyQuery } from '../../generated/graphql';
 
 interface HomePageProps
   extends RouteComponentProps<{
@@ -68,9 +68,19 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
   const settings: ISettings = globals.get_settings();
   const user_id = globals.get_user_id();
 
-  const { data: isAdminRes } = useIsAdminLoggedInQuery({
-    variables: { input: { user_id: String(user_id) } },
-  });
+  const [isAdmin, { data: isAdminRes }] = useIsAdminLoggedInLazyQuery();
+
+  useEffect(() => {
+    if (user_id) {
+      isAdmin({ variables: { input: { user_id: user_id + '' } } });
+    }
+  }, [isAdmin, user_id]);
+
+  useEffect(() => {
+    if (isAdminRes && isAdminRes.loggedInIsAdmin.isAdmin) {
+      globals.set_admin_user();
+    }
+  }, [isAdminRes]);
 
   useIonViewWillEnter(() => {
     document.title = tr('Home');
