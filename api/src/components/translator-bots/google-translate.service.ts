@@ -5,7 +5,7 @@ import { convert } from 'html-to-text';
 import { LanguageInput } from '../common/types';
 
 import { ConfigService } from 'src/core/config.service';
-import { createToken, substituteN, unSubstituteN } from '../../common/utility';
+import { createToken } from '../../common/utility';
 import { PostgresService } from '../../core/postgres.service';
 import { hash } from 'argon2';
 import {
@@ -72,7 +72,7 @@ export class GoogleTranslateService implements ITranslator {
         }
 
         const [translations] = await this.gcpTranslateClient!.translate(
-          substituteN(chunks).join('<br/>'),
+          chunks.join('<br/>'),
           {
             from: from.language_code,
             to: to.language_code,
@@ -82,11 +82,9 @@ export class GoogleTranslateService implements ITranslator {
 
         translationTexts = [
           ...translationTexts,
-          ...unSubstituteN(
-            translations
-              .split('<br/>')
-              .map((translation) => convert(translation)),
-          ),
+          ...translations
+            .split('<br/>')
+            .map((translation) => convert(translation)),
         ];
 
         chunks = [];
@@ -155,7 +153,7 @@ export class GoogleTranslateService implements ITranslator {
       const token = createToken();
       const res = await this.pg.pool.query(
         `
-        call authentication_register($1, $2, $3, $4, 0, '');
+        call authentication_register_bot($1, $2, $3, $4, 0, '');
         `,
         [GOOGLE_BOT_EMAIL, 'GoogleBot', pash, token],
       );

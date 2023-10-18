@@ -4,15 +4,14 @@ import { chatbubbleEllipsesSharp } from 'ionicons/icons';
 import { StChatIcon } from '../../common/styled';
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import {
-  AuthorContainer,
   CustomCard,
   CustomCardContent,
   CustomCardHeader,
   CustomCardTitle,
-  TimestampContainer,
 } from './styled';
 import { AudioPlayer } from '../AudioPlayer';
 import { VideoPlayer } from '../VideoPlayer';
+import { AuthorHeader } from '../../common/AuthorHeader';
 
 export const getMimeType = (fileType: string | null): string => {
   if (fileType === null || fileType.trim().length === 0) {
@@ -41,6 +40,7 @@ export const getMimeType = (fileType: string | null): string => {
 
 type PostProps = {
   created_by: string;
+  is_created_by_bot: boolean;
   created_at: string;
   chatContent: ReactNode;
   av_file_url?: string | null;
@@ -70,6 +70,7 @@ export function Post({
   discussion,
   av_file_url,
   av_file_type,
+  is_created_by_bot,
 }: PostProps) {
   const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
   const chatButton = discussion ? (
@@ -111,10 +112,11 @@ export function Post({
     >
       <CustomCardHeader>
         <CustomCardTitle>
-          <AuthorContainer>
-            {created_by}
-            <TimestampContainer>| {created_at}</TimestampContainer>
-          </AuthorContainer>
+          <AuthorHeader
+            isCreatedByBot={is_created_by_bot}
+            createdAt={created_at}
+            createdBy={created_by}
+          />
           {voteFor === 'content' ? voteButtonCom : null}
         </CustomCardTitle>
       </CustomCardHeader>

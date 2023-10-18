@@ -7,7 +7,7 @@ import {
   ObjectType,
 } from '@nestjs/graphql';
 import { LanguageInput, LanguageOutput } from 'src/components/common/types';
-import { GenericOutput } from '../../common/types';
+import { GenericOutput, SubscriptionStatus } from '../../common/types';
 import { PageInfo } from 'src/components/common/types';
 import { Phrase } from '../phrases/types';
 import { Word } from '../words/types';
@@ -290,4 +290,20 @@ export class MapVoteStatusOutputRow extends GenericOutput {
 export class MapVoteStatusOutput extends GenericOutput {
   @Field(() => [MapVoteStatus])
   vote_status_list: MapVoteStatus[];
+}
+
+////////////// Zip
+@InputType()
+export class StartZipMapDownloadInput {
+  @Field(() => LanguageInput) language: LanguageInput;
+}
+@ObjectType()
+export class StartZipMapOutput extends GenericOutput {}
+
+@ObjectType()
+export class ZipMapResult {
+  @Field(() => String, { nullable: true }) resultZipUrl: string | null;
+  @Field(() => SubscriptionStatus) status: SubscriptionStatus;
+  @Field(() => String, { nullable: true }) message?: string;
+  @Field(() => [String], { nullable: true }) errors?: string[];
 }

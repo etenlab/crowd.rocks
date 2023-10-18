@@ -1,0 +1,1 @@
+export { AuthorHeader } from './AuthorHeader';

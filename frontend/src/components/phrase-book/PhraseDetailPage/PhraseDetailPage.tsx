@@ -80,6 +80,8 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
       upvotes: number;
       downvotes: number;
       created_at: Date;
+      username: string;
+      isBot: boolean;
     }[] = [];
 
     if (definitionError) {
@@ -105,6 +107,8 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
           upvotes: definition.upvotes,
           downvotes: definition.downvotes,
           created_at: new Date(definition.created_at),
+          username: definition.created_by_user.avatar,
+          isBot: definition.created_by_user.is_bot,
         });
       }
     }
@@ -113,6 +117,13 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
       <CardContainer key={definition.phrase_definition_id}>
         <Card
           description={definition.definition}
+          createdBy={{
+            username: definition.username,
+            createdAt:
+              definition.created_at &&
+              new Date(definition.created_at).toDateString(),
+            isBot: definition.isBot,
+          }}
           vote={{
             upVotes: definition.upvotes,
             downVotes: definition.downvotes,

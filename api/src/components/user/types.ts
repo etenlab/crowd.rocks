@@ -6,6 +6,7 @@ export class User {
   @Field(() => ID) user_id: string;
   @Field() avatar: string;
   @Field(() => String, { nullable: true }) readonly avatar_url: string | null;
+  @Field(() => Boolean) is_bot: boolean;
 }
 
 @InputType()

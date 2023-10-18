@@ -73,6 +73,8 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
       upvotes: number;
       downvotes: number;
       created_at: Date;
+      username: string;
+      isBot: boolean;
     }[] = [];
 
     if (definitionError) {
@@ -98,6 +100,8 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
           upvotes: definition.upvotes,
           downvotes: definition.downvotes,
           created_at: new Date(definition.created_at),
+          username: definition.created_by_user.avatar,
+          isBot: definition.created_by_user.is_bot,
         });
       }
     }
@@ -106,6 +110,12 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
       <CardContainer key={definition.word_definition_id}>
         <Card
           description={definition.definition}
+          createdBy={{
+            username: definition.username,
+            isBot: definition.isBot,
+            createdAt:
+              definition.created_at && definition.created_at.toDateString(),
+          }}
           vote={{
             upVotes: definition.upvotes,
             downVotes: definition.downvotes,

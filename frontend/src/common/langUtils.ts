@@ -3,6 +3,7 @@ import {
   NOT_DEFINED_PLACEHOLDER,
 } from '../const/langConst';
 import Tags from 'language-tags';
+import { LanguageInput } from '../generated/graphql';
 
 export const sortSiteTextFn = (d1: IDefinition, d2: IDefinition) => {
   if (
@@ -86,6 +87,14 @@ export const langInfo2tag = (
   region?.tag && (langTag += '-' + region?.tag);
   dialect?.tag && (langTag += '-' + dialect?.tag);
   return Tags(langTag).format();
+};
+
+export const langInfo2langInput = (langInfo: LanguageInfo): LanguageInput => {
+  return {
+    language_code: langInfo.lang.tag,
+    dialect_code: langInfo.dialect?.tag,
+    geo_code: langInfo.region?.tag,
+  };
 };
 
 export const langInfo2String = (langInfo: LanguageInfo | undefined): string => {

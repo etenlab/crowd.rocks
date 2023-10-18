@@ -152,6 +152,7 @@ enum ErrorType {
   MapInsertFailed
   MapNotFound
   MapVoteNotFound
+  MapZippingError
   NoError
   NotificationDeleteFailed
   NotificationInsertFailed
@@ -592,6 +593,7 @@ type Mutation {
   siteTextPhraseDefinitionUpsert(phrase_definition_id: ID!): SiteTextPhraseDefinitionOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextDefinitionOutput!
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
+  startZipMapDownload(input: StartZipMapDownloadInput!): StartZipMapOutput!
   stopBotTranslation: GenericOutput!
   threadDelete(input: ThreadDeleteInput!): ThreadDeleteOutput!
   threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
@@ -721,6 +723,8 @@ type PericopiesOutput {
 }
 
 type Phrase {
+  created_at: DateTime!
+  created_by_user: User!
   dialect_code: String
   geo_code: String
   language_code: String!
@@ -729,7 +733,8 @@ type Phrase {
 }
 
 type PhraseDefinition {
-  created_at: String!
+  created_at: DateTime!
+  created_by_user: User!
   definition: String!
   phrase: Phrase!
   phrase_definition_id: ID!
@@ -765,7 +770,8 @@ type PhraseDefinitionVote {
 }
 
 type PhraseDefinitionWithVote {
-  created_at: String!
+  created_at: DateTime!
+  created_by_user: User!
   definition: String!
   downvotes: Int!
   phrase: Phrase!
@@ -894,6 +900,8 @@ input PhraseVoteUpsertInput {
 }
 
 type PhraseWithDefinition {
+  created_at: DateTime!
+  created_by_user: User!
   definition: String
   definition_id: String
   dialect_code: String
@@ -904,6 +912,8 @@ type PhraseWithDefinition {
 }
 
 type PhraseWithDefinitions {
+  created_at: DateTime!
+  created_by_user: User!
   definitions: [PhraseDefinition]!
   dialect_code: String
   downvotes: Int!
@@ -915,6 +925,8 @@ type PhraseWithDefinitions {
 }
 
 type PhraseWithVote {
+  created_at: DateTime!
+  created_by_user: User!
   dialect_code: String
   downvotes: Int!
   geo_code: String
@@ -1237,8 +1249,23 @@ type SiteTextWordDefinitionOutput {
   site_text_word_definition: SiteTextWordDefinition
 }
 
+input StartZipMapDownloadInput {
+  language: LanguageInput!
+}
+
+type StartZipMapOutput {
+  error: ErrorType!
+}
+
 type Subscription {
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
+  ZipMapReport: ZipMapResult!
+}
+
+enum SubscriptionStatus {
+  Completed
+  Error
+  Progressing
 }
 
 enum TableNameType {
@@ -1407,6 +1434,7 @@ scalar Upload
 type User {
   avatar: String!
   avatar_url: String
+  is_bot: Boolean!
   user_id: ID!
 }
 
@@ -1439,6 +1467,8 @@ type VersionCreateOutput {
 }
 
 type Word {
+  created_at: DateTime!
+  created_by_user: User!
   dialect_code: String
   geo_code: String
   language_code: String!
@@ -1447,7 +1477,8 @@ type Word {
 }
 
 type WordDefinition {
-  created_at: String!
+  created_at: DateTime!
+  created_by_user: User!
   definition: String!
   word: Word!
   word_definition_id: ID!
@@ -1483,7 +1514,8 @@ type WordDefinitionVote {
 }
 
 type WordDefinitionWithVote {
-  created_at: String!
+  created_at: DateTime!
+  created_by_user: User!
   definition: String!
   downvotes: Int!
   upvotes: Int!
@@ -1638,6 +1670,8 @@ input WordVoteUpsertInput {
 }
 
 type WordWithDefinition {
+  created_at: DateTime!
+  created_by_user: User!
   definition: String
   definition_id: String
   dialect_code: String
@@ -1648,6 +1682,8 @@ type WordWithDefinition {
 }
 
 type WordWithDefinitions {
+  created_at: DateTime!
+  created_by_user: User!
   definitions: [WordDefinition]!
   dialect_code: String
   downvotes: Int!
@@ -1659,6 +1695,8 @@ type WordWithDefinitions {
 }
 
 type WordWithVote {
+  created_at: DateTime!
+  created_by_user: User!
   dialect_code: String
   downvotes: Int!
   geo_code: String
@@ -1687,4 +1725,11 @@ type WordWithVoteOutput {
 type WordlikeString {
   wordlike_string: String!
   wordlike_string_id: ID!
+}
+
+type ZipMapResult {
+  errors: [String!]
+  message: String
+  resultZipUrl: String
+  status: SubscriptionStatus!
 }
