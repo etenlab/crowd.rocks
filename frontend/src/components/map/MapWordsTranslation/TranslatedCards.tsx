@@ -31,6 +31,8 @@ export const TranslatedCards = ({
     actions: { setUpdatedTrDefinitionIds },
   } = useAppContext();
 
+  console.log(wordOrPhrase);
+
   const translation = useGetRecommendedTranslationFromDefinitionIdQuery({
     variables: {
       from_definition_id: wordOrPhrase.o_definition_id,
