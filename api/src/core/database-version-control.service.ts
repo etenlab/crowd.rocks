@@ -50,7 +50,7 @@ export class DatabaseVersionControlService {
         console.error('Database version is current');
     }
 
-    if (process.env.MODE !== 'prod' && !exists) {
+    if (process.env.NODE_ENV !== 'prod' && !exists) {
       await this.dataloader.loadSiteTextData();
     }
 
