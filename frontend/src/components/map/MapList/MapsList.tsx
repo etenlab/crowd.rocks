@@ -229,9 +229,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
         position: 'top',
         color: 'danger',
       });
-      console.error(mapZipError);
     }
-    console.log(mapZipResult);
   }, [mapZipError, mapZipResult, present]);
 
   const handleStartZipMap = useCallback(async () => {

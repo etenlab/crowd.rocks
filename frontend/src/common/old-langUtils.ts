@@ -5,25 +5,6 @@ import {
 import Tags from 'language-tags';
 import { LanguageInput } from '../generated/graphql';
 
-// X_LANG_TAGS is an array of private (x-...) subtags; they are used as additional language tags to represent languages
-// that are not present in the `language-tags` npm package (which refers to the IANA registry).
-// List of main language tags we get from the `language-tags` library will be extended with these x- tags.
-const X_LANG_TAGS: Array<TLang> = [
-  { tag: 'x-Senga', descriptions: ['Senga'] },
-  { tag: 'x-Fungwe', descriptions: ['Fungwe'] },
-  { tag: 'x-Tambo', descriptions: ['Tambo'] },
-  { tag: 'x-Wandya', descriptions: ['Wandya'] },
-  { tag: 'x-Lungu', descriptions: ['Lungu'] },
-  { tag: 'x-Chikunda', descriptions: ['Chikunda'] },
-  { tag: 'x-Kabdende', descriptions: ['Kabdende'] },
-  { tag: 'x-Shila', descriptions: ['Shila'] },
-  { tag: 'x-Mwenyi', descriptions: ['Mwenyi'] },
-  { tag: 'x-Liuwa', descriptions: ['Liuwa'] },
-  // { tag: 'x-Lambya', descriptions: ['Lambya'] },
-  // { tag: 'x-Mukulu', descriptions: ['Mukulu'] },
-  // { tag: 'x-Kunda', descriptions: ['Kunda'] },
-];
-
 export const sortSiteTextFn = (d1: IDefinition, d2: IDefinition) => {
   if (
     d1.siteTextlikeString &&
@@ -182,13 +163,16 @@ export const getLangsRegistry = async (
 ): Promise<LangsRegistry> => {
   return new Promise((resolve) => {
     const allTags = Tags.search(/.*/);
-    const langs: Array<TLang> = [...X_LANG_TAGS];
+    const langs: Array<TLang> = [];
     const dialects: Array<TDialect> = [
       { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
     ];
     const regions: Array<TRegion> = [
       { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
     ];
+
+    // const strEnabledTags = enabledTags ? enabledTags.join(',') : null;
+    // console.log(allTags[0].format());
 
     for (const currTag of allTags) {
       if (enabledTags && !enabledTags.includes(currTag.format())) {
@@ -232,36 +216,3 @@ export const getLangsRegistry = async (
     });
   });
 };
-
-(async function test() {
-  const lngs = await getLangsRegistry();
-  for (const xName of [
-    'Senga',
-    'Fungwe',
-    'Lambya',
-    'Tambo',
-    'Wandya',
-    'Lungu',
-    'Kunda',
-    'Chikunda',
-    'Mukulu',
-    'Kabdende',
-    'Shila',
-    'Mwenyi',
-    'Liuwa',
-  ]) {
-    const found = lngs.langs.findIndex((l) => {
-      for (const description of l.descriptions!) {
-        if (description.includes(xName)) {
-          return true;
-        }
-      }
-    });
-
-    if (found < 0) {
-      console.log('absent:', xName);
-    } else {
-      console.log(lngs.langs[found]);
-    }
-  }
-});
