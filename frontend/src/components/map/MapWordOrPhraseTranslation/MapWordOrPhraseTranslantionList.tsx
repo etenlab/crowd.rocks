@@ -14,7 +14,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
-import { WordCard } from '../../common/WordCard';
+import { WordCard, Author } from '../../common/WordCard';
 
 export type MapWordOrPhraseTranslationListProps = {
   definition_id: string;
@@ -137,6 +137,7 @@ export function MapWordOrPhraseTranslationList({
         let to_type: 'phrase' | 'word' = 'word';
         let definition_id: string = '';
         let definition: string = '';
+        let author: Author | undefined = undefined;
 
         if (translation?.__typename === 'PhraseToPhraseTranslationWithVote') {
           value = translation.to_phrase_definition.phrase.phrase;
@@ -144,6 +145,13 @@ export function MapWordOrPhraseTranslationList({
           to_type = 'phrase';
           definition_id = translation.to_phrase_definition.phrase_definition_id;
           definition = translation.to_phrase_definition.definition;
+          author = {
+            username: translation.to_phrase_definition.created_by_user.avatar,
+            avatar:
+              translation.to_phrase_definition.created_by_user.avatar_url ||
+              undefined,
+            createdAt: new Date(translation.to_phrase_definition.created_at),
+          };
         }
         if (translation?.__typename === 'PhraseToWordTranslationWithVote') {
           value = translation.to_word_definition.word.word;
@@ -151,6 +159,13 @@ export function MapWordOrPhraseTranslationList({
           to_type = 'word';
           definition_id = translation.to_word_definition.word_definition_id;
           definition = translation.to_word_definition.definition;
+          author = {
+            username: translation.to_word_definition.created_by_user.avatar,
+            avatar:
+              translation.to_word_definition.created_by_user.avatar_url ||
+              undefined,
+            createdAt: new Date(translation.to_word_definition.created_at),
+          };
         }
         if (translation?.__typename === 'WordToPhraseTranslationWithVote') {
           value = translation.to_phrase_definition.phrase.phrase;
@@ -158,6 +173,13 @@ export function MapWordOrPhraseTranslationList({
           to_type = 'phrase';
           definition = translation.to_phrase_definition.definition;
           definition_id = translation.to_phrase_definition.phrase_definition_id;
+          author = {
+            username: translation.to_phrase_definition.created_by_user.avatar,
+            avatar:
+              translation.to_phrase_definition.created_by_user.avatar_url ||
+              undefined,
+            createdAt: new Date(translation.to_phrase_definition.created_at),
+          };
         }
         if (translation?.__typename === 'WordToWordTranslationWithVote') {
           value = translation.to_word_definition.word.word;
@@ -165,7 +187,15 @@ export function MapWordOrPhraseTranslationList({
           to_type = 'word';
           definition = translation.to_word_definition.definition;
           definition_id = translation.to_word_definition.word_definition_id;
+          author = {
+            username: translation.to_word_definition.created_by_user.avatar,
+            avatar:
+              translation.to_word_definition.created_by_user.avatar_url ||
+              undefined,
+            createdAt: new Date(translation.to_word_definition.created_at),
+          };
         }
+
         return {
           key: `${translation.__typename}:${id}`,
           value,
@@ -175,6 +205,7 @@ export function MapWordOrPhraseTranslationList({
           definition,
           upvotes: translation.upvotes,
           downvotes: translation.downvotes,
+          author,
         };
       })
       .filter((item) => item) as {
@@ -186,6 +217,7 @@ export function MapWordOrPhraseTranslationList({
       definition: string;
       upvotes: number;
       downvotes: number;
+      author?: Author;
     }[];
   }, [translationsQ]);
 
@@ -229,6 +261,7 @@ export function MapWordOrPhraseTranslationList({
                 );
               },
             }}
+            author={item?.author}
           />
         ))}
     </Stack>

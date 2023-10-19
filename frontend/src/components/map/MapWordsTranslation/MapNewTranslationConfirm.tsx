@@ -105,14 +105,15 @@ export function MapNewTranslationConfirm() {
 
   const goToTranslation = useCallback(() => {
     clearTempTranslation(`${definition_id}:${definition_type}`);
-    if (searchParams.get('map_original_id')) {
+
+    if (searchParams.get('original_map_id')) {
       router.push(
         `/${nation_id}/${language_id}/1/maps/translation/${searchParams.get(
-          'map_original_id',
+          'original_map_id',
         )}`,
       );
     } else {
-      router.push(`/${nation_id}/${language_id}/1/maps/translation/all}`);
+      router.push(`/${nation_id}/${language_id}/1/maps/translation/all`);
     }
   }, [
     language_id,

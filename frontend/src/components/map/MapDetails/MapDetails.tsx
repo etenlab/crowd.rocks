@@ -205,28 +205,34 @@ export function MapDetails() {
         />
       </Stack>
 
+      {!imageLoaded && !imageError ? (
+        <Skeleton
+          variant="rounded"
+          width="calc(100vw - 30px)"
+          height="500px"
+          animation="wave"
+          sx={{
+            marginTop: '15px',
+            borderRadius: '10px',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            maxWidth: 'calc(777px - 60px)',
+          }}
+        />
+      ) : null}
+
       <Box
         sx={(theme) => ({
-          border: `1px solid ${theme.palette.text.gray_stroke}`,
+          border: `1px solid ${
+            !imageLoaded && !imageError
+              ? 'none'
+              : theme.palette.text.gray_stroke
+          }`,
           borderRadius: '10px',
+          display: !imageLoaded && !imageError ? 'hidden' : 'inherit',
         })}
         onClick={handleGoToView}
       >
-        {!imageLoaded && !imageError ? (
-          <Skeleton
-            variant="rounded"
-            width="calc(100vw - 60px)"
-            height="500px"
-            animation="wave"
-            sx={{
-              marginTop: '15px',
-              borderRadius: '10px',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              maxWidth: 'calc(777px - 60px)',
-            }}
-          />
-        ) : null}
         {currMapContent?.mapDetails && (
           <>
             {imageError && <p>{tr('Error loading image')}</p>}
