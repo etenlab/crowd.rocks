@@ -35,12 +35,18 @@ enum TagTypes {
   DIALECT = 'variant',
 }
 
+export const xTag2langInfo = (tagGiven: string): LanguageInfo | undefined => {
+  const foundXtagIndex = X_LANG_TAGS.findIndex((xTag) => xTag.tag === tagGiven);
+  if (foundXtagIndex >= 0) {
+    return {
+      lang: X_LANG_TAGS[foundXtagIndex],
+    };
+  } else return undefined;
+};
+
 export const tag2langInfo = (tagGiven: string): LanguageInfo => {
+  if (xTag2langInfo(tagGiven)) return xTag2langInfo(tagGiven)!;
   const complexTag = Tags(tagGiven);
-
-  // if (X_LANG_TAGS.findIndex(xTtag => xTtag.tag===tagGiven_ ){
-
-  // }
   const lang = complexTag.find(TagTypes.LANGUAGE);
   const region = complexTag.find(TagTypes.REGION);
   const dialect = complexTag.find(TagTypes.DIALECT);
@@ -68,6 +74,10 @@ export const langInfo2tag = (
   if (!langInfo) return undefined;
   const { lang, region, dialect } = langInfo;
   let langTag = lang.tag;
+
+  const xTag = X_LANG_TAGS.find((xt) => xt.tag === langTag);
+  if (xTag) return xTag.tag;
+
   region?.tag && (langTag += '-' + region?.tag);
   dialect?.tag && (langTag += '-' + dialect?.tag);
   return Tags(langTag).format();
@@ -82,6 +92,10 @@ export const langInfo2langInput = (langInfo: LanguageInfo): LanguageInput => {
 };
 
 export const langInfo2String = (langInfo: LanguageInfo | undefined): string => {
+  const xTag = X_LANG_TAGS.find((xt) => xt.tag === langInfo?.lang.tag);
+  if (xTag) {
+    return xTag.descriptions?.join(DESCRIPTIONS_JOINER) || xTag.tag;
+  }
   let res = langInfo?.lang.descriptions?.join(DESCRIPTIONS_JOINER);
   if (!res) return '';
   if (langInfo?.region?.descriptions) {
@@ -103,6 +117,7 @@ export const subTags2LangInfo = ({
   region?: string;
   dialect?: string;
 }): LanguageInfo => {
+  if (xTag2langInfo(lang)) return xTag2langInfo(lang)!;
   let langTag = lang;
   region && (langTag += '-' + region);
   dialect && (langTag += '-' + dialect);
@@ -207,6 +222,7 @@ export const subTags2Tag = ({
   region?: string;
   dialect?: string;
 }): string => {
+  if (X_LANG_TAGS.find((xt) => xt.tag === lang)) return lang;
   let langTag = lang;
   region && (langTag += '-' + region);
   dialect && (langTag += '-' + dialect);
