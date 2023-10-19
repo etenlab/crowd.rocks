@@ -258,6 +258,20 @@ declare module '@mui/material/Checkbox' {
   }
 }
 
+declare module '@mui/material/Radio' {
+  interface RadioPropsColorOverrides {
+    blue: true;
+    orange: true;
+    red: true;
+    white: true;
+    green: true;
+    dark: true;
+    gray_stroke: true;
+    gray: true;
+    gray_bg: true;
+  }
+}
+
 declare module '@mui/material/LinearProgress' {
   interface LinearProgressPropsColorOverrides {
     blue: true;

@@ -9,6 +9,8 @@ import {
   LOADING_TAG_PLACEHOLDER,
 } from '../../../const/langConst';
 
+import { useTr } from '../../../hooks/useTr';
+
 import { Autocomplete, OptionItem } from '../forms/Autocomplete';
 
 export type LangSelectorProps = {
@@ -42,6 +44,7 @@ export function LangSelector({
   enabledTags,
   disabled,
 }: LangSelectorProps) {
+  const { tr } = useTr();
   const [langsRegistry, setLangsRegistry] =
     useState<LangsRegistry>(emptyLangsRegistry);
 
@@ -87,6 +90,7 @@ export function LangSelector({
     <Autocomplete
       label={title}
       placeholder={title}
+      searchPlaceholder={`${tr('Search by language')}...`}
       options={langsRegistry.langs.map((l) => ({
         label: l.descriptions
           ? l.descriptions.join(DESCRIPTIONS_JOINER)

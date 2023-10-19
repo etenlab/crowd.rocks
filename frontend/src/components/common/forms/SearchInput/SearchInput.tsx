@@ -1,4 +1,4 @@
-import { Paper, IconButton, InputBase, Divider } from '@mui/material';
+import { Box, IconButton, InputBase, Divider } from '@mui/material';
 import { Search } from '../../icons/Search';
 
 export type SearchInputProps = {
@@ -15,16 +15,16 @@ export function SearchInput({
   onClickSearchButton,
 }: SearchInputProps) {
   return (
-    <Paper
-      variant="outlined"
-      sx={{
+    <Box
+      sx={(theme) => ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '10px 12px',
         borderRadius: '10px',
+        border: `1px solid ${theme.palette.text.gray_stroke}`,
         gap: '12px',
-      }}
+      })}
     >
       <IconButton sx={{ padding: 0 }} onClick={onClickSearchButton}>
         <Search sx={{ fontSize: 24 }} />
@@ -51,6 +51,6 @@ export function SearchInput({
         }}
         placeholder={placeholder}
       />
-    </Paper>
+    </Box>
   );
 }
