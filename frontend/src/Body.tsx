@@ -288,7 +288,7 @@ const Body: React.FC = () => {
       const percent =
         originalCnt > 0 ? (translationCnt / originalCnt) * 100 : 100;
 
-      const badgeColor = percent === 100 ? 'green' : 'gray_stroke';
+      const badgeColor = percent === 100 ? 'green' : 'blue';
 
       return {
         label: `${langInfo2String(langInfo)}`,
@@ -308,8 +308,7 @@ const Body: React.FC = () => {
     menuRef.current?.toggle();
     openModal(
       <AutocompleteModal
-        label={tr('App Language')}
-        searchPlaceholder={`${tr('Search by language')}...`}
+        label={tr('Select app language')}
         onClose={closeModal}
         options={languageList}
         value={{
@@ -341,25 +340,32 @@ const Body: React.FC = () => {
 
         <IonContent className="ion-padding">
           <IonList>
-            <IonItem>
+            <IonItem style={{ cursor: 'pointer' }}>
               <IonToggle checked={show_dark_mode} onIonChange={toggle_theme}>
                 Turn on dark mode
               </IonToggle>
             </IonItem>
-            <IonItem onClick={handleOpenLangSelector}>
+            <IonItem
+              onClick={handleOpenLangSelector}
+              style={{ cursor: 'pointer' }}
+            >
               <IonIcon aria-hidden="true" icon={languageOutline} slot="end" />
               <IonLabel>Change App Language</IonLabel>
             </IonItem>
-            <IonItem onClick={click_settings}>
+            <IonItem onClick={click_settings} style={{ cursor: 'pointer' }}>
               <IonLabel>Settings</IonLabel>
             </IonItem>
 
             {is_logged_in && (
               <>
-                <IonItem onClick={click_profile}>
+                <IonItem onClick={click_profile} style={{ cursor: 'pointer' }}>
                   <IonLabel>{globals.get_avatar()}</IonLabel>
                 </IonItem>
-                <IonItem onClick={click_logout} id="app-logout-button">
+                <IonItem
+                  onClick={click_logout}
+                  id="app-logout-button"
+                  style={{ cursor: 'pointer' }}
+                >
                   <IonLabel>Logout</IonLabel>
                 </IonItem>
               </>
@@ -367,10 +373,10 @@ const Body: React.FC = () => {
 
             {!is_logged_in && (
               <>
-                <IonItem onClick={click_register}>
+                <IonItem onClick={click_register} style={{ cursor: 'pointer' }}>
                   <IonLabel>Register</IonLabel>
                 </IonItem>
-                <IonItem onClick={click_login}>
+                <IonItem onClick={click_login} style={{ cursor: 'pointer' }}>
                   <IonLabel>Login</IonLabel>
                 </IonItem>
               </>
