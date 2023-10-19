@@ -366,7 +366,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
             </>
           ) : (
             <Button startIcon={<DownloadCircle />} onClick={handleStartZipMap}>
-              {tr('Make zip and dowlnoad')}
+              {tr('Make zip and download')}
             </Button>
           )}
           {isAdminUser ? (
