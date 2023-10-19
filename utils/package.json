@@ -19,10 +19,11 @@
     "start": "dts watch",
     "test": "dts test"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "dts lint"
-    }
+  "lint-staged": {
+    "**/*.{ts,tsx,md,mdx,js,jsx}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ]
   },
   "prettier": {
     "printWidth": 80,
@@ -31,7 +32,10 @@
     "trailingComma": "es5"
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    }
   },
   "engines": {
     "node": ">=12"

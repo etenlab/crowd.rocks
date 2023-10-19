@@ -1,4 +1,12 @@
-import { IDefinition, ITagInfo, LanguageInfo, LanguageInput, TDialect, TLang, TRegion } from "./types";
+import {
+  IDefinition,
+  ITagInfo,
+  LanguageInfo,
+  LanguageInput,
+  TDialect,
+  TLang,
+  TRegion,
+} from './types';
 
 import Tags from 'language-tags';
 export const DESCRIPTIONS_JOINER = '/';
@@ -7,8 +15,6 @@ export const LOADING_TAG_PLACEHOLDER = {
   tag: 'loading',
   descriptions: ['Loading data...'],
 } as TDialect & TRegion & TLang;
-
-
 
 // X_LANG_TAGS is an array of private (x-...) subtags; they are used as additional language tags to represent languages
 // that are not present in the `language-tags` npm package (which refers to the IANA registry).
@@ -106,7 +112,7 @@ export const tag2langInfo = (tagGiven: string): LanguageInfo => {
 };
 
 export const langInfo2tag = (
-  langInfo: LanguageInfo | undefined,
+  langInfo: LanguageInfo | undefined
 ): string | undefined => {
   if (!langInfo) return undefined;
   const { lang, region, dialect } = langInfo;
@@ -155,7 +161,7 @@ export const subTags2LangInfo = ({
 
 export const compareLangInfo = (
   a: LanguageInfo | null | undefined,
-  b: LanguageInfo | null | undefined,
+  b: LanguageInfo | null | undefined
 ): boolean => {
   if (a === b) return true; // case both null or both undefined
   if (!a || !b) return false; // case one of them null or undefined
@@ -186,7 +192,7 @@ enum TagSpecialDescriptions {
 
 // make it async to test and prepare for possible language library change to async
 export const getLangsRegistry = async (
-  enabledTags?: string[],
+  enabledTags?: string[]
 ): Promise<LangsRegistry> => {
   return new Promise((resolve) => {
     const allTags = Tags.search(/.*/);
@@ -263,37 +269,3 @@ export const languageInput2tag = (languageInput: LanguageInput): string => {
     region: languageInput.geo_code || undefined,
   });
 };
-
-
-(async function test() {
-  const lngs = await getLangsRegistry();
-  for (const xName of [
-    'Senga',
-    'Fungwe',
-    'Lambya',
-    'Tambo',
-    'Wandya',
-    'Lungu',
-    'Kunda',
-    'Chikunda',
-    'Mukulu',
-    'Kabdende',
-    'Shila',
-    'Mwenyi',
-    'Liuwa',
-  ]) {
-    const found = lngs.langs.findIndex((l) => {
-      for (const description of l.descriptions!) {
-        if (description.includes(xName)) {
-          return true;
-        }
-      }
-    });
-
-    if (found < 0) {
-      console.log('absent:', xName);
-    } else {
-      console.log(lngs.langs[found]);
-    }
-  }
-});
