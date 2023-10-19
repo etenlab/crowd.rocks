@@ -14,7 +14,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
-import { WordCard, Author } from '../../common/WordCard';
+import { WordCard } from '../../common/WordCard';
 
 export type MapWordOrPhraseTranslationListProps = {
   definition_id: string;
@@ -145,7 +145,10 @@ export function MapWordOrPhraseTranslationList({
         let to_type: 'phrase' | 'word' = 'word';
         let definition_id: string = '';
         let definition: string = '';
-        let author: Author | undefined = undefined;
+        let username: string = '';
+        let avatar: string | null | undefined;
+        let createdAt: Date = new Date();
+        let parent: { id: string; table: string } = { id: '', table: '' };
 
         if (translation?.__typename === 'PhraseToPhraseTranslationWithVote') {
           value = translation.to_phrase_definition.phrase.phrase;
@@ -153,12 +156,12 @@ export function MapWordOrPhraseTranslationList({
           to_type = 'phrase';
           definition_id = translation.to_phrase_definition.phrase_definition_id;
           definition = translation.to_phrase_definition.definition;
-          author = {
-            username: translation.to_phrase_definition.created_by_user.avatar,
-            avatar:
-              translation.to_phrase_definition.created_by_user.avatar_url ||
-              undefined,
-            createdAt: new Date(translation.to_phrase_definition.created_at),
+          username = translation.to_phrase_definition.created_by_user.avatar;
+          avatar = translation.to_phrase_definition.created_by_user.avatar_url;
+          createdAt = new Date(translation.to_phrase_definition.created_at);
+          parent = {
+            id: translation.phrase_to_phrase_translation_id,
+            table: 'phrase_to_phrase_translations',
           };
         }
         if (translation?.__typename === 'PhraseToWordTranslationWithVote') {
@@ -167,12 +170,12 @@ export function MapWordOrPhraseTranslationList({
           to_type = 'word';
           definition_id = translation.to_word_definition.word_definition_id;
           definition = translation.to_word_definition.definition;
-          author = {
-            username: translation.to_word_definition.created_by_user.avatar,
-            avatar:
-              translation.to_word_definition.created_by_user.avatar_url ||
-              undefined,
-            createdAt: new Date(translation.to_word_definition.created_at),
+          username = translation.to_word_definition.created_by_user.avatar;
+          avatar = translation.to_word_definition.created_by_user.avatar_url;
+          createdAt = new Date(translation.to_word_definition.created_at);
+          parent = {
+            id: translation.phrase_to_word_translation_id,
+            table: 'phrase_to_word_translations',
           };
         }
         if (translation?.__typename === 'WordToPhraseTranslationWithVote') {
@@ -181,12 +184,12 @@ export function MapWordOrPhraseTranslationList({
           to_type = 'phrase';
           definition = translation.to_phrase_definition.definition;
           definition_id = translation.to_phrase_definition.phrase_definition_id;
-          author = {
-            username: translation.to_phrase_definition.created_by_user.avatar,
-            avatar:
-              translation.to_phrase_definition.created_by_user.avatar_url ||
-              undefined,
-            createdAt: new Date(translation.to_phrase_definition.created_at),
+          username = translation.to_phrase_definition.created_by_user.avatar;
+          avatar = translation.to_phrase_definition.created_by_user.avatar_url;
+          createdAt = new Date(translation.to_phrase_definition.created_at);
+          parent = {
+            id: translation.word_to_phrase_translation_id,
+            table: 'word_to_phrase_translations',
           };
         }
         if (translation?.__typename === 'WordToWordTranslationWithVote') {
@@ -195,12 +198,12 @@ export function MapWordOrPhraseTranslationList({
           to_type = 'word';
           definition = translation.to_word_definition.definition;
           definition_id = translation.to_word_definition.word_definition_id;
-          author = {
-            username: translation.to_word_definition.created_by_user.avatar,
-            avatar:
-              translation.to_word_definition.created_by_user.avatar_url ||
-              undefined,
-            createdAt: new Date(translation.to_word_definition.created_at),
+          username = translation.to_word_definition.created_by_user.avatar;
+          avatar = translation.to_word_definition.created_by_user.avatar_url;
+          createdAt = new Date(translation.to_word_definition.created_at);
+          parent = {
+            id: translation.word_to_word_translation_id,
+            table: 'word_to_word_translations',
           };
         }
 
@@ -213,7 +216,12 @@ export function MapWordOrPhraseTranslationList({
           definition,
           upvotes: translation.upvotes,
           downvotes: translation.downvotes,
-          author,
+          author: {
+            username,
+            avatar,
+            createdAt,
+          },
+          parent,
         };
       })
       .filter((item) => item) as {
@@ -225,7 +233,15 @@ export function MapWordOrPhraseTranslationList({
       definition: string;
       upvotes: number;
       downvotes: number;
-      author?: Author;
+      author: {
+        username: string;
+        avatar?: string;
+        createdAt: Date;
+      };
+      parent: {
+        id: string;
+        table: string;
+      };
     }[];
   }, [translationsQ]);
 
@@ -238,8 +254,8 @@ export function MapWordOrPhraseTranslationList({
             word={item.value}
             description={item.definition}
             discussion={{
-              parent_id: item.id,
-              parent_table: original.isWord ? 'words' : 'phrases',
+              parent_id: item.parent.id,
+              parent_table: item.parent.table,
             }}
             author={item.author}
             flags={{

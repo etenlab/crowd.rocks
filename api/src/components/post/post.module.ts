@@ -12,6 +12,7 @@ import { ThreadModule } from '../threads/threads.module';
 import { PhraseModule } from '../phrases/phrases.module';
 import { DefinitionsModule } from '../definitions/definitions.module';
 import { WordsModule } from '../words/words.module';
+import { TranslationsModule } from '../translations/translations.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { WordsModule } from '../words/words.module';
     forwardRef(() => WordsModule),
     forwardRef(() => AuthenticationModule),
     forwardRef(() => UserModule),
+    forwardRef(() => TranslationsModule),
   ],
   providers: [
     UserReadResolver,
