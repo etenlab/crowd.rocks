@@ -45,9 +45,9 @@ import { RouteComponentProps } from 'react-router';
 import {
   langInfo2langInput,
   langInfo2tag,
-  tag2langInfo,
+  // tag2langInfo,
 } from '../../../../../utils';
-import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
+// import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
 import { MapUploadModal } from './MapUploadModal';
 import { MapResetModal } from './MapResetModal';
 import { DownloadCircle } from '../../common/icons/DownloadCircle';
@@ -71,7 +71,6 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const timerRef = useRef<NodeJS.Timeout>();
   const singleClickTimerRef = useRef<NodeJS.Timeout>();
   const clickCountRef = useRef<number>(0);
-  const isFirstRendering = useRef<boolean>(true);
 
   const [viewMode, setViewMode] = useState<ViewMode>('normal');
   const [checkedMap, setCheckedMap] = useState<Record<string, boolean>>({});
@@ -94,36 +93,14 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     useGetAllMapsListLazyQuery();
 
   useEffect(() => {
-    if (isFirstRendering.current) {
-      if (
-        url_lang_tag &&
-        url_lang_tag !== langInfo2tag(targetLang || undefined)
-      ) {
-        const langInfo = tag2langInfo(url_lang_tag);
-        if (langInfo.lang.tag) {
-          setTargetLanguage(langInfo);
-        }
-
-        isFirstRendering.current = false;
-        return;
-      }
-
-      if (!targetLang) {
-        setTargetLanguage(tag2langInfo(DEFAULT_MAP_LANGUAGE_CODE));
-      }
-    } else {
-      if (
-        isFirstRendering.current === false &&
-        url_lang_tag &&
-        targetLang &&
-        url_lang_tag !== langInfo2tag(targetLang)
-      ) {
-        router.push(
-          `/${nation_id}/${language_id}/1/maps/list/${langInfo2tag(
-            targetLang,
-          )}`,
-        );
-      }
+    if (
+      url_lang_tag &&
+      targetLang &&
+      url_lang_tag !== langInfo2tag(targetLang)
+    ) {
+      router.push(
+        `/${nation_id}/${language_id}/1/maps/list/${langInfo2tag(targetLang)}`,
+      );
     }
   }, [
     setTargetLanguage,
