@@ -148,6 +148,7 @@ export function MapWordOrPhraseTranslationList({
         let username: string = '';
         let avatar: string | null | undefined;
         let createdAt: Date = new Date();
+        let parent: { id: string; table: string } = { id: '', table: '' };
 
         if (translation?.__typename === 'PhraseToPhraseTranslationWithVote') {
           value = translation.to_phrase_definition.phrase.phrase;
@@ -158,6 +159,10 @@ export function MapWordOrPhraseTranslationList({
           username = translation.to_phrase_definition.created_by_user.avatar;
           avatar = translation.to_phrase_definition.created_by_user.avatar_url;
           createdAt = new Date(translation.to_phrase_definition.created_at);
+          parent = {
+            id: translation.phrase_to_phrase_translation_id,
+            table: 'phrase_to_phrase_translations',
+          };
         }
         if (translation?.__typename === 'PhraseToWordTranslationWithVote') {
           value = translation.to_word_definition.word.word;
@@ -168,6 +173,10 @@ export function MapWordOrPhraseTranslationList({
           username = translation.to_word_definition.created_by_user.avatar;
           avatar = translation.to_word_definition.created_by_user.avatar_url;
           createdAt = new Date(translation.to_word_definition.created_at);
+          parent = {
+            id: translation.phrase_to_word_translation_id,
+            table: 'phrase_to_word_translations',
+          };
         }
         if (translation?.__typename === 'WordToPhraseTranslationWithVote') {
           value = translation.to_phrase_definition.phrase.phrase;
@@ -178,6 +187,10 @@ export function MapWordOrPhraseTranslationList({
           username = translation.to_phrase_definition.created_by_user.avatar;
           avatar = translation.to_phrase_definition.created_by_user.avatar_url;
           createdAt = new Date(translation.to_phrase_definition.created_at);
+          parent = {
+            id: translation.word_to_phrase_translation_id,
+            table: 'word_to_phrase_translations',
+          };
         }
         if (translation?.__typename === 'WordToWordTranslationWithVote') {
           value = translation.to_word_definition.word.word;
@@ -188,6 +201,10 @@ export function MapWordOrPhraseTranslationList({
           username = translation.to_word_definition.created_by_user.avatar;
           avatar = translation.to_word_definition.created_by_user.avatar_url;
           createdAt = new Date(translation.to_word_definition.created_at);
+          parent = {
+            id: translation.word_to_word_translation_id,
+            table: 'word_to_word_translations',
+          };
         }
         return {
           key: `${translation.__typename}:${id}`,
@@ -203,6 +220,7 @@ export function MapWordOrPhraseTranslationList({
             avatar,
             createdAt,
           },
+          parent,
         };
       })
       .filter((item) => item) as {
@@ -219,6 +237,10 @@ export function MapWordOrPhraseTranslationList({
         avatar?: string;
         createdAt: Date;
       };
+      parent: {
+        id: string;
+        table: string;
+      };
     }[];
   }, [translationsQ]);
 
@@ -231,8 +253,8 @@ export function MapWordOrPhraseTranslationList({
             word={item.value}
             description={item.definition}
             discussion={{
-              parent_id: item.id,
-              parent_table: original.isWord ? 'words' : 'phrases',
+              parent_id: item.parent.id,
+              parent_table: item.parent.table,
             }}
             author={item.author}
             flags={{

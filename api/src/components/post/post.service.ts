@@ -8,6 +8,10 @@ import { WordDefinitionsService } from '../definitions/word-definitions.service'
 import { NotificationResolver } from '../notifications/notification.resolver';
 import { PhrasesService } from '../phrases/phrases.service';
 import { ThreadsService } from '../threads/threads.service';
+import { PhraseToPhraseTranslationsService } from '../translations/phrase-to-phrase-translations.service';
+import { PhraseToWordTranslationsService } from '../translations/phrase-to-word-translations.service';
+import { WordToPhraseTranslationsService } from '../translations/word-to-phrase-translations.service';
+import { WordToWordTranslationsService } from '../translations/word-to-word-translations.service';
 import { UserService } from '../user/user.service';
 import { WordsService } from '../words/words.service';
 import {
@@ -33,6 +37,10 @@ export class PostService {
     private wordDefService: WordDefinitionsService,
     private phraseDefService: PhraseDefinitionsService,
     private wordsService: WordsService,
+    private phraseToPhraseTranslationService: PhraseToPhraseTranslationsService,
+    private phraseToWordTranslationService: PhraseToWordTranslationsService,
+    private wordToWordTranslationService: WordToWordTranslationsService,
+    private wordToPhraseTranslationService: WordToPhraseTranslationsService,
   ) {}
 
   async read(input: PostReadInput, req: any): Promise<PostReadOutput> {
@@ -316,6 +324,14 @@ export class PostService {
       word_definitions: this.wordDefService.getDiscussionTitle,
       phrase_definitions: this.phraseDefService.getDiscussionTitle,
       words: this.wordsService.getDiscussionTitle,
+      phrase_to_phrase_translations:
+        this.phraseToPhraseTranslationService.getDiscussionTitle,
+      phrase_to_word_translations:
+        this.phraseToWordTranslationService.getDiscussionTitle,
+      word_to_word_translations:
+        this.wordToWordTranslationService.getDiscussionTitle,
+      word_to_phrase_translations:
+        this.wordToPhraseTranslationService.getDiscussionTitle,
     };
     if (parentTableToGetTitle[name]) {
       return parentTableToGetTitle[name](id);
