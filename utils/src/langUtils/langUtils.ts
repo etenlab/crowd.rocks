@@ -1,20 +1,14 @@
+import { DESCRIPTIONS_JOINER, NOT_DEFINED_PLACEHOLDER } from '../constants';
+import { sortTagInfosFn } from '../sortingFns/sortingFns';
 import {
-  IDefinition,
-  ITagInfo,
   LanguageInfo,
   LanguageInput,
   TDialect,
   TLang,
   TRegion,
-} from './types';
+} from '../types';
 
 import Tags from 'language-tags';
-export const DESCRIPTIONS_JOINER = '/';
-export const NOT_DEFINED_PLACEHOLDER = '- not defined -';
-export const LOADING_TAG_PLACEHOLDER = {
-  tag: 'loading',
-  descriptions: ['Loading data...'],
-} as TDialect & TRegion & TLang;
 
 // X_LANG_TAGS is an array of private (x-...) subtags; they are used as additional language tags to represent languages
 // that are not present in the `language-tags` npm package (which refers to the IANA registry).
@@ -34,49 +28,6 @@ export const X_LANG_TAGS: Array<TLang> = [
   // { tag: 'x-Mukulu', descriptions: ['Mukulu'] },
   // { tag: 'x-Kunda', descriptions: ['Kunda'] },
 ];
-
-export const sortSiteTextFn = (d1: IDefinition, d2: IDefinition) => {
-  if (
-    d1.siteTextlikeString &&
-    d2.siteTextlikeString &&
-    d1.siteTextlikeString.toLowerCase() > d2.siteTextlikeString.toLowerCase()
-  ) {
-    return 1;
-  }
-
-  if (
-    d1.siteTextlikeString &&
-    d2.siteTextlikeString &&
-    d1.siteTextlikeString.toLowerCase() < d2.siteTextlikeString.toLowerCase()
-  ) {
-    return -1;
-  }
-  return 0;
-};
-
-export const sortTagInfosFn = (t1: ITagInfo, t2: ITagInfo) => {
-  if (t1.descriptions && t1.descriptions[0] === NOT_DEFINED_PLACEHOLDER) {
-    return -1;
-  }
-  if (t2.descriptions && t2.descriptions[0] === NOT_DEFINED_PLACEHOLDER) {
-    return 1;
-  }
-  if (
-    t1.descriptions &&
-    t2.descriptions &&
-    t1.descriptions[0] > t2.descriptions[0]
-  ) {
-    return 1;
-  }
-  if (
-    t1.descriptions &&
-    t2.descriptions &&
-    t1.descriptions[0] < t2.descriptions[0]
-  ) {
-    return -1;
-  }
-  return 0;
-};
 
 enum TagTypes {
   LANGUAGE = 'language',

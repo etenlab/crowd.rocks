@@ -25,4 +25,4 @@ export type LanguageInput = {
   dialect_code: string | null;
   geo_code: string | null;
   filter?: string | null;
-}
+};
