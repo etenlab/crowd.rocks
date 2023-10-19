@@ -39,7 +39,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { NewSiteTextForm } from '../NewSiteTextForm';
 import { TranslatedCard } from './TranslatedCard';
 
-import { sortSiteTextFn } from '../../../../../utils/dist';
+import { sortSiteTextFn } from '../../../../../utils';
 import { globals } from '../../../services/globals';
 import { AddListHeader } from '../../common/ListHeader';
 import { PageLayout } from '../../common/PageLayout';

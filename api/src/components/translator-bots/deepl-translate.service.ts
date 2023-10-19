@@ -13,7 +13,7 @@ import {
 import { ErrorType } from '../../common/types';
 import * as deepl from 'deepl-node';
 import { SourceLanguageCode, TargetLanguageCode } from 'deepl-node';
-import { languageInput2tag } from '../../../../utils/dist/index';
+import { languageInput2tag } from '../../../../utils';
 
 const LIMIT_WORDS = undefined; // 20; // for debugging purposes, not to exhaust free limit too quickly/
 const DEEPL_BOT_EMAIL = 'deeplbot@crowd.rocks';

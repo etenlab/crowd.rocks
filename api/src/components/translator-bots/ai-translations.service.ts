@@ -48,7 +48,7 @@ import {
 import {
   langInfo2String,
   subTags2LangInfo,
-} from '../../../../utils/dist/index';
+} from '../../../../utils';
 
 interface ItranslateAllWordsAndPhrasesByBot {
   translateWordsAndPhrases: (

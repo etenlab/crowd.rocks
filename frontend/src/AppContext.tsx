@@ -16,7 +16,7 @@ import {
   ErrorType,
 } from './generated/graphql';
 import { useGlobalComponents } from './hooks/useGlobalComponents';
-import { subTags2LangInfo } from '../../utils/dist';
+import { subTags2LangInfo } from '../../utils';
 
 export interface ContextType {
   states: {

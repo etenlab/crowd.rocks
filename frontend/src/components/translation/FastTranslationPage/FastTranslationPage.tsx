@@ -21,7 +21,7 @@ import {
   IonInfiniteScrollCustomEvent,
 } from '@ionic/core/components';
 
-import { subTags2LangInfo, compareLangInfo } from '../../../../../utils/dist';
+import { subTags2LangInfo, compareLangInfo } from '../../../../../utils';
 
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';

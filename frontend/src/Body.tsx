@@ -40,7 +40,7 @@ import {
   subTags2LangInfo,
   langInfo2tag,
   tag2langInfo,
-} from '../../utils/dist';
+} from '../../utils';
 
 import { useAppContext } from './hooks/useAppContext';
 

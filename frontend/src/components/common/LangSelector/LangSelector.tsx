@@ -8,7 +8,7 @@ import {
   LOADING_TAG_PLACEHOLDER,
   getLangsRegistry,
   langInfo2tag,
-} from '../../../../../utils/dist';
+} from '../../../../../utils';
 
 export type LangSelectorProps = {
   title?: string;
