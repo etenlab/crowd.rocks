@@ -8,8 +8,6 @@ import { type StateType as ComponentsStateType } from './reducers/components.red
 
 import { useGlobal } from './hooks/useGlobal';
 
-import { subTags2LangInfo } from './common/langUtils';
-
 import {
   useGetAllRecommendedSiteTextTranslationListByLanguageLazyQuery,
   useGetAllSiteTextDefinitionsLazyQuery,
@@ -18,6 +16,7 @@ import {
   ErrorType,
 } from './generated/graphql';
 import { useGlobalComponents } from './hooks/useGlobalComponents';
+import { subTags2LangInfo } from '../../utils';
 
 export interface ContextType {
   states: {

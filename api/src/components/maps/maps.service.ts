@@ -36,7 +36,6 @@ import { PostgresService } from '../../core/postgres.service';
 import { WordDefinitionsService } from '../definitions/word-definitions.service';
 import { PoolClient } from 'pg';
 import { WordToWordTranslationsService } from '../translations/word-to-word-translations.service';
-import { subTags2Tag, tag2langInfo } from '../../common/langUtils';
 import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
@@ -52,6 +51,7 @@ import * as temp from 'temp';
 import * as path from 'path';
 import { createReadStream } from 'fs';
 import * as AdmZip from 'adm-zip';
+import { subTags2Tag, tag2langInfo } from '../../../../utils';
 
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value

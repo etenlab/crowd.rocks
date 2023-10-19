@@ -9,7 +9,7 @@ import { parse } from 'node-html-parser';
 import fetch, { Headers } from 'node-fetch';
 import { ITranslator, LanguageListForBotTranslateOutput } from './types';
 import { ErrorType } from '../../common/types';
-import { languageInput2tag } from '../../common/langUtils';
+import { languageInput2tag } from '../../../../utils';
 
 const LIMIT_WORDS = undefined; //20; // for debugging purposes, not to exhaust free limit too quickly/
 const SMARTCAT_BOT_EMAIL = 'smartcatbot@crowd.rocks';

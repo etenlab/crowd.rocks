@@ -1,52 +1,33 @@
+import { DESCRIPTIONS_JOINER, NOT_DEFINED_PLACEHOLDER } from '../constants';
+import { sortTagInfosFn } from '../sortingFns/sortingFns';
 import {
-  DESCRIPTIONS_JOINER,
-  NOT_DEFINED_PLACEHOLDER,
-} from '../const/langConst';
+  LanguageInfo,
+  LanguageInput,
+  TDialect,
+  TLang,
+  TRegion,
+} from '../types';
+
 import Tags from 'language-tags';
-import { LanguageInput } from '../generated/graphql';
 
-export const sortSiteTextFn = (d1: IDefinition, d2: IDefinition) => {
-  if (
-    d1.siteTextlikeString &&
-    d2.siteTextlikeString &&
-    d1.siteTextlikeString.toLowerCase() > d2.siteTextlikeString.toLowerCase()
-  ) {
-    return 1;
-  }
-
-  if (
-    d1.siteTextlikeString &&
-    d2.siteTextlikeString &&
-    d1.siteTextlikeString.toLowerCase() < d2.siteTextlikeString.toLowerCase()
-  ) {
-    return -1;
-  }
-  return 0;
-};
-
-export const sortTagInfosFn = (t1: ITagInfo, t2: ITagInfo) => {
-  if (t1.descriptions && t1.descriptions[0] === NOT_DEFINED_PLACEHOLDER) {
-    return -1;
-  }
-  if (t2.descriptions && t2.descriptions[0] === NOT_DEFINED_PLACEHOLDER) {
-    return 1;
-  }
-  if (
-    t1.descriptions &&
-    t2.descriptions &&
-    t1.descriptions[0] > t2.descriptions[0]
-  ) {
-    return 1;
-  }
-  if (
-    t1.descriptions &&
-    t2.descriptions &&
-    t1.descriptions[0] < t2.descriptions[0]
-  ) {
-    return -1;
-  }
-  return 0;
-};
+// X_LANG_TAGS is an array of private (x-...) subtags; they are used as additional language tags to represent languages
+// that are not present in the `language-tags` npm package (which refers to the IANA registry).
+// List of main language tags we get from the `language-tags` library will be extended with these x- tags.
+export const X_LANG_TAGS: Array<TLang> = [
+  { tag: 'x-senga', descriptions: ['Senga'] },
+  { tag: 'x-fungwe', descriptions: ['Fungwe'] },
+  { tag: 'x-tambo', descriptions: ['Tambo'] },
+  { tag: 'x-wandya', descriptions: ['Wandya'] },
+  { tag: 'x-lungu', descriptions: ['Lungu'] },
+  { tag: 'x-chikunda', descriptions: ['Chikunda'] },
+  { tag: 'x-kabdende', descriptions: ['Kabdende'] },
+  { tag: 'x-shila', descriptions: ['Shila'] },
+  { tag: 'x-mwenyi', descriptions: ['Mwenyi'] },
+  { tag: 'x-liuwa', descriptions: ['Liuwa'] },
+  // { tag: 'x-Lambya', descriptions: ['Lambya'] },
+  // { tag: 'x-Mukulu', descriptions: ['Mukulu'] },
+  // { tag: 'x-Kunda', descriptions: ['Kunda'] },
+];
 
 enum TagTypes {
   LANGUAGE = 'language',
@@ -54,9 +35,18 @@ enum TagTypes {
   DIALECT = 'variant',
 }
 
-export const tag2langInfo = (tagGiven: string): LanguageInfo => {
-  const complexTag = Tags(tagGiven);
+export const xTag2langInfo = (tagGiven: string): LanguageInfo | undefined => {
+  const foundXtagIndex = X_LANG_TAGS.findIndex((xTag) => xTag.tag === tagGiven);
+  if (foundXtagIndex >= 0) {
+    return {
+      lang: X_LANG_TAGS[foundXtagIndex],
+    };
+  } else return undefined;
+};
 
+export const tag2langInfo = (tagGiven: string): LanguageInfo => {
+  if (xTag2langInfo(tagGiven)) return xTag2langInfo(tagGiven)!;
+  const complexTag = Tags(tagGiven);
   const lang = complexTag.find(TagTypes.LANGUAGE);
   const region = complexTag.find(TagTypes.REGION);
   const dialect = complexTag.find(TagTypes.DIALECT);
@@ -79,11 +69,15 @@ export const tag2langInfo = (tagGiven: string): LanguageInfo => {
 };
 
 export const langInfo2tag = (
-  langInfo: LanguageInfo | undefined,
+  langInfo: LanguageInfo | undefined
 ): string | undefined => {
   if (!langInfo) return undefined;
   const { lang, region, dialect } = langInfo;
   let langTag = lang.tag;
+
+  const xTag = X_LANG_TAGS.find((xt) => xt.tag === langTag);
+  if (xTag) return xTag.tag;
+
   region?.tag && (langTag += '-' + region?.tag);
   dialect?.tag && (langTag += '-' + dialect?.tag);
   return Tags(langTag).format();
@@ -92,12 +86,16 @@ export const langInfo2tag = (
 export const langInfo2langInput = (langInfo: LanguageInfo): LanguageInput => {
   return {
     language_code: langInfo.lang.tag,
-    dialect_code: langInfo.dialect?.tag,
-    geo_code: langInfo.region?.tag,
+    dialect_code: langInfo.dialect?.tag || null,
+    geo_code: langInfo.region?.tag || null,
   };
 };
 
 export const langInfo2String = (langInfo: LanguageInfo | undefined): string => {
+  const xTag = X_LANG_TAGS.find((xt) => xt.tag === langInfo?.lang.tag);
+  if (xTag) {
+    return xTag.descriptions?.join(DESCRIPTIONS_JOINER) || xTag.tag;
+  }
   let res = langInfo?.lang.descriptions?.join(DESCRIPTIONS_JOINER);
   if (!res) return '';
   if (langInfo?.region?.descriptions) {
@@ -119,6 +117,7 @@ export const subTags2LangInfo = ({
   region?: string;
   dialect?: string;
 }): LanguageInfo => {
+  if (xTag2langInfo(lang)) return xTag2langInfo(lang)!;
   let langTag = lang;
   region && (langTag += '-' + region);
   dialect && (langTag += '-' + dialect);
@@ -128,7 +127,7 @@ export const subTags2LangInfo = ({
 
 export const compareLangInfo = (
   a: LanguageInfo | null | undefined,
-  b: LanguageInfo | null | undefined,
+  b: LanguageInfo | null | undefined
 ): boolean => {
   if (a === b) return true; // case both null or both undefined
   if (!a || !b) return false; // case one of them null or undefined
@@ -159,20 +158,17 @@ enum TagSpecialDescriptions {
 
 // make it async to test and prepare for possible language library change to async
 export const getLangsRegistry = async (
-  enabledTags?: string[],
+  enabledTags?: string[]
 ): Promise<LangsRegistry> => {
   return new Promise((resolve) => {
     const allTags = Tags.search(/.*/);
-    const langs: Array<TLang> = [];
+    const langs: Array<TLang> = [...X_LANG_TAGS];
     const dialects: Array<TDialect> = [
       { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
     ];
     const regions: Array<TRegion> = [
       { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
     ];
-
-    // const strEnabledTags = enabledTags ? enabledTags.join(',') : null;
-    // console.log(allTags[0].format());
 
     for (const currTag of allTags) {
       if (enabledTags && !enabledTags.includes(currTag.format())) {
@@ -214,5 +210,29 @@ export const getLangsRegistry = async (
       dialects,
       regions,
     });
+  });
+};
+
+export const subTags2Tag = ({
+  lang,
+  region,
+  dialect,
+}: {
+  lang: string;
+  region?: string;
+  dialect?: string;
+}): string => {
+  if (X_LANG_TAGS.find((xt) => xt.tag === lang)) return lang;
+  let langTag = lang;
+  region && (langTag += '-' + region);
+  dialect && (langTag += '-' + dialect);
+  return Tags(langTag).format();
+};
+
+export const languageInput2tag = (languageInput: LanguageInput): string => {
+  return subTags2Tag({
+    lang: languageInput.language_code,
+    dialect: languageInput.dialect_code || undefined,
+    region: languageInput.geo_code || undefined,
   });
 };

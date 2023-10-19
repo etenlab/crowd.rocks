@@ -46,7 +46,7 @@ import {
   langInfo2langInput,
   langInfo2tag,
   tag2langInfo,
-} from '../../../common/langUtils';
+} from '../../../../../utils';
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
 import { MapUploadModal } from './MapUploadModal';
 import { MapResetModal } from './MapResetModal';
@@ -229,9 +229,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
         position: 'top',
         color: 'danger',
       });
-      console.error(mapZipError);
     }
-    console.log(mapZipResult);
   }, [mapZipError, mapZipResult, present]);
 
   const handleStartZipMap = useCallback(async () => {
