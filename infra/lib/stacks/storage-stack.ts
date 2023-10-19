@@ -31,6 +31,8 @@ export interface StorageStackProps extends cdk.StackProps {
 
   /** Bucket name for storing public files */
   readonly publicFilesBucketName: string;
+
+  readonly tempPublicFilesBucketName: string;
 }
 
 /**
@@ -116,7 +118,6 @@ export class StorageStack extends cdk.Stack {
         bucketName: props.publicFilesBucketName,
         removalPolicy: cdk.RemovalPolicy.RETAIN,
         publicReadAccess: true,
-        accessControl: s3.BucketAccessControl.PUBLIC_READ,
         blockPublicAccess: new s3.BlockPublicAccess({
           blockPublicAcls: false,
           blockPublicPolicy: false,
@@ -140,5 +141,42 @@ export class StorageStack extends cdk.Stack {
         ],
       },
     );
+
+    const tempPublicFilesBucket = new s3.Bucket(
+      this,
+      `${props.appPrefix}TempFilesBucket`,
+      {
+        bucketName: props.tempPublicFilesBucketName,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        publicReadAccess: true,
+        blockPublicAccess: new s3.BlockPublicAccess({
+          blockPublicAcls: false,
+          blockPublicPolicy: false,
+          ignorePublicAcls: false,
+          restrictPublicBuckets: false,
+        }),
+        objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
+        cors: [
+          {
+            allowedHeaders: ['*'],
+            allowedOrigins: ['*'],
+            exposedHeaders: ['ETag', 'x-amz-meta-custom-header'],
+            allowedMethods: [
+              s3.HttpMethods.HEAD,
+              s3.HttpMethods.GET,
+              s3.HttpMethods.PUT,
+              s3.HttpMethods.POST,
+              s3.HttpMethods.DELETE,
+            ],
+          },
+        ],
+      },
+    );
+
+    tempPublicFilesBucket.addLifecycleRule({
+      enabled: true,
+      expiration: cdk.Duration.days(1),
+      expiredObjectDeleteMarker: false,
+    });
   }
 }

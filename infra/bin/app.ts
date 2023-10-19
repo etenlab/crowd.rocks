@@ -53,6 +53,7 @@ const databaseStack = new StorageStack(
     dbCredentialSecret: config.dbCredentialSecret,
     dbSecurityGroupSsmParam: config.dbSecurityGroupSsmParam,
     publicFilesBucketName: config.publicFilesBucketName,
+    tempPublicFilesBucketName: config.tempPublicFilesBucketName,
   },
 );
 
@@ -122,6 +123,9 @@ const apiServiceStack = new ApiServiceStack(
       },
       {
         AWS_S3_BUCKET_NAME: config.publicFilesBucketName,
+      },
+      {
+        AWS_S3_TEMPORARY_BUCKET_NAME: config.tempPublicFilesBucketName,
       },
       {
         HTTP_LOGGING: 'false',
