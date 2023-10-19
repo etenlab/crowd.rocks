@@ -9,6 +9,9 @@ COPY utils /utils/
 
 ARG BUILD_MODE
 
+WORKDIR /utils
+RUN npm install
+
 WORKDIR /frontend
 
 RUN npm install
