@@ -118,11 +118,17 @@ export function MapWordsList() {
         `${wordOrPhrase.o_definition_id}:${wordOrPhrase.type}`,
         { translation, description },
       );
-      router.push(
-        `/${nation_id}/${language_id}/1/maps/translation_confirm/${wordOrPhrase.o_definition_id}/${wordOrPhrase.type}`,
-      );
+      if (id === 'all') {
+        router.push(
+          `/${nation_id}/${language_id}/1/maps/translation_confirm/${wordOrPhrase.o_definition_id}/${wordOrPhrase.type}`,
+        );
+      } else {
+        router.push(
+          `/${nation_id}/${language_id}/1/maps/translation_confirm/${wordOrPhrase.o_definition_id}/${wordOrPhrase.type}?original_map_id=${id}`,
+        );
+      }
     },
-    [language_id, nation_id, router, setTempTranslation],
+    [language_id, nation_id, router, setTempTranslation, id],
   );
 
   const handleOpenFilterModal = () => {

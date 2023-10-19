@@ -106,6 +106,16 @@ export function MapDetails() {
     );
   };
 
+  const handleGoToTranslation = () => {
+    if (currMapContent?.mapDetails?.original_map_id) {
+      history.push(
+        `/${nation_id}/${language_id}/1/maps/translation/${currMapContent?.mapDetails?.original_map_id}`,
+      );
+    } else {
+      history.push(`/${nation_id}/${language_id}/1/maps/translation/all`);
+    }
+  };
+
   const tagLabel = currMapContent?.mapDetails?.is_original
     ? tr('Original')
     : langInfo2String(langInfo) +
@@ -142,19 +152,13 @@ export function MapDetails() {
 
         <Divider />
 
-        {isOriginal ? (
-          <Button
-            variant="contained"
-            color="blue"
-            onClick={() => {
-              history.push(
-                `/${nation_id}/${language_id}/1/maps/translation/${id}`,
-              );
-            }}
-          >
-            {tr('Translate This Map')}
-          </Button>
-        ) : null}
+        <Button
+          variant="contained"
+          color="blue"
+          onClick={handleGoToTranslation}
+        >
+          {tr('Translate This Map')}
+        </Button>
 
         <DiscussionButton
           parent_table={
