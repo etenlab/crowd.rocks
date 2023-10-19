@@ -50,6 +50,10 @@ export class DatabaseVersionControlService {
         console.error('Database version is current');
     }
 
+    if (process.env.NODE_ENV !== 'prod' && !exists) {
+      await this.dataloader.loadSiteTextData();
+    }
+
     console.log('Database version check complete');
   }
 
@@ -188,9 +192,6 @@ export class DatabaseVersionControlService {
       this.config.ADMIN_PASSWORD || 'asdfasdf',
     );
     await this.registerUser('anonymous@crowd.rocks', 'Anonymous', 'asdfasdf');
-
-    // load data
-    await this.dataloader.loadSiteTextData();
   }
 
   async loadVersion2(): Promise<void> {
