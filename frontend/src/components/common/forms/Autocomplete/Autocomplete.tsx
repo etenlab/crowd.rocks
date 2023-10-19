@@ -18,6 +18,7 @@ export type OptionItem = {
 export type AutocompleteProps = {
   options: OptionItem[];
   placeholder: string;
+  searchPlaceholder?: string;
   label?: string;
   value: OptionItem | null;
   onChange(value: OptionItem | null): void;
@@ -28,6 +29,7 @@ export type AutocompleteProps = {
 export function Autocomplete({
   options,
   placeholder,
+  searchPlaceholder,
   label,
   value,
   disabled,
@@ -44,6 +46,8 @@ export function Autocomplete({
     openModal(
       <AutocompleteModal
         options={options}
+        searchPlaceholder={searchPlaceholder}
+        label={label}
         value={value}
         onChange={onChange}
         onClose={closeModal}

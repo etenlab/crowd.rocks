@@ -741,4 +741,13 @@ export class WordToWordTranslationsService {
       word_to_word_tr_with_vote_list: [],
     };
   }
+
+  getDiscussionTitle = async (id: string): Promise<string> => {
+    const translation = await this.read(+id, null);
+    if (translation.error !== ErrorType.NoError) {
+      console.error(translation.error);
+      return 'Translation:';
+    }
+    return `Translation from '${translation.word_to_word_translation?.from_word_definition.word.word}' to '${translation.word_to_word_translation?.to_word_definition.word.word}'`;
+  };
 }

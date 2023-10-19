@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { useIonRouter, useIonToast } from '@ionic/react';
 
 import { Stack, Typography, Button } from '@mui/material';
@@ -13,6 +13,7 @@ import {
   useGetMapWordOrPhraseAsOrigByDefinitionIdQuery,
   useUpsertTranslationFromWordAndDefinitionlikeStringMutation,
 } from '../../../generated/graphql';
+import { useQuery } from '../../../hooks/useQuery';
 
 import { InfoFill } from '../../common/icons/InfoFill';
 import { AddCircle } from '../../common/icons/AddCircle';
@@ -35,6 +36,7 @@ export function MapNewTranslationConfirm() {
     definition_id: string;
     type: string;
   }>();
+  const searchParams = useQuery();
 
   const {
     states: {
@@ -103,7 +105,16 @@ export function MapNewTranslationConfirm() {
 
   const goToTranslation = useCallback(() => {
     clearTempTranslation(`${definition_id}:${definition_type}`);
-    router.push(`/${nation_id}/${language_id}/1/maps/translation`);
+
+    if (searchParams.get('original_map_id')) {
+      router.push(
+        `/${nation_id}/${language_id}/1/maps/translation/${searchParams.get(
+          'original_map_id',
+        )}`,
+      );
+    } else {
+      router.push(`/${nation_id}/${language_id}/1/maps/translation/all`);
+    }
   }, [
     language_id,
     nation_id,
@@ -111,6 +122,7 @@ export function MapNewTranslationConfirm() {
     clearTempTranslation,
     definition_id,
     definition_type,
+    searchParams,
   ]);
 
   useEffect(() => {

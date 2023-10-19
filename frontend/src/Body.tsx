@@ -288,7 +288,7 @@ const Body: React.FC = () => {
       const percent =
         originalCnt > 0 ? (translationCnt / originalCnt) * 100 : 100;
 
-      const badgeColor = percent === 100 ? 'green' : 'blue';
+      const badgeColor = percent === 100 ? 'green' : 'gray_stroke';
 
       return {
         label: `${langInfo2String(langInfo)}`,
@@ -308,7 +308,8 @@ const Body: React.FC = () => {
     menuRef.current?.toggle();
     openModal(
       <AutocompleteModal
-        label={tr('Select app language')}
+        label={tr('App Language')}
+        searchPlaceholder={`${tr('Search by language')}...`}
         onClose={closeModal}
         options={languageList}
         value={{

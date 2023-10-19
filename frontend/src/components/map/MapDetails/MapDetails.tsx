@@ -106,6 +106,16 @@ export function MapDetails() {
     );
   };
 
+  const handleGoToTranslation = () => {
+    if (currMapContent?.mapDetails?.original_map_id) {
+      history.push(
+        `/${nation_id}/${language_id}/1/maps/translation/${currMapContent?.mapDetails?.original_map_id}`,
+      );
+    } else {
+      history.push(`/${nation_id}/${language_id}/1/maps/translation/all`);
+    }
+  };
+
   const tagLabel = currMapContent?.mapDetails?.is_original
     ? tr('Original')
     : langInfo2String(langInfo) +
@@ -142,19 +152,13 @@ export function MapDetails() {
 
         <Divider />
 
-        {isOriginal ? (
-          <Button
-            variant="contained"
-            color="blue"
-            onClick={() => {
-              history.push(
-                `/${nation_id}/${language_id}/1/maps/translation/${id}`,
-              );
-            }}
-          >
-            {tr('Translate This Map')}
-          </Button>
-        ) : null}
+        <Button
+          variant="contained"
+          color="blue"
+          onClick={handleGoToTranslation}
+        >
+          {tr('Translate This Map')}
+        </Button>
 
         <DiscussionButton
           parent_table={
@@ -201,28 +205,34 @@ export function MapDetails() {
         />
       </Stack>
 
+      {!imageLoaded && !imageError ? (
+        <Skeleton
+          variant="rounded"
+          width="calc(100vw - 30px)"
+          height="500px"
+          animation="wave"
+          sx={{
+            marginTop: '15px',
+            borderRadius: '10px',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            maxWidth: 'calc(777px - 60px)',
+          }}
+        />
+      ) : null}
+
       <Box
         sx={(theme) => ({
-          border: `1px solid ${theme.palette.text.gray_stroke}`,
+          border: `1px solid ${
+            !imageLoaded && !imageError
+              ? 'none'
+              : theme.palette.text.gray_stroke
+          }`,
           borderRadius: '10px',
+          display: !imageLoaded && !imageError ? 'hidden' : 'inherit',
         })}
         onClick={handleGoToView}
       >
-        {!imageLoaded && !imageError ? (
-          <Skeleton
-            variant="rounded"
-            width="calc(100vw - 60px)"
-            height="500px"
-            animation="wave"
-            sx={{
-              marginTop: '15px',
-              borderRadius: '10px',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              maxWidth: 'calc(777px - 60px)',
-            }}
-          />
-        ) : null}
         {currMapContent?.mapDetails && (
           <>
             {imageError && <p>{tr('Error loading image')}</p>}

@@ -8,6 +8,12 @@ import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { VoteButtonsHorizontal } from '../VoteButtonsHorizontal';
 import { PostAuthor } from '../PostAuthor';
 
+export type Author = {
+  username: string;
+  avatar?: string;
+  createdAt: Date;
+};
+
 export type WordCardProps = {
   word: string;
   description: string;
@@ -26,11 +32,7 @@ export type WordCardProps = {
     parent_id: string;
     flag_names: FlagName[];
   };
-  author?: {
-    username: string;
-    avatar?: string;
-    createdAt: Date;
-  };
+  author?: Author;
 };
 
 export function WordCard({
