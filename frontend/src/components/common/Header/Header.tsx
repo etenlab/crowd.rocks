@@ -1,6 +1,7 @@
 import {
   Stack,
   IconButton,
+  Box,
   Button,
   Badge,
   Avatar as MuiAvatar,
@@ -80,34 +81,41 @@ export function Header({
   const justify = !isMenuHeader ? 'space-between' : 'center';
 
   return (
-    <Stack
-      direction="row"
-      justifyContent={justify}
-      alignItems="center"
-      sx={(theme) => ({
-        padding,
-        borderBottom: '1px solid #DEE0E8',
-        maxWidth: '777px',
-        margin: 'auto',
-        backgroundColor: theme.palette.text.white,
-      })}
+    <Box
+      sx={{
+        width: '100%',
+        background: (theme) => theme.palette.background.white,
+      }}
     >
-      {avatarCom}
-      <Button
-        id="app-name-text"
-        variant="text"
-        onClick={onClickAppName}
+      <Stack
+        direction="row"
+        justifyContent={justify}
+        alignItems="center"
         sx={(theme) => ({
-          color: theme.palette.text.dark,
-          fontSize: '18px',
-          fontWeight: 600,
-          lineHeight: '22px',
-          letterSpacing: '-0.36px',
+          padding,
+          borderBottom: '1px solid #DEE0E8',
+          maxWidth: '777px',
+          margin: 'auto',
+          backgroundColor: theme.palette.text.white,
         })}
       >
-        {title[0]}.<span style={{ color: '#476FFF' }}>{title[1]}</span>
-      </Button>
-      {iconsCom}
-    </Stack>
+        {avatarCom}
+        <Button
+          id="app-name-text"
+          variant="text"
+          onClick={onClickAppName}
+          sx={(theme) => ({
+            color: theme.palette.text.dark,
+            fontSize: '18px',
+            fontWeight: 600,
+            lineHeight: '22px',
+            letterSpacing: '-0.36px',
+          })}
+        >
+          {title[0]}.<span style={{ color: '#476FFF' }}>{title[1]}</span>
+        </Button>
+        {iconsCom}
+      </Stack>
+    </Box>
   );
 }

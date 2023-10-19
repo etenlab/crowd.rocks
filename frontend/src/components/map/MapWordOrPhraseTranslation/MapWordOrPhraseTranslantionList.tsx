@@ -206,6 +206,7 @@ export function MapWordOrPhraseTranslationList({
             table: 'word_to_word_translations',
           };
         }
+
         return {
           key: `${translation.__typename}:${id}`,
           value,
