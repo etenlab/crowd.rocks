@@ -1093,8 +1093,9 @@ export class MapsService {
         fileNames.push(fileNameFull);
       }
       await Promise.all(fileDownloadsPromises);
-      const zipFileName = `maps-${input.language.language_code}-${new Date().getMonth() + 1
-        }-${new Date().getDate()}.zip`;
+      const zipFileName = `maps-${input.language.language_code}-${
+        new Date().getMonth() + 1
+      }-${new Date().getDate()}.zip`;
       this.pubSub.publish(SubscriptionToken.ZipMapReport, {
         [SubscriptionToken.ZipMapReport]: {
           resultZipUrl: null,

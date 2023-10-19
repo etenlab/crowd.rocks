@@ -1216,10 +1216,11 @@ export class MapsRepository {
         o_language_code,
         o_dialect_code,
         o_geo_code,
-        user_id as o_user_id,
-        is_bot as o_is_bot,
-        avatar as o_avatar,
-        avatar_url as o_avatar_url
+        o_created_at,
+        o_user_id,
+        o_is_bot,
+        o_avatar,
+        o_avatar_url
       from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}

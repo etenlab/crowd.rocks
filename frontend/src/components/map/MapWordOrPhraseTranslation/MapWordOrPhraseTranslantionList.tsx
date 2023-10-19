@@ -114,6 +114,9 @@ export function MapWordOrPhraseTranslationList({
       : isPhrase
       ? wordOrPhrase?.phrase_id
       : '';
+    const username = wordOrPhrase?.created_by_user.avatar;
+    const avatar = wordOrPhrase?.created_by_user.avatar_url;
+    const createdAt = wordOrPhrase?.created_at;
 
     return {
       isWord,
@@ -122,6 +125,11 @@ export function MapWordOrPhraseTranslationList({
       value,
       id,
       definition: wordOrPhrase?.definition,
+      author: {
+        username,
+        avatar,
+        createdAt,
+      },
     };
   }, [wordOrPhraseQ]);
 
@@ -137,6 +145,9 @@ export function MapWordOrPhraseTranslationList({
         let to_type: 'phrase' | 'word' = 'word';
         let definition_id: string = '';
         let definition: string = '';
+        let username: string = '';
+        let avatar: string | null | undefined;
+        let createdAt: Date = new Date();
 
         if (translation?.__typename === 'PhraseToPhraseTranslationWithVote') {
           value = translation.to_phrase_definition.phrase.phrase;
@@ -144,6 +155,9 @@ export function MapWordOrPhraseTranslationList({
           to_type = 'phrase';
           definition_id = translation.to_phrase_definition.phrase_definition_id;
           definition = translation.to_phrase_definition.definition;
+          username = translation.to_phrase_definition.created_by_user.avatar;
+          avatar = translation.to_phrase_definition.created_by_user.avatar_url;
+          createdAt = new Date(translation.to_phrase_definition.created_at);
         }
         if (translation?.__typename === 'PhraseToWordTranslationWithVote') {
           value = translation.to_word_definition.word.word;
@@ -151,6 +165,9 @@ export function MapWordOrPhraseTranslationList({
           to_type = 'word';
           definition_id = translation.to_word_definition.word_definition_id;
           definition = translation.to_word_definition.definition;
+          username = translation.to_word_definition.created_by_user.avatar;
+          avatar = translation.to_word_definition.created_by_user.avatar_url;
+          createdAt = new Date(translation.to_word_definition.created_at);
         }
         if (translation?.__typename === 'WordToPhraseTranslationWithVote') {
           value = translation.to_phrase_definition.phrase.phrase;
@@ -158,6 +175,9 @@ export function MapWordOrPhraseTranslationList({
           to_type = 'phrase';
           definition = translation.to_phrase_definition.definition;
           definition_id = translation.to_phrase_definition.phrase_definition_id;
+          username = translation.to_phrase_definition.created_by_user.avatar;
+          avatar = translation.to_phrase_definition.created_by_user.avatar_url;
+          createdAt = new Date(translation.to_phrase_definition.created_at);
         }
         if (translation?.__typename === 'WordToWordTranslationWithVote') {
           value = translation.to_word_definition.word.word;
@@ -165,6 +185,9 @@ export function MapWordOrPhraseTranslationList({
           to_type = 'word';
           definition = translation.to_word_definition.definition;
           definition_id = translation.to_word_definition.word_definition_id;
+          username = translation.to_word_definition.created_by_user.avatar;
+          avatar = translation.to_word_definition.created_by_user.avatar_url;
+          createdAt = new Date(translation.to_word_definition.created_at);
         }
         return {
           key: `${translation.__typename}:${id}`,
@@ -175,6 +198,11 @@ export function MapWordOrPhraseTranslationList({
           definition,
           upvotes: translation.upvotes,
           downvotes: translation.downvotes,
+          author: {
+            username,
+            avatar,
+            createdAt,
+          },
         };
       })
       .filter((item) => item) as {
@@ -186,6 +214,11 @@ export function MapWordOrPhraseTranslationList({
       definition: string;
       upvotes: number;
       downvotes: number;
+      author: {
+        username: string;
+        avatar?: string;
+        createdAt: Date;
+      };
     }[];
   }, [translationsQ]);
 
@@ -201,6 +234,7 @@ export function MapWordOrPhraseTranslationList({
               parent_id: item.id,
               parent_table: original.isWord ? 'words' : 'phrases',
             }}
+            author={item.author}
             flags={{
               parent_table:
                 item.to_type === 'word'

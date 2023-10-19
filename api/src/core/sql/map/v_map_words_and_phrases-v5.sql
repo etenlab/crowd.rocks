@@ -11,10 +11,11 @@ AS SELECT DISTINCT concat(ws.wordlike_string, owd.word_definition_id) AS cursor,
     ow.dialect_code AS o_dialect_code,
     ow.geo_code AS o_geo_code,
     omw.original_map_id,
-    ow.created_by as user_id,
-	  u.is_bot,
-    a.avatar,
-	  a.url as avatar_url
+    ow.created_by as o_user_id,
+	  ow.created_at as o_created_at,
+	  u.is_bot as o_is_bot,
+    a.avatar as o_avatar,
+	  a.url as o_avatar_url
    FROM words ow
      LEFT JOIN wordlike_strings ws ON ow.wordlike_string_id = ws.wordlike_string_id
      LEFT JOIN word_definitions owd ON ow.word_id = owd.word_id
@@ -33,9 +34,10 @@ UNION ALL
     ow.geo_code AS o_geo_code,
     omph.original_map_id,
     oph.created_by as user_id,
-	  u.is_bot,
-    a.avatar,
-	  a.url as avatar_url
+	  oph.created_at as o_created_at,
+	  u.is_bot as o_is_bot,
+    a.avatar as o_avatar,
+	  a.url as o_avatar_url
    FROM phrases oph
      LEFT JOIN phrase_definitions ophd ON oph.phrase_id = ophd.phrase_id
      JOIN original_map_phrases omph ON oph.phrase_id = omph.phrase_id

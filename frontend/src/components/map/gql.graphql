@@ -59,6 +59,10 @@ fragment WordWithDefinitionFragment on WordWithDefinition {
   geo_code
   definition
   definition_id
+  created_at
+  created_by_user {
+    ...UserFields
+  }
 }
 
 fragment PhraseWithDefinitionFragment on PhraseWithDefinition {
@@ -69,6 +73,10 @@ fragment PhraseWithDefinitionFragment on PhraseWithDefinition {
   geo_code
   definition
   definition_id
+  created_at
+  created_by_user {
+    ...UserFields
+  }
 }
 
 query GetOrigMapWordsAndPhrases(
