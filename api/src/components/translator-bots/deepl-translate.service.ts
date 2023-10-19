@@ -5,7 +5,6 @@ import { ConfigService } from 'src/core/config.service';
 import { PostgresService } from '../../core/postgres.service';
 import { createToken } from '../../common/utility';
 import { hash } from 'argon2';
-import { languageInput2tag } from '../../common/langUtils';
 import {
   ITranslator,
   LanguageForBotTranslate,
@@ -14,6 +13,7 @@ import {
 import { ErrorType } from '../../common/types';
 import * as deepl from 'deepl-node';
 import { SourceLanguageCode, TargetLanguageCode } from 'deepl-node';
+import { languageInput2tag } from '../../../../utils';
 
 const LIMIT_WORDS = undefined; // 20; // for debugging purposes, not to exhaust free limit too quickly/
 const DEEPL_BOT_EMAIL = 'deeplbot@crowd.rocks';

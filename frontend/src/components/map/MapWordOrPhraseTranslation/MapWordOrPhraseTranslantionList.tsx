@@ -114,6 +114,9 @@ export function MapWordOrPhraseTranslationList({
       : isPhrase
       ? wordOrPhrase?.phrase_id
       : '';
+    const username = wordOrPhrase?.created_by_user.avatar;
+    const avatar = wordOrPhrase?.created_by_user.avatar_url;
+    const createdAt = wordOrPhrase?.created_at;
 
     return {
       isWord,
@@ -122,6 +125,11 @@ export function MapWordOrPhraseTranslationList({
       value,
       id,
       definition: wordOrPhrase?.definition,
+      author: {
+        username,
+        avatar,
+        createdAt,
+      },
     };
   }, [wordOrPhraseQ]);
 
@@ -233,6 +241,7 @@ export function MapWordOrPhraseTranslationList({
               parent_id: item.id,
               parent_table: original.isWord ? 'words' : 'phrases',
             }}
+            author={item.author}
             flags={{
               parent_table:
                 item.to_type === 'word'
@@ -261,7 +270,6 @@ export function MapWordOrPhraseTranslationList({
                 );
               },
             }}
-            author={item?.author}
           />
         ))}
     </Stack>
