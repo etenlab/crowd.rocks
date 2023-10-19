@@ -59,5 +59,15 @@ targetSdkVersion = 34
 1. With the API running, run `npm run codegen` on the frontend to generate the new types within the frontend project.
 1. Create the Ionic React components necessary on the frontend.
 
+### Utils lib
+
+There some imports in the API and Frontend which rely on utils/dist folder.
+So, if anything in the utils lib was changed, utils should be rebuilt to allow these changes be imported by API and Frontend:
+```bash
+$ cd utils
+$ npm run build
+```
+
+
 Its also a good idea to run `npm run codegen` on the frontend if you have messed around 
 with GraphQL types anywhere
