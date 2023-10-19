@@ -11,7 +11,8 @@ import {
 } from './styled';
 import { AudioPlayer } from '../AudioPlayer';
 import { VideoPlayer } from '../VideoPlayer';
-import { AuthorHeader } from '../../common/AuthorHeader';
+import { PostAuthor } from '../../common/PostAuthor';
+import { Stack } from '@mui/material';
 
 export const getMimeType = (fileType: string | null): string => {
   if (fileType === null || fileType.trim().length === 0) {
@@ -39,12 +40,14 @@ export const getMimeType = (fileType: string | null): string => {
 };
 
 type PostProps = {
-  created_by: string;
-  is_created_by_bot: boolean;
-  created_at: string;
   chatContent: ReactNode;
   av_file_url?: string | null;
   av_file_type?: string | null;
+  author?: {
+    username: string;
+    avatar?: string;
+    createdAt: Date;
+  };
   voteFor?: 'content' | 'description';
   vote?: {
     upVotes: number;
@@ -60,8 +63,7 @@ type PostProps = {
 };
 
 export function Post({
-  created_by,
-  created_at,
+  author,
   chatContent,
   voteFor = 'content',
   onClick,
@@ -70,7 +72,6 @@ export function Post({
   discussion,
   av_file_url,
   av_file_type,
-  is_created_by_bot,
 }: PostProps) {
   const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
   const chatButton = discussion ? (
@@ -105,30 +106,36 @@ export function Post({
   }
 
   return (
-    <CustomCard
-      onClick={() => onClick && onClick()}
-      routerLink={routerLink}
-      style={{ cursor: onClick ? 'pointer' : 'unset' }}
-    >
-      <CustomCardHeader>
-        <CustomCardTitle>
-          <AuthorHeader
-            isCreatedByBot={is_created_by_bot}
-            createdAt={created_at}
-            createdBy={created_by}
-          />
-          {voteFor === 'content' ? voteButtonCom : null}
-        </CustomCardTitle>
-      </CustomCardHeader>
+    <Stack gap="10px">
+      {author ? (
+        <PostAuthor
+          username={author.username}
+          avatar={author.avatar}
+          date={author.createdAt}
+        />
+      ) : (
+        <div />
+      )}
+      <CustomCard
+        onClick={() => onClick && onClick()}
+        routerLink={routerLink}
+        style={{ cursor: onClick ? 'pointer' : 'unset' }}
+      >
+        <CustomCardHeader>
+          <CustomCardTitle>
+            {voteFor === 'content' ? voteButtonCom : null}
+          </CustomCardTitle>
+        </CustomCardHeader>
 
-      <CustomCardContent>
-        {chatContent}
-        <div style={{ display: 'flex' }}>
-          {voteFor === 'description' ? voteButtonCom : null}
-          {chatButton}
-        </div>
-        {avComp}
-      </CustomCardContent>
-    </CustomCard>
+        <CustomCardContent>
+          {chatContent}
+          <div style={{ display: 'flex' }}>
+            {voteFor === 'description' ? voteButtonCom : null}
+            {chatButton}
+          </div>
+          {avComp}
+        </CustomCardContent>
+      </CustomCard>
+    </Stack>
   );
 }

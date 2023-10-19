@@ -1215,7 +1215,12 @@ export class MapsRepository {
         o_definition_id,
         o_language_code,
         o_dialect_code,
-        o_geo_code
+        o_geo_code,
+        o_created_at,
+        o_user_id,
+        o_is_bot,
+        o_avatar,
+        o_avatar_url
       from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
@@ -1225,6 +1230,7 @@ export class MapsRepository {
     const resQ = await dbPoolClient.query(sqlStr, langAndPickParams);
 
     if (!(resQ.rows.length > 0)) {
+      console.log('no data');
       return {
         edges: [],
         pageInfo: {
@@ -1265,6 +1271,13 @@ export class MapsRepository {
         o_language_code: r.o_language_code,
         o_dialect_code: r.o_dialect_code,
         o_geo_code: r.o_geo_code,
+        o_created_at: r.o_created_at,
+        o_created_by_user: {
+          user_id: r.o_user_id,
+          avatar: r.o_avatar,
+          avatar_url: r.o_avatar_url,
+          is_bot: r.o_is_bot,
+        },
       };
       return {
         cursor: r.cursor,
@@ -1385,7 +1398,11 @@ export class MapsRepository {
         o_definition_id,
         o_language_code,
         o_dialect_code,
-        o_geo_code
+        o_geo_code,
+        user_id as o_user_id,
+        is_bot as o_is_bot,
+        avatar as o_avatar,
+        avatar_url as o_avatar_url
       from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
@@ -1412,6 +1429,13 @@ export class MapsRepository {
         o_language_code: r.o_language_code,
         o_dialect_code: r.o_dialect_code,
         o_geo_code: r.o_geo_code,
+        o_created_at: r.o_created_at,
+        o_created_by_user: {
+          user_id: r.o_user_id,
+          avatar: r.o_avatar,
+          avatar_url: r.o_avatar_url,
+          is_bot: r.o_is_bot,
+        },
       };
     });
     return {

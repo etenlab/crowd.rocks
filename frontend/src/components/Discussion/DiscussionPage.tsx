@@ -116,9 +116,11 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
       return tempPosts.map((post) => (
         <CardContainer key={post.id}>
           <Post
-            created_by={post.created_by_user.avatar}
-            created_at={post.created_at}
-            is_created_by_bot={post.created_by_user.is_bot}
+            author={{
+              username: post.created_by_user.avatar,
+              avatar: post.created_by_user.avatar_url + '',
+              createdAt: new Date(post.created_at),
+            }}
             chatContent={
               <div
                 dangerouslySetInnerHTML={{ __html: `${post.content}` }}
@@ -153,6 +155,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
         }}
       />
       {postsComp}
+
       <IonModal isOpen={isAdding}>
         <IonHeader>
           <IonToolbar>
