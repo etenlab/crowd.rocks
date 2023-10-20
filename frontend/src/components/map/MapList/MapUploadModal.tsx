@@ -1,10 +1,12 @@
 import { useCallback, useState } from 'react';
+import { useHistory, useParams } from 'react-router';
 import { useIonToast } from '@ionic/react';
 import {
   Stack,
   Typography,
   Divider,
   Button,
+  Badge,
   LinearProgress,
 } from '@mui/material';
 
@@ -12,6 +14,7 @@ import { useTr } from '../../../hooks/useTr';
 import { AddCircle } from '../../common/icons/AddCircle';
 import { Check } from '../../common/icons/Check';
 import { FilledCheckCircle } from '../../common/icons/FilledCheckCircle';
+import { Cancel } from '../../common/icons/Cancel';
 
 import { FileUpload } from '../../common/FileUploadBtn/FileUpload';
 
@@ -27,7 +30,12 @@ type MapUploadModalProps = {
 
 export function MapUploadModal({ onClose }: MapUploadModalProps) {
   const [present] = useIonToast();
+  const history = useHistory();
   const { tr } = useTr();
+  const { nation_id, language_id } = useParams<{
+    nation_id: string;
+    language_id: string;
+  }>();
 
   const [sendMapFile, { loading, data }] = useMapUploadMutation();
   const [uploadFile, { loading: uploading }] = useUploadFileMutation();
@@ -66,6 +74,10 @@ export function MapUploadModal({ onClose }: MapUploadModalProps) {
           },
         });
 
+        if (mapUploadResult.data?.mapUpload.error === ErrorType.Unauthorized) {
+          history.push(`/${nation_id}/${language_id}/1/login`);
+        }
+
         if (
           mapUploadResult.errors?.length &&
           mapUploadResult.errors?.length > 0
@@ -82,7 +94,7 @@ export function MapUploadModal({ onClose }: MapUploadModalProps) {
         });
       }
     },
-    [uploadFile, sendMapFile, present],
+    [uploadFile, sendMapFile, history, nation_id, language_id, present],
   );
 
   let title = tr('Add new map');
@@ -125,8 +137,29 @@ export function MapUploadModal({ onClose }: MapUploadModalProps) {
   }
 
   if (data && data.mapUpload.error === ErrorType.NoError) {
-    title = tr('Done!');
-    content = tr('Go to your downloaded maps to start translating them.');
+    title = tr('Great news!');
+    content = tr(
+      'Map(s) loaded successfully! Go to your downloaded maps to start translating them.',
+    );
+    bottomCom = (
+      <Stack gap="16px">
+        <Button
+          variant="contained"
+          color="blue"
+          onClick={onClose}
+          startIcon={<Check sx={{ fontSize: 24 }} />}
+        >
+          {tr('Go to Maps')}
+        </Button>
+      </Stack>
+    );
+  }
+
+  if (data && data.mapUpload.error !== ErrorType.NoError) {
+    title = tr('Something went wrong');
+    content = tr(
+      'We apologize for the inconvenience, there seems to be an issue with loading maps at the moment. Please, try again later.',
+    );
     bottomCom = (
       <Stack gap="16px">
         <Button
@@ -152,6 +185,17 @@ export function MapUploadModal({ onClose }: MapUploadModalProps) {
         >
           {data && data.mapUpload.error === ErrorType.NoError ? (
             <FilledCheckCircle color="green" />
+          ) : null}
+          {data && data.mapUpload.error === ErrorType.NoError ? (
+            <Badge
+              sx={(theme) => ({
+                padding: '1px',
+                borderRadius: '50%',
+                backgroundColor: theme.palette.background.red,
+              })}
+            >
+              <Cancel color="white" sx={{ fontSize: '18px' }} />
+            </Badge>
           ) : null}
           <Typography variant="h2">{title}</Typography>
         </Stack>
