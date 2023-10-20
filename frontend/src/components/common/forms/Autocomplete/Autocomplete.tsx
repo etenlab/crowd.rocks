@@ -82,7 +82,10 @@ export function Autocomplete({
           {label}
         </Typography>
       ) : null}
-      <StyledPaper variant="outlined">
+      <StyledPaper
+        variant="outlined"
+        sx={{ backgroundColor: (theme) => theme.palette.background.gray_bg }}
+      >
         {inputCom}
         <Divider
           orientation="vertical"

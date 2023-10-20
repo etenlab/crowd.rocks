@@ -83,11 +83,19 @@ query GetOrigMapWordsAndPhrases(
   $original_map_id: String
   $lang: LanguageInput!
   $filter: String
+  $onlyNotTranslated: Boolean
+  $onlyTranslated: Boolean
   $after: ID
   $first: Int
 ) {
   getOrigMapWordsAndPhrases(
-    input: { lang: $lang, filter: $filter, original_map_id: $original_map_id }
+    input: {
+      lang: $lang
+      filter: $filter
+      original_map_id: $original_map_id
+      onlyNotTranslated: $onlyNotTranslated
+      onlyTranslated: $onlyTranslated
+    }
     after: $after
     first: $first
   ) {
