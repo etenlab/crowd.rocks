@@ -48,6 +48,7 @@ function stringAvatar(name: string, mini: boolean) {
   return {
     sx: {
       bgcolor: stringToColor(name),
+      color: 'white !important',
       ...size,
     },
     children: <p style={{ textShadow: '1px 1px 2px #000' }}>{shrinkName}</p>,
@@ -89,7 +90,7 @@ export function Avatar({ username, url, mini = false }: AvatarProps) {
   const sxObj = mini ? { width: 24, height: 24 } : { width: 46, height: 46 };
 
   return existImage ? (
-    <MuiAvatar alt={username} src={url} sx={sxObj} />
+    <MuiAvatar alt={username} src={url} sx={{ color: 'white', ...sxObj }} />
   ) : (
     <MuiAvatar {...stringAvatar(username, mini)} />
   );
