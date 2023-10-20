@@ -1,8 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
-  IonModal,
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -34,6 +33,7 @@ import { NewWordDefinitionForm } from '../NewWordDefinitionForm';
 
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 import { Chat } from '../../chat/Chat';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 interface WordDetailPageProps
   extends RouteComponentProps<{
@@ -47,7 +47,11 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
   const router = useIonRouter();
   // const [present] = useIonToast();
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const {
+    actions: { createModal },
+  } = useAppContext();
+
+  const { openModal, closeModal } = createModal();
 
   const { data: definitionData, error: definitionError } =
     useGetWordDefinitionsByWordIdQuery({
@@ -227,20 +231,9 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
     wordError,
   ]);
 
-  return (
-    <PageLayout>
-      <Caption>{tr('Dictionary')}</Caption>
-
-      <CardContainer>{wordCom}</CardContainer>
-
-      <AddListHeader
-        title={tr('Definitions')}
-        onClick={() => setIsOpenModal(true)}
-      />
-
-      <CardListContainer>{definitionsCom}</CardListContainer>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
+  const handleOpenModal = () => {
+    openModal(
+      <>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Word Definition')}</IonTitle>
@@ -250,16 +243,28 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
           {match.params.word_id ? (
             <NewWordDefinitionForm
               word_id={match.params.word_id}
-              onCreated={() => {
-                setIsOpenModal(false);
-              }}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
+              onCreated={closeModal}
+              onCancel={closeModal}
             />
           ) : null}
         </IonContent>
-      </IonModal>
+      </>,
+      'full',
+    );
+  };
+
+  return (
+    <PageLayout>
+      <Caption>{tr('Dictionary')}</Caption>
+
+      <CardContainer>{wordCom}</CardContainer>
+
+      <AddListHeader
+        title={tr('Definitions')}
+        onClick={() => handleOpenModal()}
+      />
+
+      <CardListContainer>{definitionsCom}</CardListContainer>
     </PageLayout>
   );
 }

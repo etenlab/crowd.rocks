@@ -7,10 +7,12 @@ import { ErrorType } from '../generated/graphql';
 import { updateCacheWithToggleMapVoteStatus } from '../cacheUpdators/toggleMapVoteStatus';
 
 import { useTr } from '../hooks/useTr';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useToggleMapVoteStatusMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedToggleMapVoteStatusMutation({
     update(cache, { data, errors }) {
@@ -34,6 +36,7 @@ export function useToggleMapVoteStatusMutation() {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.toggleMapVoteStatus.error);
       }
     },
   });

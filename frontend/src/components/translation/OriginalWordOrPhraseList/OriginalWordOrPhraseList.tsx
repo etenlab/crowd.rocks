@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   IonButton,
   IonSpinner,
@@ -7,7 +7,6 @@ import {
   IonLabel,
   IonRadio,
   IonContent,
-  IonModal,
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -31,6 +30,7 @@ import { WordOrPhraseListContainer } from '../styled';
 import { NewWordOrPhraseWithDefinitionForm } from '../NewWordOrPhraseWithDefinitionForm';
 
 import { PAGE_SIZE } from '../../../const/commonConst';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 interface OriginalWordOrPhraseListProps {
   listLabel?: string;
@@ -52,7 +52,11 @@ export function OriginalWordOrPhraseList({
 }: OriginalWordOrPhraseListProps) {
   const { tr } = useTr();
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const {
+    actions: { createModal },
+  } = useAppContext();
+
+  const { openModal, closeModal } = createModal();
 
   const [
     getWordsByLanguage,
@@ -258,11 +262,33 @@ export function OriginalWordOrPhraseList({
     onChangeOriginalDefinition,
   ]);
 
+  const handleOpenModal = () => {
+    openModal(
+      <>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('Add New Definition')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {langInfo ? (
+            <NewWordOrPhraseWithDefinitionForm
+              langInfo={langInfo}
+              onCreated={closeModal}
+              onCancel={closeModal}
+            />
+          ) : null}
+        </IonContent>
+      </>,
+      'full',
+    );
+  };
+
   return (
     <WordOrPhraseListContainer>
       <AddListHeader
         title={listLabel || tr('Original')}
-        onClick={() => setIsOpenModal(true)}
+        onClick={() => handleOpenModal()}
       />
 
       <CustomIonRadioGroup value={selectedValue}>
@@ -281,27 +307,6 @@ export function OriginalWordOrPhraseList({
         {tr('Load More')}
         {wordsLoading || phrasesLoading ? <IonSpinner name="bubbles" /> : null}
       </IonButton>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('Add New Definition')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          {langInfo ? (
-            <NewWordOrPhraseWithDefinitionForm
-              langInfo={langInfo}
-              onCreated={() => {
-                setIsOpenModal(false);
-              }}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
-            />
-          ) : null}
-        </IonContent>
-      </IonModal>
     </WordOrPhraseListContainer>
   );
 }

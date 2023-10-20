@@ -7,7 +7,6 @@ import {
   TableNameType,
   useGetMapWordOrPhraseAsOrigByDefinitionIdQuery,
   useGetTranslationsByFromDefinitionIdQuery,
-  useToggleTranslationVoteStatusMutation,
 } from '../../../generated/graphql';
 
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -15,6 +14,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 import { WordCard } from '../../common/WordCard';
+import { useToggleTranslationVoteStatusWithRefetchMutation } from '../../../hooks/useToggleTranslationVoteStatusMutation';
 
 export type MapWordOrPhraseTranslationListProps = {
   definition_id: string;
@@ -55,9 +55,7 @@ export function MapWordOrPhraseTranslationList({
   });
 
   const [toggleTrVoteStatus, { data: voteData, loading: voteLoading }] =
-    useToggleTranslationVoteStatusMutation({
-      refetchQueries: ['GetTranslationsByFromDefinitionId'],
-    });
+    useToggleTranslationVoteStatusWithRefetchMutation();
 
   useEffect(() => {
     if (voteLoading) return;

@@ -7,10 +7,12 @@ import { ErrorType } from '../generated/graphql';
 import { updateCacheWithTogglePericopeVoteStatus } from '../cacheUpdators/togglePericopeVoteStatus';
 
 import { useTr } from './useTr';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useTogglePericopeVoteStatusMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedTogglePericopeVoteStatusMutation({
     update(cache, { data, errors }) {
@@ -34,6 +36,7 @@ export function useTogglePericopeVoteStatusMutation() {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.togglePericopeVoteStatus.error);
       }
     },
   });

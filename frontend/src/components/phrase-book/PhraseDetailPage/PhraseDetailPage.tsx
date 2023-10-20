@@ -1,8 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
-  IonModal,
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -40,6 +39,7 @@ import { NewPhraseDefinitionForm } from '../NewPhraseDefinitionForm';
 import { chatbubbleEllipsesSharp } from 'ionicons/icons';
 
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 interface PhraseDetailPageProps
   extends RouteComponentProps<{
@@ -52,7 +52,11 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
   // const [present] = useIonToast();
   const { tr } = useTr();
   const router = useIonRouter();
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const {
+    actions: { createModal },
+  } = useAppContext();
+
+  const { openModal, closeModal } = createModal();
 
   const { data: definitionData, error: definitionError } =
     useGetPhraseDefinitionsByPhraseIdQuery({
@@ -236,20 +240,9 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
     togglePhraseVoteStatus,
   ]);
 
-  return (
-    <PageLayout>
-      <Caption>{tr('Phrase Book')}</Caption>
-
-      <CardContainer>{phraseCom}</CardContainer>
-
-      <AddListHeader
-        title={tr('Definitions')}
-        onClick={() => setIsOpenModal(true)}
-      />
-
-      <CardListContainer>{definitionsCom}</CardListContainer>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
+  const handleOpenModal = () => {
+    openModal(
+      <>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Phrase Definition')}</IonTitle>
@@ -259,16 +252,28 @@ export function PhraseDetailPage({ match }: PhraseDetailPageProps) {
           {match.params.phrase_id ? (
             <NewPhraseDefinitionForm
               phrase_id={match.params.phrase_id}
-              onCreated={() => {
-                setIsOpenModal(false);
-              }}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
+              onCreated={closeModal}
+              onCancel={closeModal}
             />
           ) : null}
         </IonContent>
-      </IonModal>
+      </>,
+      'full',
+    );
+  };
+
+  return (
+    <PageLayout>
+      <Caption>{tr('Phrase Book')}</Caption>
+
+      <CardContainer>{phraseCom}</CardContainer>
+
+      <AddListHeader
+        title={tr('Definitions')}
+        onClick={() => handleOpenModal()}
+      />
+
+      <CardListContainer>{definitionsCom}</CardListContainer>
     </PageLayout>
   );
 }

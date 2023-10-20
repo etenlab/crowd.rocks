@@ -9,6 +9,7 @@ import { ErrorType } from '../generated/graphql';
 
 import { useTr } from './useTr';
 import { updateCacheWithToggleFlags } from '../cacheUpdators/toggleFlags';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useToggleFlagWithRefMutation(
   parent_table: TableNameType,
@@ -16,6 +17,7 @@ export function useToggleFlagWithRefMutation(
 ) {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedToggleFlagWithRefMutation({
     update(cache, { data, errors }) {
@@ -39,6 +41,7 @@ export function useToggleFlagWithRefMutation(
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.toggleFlagWithRef.error);
       }
     },
   });

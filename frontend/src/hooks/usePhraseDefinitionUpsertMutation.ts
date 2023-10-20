@@ -7,10 +7,12 @@ import { ErrorType } from '../generated/graphql';
 import { updateCacheWithUpsertPhraseDefinition } from '../cacheUpdators/upsertPhraseDefinition';
 
 import { useTr } from '../hooks/useTr';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function usePhraseDefinitionUpsertMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedPhraseDefinitionUpsertMutation({
     update(cache, { data, errors }) {
@@ -40,6 +42,7 @@ export function usePhraseDefinitionUpsertMutation() {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.phraseDefinitionUpsert.error);
       }
     },
   });
