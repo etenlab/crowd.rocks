@@ -7,10 +7,12 @@ import { ErrorType } from '../generated/graphql';
 import { updateCacheWithUpsertAnswer } from '../cacheUpdators/upsertAnswer';
 
 import { useTr } from './useTr';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useUpsertAnswerMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedUpsertAnswerMutation({
     update(cache, { data, errors }) {
@@ -41,6 +43,7 @@ export function useUpsertAnswerMutation() {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.upsertAnswers.error);
       }
     },
   });

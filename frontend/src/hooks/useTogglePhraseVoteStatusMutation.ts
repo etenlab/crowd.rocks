@@ -7,10 +7,12 @@ import { ErrorType } from '../generated/graphql';
 import { updateCacheWithTogglePhraseVoteStatus } from '../cacheUpdators/togglePhraseVoteStatus';
 
 import { useTr } from '../hooks/useTr';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useTogglePhraseVoteStatusMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedTogglePhraseVoteStatusMutation({
     update(cache, { data, errors }) {
@@ -34,6 +36,7 @@ export function useTogglePhraseVoteStatusMutation() {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.togglePhraseVoteStatus.error);
       }
     },
   });

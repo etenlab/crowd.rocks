@@ -7,10 +7,12 @@ import { ErrorType } from '../generated/graphql';
 import { updateCacheWithUpsertPericope } from '../cacheUpdators/upsertPericope';
 
 import { useTr } from './useTr';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useUpsertPericopeMutation(documentId: string) {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedUpsertPericopeMutation({
     update(cache, { data, errors }) {
@@ -41,6 +43,7 @@ export function useUpsertPericopeMutation(documentId: string) {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.upsertPericopies.error);
       }
     },
   });
