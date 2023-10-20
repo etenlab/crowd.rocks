@@ -57,13 +57,20 @@ const Login: React.FC = () => {
   const [is_unknown_error, set_is_unknown_error] = useState(false);
 
   const [loginMutation] = useLoginMutation();
-  const [isAdmin, { data: isAdminRes }] = useIsAdminLoggedInLazyQuery();
+  const [isAdmin, isAdminQueryRes] = useIsAdminLoggedInLazyQuery();
 
   useEffect(() => {
-    if (isAdminRes && isAdminRes.loggedInIsAdmin.isAdmin) {
-      globals.set_admin_user();
+    try {
+      if (
+        isAdminQueryRes?.data &&
+        isAdminQueryRes.data.loggedInIsAdmin.isAdmin
+      ) {
+        globals.set_admin_user();
+      }
+    } catch (error) {
+      console.log(`Login.tsx#useEffect isAdmin:`, error);
     }
-  }, [isAdminRes]);
+  }, [isAdmin, isAdminQueryRes.data]);
 
   async function handle_submit(event: FormEvent) {
     event.preventDefault();
@@ -80,7 +87,7 @@ const Login: React.FC = () => {
         errorPolicy: 'all',
       });
     } catch (e) {
-      console.log(e);
+      console.log('loginMutation#handle_submit: ', e);
     }
 
     const error = result?.data?.login.error;
