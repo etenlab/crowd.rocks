@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import {
   IonButton,
@@ -6,7 +6,6 @@ import {
   IonItemGroup,
   IonItemDivider,
   IonContent,
-  IonModal,
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -34,6 +33,7 @@ import { NoDefinition, CardContainer, CardListContainer } from './styled';
 import { WordOrPhraseListContainer } from '../styled';
 
 import { PAGE_SIZE } from '../../../const/commonConst';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 interface TranslationWordOrPhraseListProps {
   listLabel?: string;
@@ -85,7 +85,11 @@ export function TranslationWordOrPhraseList({
 }: TranslationWordOrPhraseListProps) {
   const { tr } = useTr();
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const {
+    actions: { createModal },
+  } = useAppContext();
+
+  const { openModal, closeModal } = createModal();
 
   const [
     getWordsByLanguage,
@@ -470,11 +474,33 @@ export function TranslationWordOrPhraseList({
     (!wordsData?.getWordsByLanguage.pageInfo.hasNextPage &&
       !phrasesData?.getPhrasesByLanguage.pageInfo.hasNextPage);
 
+  const handleOpenModal = () => {
+    openModal(
+      <>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('Add New Definition')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {langInfo ? (
+            <NewWordOrPhraseWithDefinitionForm
+              langInfo={langInfo}
+              onCreated={closeModal}
+              onCancel={closeModal}
+            />
+          ) : null}
+        </IonContent>
+      </>,
+      'full',
+    );
+  };
+
   return (
     <WordOrPhraseListContainer>
       <AddListHeader
         title={listLabel || tr('Translation')}
-        onClick={() => setIsOpenModal(true)}
+        onClick={() => handleOpenModal()}
       />
 
       <CardListContainer>{cardListComs}</CardListContainer>
@@ -488,27 +514,6 @@ export function TranslationWordOrPhraseList({
         {tr('Load More')}
         {wordsLoading || phrasesLoading ? <IonSpinner name="bubbles" /> : null}
       </IonButton>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('Add New Definition')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          {langInfo ? (
-            <NewWordOrPhraseWithDefinitionForm
-              langInfo={langInfo}
-              onCreated={() => {
-                setIsOpenModal(false);
-              }}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
-            />
-          ) : null}
-        </IonContent>
-      </IonModal>
     </WordOrPhraseListContainer>
   );
 }

@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
-  IonModal,
   IonToolbar,
   IonHeader,
   IonTitle,
@@ -54,10 +53,10 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
         langauges: { targetLang },
       },
     },
-    actions: { setTargetLanguage },
+    actions: { setTargetLanguage, createModal },
   } = useAppContext();
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const { openModal, closeModal } = createModal();
 
   const [filter, setFilter] = useState<string>('');
 
@@ -238,6 +237,28 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
     togglePhraseVoteStatus,
   ]);
 
+  const handleOpenModal = () => {
+    openModal(
+      <>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('Add New Phrase')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {targetLang ? (
+            <NewPhraseForm
+              langInfo={targetLang}
+              onCreated={closeModal}
+              onCancel={closeModal}
+            />
+          ) : null}
+        </IonContent>
+      </>,
+      'full',
+    );
+  };
+
   return (
     <PageLayout>
       <Caption>{tr('Phrase Book')}</Caption>
@@ -262,7 +283,7 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
 
       <AddListHeader
         title={tr('All Phrases')}
-        onClick={() => setIsOpenModal(true)}
+        onClick={() => handleOpenModal()}
       />
 
       <CardListContainer>{cardListComs}</CardListContainer>
@@ -273,27 +294,6 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
           loadingSpinner="bubbles"
         />
       </IonInfiniteScroll>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('Add New Phrase')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          {targetLang ? (
-            <NewPhraseForm
-              langInfo={targetLang}
-              onCreated={() => {
-                setIsOpenModal(false);
-              }}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
-            />
-          ) : null}
-        </IonContent>
-      </IonModal>
     </PageLayout>
   );
 }

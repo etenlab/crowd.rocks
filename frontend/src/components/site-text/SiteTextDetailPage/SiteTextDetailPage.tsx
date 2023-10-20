@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
-  IonModal,
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -50,9 +49,10 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
         langauges: { targetLang },
       },
     },
+    actions: { createModal },
   } = useAppContext();
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const { openModal, closeModal } = createModal();
 
   const [
     getAllTranslationFromSiteTextDefinitionID,
@@ -414,25 +414,9 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
     phraseData?.siteTextPhraseDefinitionRead?.site_text_phrase_definition
       ?.phrase_definition?.phrase.phrase || title;
 
-  return (
-    <PageLayout>
-      <Caption>
-        {tr('Site Text')} - {title}
-      </Caption>
-
-      <CardContainer>
-        {wordCom}
-        {phraseCom}
-      </CardContainer>
-
-      <AddListHeader
-        title={tr('Site Text Translations')}
-        onClick={() => setIsOpenModal(true)}
-      />
-
-      <CardListContainer>{translationsCom}</CardListContainer>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
+  const handleOpenModal = () => {
+    openModal(
+      <>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Translation')}</IonTitle>
@@ -446,16 +430,33 @@ export function SiteTextDetailPage({ match }: SiteTextDetailPageProps) {
                 match.params.definition_type === 'word' ? true : false
               }
               langInfo={targetLang}
-              onCreated={() => {
-                setIsOpenModal(false);
-              }}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
+              onCreated={closeModal}
+              onCancel={closeModal}
             />
           ) : null}
         </IonContent>
-      </IonModal>
+      </>,
+      'full',
+    );
+  };
+
+  return (
+    <PageLayout>
+      <Caption>
+        {tr('Site Text')} - {title}
+      </Caption>
+
+      <CardContainer>
+        {wordCom}
+        {phraseCom}
+      </CardContainer>
+
+      <AddListHeader
+        title={tr('Site Text Translations')}
+        onClick={() => handleOpenModal()}
+      />
+
+      <CardListContainer>{translationsCom}</CardListContainer>
     </PageLayout>
   );
 }

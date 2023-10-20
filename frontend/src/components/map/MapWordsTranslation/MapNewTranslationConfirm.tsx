@@ -11,7 +11,6 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import {
   ErrorType,
   useGetMapWordOrPhraseAsOrigByDefinitionIdQuery,
-  useUpsertTranslationFromWordAndDefinitionlikeStringMutation,
 } from '../../../generated/graphql';
 import { useQuery } from '../../../hooks/useQuery';
 
@@ -19,6 +18,7 @@ import { InfoFill } from '../../common/icons/InfoFill';
 import { AddCircle } from '../../common/icons/AddCircle';
 import { WordItem } from '../../common/WordItem';
 import { MapWordOrPhraseTranslationList } from '../MapWordOrPhraseTranslation/MapWordOrPhraseTranslantionList';
+import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 
 export function MapNewTranslationConfirm() {
   const { tr } = useTr();
@@ -56,9 +56,7 @@ export function MapNewTranslationConfirm() {
   });
 
   const [upsertTranslation, { data: upsertData, loading: upsertLoading }] =
-    useUpsertTranslationFromWordAndDefinitionlikeStringMutation({
-      refetchQueries: ['GetTranslationsByFromDefinitionId'],
-    });
+    useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
 
   useEffect(() => {
     if (upsertLoading) return;
