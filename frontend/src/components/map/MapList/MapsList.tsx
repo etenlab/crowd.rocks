@@ -200,12 +200,21 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
 
   useEffect(() => {
     if (mapZipError) {
-      present({
-        message: 'Maps zipping error',
-        duration: 3000,
-        position: 'top',
-        color: 'danger',
-      });
+      if (mapZipError.message === 'Socket closed') {
+        present({
+          message: 'No connection with the server',
+          duration: 3000,
+          position: 'top',
+          color: 'danger',
+        });
+      } else {
+        present({
+          message: 'Maps zipping error: ' + mapZipError.message,
+          duration: 3000,
+          position: 'top',
+          color: 'danger',
+        });
+      }
     }
   }, [mapZipError, mapZipResult, present]);
 
