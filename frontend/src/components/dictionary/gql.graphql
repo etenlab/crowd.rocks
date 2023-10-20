@@ -96,6 +96,7 @@ fragment PageInfoFragment on PageInfo {
   hasNextPage
   hasPreviousPage
   startCursor
+  totalEdges
 }
 
 query WordDefinitionRead($id: ID!) {
