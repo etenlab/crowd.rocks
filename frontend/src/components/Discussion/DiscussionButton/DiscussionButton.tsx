@@ -1,7 +1,7 @@
 import { MouseEventHandler } from 'react';
 import { useHistory, useParams } from 'react-router';
 
-import { Badge, Button } from '@mui/material';
+import { Button } from '@mui/material';
 
 import { ChatLines } from '../../common/icons/ChatLines';
 
@@ -47,12 +47,10 @@ export function DiscussionButton({
       color="blue"
       startIcon={<ChatLines sx={{ fontSize: 24 }} />}
     >
-      <Badge
-        badgeContent={postCountData?.getTotalPosts.total || 0}
-        color="green"
-      >
-        {label}
-      </Badge>
+      {label}
+      {postCountData?.getTotalPosts.total
+        ? ` (${postCountData?.getTotalPosts.total})`
+        : ''}
     </Button>
   );
 }
