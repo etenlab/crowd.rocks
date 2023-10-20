@@ -22,6 +22,7 @@ import {
   OrigMapWordsAndPhrasesOutput,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
+import { deprecate } from 'util';
 
 interface ISaveMapParams {
   mapFileName: string;
@@ -1194,12 +1195,21 @@ export class MapsRepository {
       languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;
     }
 
+    if (input.onlyTranslated) {
+      languagesFiltersRestrictionClause += ` and (some_to_word_tr_id is not null or some_to_phrase_tr_id is not null) `;
+    }
+    if (input.onlyNotTranslated) {
+      languagesFiltersRestrictionClause += ` and (some_to_word_tr_id is null and some_to_phrase_tr_id is null) `;
+    }
+
     const langAndPickParams: string[] = [...filterParams];
     if (after) {
       langAndPickParams.push(String(after));
       pickDataClause += ` and cursor > $${langAndPickParams.length} `;
     }
-    pickDataClause += ` order by cursor `;
+    pickDataClause += ` order by cursor ${
+      input.isSortDescending ? 'DESC' : 'ASC'
+    }`;
     if (first) {
       langAndPickParams.push(String(first));
       pickDataClause += ` limit $${langAndPickParams.length} `;
@@ -1220,7 +1230,9 @@ export class MapsRepository {
         o_user_id,
         o_is_bot,
         o_avatar,
-        o_avatar_url
+        o_avatar_url,
+        some_to_word_tr_id,
+        some_to_phrase_tr_id,
       from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
