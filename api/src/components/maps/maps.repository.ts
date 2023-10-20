@@ -1230,9 +1230,7 @@ export class MapsRepository {
         o_user_id,
         o_is_bot,
         o_avatar,
-        o_avatar_url,
-        some_to_word_tr_id,
-        some_to_phrase_tr_id,
+        o_avatar_url
       from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
