@@ -313,7 +313,13 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
 
   return (
     <>
-      <Caption>{tr('Maps')}</Caption>
+      <Caption
+        handleBackClick={() => {
+          router.push(`/${nation_id}/${language_id}/1/home`);
+        }}
+      >
+        {tr('Maps')}
+      </Caption>
 
       <LangSelector
         title={tr('Select your language')}
