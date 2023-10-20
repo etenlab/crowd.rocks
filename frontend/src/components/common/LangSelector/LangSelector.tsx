@@ -6,8 +6,9 @@ import { Autocomplete, OptionItem } from '../forms/Autocomplete';
 import {
   DESCRIPTIONS_JOINER,
   LOADING_TAG_PLACEHOLDER,
-} from '../../../const/_langConst';
-import { getLangsRegistry, langInfo2tag } from '../../../../../utils';
+  getLangsRegistry,
+  langInfo2tag,
+} from '../../../../../utils';
 
 import { useTr } from '../../../hooks/useTr';
 
