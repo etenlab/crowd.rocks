@@ -1,7 +1,7 @@
 -- public.v_map_words_and_phrases source
-
+drop view if exists v_map_words_and_phrases;
 CREATE OR REPLACE VIEW public.v_map_words_and_phrases
-AS SELECT DISTINCT concat(ws.wordlike_string, owd.word_definition_id) AS cursor,
+AS SELECT distinct on (type, o_id) concat(ws.wordlike_string, owd.word_definition_id) AS cursor,
     'word'::text AS type,
     ow.word_id AS o_id,
     ws.wordlike_string AS o_like_string,
@@ -15,15 +15,19 @@ AS SELECT DISTINCT concat(ws.wordlike_string, owd.word_definition_id) AS cursor,
 	  ow.created_at as o_created_at,
 	  u.is_bot as o_is_bot,
     a.avatar as o_avatar,
-	  a.url as o_avatar_url
+	  a.url as o_avatar_url,
+	  wtwt.word_to_word_translation_id as some_to_word_tr_id,
+	  wtpt.word_to_phrase_translation_id as some_to_phrase_tr_id
    FROM words ow
-     LEFT JOIN wordlike_strings ws ON ow.wordlike_string_id = ws.wordlike_string_id
-     LEFT JOIN word_definitions owd ON ow.word_id = owd.word_id
+     JOIN wordlike_strings ws ON ow.wordlike_string_id = ws.wordlike_string_id
+     JOIN word_definitions owd ON ow.word_id = owd.word_id
      JOIN original_map_words omw ON ow.word_id = omw.word_id
-     JOIN users u ON u.user_id = ow.created_by
-     JOIN avatars a ON u.user_id = a.user_id
+     JOIN users u ON u.user_id = ow.created_by -- small optimization is possible by removing this info to a separate gql query  (cost=244.72..302.52) to (cost=146.45..385.39)
+     JOIN avatars a ON u.user_id = a.user_id -- small optimization is possible by removing this info to a separate gql query
+     left join word_to_word_translations wtwt on owd.word_definition_id = wtwt.from_word_definition_id  
+     left join word_to_phrase_translations wtpt on owd.word_definition_id = wtpt.from_word_definition_id          
 UNION ALL
- SELECT DISTINCT concat(oph.phraselike_string, ophd.phrase_definition_id) AS cursor,
+ SELECT DISTINCT on (type, o_id) concat(oph.phraselike_string, ophd.phrase_definition_id) AS cursor,
     'phrase'::text AS type,
     oph.phrase_id AS o_id,
     oph.phraselike_string AS o_like_string,
@@ -37,10 +41,14 @@ UNION ALL
 	  oph.created_at as o_created_at,
 	  u.is_bot as o_is_bot,
     a.avatar as o_avatar,
-	  a.url as o_avatar_url
+	  a.url as o_avatar_url,
+	  ptwt.phrase_to_word_translation_id as some_to_word_tr_id,
+	  ptpt.phrase_to_phrase_translation_id as some_to_phrase_tr_id
    FROM phrases oph
-     LEFT JOIN phrase_definitions ophd ON oph.phrase_id = ophd.phrase_id
+     JOIN phrase_definitions ophd ON oph.phrase_id = ophd.phrase_id
      JOIN original_map_phrases omph ON oph.phrase_id = omph.phrase_id
-     LEFT JOIN words ow ON ow.word_id = oph.words[1]
-     JOIN users u ON u.user_id = ow.created_by
-     JOIN avatars a ON u.user_id = a.user_id;
+     JOIN words ow ON ow.word_id = oph.words[1]
+     JOIN users u ON u.user_id = ow.created_by -- small optimization is possible by removing this info to a separate gql query
+     JOIN avatars a ON u.user_id = a.user_id -- small optimization is possible by removing this info to a separate gql query
+     left join phrase_to_word_translations ptwt on ophd.phrase_definition_id = ptwt.from_phrase_definition_id  
+     left join phrase_to_phrase_translations ptpt on ophd.phrase_definition_id = ptpt.from_phrase_definition_id        
