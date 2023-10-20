@@ -27,4 +27,5 @@ export class PageInfo {
   @Field(() => Boolean) hasPreviousPage: boolean;
   @Field(() => ID, { nullable: true }) startCursor: string | null;
   @Field(() => ID, { nullable: true }) endCursor: string | null;
+  @Field(() => Int, { nullable: true }) totalEdges?: number | null;
 }

@@ -204,6 +204,10 @@ export class MapsRepository {
       params.push(lang?.geo_code);
       languageClause += ` and geo_code = $${params.length}`;
     }
+    if (lang?.filter && lang?.filter.length > 0) {
+      params.push(lang.filter);
+      languageClause += ` and lower(om.map_file_name) like concat('%', LOWER($${params.length}),'%')`;
+    }
     const sqlStr = `
         select
           om.original_map_id,
@@ -291,6 +295,11 @@ export class MapsRepository {
     if (originalMapId) {
       params.push(String(originalMapId));
       languageClause += ` and tm.original_map_id = $${params.length}`;
+    }
+
+    if (lang?.filter && lang?.filter.length > 0) {
+      params.push(lang.filter);
+      languageClause += ` and lower(om.map_file_name) like concat('%', LOWER($${params.length}),'%')`;
     }
 
     const sqlStr = `

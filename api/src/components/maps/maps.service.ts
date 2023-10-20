@@ -361,6 +361,7 @@ export class MapsService {
           hasPreviousPage: false,
           startCursor,
           endCursor,
+          totalEdges: allMapsList.length,
         },
       };
     } catch (e) {

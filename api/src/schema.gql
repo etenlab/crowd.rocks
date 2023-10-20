@@ -681,6 +681,7 @@ type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: ID
+  totalEdges: Int
 }
 
 input PasswordResetFormInput {

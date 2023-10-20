@@ -236,6 +236,7 @@ export class MapsResolver {
     @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
   ): Promise<MapListConnection> {
+    Logger.log('getAllMapsList', JSON.stringify(input, null, 2), first, after);
     return this.mapsService.getAllMapsList({
       lang: input.lang,
       first,
