@@ -13,6 +13,7 @@ import {
 import { Caption } from '../../common/Caption/Caption';
 import { Tag } from '../../common/chips/Tag';
 import { FlagV2 } from '../../flags/Flag';
+import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 import { DiscussionButton } from '../../Discussion/DiscussionButton';
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 
@@ -135,14 +136,18 @@ export function MapDetails() {
           alignItems="center"
         >
           <Tag label={tagLabel} color={tagColor} />
-          <FlagV2
-            parent_table={
-              isOriginal
-                ? TableNameType.OriginalMaps
-                : TableNameType.TranslatedMaps
+          <MoreHorizButton
+            component={
+              <FlagV2
+                parent_table={
+                  isOriginal
+                    ? TableNameType.OriginalMaps
+                    : TableNameType.TranslatedMaps
+                }
+                parent_id={id}
+                flag_names={MAPS_FLAGS}
+              />
             }
-            parent_id={id}
-            flag_names={MAPS_FLAGS}
           />
         </Stack>
 

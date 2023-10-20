@@ -14,6 +14,7 @@ import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { FlagV2 } from '../../flags/Flag';
+import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 import { NewTranslationForm } from './NewTranslationForm';
 import { MapWordOrPhraseTranslationList } from './MapWordOrPhraseTranslantionList';
 
@@ -101,14 +102,18 @@ export function MapWordOrPhraseTranslation() {
               original.isWord ? TableNameType.Words : TableNameType.Phrases
             }
           />
-          <FlagV2
-            parent_id={definition_id}
-            parent_table={
-              original.isWord
-                ? TableNameType.WordDefinitions
-                : TableNameType.PhraseDefinitions
+          <MoreHorizButton
+            component={
+              <FlagV2
+                parent_id={definition_id}
+                parent_table={
+                  original.isWord
+                    ? TableNameType.WordDefinitions
+                    : TableNameType.PhraseDefinitions
+                }
+                flag_names={WORD_AND_PHRASE_FLAGS}
+              />
             }
-            flag_names={WORD_AND_PHRASE_FLAGS}
           />
         </Stack>
       </Stack>
