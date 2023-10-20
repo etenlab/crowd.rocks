@@ -88,6 +88,9 @@ export class GetOrigMapWordsAndPhrasesInput {
   @Field(() => String, { nullable: true }) original_map_id: string | null;
   @Field(() => LanguageInput) lang: LanguageInput;
   @Field(() => String, { nullable: true }) filter: string | null;
+  @Field(() => Boolean, { nullable: true }) onlyTranslated?: boolean | null;
+  @Field(() => Boolean, { nullable: true }) onlyNotTranslated?: boolean | null;
+  @Field(() => Boolean, { nullable: true }) isSortDescending?: boolean | null;
 }
 @ObjectType()
 export class MapWordOrPhrase {

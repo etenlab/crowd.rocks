@@ -370,7 +370,10 @@ input GetOrigMapListInput {
 
 input GetOrigMapWordsAndPhrasesInput {
   filter: String
+  isSortDescending: Boolean
   lang: LanguageInput!
+  onlyNotTranslated: Boolean
+  onlyTranslated: Boolean
   original_map_id: String
 }
 
