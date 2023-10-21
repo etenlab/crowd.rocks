@@ -7,10 +7,12 @@ import { ErrorType } from '../generated/graphql';
 import { updateCacheWithUpsertTranslation } from '../cacheUpdators/upsertTranslation';
 
 import { useTr } from './useTr';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useUpsertTranslationMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedUpsertTranslationMutation({
     update(cache, { data, errors }) {
@@ -44,6 +46,7 @@ export function useUpsertTranslationMutation() {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.upsertTranslation.error);
       }
     },
   });

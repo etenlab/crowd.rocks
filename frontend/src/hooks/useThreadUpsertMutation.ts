@@ -10,10 +10,12 @@ import {
   updateCacheWithCreateThread,
   updateCacheWithUpdateThread,
 } from '../cacheUpdators/upsertThread';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useThreadUpdateMutation(folder_id: string) {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedThreadUpdateMutation({
     update(cache, { data, errors }) {
@@ -44,6 +46,7 @@ export function useThreadUpdateMutation(folder_id: string) {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.threadUpsert.error);
       }
     },
   });
@@ -52,6 +55,7 @@ export function useThreadUpdateMutation(folder_id: string) {
 export function useThreadCreateMutation(folder_id: string) {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedThreadCreateMutation({
     update(cache, { data, errors }) {
@@ -82,6 +86,7 @@ export function useThreadCreateMutation(folder_id: string) {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.threadUpsert.error);
       }
     },
   });

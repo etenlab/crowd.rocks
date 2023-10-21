@@ -10,10 +10,8 @@ import { AddCircle } from '../../common/icons/AddCircle';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-import {
-  ErrorType,
-  useUpsertTranslationFromWordAndDefinitionlikeStringMutation,
-} from '../../../generated/graphql';
+import { ErrorType } from '../../../generated/graphql';
+import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 
 export type NewTranslationForm = {
   definition_id: string;
@@ -42,9 +40,7 @@ export function NewTranslationForm({
   const [description, setDescription] = useState<string>('');
 
   const [upsertTranslation, { data: upsertData, loading: upsertLoading }] =
-    useUpsertTranslationFromWordAndDefinitionlikeStringMutation({
-      refetchQueries: ['GetTranslationsByFromDefinitionId'],
-    });
+    useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
 
   useEffect(() => {
     if (upsertLoading) return;

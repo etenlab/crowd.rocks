@@ -5,10 +5,12 @@ import { ErrorType } from '../generated/graphql';
 
 import { useTr } from './useTr';
 import { updateCacheWithReadNotification } from '../cacheUpdators/readNotification';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useMarkNotificationReadMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedMarkNotificationReadMutation({
     update(cache, { data, errors }) {
@@ -33,6 +35,7 @@ export function useMarkNotificationReadMutation() {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.markNotificationAsRead.error);
       }
     },
   });

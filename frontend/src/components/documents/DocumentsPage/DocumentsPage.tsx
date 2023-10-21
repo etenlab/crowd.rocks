@@ -1,9 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useHistory, useParams } from 'react-router';
 import {
   IonContent,
   IonHeader,
-  IonModal,
   IonTitle,
   IonToolbar,
   useIonToast,
@@ -19,12 +18,12 @@ import { RowStack } from '../../common/Layout/styled';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-import { useUploadFileMutation } from '../../../generated/graphql';
 import { useDocumentUploadMutation } from '../../../hooks/useDocumentUploadMutation';
 
 import { DocumentList } from '../DocumentList/DocumentList';
 import { NewDocumentForm } from './NewDocumentForm';
 import { DocumentsTools } from './DocumentsTools';
+import { useUploadFileMutation } from '../../../hooks/useUploadFileMutation';
 
 export function DocumentsPage() {
   const { tr } = useTr();
@@ -34,17 +33,17 @@ export function DocumentsPage() {
         langauges: { sourceLang },
       },
     },
-    actions: { setSourceLanguage },
+    actions: { setSourceLanguage, createModal },
   } = useAppContext();
   const { nation_id, language_id, cluster_id } = useParams<{
     nation_id: string;
     language_id: string;
     cluster_id: string;
   }>();
+  const { openModal, closeModal } = createModal();
 
   const [uploadFile] = useUploadFileMutation();
   const [documentUpload] = useDocumentUploadMutation();
-  const [isOpenModal, setIsOpenModal] = useState(false);
 
   const [toast] = useIonToast();
   const [loader, dismissLoader] = useIonLoading();
@@ -84,12 +83,6 @@ export function DocumentsPage() {
       });
 
       if (!uploadResult.data?.uploadFile.file?.id) {
-        toast({
-          message: tr('Failed at file upload'),
-          duration: 1500,
-          position: 'top',
-          color: 'danger',
-        });
         dismissLoader();
         console.log(`S3 upload error `, uploadResult.data?.uploadFile.error);
         return;
@@ -108,7 +101,7 @@ export function DocumentsPage() {
 
       dismissLoader();
 
-      setIsOpenModal(false);
+      closeModal();
     },
     [
       sourceLang?.lang,
@@ -117,8 +110,9 @@ export function DocumentsPage() {
       loader,
       tr,
       uploadFile,
-      dismissLoader,
       documentUpload,
+      dismissLoader,
+      closeModal,
       toast,
     ],
   );
@@ -131,6 +125,22 @@ export function DocumentsPage() {
     },
     [cluster_id, history, language_id, nation_id],
   );
+
+  const handleOpenModal = () => {
+    openModal(
+      <>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('New Document')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <NewDocumentForm onSave={handleAddDocument} onCancel={closeModal} />
+        </IonContent>
+      </>,
+      'full',
+    );
+  };
 
   return (
     <PageLayout>
@@ -147,26 +157,10 @@ export function DocumentsPage() {
 
       <RowStack>
         <ListCaption>{tr('Document List')}</ListCaption>
-        <DocumentsTools onAddClick={() => setIsOpenModal(true)} />
+        <DocumentsTools onAddClick={() => handleOpenModal()} />
       </RowStack>
 
       <DocumentList onClickItem={handleGoToDocumentViewer} />
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('New Document')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          <NewDocumentForm
-            onSave={handleAddDocument}
-            onCancel={() => {
-              setIsOpenModal(false);
-            }}
-          />
-        </IonContent>
-      </IonModal>
     </PageLayout>
   );
 }

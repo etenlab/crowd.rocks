@@ -410,7 +410,10 @@ export type GetOrigMapListInput = {
 
 export type GetOrigMapWordsAndPhrasesInput = {
   filter?: InputMaybe<Scalars['String']['input']>;
+  isSortDescending?: InputMaybe<Scalars['Boolean']['input']>;
   lang: LanguageInput;
+  onlyNotTranslated?: InputMaybe<Scalars['Boolean']['input']>;
+  onlyTranslated?: InputMaybe<Scalars['Boolean']['input']>;
   original_map_id?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -3162,6 +3165,8 @@ export type GetOrigMapWordsAndPhrasesQueryVariables = Exact<{
   original_map_id?: InputMaybe<Scalars['String']['input']>;
   lang: LanguageInput;
   filter?: InputMaybe<Scalars['String']['input']>;
+  onlyNotTranslated?: InputMaybe<Scalars['Boolean']['input']>;
+  onlyTranslated?: InputMaybe<Scalars['Boolean']['input']>;
   after?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -6166,9 +6171,9 @@ export type DeleteForumMutationHookResult = ReturnType<typeof useDeleteForumMuta
 export type DeleteForumMutationResult = Apollo.MutationResult<DeleteForumMutation>;
 export type DeleteForumMutationOptions = Apollo.BaseMutationOptions<DeleteForumMutation, DeleteForumMutationVariables>;
 export const GetOrigMapWordsAndPhrasesDocument = gql`
-    query GetOrigMapWordsAndPhrases($original_map_id: String, $lang: LanguageInput!, $filter: String, $after: ID, $first: Int) {
+    query GetOrigMapWordsAndPhrases($original_map_id: String, $lang: LanguageInput!, $filter: String, $onlyNotTranslated: Boolean, $onlyTranslated: Boolean, $after: ID, $first: Int) {
   getOrigMapWordsAndPhrases(
-    input: {lang: $lang, filter: $filter, original_map_id: $original_map_id}
+    input: {lang: $lang, filter: $filter, original_map_id: $original_map_id, onlyNotTranslated: $onlyNotTranslated, onlyTranslated: $onlyTranslated}
     after: $after
     first: $first
   ) {
@@ -6200,6 +6205,8 @@ export const GetOrigMapWordsAndPhrasesDocument = gql`
  *      original_map_id: // value for 'original_map_id'
  *      lang: // value for 'lang'
  *      filter: // value for 'filter'
+ *      onlyNotTranslated: // value for 'onlyNotTranslated'
+ *      onlyTranslated: // value for 'onlyTranslated'
  *      after: // value for 'after'
  *      first: // value for 'first'
  *   },

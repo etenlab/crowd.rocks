@@ -7,10 +7,12 @@ import { ErrorType } from '../generated/graphql';
 import { updateCacheWithToggleWordDefinitionVoteStatus } from '../cacheUpdators/toggleWordDefinitionVoteStatus';
 
 import { useTr } from '../hooks/useTr';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useToggleWordDefinitionVoteStatusMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedToggleWordDefinitonVoteStatusMutation({
     update(cache, { data, errors }) {
@@ -34,6 +36,7 @@ export function useToggleWordDefinitionVoteStatusMutation() {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.toggleWordDefinitionVoteStatus.error);
       }
     },
   });
