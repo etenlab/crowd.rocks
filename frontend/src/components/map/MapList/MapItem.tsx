@@ -1,13 +1,6 @@
-import { useRef, useState, MouseEvent, MouseEventHandler } from 'react';
+import { useRef, MouseEventHandler } from 'react';
 import { useHistory } from 'react-router';
-import {
-  Typography,
-  Popover,
-  IconButton,
-  Button,
-  Divider,
-  Stack,
-} from '@mui/material';
+import { Typography, IconButton, Button, Divider, Stack } from '@mui/material';
 
 import {
   MapDetailsInfo,
@@ -16,11 +9,11 @@ import {
 
 import { langInfo2String, subTags2LangInfo } from '../../../../../utils';
 import { downloadFromUrl } from '../../../common/utility';
-import { MoreHoriz } from '../../common/icons/MoreHoriz';
 import { DownloadCircle } from '../../common/icons/DownloadCircle';
 import { DeleteCircle } from '../../common/icons/DeleteCircle';
 import { Checkbox } from '../../common/buttons/Checkbox';
 import { Tag } from '../../common/chips/Tag';
+import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 
 import { globals } from '../../../services/globals';
 
@@ -29,7 +22,6 @@ import { useTr } from '../../../hooks/useTr';
 
 import { PreviewContainer } from './styled';
 import { MapDeleteModal } from './MapDeleteModal';
-import { MoreVert } from '../../common/icons/MoreVert';
 
 export type ViewMode = 'normal' | 'selection';
 
@@ -60,7 +52,6 @@ export function MapItem({
   const { openModal, closeModal } = createModal();
 
   const downloadFlagRef = useRef<'original' | 'translated' | null>(null);
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const singleClickTimerRef = useRef<NodeJS.Timeout>();
   const clickCountRef = useRef<number>(0);
 
@@ -116,17 +107,6 @@ export function MapItem({
     e.stopPropagation();
   };
 
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   if (
     mapContent.data &&
     !mapContent.error &&
@@ -155,7 +135,6 @@ export function MapItem({
     downloadFlagRef.current = null;
   }
 
-  const open = Boolean(anchorEl);
   const adminMode = globals.is_admin_user();
 
   const tagLabel = mapInfo.is_original
@@ -187,8 +166,36 @@ export function MapItem({
         />
 
         {viewMode === 'normal' ? (
-          <IconButton
-            onClick={handleClick}
+          <MoreHorizButton
+            component={
+              <>
+                <Button
+                  variant="text"
+                  startIcon={<DownloadCircle sx={{ fontSize: '24px' }} />}
+                  color="dark"
+                  sx={{ padding: 0, justifyContent: 'flex-start' }}
+                  onClick={handleDownloadSvg}
+                >
+                  {tr('Download')}
+                </Button>
+                {adminMode ? (
+                  <>
+                    <Divider />
+                    <Button
+                      variant="text"
+                      startIcon={
+                        <DeleteCircle sx={{ fontSize: '24px' }} color="red" />
+                      }
+                      color="red"
+                      onClick={handleDeleteMap}
+                      sx={{ padding: 0, justifyContent: 'flex-start' }}
+                    >
+                      {tr('Delete')}
+                    </Button>
+                  </>
+                ) : null}
+              </>
+            }
             color="gray"
             sx={(theme) => ({
               position: 'absolute',
@@ -196,11 +203,12 @@ export function MapItem({
               right: '6px',
               padding: '4px',
               background: theme.palette.text.white,
+              '&:hover': {
+                background: theme.palette.background.gray_stroke,
+              },
               border: `1.5px solid ${theme.palette.text.gray_stroke}`,
             })}
-          >
-            <MoreHoriz sx={{ fontSize: 24 }} />
-          </IconButton>
+          />
         ) : (
           <IconButton
             onClick={(e) => {
@@ -225,67 +233,6 @@ export function MapItem({
           sx={{ position: 'absolute', bottom: '8px', left: '8px' }}
         />
       </PreviewContainer>
-
-      <Popover
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        sx={(theme) => ({
-          '& .MuiPopover-paper': {
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            padding: '19px 15px',
-            border: `1.5px solid ${theme.palette.text.gray_stroke}`,
-            borderRadius: '8px',
-            width: '150px',
-          },
-        })}
-      >
-        <IconButton
-          sx={{ position: 'absolute', top: 0, right: 0 }}
-          color="gray"
-        >
-          <MoreVert
-            sx={{
-              fontSize: 24,
-            }}
-            color="gray"
-          />
-        </IconButton>
-        <Button
-          variant="text"
-          startIcon={<DownloadCircle sx={{ fontSize: '24px' }} />}
-          color="dark"
-          sx={{ padding: 0, justifyContent: 'flex-start' }}
-          onClick={handleDownloadSvg}
-        >
-          {tr('Download')}
-        </Button>
-        {adminMode ? (
-          <>
-            <Divider />
-            <Button
-              variant="text"
-              startIcon={<DeleteCircle sx={{ fontSize: '24px' }} color="red" />}
-              color="red"
-              onClick={handleDeleteMap}
-              sx={{ padding: 0, justifyContent: 'flex-start' }}
-            >
-              {tr('Delete')}
-            </Button>
-          </>
-        ) : null}
-      </Popover>
 
       <Typography variant="body3">
         {mapInfo.is_original

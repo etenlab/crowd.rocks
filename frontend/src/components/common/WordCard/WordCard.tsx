@@ -7,6 +7,7 @@ import { FlagV2 } from '../../flags/Flag';
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { VoteButtonsHorizontal } from '../VoteButtonsHorizontal';
 import { PostAuthor } from '../PostAuthor';
+import { MoreHorizButton } from '../buttons/MoreHorizButton';
 
 export type Author = {
   username: string;
@@ -51,7 +52,6 @@ export function WordCard({
   const discussionBtnCom = discussion ? (
     <DiscussionIconButton {...discussion} />
   ) : null;
-  const flagCom = flags ? <FlagV2 {...flags} /> : null;
 
   return (
     <Stack gap="10px">
@@ -65,7 +65,7 @@ export function WordCard({
         ) : (
           <div />
         )}
-        {flagCom}
+        <MoreHorizButton component={flags ? <FlagV2 {...flags} /> : null} />
       </Stack>
 
       <Stack

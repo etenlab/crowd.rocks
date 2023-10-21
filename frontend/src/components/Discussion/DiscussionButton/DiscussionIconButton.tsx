@@ -1,7 +1,7 @@
 import { MouseEventHandler } from 'react';
 import { useHistory, useParams } from 'react-router';
 
-import { Badge, Button } from '@mui/material';
+import { Button } from '@mui/material';
 
 import { ChatLines } from '../../common/icons/ChatLines';
 
@@ -39,15 +39,19 @@ export function DiscussionIconButton({
   };
 
   return (
-    <Badge badgeContent={postCountData?.getTotalPosts.total || 0} color="green">
-      <Button
-        variant="contained"
-        onClick={handleClick}
-        sx={{ padding: '4px', minWidth: '22px', borderRadius: '50%' }}
-        color="blue"
-      >
-        <ChatLines sx={{ fontSize: 24 }} />
-      </Button>
-    </Badge>
+    <Button
+      variant="contained"
+      onClick={handleClick}
+      sx={{
+        padding: `4px ${postCountData?.getTotalPosts.total ? '10px' : ''}`,
+        minWidth: '22px',
+        fontSize: '13px',
+        gap: '4px',
+      }}
+      color="blue"
+    >
+      <ChatLines sx={{ fontSize: 20 }} />
+      {postCountData?.getTotalPosts.total || ''}
+    </Button>
   );
 }
