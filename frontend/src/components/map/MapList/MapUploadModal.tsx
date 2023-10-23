@@ -23,6 +23,7 @@ import {
   useMapUploadMutation,
   useUploadFileMutation,
 } from '../../../generated/graphql';
+import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 
 type MapUploadModalProps = {
   onClose(): void;
@@ -41,6 +42,7 @@ export function MapUploadModal({ onClose }: MapUploadModalProps) {
   const [uploadFile, { loading: uploading }] = useUploadFileMutation();
 
   const [fileName, setFileName] = useState<string>('');
+  const { makeMapThumbnail } = useMapTranslationTools();
 
   const addMap = useCallback(
     async (file: File) => {
@@ -49,11 +51,17 @@ export function MapUploadModal({ onClose }: MapUploadModalProps) {
       try {
         setFileName(file.name);
 
+        const previewFile = (await makeMapThumbnail(await file.text(), {
+          toWidth: 165,
+          toHeight: 165,
+          asFile: `${file.name}-thmb`,
+        })) as File;
+
         const uploadPreviewResult = await uploadFile({
           variables: {
-            file: file,
-            file_size: file.size,
-            file_type: file.type,
+            file: previewFile,
+            file_size: previewFile.size,
+            file_type: previewFile.type,
           },
         });
 
@@ -94,7 +102,15 @@ export function MapUploadModal({ onClose }: MapUploadModalProps) {
         });
       }
     },
-    [uploadFile, sendMapFile, history, nation_id, language_id, present],
+    [
+      makeMapThumbnail,
+      uploadFile,
+      sendMapFile,
+      history,
+      nation_id,
+      language_id,
+      present,
+    ],
   );
 
   let title = tr('Add new map');
