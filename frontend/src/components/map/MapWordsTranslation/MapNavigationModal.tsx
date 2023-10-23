@@ -6,9 +6,13 @@ import { Cancel } from '../../common/icons/Cancel';
 
 type MapNavigationModalProps = {
   onClose(): void;
+  setQuickFilter: (quickFilterValue: string | null) => void;
 };
 
-export function MapNavigationModal({ onClose }: MapNavigationModalProps) {
+export function MapNavigationModal({
+  onClose,
+  setQuickFilter,
+}: MapNavigationModalProps) {
   const { tr } = useTr();
 
   const handleCancel = () => {
@@ -19,6 +23,26 @@ export function MapNavigationModal({ onClose }: MapNavigationModalProps) {
     .map((_, index) => index)
     .map((num) => String.fromCharCode('A'.charCodeAt(0) + num));
 
+  const digits = [...new Array(10)]
+    .map((_, index) => index)
+    .map((num) => String.fromCharCode('0'.charCodeAt(0) + num));
+
+  const specialSymbols = [
+    '`',
+    '!',
+    '@',
+    '%',
+    '^',
+    '&',
+    '*',
+    '(',
+    ')',
+    '-',
+    '+',
+  ];
+
+  const allSymbols = [chars, digits, specialSymbols];
+
   return (
     <Stack gap="24px">
       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -28,22 +52,48 @@ export function MapNavigationModal({ onClose }: MapNavigationModalProps) {
         </IconButton>
       </Stack>
       <Divider />
-      <Stack direction="row" gap="10px" flexWrap="wrap">
-        {chars.map((item) => (
-          <Button
-            key={item}
-            variant="contained"
-            color="gray_bg"
-            sx={{
-              padding: '7px',
-              minWidth: '37px',
-              border: (theme) => `1px solid ${theme.palette.text.gray_stroke}`,
-            }}
-          >
-            {item}
-          </Button>
-        ))}
+      <Stack
+        sx={{ cursor: 'pointer' }}
+        onClick={() => {
+          setQuickFilter(null);
+          onClose();
+        }}
+        direction="row"
+        alignItems="ceter"
+        width="fit-content"
+      >
+        <Cancel sx={{ color: (theme) => theme.palette.text.red }} />
+        <Typography
+          alignSelf="center"
+          marginLeft={'2px'}
+          sx={{ color: (theme) => theme.palette.text.red }}
+        >
+          {tr('Clear Filter')}
+        </Typography>
       </Stack>
+      {allSymbols.map((symbolSection, i) => (
+        <Stack key={i} direction="row" gap="10px" flexWrap="wrap">
+          {symbolSection.map((item) => (
+            <Button
+              key={item}
+              variant="contained"
+              color="gray_bg"
+              sx={{
+                padding: '7px',
+                minWidth: '37px',
+                border: (theme) =>
+                  `1px solid ${theme.palette.text.gray_stroke}`,
+              }}
+              onClick={() => {
+                setQuickFilter(item);
+                onClose();
+              }}
+            >
+              {item}
+            </Button>
+          ))}
+        </Stack>
+      ))}
     </Stack>
   );
 }

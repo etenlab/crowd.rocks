@@ -375,6 +375,7 @@ input GetOrigMapWordsAndPhrasesInput {
   onlyNotTranslated: Boolean
   onlyTranslated: Boolean
   original_map_id: String
+  quickFilter: String
 }
 
 type GetOrigMapsListOutput {
