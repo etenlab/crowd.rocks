@@ -14,6 +14,7 @@ import { setContext } from '@apollo/client/link/context';
 import { createClient } from 'graphql-ws';
 
 import { typePolicies } from './cacheTypePolicies';
+import { persistCache, LocalStorageWrapper } from 'apollo3-cache-persist';
 
 const server_url = `${import.meta.env.VITE_APP_SERVER_URL}/graphql`;
 const ws_server_url = `${import.meta.env.VITE_APP_WS_SERVER_URL}/graphql`;
@@ -55,11 +56,18 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+const cache = new InMemoryCache({
+  typePolicies,
+});
+
+await persistCache({
+  cache,
+  storage: new LocalStorageWrapper(window.localStorage),
+});
+
 export const apollo_client = new ApolloClient({
   link: authLink.concat(splitLink),
-  cache: new InMemoryCache({
-    typePolicies,
-  }),
+  cache: cache,
 });
 
 // const client = new ApolloClient({
@@ -69,6 +77,7 @@ export const apollo_client = new ApolloClient({
 
 const container = document.getElementById('root');
 const root = createRoot(container!);
+
 root.render(
   <React.StrictMode>
     <ApolloProvider client={apollo_client}>
