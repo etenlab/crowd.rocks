@@ -23,6 +23,26 @@ export function MapNavigationModal({
     .map((_, index) => index)
     .map((num) => String.fromCharCode('A'.charCodeAt(0) + num));
 
+  const digits = [...new Array(10)]
+    .map((_, index) => index)
+    .map((num) => String.fromCharCode('0'.charCodeAt(0) + num));
+
+  const specialSymbols = [
+    '`',
+    '!',
+    '@',
+    '%',
+    '^',
+    '&',
+    '*',
+    '(',
+    ')',
+    '-',
+    '+',
+  ];
+
+  const allSymbols = [chars, digits, specialSymbols];
+
   return (
     <Stack gap="24px">
       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -51,26 +71,29 @@ export function MapNavigationModal({
           {tr('Clear Filter')}
         </Typography>
       </Stack>
-      <Stack direction="row" gap="10px" flexWrap="wrap">
-        {chars.map((item) => (
-          <Button
-            key={item}
-            variant="contained"
-            color="gray_bg"
-            sx={{
-              padding: '7px',
-              minWidth: '37px',
-              border: (theme) => `1px solid ${theme.palette.text.gray_stroke}`,
-            }}
-            onClick={() => {
-              setQuickFilter(item);
-              onClose();
-            }}
-          >
-            {item}
-          </Button>
-        ))}
-      </Stack>
+      {allSymbols.map((symbolSection, i) => (
+        <Stack key={i} direction="row" gap="10px" flexWrap="wrap">
+          {symbolSection.map((item) => (
+            <Button
+              key={item}
+              variant="contained"
+              color="gray_bg"
+              sx={{
+                padding: '7px',
+                minWidth: '37px',
+                border: (theme) =>
+                  `1px solid ${theme.palette.text.gray_stroke}`,
+              }}
+              onClick={() => {
+                setQuickFilter(item);
+                onClose();
+              }}
+            >
+              {item}
+            </Button>
+          ))}
+        </Stack>
+      ))}
     </Stack>
   );
 }
