@@ -6,9 +6,13 @@ import { Cancel } from '../../common/icons/Cancel';
 
 type MapNavigationModalProps = {
   onClose(): void;
+  setQuickFilter: (quickFilterValue: string | null) => void;
 };
 
-export function MapNavigationModal({ onClose }: MapNavigationModalProps) {
+export function MapNavigationModal({
+  onClose,
+  setQuickFilter,
+}: MapNavigationModalProps) {
   const { tr } = useTr();
 
   const handleCancel = () => {
@@ -28,6 +32,25 @@ export function MapNavigationModal({ onClose }: MapNavigationModalProps) {
         </IconButton>
       </Stack>
       <Divider />
+      <Stack
+        sx={{ cursor: 'pointer' }}
+        onClick={() => {
+          setQuickFilter(null);
+          onClose();
+        }}
+        direction="row"
+        alignItems="ceter"
+        width="fit-content"
+      >
+        <Cancel sx={{ color: (theme) => theme.palette.text.red }} />
+        <Typography
+          alignSelf="center"
+          marginLeft={'2px'}
+          sx={{ color: (theme) => theme.palette.text.red }}
+        >
+          {tr('Clear Filter')}
+        </Typography>
+      </Stack>
       <Stack direction="row" gap="10px" flexWrap="wrap">
         {chars.map((item) => (
           <Button
@@ -38,6 +61,10 @@ export function MapNavigationModal({ onClose }: MapNavigationModalProps) {
               padding: '7px',
               minWidth: '37px',
               border: (theme) => `1px solid ${theme.palette.text.gray_stroke}`,
+            }}
+            onClick={() => {
+              setQuickFilter(item);
+              onClose();
             }}
           >
             {item}

@@ -6,7 +6,7 @@ import {
   useIonRouter,
 } from '@ionic/react';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
-import { Button, Stack } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
 
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -61,6 +61,7 @@ export function MapWordsList() {
   const { openModal, closeModal } = createModal();
 
   const [filter, setFilter] = useState<string>('');
+  const [quickFilter, setQuickFilter] = useState<string | null>('');
   const [filterOption, setFilterOption] = useState<OptionItem>({
     label: tr('All'),
     value: 'all',
@@ -90,13 +91,14 @@ export function MapWordsList() {
         },
         original_map_id: id && id !== 'all' ? id : null,
         filter,
+        quickFilter,
         onlyNotTranslated:
           filterOption.value === 'not translated' ? true : null,
         onlyTranslated: filterOption.value === 'translated' ? true : null,
         first: PAGE_SIZE,
       },
     });
-  }, [getWordsAndPhrases, targetLang, filter, id, filterOption]);
+  }, [getWordsAndPhrases, targetLang, filter, id, filterOption, quickFilter]);
 
   const handleInfinite = useCallback(
     async (ev: IonInfiniteScrollCustomEvent<void>) => {
@@ -105,6 +107,12 @@ export function MapWordsList() {
           lang: {
             language_code: DEFAULT_MAP_LANGUAGE_CODE,
           },
+          original_map_id: id && id !== 'all' ? id : null,
+          filter,
+          quickFilter,
+          onlyNotTranslated:
+            filterOption.value === 'not translated' ? true : null,
+          onlyTranslated: filterOption.value === 'translated' ? true : null,
           first: PAGE_SIZE,
           after: wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.endCursor,
         };
@@ -119,6 +127,10 @@ export function MapWordsList() {
     [
       wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.hasNextPage,
       wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.endCursor,
+      id,
+      filter,
+      quickFilter,
+      filterOption.value,
       fetchMore,
     ],
   );
@@ -162,7 +174,12 @@ export function MapWordsList() {
   }, []);
 
   const handleOpenFilterModal = () => {
-    openModal(<MapNavigationModal onClose={closeModal} />);
+    openModal(
+      <MapNavigationModal
+        onClose={closeModal}
+        setQuickFilter={setQuickFilter}
+      />,
+    );
   };
 
   return (
@@ -226,9 +243,19 @@ export function MapWordsList() {
           value={filter}
           onChange={handleFilterChange}
           onClickSearchButton={() => {}}
-          placeholder={tr('Search by country/city...')}
+          placeholder={tr('Search by words...')}
         />
       </Stack>
+      {quickFilter && (
+        <Stack>
+          <Typography
+            variant="h2"
+            sx={{ color: (theme) => theme.palette.text.gray }}
+          >
+            {quickFilter}
+          </Typography>
+        </Stack>
+      )}
 
       <Stack gap="16px">
         {wordsAndPhrases &&

@@ -1199,6 +1199,10 @@ export class MapsRepository {
       filterParams.push(input.filter);
       languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${filterParams.length}),'%')`;
     }
+    if (input.quickFilter && input.quickFilter.length > 0) {
+      filterParams.push(input.quickFilter);
+      languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat(LOWER($${filterParams.length}),'%')`;
+    }
     if (input.original_map_id) {
       filterParams.push(input.original_map_id);
       languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;

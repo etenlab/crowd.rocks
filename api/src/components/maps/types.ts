@@ -91,6 +91,7 @@ export class GetOrigMapWordsAndPhrasesInput {
   @Field(() => Boolean, { nullable: true }) onlyTranslated?: boolean | null;
   @Field(() => Boolean, { nullable: true }) onlyNotTranslated?: boolean | null;
   @Field(() => Boolean, { nullable: true }) isSortDescending?: boolean | null;
+  @Field(() => String, { nullable: true }) quickFilter?: string | null;
 }
 @ObjectType()
 export class MapWordOrPhrase {
