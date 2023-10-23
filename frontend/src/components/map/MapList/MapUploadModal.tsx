@@ -38,7 +38,9 @@ export function MapUploadModal({ onClose }: MapUploadModalProps) {
     language_id: string;
   }>();
 
-  const [sendMapFile, { loading, data }] = useMapUploadMutation();
+  const [sendMapFile, { loading, data }] = useMapUploadMutation({
+    refetchQueries: ['GetAllMapsList'],
+  });
   const [uploadFile, { loading: uploading }] = useUploadFileMutation();
 
   const [fileName, setFileName] = useState<string>('');
@@ -202,7 +204,7 @@ export function MapUploadModal({ onClose }: MapUploadModalProps) {
           {data && data.mapUpload.error === ErrorType.NoError ? (
             <FilledCheckCircle color="green" />
           ) : null}
-          {data && data.mapUpload.error === ErrorType.NoError ? (
+          {data && data.mapUpload.error !== ErrorType.NoError ? (
             <Badge
               sx={(theme) => ({
                 padding: '1px',

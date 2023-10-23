@@ -113,7 +113,7 @@ export function MapDeleteModal({ mapInfo, onClose }: MapDeleteModalProps) {
         <Button
           variant="contained"
           color="blue"
-          onClick={() => onClose}
+          onClick={() => onClose()}
           startIcon={<Check sx={{ fontSize: 24 }} />}
         >
           {tr('Go to Maps')}
