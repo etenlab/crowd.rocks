@@ -1,5 +1,5 @@
 import { RouteComponentProps } from 'react-router';
-import { IonTitle, useIonRouter } from '@ionic/react';
+import { useIonRouter } from '@ionic/react';
 import { useTr } from '../../hooks/useTr';
 import { Caption } from '../common/Caption/Caption';
 import { AddListHeader } from '../common/ListHeader';
@@ -15,6 +15,7 @@ import 'react-quill/dist/quill.snow.css';
 import { Post } from './Post';
 import { useAppContext } from '../../hooks/useAppContext';
 import { PostModal } from './PostModal';
+import { Typography } from '@mui/material';
 
 interface DiscussionPageProps
   extends RouteComponentProps<{
@@ -114,7 +115,9 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
         {tr('Discussion')}
       </Caption>
 
-      <IonTitle>{postData?.postsByParent.title}</IonTitle>
+      <Typography variant="h3" letterSpacing="-2%">
+        {postData?.postsByParent.title}
+      </Typography>
       <AddListHeader
         title={tr('Posts')}
         onClick={() => {
