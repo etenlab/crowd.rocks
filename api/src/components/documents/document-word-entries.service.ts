@@ -17,12 +17,14 @@ import {
 } from './sql-string';
 import { WordlikeStringsService } from '../words/wordlike-strings.service';
 import { WordlikeString } from '../words/types';
+import { AuthorizationService } from '../authorization/authorization.service';
 
 @Injectable()
 export class DocumentWordEntriesService {
   constructor(
     private pg: PostgresService,
     private wordlikeStringsService: WordlikeStringsService,
+    private authService: AuthorizationService,
   ) {}
 
   async reads(
@@ -109,6 +111,13 @@ export class DocumentWordEntriesService {
     if (input.length === 0) {
       return {
         error: ErrorType.NoError,
+        document_word_entries: [],
+      };
+    }
+
+    if (!(await this.authService.is_authorized(token))) {
+      return {
+        error: ErrorType.Unauthorized,
         document_word_entries: [],
       };
     }

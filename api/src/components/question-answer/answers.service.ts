@@ -17,12 +17,14 @@ import {
   GetAnswersObjectRow,
 } from './sql-string';
 import { QuestionItemsService } from './question-items.service';
+import { AuthorizationService } from '../authorization/authorization.service';
 
 @Injectable()
 export class AnswersService {
   constructor(
     private pg: PostgresService,
     private questionItemService: QuestionItemsService,
+    private authService: AuthorizationService,
   ) {}
 
   private async convertQueryResultToAnswers(
@@ -133,6 +135,13 @@ export class AnswersService {
     if (input.length === 0) {
       return {
         error: ErrorType.NoError,
+        answers: [],
+      };
+    }
+
+    if (!(await this.authService.is_authorized(token))) {
+      return {
+        error: ErrorType.Unauthorized,
         answers: [],
       };
     }
