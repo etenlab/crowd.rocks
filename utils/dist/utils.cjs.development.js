@@ -373,6 +373,11 @@ var LOADING_TAG_PLACEHOLDER = {
   tag: 'loading',
   descriptions: ['Loading data...']
 };
+exports.GroupedFilterSymbols = void 0;
+(function (GroupedFilterSymbols) {
+  GroupedFilterSymbols["Digits"] = "0-9";
+  GroupedFilterSymbols["SpecialCharacters"] = "#";
+})(exports.GroupedFilterSymbols || (exports.GroupedFilterSymbols = {}));
 
 var sortSiteTextFn = function sortSiteTextFn(d1, d2) {
   if (d1.siteTextlikeString && d2.siteTextlikeString && d1.siteTextlikeString.toLowerCase() > d2.siteTextlikeString.toLowerCase()) {
