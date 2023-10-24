@@ -37,6 +37,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/styled-components": "^5.1.26",
     "apollo-upload-client": "^17.0.0",
+    "apollo3-cache-persist": "^0.14.1",
     "ionicons": "^7.0.0",
     "language-tags": "^1.0.8",
     "nanoid": "^5.0.2",
