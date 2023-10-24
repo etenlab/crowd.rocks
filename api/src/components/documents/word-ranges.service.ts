@@ -21,12 +21,14 @@ import {
   WordRangeUpsertsProcedureOutputRow,
   callWordRangeUpsertsProcedure,
 } from './sql-string';
+import { AuthorizationService } from '../authorization/authorization.service';
 
 @Injectable()
 export class WordRangesService {
   constructor(
     private pg: PostgresService,
     private documentWordEntryService: DocumentWordEntriesService,
+    private authService: AuthorizationService,
   ) {}
 
   private async convertQueryResultToWordRange(
@@ -163,6 +165,12 @@ export class WordRangesService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<WordRangesOutput> {
+    if (!(await this.authService.is_authorized(token))) {
+      return {
+        error: ErrorType.Unauthorized,
+        word_ranges: [],
+      };
+    }
     if (input.length === 0) {
       return {
         error: ErrorType.NoError,

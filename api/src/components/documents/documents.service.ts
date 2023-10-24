@@ -15,6 +15,7 @@ import {
   TextyDocumentInput,
   DocumentUploadOutput,
 } from './types';
+import { AuthorizationService } from '../authorization/authorization.service';
 
 @Injectable()
 export class DocumentsService {
@@ -24,6 +25,7 @@ export class DocumentsService {
     private fileService: FileService,
     private wordlikeStringService: WordlikeStringsService,
     private documentWordEntryService: DocumentWordEntriesService,
+    private authService: AuthorizationService,
   ) {}
 
   async saveDocument({
@@ -34,7 +36,12 @@ export class DocumentsService {
     token: string;
   }): Promise<DocumentUploadOutput> {
     const dbPoolClient = await this.pg.pool.connect();
-
+    if (!(await this.authService.is_authorized(token))) {
+      return {
+        error: ErrorType.Unauthorized,
+        document: null,
+      };
+    }
     try {
       const content = await this.fileService.getFileContentAsString(
         document.file_id,
