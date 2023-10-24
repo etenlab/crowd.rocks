@@ -24,9 +24,7 @@ export const X_LANG_TAGS: Array<TLang> = [
   { tag: 'x-shila', descriptions: ['Shila'] },
   { tag: 'x-mwenyi', descriptions: ['Mwenyi'] },
   { tag: 'x-liuwa', descriptions: ['Liuwa'] },
-  // { tag: 'x-Lambya', descriptions: ['Lambya'] },
-  // { tag: 'x-Mukulu', descriptions: ['Mukulu'] },
-  // { tag: 'x-Kunda', descriptions: ['Kunda'] },
+  { tag: 'x-Seabo', descriptions: ['Seabo'] },
 ];
 
 enum TagTypes {

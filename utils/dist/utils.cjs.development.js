@@ -437,12 +437,10 @@ var X_LANG_TAGS = [{
 }, {
   tag: 'x-liuwa',
   descriptions: ['Liuwa']
-}
-// { tag: 'x-Lambya', descriptions: ['Lambya'] },
-// { tag: 'x-Mukulu', descriptions: ['Mukulu'] },
-// { tag: 'x-Kunda', descriptions: ['Kunda'] },
-];
-
+}, {
+  tag: 'x-Seabo',
+  descriptions: ['Seabo']
+}];
 var TagTypes;
 (function (TagTypes) {
   TagTypes["LANGUAGE"] = "language";
