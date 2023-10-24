@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router';
-import {
-  IonInfiniteScroll,
-  IonInfiniteScrollContent,
-  useIonRouter,
-} from '@ionic/react';
+import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 import { Button, Stack, Typography } from '@mui/material';
 
@@ -12,13 +8,10 @@ import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { SearchInput } from '../../common/forms/SearchInput';
 import { FilterList } from '../../common/icons/FilterList';
-import { WordItem } from '../../common/WordItem';
+import { MapWordItem } from './MapWordItem';
 import { Select, OptionItem } from '../../common/forms/Select';
 
-import {
-  MapWordOrPhrase,
-  useGetOrigMapWordsAndPhrasesLazyQuery,
-} from '../../../generated/graphql';
+import { useGetOrigMapWordsAndPhrasesLazyQuery } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
@@ -28,8 +21,7 @@ import { MapNavigationModal } from './MapNavigationModal';
 
 export function MapWordsList() {
   const { tr } = useTr();
-  const router = useIonRouter();
-  const { nation_id, language_id, id } = useParams<{
+  const { id } = useParams<{
     id: string;
     nation_id: string;
     language_id: string;
@@ -55,7 +47,7 @@ export function MapWordsList() {
   );
 
   const {
-    actions: { setTempTranslation, createModal },
+    actions: { createModal },
   } = useAppContext();
 
   const { openModal, closeModal } = createModal();
@@ -133,38 +125,6 @@ export function MapWordsList() {
       filterOption.value,
       fetchMore,
     ],
-  );
-
-  const handleWordOrPhraseSelect = useCallback(
-    (wordOrPhrase: MapWordOrPhrase) => {
-      router.push(
-        `/${nation_id}/${language_id}/1/maps/translate_word/${wordOrPhrase.o_definition_id}/${wordOrPhrase.type}`,
-      );
-    },
-    [language_id, nation_id, router],
-  );
-
-  const handleConfirm = useCallback(
-    (
-      translation: string,
-      description: string,
-      wordOrPhrase: MapWordOrPhrase,
-    ) => {
-      setTempTranslation(
-        `${wordOrPhrase.o_definition_id}:${wordOrPhrase.type}`,
-        { translation, description },
-      );
-      if (id === 'all') {
-        router.push(
-          `/${nation_id}/${language_id}/1/maps/translation_confirm/${wordOrPhrase.o_definition_id}/${wordOrPhrase.type}`,
-        );
-      } else {
-        router.push(
-          `/${nation_id}/${language_id}/1/maps/translation_confirm/${wordOrPhrase.o_definition_id}/${wordOrPhrase.type}?original_map_id=${id}`,
-        );
-      }
-    },
-    [language_id, nation_id, router, setTempTranslation, id],
   );
 
   const handleChangeFilterOption = useCallback((value: OptionItem | null) => {
@@ -259,17 +219,10 @@ export function MapWordsList() {
 
       <Stack gap="16px">
         {wordsAndPhrases &&
-          wordsAndPhrases.getOrigMapWordsAndPhrases.edges.map((omw) => (
-            <WordItem
-              key={omw.cursor}
-              word={omw.node.o_like_string}
-              description={omw.node.o_definition}
-              onConfirm={(translation, description) => {
-                handleConfirm(translation, description, omw.node);
-              }}
-              onDetail={() => handleWordOrPhraseSelect(omw.node)}
-            />
-          ))}
+          wordsAndPhrases.getOrigMapWordsAndPhrases.edges.map(
+            (omw) =>
+              omw.node && <MapWordItem key={omw.cursor} original={omw.node} />,
+          )}
       </Stack>
 
       <IonInfiniteScroll onIonInfinite={handleInfinite}>

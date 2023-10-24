@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Stack, Typography, Button } from '@mui/material';
+import { Stack, Typography, Button, CircularProgress } from '@mui/material';
 import { useIonToast } from '@ionic/react';
 
 import { typeOfString, StringContentTypes } from '../../../common/utility';
@@ -9,7 +9,6 @@ import { WordForm } from '../../common/forms/WordForm';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-import { ErrorType } from '../../../generated/graphql';
 import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 import { CheckCircle } from '../../common/icons/CheckCircle';
 
@@ -39,25 +38,52 @@ export function NewTranslationForm({
   const [translation, setTranslation] = useState<string>('');
   const [description, setDescription] = useState<string>('');
 
-  const [upsertTranslation, { data: upsertData, loading: upsertLoading }] =
+  const [saving, setSaving] = useState<boolean>(false);
+
+  const [upsertTranslation] =
     useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
 
   useEffect(() => {
-    if (upsertLoading) return;
-    if (
-      upsertData &&
-      upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error !==
-        ErrorType.NoError
-    ) {
-      present({
-        message:
-          upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error,
-        duration: 1500,
-        position: 'top',
-        color: 'danger',
-      });
+    if (!saving) {
+      return;
     }
-  }, [present, upsertData, upsertLoading]);
+
+    if (!targetLang) {
+      setSaving(false);
+      return;
+    }
+
+    (async () => {
+      await upsertTranslation({
+        variables: {
+          language_code: targetLang?.lang.tag,
+          dialect_code: targetLang?.dialect?.tag,
+          geo_code: targetLang?.region?.tag,
+          word_or_phrase: translation,
+          definition: description,
+          from_definition_id: definition_id,
+          from_definition_type_is_word:
+            definition_type === StringContentTypes.WORD,
+          is_type_word: typeOfString(translation) === StringContentTypes.WORD,
+        },
+      });
+
+      setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]);
+
+      setTranslation('');
+      setDescription('');
+    })();
+  }, [
+    definition_id,
+    definition_type,
+    description,
+    saving,
+    setUpdatedTrDefinitionIds,
+    targetLang,
+    translation,
+    updatedTrDefinitionIds,
+    upsertTranslation,
+  ]);
 
   const handleNewTranslation = () => {
     if (translation.trim() === '') {
@@ -90,24 +116,7 @@ export function NewTranslationForm({
       return;
     }
 
-    upsertTranslation({
-      variables: {
-        language_code: targetLang?.lang.tag,
-        dialect_code: targetLang?.dialect?.tag,
-        geo_code: targetLang?.region?.tag,
-        word_or_phrase: translation,
-        definition: description,
-        from_definition_id: definition_id,
-        from_definition_type_is_word:
-          definition_type === StringContentTypes.WORD,
-        is_type_word: typeOfString(translation) === StringContentTypes.WORD,
-      },
-    });
-
-    setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]);
-
-    setTranslation('');
-    setDescription('');
+    setSaving(true);
   };
 
   const handleChangeWordForm = (word: string, description: string) => {
@@ -128,6 +137,7 @@ export function NewTranslationForm({
           wordPlaceholder={tr('Your translation')}
           descriptionPlaceholder={tr('Description')}
           onChange={handleChangeWordForm}
+          disabled={saving}
         />
       </Stack>
       {translation.trim() === '' || description.trim() === '' ? (
@@ -146,15 +156,24 @@ export function NewTranslationForm({
             variant="contained"
             color="gray_stroke"
             onClick={onCancel}
+            disabled={saving}
           >
             {tr('Cancel')}
           </Button>
           <Button
             variant="contained"
             color="green"
-            startIcon={<CheckCircle sx={{ fontSize: 24 }} />}
+            startIcon={
+              saving ? (
+                <CircularProgress size="18px" color="inherit" />
+              ) : (
+                <CheckCircle sx={{ fontSize: 24 }} />
+              )
+            }
             onClick={handleNewTranslation}
-            disabled={translation.trim() === '' || description.trim() === ''}
+            disabled={
+              saving || translation.trim() === '' || description.trim() === ''
+            }
             fullWidth
           >
             {tr('Save')}

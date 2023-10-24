@@ -6,6 +6,7 @@ export type WordFormProps = {
   description: string;
   descriptionPlaceholder?: string;
   onChange(word: string, description: string): void;
+  disabled?: boolean;
 };
 
 export function WordForm({
@@ -14,6 +15,7 @@ export function WordForm({
   description,
   descriptionPlaceholder,
   onChange,
+  disabled,
 }: WordFormProps) {
   return (
     <Stack
@@ -40,6 +42,7 @@ export function WordForm({
           },
         }}
         placeholder={wordPlaceholder}
+        disabled={disabled}
       />
       <Divider />
       <InputBase
@@ -60,6 +63,7 @@ export function WordForm({
           },
         }}
         placeholder={descriptionPlaceholder}
+        disabled={disabled}
       />
     </Stack>
   );
