@@ -18,7 +18,7 @@ import { InfoFill } from '../../common/icons/InfoFill';
 import { AddCircle } from '../../common/icons/AddCircle';
 import { WordItem } from '../../common/WordItem';
 import { MapWordOrPhraseTranslationList } from '../MapWordOrPhraseTranslation/MapWordOrPhraseTranslantionList';
-import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
+import { useCustomUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 
 export function MapNewTranslationConfirm() {
   const { tr } = useTr();
@@ -56,7 +56,7 @@ export function MapNewTranslationConfirm() {
   });
 
   const [upsertTranslation, { data: upsertData, loading: upsertLoading }] =
-    useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
+    useCustomUpsertTranslationFromWordAndDefinitionlikeStringMutation();
 
   useEffect(() => {
     if (upsertLoading) return;

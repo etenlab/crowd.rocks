@@ -19,7 +19,7 @@ export interface StateType {
     languages: SiteTextLanguageWithTranslationInfo[];
   };
   maps: {
-    updatedTrDefinitionIds: Array<string>;
+    updatedTrDefinitionIds: Array<string>; //todo: deprecated? Chack and remove.
     tempTranslations: Record<
       string,
       { translation: string; description: string } | undefined

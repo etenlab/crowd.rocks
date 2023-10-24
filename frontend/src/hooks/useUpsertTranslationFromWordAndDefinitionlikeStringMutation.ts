@@ -7,10 +7,13 @@ import {
 import { useTr } from './useTr';
 import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
-export function useUpsertTranslationFromWordAndDefinitionlikeStringMutation() {
+export function useCustomUpsertTranslationFromWordAndDefinitionlikeStringMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
   const redirectOnUnauth = useUnauthorizedRedirect();
+  console.log(
+    'useCustomUpsertTranslationFromWordAndDefinitionlikeStringMutation()',
+  );
   return useGeneratedUpsertTranslationFromWordAndDefinitionlikeStringMutation({
     refetchQueries: ['GetTranslationsByFromDefinitionId'],
     update(cache, { data, errors }) {
