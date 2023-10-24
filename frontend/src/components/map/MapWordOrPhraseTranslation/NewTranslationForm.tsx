@@ -5,13 +5,13 @@ import { useIonToast } from '@ionic/react';
 import { typeOfString, StringContentTypes } from '../../../common/utility';
 
 import { WordForm } from '../../common/forms/WordForm';
-import { AddCircle } from '../../common/icons/AddCircle';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 import { ErrorType } from '../../../generated/graphql';
 import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
+import { CheckCircle } from '../../common/icons/CheckCircle';
 
 export type NewTranslationForm = {
   definition_id: string;
@@ -130,20 +130,37 @@ export function NewTranslationForm({
           onChange={handleChangeWordForm}
         />
       </Stack>
-      <Stack gap="16px">
-        <Button
-          variant="contained"
-          color="green"
-          startIcon={<AddCircle sx={{ fontSize: 24 }} />}
-          onClick={handleNewTranslation}
-          disabled={translation.trim() === '' || description.trim() === ''}
-        >
-          {tr('Yes, add my translation')}
-        </Button>
+      {translation.trim() === '' || description.trim() === '' ? (
         <Button variant="contained" color="gray_stroke" onClick={onCancel}>
           {tr('Cancel')}
         </Button>
-      </Stack>
+      ) : (
+        <Stack
+          gap="24px"
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Button
+            fullWidth
+            variant="contained"
+            color="gray_stroke"
+            onClick={onCancel}
+          >
+            {tr('Cancel')}
+          </Button>
+          <Button
+            variant="contained"
+            color="green"
+            startIcon={<CheckCircle sx={{ fontSize: 24 }} />}
+            onClick={handleNewTranslation}
+            disabled={translation.trim() === '' || description.trim() === ''}
+            fullWidth
+          >
+            {tr('Save')}
+          </Button>
+        </Stack>
+      )}
     </Stack>
   );
 }
