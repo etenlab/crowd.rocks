@@ -33,7 +33,7 @@ import {
 import { globals } from './services/globals';
 import { login_change } from './services/subscriptions';
 
-import { apollo_client } from './main';
+import { apollo_client } from './App';
 
 import {
   langInfo2String,

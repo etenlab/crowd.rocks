@@ -11,7 +11,7 @@ import { useHistory } from 'react-router';
 
 import { PageLayout } from '../common/PageLayout';
 
-import { apollo_client } from '../../main';
+import { apollo_client } from '../../App';
 import {
   ErrorType,
   useLoginMutation,
