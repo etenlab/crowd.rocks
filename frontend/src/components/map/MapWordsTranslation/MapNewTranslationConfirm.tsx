@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIonRouter, useIonToast } from '@ionic/react';
 
@@ -57,6 +57,8 @@ export function MapNewTranslationConfirm() {
 
   const [upsertTranslation, { data: upsertData, loading: upsertLoading }] =
     useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
+
+  const [isSimiliarTr, setIsSimilarTr] = useState<boolean>(false);
 
   useEffect(() => {
     if (upsertLoading) return;
@@ -188,22 +190,28 @@ export function MapNewTranslationConfirm() {
     goToTranslation();
   };
 
+  const handleFindSimilarTranslation = useCallback((founded: boolean) => {
+    setIsSimilarTr(founded);
+  }, []);
+
   return (
     <>
-      <Stack gap="8px">
-        <Stack direction="row" gap="8px" alignItems="center">
-          <InfoFill color="orange" />
-          <Typography variant="h3">
-            {tr('Your translation may exist!')}
+      {isSimiliarTr ? (
+        <Stack gap="8px">
+          <Stack direction="row" gap="8px" alignItems="center">
+            <InfoFill color="orange" />
+            <Typography variant="h3">
+              {tr('Your translation already exists!')}
+            </Typography>
+          </Stack>
+
+          <Typography variant="body1" color="text.gray">
+            {tr(
+              'Compare translations below. Are you sure you want to duplicate the translation? ',
+            )}
           </Typography>
         </Stack>
-
-        <Typography variant="body1" color="text.gray">
-          {tr(
-            'Compare translations below. Are you sure you want to duplicate the translation? ',
-          )}
-        </Typography>
-      </Stack>
+      ) : null}
 
       <WordItem
         word={original.value || ''}
@@ -213,11 +221,17 @@ export function MapNewTranslationConfirm() {
         onDetail={() => {}}
       />
 
-      <Typography variant="h3">{tr('Similar translation')}</Typography>
+      {isSimiliarTr ? (
+        <Typography variant="h3">{tr('Similar translation')}</Typography>
+      ) : null}
 
       <MapWordOrPhraseTranslationList
         definition_id={definition_id}
         definition_type={definition_type}
+        tempTranslation={
+          tempTranslations[`${definition_id}:${definition_type}`]?.translation
+        }
+        onFindSimilarTranslation={handleFindSimilarTranslation}
       />
 
       <Stack gap="16px">
