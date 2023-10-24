@@ -3,3 +3,7 @@ export declare const NOT_DEFINED_PLACEHOLDER = "- not defined -";
 export declare const LOADING_TAG_PLACEHOLDER: import("./types").ITagInfo & Omit<import("./types").ITagInfo, "tag"> & {
     tag: string;
 };
+export declare enum GroupedFilterSymbols {
+    Digits = "0-9",
+    SpecialCharacters = "#"
+}
