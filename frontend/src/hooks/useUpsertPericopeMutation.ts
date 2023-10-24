@@ -27,7 +27,7 @@ export function useUpsertPericopeMutation(documentId: string) {
         updateCacheWithUpsertPericope(cache, newPericope, documentId);
 
         present({
-          message: tr('Success at creating new Answer!'),
+          message: tr('Success at creating new Pericope!'),
           duration: 1500,
           position: 'top',
           color: 'success',

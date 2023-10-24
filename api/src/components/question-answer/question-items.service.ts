@@ -15,10 +15,14 @@ import {
   getQuestionItemsObjByIds,
   GetQuestionItemsObjectByIds,
 } from './sql-string';
+import { AuthorizationService } from '../authorization/authorization.service';
 
 @Injectable()
 export class QuestionItemsService {
-  constructor(private pg: PostgresService) {}
+  constructor(
+    private pg: PostgresService,
+    private authService: AuthorizationService,
+  ) {}
 
   async reads(
     ids: number[],
@@ -56,10 +60,18 @@ export class QuestionItemsService {
   async upserts(
     items: string[],
     pgClient: PoolClient | null,
+    token?: string,
   ): Promise<QuestionItemsOutput> {
     if (items.length === 0) {
       return {
         error: ErrorType.NoError,
+        question_items: [],
+      };
+    }
+
+    if (!(await this.authService.is_authorized(token))) {
+      return {
+        error: ErrorType.Unauthorized,
         question_items: [],
       };
     }
