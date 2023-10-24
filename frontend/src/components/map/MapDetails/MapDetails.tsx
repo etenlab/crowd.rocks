@@ -29,7 +29,7 @@ import { langInfo2String, subTags2LangInfo } from '../../../../../utils';
 import { useTr } from '../../../hooks/useTr';
 import { useToggleMapVoteStatusMutation } from '../../../hooks/useToggleMapVoteStatusMutation';
 
-import { MAPS_FLAGS } from '../../flags/flagGroups';
+import { MAPS_FLAGS, authorizedForAnyFlag } from '../../flags/flagGroups';
 
 export function MapDetails() {
   const { tr } = useTr();
@@ -134,6 +134,9 @@ export function MapDetails() {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
+          sx={{
+            display: authorizedForAnyFlag(MAPS_FLAGS) ? undefined : 'none',
+          }}
         >
           <Tag label={tagLabel} color={tagColor} />
           <MoreHorizButton

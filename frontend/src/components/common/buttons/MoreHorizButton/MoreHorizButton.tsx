@@ -47,7 +47,6 @@ export function MoreHorizButton({
       >
         <MoreHoriz sx={{ fontSize: 24 }} />
       </IconButton>
-
       <Popover
         onClick={(e) => {
           e.stopPropagation();
