@@ -224,6 +224,7 @@ export class MapsResolver {
 
   @Query(() => GetOrigMapsListOutput)
   async getOrigMapsList(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Args('input') input: GetOrigMapListInput,
   ): Promise<GetOrigMapsListOutput> {
     const maps = await this.mapsService.getOrigMaps();

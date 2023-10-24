@@ -45,10 +45,7 @@ import {
   getLangConnectionsObjectMapAndTexts,
   validateTranslateByBotInput,
 } from './utility';
-import {
-  langInfo2String,
-  subTags2LangInfo,
-} from '../../../../utils';
+import { langInfo2String, subTags2LangInfo } from '../../../../utils';
 
 interface ItranslateAllWordsAndPhrasesByBot {
   translateWordsAndPhrases: (
@@ -363,7 +360,7 @@ export class AiTranslationsService {
 
       let translatedWordCount = 0;
       let translatedPhraseCount = 0;
-      let upVoteCount = 0;
+
       for (const edge of wordsConnection.edges) {
         const { node } = edge;
         const oWord = textsToTranslateObjMap.get(node.word);
@@ -416,7 +413,6 @@ export class AiTranslationsService {
           }
           // process: the same translation was made by someone else
           else {
-            upVoteCount++;
             //console.log(`upvote ${otherSameTranslations[0].translationId}`);
             await setTranslationsVotes(
               true,

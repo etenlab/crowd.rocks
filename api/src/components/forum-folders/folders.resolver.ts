@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Args, Query, Resolver, Mutation, Context } from '@nestjs/graphql';
 
 import { ForumFoldersService } from './folders.service';
@@ -25,7 +25,7 @@ export class ForumFolderResolver {
   async forumFolderRead(
     @Args('input') input: ForumFolderReadInput,
   ): Promise<ForumFolderReadOutput> {
-    console.log('forum read resolver, word_id:', input.folder_id);
+    Logger.log('forum read resolver, word_id:', input.folder_id);
 
     return this.folderService.read(input);
   }
@@ -34,7 +34,7 @@ export class ForumFolderResolver {
   async forumFolders(
     @Args('input') input: ForumFolderListInput,
   ): Promise<ForumFolderListOutput> {
-    console.log('forum list resolver');
+    Logger.log('forum list resolver');
     return this.folderService.listByForumId(+input.forum_id);
   }
 
@@ -43,8 +43,8 @@ export class ForumFolderResolver {
     @Args('input') input: ForumFolderUpsertInput,
     @Context() req: any,
   ): Promise<ForumFolderUpsertOutput> {
-    console.log('forum upsert resolver, name: ', input.name);
-    console.log('forum_id', input.forum_id);
+    Logger.log('forum upsert resolver, name: ', input.name);
+    Logger.log('forum_id', input.forum_id);
 
     return this.folderService.upsert(input, getBearer(req) || '');
   }
@@ -54,7 +54,7 @@ export class ForumFolderResolver {
     @Args('input') input: ForumFolderDeleteInput,
     @Context() req: any,
   ): Promise<ForumFolderDeleteOutput> {
-    console.log('forum delete resolver, forum_id: ', input.folder_id);
+    Logger.log('forum delete resolver, forum_id: ', input.folder_id);
     return this.folderService.delete(input, getBearer(req) || '');
   }
 }

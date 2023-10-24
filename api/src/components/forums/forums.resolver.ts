@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Args, Query, Resolver, Mutation, Context } from '@nestjs/graphql';
 
 import { ForumsService } from './forums.service';
@@ -24,14 +24,14 @@ export class ForumsResolver {
   async forumRead(
     @Args('input') input: ForumReadInput,
   ): Promise<ForumReadOutput> {
-    console.log('forum read resolver, word_id:', input.forum_id);
+    Logger.log('forum read resolver, word_id:', input.forum_id);
 
     return this.forumsService.read(input);
   }
 
   @Query(() => ForumListOutput)
   async forums(): Promise<ForumListOutput> {
-    console.log('forum list resolver');
+    Logger.log('forum list resolver');
     return this.forumsService.list();
   }
 
@@ -40,7 +40,7 @@ export class ForumsResolver {
     @Args('input') input: ForumUpsertInput,
     @Context() req: any,
   ): Promise<ForumUpsertOutput> {
-    console.log('forum upsert resolver, name: ', input.name);
+    Logger.log('forum upsert resolver, name: ', input.name);
 
     return this.forumsService.upsert(input, getBearer(req) || '');
   }
@@ -50,7 +50,7 @@ export class ForumsResolver {
     @Args('input') input: ForumDeleteInput,
     @Context() req: any,
   ): Promise<ForumDeleteOutput> {
-    console.log('forum delete resolver, forum_id: ', input.forum_id);
+    Logger.log('forum delete resolver, forum_id: ', input.forum_id);
     return this.forumsService.delete(input, getBearer(req) || '');
   }
 }
