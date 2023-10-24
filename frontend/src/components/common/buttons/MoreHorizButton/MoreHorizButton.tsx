@@ -2,7 +2,6 @@ import { useState, MouseEvent, ReactNode } from 'react';
 import { IconButton, Popover, IconButtonProps } from '@mui/material';
 
 import { MoreHoriz } from '../../icons/MoreHoriz';
-import { MoreVert } from '../../icons/MoreVert';
 
 export type MoreHorizButtonProps = Omit<IconButtonProps, 'component'> & {
   component: ReactNode;
@@ -76,25 +75,6 @@ export function MoreHorizButton({
           },
         })}
       >
-        <IconButton
-          sx={(theme) => ({
-            position: 'absolute',
-            top: '5px',
-            right: '5px',
-            background: theme.palette.background.white,
-            '&:hover': {
-              background: theme.palette.background.white,
-            },
-          })}
-          color="gray"
-        >
-          <MoreVert
-            sx={{
-              fontSize: 24,
-            }}
-            color="gray"
-          />
-        </IconButton>
         {component}
       </Popover>
     </>
