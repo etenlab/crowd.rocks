@@ -15,9 +15,15 @@ type FlagProps = {
   parent_table: TableNameType;
   parent_id: string;
   flag_names: FlagName[];
+  onEmptyComps?(): void;
 };
 
-export function FlagV2({ parent_table, parent_id, flag_names }: FlagProps) {
+export function FlagV2({
+  parent_table,
+  parent_id,
+  flag_names,
+  onEmptyComps,
+}: FlagProps) {
   const { tr } = useTr();
   const {
     actions: { createModal },
@@ -32,6 +38,7 @@ export function FlagV2({ parent_table, parent_id, flag_names }: FlagProps) {
         parent_id={parent_id}
         flag_names={flag_names}
         onClose={closeModal}
+        onEmptyComps={onEmptyComps}
       />,
     );
 

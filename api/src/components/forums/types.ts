@@ -1,6 +1,5 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
-import { ForumFolder } from '../forum-folders/types';
 
 @ObjectType()
 export class Forum {

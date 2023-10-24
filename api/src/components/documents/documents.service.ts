@@ -150,10 +150,28 @@ export class DocumentsService {
   }
 
   async getAllDocuments(lang?: LanguageInput): Promise<GetAllDocumentsOutput> {
-    return this.documentsRepository.getAllDocuments(lang);
+    try {
+      return this.documentsRepository.getAllDocuments(lang);
+    } catch (err) {
+      Logger.log(err);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      documents: [],
+    };
   }
 
   async getDocument(document_id: string): Promise<GetDocumentOutput> {
-    return this.documentsRepository.getDocument(document_id);
+    try {
+      return this.documentsRepository.getDocument(document_id);
+    } catch (err) {
+      Logger.log(err);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      document: null,
+    };
   }
 }
