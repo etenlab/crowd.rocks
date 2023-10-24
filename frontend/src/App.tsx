@@ -40,6 +40,7 @@ import {
   InMemoryCache,
   ApolloClient,
   ApolloProvider,
+  NormalizedCacheObject,
 } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
@@ -47,7 +48,8 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { createUploadLink } from 'apollo-upload-client';
 import { typePolicies } from './cacheTypePolicies';
 import { createClient } from 'graphql-ws';
-import { persistCache, LocalStorageWrapper } from 'apollo3-cache-persist';
+import { persistCache } from 'apollo3-cache-persist';
+import { useEffect, useState } from 'react';
 
 console.info('Runninig in environment: ' + import.meta.env.MODE);
 
@@ -91,20 +93,6 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-const cache = new InMemoryCache({
-  typePolicies,
-});
-
-await persistCache({
-  cache,
-  storage: new LocalStorageWrapper(window.localStorage),
-});
-
-export const apollo_client = new ApolloClient({
-  link: authLink.concat(splitLink),
-  cache: cache,
-});
-
 // const client = new ApolloClient({
 //   uri: 'http://localhost:3001/graphql',
 //   cache: new InMemoryCache(),
@@ -114,22 +102,50 @@ setupIonicReact({
   innerHTMLTemplatesEnabled: true,
 });
 
-const App: React.FC = () => (
-  <IonApp>
-    <ApolloProvider client={apollo_client}>
-      <AppContextProvider>
-        <ThemeProvider autoDetectPrefersDarkMode={false}>
-          <IonReactRouter>
-            <IonRouterOutlet>
-              <Route path="/">
-                <Body />
-              </Route>
-            </IonRouterOutlet>
-          </IonReactRouter>
-        </ThemeProvider>
-      </AppContextProvider>
-    </ApolloProvider>
-  </IonApp>
-);
+const App: React.FC = () => {
+  const [apollo_client, setClient] =
+    useState<ApolloClient<NormalizedCacheObject>>();
+
+  useEffect(() => {
+    async function init() {
+      const cache = new InMemoryCache({
+        typePolicies,
+      });
+      persistCache({ cache, storage: window.localStorage }).then(() => {
+        setClient(
+          new ApolloClient({
+            cache,
+            link: authLink.concat(splitLink),
+          }),
+        );
+      });
+    }
+    if (!apollo_client) {
+      init().catch(console.error);
+    } else {
+      return;
+    }
+  }, [apollo_client]);
+  if (!apollo_client) {
+    return <h2>Initializing app...</h2>; //todo: change later
+  }
+  return (
+    <IonApp>
+      <ApolloProvider client={apollo_client}>
+        <AppContextProvider>
+          <ThemeProvider autoDetectPrefersDarkMode={false}>
+            <IonReactRouter>
+              <IonRouterOutlet>
+                <Route path="/">
+                  <Body />
+                </Route>
+              </IonRouterOutlet>
+            </IonReactRouter>
+          </ThemeProvider>
+        </AppContextProvider>
+      </ApolloProvider>
+    </IonApp>
+  );
+};
 
 export default App;
