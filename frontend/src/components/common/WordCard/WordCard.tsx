@@ -13,6 +13,7 @@ export type Author = {
   username: string;
   avatar?: string;
   createdAt: Date;
+  createdByBot?: boolean;
 };
 
 export type WordCardProps = {
@@ -61,6 +62,7 @@ export function WordCard({
             username={author.username}
             date={author.createdAt}
             avatar={author.avatar}
+            isCreatedByBot={author.createdByBot}
           />
         ) : (
           <div />
