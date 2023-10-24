@@ -56,6 +56,7 @@ export function MapWordOrPhraseTranslationList({
       dialect_code: targetLang?.dialect?.tag,
       geo_code: targetLang?.region?.tag,
     },
+    fetchPolicy: 'no-cache',
   });
 
   const [toggleTrVoteStatus, { data: voteData, loading: voteLoading }] =
