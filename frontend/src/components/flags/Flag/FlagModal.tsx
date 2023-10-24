@@ -28,12 +28,14 @@ type FlagModalProps = {
   parent_id: string;
   flag_names: FlagName[];
   onClose(): void;
+  onEmptyComps?(): void;
 };
 export function FlagModal({
   onClose,
   flag_names,
   parent_id,
   parent_table,
+  onEmptyComps,
 }: FlagModalProps) {
   const { tr } = useTr();
 
@@ -113,6 +115,10 @@ export function FlagModal({
         </ListItemButton>
       </ListItem>
     ));
+  if (flagListCom.length === 0) {
+    onEmptyComps && onEmptyComps();
+    return null;
+  }
 
   return (
     <Stack gap="24px">

@@ -2,7 +2,7 @@ import { Typography, Stack } from '@mui/material';
 
 import { TableNameType } from '../../../generated/graphql';
 
-import { FlagName } from '../../flags/flagGroups';
+import { FlagName, authorizedForAnyFlag } from '../../flags/flagGroups';
 import { FlagV2 } from '../../flags/Flag';
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { VoteButtonsHorizontal } from '../VoteButtonsHorizontal';
@@ -65,7 +65,14 @@ export function WordCard({
         ) : (
           <div />
         )}
-        <MoreHorizButton component={flags ? <FlagV2 {...flags} /> : null} />
+        <MoreHorizButton
+          sx={{
+            display: authorizedForAnyFlag(flags?.flag_names ?? [])
+              ? undefined
+              : 'none',
+          }}
+          component={flags ? <FlagV2 {...flags} /> : null}
+        />
       </Stack>
 
       <Stack
