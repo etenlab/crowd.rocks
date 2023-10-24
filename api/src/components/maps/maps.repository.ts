@@ -22,7 +22,6 @@ import {
   OrigMapWordsAndPhrasesOutput,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
-import { deprecate } from 'util';
 
 interface ISaveMapParams {
   mapFileName: string;

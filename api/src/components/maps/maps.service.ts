@@ -153,6 +153,7 @@ export class MapsService {
     const origMapString = await this.fileService.getFileContentAsString(
       content_file_id,
     );
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { transformedSvgINode, foundWords, foundPhrases } =
       this.parseSvgMapString(origMapString);
 

@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ConfigService } from 'src/core/config.service';
 import { PostgresService } from 'src/core/postgres.service';
-import { Bounce, Complaint, Delivery, SESNotificationPayload } from './types';
+import { SESNotificationPayload } from './types';
 
 @Controller()
 export class SnsController {

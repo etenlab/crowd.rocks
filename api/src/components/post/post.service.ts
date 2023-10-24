@@ -209,10 +209,7 @@ export class PostService {
     };
   }
 
-  async getTotalPosts(
-    input: PostsByParentInput,
-    req: any,
-  ): Promise<PostCountOutput> {
+  async getTotalPosts(input: PostsByParentInput): Promise<PostCountOutput> {
     if (input.parent_id === '') {
       return {
         error: ErrorType.InvalidInputs,
@@ -249,7 +246,6 @@ export class PostService {
 
   async getPostsByParent(
     input: PostsByParentInput,
-    req: any,
   ): Promise<PostsByParentOutput> {
     try {
       const res1 = await this.pg.pool.query(
