@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
 import { pgClientOrPool } from 'src/common/utility';
@@ -28,16 +28,16 @@ export class DataLoadService {
   }
 
   async loadSiteTextData() {
-    console.log('loading site text data');
+    Logger.log('loading site text data');
 
     const token = await this.getAdminToken(null);
 
     if (token == null) {
-      console.error("Admin user hasn't been created yet");
+      Logger.error("Admin user hasn't been created yet");
       return;
     }
 
-    console.log(`Admin token ${token}`);
+    Logger.log(`Admin token ${token}`);
 
     for (const [siteTextlike_string, translationObj] of Object.entries(
       siteText,
@@ -55,7 +55,7 @@ export class DataLoadService {
       );
 
       if (error !== ErrorType.NoError) {
-        console.log(
+        Logger.error(
           `creating site text got error: ${error}`,
           `params: siteTextlike_string: ${siteTextlike_string}`,
         );
@@ -99,7 +99,7 @@ export class DataLoadService {
           );
 
         if (error !== ErrorType.NoError) {
-          console.log(
+          Logger.error(
             `creating site text translation got error: ${error}`,
             `params: siteTextlike_string: ${siteTextlike_string}, translationlike_string: ${translationlike_string}`,
           );

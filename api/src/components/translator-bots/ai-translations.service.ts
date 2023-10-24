@@ -82,99 +82,112 @@ export class AiTranslationsService {
     input: TranslatedLanguageInfoInput,
     pgClient: PoolClient | null,
   ): Promise<TranslatedLanguageInfoOutput> {
-    const pg = await pgClientOrPool({
-      client: pgClient,
-      pool: this.pg.pool,
-    });
+    try {
+      const pg = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      });
 
-    const { id: google_user_id } = await this.gTrService.getTranslatorToken();
-    const { id: lilt_user_id } = await this.lTrService.getTranslatorToken();
-    const { id: gpt_3_user_id } = await this.chatgptService.getTranslatorToken(
-      ChatGPTVersion.Three,
-    );
-    const { id: gpt_4_user_id } = await this.chatgptService.getTranslatorToken(
-      ChatGPTVersion.Four,
-    );
+      const { id: google_user_id } = await this.gTrService.getTranslatorToken();
+      const { id: lilt_user_id } = await this.lTrService.getTranslatorToken();
+      const { id: gpt_3_user_id } =
+        await this.chatgptService.getTranslatorToken(ChatGPTVersion.Three);
+      const { id: gpt_4_user_id } =
+        await this.chatgptService.getTranslatorToken(ChatGPTVersion.Four);
 
-    const totalWordres = await pg.query(
-      ...getTotalWordCountByLanguage(input.fromLanguageCode),
-    );
-    const totalWordCount = totalWordres.rows[0].count;
-
-    // total phrases
-    const totalPhraseRes = await pg.query(
-      ...getTotalPhraseCountByLanguage(input.fromLanguageCode),
-    );
-    const totalPhraseCount = totalPhraseRes.rows[0].count;
-
-    let translatedMissingPhraseCount: number | undefined = undefined;
-    // missing phrases
-    if (input.toLanguageCode) {
-      const totalPhraseToWordRes = await pg.query(
-        ...getTotalPhraseToWordCount(
-          input.fromLanguageCode,
-          input.toLanguageCode,
-          [google_user_id, lilt_user_id, gpt_3_user_id, gpt_4_user_id],
-        ),
+      const totalWordres = await pg.query(
+        ...getTotalWordCountByLanguage(input.fromLanguageCode),
       );
-      const totalPhraseToPhraseRes = await pg.query(
-        ...getTotalPhraseToPhraseCount(
-          input.fromLanguageCode,
-          input.toLanguageCode,
-          [google_user_id, lilt_user_id, gpt_3_user_id, gpt_4_user_id],
-        ),
+      const totalWordCount = totalWordres.rows[0].count;
+
+      // total phrases
+      const totalPhraseRes = await pg.query(
+        ...getTotalPhraseCountByLanguage(input.fromLanguageCode),
       );
-      translatedMissingPhraseCount =
-        +totalPhraseCount -
-        (+totalPhraseToWordRes.rows[0].count +
-          +totalPhraseToPhraseRes.rows[0].count);
+      const totalPhraseCount = totalPhraseRes.rows[0].count;
+
+      let translatedMissingPhraseCount: number | undefined = undefined;
+      // missing phrases
+      if (input.toLanguageCode) {
+        const totalPhraseToWordRes = await pg.query(
+          ...getTotalPhraseToWordCount(
+            input.fromLanguageCode,
+            input.toLanguageCode,
+            [google_user_id, lilt_user_id, gpt_3_user_id, gpt_4_user_id],
+          ),
+        );
+        const totalPhraseToPhraseRes = await pg.query(
+          ...getTotalPhraseToPhraseCount(
+            input.fromLanguageCode,
+            input.toLanguageCode,
+            [google_user_id, lilt_user_id, gpt_3_user_id, gpt_4_user_id],
+          ),
+        );
+        translatedMissingPhraseCount =
+          +totalPhraseCount -
+          (+totalPhraseToWordRes.rows[0].count +
+            +totalPhraseToPhraseRes.rows[0].count);
+      }
+
+      // missing words
+      let translatedMissingWordCount: number | undefined = undefined;
+      if (input.toLanguageCode) {
+        const totalWordToWordRes = await pg.query(
+          ...getTotalWordToWordCount(
+            input.fromLanguageCode,
+            input.toLanguageCode,
+            [google_user_id, lilt_user_id, gpt_3_user_id, gpt_4_user_id],
+          ),
+        );
+
+        const totalWordToPhraseRes = await pg.query(
+          ...getTotalWordToPhraseCount(
+            input.fromLanguageCode,
+            input.toLanguageCode,
+            [google_user_id, lilt_user_id],
+          ),
+        );
+        translatedMissingWordCount =
+          +totalWordCount -
+          (+totalWordToWordRes.rows[0].count +
+            +totalWordToPhraseRes.rows[0].count);
+      }
+
+      // total possible 'to' languages bot Translators can translate to.
+      const googleTranslateTotalLangCount =
+        (await this.gTrService.getLanguages()).languages?.length || 0;
+      const liltTranslateTotalLangCount =
+        (await this.lTrService.getLanguages()).languages?.length || 0;
+      const smartcatTranslateTotalLangCount =
+        (await this.scTrService.getLanguages()).languages?.length || 0;
+      const deeplTranslateTotalLangCount =
+        (await this.deepLTrService.getLanguages()).languages?.length || 0;
+
+      return {
+        error: ErrorType.NoError, // later
+        totalPhraseCount,
+        totalWordCount,
+        translatedMissingPhraseCount,
+        translatedMissingWordCount,
+        googleTranslateTotalLangCount,
+        liltTranslateTotalLangCount,
+        smartcatTranslateTotalLangCount,
+        deeplTranslateTotalLangCount,
+      };
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        totalPhraseCount: 0,
+        totalWordCount: 0,
+        translatedMissingPhraseCount: 0,
+        translatedMissingWordCount: 0,
+        googleTranslateTotalLangCount: 0,
+        liltTranslateTotalLangCount: 0,
+        smartcatTranslateTotalLangCount: 0,
+        deeplTranslateTotalLangCount: 0,
+      };
     }
-
-    // missing words
-    let translatedMissingWordCount: number | undefined = undefined;
-    if (input.toLanguageCode) {
-      const totalWordToWordRes = await pg.query(
-        ...getTotalWordToWordCount(
-          input.fromLanguageCode,
-          input.toLanguageCode,
-          [google_user_id, lilt_user_id, gpt_3_user_id, gpt_4_user_id],
-        ),
-      );
-
-      const totalWordToPhraseRes = await pg.query(
-        ...getTotalWordToPhraseCount(
-          input.fromLanguageCode,
-          input.toLanguageCode,
-          [google_user_id, lilt_user_id],
-        ),
-      );
-      translatedMissingWordCount =
-        +totalWordCount -
-        (+totalWordToWordRes.rows[0].count +
-          +totalWordToPhraseRes.rows[0].count);
-    }
-
-    // total possible 'to' languages bot Translators can translate to.
-    const googleTranslateTotalLangCount =
-      (await this.gTrService.getLanguages()).languages?.length || 0;
-    const liltTranslateTotalLangCount =
-      (await this.lTrService.getLanguages()).languages?.length || 0;
-    const smartcatTranslateTotalLangCount =
-      (await this.scTrService.getLanguages()).languages?.length || 0;
-    const deeplTranslateTotalLangCount =
-      (await this.deepLTrService.getLanguages()).languages?.length || 0;
-
-    return {
-      error: ErrorType.NoError, // later
-      totalPhraseCount,
-      totalWordCount,
-      translatedMissingPhraseCount,
-      translatedMissingWordCount,
-      googleTranslateTotalLangCount,
-      liltTranslateTotalLangCount,
-      smartcatTranslateTotalLangCount,
-      deeplTranslateTotalLangCount,
-    };
   }
 
   async translateMissingWordsAndPhrasesByGoogle(
@@ -183,13 +196,21 @@ export class AiTranslationsService {
     token: string, //later
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
-    return this.translateMissingWordsAndPhrasesByBot(
-      this.gTrService.translate,
-      this.gTrService.getTranslatorToken,
-      from_language,
-      to_language,
-      pgClient,
-    );
+    try {
+      return this.translateMissingWordsAndPhrasesByBot(
+        this.gTrService.translate,
+        this.gTrService.getTranslatorToken,
+        from_language,
+        to_language,
+        pgClient,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
   }
 
   async translateMissingWordsAndPhrasesByGpt35(
@@ -199,14 +220,22 @@ export class AiTranslationsService {
     pgClient: PoolClient | null,
     version: ChatGPTVersion,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
-    return this.translateMissingWordsAndPhrasesByBot(
-      this.chatgptService.translate,
-      this.chatgptService.getTranslatorToken,
-      from_language,
-      to_language,
-      pgClient,
-      version,
-    );
+    try {
+      return this.translateMissingWordsAndPhrasesByBot(
+        this.chatgptService.translate,
+        this.chatgptService.getTranslatorToken,
+        from_language,
+        to_language,
+        pgClient,
+        version,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
   }
 
   async translateMissingWordsAndPhrasesByGpt4(
@@ -216,14 +245,22 @@ export class AiTranslationsService {
     pgClient: PoolClient | null,
     version: ChatGPTVersion,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
-    return this.translateMissingWordsAndPhrasesByBot(
-      this.chatgptService.translate,
-      this.chatgptService.getTranslatorToken,
-      from_language,
-      to_language,
-      pgClient,
-      version,
-    );
+    try {
+      return this.translateMissingWordsAndPhrasesByBot(
+        this.chatgptService.translate,
+        this.chatgptService.getTranslatorToken,
+        from_language,
+        to_language,
+        pgClient,
+        version,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
   }
 
   async translateMissingWordsAndPhrasesByDeepL(
@@ -232,13 +269,21 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
-    return this.translateMissingWordsAndPhrasesByBot(
-      this.deepLTrService.translate,
-      this.deepLTrService.getTranslatorToken,
-      from_language,
-      to_language,
-      pgClient,
-    );
+    try {
+      return this.translateMissingWordsAndPhrasesByBot(
+        this.deepLTrService.translate,
+        this.deepLTrService.getTranslatorToken,
+        from_language,
+        to_language,
+        pgClient,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
   }
 
   async translateMissingWordsAndPhrasesBySmartcat(
@@ -247,15 +292,24 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
-    return this.translateMissingWordsAndPhrasesByBot(
-      this.scTrService.translate,
-      this.scTrService.getTranslatorToken,
-      from_language,
-      to_language,
-      pgClient,
-    );
+    try {
+      return this.translateMissingWordsAndPhrasesByBot(
+        this.scTrService.translate,
+        this.scTrService.getTranslatorToken,
+        from_language,
+        to_language,
+        pgClient,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
   }
 
+  // helper function, whatever calls this needs to wrap in try/catch
   async translateMissingWordsAndPhrasesByBot<T extends ITranslator>(
     translateF: (...args: any[]) => Promise<string[]>,
     getTranslatorToken: (
@@ -552,7 +606,7 @@ export class AiTranslationsService {
         },
       };
     } catch (err) {
-      console.error(err);
+      Logger.error(err);
     }
     return {
       error: ErrorType.BotTranslationError,
@@ -566,12 +620,20 @@ export class AiTranslationsService {
     to_language: LanguageInput,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
-    return this.translateWordsAndPhrasesByBot(
-      this.gTrService,
-      from_language,
-      to_language,
-      pgClient,
-    );
+    try {
+      return this.translateWordsAndPhrasesByBot(
+        this.gTrService,
+        from_language,
+        to_language,
+        pgClient,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
   };
 
   // use arrow function declaration here to provide proper 'this' context!
@@ -580,13 +642,21 @@ export class AiTranslationsService {
     to_language: LanguageInput,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
-    return this.translateWordsAndPhrasesByBot(
-      this.lTrService,
-      from_language,
-      to_language,
-      pgClient,
-      undefined,
-    );
+    try {
+      return this.translateWordsAndPhrasesByBot(
+        this.lTrService,
+        from_language,
+        to_language,
+        pgClient,
+        undefined,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
   };
 
   // use arrow function declaration here to provide proper 'this' context!
@@ -595,12 +665,20 @@ export class AiTranslationsService {
     to_language: LanguageInput,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
-    return this.translateWordsAndPhrasesByBot(
-      this.scTrService,
-      from_language,
-      to_language,
-      pgClient,
-    );
+    try {
+      return this.translateWordsAndPhrasesByBot(
+        this.scTrService,
+        from_language,
+        to_language,
+        pgClient,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
   };
 
   // use arrow function declaration here to provide proper 'this' context!
@@ -609,12 +687,20 @@ export class AiTranslationsService {
     to_language: LanguageInput,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
-    return this.translateWordsAndPhrasesByBot(
-      this.deepLTrService,
-      from_language,
-      to_language,
-      pgClient,
-    );
+    try {
+      return this.translateWordsAndPhrasesByBot(
+        this.deepLTrService,
+        from_language,
+        to_language,
+        pgClient,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
   };
 
   translateWordsAndPhrasesByChatGPT4 = async (
@@ -623,13 +709,21 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
-    return this.translateWordsAndPhrasesByBot(
-      this.chatgptService,
-      from_language,
-      to_language,
-      pgClient,
-      ChatGPTVersion.Three,
-    );
+    try {
+      return this.translateWordsAndPhrasesByBot(
+        this.chatgptService,
+        from_language,
+        to_language,
+        pgClient,
+        ChatGPTVersion.Three,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
   };
 
   // use arrow function declaration here to provide proper 'this' context!
@@ -639,13 +733,21 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
-    return this.translateWordsAndPhrasesByBot(
-      this.chatgptService,
-      from_language,
-      to_language,
-      pgClient,
-      ChatGPTVersion.Four,
-    );
+    try {
+      return this.translateWordsAndPhrasesByBot(
+        this.chatgptService,
+        from_language,
+        to_language,
+        pgClient,
+        ChatGPTVersion.Four,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
   };
 
   // use arrow function declaration here to provide proper 'this' context!
@@ -654,12 +756,19 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<GenericOutput> => {
-    return this.translateWordsAndPhrasesToAllLangsByBot({
-      translateWordsAndPhrases: this.translateWordsAndPhrasesByLilt,
-      translator: this.lTrService,
-      from_language,
-      pgClient,
-    });
+    try {
+      return this.translateWordsAndPhrasesToAllLangsByBot({
+        translateWordsAndPhrases: this.translateWordsAndPhrasesByLilt,
+        translator: this.lTrService,
+        from_language,
+        pgClient,
+      });
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+      };
+    }
   };
 
   // use arrow function declaration here to provide proper 'this' context!
@@ -668,12 +777,19 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<GenericOutput> => {
-    return this.translateWordsAndPhrasesToAllLangsByBot({
-      translateWordsAndPhrases: this.translateWordsAndPhrasesByDeepL,
-      translator: this.deepLTrService,
-      from_language,
-      pgClient,
-    });
+    try {
+      return this.translateWordsAndPhrasesToAllLangsByBot({
+        translateWordsAndPhrases: this.translateWordsAndPhrasesByDeepL,
+        translator: this.deepLTrService,
+        from_language,
+        pgClient,
+      });
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+      };
+    }
   };
 
   async translateWordsAndPhrasesToAllLangsBySmartcat(
@@ -681,12 +797,19 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<GenericOutput> {
-    return this.translateWordsAndPhrasesToAllLangsByBot({
-      translateWordsAndPhrases: this.translateWordsAndPhrasesBySmartcat,
-      translator: this.scTrService,
-      from_language,
-      pgClient,
-    });
+    try {
+      return this.translateWordsAndPhrasesToAllLangsByBot({
+        translateWordsAndPhrases: this.translateWordsAndPhrasesBySmartcat,
+        translator: this.scTrService,
+        from_language,
+        pgClient,
+      });
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+      };
+    }
   }
 
   async translateWordsAndPhrasesToAllLangsByGoogle(
@@ -694,12 +817,19 @@ export class AiTranslationsService {
     token: string,
     pgClient: PoolClient | null,
   ): Promise<GenericOutput> {
-    return this.translateWordsAndPhrasesToAllLangsByBot({
-      translateWordsAndPhrases: this.translateWordsAndPhrasesByGoogle,
-      translator: this.gTrService,
-      from_language,
-      pgClient,
-    });
+    try {
+      return this.translateWordsAndPhrasesToAllLangsByBot({
+        translateWordsAndPhrases: this.translateWordsAndPhrasesByGoogle,
+        translator: this.gTrService,
+        from_language,
+        pgClient,
+      });
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+      };
+    }
   }
 
   translateWordsAndPhrasesToAllLangsByBot = async ({
@@ -878,11 +1008,27 @@ export class AiTranslationsService {
   }
 
   async languagesForChatGPT35Translate(): Promise<LanguageListForBotTranslateOutput> {
-    return this.chatgptService.getLanguages();
+    try {
+      return this.chatgptService.getLanguages();
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        languages: [],
+      };
+    }
   }
 
   async languagesForChatGPT4Translate(): Promise<LanguageListForBotTranslateOutput> {
-    return this.chatgptService.getLanguages();
+    try {
+      return this.chatgptService.getLanguages();
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        languages: [],
+      };
+    }
   }
 
   translateWordsAndPhrasesByBot = async (
