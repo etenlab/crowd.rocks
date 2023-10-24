@@ -369,6 +369,42 @@ export class TranslationsResolver {
     );
   }
 
+  @Query(() => TranslationWithVoteListOutput)
+  async getRecommendedTranslationFromDefinitionIDs(
+    @Args('from_definition_ids', { type: () => [ID] })
+    from_definition_ids: string[],
+    @Args('from_type_is_words', { type: () => [Boolean] })
+    from_type_is_words: boolean[],
+    @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
+  ): Promise<TranslationWithVoteListOutput> {
+    console.log(
+      'getTranslationsByFromDefinitionId resolver',
+      from_definition_ids,
+      from_type_is_words,
+      JSON.stringify(langInfo, null, 2),
+    );
+
+    const fromDefinitionIds: {
+      from_definition_id: number;
+      from_type_is_word: boolean;
+    }[] = [];
+
+    for (let i = 0; i < from_definition_ids.length; i++) {
+      fromDefinitionIds.push({
+        from_definition_id: +from_definition_ids[i],
+        from_type_is_word: from_type_is_words[i],
+      });
+    }
+
+    return this.translationService.getRecommendedTranslationFromDefinitionIDs(
+      fromDefinitionIds,
+      langInfo.language_code,
+      langInfo.dialect_code,
+      langInfo.geo_code,
+      null,
+    );
+  }
+
   @Mutation(() => TranslationVoteStatusOutputRow)
   async toggleTranslationVoteStatus(
     @Args('translation_id', { type: () => ID }) translation_id: number,
