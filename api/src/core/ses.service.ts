@@ -1,5 +1,5 @@
 import { SendEmailCommand, SESv2Client } from '@aws-sdk/client-sesv2';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from './config.service';
 
 @Injectable()
@@ -50,7 +50,7 @@ export class SesService {
       return data;
     } catch (error) {
       // error handling.
-      console.log('error sending email', error);
+      Logger.error('error sending email', error);
     } finally {
       // finally.
     }
