@@ -1,7 +1,9 @@
 import BasePage from './BasePage';
 
 const headerText = '#crowd-rock-app #app-name-text';
-const logoutOption = '#app-logout-button';
+const logoutButton = '#app-logout-button';
+const loginButton =
+  "//ion-list[@class='md list-md']/ion-item//ion-label[text() = 'Login']";
 
 class MenuPage extends BasePage {
   async isheaderTextPresent() {
@@ -14,7 +16,11 @@ class MenuPage extends BasePage {
   }
 
   async clickOnLogout() {
-    await this.page.locator(logoutOption).first().click();
+    await this.page.locator(logoutButton).first().click();
+  }
+
+  async clickOnLoginButton() {
+    await this.page.locator(loginButton).first().click();
   }
 }
 

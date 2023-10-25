@@ -9,61 +9,155 @@ import LoginDTO from '../data-objects/LoginDto';
 test('1: Verify that user is register/logout and login again successfully', async ({
   page,
 }) => {
-  const register = new RegisterPO(page);
-  const login = new LoginPO(page);
-  const home = new HomePO(page);
+  const registerPage = new RegisterPO(page);
+  const loginPage = new LoginPO(page);
+  const homePage = new HomePO(page);
   const leftMenu = new MenuPO(page);
   const registerData = RegisterData.validRegisterData();
 
   //Navigate to the URL
   await page.goto('/US/en/1/login');
 
-  //Verify the current url
-  const currentUrl = await page.url();
-  console.log('Env url is: ' + currentUrl);
-
   //Verify the login header text
-  expect(await login.isHeaderTextPresent()).toBeTruthy();
+  expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
 
   //Click on the 'Register' button
-  await login.goToRegisterPage();
+  await loginPage.goToRegisterPage();
 
   //Verify the title of the page
-  expect(await register.isHeaderTextPresent()).toBeTruthy();
+  expect(await registerPage.isRegisterPageTitleVisible()).toBeTruthy();
 
   //Fill and submit the register form
-  await register.fillRegistrationForm(registerData);
-  await register.clickOnRegisterButton();
+  await registerPage.fillRegistrationForm(registerData);
+  await registerPage.clickOnRegisterButton();
 
-  //Verify the header of the home page
-  expect(await home.isHeaderTextPresent()).toBeTruthy();
-
-  //logout to the app
-  await home.clickOnExpandMenu();
-  expect(await leftMenu.isheaderTextPresent()).toBeTruthy();
+  //logout from the app
+  await homePage.clickOnExpandMenu();
   await leftMenu.clickOnLogout();
 
-  //Verify the user is redirected to the home page
-  expect(await home.isHeaderTextPresent()).toBeTruthy();
-
-  //Navigate to the URL
-  await page.goto('/US/en/1/login');
-
   //Login to the app with registered data
+  await homePage.clickOnExpandMenu();
+  await leftMenu.clickOnLoginButton();
+
   const loginData = LoginDTO;
   loginData.email = registerData.email;
   loginData.password = registerData.password;
 
-  await login.loginToApp(loginData);
+  //Login with valid credentials
+  await loginPage.loginToApp(loginData);
 
   //Verify user is logged in
-  expect(await home.isHeaderTextPresent()).toBeTruthy();
+  expect(await homePage.isHomePageVisible()).toBeTruthy();
+});
 
-  //logout to the app
-  await home.clickOnExpandMenu();
-  expect(await leftMenu.isheaderTextPresent()).toBeTruthy();
-  await leftMenu.clickOnLogout();
+test('2: Verify that email field is mandatory', async ({ page }) => {
+  const registerPage = new RegisterPO(page);
+  const loginPage = new LoginPO(page);
+  const registerData = RegisterData.registerDataWithoutEmail();
 
-  //Verify the user is redirected to the home page
-  expect(await home.isHeaderTextPresent()).toBeTruthy();
+  //Navigate to the URL
+  await page.goto('/US/en/1/login');
+
+  //Verify the login header text
+  expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
+
+  //Click on the 'Register' button on login page
+  await loginPage.goToRegisterPage();
+
+  //Verify the title of the page
+  expect(await registerPage.isRegisterPageTitleVisible()).toBeTruthy();
+
+  //Fill the register form without email
+  await registerPage.fillRegistrationForm(registerData);
+
+  //click on register button
+  await registerPage.clickOnRegisterButton();
+
+  //verify the validation message is displayed for email
+  await expect(page).toHaveScreenshot('emailErrorMessage.png');
+});
+
+test('3: Verify that username field is mandatory', async ({ page }) => {
+  const registerPage = new RegisterPO(page);
+  const loginPage = new LoginPO(page);
+  const registerData = RegisterData.registerDataWithoutUserName();
+
+  //Navigate to the URL
+  await page.goto('/US/en/1/login');
+
+  //Verify the login header text
+  expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
+
+  //Click on the 'Register' button on login page
+  await loginPage.goToRegisterPage();
+
+  //Verify the title of the page
+  expect(await registerPage.isRegisterPageTitleVisible()).toBeTruthy();
+
+  //Fill the register form withoutusername
+  await registerPage.fillRegistrationForm(registerData);
+
+  //click on register button
+  await registerPage.clickOnRegisterButton();
+
+  //verify the validation message is displayed for username
+  await expect(page).toHaveScreenshot('usernameErrorMessage.png', {
+    threshold: 0.2,
+  });
+});
+
+test('4: Verify that password field is mandatory', async ({ page }) => {
+  const registerPage = new RegisterPO(page);
+  const loginPage = new LoginPO(page);
+  const registerData = RegisterData.registerDataWithoutPassword();
+
+  //Navigate to the URL
+  await page.goto('/US/en/1/login');
+
+  //Verify the login header text
+  expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
+
+  //Click on the 'Register' button on login page
+  await loginPage.goToRegisterPage();
+
+  //Verify the title of the page
+  expect(await registerPage.isRegisterPageTitleVisible()).toBeTruthy();
+
+  //Fill the register form without password
+  await registerPage.fillRegistrationForm(registerData);
+
+  //click on register button
+  await registerPage.clickOnRegisterButton();
+
+  //verify the validation message is displayed for password
+  await expect(page).toHaveScreenshot('passwordErrorMessage.png');
+});
+
+test('5: Verify that validation shown for invalid email format', async ({
+  page,
+}) => {
+  const registerPage = new RegisterPO(page);
+  const loginPage = new LoginPO(page);
+  const registerData = RegisterData.registerDataWithInvalidEmailFormat();
+
+  //Navigate to the URL
+  await page.goto('/US/en/1/login');
+
+  //Verify the login header text
+  expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
+
+  //Click on the 'Register' button on login page
+  await loginPage.goToRegisterPage();
+
+  //Verify the title of the page
+  expect(await registerPage.isRegisterPageTitleVisible()).toBeTruthy();
+
+  //Fill and submit the register form with invalid email format
+  await registerPage.fillRegistrationForm(registerData);
+
+  //click on register button
+  await registerPage.clickOnRegisterButton();
+
+  //Verify validation message is displayed for invalid email
+  await expect(page).toHaveScreenshot('invalidEmailErrorMessage.png');
 });
