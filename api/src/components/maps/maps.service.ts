@@ -324,11 +324,26 @@ export class MapsService {
       const translatedMaps = await this.mapsRepository.getTranslatedMaps({
         lang,
       });
-      const allMapsList = [...origMaps.mapList, ...translatedMaps.mapList].sort(
-        (map1, map2) =>
-          map1.mapDetails!.map_file_name_with_langs.localeCompare(
-            map2.mapDetails!.map_file_name_with_langs,
+
+      const origIdMap = new Map<string, boolean>();
+
+      origMaps.mapList.forEach((item) =>
+        item.mapDetails
+          ? origIdMap.set(item.mapDetails.original_map_id, true)
+          : null,
+      );
+
+      const allMapsList = [
+        ...origMaps.mapList.filter((item) => item.mapDetails),
+        ...translatedMaps.mapList
+          .filter((item) => item.mapDetails)
+          .filter((item) =>
+            origIdMap.get(item.mapDetails!.original_map_id) ? false : true,
           ),
+      ].sort((map1, map2) =>
+        map1.mapDetails!.map_file_name_with_langs.localeCompare(
+          map2.mapDetails!.map_file_name_with_langs,
+        ),
       );
 
       let offset: number | null = null;

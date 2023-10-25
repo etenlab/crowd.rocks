@@ -11,6 +11,7 @@ import { useTr } from '../../../hooks/useTr';
 
 import { AppNotification } from '../icons/AppNotification';
 import { ChatBubbleEmpty } from '../icons/ChatBubbleEmpty';
+import { Cancel } from '../icons/Cancel';
 
 import { Avatar } from '../Avatar';
 import { globals } from '../../../services/globals';
@@ -20,6 +21,7 @@ export type HeaderProps = {
   onClickAppName(): void;
   onClickDiscussion(): void;
   onClickNotification(): void;
+  onCancel(): void;
   notificationCount: number;
   isMenuHeader?: boolean;
 };
@@ -29,6 +31,7 @@ export function Header({
   onClickAppName,
   onClickDiscussion,
   onClickNotification,
+  onCancel,
   notificationCount,
   isMenuHeader,
 }: HeaderProps) {
@@ -38,47 +41,62 @@ export function Header({
 
   const username = globals.get_avatar();
 
-  const avatarCom = !isMenuHeader ? (
-    <IconButton onClick={onClickMenu} id="app-menu-button">
-      {username ? (
-        <Avatar username={username} mini={false} />
-      ) : (
-        <MuiAvatar sx={{ width: '46px', height: '46px' }} />
-      )}
-    </IconButton>
-  ) : null;
-  const iconsCom = !isMenuHeader ? (
+  const iconsCom = (
     <Stack
       direction="row"
       justifyContent="flex-start"
       alignItems="center"
       gap="8px"
     >
-      <IconButton onClick={onClickDiscussion}>
-        <ChatBubbleEmpty sx={{ fontSize: 24 }} color="dark" />
-      </IconButton>
-      <IconButton onClick={onClickNotification} sx={{ position: 'relative' }}>
-        <Badge
-          badgeContent={notificationCount}
-          color="red"
-          variant="dot"
-          sx={{
-            position: 'absolute',
-            top: '13px',
-            right: '13px',
-            '& .MuiBadge-badge': {
-              width: '10px',
-              height: '10px',
-            },
-          }}
-        ></Badge>
-        <AppNotification sx={{ fontSize: 24 }} color="dark" />
-      </IconButton>
+      {!isMenuHeader ? (
+        <>
+          <IconButton onClick={onClickDiscussion}>
+            <ChatBubbleEmpty sx={{ fontSize: 24 }} color="dark" />
+          </IconButton>
+          <IconButton
+            onClick={onClickNotification}
+            sx={{ position: 'relative' }}
+          >
+            <Badge
+              badgeContent={notificationCount}
+              color="red"
+              variant="dot"
+              sx={{
+                position: 'absolute',
+                top: '13px',
+                right: '13px',
+                '& .MuiBadge-badge': {
+                  width: '10px',
+                  height: '10px',
+                },
+              }}
+            ></Badge>
+            <AppNotification sx={{ fontSize: 24 }} color="dark" />
+          </IconButton>
+        </>
+      ) : (
+        <IconButton onClick={onCancel}>
+          <Cancel sx={{ fontSize: 30 }} color="dark" />
+        </IconButton>
+      )}
     </Stack>
+  );
+  const headerCom = !isMenuHeader ? (
+    <Button
+      id="app-name-text"
+      variant="text"
+      onClick={onClickAppName}
+      sx={(theme) => ({
+        color: theme.palette.text.dark,
+        fontSize: '18px',
+        fontWeight: 600,
+        lineHeight: '22px',
+        letterSpacing: '-0.36px',
+      })}
+    >
+      {title[0]}.<span style={{ color: '#476FFF' }}>{title[1]}</span>
+    </Button>
   ) : null;
-
-  const padding = !isMenuHeader ? '8px' : '18px';
-  const justify = !isMenuHeader ? 'space-between' : 'center';
 
   return (
     <Box
@@ -89,31 +107,24 @@ export function Header({
     >
       <Stack
         direction="row"
-        justifyContent={justify}
+        justifyContent="space-between"
         alignItems="center"
         sx={(theme) => ({
-          padding,
+          padding: '8px',
           borderBottom: '1px solid #DEE0E8',
           maxWidth: '777px',
           margin: 'auto',
           backgroundColor: theme.palette.text.white,
         })}
       >
-        {avatarCom}
-        <Button
-          id="app-name-text"
-          variant="text"
-          onClick={onClickAppName}
-          sx={(theme) => ({
-            color: theme.palette.text.dark,
-            fontSize: '18px',
-            fontWeight: 600,
-            lineHeight: '22px',
-            letterSpacing: '-0.36px',
-          })}
-        >
-          {title[0]}.<span style={{ color: '#476FFF' }}>{title[1]}</span>
-        </Button>
+        <IconButton onClick={onClickMenu} id="app-menu-button">
+          {username ? (
+            <Avatar username={username} mini={false} />
+          ) : (
+            <MuiAvatar sx={{ width: '46px', height: '46px' }} />
+          )}
+        </IconButton>
+        {headerCom}
         {iconsCom}
       </Stack>
     </Box>

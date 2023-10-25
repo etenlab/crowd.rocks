@@ -267,33 +267,48 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     clearTimeout(timerRef.current);
   };
 
-  const mapItemComs = useMemo(
-    () =>
-      allMapsQuery?.getAllMapsList.edges?.length ? (
-        allMapsQuery?.getAllMapsList.edges.map((edge) =>
-          edge.node.mapDetails ? (
-            <MapItem
-              mapInfo={edge.node.mapDetails}
-              key={edge.cursor}
-              viewMode={viewMode}
-              onChangeViewMode={() => {}}
-              onChangeCheck={(checked) => {
-                setCheckedMap((_mapObj) => ({
-                  ..._mapObj,
-                  [edge.cursor]: checked,
-                }));
-              }}
-              checked={checkedMap[edge.cursor] || allChecked}
-            />
-          ) : (
-            <>{edge.node.error}</>
-          ),
-        )
-      ) : (
-        <div> {tr('No maps found')} </div>
-      ),
-    [allChecked, allMapsQuery?.getAllMapsList.edges, checkedMap, tr, viewMode],
-  );
+  const mapItemComs = useMemo(() => {
+    if (!allMapsQuery || !allMapsQuery.getAllMapsList.edges) {
+      return <div> {tr('No maps found')} </div>;
+    }
+
+    const originalMapIds = new Map<string, boolean>();
+
+    allMapsQuery.getAllMapsList.edges.map((edge) => {
+      if (edge.node.mapDetails?.is_original) {
+        originalMapIds.set(edge.node.mapDetails.original_map_id, true);
+      }
+    });
+
+    return allMapsQuery.getAllMapsList.edges.map((edge) => {
+      if (!edge.node.mapDetails) {
+        return null;
+      }
+
+      if (
+        !edge.node.mapDetails.is_original &&
+        originalMapIds.get(edge.node.mapDetails.original_map_id)
+      ) {
+        return null;
+      }
+
+      return (
+        <MapItem
+          mapInfo={edge.node.mapDetails}
+          key={edge.cursor}
+          viewMode={viewMode}
+          onChangeViewMode={() => {}}
+          onChangeCheck={(checked) => {
+            setCheckedMap((_mapObj) => ({
+              ..._mapObj,
+              [edge.cursor]: checked,
+            }));
+          }}
+          checked={checkedMap[edge.cursor] || allChecked}
+        />
+      );
+    });
+  }, [allChecked, allMapsQuery, checkedMap, tr, viewMode]);
 
   const handleClickNewMapButton = () => {
     openModal(<MapUploadModal onClose={closeModal} />);

@@ -34,7 +34,8 @@ import './theme/variables.css';
 import { AppContextProvider } from './AppContext';
 import { ThemeProvider } from './theme';
 
-import Body from './Body';
+import { Body } from './Body';
+
 import {
   split,
   InMemoryCache,

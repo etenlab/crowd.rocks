@@ -1,209 +1,101 @@
-import { MouseEventHandler, useState } from 'react';
-import {
-  Typography,
-  Stack,
-  Divider,
-  InputBase,
-  IconButton,
-  useTheme,
-} from '@mui/material';
-import { NavArrowRight } from '../icons/NavArrowRight';
-import { Cancel } from '../icons/Cancel';
-import { Check } from '../icons/Check';
+import { useEffect, useState } from 'react';
 
-import { useTr } from '../../../hooks/useTr';
+import { WordItemStandard } from './WordItemStandard';
+import { WordItemForm } from './WordItemForm';
 
-import { Div } from './styled';
-
-export type WordItemProps = {
+type Item = {
   word: string;
   description: string;
-  viewData?: {
-    translation: string;
-    description: string;
-  };
+};
+
+export type WordItemProps = {
+  saving?: boolean;
+  error?: boolean;
+  original: Item;
+  translation?: Item;
+  initFormData?: Item;
   onDetail(): void;
   onConfirm(translation: string, description: string): void;
+  onCancel(): void;
 };
 
 export function WordItem({
-  viewData,
-  word,
-  description,
+  saving,
+  error,
+  original,
+  translation,
+  initFormData,
   onDetail,
   onConfirm,
+  onCancel,
 }: WordItemProps) {
-  const { tr } = useTr();
-  const theme = useTheme();
-
-  const [translation, setTranslation] = useState<string>('');
-  const [descriptionForTr, setDescriptionForTr] = useState<string>('');
-  const [openForm, setOpenForm] = useState<boolean>(false);
-
-  const handleClick: MouseEventHandler<HTMLButtonElement> = (e) => {
-    if (openForm) {
-      if (translation.trim() !== '' && descriptionForTr.trim() !== '') {
-        onConfirm(translation.trim(), descriptionForTr.trim());
-      }
-
-      setOpenForm(false);
-    } else {
-      onDetail();
-    }
-
-    e.stopPropagation();
-    e.preventDefault();
-  };
-
-  const handleOpenForm = () => {
-    setOpenForm(true);
-  };
-
-  let buttonIcon = <NavArrowRight sx={{ fontSize: 24 }} />;
-  let sxObj = {
-    border: `1px solid ${theme.palette.text.gray_stroke}`,
-    borderRadius: '10px',
-    background: 'default',
-  };
-  let iconBtnSxObj = {
-    padding: '4px',
-    border: `1px solid ${theme.palette.text.gray_stroke}`,
-    borderRadius: '50%',
-    background: '#fff',
-    color: theme.palette.text.gray,
-  };
-
-  if (openForm || viewData) {
-    buttonIcon = <Cancel sx={{ fontSize: 24 }} />;
-    sxObj = {
-      border: `1px solid ${theme.palette.text.blue}`,
-      borderRadius: '10px 10px 0 0',
-      background: theme.palette.text.blue,
-    };
-    iconBtnSxObj = {
-      padding: '4px',
-      border: `2px solid #F8F8F9`,
-      borderRadius: '50%',
-      background: 'rgba(255, 255, 255, 0.10)',
-      color: '#fff',
-    };
-
-    if (translation.trim() !== '' && descriptionForTr.trim() !== '') {
-      buttonIcon = <Check sx={{ fontSize: 24 }} />;
-      iconBtnSxObj = {
-        padding: '4px',
-        border: `2px solid #F8F8F9`,
-        borderRadius: '50%',
-        background: theme.palette.background.green,
-        color: '#fff',
-      };
-    }
-  }
-
-  const formCom =
-    openForm && !viewData ? (
-      <Div
-        sx={{
-          border: `1px solid ${theme.palette.text.gray_stroke}`,
-          borderTop: 'none',
-          borderRadius: '0 0 10px 10px',
-        }}
-      >
-        <InputBase
-          value={translation}
-          onChange={(e) => {
-            setTranslation(e.currentTarget.value);
-          }}
-          multiline
-          sx={{
-            fontSize: '14px',
-            fontWeight: 400,
-            lineHeight: '22px',
-            letterSpacing: '-0.28px',
-            padding: '12px 16px',
-            width: '100%',
-            '& input': {
-              padding: 0,
-            },
-          }}
-          placeholder={tr('Your translation')}
-        />
-        <Divider />
-        <InputBase
-          value={descriptionForTr}
-          onChange={(e) => {
-            setDescriptionForTr(e.currentTarget.value);
-          }}
-          multiline
-          sx={{
-            fontSize: '14px',
-            fontWeight: 400,
-            lineHeight: '22px',
-            letterSpacing: '-0.28px',
-            padding: '12px 16px',
-            width: '100%',
-            '& input': {
-              padding: 0,
-            },
-          }}
-          placeholder={tr('Description')}
-        />
-      </Div>
-    ) : null;
-
-  const translationCom = viewData ? (
-    <Div
-      sx={{
-        border: `1px solid ${theme.palette.text.gray_stroke}`,
-        borderTop: 'none',
-        borderRadius: '0 0 10px 10px',
-      }}
-    >
-      <Typography variant="h3" sx={{ padding: '12px 16px' }}>
-        {viewData.translation}
-      </Typography>
-      <Divider />
-      <Typography variant="body1" sx={{ padding: '12px 16px' }}>
-        {viewData.description}
-      </Typography>
-    </Div>
-  ) : null;
-
-  return (
-    <Stack>
-      <Div
-        onClick={handleOpenForm}
-        sx={{ position: 'relative', padding: '16px', ...sxObj }}
-      >
-        <Typography
-          variant="h3"
-          color={!openForm && !viewData ? 'text.dark' : 'text.white'}
-        >
-          {word}
-        </Typography>
-        <Typography
-          variant="body2"
-          color={!openForm && !viewData ? 'text.gray' : 'text.white'}
-        >
-          {description}
-        </Typography>
-
-        {!viewData ? (
-          <IconButton
-            onClick={handleClick}
-            sx={{
-              position: 'absolute',
-              top: '16px',
-              right: '16px',
-              ...iconBtnSxObj,
-            }}
-          >
-            {buttonIcon}
-          </IconButton>
-        ) : null}
-      </Div>
-      {formCom}
-      {translationCom}
-    </Stack>
+  const [isForm, setIsForm] = useState<boolean>(false);
+  const [savingState, setSavingState] = useState<'start' | 'progress' | 'end'>(
+    'end',
   );
+
+  useEffect(() => {
+    if (error) {
+      setSavingState('end');
+      return;
+    }
+
+    if (savingState === 'end') {
+      return;
+    }
+
+    if (savingState === 'start' && saving === false) {
+      return;
+    }
+
+    if (savingState === 'start' && saving === true) {
+      setSavingState('progress');
+      return;
+    }
+
+    if (savingState === 'progress' && saving) {
+      return;
+    }
+
+    if (savingState === 'progress' && saving === false) {
+      setSavingState('end');
+      setIsForm(false);
+      return;
+    }
+  }, [savingState, saving, error]);
+
+  const handleClick = () => {
+    setIsForm(true);
+  };
+
+  const handleConfirm = (translation: string, description: string) => {
+    onConfirm(translation, description);
+    setSavingState('start');
+  };
+
+  const handleCancel = () => {
+    setIsForm(false);
+    onCancel();
+  };
+
+  if (isForm) {
+    return (
+      <WordItemForm
+        original={original}
+        initialFormData={initFormData || { word: '', description: '' }}
+        onCancel={handleCancel}
+        onConfirm={handleConfirm}
+        saving={savingState !== 'end'}
+      />
+    );
+  } else {
+    return (
+      <WordItemStandard
+        original={original}
+        translation={translation}
+        onDetail={onDetail}
+        onClick={handleClick}
+      />
+    );
+  }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, MouseEventHandler } from 'react';
 import { useLocation, useParams, useHistory } from 'react-router';
 import { useIonToast } from '@ionic/react';
 import {
@@ -10,12 +10,14 @@ import {
   Box,
 } from '@mui/material';
 
+import { downloadFromUrl } from '../../../common/utility';
 import { Caption } from '../../common/Caption/Caption';
 import { Tag } from '../../common/chips/Tag';
 import { FlagV2 } from '../../flags/Flag';
 import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 import { DiscussionButton } from '../../Discussion/DiscussionButton';
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
+import { DownloadCircle } from '../../common/icons/DownloadCircle';
 
 import {
   ErrorType,
@@ -91,6 +93,25 @@ export function MapDetails() {
     currentMapWithContent,
   ]);
 
+  const handleDownloadSvg: MouseEventHandler<HTMLButtonElement> = (e) => {
+    if (currMapContent && currMapContent.mapDetails) {
+      if (isOriginal) {
+        downloadFromUrl(
+          currMapContent.mapDetails.map_file_name,
+          currMapContent.mapDetails.content_file_url,
+        );
+      } else {
+        downloadFromUrl(
+          currMapContent.mapDetails.map_file_name_with_langs,
+          currMapContent.mapDetails.content_file_url,
+        );
+      }
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   const handleImageLoad = () => {
     setTimeout(() => {
       setImageLoaded(true);
@@ -125,6 +146,11 @@ export function MapDetails() {
         : ' ? %');
   const tagColor = currMapContent?.mapDetails?.is_original ? 'orange' : 'green';
 
+  const loadingOrError =
+    !!currentMapWithContent.error ||
+    !!currentMapWithContent.loading ||
+    !currentMapWithContent.data;
+
   return (
     <>
       <Caption>{tr('Map Details')}</Caption>
@@ -134,22 +160,34 @@ export function MapDetails() {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          sx={{
-            display: authorizedForAnyFlag(MAPS_FLAGS) ? undefined : 'none',
-          }}
         >
           <Tag label={tagLabel} color={tagColor} />
+
           <MoreHorizButton
             component={
-              <FlagV2
-                parent_table={
-                  isOriginal
-                    ? TableNameType.OriginalMaps
-                    : TableNameType.TranslatedMaps
-                }
-                parent_id={id}
-                flag_names={MAPS_FLAGS}
-              />
+              <>
+                {authorizedForAnyFlag(MAPS_FLAGS) ? (
+                  <FlagV2
+                    parent_table={
+                      isOriginal
+                        ? TableNameType.OriginalMaps
+                        : TableNameType.TranslatedMaps
+                    }
+                    parent_id={id}
+                    flag_names={MAPS_FLAGS}
+                  />
+                ) : null}
+                <Button
+                  variant="text"
+                  startIcon={<DownloadCircle sx={{ fontSize: '24px' }} />}
+                  color="dark"
+                  sx={{ padding: 0, justifyContent: 'flex-start' }}
+                  onClick={handleDownloadSvg}
+                  disabled={loadingOrError}
+                >
+                  {tr('Download')}
+                </Button>
+              </>
             }
           />
         </Stack>
