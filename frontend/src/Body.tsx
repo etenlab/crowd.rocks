@@ -4,18 +4,12 @@ import {
   IonMenu,
   IonContent,
   IonHeader,
-  IonIcon,
   IonPage,
   IonRouterOutlet,
   useIonRouter,
   useIonViewWillEnter,
   useIonViewWillLeave,
-  IonList,
-  IonItem,
-  IonToggle,
-  IonLabel,
 } from '@ionic/react';
-import { languageOutline } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 
 import { AutocompleteModal } from './components/common/forms/Autocomplete/AutocompleteModal';
@@ -41,6 +35,16 @@ import {
   langInfo2tag,
   tag2langInfo,
 } from '../../utils';
+
+import { MenuList } from './components/common/list/MenuList';
+import { useTr } from './hooks/useTr';
+import { UserCircle } from './components/common/icons/UserCircle';
+import { NavArrowRight } from './components/common/icons/NavArrowRight';
+import { Settings } from './components/common/icons/Settings';
+import { ChatBubbleTranslate } from './components/common/icons/ChatBubbleTranslate';
+import { LogOut } from './components/common/icons/LogOut';
+import { LogIn } from './components/common/icons/LogIn';
+import { AddUser } from './components/common/icons/AddUser';
 
 import { useAppContext } from './hooks/useAppContext';
 
@@ -87,19 +91,8 @@ import { Forms } from './components/demo/Forms';
 import { Header } from './components/common/Header';
 
 import { useColorModeContext } from './theme';
-import { useTr } from './hooks/useTr';
 
-interface ToggleChangeEventDetail<T = unknown> {
-  value: T;
-  checked: boolean;
-}
-
-interface ToggleCustomEvent<T = unknown> extends CustomEvent {
-  detail: ToggleChangeEventDetail<T>;
-  target: HTMLIonToggleElement;
-}
-
-const Body: React.FC = () => {
+export function Body() {
   const { tr } = useTr();
   const {
     states: {
@@ -117,7 +110,6 @@ const Body: React.FC = () => {
 
   const [show_menu, set_show_menu] = useState(false);
   const [is_logged_in, set_is_logged_in] = useState(false);
-  const [show_dark_mode, set_show_dark_mode] = useState(false);
 
   const modal = useRef<HTMLIonModalElement>(null);
   const menuRef = useRef<HTMLIonMenuElement>(null);
@@ -151,23 +143,19 @@ const Body: React.FC = () => {
     const theme_storage = localStorage.getItem('theme');
     switch (theme_storage) {
       case null:
-        set_show_dark_mode(false);
         localStorage.setItem('theme', 'light');
         setColorMode('light');
         set_theme_classes(false);
         break;
       case 'light':
-        set_show_dark_mode(false);
         set_theme_classes(false);
         setColorMode('light');
         break;
       case 'dark':
-        set_show_dark_mode(true);
         set_theme_classes(true);
         setColorMode('dark');
         break;
       default:
-        set_show_dark_mode(false);
         set_theme_classes(false);
         setColorMode('light');
     }
@@ -187,6 +175,10 @@ const Body: React.FC = () => {
   const toggleMenu = () => {
     set_show_menu(!show_menu);
     menuRef.current?.toggle();
+  };
+  const cancelMenu = () => {
+    set_show_menu(false);
+    menuRef.current?.close();
   };
 
   const click_profile = () => {
@@ -238,18 +230,6 @@ const Body: React.FC = () => {
 
   const click_notifications = () => {
     router.push(`/US/${appLanguage.lang.tag}/1/notifications`);
-  };
-
-  const toggle_theme = (event: ToggleCustomEvent) => {
-    set_show_dark_mode(event.detail.checked);
-    if (!event.detail.checked) {
-      localStorage.setItem('theme', 'light');
-      setColorMode('light');
-    } else {
-      localStorage.setItem('theme', 'dark');
-      setColorMode('dark');
-    }
-    set_theme_classes(event.detail.checked);
   };
 
   const set_theme_classes = (is_dark: boolean) => {
@@ -321,6 +301,48 @@ const Body: React.FC = () => {
     );
   };
 
+  const menuItems = [
+    {
+      title: tr('Settings'),
+      startIcon: <Settings sx={{ fontSize: 24 }} color="blue" />,
+      endIcon: <NavArrowRight sx={{ fontSize: 24 }} color="gray" />,
+      onClick: click_settings,
+    },
+    {
+      title: tr('App Language'),
+      startIcon: <ChatBubbleTranslate sx={{ fontSize: 24 }} color="blue" />,
+      endIcon: <NavArrowRight sx={{ fontSize: 24 }} color="gray" />,
+      onClick: handleOpenLangSelector,
+    },
+
+    ...(is_logged_in
+      ? [
+          {
+            title: tr('My profile'),
+            startIcon: <UserCircle sx={{ fontSize: 24 }} color="blue" />,
+            endIcon: <NavArrowRight sx={{ fontSize: 24 }} color="gray" />,
+            onClick: click_profile,
+          },
+          {
+            title: tr('Logout'),
+            startIcon: <LogOut sx={{ fontSize: 24 }} color="blue" />,
+            onClick: click_logout,
+          },
+        ]
+      : [
+          {
+            title: tr('Login'),
+            startIcon: <LogIn sx={{ fontSize: 24 }} color="blue" />,
+            onClick: click_login,
+          },
+          {
+            title: tr('Register'),
+            startIcon: <AddUser sx={{ fontSize: 24 }} color="blue" />,
+            onClick: click_register,
+          },
+        ]),
+  ];
+
   return (
     <>
       <IonMenu contentId="crowd-rock-app" ref={menuRef}>
@@ -335,53 +357,12 @@ const Body: React.FC = () => {
             onClickNotification={click_notifications}
             notificationCount={unreadNotificationCount || 0}
             isMenuHeader={true}
+            onCancel={cancelMenu}
           />
         </IonHeader>
 
-        <IonContent className="ion-padding">
-          <IonList>
-            <IonItem style={{ cursor: 'pointer' }}>
-              <IonToggle checked={show_dark_mode} onIonChange={toggle_theme}>
-                Turn on dark mode
-              </IonToggle>
-            </IonItem>
-            <IonItem
-              onClick={handleOpenLangSelector}
-              style={{ cursor: 'pointer' }}
-            >
-              <IonIcon aria-hidden="true" icon={languageOutline} slot="end" />
-              <IonLabel>Change App Language</IonLabel>
-            </IonItem>
-            <IonItem onClick={click_settings} style={{ cursor: 'pointer' }}>
-              <IonLabel>Settings</IonLabel>
-            </IonItem>
-
-            {is_logged_in && (
-              <>
-                <IonItem onClick={click_profile} style={{ cursor: 'pointer' }}>
-                  <IonLabel>{globals.get_avatar()}</IonLabel>
-                </IonItem>
-                <IonItem
-                  onClick={click_logout}
-                  id="app-logout-button"
-                  style={{ cursor: 'pointer' }}
-                >
-                  <IonLabel>Logout</IonLabel>
-                </IonItem>
-              </>
-            )}
-
-            {!is_logged_in && (
-              <>
-                <IonItem onClick={click_register} style={{ cursor: 'pointer' }}>
-                  <IonLabel>Register</IonLabel>
-                </IonItem>
-                <IonItem onClick={click_login} style={{ cursor: 'pointer' }}>
-                  <IonLabel>Login</IonLabel>
-                </IonItem>
-              </>
-            )}
-          </IonList>
+        <IonContent>
+          <MenuList items={menuItems} />
         </IonContent>
       </IonMenu>
       <IonPage id="crowd-rock-app">
@@ -392,6 +373,7 @@ const Body: React.FC = () => {
             onClickDiscussion={() => {}}
             onClickNotification={click_notifications}
             notificationCount={unreadNotificationCount || 0}
+            onCancel={cancelMenu}
           />
         </IonHeader>
 
@@ -539,6 +521,4 @@ const Body: React.FC = () => {
       </IonPage>
     </>
   );
-};
-
-export default Body;
+}
