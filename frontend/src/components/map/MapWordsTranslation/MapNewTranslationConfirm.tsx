@@ -1,23 +1,21 @@
-import { useCallback, useEffect, useMemo } from 'react';
-import { useParams } from 'react-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useIonRouter, useIonToast } from '@ionic/react';
 
-import { Stack, Typography, Button } from '@mui/material';
+import { Stack, Typography, Button, CircularProgress } from '@mui/material';
 
 import { typeOfString, StringContentTypes } from '../../../common/utility';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-import {
-  ErrorType,
-  useGetMapWordOrPhraseAsOrigByDefinitionIdQuery,
-  useUpsertTranslationFromWordAndDefinitionlikeStringMutation,
-} from '../../../generated/graphql';
+import { useGetMapWordOrPhraseAsOrigByDefinitionIdQuery } from '../../../generated/graphql';
+import { useQuery } from '../../../hooks/useQuery';
 
 import { InfoFill } from '../../common/icons/InfoFill';
 import { AddCircle } from '../../common/icons/AddCircle';
-import { WordItem } from '../../common/WordItem';
+import { WordItemViewer } from '../../common/WordItem';
 import { MapWordOrPhraseTranslationList } from '../MapWordOrPhraseTranslation/MapWordOrPhraseTranslantionList';
+import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 
 export function MapNewTranslationConfirm() {
   const { tr } = useTr();
@@ -35,6 +33,8 @@ export function MapNewTranslationConfirm() {
     definition_id: string;
     type: string;
   }>();
+  const searchParams = useQuery();
+  const [saving, setSaving] = useState<boolean>(false);
 
   const {
     states: {
@@ -53,27 +53,8 @@ export function MapNewTranslationConfirm() {
     },
   });
 
-  const [upsertTranslation, { data: upsertData, loading: upsertLoading }] =
-    useUpsertTranslationFromWordAndDefinitionlikeStringMutation({
-      refetchQueries: ['GetTranslationsByFromDefinitionId'],
-    });
-
-  useEffect(() => {
-    if (upsertLoading) return;
-    if (
-      upsertData &&
-      upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error !==
-        ErrorType.NoError
-    ) {
-      present({
-        message:
-          upsertData?.upsertTranslationFromWordAndDefinitionlikeString.error,
-        duration: 1500,
-        position: 'top',
-        color: 'danger',
-      });
-    }
-  }, [present, upsertData, upsertLoading]);
+  const [upsertTranslation] =
+    useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
 
   const original = useMemo(() => {
     const wordOrPhrase =
@@ -103,7 +84,16 @@ export function MapNewTranslationConfirm() {
 
   const goToTranslation = useCallback(() => {
     clearTempTranslation(`${definition_id}:${definition_type}`);
-    router.push(`/${nation_id}/${language_id}/1/maps/translation`);
+
+    if (searchParams.get('original_map_id')) {
+      router.push(
+        `/${nation_id}/${language_id}/1/maps/translation/${searchParams.get(
+          'original_map_id',
+        )}`,
+      );
+    } else {
+      router.push(`/${nation_id}/${language_id}/1/maps/translation/all`);
+    }
   }, [
     language_id,
     nation_id,
@@ -111,6 +101,7 @@ export function MapNewTranslationConfirm() {
     clearTempTranslation,
     definition_id,
     definition_type,
+    searchParams,
   ]);
 
   useEffect(() => {
@@ -118,6 +109,60 @@ export function MapNewTranslationConfirm() {
       goToTranslation();
     }
   }, [tempTranslations, definition_id, definition_type, goToTranslation]);
+
+  useEffect(() => {
+    if (!saving) {
+      return;
+    }
+
+    if (!targetLang) {
+      setSaving(false);
+      return;
+    }
+
+    (async () => {
+      const currentData =
+        tempTranslations[`${definition_id}:${definition_type}`];
+
+      if (!currentData) {
+        return;
+      }
+
+      const { translation, description } = currentData;
+
+      await upsertTranslation({
+        variables: {
+          language_code: targetLang.lang.tag,
+          dialect_code: targetLang.dialect?.tag,
+          geo_code: targetLang.region?.tag,
+          word_or_phrase: translation,
+          definition: description,
+          from_definition_id: definition_id,
+          from_definition_type_is_word:
+            definition_type === StringContentTypes.WORD,
+          is_type_word: typeOfString(translation) === StringContentTypes.WORD,
+        },
+      });
+
+      setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]);
+
+      clearTempTranslation(`${definition_id}:${definition_type}`);
+
+      setSaving(false);
+      goToTranslation();
+    })();
+  }, [
+    clearTempTranslation,
+    definition_id,
+    definition_type,
+    goToTranslation,
+    saving,
+    setUpdatedTrDefinitionIds,
+    targetLang,
+    tempTranslations,
+    updatedTrDefinitionIds,
+    upsertTranslation,
+  ]);
 
   const handleUpsertTranslation = () => {
     const currentData = tempTranslations[`${definition_id}:${definition_type}`];
@@ -158,25 +203,10 @@ export function MapNewTranslationConfirm() {
       return;
     }
 
-    upsertTranslation({
-      variables: {
-        language_code: targetLang?.lang.tag,
-        dialect_code: targetLang?.dialect?.tag,
-        geo_code: targetLang?.region?.tag,
-        word_or_phrase: translation,
-        definition: description,
-        from_definition_id: definition_id,
-        from_definition_type_is_word:
-          definition_type === StringContentTypes.WORD,
-        is_type_word: typeOfString(translation) === StringContentTypes.WORD,
-      },
-    });
-
-    setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]);
-
-    clearTempTranslation(`${definition_id}:${definition_type}`);
-    goToTranslation();
+    setSaving(true);
   };
+
+  const viewData = tempTranslations[`${definition_id}:${definition_type}`];
 
   return (
     <>
@@ -184,7 +214,7 @@ export function MapNewTranslationConfirm() {
         <Stack direction="row" gap="8px" alignItems="center">
           <InfoFill color="orange" />
           <Typography variant="h3">
-            {tr('Your translation may exist!')}
+            {tr('Your translation already exists!')}
           </Typography>
         </Stack>
 
@@ -195,27 +225,40 @@ export function MapNewTranslationConfirm() {
         </Typography>
       </Stack>
 
-      <WordItem
-        word={original.value || ''}
-        description={original.definition || ''}
-        viewData={tempTranslations[`${definition_id}:${definition_type}`]}
-        onConfirm={() => {}}
-        onDetail={() => {}}
-      />
+      {viewData ? (
+        <WordItemViewer
+          original={{
+            word: original.value || '',
+            description: original.definition || '',
+          }}
+          viewData={{
+            word: viewData.translation,
+            description: viewData.description,
+          }}
+        />
+      ) : null}
 
       <Typography variant="h3">{tr('Similar translation')}</Typography>
 
       <MapWordOrPhraseTranslationList
         definition_id={definition_id}
         definition_type={definition_type}
+        tempTranslation={viewData?.translation}
       />
 
       <Stack gap="16px">
         <Button
           variant="contained"
           color="green"
-          startIcon={<AddCircle sx={{ fontSize: 24 }} />}
+          startIcon={
+            saving ? (
+              <CircularProgress color="inherit" size="18px" />
+            ) : (
+              <AddCircle sx={{ fontSize: 24 }} />
+            )
+          }
           onClick={handleUpsertTranslation}
+          disabled={saving}
         >
           {tr('Yes, add my translation')}
         </Button>
@@ -223,6 +266,7 @@ export function MapNewTranslationConfirm() {
           variant="contained"
           color="gray_stroke"
           onClick={goToTranslation}
+          disabled={saving}
         >
           {tr('Cancel')}
         </Button>

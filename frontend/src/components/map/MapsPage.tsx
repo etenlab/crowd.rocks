@@ -12,7 +12,7 @@ import { MapNewTranslationConfirm } from './MapWordsTranslation/MapNewTranslatio
 
 import { useAppContext } from '../../hooks/useAppContext';
 
-import { langInfo2tag } from '../../common/langUtils';
+import { langInfo2tag } from '../../../../utils';
 
 interface MapsPageProps
   extends RouteComponentProps<{

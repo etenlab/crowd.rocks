@@ -1,28 +1,27 @@
-import { useCallback, useState, useMemo, Fragment } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import { useDebounce } from 'use-debounce';
 
 import {
-  Divider,
   Typography,
   Stack,
   Button,
   List,
   ListItem,
   ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Radio,
   useMediaQuery,
 } from '@mui/material';
 
 import { useTr } from '../../../../hooks/useTr';
 import { SearchInput } from '../SearchInput';
+import { Radio } from '../../buttons/Radio';
 
 import { OptionItem } from './Autocomplete';
+import { CheckCircle } from '../../icons/CheckCircle';
 
 export type AutocompleteModalProps = {
   options: OptionItem[];
+  searchPlaceholder?: string;
   label?: string;
   value: OptionItem | null;
   onChange(value: OptionItem | null): void;
@@ -32,6 +31,7 @@ export type AutocompleteModalProps = {
 export function AutocompleteModal({
   options,
   label,
+  searchPlaceholder,
   value,
   onChange,
   onClose,
@@ -73,80 +73,103 @@ export function AutocompleteModal({
   );
 
   return (
-    <Stack sx={{ width: '100%' }}>
-      <Stack
-        gap="5px"
-        sx={(theme) => ({
-          padding: '18px',
-          paddingTop: matches ? 0 : '18px',
-          borderBottom: '1px solid #DEE0E8',
-          maxWidth: '777px',
-          width: '100%',
-          margin: 'auto',
-          backgroundColor: theme.palette.text.white,
-        })}
-      >
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Button onClick={onClose} color="red">
-            {tr('Cancel')}
-          </Button>
-          <Button onClick={handleChange}>{tr('Confirm')}</Button>
-        </Stack>
-
-        <SearchInput
-          value={filter}
-          onChange={(value) => setFilter(value)}
-          placeholder={label || ''}
-          onClickSearchButton={() => {}}
-        />
-      </Stack>
+    <Stack gap="20px" sx={{ width: '100%', padding: '0 20px 30px' }}>
+      <Typography variant="h2">{label}</Typography>
+      <SearchInput
+        value={filter}
+        onChange={(value) => setFilter(value)}
+        placeholder={searchPlaceholder || ''}
+        onClickSearchButton={() => {}}
+      />
 
       <List sx={{ padding: 0 }}>
         <Virtuoso
           style={{
-            height: matches ? 'calc(700px - 170px)' : 'calc(100vh - 170px)',
+            height: matches ? 'calc(700px - 224px)' : 'calc(100vh - 224px)',
           }}
           data={filteredOptions}
+          components={{
+            Footer: () => {
+              return filteredOptions.length === 0 ? (
+                <Typography variant="body1">{tr('No results')}...</Typography>
+              ) : null;
+            },
+          }}
           itemContent={(_index, item) => (
-            <Fragment key={item.value as string}>
-              <ListItem
-                secondaryAction={
-                  item.endBadge ? (
-                    item.endBadge
-                  ) : (
+            <ListItem key={item.value as string} disablePadding>
+              <ListItemButton
+                onClick={() => setSelected(item)}
+                sx={(theme) => ({
+                  borderRadius: '10px',
+                  border: `1px solid ${
+                    item.value === selected?.value
+                      ? theme.palette.text.blue
+                      : theme.palette.text.gray_stroke
+                  }`,
+                  marginBottom: '10px',
+                  padding: '15px 14px',
+                })}
+              >
+                <Stack
+                  direction="row"
+                  alignContent="center"
+                  justifyContent="space-between"
+                  sx={{ width: '100%' }}
+                >
+                  <Stack
+                    direction="row"
+                    alignContent="center"
+                    justifyContent="flex-start"
+                    gap="9px"
+                  >
                     <Radio
-                      edge="end"
+                      color={
+                        item.value === selected?.value ? 'blue' : 'gray_stroke'
+                      }
                       checked={item.value === selected?.value}
                     />
-                  )
-                }
-                disablePadding
-              >
-                <ListItemButton onClick={() => setSelected(item)}>
-                  {item.endBadge ? (
-                    <ListItemIcon>
-                      <Radio
-                        edge="end"
-                        checked={item.value === selected?.value}
-                      />
-                    </ListItemIcon>
-                  ) : null}
-                  <ListItemText
-                    primary={
-                      <Typography variant="body1">{item.label}</Typography>
-                    }
-                  />
-                </ListItemButton>
-              </ListItem>
-              <Divider />
-            </Fragment>
+                    <Typography variant="h5" sx={{ fontWeight: 400 }}>
+                      {item.label}
+                    </Typography>
+                  </Stack>
+                  {item.endBadge ? item.endBadge : null}
+                </Stack>
+              </ListItemButton>
+            </ListItem>
           )}
         />
       </List>
+
+      <Stack
+        gap="18px"
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Button
+          onClick={onClose}
+          variant="contained"
+          color="gray_stroke"
+          sx={{
+            flex: 1,
+            boxShadow: `0px 12px 14px 0px rgba(12, 29, 87, 0.20)`,
+          }}
+        >
+          {tr('Cancel')}
+        </Button>
+        <Button
+          onClick={handleChange}
+          variant="contained"
+          color="blue"
+          sx={{
+            flex: 1,
+            boxShadow: `0px 12px 14px 0px rgba(12, 29, 87, 0.20)`,
+          }}
+          startIcon={<CheckCircle sx={{ fontSize: 24 }} />}
+        >
+          {tr('Confirm')}
+        </Button>
+      </Stack>
     </Stack>
   );
 }

@@ -12,11 +12,16 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
   useIonToast,
-  IonSpinner,
 } from '@ionic/react';
 import { useDebounce } from 'use-debounce';
 
-import { Stack, Typography, Button, FormControlLabel } from '@mui/material';
+import {
+  Stack,
+  Typography,
+  Button,
+  FormControlLabel,
+  CircularProgress,
+} from '@mui/material';
 
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 
@@ -42,16 +47,13 @@ import { globals } from '../../../services/globals';
 
 import { PAGE_SIZE } from '../../../const/commonConst';
 import { RouteComponentProps } from 'react-router';
-import {
-  langInfo2langInput,
-  langInfo2tag,
-  tag2langInfo,
-} from '../../../common/langUtils';
-import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
+import { langInfo2langInput, langInfo2tag } from '../../../../../utils';
+
 import { MapUploadModal } from './MapUploadModal';
 import { MapResetModal } from './MapResetModal';
 import { DownloadCircle } from '../../common/icons/DownloadCircle';
 import { downloadFromUrl } from '../../../common/utility';
+import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 interface MapListProps
   extends RouteComponentProps<{
     lang_full_tag: string;
@@ -71,7 +73,6 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const timerRef = useRef<NodeJS.Timeout>();
   const singleClickTimerRef = useRef<NodeJS.Timeout>();
   const clickCountRef = useRef<number>(0);
-  const isFirstRendering = useRef<boolean>(true);
 
   const [viewMode, setViewMode] = useState<ViewMode>('normal');
   const [checkedMap, setCheckedMap] = useState<Record<string, boolean>>({});
@@ -94,36 +95,14 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     useGetAllMapsListLazyQuery();
 
   useEffect(() => {
-    if (isFirstRendering.current) {
-      if (
-        url_lang_tag &&
-        url_lang_tag !== langInfo2tag(targetLang || undefined)
-      ) {
-        const langInfo = tag2langInfo(url_lang_tag);
-        if (langInfo.lang.tag) {
-          setTargetLanguage(langInfo);
-        }
-
-        isFirstRendering.current = false;
-        return;
-      }
-
-      if (!targetLang) {
-        setTargetLanguage(tag2langInfo(DEFAULT_MAP_LANGUAGE_CODE));
-      }
-    } else {
-      if (
-        isFirstRendering.current === false &&
-        url_lang_tag &&
-        targetLang &&
-        url_lang_tag !== langInfo2tag(targetLang)
-      ) {
-        router.push(
-          `/${nation_id}/${language_id}/1/maps/list/${langInfo2tag(
-            targetLang,
-          )}`,
-        );
-      }
+    if (
+      url_lang_tag &&
+      targetLang &&
+      url_lang_tag !== langInfo2tag(targetLang)
+    ) {
+      router.push(
+        `/${nation_id}/${language_id}/1/maps/list/${langInfo2tag(targetLang)}`,
+      );
     }
   }, [
     setTargetLanguage,
@@ -145,6 +124,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
             language_code: targetLang.lang.tag,
             dialect_code: targetLang?.dialect?.tag,
             geo_code: targetLang?.region?.tag,
+            filter: bouncedFilter,
           },
           first: PAGE_SIZE,
           after: null,
@@ -156,7 +136,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
         };
 
     getAllMapsList({ variables });
-  }, [getAllMapsList, targetLang]);
+  }, [getAllMapsList, targetLang, bouncedFilter]);
 
   const handleFilterChange = (value: string) => {
     setFilter(value);
@@ -223,15 +203,22 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
 
   useEffect(() => {
     if (mapZipError) {
-      present({
-        message: 'Maps zipping error',
-        duration: 3000,
-        position: 'top',
-        color: 'danger',
-      });
-      console.error(mapZipError);
+      if (mapZipError.message === 'Socket closed') {
+        present({
+          message: 'No connection with the server',
+          duration: 3000,
+          position: 'top',
+          color: 'danger',
+        });
+      } else {
+        present({
+          message: 'Maps zipping error: ' + mapZipError.message,
+          duration: 3000,
+          position: 'top',
+          color: 'danger',
+        });
+      }
     }
-    console.log(mapZipResult);
   }, [mapZipError, mapZipResult, present]);
 
   const handleStartZipMap = useCallback(async () => {
@@ -280,46 +267,48 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     clearTimeout(timerRef.current);
   };
 
-  const mapItemComs = useMemo(
-    () =>
-      allMapsQuery?.getAllMapsList.edges?.length ? (
-        allMapsQuery?.getAllMapsList.edges
-          ?.filter((edge) => {
-            return (edge.node.mapDetails?.map_file_name_with_langs || '')
-              .toLowerCase()
-              .includes(bouncedFilter.toLowerCase());
-          })
-          .map((edge) =>
-            edge.node.mapDetails ? (
-              <MapItem
-                mapInfo={edge.node.mapDetails}
-                key={edge.cursor}
-                viewMode={viewMode}
-                onChangeViewMode={() => {}}
-                onChangeCheck={(checked) => {
-                  setCheckedMap((_mapObj) => ({
-                    ..._mapObj,
-                    [edge.cursor]: checked,
-                  }));
-                }}
-                checked={checkedMap[edge.cursor] || allChecked}
-              />
-            ) : (
-              <>{edge.node.error}</>
-            ),
-          )
-      ) : (
-        <div> {tr('No maps found')} </div>
-      ),
-    [
-      allChecked,
-      allMapsQuery?.getAllMapsList.edges,
-      bouncedFilter,
-      checkedMap,
-      tr,
-      viewMode,
-    ],
-  );
+  const mapItemComs = useMemo(() => {
+    if (!allMapsQuery || !allMapsQuery.getAllMapsList.edges) {
+      return <div> {tr('No maps found')} </div>;
+    }
+
+    const originalMapIds = new Map<string, boolean>();
+
+    allMapsQuery.getAllMapsList.edges.map((edge) => {
+      if (edge.node.mapDetails?.is_original) {
+        originalMapIds.set(edge.node.mapDetails.original_map_id, true);
+      }
+    });
+
+    return allMapsQuery.getAllMapsList.edges.map((edge) => {
+      if (!edge.node.mapDetails) {
+        return null;
+      }
+
+      if (
+        !edge.node.mapDetails.is_original &&
+        originalMapIds.get(edge.node.mapDetails.original_map_id)
+      ) {
+        return null;
+      }
+
+      return (
+        <MapItem
+          mapInfo={edge.node.mapDetails}
+          key={edge.cursor}
+          viewMode={viewMode}
+          onChangeViewMode={() => {}}
+          onChangeCheck={(checked) => {
+            setCheckedMap((_mapObj) => ({
+              ..._mapObj,
+              [edge.cursor]: checked,
+            }));
+          }}
+          checked={checkedMap[edge.cursor] || allChecked}
+        />
+      );
+    });
+  }, [allChecked, allMapsQuery, checkedMap, tr, viewMode]);
 
   const handleClickNewMapButton = () => {
     openModal(<MapUploadModal onClose={closeModal} />);
@@ -329,7 +318,13 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
 
   return (
     <>
-      <Caption>{tr('Maps')}</Caption>
+      <Caption
+        handleBackClick={() => {
+          router.push(`/${nation_id}/${language_id}/1/home`);
+        }}
+      >
+        {tr('Maps')}
+      </Caption>
 
       <LangSelector
         title={tr('Select your language')}
@@ -356,30 +351,65 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
           alignItems="center"
         >
           <Typography variant="h3" color="dark">{`${
-            allMapsQuery?.getAllMapsList.edges?.length || 0
+            allMapsQuery?.getAllMapsList.pageInfo.totalEdges || 0
           } ${tr('maps found')}`}</Typography>
-          {mapZipResult?.ZipMapReport.status ===
-          SubscriptionStatus.Progressing ? (
-            <>
-              {mapZipResult.ZipMapReport.message}
-              <IonSpinner color={'primary'} />
-            </>
-          ) : (
-            <Button startIcon={<DownloadCircle />} onClick={handleStartZipMap}>
-              {tr('Make zip and dowlnoad')}
-            </Button>
-          )}
-          {isAdminUser ? (
-            <Button
-              variant="text"
-              startIcon={<AddCircle sx={{ fontSize: '24px' }} />}
-              color="orange"
-              sx={{ padding: 0 }}
-              onClick={handleClickNewMapButton}
-            >
-              {tr('New Map')}
-            </Button>
-          ) : null}
+
+          <Stack direction="row" alignItems="center" gap="10px">
+            {isAdminUser ? (
+              <Button
+                variant="contained"
+                color="orange"
+                sx={{ padding: '7px', minWidth: 0 }}
+                onClick={handleClickNewMapButton}
+              >
+                <AddCircle sx={{ fontSize: '18px' }} />
+              </Button>
+            ) : null}
+            <MoreHorizButton
+              popoverWidth="250px"
+              component={
+                <>
+                  <Button
+                    variant="text"
+                    startIcon={
+                      mapZipResult?.ZipMapReport.status ===
+                      SubscriptionStatus.Progressing ? (
+                        <CircularProgress color={'primary'} size={18} />
+                      ) : (
+                        <DownloadCircle sx={{ fontSize: '24px' }} />
+                      )
+                    }
+                    color="dark"
+                    sx={{
+                      padding: '0 5px',
+                      justifyContent: 'flex-start',
+                    }}
+                    onClick={handleStartZipMap}
+                  >
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        textOverflow: 'ellipsis',
+                        width: '180px',
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {mapZipResult?.ZipMapReport.status ===
+                      SubscriptionStatus.Progressing
+                        ? tr(mapZipResult.ZipMapReport.message || '')
+                        : tr(
+                            `Download All Maps (${
+                              allMapsQuery?.getAllMapsList.pageInfo
+                                .totalEdges || 0
+                            })`,
+                          )}
+                    </Typography>
+                  </Button>
+                </>
+              }
+            />
+          </Stack>
         </Stack>
         <SearchInput
           value={filter}
@@ -458,7 +488,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
           maxWidth: 'calc(777px - 32px)',
         }}
         onClick={() => {
-          router.push(`/US/${appLanguage.lang.tag}/1/maps/translation`);
+          router.push(`/US/${appLanguage.lang.tag}/1/maps/translation/all`);
         }}
       >
         {viewMode === 'normal' || allChecked

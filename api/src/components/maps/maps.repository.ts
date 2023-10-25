@@ -22,6 +22,7 @@ import {
   OrigMapWordsAndPhrasesOutput,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
+import { GroupedFilterSymbols } from '../../../../utils/dist';
 
 interface ISaveMapParams {
   mapFileName: string;
@@ -204,6 +205,10 @@ export class MapsRepository {
       params.push(lang?.geo_code);
       languageClause += ` and geo_code = $${params.length}`;
     }
+    if (lang?.filter && lang?.filter.length > 0) {
+      params.push(lang.filter);
+      languageClause += ` and lower(om.map_file_name) like concat('%', LOWER($${params.length}),'%')`;
+    }
     const sqlStr = `
         select
           om.original_map_id,
@@ -291,6 +296,11 @@ export class MapsRepository {
     if (originalMapId) {
       params.push(String(originalMapId));
       languageClause += ` and tm.original_map_id = $${params.length}`;
+    }
+
+    if (lang?.filter && lang?.filter.length > 0) {
+      params.push(lang.filter);
+      languageClause += ` and lower(om.map_file_name) like concat('%', LOWER($${params.length}),'%')`;
     }
 
     const sqlStr = `
@@ -1189,9 +1199,33 @@ export class MapsRepository {
       filterParams.push(input.filter);
       languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${filterParams.length}),'%')`;
     }
+    if (input.quickFilter && input.quickFilter.length > 0) {
+      switch (input.quickFilter) {
+        case GroupedFilterSymbols.Digits:
+          languagesFiltersRestrictionClause += ` and substring(o_like_string from 1 for 1) SIMILAR TO '(0|1|2|3|4|5|6|7|8|9)'`;
+          break;
+
+        case GroupedFilterSymbols.SpecialCharacters:
+          const s = ` and substring(o_like_string from 1 for 1) SIMILAR TO '(\`|\\!|\\@|\\%|\\^|\\&|\\*|\\(|\\)|\\-|\\+)'`;
+          languagesFiltersRestrictionClause += s;
+          break;
+
+        default:
+          filterParams.push(input.quickFilter);
+          languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat(LOWER($${filterParams.length}),'%')`;
+          break;
+      }
+    }
     if (input.original_map_id) {
       filterParams.push(input.original_map_id);
       languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;
+    }
+
+    if (input.onlyTranslated) {
+      languagesFiltersRestrictionClause += ` and (some_to_word_tr_id is not null or some_to_phrase_tr_id is not null) `;
+    }
+    if (input.onlyNotTranslated) {
+      languagesFiltersRestrictionClause += ` and (some_to_word_tr_id is null and some_to_phrase_tr_id is null) `;
     }
 
     const langAndPickParams: string[] = [...filterParams];
@@ -1199,7 +1233,9 @@ export class MapsRepository {
       langAndPickParams.push(String(after));
       pickDataClause += ` and cursor > $${langAndPickParams.length} `;
     }
-    pickDataClause += ` order by cursor `;
+    pickDataClause += ` order by cursor ${
+      input.isSortDescending ? 'DESC' : 'ASC'
+    }`;
     if (first) {
       langAndPickParams.push(String(first));
       pickDataClause += ` limit $${langAndPickParams.length} `;
@@ -1215,7 +1251,12 @@ export class MapsRepository {
         o_definition_id,
         o_language_code,
         o_dialect_code,
-        o_geo_code
+        o_geo_code,
+        o_created_at,
+        o_user_id,
+        o_is_bot,
+        o_avatar,
+        o_avatar_url
       from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
@@ -1225,6 +1266,7 @@ export class MapsRepository {
     const resQ = await dbPoolClient.query(sqlStr, langAndPickParams);
 
     if (!(resQ.rows.length > 0)) {
+      console.log('no data');
       return {
         edges: [],
         pageInfo: {
@@ -1265,6 +1307,13 @@ export class MapsRepository {
         o_language_code: r.o_language_code,
         o_dialect_code: r.o_dialect_code,
         o_geo_code: r.o_geo_code,
+        o_created_at: r.o_created_at,
+        o_created_by_user: {
+          user_id: r.o_user_id,
+          avatar: r.o_avatar,
+          avatar_url: r.o_avatar_url,
+          is_bot: r.o_is_bot,
+        },
       };
       return {
         cursor: r.cursor,
@@ -1385,7 +1434,11 @@ export class MapsRepository {
         o_definition_id,
         o_language_code,
         o_dialect_code,
-        o_geo_code
+        o_geo_code,
+        user_id as o_user_id,
+        is_bot as o_is_bot,
+        avatar as o_avatar,
+        avatar_url as o_avatar_url
       from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
@@ -1412,6 +1465,13 @@ export class MapsRepository {
         o_language_code: r.o_language_code,
         o_dialect_code: r.o_dialect_code,
         o_geo_code: r.o_geo_code,
+        o_created_at: r.o_created_at,
+        o_created_by_user: {
+          user_id: r.o_user_id,
+          avatar: r.o_avatar,
+          avatar_url: r.o_avatar_url,
+          is_bot: r.o_is_bot,
+        },
       };
     });
     return {

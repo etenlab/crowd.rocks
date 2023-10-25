@@ -184,6 +184,32 @@ query GetRecommendedTranslationFromDefinitionID(
   }
 }
 
+query GetRecommendedTranslationFromDefinitionIDs(
+  $from_definition_ids: [ID!]!
+  $from_type_is_words: [Boolean!]!
+  $language_code: String!
+  $dialect_code: String
+  $geo_code: String
+) {
+  getRecommendedTranslationFromDefinitionIDs(
+    from_definition_ids: $from_definition_ids
+    from_type_is_words: $from_type_is_words
+    langInfo: {
+      language_code: $language_code
+      dialect_code: $dialect_code
+      geo_code: $geo_code
+    }
+  ) {
+    error
+    translation_with_vote_list {
+      ...WordToWordTranslationWithVoteFragment
+      ...WordToPhraseTranslationWithVoteFragment
+      ...PhraseToWordTranslationWithVoteFragment
+      ...PhraseToPhraseTranslationWithVoteFragment
+    }
+  }
+}
+
 query LanguagesForBotTranslate($botType: BotType!) {
   languagesForBotTranslate(botType: $botType) {
     error

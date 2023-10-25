@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Args, Query, Resolver, Mutation, Context } from '@nestjs/graphql';
 import { ErrorType } from 'src/common/types';
 
@@ -27,7 +27,7 @@ export class NotificationResolver {
 
   @Query(() => NotificationListOutput)
   async notifications(@Context() req: any): Promise<NotificationListOutput> {
-    console.log('notification list resolver');
+    Logger.log('notification list resolver');
     const bearer = getBearer(req) || '';
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       bearer,
@@ -46,7 +46,7 @@ export class NotificationResolver {
     @Args('input') input: AddNotificationInput,
     @Context() req: any,
   ): Promise<AddNotificationOutput> {
-    console.log('add notification resolver, text: ', input.text);
+    Logger.log('add notification resolver, text: ', input.text);
 
     return this.notificationService.insert(input, getBearer(req) || '');
   }
@@ -82,7 +82,7 @@ export class NotificationResolver {
     @Args('input') input: MarkNotificationReadInput,
     @Context() req: any,
   ): Promise<MarkNotificationReadOutput> {
-    console.log(
+    Logger.log(
       'mark as read notification resolver, notification id: ',
       input.notification_id,
     );
@@ -95,7 +95,7 @@ export class NotificationResolver {
     @Args('input') input: NotificationDeleteInput,
     @Context() req: any,
   ): Promise<NotificationDeleteOutput> {
-    console.log(
+    Logger.log(
       'notification delete resolver, notification_id: ',
       input.notification_id,
     );

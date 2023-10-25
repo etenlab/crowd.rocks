@@ -8,6 +8,7 @@ export interface EnvConfig {
   envSubdomain: string;
   ecsClusterName: string;
   publicFilesBucketName: string;
+  tempPublicFilesBucketName: string;
   vpcSsmParam: string;
   defaultEcsExecRoleSsmParam: string;
   defaultEcsTaskRoleSsmParam: string;

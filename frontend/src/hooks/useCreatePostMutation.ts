@@ -5,6 +5,7 @@ import { ErrorType } from '../generated/graphql';
 
 import { useTr } from './useTr';
 import { updateCacheWithCreatePost } from '../cacheUpdators/createPost';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function usePostCreateMutation({
   parent_name,
@@ -15,7 +16,7 @@ export function usePostCreateMutation({
 }) {
   const { tr } = useTr();
   const [present] = useIonToast();
-
+  const redirectOnUnauth = useUnauthorizedRedirect();
   return useGeneratedPostCreateMutation({
     update(cache, { data, errors }) {
       if (
@@ -45,6 +46,7 @@ export function usePostCreateMutation({
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.postCreateResolver.error);
       }
     },
   });

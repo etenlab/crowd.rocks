@@ -11,6 +11,7 @@ import { GenericOutput, SubscriptionStatus } from '../../common/types';
 import { PageInfo } from 'src/components/common/types';
 import { Phrase } from '../phrases/types';
 import { Word } from '../words/types';
+import { User } from '../user/types';
 
 @ObjectType()
 export class MapDetailsInfo {
@@ -87,6 +88,10 @@ export class GetOrigMapWordsAndPhrasesInput {
   @Field(() => String, { nullable: true }) original_map_id: string | null;
   @Field(() => LanguageInput) lang: LanguageInput;
   @Field(() => String, { nullable: true }) filter: string | null;
+  @Field(() => Boolean, { nullable: true }) onlyTranslated?: boolean | null;
+  @Field(() => Boolean, { nullable: true }) onlyNotTranslated?: boolean | null;
+  @Field(() => Boolean, { nullable: true }) isSortDescending?: boolean | null;
+  @Field(() => String, { nullable: true }) quickFilter?: string | null;
 }
 @ObjectType()
 export class MapWordOrPhrase {
@@ -99,6 +104,8 @@ export class MapWordOrPhrase {
   @Field(() => String) o_language_code: string;
   @Field(() => String, { nullable: true }) o_dialect_code?: string | null;
   @Field(() => String, { nullable: true }) o_geo_code?: string | null;
+  @Field(() => Date) o_created_at: string;
+  @Field(() => User) o_created_by_user: User;
 }
 @ObjectType()
 export class MapWordsAndPhrasesEdge {

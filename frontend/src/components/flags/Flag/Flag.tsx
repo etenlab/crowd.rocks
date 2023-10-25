@@ -87,7 +87,7 @@ export function Flag({ parent_table, parent_id, flag_names }: FlagProps) {
       </IonItem>
     ));
 
-  return (
+  return flagListCom.length > 0 ? (
     <>
       <StChatIcon icon={flagSharp} onClick={handleToggleFlagBtn} />
       <IonPopover
@@ -105,5 +105,5 @@ export function Flag({ parent_table, parent_id, flag_names }: FlagProps) {
         <PopoverContainer>{flagListCom}</PopoverContainer>
       </IonPopover>
     </>
-  );
+  ) : null;
 }

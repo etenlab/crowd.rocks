@@ -4,7 +4,6 @@ import {
   IonContent,
   IonBadge,
   useIonRouter,
-  IonModal,
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -39,7 +38,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { NewSiteTextForm } from '../NewSiteTextForm';
 import { TranslatedCard } from './TranslatedCard';
 
-import { sortSiteTextFn } from '../../../common/langUtils';
+import { sortSiteTextFn } from '../../../../../utils';
 import { globals } from '../../../services/globals';
 import { AddListHeader } from '../../common/ListHeader';
 import { PageLayout } from '../../common/PageLayout';
@@ -63,12 +62,12 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
         langauges: { targetLang },
       },
     },
-    actions: { setTargetLanguage },
+    actions: { setTargetLanguage, createModal },
   } = useAppContext();
 
   const [filter, setFilter] = useState<string>('');
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const { openModal, closeModal } = createModal();
 
   const user_id = globals.get_user_id();
   const variables = { input: { user_id: String(user_id) } };
@@ -257,6 +256,24 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
     ));
   }, [data, error, handleGoToDefinitionDetail, targetLang]);
 
+  const handleOpenModal = () => {
+    openModal(
+      <>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('Add New Site Text')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {targetLang ? (
+            <NewSiteTextForm onCreated={closeModal} onCancel={closeModal} />
+          ) : null}
+        </IonContent>
+      </>,
+      'full',
+    );
+  };
+
   return (
     <PageLayout>
       <Caption>{tr('Site Text')}</Caption>
@@ -297,31 +314,11 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
       {isAdminRes?.loggedInIsAdmin.isAdmin && (
         <AddListHeader
           title={tr('Site Text Strings')}
-          onClick={() => setIsOpenModal(true)}
+          onClick={() => handleOpenModal()}
         />
       )}
 
       <CardListContainer>{cardListComs}</CardListContainer>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('Add New Site Text')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          {targetLang ? (
-            <NewSiteTextForm
-              onCreated={() => {
-                setIsOpenModal(false);
-              }}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
-            />
-          ) : null}
-        </IonContent>
-      </IonModal>
     </PageLayout>
   );
 }

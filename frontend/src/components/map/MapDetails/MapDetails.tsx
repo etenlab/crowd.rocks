@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, MouseEventHandler } from 'react';
 import { useLocation, useParams, useHistory } from 'react-router';
 import { useIonToast } from '@ionic/react';
 import {
@@ -10,11 +10,14 @@ import {
   Box,
 } from '@mui/material';
 
+import { downloadFromUrl } from '../../../common/utility';
 import { Caption } from '../../common/Caption/Caption';
 import { Tag } from '../../common/chips/Tag';
 import { FlagV2 } from '../../flags/Flag';
+import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 import { DiscussionButton } from '../../Discussion/DiscussionButton';
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
+import { DownloadCircle } from '../../common/icons/DownloadCircle';
 
 import {
   ErrorType,
@@ -23,12 +26,12 @@ import {
   useGetMapVoteStatusQuery,
 } from '../../../generated/graphql';
 
-import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
+import { langInfo2String, subTags2LangInfo } from '../../../../../utils';
 
 import { useTr } from '../../../hooks/useTr';
 import { useToggleMapVoteStatusMutation } from '../../../hooks/useToggleMapVoteStatusMutation';
 
-import { MAPS_FLAGS } from '../../flags/flagGroups';
+import { MAPS_FLAGS, authorizedForAnyFlag } from '../../flags/flagGroups';
 
 export function MapDetails() {
   const { tr } = useTr();
@@ -90,6 +93,25 @@ export function MapDetails() {
     currentMapWithContent,
   ]);
 
+  const handleDownloadSvg: MouseEventHandler<HTMLButtonElement> = (e) => {
+    if (currMapContent && currMapContent.mapDetails) {
+      if (isOriginal) {
+        downloadFromUrl(
+          currMapContent.mapDetails.map_file_name,
+          currMapContent.mapDetails.content_file_url,
+        );
+      } else {
+        downloadFromUrl(
+          currMapContent.mapDetails.map_file_name_with_langs,
+          currMapContent.mapDetails.content_file_url,
+        );
+      }
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   const handleImageLoad = () => {
     setTimeout(() => {
       setImageLoaded(true);
@@ -106,6 +128,16 @@ export function MapDetails() {
     );
   };
 
+  const handleGoToTranslation = () => {
+    if (currMapContent?.mapDetails?.original_map_id) {
+      history.push(
+        `/${nation_id}/${language_id}/1/maps/translation/${currMapContent?.mapDetails?.original_map_id}`,
+      );
+    } else {
+      history.push(`/${nation_id}/${language_id}/1/maps/translation/all`);
+    }
+  };
+
   const tagLabel = currMapContent?.mapDetails?.is_original
     ? tr('Original')
     : langInfo2String(langInfo) +
@@ -113,6 +145,11 @@ export function MapDetails() {
         ? ' ' + currMapContent?.mapDetails?.translated_percent + '%'
         : ' ? %');
   const tagColor = currMapContent?.mapDetails?.is_original ? 'orange' : 'green';
+
+  const loadingOrError =
+    !!currentMapWithContent.error ||
+    !!currentMapWithContent.loading ||
+    !currentMapWithContent.data;
 
   return (
     <>
@@ -125,14 +162,33 @@ export function MapDetails() {
           alignItems="center"
         >
           <Tag label={tagLabel} color={tagColor} />
-          <FlagV2
-            parent_table={
-              isOriginal
-                ? TableNameType.OriginalMaps
-                : TableNameType.TranslatedMaps
+
+          <MoreHorizButton
+            component={
+              <>
+                {authorizedForAnyFlag(MAPS_FLAGS) ? (
+                  <FlagV2
+                    parent_table={
+                      isOriginal
+                        ? TableNameType.OriginalMaps
+                        : TableNameType.TranslatedMaps
+                    }
+                    parent_id={id}
+                    flag_names={MAPS_FLAGS}
+                  />
+                ) : null}
+                <Button
+                  variant="text"
+                  startIcon={<DownloadCircle sx={{ fontSize: '24px' }} />}
+                  color="dark"
+                  sx={{ padding: 0, justifyContent: 'flex-start' }}
+                  onClick={handleDownloadSvg}
+                  disabled={loadingOrError}
+                >
+                  {tr('Download')}
+                </Button>
+              </>
             }
-            parent_id={id}
-            flag_names={MAPS_FLAGS}
           />
         </Stack>
 
@@ -142,19 +198,13 @@ export function MapDetails() {
 
         <Divider />
 
-        {isOriginal ? (
-          <Button
-            variant="contained"
-            color="blue"
-            onClick={() => {
-              history.push(
-                `/${nation_id}/${language_id}/1/maps/translation/${id}`,
-              );
-            }}
-          >
-            {tr('Translate This Map')}
-          </Button>
-        ) : null}
+        <Button
+          variant="contained"
+          color="blue"
+          onClick={handleGoToTranslation}
+        >
+          {tr('Translate This Map')}
+        </Button>
 
         <DiscussionButton
           parent_table={
@@ -201,28 +251,34 @@ export function MapDetails() {
         />
       </Stack>
 
+      {!imageLoaded && !imageError ? (
+        <Skeleton
+          variant="rounded"
+          width="calc(100vw - 30px)"
+          height="500px"
+          animation="wave"
+          sx={{
+            marginTop: '15px',
+            borderRadius: '10px',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            maxWidth: 'calc(777px - 60px)',
+          }}
+        />
+      ) : null}
+
       <Box
         sx={(theme) => ({
-          border: `1px solid ${theme.palette.text.gray_stroke}`,
+          border: `1px solid ${
+            !imageLoaded && !imageError
+              ? 'none'
+              : theme.palette.text.gray_stroke
+          }`,
           borderRadius: '10px',
+          display: !imageLoaded && !imageError ? 'hidden' : 'inherit',
         })}
         onClick={handleGoToView}
       >
-        {!imageLoaded && !imageError ? (
-          <Skeleton
-            variant="rounded"
-            width="calc(100vw - 60px)"
-            height="500px"
-            animation="wave"
-            sx={{
-              marginTop: '15px',
-              borderRadius: '10px',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              maxWidth: 'calc(777px - 60px)',
-            }}
-          />
-        ) : null}
         {currMapContent?.mapDetails && (
           <>
             {imageError && <p>{tr('Error loading image')}</p>}

@@ -10,12 +10,17 @@ import {
 
 import { useTr } from '../../../hooks/useTr';
 
-import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
+import {
+  WORD_AND_PHRASE_FLAGS,
+  authorizedForAnyFlag,
+} from '../../flags/flagGroups';
 
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { FlagV2 } from '../../flags/Flag';
+import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 import { NewTranslationForm } from './NewTranslationForm';
 import { MapWordOrPhraseTranslationList } from './MapWordOrPhraseTranslantionList';
+import { Box } from '@mui/material';
 
 export function MapWordOrPhraseTranslation() {
   const { tr } = useTr();
@@ -101,15 +106,27 @@ export function MapWordOrPhraseTranslation() {
               original.isWord ? TableNameType.Words : TableNameType.Phrases
             }
           />
-          <FlagV2
-            parent_id={definition_id}
-            parent_table={
-              original.isWord
-                ? TableNameType.WordDefinitions
-                : TableNameType.PhraseDefinitions
-            }
-            flag_names={WORD_AND_PHRASE_FLAGS}
-          />
+          <Box
+            sx={{
+              display: authorizedForAnyFlag(WORD_AND_PHRASE_FLAGS)
+                ? undefined
+                : 'none',
+            }}
+          >
+            <MoreHorizButton
+              component={
+                <FlagV2
+                  parent_id={definition_id}
+                  parent_table={
+                    original.isWord
+                      ? TableNameType.WordDefinitions
+                      : TableNameType.PhraseDefinitions
+                  }
+                  flag_names={WORD_AND_PHRASE_FLAGS}
+                />
+              }
+            />
+          </Box>
         </Stack>
       </Stack>
 

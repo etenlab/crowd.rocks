@@ -38,6 +38,10 @@ fragment MapWordOrPhraseFragment on MapWordOrPhrase {
   o_language_code
   o_dialect_code
   o_geo_code
+  o_created_at
+  o_created_by_user {
+    ...UserFields
+  }
 }
 
 fragment MapWordsAndPhrasesEdgeFragment on MapWordsAndPhrasesEdge {
@@ -55,6 +59,10 @@ fragment WordWithDefinitionFragment on WordWithDefinition {
   geo_code
   definition
   definition_id
+  created_at
+  created_by_user {
+    ...UserFields
+  }
 }
 
 fragment PhraseWithDefinitionFragment on PhraseWithDefinition {
@@ -65,17 +73,31 @@ fragment PhraseWithDefinitionFragment on PhraseWithDefinition {
   geo_code
   definition
   definition_id
+  created_at
+  created_by_user {
+    ...UserFields
+  }
 }
 
 query GetOrigMapWordsAndPhrases(
   $original_map_id: String
   $lang: LanguageInput!
   $filter: String
+  $quickFilter: String
+  $onlyNotTranslated: Boolean
+  $onlyTranslated: Boolean
   $after: ID
   $first: Int
 ) {
   getOrigMapWordsAndPhrases(
-    input: { lang: $lang, filter: $filter, original_map_id: $original_map_id }
+    input: {
+      lang: $lang
+      filter: $filter
+      quickFilter: $quickFilter
+      original_map_id: $original_map_id
+      onlyNotTranslated: $onlyNotTranslated
+      onlyTranslated: $onlyTranslated
+    }
     after: $after
     first: $first
   ) {

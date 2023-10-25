@@ -4,8 +4,9 @@ import { AudioRecorderUI } from './AudioRecorderUI';
 import { globals } from '../../../services/globals';
 import { useIonToast } from '@ionic/react';
 import { useTr } from '../../../hooks/useTr';
-import { ErrorType, useUploadFileMutation } from '../../../generated/graphql';
+import { ErrorType } from '../../../generated/graphql';
 import { usePostCreateMutation } from '../../../hooks/useCreatePostMutation';
+import { useUploadFileMutation } from '../../../hooks/useUploadFileMutation';
 
 const maxFileSize = 1024 * 1024 * 50;
 

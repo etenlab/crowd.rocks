@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { readFileSync } from 'fs';
 import { justBearerHeader } from 'src/common/utility';
@@ -17,40 +17,48 @@ export class DatabaseVersionControlService {
     private config: ConfigService,
     private dataloader: DataLoadService,
   ) {
-    console.log('Database Version Control');
+    Logger.log('Database Version Control');
     this.init();
   }
 
   async init() {
-    const exists = await this.getIsDbInit();
+    try {
+      const exists = await this.getIsDbInit();
 
-    if (!exists) {
-      console.log('Creating database schema');
-      await this.loadVersion1();
+      if (!exists) {
+        console.log('Creating database schema');
+        await this.loadVersion1();
+      }
+
+      const version = +(await this.getSchemaVersion());
+      console.log('Database schema version:', version);
+
+      switch (version) {
+        case 1:
+          console.log('Updating database to version 2');
+          await this.loadVersion2();
+        // note that there is no break needed in the switch's cases
+        case 2:
+          console.log('Updating database to version 3');
+          await this.loadVersion3();
+        case 3:
+          console.log('Updating database to version 4');
+          await this.loadVersion4();
+        case 4:
+          console.log('Updating database to version 5');
+          await this.loadVersion5();
+        default:
+          console.error('Database version is current');
+      }
+
+      if (process.env.NODE_ENV !== 'prod' && !exists) {
+        await this.dataloader.loadSiteTextData();
+      }
+    } catch (e) {
+      Logger.error(e);
     }
 
-    const version = +(await this.getSchemaVersion());
-    console.log('Database schema version:', version);
-
-    switch (version) {
-      case 1:
-        console.log('Updating database to version 2');
-        await this.loadVersion2();
-      // note that there is no break needed in the switch's cases
-      case 2:
-        console.log('Updating database to version 3');
-        await this.loadVersion3();
-      case 3:
-        console.log('Updating database to version 4');
-        await this.loadVersion4();
-      case 4:
-        console.log('Updating database to version 5');
-        await this.loadVersion5();
-      default:
-        console.error('Database version is current');
-    }
-
-    console.log('Database version check complete');
+    Logger.log('Database version check complete');
   }
 
   async getIsDbInit(): Promise<boolean> {
@@ -188,9 +196,6 @@ export class DatabaseVersionControlService {
       this.config.ADMIN_PASSWORD || 'asdfasdf',
     );
     await this.registerUser('anonymous@crowd.rocks', 'Anonymous', 'asdfasdf');
-
-    // load data
-    await this.dataloader.loadSiteTextData();
   }
 
   async loadVersion2(): Promise<void> {
@@ -398,6 +403,9 @@ export class DatabaseVersionControlService {
 
     await this.runSqlFile('./src/core/sql/authentication/register-bot.sql');
     await this.runSqlFile('./src/core/sql/user/avatar_update_v2.sql');
+
+    //maps
+    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v5.sql');
 
     // set version
     await this.setVersionNumber(5);

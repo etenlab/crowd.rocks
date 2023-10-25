@@ -370,8 +370,12 @@ input GetOrigMapListInput {
 
 input GetOrigMapWordsAndPhrasesInput {
   filter: String
+  isSortDescending: Boolean
   lang: LanguageInput!
+  onlyNotTranslated: Boolean
+  onlyTranslated: Boolean
   original_map_id: String
+  quickFilter: String
 }
 
 type GetOrigMapsListOutput {
@@ -521,6 +525,8 @@ input MapVoteUpsertInput {
 
 type MapWordOrPhrase {
   id: ID!
+  o_created_at: DateTime!
+  o_created_by_user: User!
   o_definition: String!
   o_definition_id: String!
   o_dialect_code: String
@@ -679,6 +685,7 @@ type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: ID
+  totalEdges: Int
 }
 
 input PasswordResetFormInput {
@@ -1042,6 +1049,7 @@ type Query {
   getQuestionOnWordRangesByDocumentId(document_id: ID!): QuestionOnWordRangesOutput!
   getQuestionsByRefs(parent_ids: [ID!]!, parent_tables: [TableNameType!]!): QuestionsOutput!
   getRecommendedTranslationFromDefinitionID(from_definition_id: ID!, from_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteOutput!
+  getRecommendedTranslationFromDefinitionIDs(from_definition_ids: [ID!]!, from_type_is_words: [Boolean!]!, langInfo: LanguageInput!): TranslationWithVoteListOutput!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): TranslationWithVoteOutput!
   getTotalPosts(input: PostsByParentInput!): PostCountOutput!
   getTranslationsByFromDefinitionId(definition_id: ID!, from_definition_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteListOutput!

@@ -44,7 +44,7 @@ export function TranslatedCard(props: TranslatedCardProps) {
   let siteTextlikeString = '';
   let definitionlikeString = '';
   let username = '';
-  let isBot = false;
+  let isBot;
   let createdAt = '';
 
   const translationWithVote =
@@ -113,15 +113,19 @@ export function TranslatedCard(props: TranslatedCardProps) {
   }
 
   return (
-    <Card
-      content={siteTextlikeString}
-      description={definitionlikeString}
-      onClick={() => props.onClick()}
-      createdBy={{
-        username,
-        isBot,
-        createdAt: createdAt && new Date(createdAt).toDateString(),
-      }}
-    />
+    <>
+      {siteTextlikeString && (
+        <Card
+          content={siteTextlikeString}
+          description={definitionlikeString}
+          onClick={() => props.onClick()}
+          createdBy={{
+            username,
+            isBot,
+            createdAt: createdAt && new Date(createdAt).toDateString(),
+          }}
+        />
+      )}
+    </>
   );
 }

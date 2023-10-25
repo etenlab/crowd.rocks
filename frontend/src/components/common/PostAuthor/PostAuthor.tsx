@@ -1,4 +1,4 @@
-import { Stack, Typography, Box } from '@mui/material';
+import { Stack, Typography, Box, Chip } from '@mui/material';
 
 import { Avatar } from '../Avatar';
 import { DateViewer } from '../DateViewer';
@@ -7,9 +7,15 @@ export type PostAuthorProps = {
   avatar?: string;
   username: string;
   date: Date;
+  isCreatedByBot?: boolean;
 };
 
-export function PostAuthor({ avatar, username, date }: PostAuthorProps) {
+export function PostAuthor({
+  avatar,
+  username,
+  date,
+  isCreatedByBot,
+}: PostAuthorProps) {
   const transformUsername = `@${username}`;
 
   return (
@@ -26,6 +32,7 @@ export function PostAuthor({ avatar, username, date }: PostAuthorProps) {
         }}
       />
       <DateViewer date={date} />
+      {isCreatedByBot && <Chip label={'bot'} color="blue" size="small" />}
     </Stack>
   );
 }

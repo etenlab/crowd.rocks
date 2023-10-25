@@ -7,10 +7,12 @@ import { ErrorType } from '../generated/graphql';
 import { updateCacheWithUpsertSiteText } from '../cacheUpdators/upsertSiteText';
 
 import { useTr } from '../hooks/useTr';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useSiteTextUpsertMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedSiteTextUpsertMutation({
     update(cache, { data: upsertData, errors }) {
@@ -46,6 +48,7 @@ export function useSiteTextUpsertMutation() {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(upsertData?.siteTextUpsert.error);
       }
     },
   });

@@ -1,17 +1,17 @@
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import {
   Typography,
   Stack,
   List,
   ListItem,
   ListItemButton,
-  ListItemText,
-  Radio,
   Button,
-  Divider,
   useMediaQuery,
 } from '@mui/material';
 import { Virtuoso } from 'react-virtuoso';
+
+import { CheckCircle } from '../../icons/CheckCircle';
+import { Radio } from '../../buttons/Radio';
 
 import { useTr } from '../../../../hooks/useTr';
 
@@ -41,56 +41,96 @@ export function SelectModal({
   };
 
   return (
-    <Stack width="100%">
-      <Stack
-        gap="5px"
-        sx={(theme) => ({
-          padding: '18px',
-          borderBottom: '1px solid #DEE0E8',
-          maxWidth: '777px',
-          width: '100%',
-          margin: 'auto',
-          backgroundColor: theme.palette.text.white,
-        })}
-      >
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Button onClick={onClose} color="red">
-            {tr('Cancel')}
-          </Button>
-          <Button onClick={handleChange}>{tr('Confirm')}</Button>
-        </Stack>
-      </Stack>
+    <Stack gap="20px" sx={{ width: '100%', padding: '0 20px 30px' }}>
+      <Typography variant="h2">{tr('Select')}</Typography>
+
       <List sx={{ padding: 0 }}>
         <Virtuoso
           style={{
-            height: matches ? 'calc(600px - 200px)' : 'calc(100vh - 170px)',
+            height: matches ? 'calc(700px - 170px)' : 'calc(100vh - 170px)',
           }}
           data={options}
+          components={{
+            Footer: () => {
+              return options.length === 0 ? (
+                <Typography variant="body1">{tr('No results')}...</Typography>
+              ) : null;
+            },
+          }}
           itemContent={(_index, item) => (
-            <Fragment key={item.value as string}>
-              <ListItem
-                secondaryAction={
-                  <Radio edge="end" checked={item.value === selected?.value} />
-                }
-                disablePadding
+            <ListItem key={item.value as string} disablePadding>
+              <ListItemButton
+                onClick={() => setSelected(item)}
+                sx={(theme) => ({
+                  borderRadius: '10px',
+                  border: `1px solid ${
+                    item.value === selected?.value
+                      ? theme.palette.text.blue
+                      : theme.palette.text.gray_stroke
+                  }`,
+                  marginBottom: '10px',
+                  padding: '15px 14px',
+                })}
               >
-                <ListItemButton onClick={() => setSelected(item)}>
-                  <ListItemText
-                    primary={
-                      <Typography variant="body1">{item.label}</Typography>
-                    }
-                  />
-                </ListItemButton>
-              </ListItem>
-              <Divider />
-            </Fragment>
+                <Stack
+                  direction="row"
+                  alignContent="center"
+                  justifyContent="space-between"
+                  sx={{ width: '100%' }}
+                >
+                  <Stack
+                    direction="row"
+                    alignContent="center"
+                    justifyContent="flex-start"
+                    gap="9px"
+                  >
+                    <Radio
+                      color={
+                        item.value === selected?.value ? 'blue' : 'gray_stroke'
+                      }
+                      checked={item.value === selected?.value}
+                    />
+                    <Typography variant="h5" sx={{ fontWeight: 400 }}>
+                      {item.label}
+                    </Typography>
+                  </Stack>
+                </Stack>
+              </ListItemButton>
+            </ListItem>
           )}
         />
       </List>
+
+      <Stack
+        gap="18px"
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Button
+          onClick={onClose}
+          variant="contained"
+          color="gray_stroke"
+          sx={{
+            flex: 1,
+            boxShadow: `0px 12px 14px 0px rgba(12, 29, 87, 0.20)`,
+          }}
+        >
+          {tr('Cancel')}
+        </Button>
+        <Button
+          onClick={handleChange}
+          variant="contained"
+          color="blue"
+          sx={{
+            flex: 1,
+            boxShadow: `0px 12px 14px 0px rgba(12, 29, 87, 0.20)`,
+          }}
+          startIcon={<CheckCircle sx={{ fontSize: 24 }} />}
+        >
+          {tr('Confirm')}
+        </Button>
+      </Stack>
     </Stack>
   );
 }

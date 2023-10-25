@@ -2,11 +2,19 @@ import { Typography, Stack } from '@mui/material';
 
 import { TableNameType } from '../../../generated/graphql';
 
-import { FlagName } from '../../flags/flagGroups';
+import { FlagName, authorizedForAnyFlag } from '../../flags/flagGroups';
 import { FlagV2 } from '../../flags/Flag';
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { VoteButtonsHorizontal } from '../VoteButtonsHorizontal';
 import { PostAuthor } from '../PostAuthor';
+import { MoreHorizButton } from '../buttons/MoreHorizButton';
+
+export type Author = {
+  username: string;
+  avatar?: string;
+  createdAt: Date;
+  createdByBot?: boolean;
+};
 
 export type WordCardProps = {
   word: string;
@@ -26,11 +34,7 @@ export type WordCardProps = {
     parent_id: string;
     flag_names: FlagName[];
   };
-  author?: {
-    username: string;
-    avatar?: string;
-    createdAt: Date;
-  };
+  author?: Author;
 };
 
 export function WordCard({
@@ -49,7 +53,6 @@ export function WordCard({
   const discussionBtnCom = discussion ? (
     <DiscussionIconButton {...discussion} />
   ) : null;
-  const flagCom = flags ? <FlagV2 {...flags} /> : null;
 
   return (
     <Stack gap="10px">
@@ -59,11 +62,19 @@ export function WordCard({
             username={author.username}
             date={author.createdAt}
             avatar={author.avatar}
+            isCreatedByBot={author.createdByBot}
           />
         ) : (
           <div />
         )}
-        {flagCom}
+        <MoreHorizButton
+          sx={{
+            display: authorizedForAnyFlag(flags?.flag_names ?? [])
+              ? undefined
+              : 'none',
+          }}
+          component={flags ? <FlagV2 {...flags} /> : null}
+        />
       </Stack>
 
       <Stack

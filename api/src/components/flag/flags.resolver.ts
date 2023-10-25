@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   Args,
   Query,
@@ -36,7 +36,7 @@ export class FlagsResolver {
     parent_table: TableNameType,
     @Args('parent_id', { type: () => String }) parent_id: string,
   ): Promise<FlagsOutput> {
-    console.log('get getFlagsFromRef:', {
+    Logger.log('get getFlagsFromRef:', {
       parent_table,
       parent_id,
     });
@@ -51,7 +51,7 @@ export class FlagsResolver {
     @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
   ): Promise<WordDefinitionListConnection> {
-    console.log('get getWordsByFlag:', {
+    Logger.log('get getWordsByFlag:', {
       flag_name,
       first,
       after,
@@ -72,7 +72,7 @@ export class FlagsResolver {
     @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
   ): Promise<PhraseDefinitionListConnection> {
-    console.log('get getPhrasesByFlag:', {
+    Logger.log('get getPhrasesByFlag:', {
       flag_name,
       first,
       after,
@@ -94,7 +94,7 @@ export class FlagsResolver {
     @Args('name', { type: () => String }) name: FlagType,
     @Context() req: any,
   ): Promise<FlagsOutput> {
-    console.log(`toggleFlagWithRef: `, {
+    Logger.log(`toggleFlagWithRef: `, {
       parent_table,
       parent_id,
       name,

@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
-  IonModal,
   IonHeader,
   IonTitle,
   IonToolbar,
@@ -57,12 +56,12 @@ export function WordListPage({ match }: WordListPageProps) {
         langauges: { targetLang },
       },
     },
-    actions: { setTargetLanguage },
+    actions: { setTargetLanguage, createModal },
   } = useAppContext();
 
   const [present] = useIonToast();
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const { openModal, closeModal } = createModal();
 
   const [filter, setFilter] = useState<string>('');
 
@@ -249,6 +248,28 @@ export function WordListPage({ match }: WordListPageProps) {
     wordsData,
   ]);
 
+  const handleOpenModal = () => {
+    openModal(
+      <>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('Add New Word')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {targetLang ? (
+            <NewWordForm
+              langInfo={targetLang}
+              onCreated={closeModal}
+              onCancel={closeModal}
+            />
+          ) : null}
+        </IonContent>
+      </>,
+      'full',
+    );
+  };
+
   return (
     <PageLayout>
       <Caption>{tr('Dictionary')}</Caption>
@@ -285,7 +306,8 @@ export function WordListPage({ match }: WordListPageProps) {
             });
             return;
           }
-          setIsOpenModal(true);
+
+          handleOpenModal();
         }}
       />
 
@@ -297,27 +319,6 @@ export function WordListPage({ match }: WordListPageProps) {
           loadingSpinner="bubbles"
         />
       </IonInfiniteScroll>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('Add New Word')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          {targetLang ? (
-            <NewWordForm
-              langInfo={targetLang}
-              onCreated={() => {
-                setIsOpenModal(false);
-              }}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
-            />
-          ) : null}
-        </IonContent>
-      </IonModal>
     </PageLayout>
   );
 }

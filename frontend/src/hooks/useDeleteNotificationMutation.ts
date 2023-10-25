@@ -5,10 +5,12 @@ import { ErrorType } from '../generated/graphql';
 
 import { useTr } from './useTr';
 import { updateCacheWithDeleteNotification } from '../cacheUpdators/deleteNotification';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useDeleteNotificationMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedDeleteMutation({
     update(cache, { data, errors }) {
@@ -33,6 +35,7 @@ export function useDeleteNotificationMutation() {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.notificationDelete.error);
       }
     },
   });

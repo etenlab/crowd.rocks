@@ -17,7 +17,7 @@
     "codegen": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
-    "@apollo/client": "^3.8.1",
+    "@apollo/client": "^3.8.6",
     "@capacitor/android": "5.1.1",
     "@capacitor/app": "5.0.5",
     "@capacitor/core": "5.1.1",
@@ -37,6 +37,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/styled-components": "^5.1.26",
     "apollo-upload-client": "^17.0.0",
+    "apollo3-cache-persist": "^0.14.1",
     "ionicons": "^7.0.0",
     "language-tags": "^1.0.8",
     "nanoid": "^5.0.2",

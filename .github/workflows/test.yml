@@ -53,6 +53,8 @@ jobs:
         with:
           node-version: 16
 
+      - run: cd utils && npm ci
+
       - run: cd api && cp .env.example .env && yarn install
 
       - name: Test
@@ -77,6 +79,8 @@ jobs:
             postgres
             api
 
+      - run: cd utils && npm ci
+        
       - run: cd frontend && npm ci --force
 
       - name: Install Playwright Browsers

@@ -17,6 +17,7 @@ ecsClusterName: 'prod-cluster'
 
 # S3 bucket names
 publicFilesBucketName: 'crowdrocks-public-files-prod'
+tempPublicFilesBucketName: 'crowdrocks-public-files-prod-temp'
 
 # System Manager params to create
 vpcSsmParam: '/prod/app-vpc-id'
