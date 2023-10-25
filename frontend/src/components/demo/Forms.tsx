@@ -6,8 +6,6 @@ import { Caption } from '../common/Caption/Caption';
 import { SearchInput } from '../common/forms/SearchInput/SearchInput';
 import { Autocomplete } from '../common/forms/Autocomplete/Autocomplete';
 
-import { WordItem } from '../common/WordItem';
-
 const top100Films = [
   { label: 'The Shawshank Redemption', value: '1' },
   { label: 'The Godfather', value: '2' },
@@ -70,13 +68,6 @@ export function Forms() {
         label="Label"
         value={autoCompleteValue}
         onChange={(value) => setAutoCompleteValue(value)}
-      />
-
-      <WordItem
-        word="Asia"
-        description="A geographical place phrase"
-        onConfirm={() => {}}
-        onDetail={() => {}}
       />
     </PageLayout>
   );
