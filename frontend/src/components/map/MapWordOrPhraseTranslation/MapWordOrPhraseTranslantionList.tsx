@@ -2,7 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { useIonToast } from '@ionic/react';
 import { Stack, LinearProgress } from '@mui/material';
 
-import { ErrorType, TableNameType } from '../../../generated/graphql';
+import {
+  ErrorType,
+  TableNameType,
+  useGetMapWordOrPhraseAsOrigByDefinitionIdQuery,
+  useGetTranslationsByFromDefinitionIdQuery,
+} from '../../../generated/graphql';
 
 import { useAppContext } from '../../../hooks/useAppContext';
 import {
@@ -36,33 +41,37 @@ export function MapWordOrPhraseTranslationList({
     },
     actions: { setUpdatedTrDefinitionIds },
   } = useAppContext();
-  const { getTranslationsFromDefinitionId } = useMapTranslationTools();
-  const [translations, setTranslations] = useState<{
-    original: Original;
+  const { getTransformedTranslations } = useMapTranslationTools();
+  const [origAndTr, setOrigAndTr] = useState<{
+    original: Original | null;
     translations: Translation[];
   } | null>(null);
 
   const [present] = useIonToast();
 
-  useEffect(() => {
-    if (targetLang) {
-      (async () => {
-        const { original, translations } =
-          await getTranslationsFromDefinitionId(
-            definition_id,
-            definition_type,
-            targetLang,
-          );
+  const wordOrPhraseQ = useGetMapWordOrPhraseAsOrigByDefinitionIdQuery({
+    variables: {
+      definition_id,
+      is_word_definition: definition_type === 'word',
+    },
+  }).data?.getMapWordOrPhraseAsOrigByDefinitionId.wordOrPhrase;
 
-        setTranslations({ original, translations });
-      })();
-    }
-  }, [
-    definition_id,
-    definition_type,
-    getTranslationsFromDefinitionId,
-    targetLang,
-  ]);
+  const translationsQ = useGetTranslationsByFromDefinitionIdQuery({
+    variables: {
+      definition_id,
+      from_definition_type_is_word: definition_type === 'word',
+      language_code: targetLang?.lang.tag || '',
+      dialect_code: targetLang?.dialect?.tag,
+      geo_code: targetLang?.region?.tag,
+    },
+  }).data?.getTranslationsByFromDefinitionId.translation_with_vote_list;
+
+  useEffect(() => {
+    if (!wordOrPhraseQ || !translationsQ) return;
+    const t = getTransformedTranslations(wordOrPhraseQ, translationsQ);
+    if (!t?.original) return;
+    setOrigAndTr(t);
+  }, [getTransformedTranslations, translationsQ, wordOrPhraseQ]);
 
   const [toggleTrVoteStatus, { data: voteData, loading: voteLoading }] =
     useToggleTranslationVoteStatusWithRefetchMutation();
@@ -109,10 +118,10 @@ export function MapWordOrPhraseTranslationList({
 
   return (
     <Stack gap="24px">
-      {!translations ? (
+      {!origAndTr?.original ? (
         <LinearProgress />
       ) : (
-        translations.translations.map((item) => {
+        origAndTr.translations.map((item) => {
           if (tempTranslation && tempTranslation !== item.value) {
             return null;
           }
@@ -141,7 +150,7 @@ export function MapWordOrPhraseTranslationList({
                 onVoteUpClick: () => {
                   handleVoteClick(
                     item.id,
-                    translations.original.isWord,
+                    origAndTr.original!.isWord,
                     item.to_type === 'word',
                     true,
                   );
@@ -149,7 +158,7 @@ export function MapWordOrPhraseTranslationList({
                 onVoteDownClick: () => {
                   handleVoteClick(
                     item.id,
-                    translations.original.isWord,
+                    origAndTr.original!.isWord,
                     item.to_type === 'word',
                     false,
                   );
