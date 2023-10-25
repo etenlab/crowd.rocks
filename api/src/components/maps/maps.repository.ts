@@ -1262,7 +1262,7 @@ export class MapsRepository {
       ${languagesFiltersRestrictionClause}
       ${pickDataClause}
     `;
-
+    console.log('mapsRepository#getOrigMapWordsAndPhrases sqlStr:', sqlStr);
     const resQ = await dbPoolClient.query(sqlStr, langAndPickParams);
 
     if (!(resQ.rows.length > 0)) {
@@ -1285,6 +1285,7 @@ export class MapsRepository {
       ${languagesFiltersRestrictionClause}
       and cursor>${dbPoolClient.escapeLiteral(resQ.rows.at(-1).cursor)}
     `;
+    console.log('mapsRepository#getOrigMapWordsAndPhrases sqlAfter:', sqlAfter);
     const resCheckAfter = await dbPoolClient.query(sqlAfter, filterParams);
 
     // just to know if there pages before the current selection
@@ -1294,6 +1295,15 @@ export class MapsRepository {
       ${languagesFiltersRestrictionClause}
       and cursor<${dbPoolClient.escapeLiteral(resQ.rows[0].cursor)}
     `;
+    console.log(
+      'mapsRepository#getOrigMapWordsAndPhrases sqlBefore:',
+      sqlBefore,
+    );
+    console.log(
+      'mapsRepository#getOrigMapWordsAndPhrases langAndPickParams:',
+      JSON.stringify(langAndPickParams),
+    );
+
     const resCheckBefore = await dbPoolClient.query(sqlBefore, filterParams);
 
     const edges: MapWordsAndPhrasesEdge[] = resQ.rows.map((r) => {

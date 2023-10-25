@@ -6,6 +6,7 @@ import {
   ErrorType,
   MapWordOrPhrase,
   useGetRecommendedTranslationFromDefinitionIdLazyQuery,
+  useGetTranslationsByFromDefinitionIdLazyQuery,
 } from '../../../generated/graphql';
 import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 
@@ -39,7 +40,7 @@ export function MapWordItem({ original }: MapWordItemProps) {
       setUpdatedTrDefinitionIds,
     },
   } = useAppContext();
-  const { getTranslationsFromDefinitionId } = useMapTranslationTools();
+  const { getTransformedTranslations } = useMapTranslationTools();
 
   const [saving, setSaving] = useState<boolean>(false);
 
@@ -49,11 +50,14 @@ export function MapWordItem({ original }: MapWordItemProps) {
   const [upsertTranslation] =
     useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
 
+  const [getTranslationsQ, { data: dataTrs }] =
+    useGetTranslationsByFromDefinitionIdLazyQuery();
+
   useEffect(() => {
     if (targetLang) {
       getRecommendedTranslationFromDefinitionId({
         variables: {
-          from_definition_id: original.o_id,
+          from_definition_id: original.o_id, // todo maybe original.o_definition_id ??
           from_type_is_word: original.type === StringContentTypes.WORD,
           language_code: targetLang.lang.tag,
           dialect_code: targetLang.dialect?.tag,
@@ -64,9 +68,21 @@ export function MapWordItem({ original }: MapWordItemProps) {
   }, [getRecommendedTranslationFromDefinitionId, targetLang, original]);
 
   useEffect(() => {
-    if (!saving) {
-      return;
-    }
+    if (!targetLang) return;
+    getTranslationsQ({
+      variables: {
+        definition_id: original.o_definition_id,
+        from_definition_type_is_word: original.type === StringContentTypes.WORD,
+        language_code: targetLang.lang.tag,
+        dialect_code: targetLang.dialect?.tag,
+        geo_code: targetLang.region?.tag,
+      },
+    });
+  }, [getTranslationsQ, original.o_definition_id, original.type, targetLang]);
+
+  useEffect(() => {
+    if (!saving) return;
+    if (!dataTrs) return;
 
     const formData =
       tempTranslations[`${original.o_definition_id}:${original.type}`];
@@ -77,13 +93,12 @@ export function MapWordItem({ original }: MapWordItemProps) {
     }
 
     (async () => {
-      const { translations } = await getTranslationsFromDefinitionId(
-        original.o_definition_id,
-        original.type,
-        targetLang,
-      );
+      const translationsQ =
+        dataTrs.getTranslationsByFromDefinitionId.translation_with_vote_list;
+      const t = getTransformedTranslations(null, translationsQ);
+      if (!t?.translations) return;
 
-      const exists = translations.find(
+      const exists = t.translations.find(
         (item) => item.value === formData.translation,
       );
 
@@ -129,7 +144,7 @@ export function MapWordItem({ original }: MapWordItemProps) {
     tempTranslations,
     original.o_definition_id,
     original.type,
-    getTranslationsFromDefinitionId,
+    getTransformedTranslations,
     id,
     history,
     nation_id,
@@ -138,6 +153,7 @@ export function MapWordItem({ original }: MapWordItemProps) {
     setUpdatedTrDefinitionIds,
     updatedTrDefinitionIds,
     clearTempTranslation,
+    dataTrs,
   ]);
 
   const handleDetail = useCallback(() => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { Stack, Typography, Button, CircularProgress } from '@mui/material';
 import { useIonToast } from '@ionic/react';
 
@@ -29,10 +29,10 @@ export function NewTranslationForm({
     states: {
       global: {
         langauges: { targetLang },
-        maps: { updatedTrDefinitionIds },
+        // maps: { updatedTrDefinitionIds },
       },
     },
-    actions: { setUpdatedTrDefinitionIds },
+    // actions: { setUpdatedTrDefinitionIds },
   } = useAppContext();
 
   const [translation, setTranslation] = useState<string>('');
@@ -43,49 +43,7 @@ export function NewTranslationForm({
   const [upsertTranslation] =
     useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
 
-  useEffect(() => {
-    if (!saving) {
-      return;
-    }
-
-    if (!targetLang) {
-      setSaving(false);
-      return;
-    }
-
-    (async () => {
-      await upsertTranslation({
-        variables: {
-          language_code: targetLang?.lang.tag,
-          dialect_code: targetLang?.dialect?.tag,
-          geo_code: targetLang?.region?.tag,
-          word_or_phrase: translation,
-          definition: description,
-          from_definition_id: definition_id,
-          from_definition_type_is_word:
-            definition_type === StringContentTypes.WORD,
-          is_type_word: typeOfString(translation) === StringContentTypes.WORD,
-        },
-      });
-
-      setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]);
-
-      setTranslation('');
-      setDescription('');
-    })();
-  }, [
-    definition_id,
-    definition_type,
-    description,
-    saving,
-    setUpdatedTrDefinitionIds,
-    targetLang,
-    translation,
-    updatedTrDefinitionIds,
-    upsertTranslation,
-  ]);
-
-  const handleNewTranslation = () => {
+  const handleNewTranslation = useCallback(async () => {
     if (translation.trim() === '') {
       present({
         message: `${tr('New translation value is mandatory')}`,
@@ -115,9 +73,39 @@ export function NewTranslationForm({
       });
       return;
     }
-
     setSaving(true);
-  };
+
+    await upsertTranslation({
+      variables: {
+        language_code: targetLang?.lang.tag,
+        dialect_code: targetLang?.dialect?.tag,
+        geo_code: targetLang?.region?.tag,
+        word_or_phrase: translation,
+        definition: description,
+        from_definition_id: definition_id,
+        from_definition_type_is_word:
+          definition_type === StringContentTypes.WORD,
+        is_type_word: typeOfString(translation) === StringContentTypes.WORD,
+      },
+      // refetchQueries: [GetTranslationsByFromDefinitionIdDocument],
+    });
+    setTranslation('');
+    setDescription('');
+    // setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]); //IMO deprecated, need to check
+
+    setSaving(false);
+  }, [
+    definition_id,
+    definition_type,
+    description,
+    present,
+    targetLang?.dialect?.tag,
+    targetLang?.lang,
+    targetLang?.region?.tag,
+    tr,
+    translation,
+    upsertTranslation,
+  ]);
 
   const handleChangeWordForm = (word: string, description: string) => {
     setTranslation(word);

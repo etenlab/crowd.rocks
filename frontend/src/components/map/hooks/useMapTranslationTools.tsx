@@ -1,10 +1,12 @@
 import { useCallback } from 'react';
 
 import {
+  PhraseToPhraseTranslationWithVote,
+  PhraseToWordTranslationWithVote,
   PhraseWithDefinition,
+  WordToPhraseTranslationWithVote,
+  WordToWordTranslationWithVote,
   WordWithDefinition,
-  useGetMapWordOrPhraseAsOrigByDefinitionIdLazyQuery,
-  useGetTranslationsByFromDefinitionIdLazyQuery,
 } from '../../../generated/graphql';
 
 export interface ITranslationsVotes {
@@ -49,62 +51,44 @@ export type Translation = {
   };
 };
 export function useMapTranslationTools() {
-  const [getMapWordOrPhraseAsOrigByDefinitionId] =
-    useGetMapWordOrPhraseAsOrigByDefinitionIdLazyQuery();
-
-  const [getTranslationsByFromDefinitionId] =
-    useGetTranslationsByFromDefinitionIdLazyQuery();
-
-  const getTranslationsFromDefinitionId = useCallback(
-    async (
-      definition_id: string,
-      definition_type: string,
-      langInfo: LanguageInfo,
-    ): Promise<{ original: Original; translations: Translation[] }> => {
-      const wordOrPhraseQ = await getMapWordOrPhraseAsOrigByDefinitionId({
-        variables: {
-          definition_id,
-          is_word_definition: definition_type === 'word',
-        },
-      });
-
-      const translationsQ = await getTranslationsByFromDefinitionId({
-        variables: {
-          definition_id,
-          from_definition_type_is_word: definition_type === 'word',
-          language_code: langInfo?.lang.tag || '',
-          dialect_code: langInfo?.dialect?.tag,
-          geo_code: langInfo?.region?.tag,
-        },
-      });
-
+  const getTransformedTranslations = useCallback(
+    (
+      wordOrPhraseQ: PhraseWithDefinition | WordWithDefinition | null,
+      translationsQ: Array<
+        | PhraseToPhraseTranslationWithVote
+        | PhraseToWordTranslationWithVote
+        | WordToPhraseTranslationWithVote
+        | WordToWordTranslationWithVote
+        | null
+      >,
+    ): { original: Original | null; translations: Translation[] } | null => {
       const original = (() => {
-        const wordOrPhrase =
-          wordOrPhraseQ.data?.getMapWordOrPhraseAsOrigByDefinitionId
-            .wordOrPhrase;
-        const isWord = wordOrPhrase?.__typename === 'WordWithDefinition';
-        const isPhrase = wordOrPhrase?.__typename === 'PhraseWithDefinition';
+        if (!wordOrPhraseQ) {
+          return null;
+        }
+        const isWord = wordOrPhraseQ?.__typename === 'WordWithDefinition';
+        const isPhrase = wordOrPhraseQ?.__typename === 'PhraseWithDefinition';
         const value = isWord
-          ? wordOrPhrase?.word
+          ? wordOrPhraseQ?.word
           : isPhrase
-          ? wordOrPhrase?.phrase
+          ? wordOrPhraseQ?.phrase
           : '';
         const id = isWord
-          ? wordOrPhrase?.word_id
+          ? wordOrPhraseQ?.word_id
           : isPhrase
-          ? wordOrPhrase?.phrase_id
+          ? wordOrPhraseQ?.phrase_id
           : '';
-        const username = wordOrPhrase?.created_by_user.avatar;
-        const avatar = wordOrPhrase?.created_by_user.avatar_url;
-        const createdAt = wordOrPhrase?.created_at;
+        const username = wordOrPhraseQ?.created_by_user.avatar;
+        const avatar = wordOrPhraseQ?.created_by_user.avatar_url;
+        const createdAt = wordOrPhraseQ?.created_at;
 
         return {
           isWord,
           isPhrase,
-          wordOrPhrase,
+          wordOrPhrase: wordOrPhraseQ,
           value,
           id,
-          definition: wordOrPhrase?.definition,
+          definition: wordOrPhraseQ?.definition,
           author: {
             username,
             avatar,
@@ -114,11 +98,11 @@ export function useMapTranslationTools() {
       })();
 
       const translations = (() => {
-        if (!translationsQ.data) {
+        if (!translationsQ) {
           return [];
         }
 
-        return translationsQ.data.getTranslationsByFromDefinitionId.translation_with_vote_list
+        return translationsQ
           .map((translation) => {
             if (!translation) {
               return null;
@@ -258,7 +242,7 @@ export function useMapTranslationTools() {
         translations,
       };
     },
-    [getTranslationsByFromDefinitionId, getMapWordOrPhraseAsOrigByDefinitionId],
+    [],
   );
 
   const makeMapThumbnail = async (
@@ -322,7 +306,7 @@ export function useMapTranslationTools() {
   };
 
   return {
-    getTranslationsFromDefinitionId,
+    getTransformedTranslations,
     makeMapThumbnail,
   };
 }
