@@ -417,6 +417,9 @@ export class DatabaseVersionControlService {
   async loadVersion6(): Promise<void> {
     //maps
     await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v6.sql');
+    await this.runSqlFile(
+      './src/core/sql/map/v_map_words_and_phrases-with-tr-info-v6.sql',
+    );
 
     // set version
     await this.setVersionNumber(6);
