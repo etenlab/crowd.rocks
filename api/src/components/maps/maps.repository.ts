@@ -1257,7 +1257,11 @@ export class MapsRepository {
         o_geo_code,
         o_created_at,
         o_created_by
-      from v_map_words_and_phrases
+      ${
+        input.onlyTranslated || input.onlyNotTranslated
+          ? ' from v_map_words_and_phrases_with_tr_info'
+          : ' from v_map_words_and_phrases'
+      }
       where true
       ${languagesFiltersRestrictionClause}
       ${pickDataClause}
@@ -1280,7 +1284,12 @@ export class MapsRepository {
 
     // just to know if there pages after the current selection
     const sqlAfter = `
-      select count(*) as count_after from v_map_words_and_phrases
+      select count(*) as count_after
+      ${
+        input.onlyTranslated || input.onlyNotTranslated
+          ? ' from v_map_words_and_phrases_with_tr_info'
+          : ' from v_map_words_and_phrases'
+      }
       where true
       ${languagesFiltersRestrictionClause}
       and cursor>${dbPoolClient.escapeLiteral(resQ.rows.at(-1).cursor)}
@@ -1290,7 +1299,12 @@ export class MapsRepository {
 
     // just to know if there pages before the current selection
     const sqlBefore = `
-      select count(*) as count_before from v_map_words_and_phrases
+      select count(*) as count_before
+      ${
+        input.onlyTranslated || input.onlyNotTranslated
+          ? ' from v_map_words_and_phrases_with_tr_info'
+          : ' from v_map_words_and_phrases'
+      }
       where true
       ${languagesFiltersRestrictionClause}
       and cursor<${dbPoolClient.escapeLiteral(resQ.rows[0].cursor)}
