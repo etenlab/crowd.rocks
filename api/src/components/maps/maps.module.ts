@@ -11,6 +11,7 @@ import { TranslationsModule } from '../translations/translations.module';
 import { PhraseModule } from '../phrases/phrases.module';
 import { FileModule } from '../file/file.module';
 import { MapVotesService } from './map-votes.service';
+import { UserModule } from '../user/user.module';
 @Module({
   imports: [
     forwardRef(() => CoreModule),
@@ -20,6 +21,7 @@ import { MapVotesService } from './map-votes.service';
     forwardRef(() => PhraseModule),
     forwardRef(() => DefinitionsModule),
     forwardRef(() => TranslationsModule),
+    forwardRef(() => UserModule),
   ],
   providers: [MapsService, MapVotesService, MapsResolver, MapsRepository],
   exports: [MapsService],
