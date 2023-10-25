@@ -7,9 +7,14 @@ import { PericopiesResolver } from './pericopies.resolver';
 
 import { PericopeVotesService } from './pericope-votes.service';
 import { PericopiesService } from './pericopies.service';
+import { AuthorizationModule } from '../authorization/authorization.module';
 
 @Module({
-  imports: [forwardRef(() => CoreModule), forwardRef(() => DocumentsModule)],
+  imports: [
+    forwardRef(() => CoreModule),
+    forwardRef(() => DocumentsModule),
+    forwardRef(() => AuthorizationModule),
+  ],
   providers: [PericopiesService, PericopeVotesService, PericopiesResolver],
   exports: [PericopiesService, PericopeVotesService],
 })

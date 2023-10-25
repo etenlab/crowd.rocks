@@ -1,47 +1,59 @@
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
-  InputChangeEventDetail,
-  InputCustomEvent,
-  IonButton,
-  IonButtons,
-  IonContent,
-  IonHeader,
-  IonList,
-  IonModal,
-  IonTitle,
-  IonToolbar,
+  useCallback,
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  MouseEventHandler,
+  ChangeEvent,
+} from 'react';
+import {
   useIonRouter,
-  useIonToast,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
+  useIonToast,
 } from '@ionic/react';
+import { useDebounce } from 'use-debounce';
+
+import {
+  Stack,
+  Typography,
+  Button,
+  FormControlLabel,
+  CircularProgress,
+} from '@mui/material';
+
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 
-import { MapItem } from './MapItem';
 import { Caption } from '../../common/Caption/Caption';
-import { MapTools } from './MapsTools';
+import { SearchInput } from '../../common/forms/SearchInput';
+import { AddCircle } from '../../common/icons/AddCircle';
+import { Checkbox } from '../../common/buttons/Checkbox';
+
+import { MapItem, ViewMode } from './MapItem';
+
 import {
   ErrorType,
-  MapDetailsInfo,
+  SubscriptionStatus,
   useGetAllMapsListLazyQuery,
-  useIsAdminLoggedInLazyQuery,
-  useMapDeleteMutation,
-  useMapUploadMutation,
-  useMapsTranslationsResetMutation,
-  useUploadFileMutation,
+  useStartZipMapDownloadMutation,
+  useSubscribeToZipMapSubscription,
 } from '../../../generated/graphql';
+
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { globals } from '../../../services/globals';
-import { FilterContainer, Input } from '../../common/styled';
-import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
+
 import { PAGE_SIZE } from '../../../const/commonConst';
 import { RouteComponentProps } from 'react-router';
-import { langInfo2tag, tag2langInfo } from '../../../common/langUtils';
-import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
-// import { updateCacheWithAddNewMap } from '../../../cacheUpdators/addNewMap';
+import { langInfo2langInput, langInfo2tag } from '../../../../../utils';
 
+import { MapUploadModal } from './MapUploadModal';
+import { MapResetModal } from './MapResetModal';
+import { DownloadCircle } from '../../common/icons/DownloadCircle';
+import { downloadFromUrl } from '../../../common/utility';
+import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 interface MapListProps
   extends RouteComponentProps<{
     lang_full_tag: string;
@@ -54,7 +66,19 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const router = useIonRouter();
   const { tr } = useTr();
   const [present] = useIonToast();
+
   const [filter, setFilter] = useState<string>('');
+  const [bouncedFilter] = useDebounce(filter, 500);
+
+  const timerRef = useRef<NodeJS.Timeout>();
+  const singleClickTimerRef = useRef<NodeJS.Timeout>();
+  const clickCountRef = useRef<number>(0);
+
+  const [viewMode, setViewMode] = useState<ViewMode>('normal');
+  const [checkedMap, setCheckedMap] = useState<Record<string, boolean>>({});
+  const [allChecked, setAllChecked] = useState<boolean>(false);
+
+  const [startZipMapDownload] = useStartZipMapDownloadMutation();
 
   const {
     states: {
@@ -62,108 +86,23 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
         langauges: { targetLang, appLanguage },
       },
     },
-    actions: { setTargetLanguage },
+    actions: { setTargetLanguage, createModal },
   } = useAppContext();
 
-  const [isAdmin, { data: isAdminRes }] = useIsAdminLoggedInLazyQuery();
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sendMapFile, { loading: loadingSendMapFile, data: dataSendMapFile }] =
-    useMapUploadMutation();
-  const [uploadFile, { loading: loadingUploadFile, data: dataUploadFile }] =
-    useUploadFileMutation();
-  const [mapDelete, { loading: loadingMapDelete, data: dataMapDelete }] =
-    useMapDeleteMutation();
-  const [
-    mapTranslationReset,
-    {
-      loading: loadingMapReset,
-      data: dataMapReset,
-      called: dataMapResetCalled,
-    },
-  ] = useMapsTranslationsResetMutation();
+  const { openModal, closeModal } = createModal();
 
   const [getAllMapsList, { data: allMapsQuery, fetchMore }] =
     useGetAllMapsListLazyQuery();
 
-  const { makeMapThumbnail } = useMapTranslationTools();
-  const [isMapDeleteModalOpen, setIsMapDeleteModalOpen] = useState(false);
-  const [isMapResetModalOpen, setIsMapResetModalOpen] = useState(false);
-  const candidateForDeletion = useRef<MapDetailsInfo | undefined>();
-  const [currUploads, setCurrUploads] = useState<Array<MapDetailsInfo>>([]);
-
-  useEffect(() => {
-    if (loadingSendMapFile || loadingUploadFile || loadingMapDelete) return;
-    if (
-      (dataSendMapFile &&
-        dataSendMapFile?.mapUpload.error !== ErrorType.NoError) ||
-      (dataUploadFile &&
-        dataUploadFile?.uploadFile.error !== ErrorType.NoError) ||
-      (dataMapDelete && dataMapDelete?.mapDelete.error !== ErrorType.NoError)
-    ) {
-      present({
-        message:
-          dataSendMapFile?.mapUpload.error ||
-          dataUploadFile?.uploadFile.error ||
-          dataMapDelete?.mapDelete.error,
-        duration: 1500,
-        position: 'top',
-        color: 'danger',
-      });
-    }
-  }, [
-    dataMapDelete,
-    dataSendMapFile,
-    dataUploadFile,
-    loadingMapDelete,
-    loadingSendMapFile,
-    loadingUploadFile,
-    present,
-  ]);
-
-  useEffect(() => {
-    if (!dataMapResetCalled || loadingMapReset) return;
-    if (dataMapReset?.mapsTranslationsReset.error === ErrorType.NoError) {
-      present({
-        message: `Maps translations data reset completed`,
-        duration: 1500,
-        position: 'top',
-        color: 'primary',
-      });
-    } else {
-      present({
-        message: `Maps translations data reset error: ${dataMapReset?.mapsTranslationsReset.error}`,
-        duration: 1500,
-        position: 'top',
-        color: 'danger',
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataMapReset, dataMapReset?.mapsTranslationsReset.error, present]);
-
-  useEffect(() => {
-    const user_id = globals.get_user_id();
-
-    if (!user_id) return;
-
-    const variables = { input: { user_id: String(user_id) } };
-    isAdmin({ variables });
-  }, [isAdmin]);
-
   useEffect(() => {
     if (
       url_lang_tag &&
-      url_lang_tag !== langInfo2tag(targetLang || undefined)
+      targetLang &&
+      url_lang_tag !== langInfo2tag(targetLang)
     ) {
-      const langInfo = tag2langInfo(url_lang_tag);
-      if (langInfo.lang.tag) {
-        setTargetLanguage(langInfo);
-      }
-      return;
-    }
-
-    if (!targetLang) {
-      setTargetLanguage(tag2langInfo(DEFAULT_MAP_LANGUAGE_CODE));
+      router.push(
+        `/${nation_id}/${language_id}/1/maps/list/${langInfo2tag(targetLang)}`,
+      );
     }
   }, [
     setTargetLanguage,
@@ -185,6 +124,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
             language_code: targetLang.lang.tag,
             dialect_code: targetLang?.dialect?.tag,
             geo_code: targetLang?.region?.tag,
+            filter: bouncedFilter,
           },
           first: PAGE_SIZE,
           after: null,
@@ -196,12 +136,10 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
         };
 
     getAllMapsList({ variables });
-  }, [getAllMapsList, targetLang]);
+  }, [getAllMapsList, targetLang, bouncedFilter]);
 
-  const handleFilterChange = (
-    event: InputCustomEvent<InputChangeEventDetail>,
-  ) => {
-    setFilter(event.detail.value!);
+  const handleFilterChange = (value: string) => {
+    setFilter(value);
   };
 
   const handleInfinite = useCallback(
@@ -233,227 +171,332 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     [fetchMore, allMapsQuery, targetLang],
   );
 
-  const addMap = useCallback(
-    async (file: File) => {
-      if (!file) return;
-      let previewFileId: string | undefined;
-      try {
+  const handleLongPress = () => {
+    setViewMode('selection');
+  };
+
+  const handleDoubleClick: MouseEventHandler<HTMLDivElement> = (e) => {
+    clickCountRef.current++;
+
+    if (clickCountRef.current === 1) {
+      singleClickTimerRef.current = setTimeout(() => {
+        clickCountRef.current = 0;
+      }, 400);
+    } else if (clickCountRef.current === 2) {
+      clearTimeout(singleClickTimerRef.current);
+      clickCountRef.current = 0;
+
+      setViewMode('normal');
+      setCheckedMap({});
+      setAllChecked(false);
+
+      e.stopPropagation();
+    }
+  };
+
+  const handleChangeAllCheck = (e: ChangeEvent<HTMLInputElement>) => {
+    setAllChecked(e.target.checked);
+  };
+
+  const { data: mapZipResult, error: mapZipError } =
+    useSubscribeToZipMapSubscription();
+
+  useEffect(() => {
+    if (mapZipError) {
+      if (mapZipError.message === 'Socket closed') {
         present({
-          message: tr(
-            'Started map uploading and translation to known languages',
-          ),
-          duration: 2000,
-          position: 'top',
-          color: 'primary',
-        });
-
-        const thumbnailFile = (await makeMapThumbnail(await file.text(), {
-          toWidth: 100,
-          toHeight: 100,
-          asFile: `${file.name}-thmb`,
-        })) as File;
-
-        const uploadPreviewResult = await uploadFile({
-          variables: {
-            file: thumbnailFile,
-            file_size: thumbnailFile.size,
-            file_type: thumbnailFile.type,
-          },
-        });
-        previewFileId = uploadPreviewResult.data?.uploadFile.file?.id
-          ? String(uploadPreviewResult.data?.uploadFile.file.id)
-          : undefined;
-        if (uploadPreviewResult.data?.uploadFile.error !== ErrorType.NoError) {
-          throw new Error(uploadPreviewResult.data?.uploadFile.error);
-        }
-
-        setCurrUploads((cu) => [
-          ...cu,
-          {
-            preview_file_id: previewFileId,
-            content_file_id: `temp-${previewFileId}`,
-            content_file_url: 'assets/images/Spin-1s-200px.gif',
-            preview_file_url: 'assets/images/Spin-1s-200px.gif',
-            created_at: '',
-            created_by: '',
-            is_original: true,
-            language: { language_code: DEFAULT_MAP_LANGUAGE_CODE },
-            map_file_name: tr('Uploading') + ' ' + file.name,
-            map_file_name_with_langs: tr('Uploading') + ' ' + file.name,
-            original_map_id: `temp-map-id-${previewFileId}`,
-          } as MapDetailsInfo,
-        ]);
-
-        const mapUploadResult = await sendMapFile({
-          variables: {
-            file,
-            previewFileId,
-            file_size: file.size,
-            file_type: file.type,
-          },
-          refetchQueries: ['GetAllMapsList'],
-        });
-
-        if (
-          mapUploadResult.errors?.length &&
-          mapUploadResult.errors?.length > 0
-        ) {
-          throw new Error(JSON.stringify(mapUploadResult.errors));
-        }
-        const uploadedId =
-          mapUploadResult.data?.mapUpload.mapDetailsOutput?.mapDetails
-            ?.preview_file_id;
-
-        setCurrUploads((cus) =>
-          cus.filter((cu) => cu.preview_file_id !== uploadedId),
-        );
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        present({
-          message: `${file.name}: ` + error.message,
+          message: 'No connection with the server',
           duration: 3000,
           position: 'top',
           color: 'danger',
         });
-        setCurrUploads((cus) =>
-          cus.filter((cu) => cu.preview_file_id !== previewFileId),
-        );
+      } else {
+        present({
+          message: 'Maps zipping error: ' + mapZipError.message,
+          duration: 3000,
+          position: 'top',
+          color: 'danger',
+        });
       }
-    },
-    [makeMapThumbnail, uploadFile, sendMapFile, present, tr],
-  );
+    }
+  }, [mapZipError, mapZipResult, present]);
 
-  const deleteMap = <
-    T extends {
-      is_original: boolean;
-      original_map_id?: string | null;
-      translated_map_id?: string | null;
-    },
-  >(
-    mapItem: T,
-  ) => {
-    const mapId = mapItem.is_original
-      ? mapItem.original_map_id
-      : mapItem.translated_map_id;
-    if (!mapId) {
-      console.error(
-        `Error: original_map_id or translated_map_id isn't specified`,
-      );
+  const handleStartZipMap = useCallback(async () => {
+    if (!targetLang) {
+      present({
+        message: `Please select language first`,
+        duration: 3000,
+        position: 'top',
+        color: 'danger',
+      });
       return;
     }
-    mapDelete({
-      variables: {
-        mapId,
-        is_original: mapItem.is_original,
-      },
-      refetchQueries: ['GetAllMapsList'],
+    const { data, errors } = await startZipMapDownload({
+      variables: { language: langInfo2langInput(targetLang) },
     });
+    if (data?.startZipMapDownload.error !== ErrorType.NoError) {
+      present({
+        message: data?.startZipMapDownload.error,
+        duration: 3000,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+    if (errors?.length && errors?.length > 0) {
+      present({
+        message: 'Errors: ' + JSON.stringify(errors),
+        duration: 3000,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+  }, [present, startZipMapDownload, targetLang]);
+
+  useEffect(() => {
+    if (!mapZipResult?.ZipMapReport.resultZipUrl) {
+      return;
+    }
+    downloadFromUrl('maps', mapZipResult.ZipMapReport.resultZipUrl);
+  }, [mapZipResult?.ZipMapReport.resultZipUrl]);
+
+  const startTimer = () => {
+    timerRef.current = setTimeout(handleLongPress, 2000);
   };
 
-  const resetTranslatedMaps = () => {
-    mapTranslationReset({
-      refetchQueries: ['GetAllMapsList'],
-    });
+  const cancelTimer = () => {
+    clearTimeout(timerRef.current);
   };
 
-  const loadingMapItemComs = useMemo(
-    () =>
-      currUploads.length > 0
-        ? currUploads.map((uploadingMapDetails) => (
-            <MapItem
-              mapItem={uploadingMapDetails}
-              key={uploadingMapDetails.content_file_id}
-              showDelete={false}
-              showDownload={false}
-            />
-          ))
-        : null,
-    [currUploads],
-  );
+  const mapItemComs = useMemo(() => {
+    if (!allMapsQuery || !allMapsQuery.getAllMapsList.edges) {
+      return <div> {tr('No maps found')} </div>;
+    }
 
-  const mapItemComs = useMemo(
-    () =>
-      allMapsQuery?.getAllMapsList.edges?.length ? (
-        allMapsQuery?.getAllMapsList.edges
-          ?.filter((edge) => {
-            return (edge.node.mapDetails?.map_file_name_with_langs || '')
-              .toLowerCase()
-              .includes(filter.toLowerCase());
-          })
-          .map((edge) =>
-            edge.node.mapDetails ? (
-              <MapItem
-                mapItem={edge.node.mapDetails}
-                key={edge.cursor}
-                candidateForDeletionRef={candidateForDeletion}
-                setIsMapDeleteModalOpen={setIsMapDeleteModalOpen}
-                showDelete={!!isAdminRes?.loggedInIsAdmin.isAdmin}
-              />
-            ) : (
-              <>{edge.node.error}</>
-            ),
-          )
-      ) : (
-        <div> {tr('No maps found')} </div>
-      ),
-    [
-      allMapsQuery?.getAllMapsList.edges,
-      filter,
-      isAdminRes?.loggedInIsAdmin.isAdmin,
-      tr,
-    ],
-  );
+    const originalMapIds = new Map<string, boolean>();
+
+    allMapsQuery.getAllMapsList.edges.map((edge) => {
+      if (edge.node.mapDetails?.is_original) {
+        originalMapIds.set(edge.node.mapDetails.original_map_id, true);
+      }
+    });
+
+    return allMapsQuery.getAllMapsList.edges.map((edge) => {
+      if (!edge.node.mapDetails) {
+        return null;
+      }
+
+      if (
+        !edge.node.mapDetails.is_original &&
+        originalMapIds.get(edge.node.mapDetails.original_map_id)
+      ) {
+        return null;
+      }
+
+      return (
+        <MapItem
+          mapInfo={edge.node.mapDetails}
+          key={edge.cursor}
+          viewMode={viewMode}
+          onChangeViewMode={() => {}}
+          onChangeCheck={(checked) => {
+            setCheckedMap((_mapObj) => ({
+              ..._mapObj,
+              [edge.cursor]: checked,
+            }));
+          }}
+          checked={checkedMap[edge.cursor] || allChecked}
+        />
+      );
+    });
+  }, [allChecked, allMapsQuery, checkedMap, tr, viewMode]);
+
+  const handleClickNewMapButton = () => {
+    openModal(<MapUploadModal onClose={closeModal} />);
+  };
+
+  const isAdminUser = globals.is_admin_user();
 
   return (
     <>
-      <Caption>{tr('Maps')}</Caption>
-
-      <FilterContainer>
-        <LangSelector
-          title={tr('Select language')}
-          langSelectorId="mapsListLangSelector"
-          selected={targetLang ?? undefined}
-          onChange={(langTag) => {
-            router.push(`/${nation_id}/${language_id}/1/maps/list/${langTag}`);
-          }}
-          onClearClick={() =>
-            router.push(
-              `/${nation_id}/${language_id}/1/maps/list/${DEFAULT_MAP_LANGUAGE_CODE}`,
-            )
-          }
-        />
-      </FilterContainer>
-      <MapTools
-        onTranslationsClick={() => {
-          router.push(`/US/${appLanguage.lang.tag}/1/maps/translation`);
+      <Caption
+        handleBackClick={() => {
+          router.push(`/${nation_id}/${language_id}/1/home`);
         }}
-        onAddClick={isAdminRes?.loggedInIsAdmin.isAdmin ? addMap : undefined}
-        onResetClick={
-          isAdminRes?.loggedInIsAdmin.isAdmin
-            ? () => {
-                setIsMapResetModalOpen(true);
-              }
-            : undefined
+      >
+        {tr('Maps')}
+      </Caption>
+
+      <LangSelector
+        title={tr('Select your language')}
+        selected={targetLang}
+        onChange={(_langTag, langInfo) => {
+          if (langInfo) {
+            setTargetLanguage(langInfo);
+          }
+        }}
+        onClearClick={() =>
+          setTargetLanguage({
+            lang: {
+              tag: 'en',
+              descriptions: ['English'],
+            },
+          })
         }
       />
-      <Input
-        type="text"
-        label={tr('Search')}
-        labelPlacement="floating"
-        fill="outline"
-        debounce={300}
-        value={filter}
-        onIonInput={handleFilterChange}
-      />
-      {loadingMapReset ? (
-        <div>Resetting map data...</div>
-      ) : (
-        <>
-          <IonList lines="none">{loadingMapItemComs}</IonList>
-          <IonList lines="none">{mapItemComs}</IonList>
-        </>
-      )}
+
+      <Stack gap="14px">
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Typography variant="h3" color="dark">{`${
+            allMapsQuery?.getAllMapsList.pageInfo.totalEdges || 0
+          } ${tr('maps found')}`}</Typography>
+
+          <Stack direction="row" alignItems="center" gap="10px">
+            {isAdminUser ? (
+              <Button
+                variant="contained"
+                color="orange"
+                sx={{ padding: '7px', minWidth: 0 }}
+                onClick={handleClickNewMapButton}
+              >
+                <AddCircle sx={{ fontSize: '18px' }} />
+              </Button>
+            ) : null}
+            <MoreHorizButton
+              popoverWidth="250px"
+              component={
+                <>
+                  <Button
+                    variant="text"
+                    startIcon={
+                      mapZipResult?.ZipMapReport.status ===
+                      SubscriptionStatus.Progressing ? (
+                        <CircularProgress color={'primary'} size={18} />
+                      ) : (
+                        <DownloadCircle sx={{ fontSize: '24px' }} />
+                      )
+                    }
+                    color="dark"
+                    sx={{
+                      padding: '0 5px',
+                      justifyContent: 'flex-start',
+                    }}
+                    onClick={handleStartZipMap}
+                  >
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        textOverflow: 'ellipsis',
+                        width: '180px',
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {mapZipResult?.ZipMapReport.status ===
+                      SubscriptionStatus.Progressing
+                        ? tr(mapZipResult.ZipMapReport.message || '')
+                        : tr(
+                            `Download All Maps (${
+                              allMapsQuery?.getAllMapsList.pageInfo
+                                .totalEdges || 0
+                            })`,
+                          )}
+                    </Typography>
+                  </Button>
+                </>
+              }
+            />
+          </Stack>
+        </Stack>
+        <SearchInput
+          value={filter}
+          onChange={handleFilterChange}
+          onClickSearchButton={() => {}}
+          placeholder={tr('Search by country/city...')}
+        />
+      </Stack>
+
+      {isAdminUser ? (
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          {viewMode === 'selection' ? (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={allChecked}
+                  onChange={handleChangeAllCheck}
+                />
+              }
+              label={tr('Select All')}
+              sx={{
+                marginLeft: 0,
+                gap: '6px',
+                '& .MuiTypography-root': {
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  lineHeight: '22px',
+                  letterSpacing: '-0.26px',
+                  color: '#476FFF',
+                },
+              }}
+            />
+          ) : (
+            <div />
+          )}
+          <Button
+            variant="text"
+            color="red"
+            onClick={() => {
+              openModal(<MapResetModal onClose={closeModal} />);
+            }}
+          >
+            {tr('Reset Data')}
+          </Button>
+        </Stack>
+      ) : null}
+
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        gap="16px"
+        sx={{ flexWrap: 'wrap' }}
+        onMouseDown={startTimer}
+        onMouseUp={cancelTimer}
+        onMouseMove={cancelTimer}
+        onTouchStart={startTimer}
+        onTouchMove={cancelTimer}
+        onTouchEnd={cancelTimer}
+        onClick={handleDoubleClick}
+      >
+        {mapItemComs}
+      </Stack>
+
+      <Button
+        variant="contained"
+        color="blue"
+        sx={{
+          position: 'fixed',
+          bottom: '20px',
+          width: 'calc(100% - 32px)',
+          maxWidth: 'calc(777px - 32px)',
+        }}
+        onClick={() => {
+          router.push(`/US/${appLanguage.lang.tag}/1/maps/translation/all`);
+        }}
+      >
+        {viewMode === 'normal' || allChecked
+          ? tr('Translate All')
+          : `${tr('Translate')} (${
+              Object.values(checkedMap).filter((item) => item === true).length
+            })`}
+      </Button>
 
       <IonInfiniteScroll onIonInfinite={handleInfinite}>
         <IonInfiniteScrollContent
@@ -461,108 +504,6 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
           loadingSpinner="bubbles"
         />
       </IonInfiniteScroll>
-
-      <IonModal
-        isOpen={isMapDeleteModalOpen}
-        onDidDismiss={() => setIsMapDeleteModalOpen(false)}
-      >
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('Delete map ?')}</IonTitle>
-            <IonButtons slot="start">
-              <IonButton
-                fill="solid"
-                onClick={() => {
-                  setIsMapDeleteModalOpen(false);
-                }}
-              >
-                {tr('Cancel')}
-              </IonButton>
-            </IonButtons>
-            <IonButtons slot="end">
-              <IonButton
-                fill="solid"
-                color={'danger'}
-                onClick={() => {
-                  candidateForDeletion.current &&
-                    deleteMap(candidateForDeletion.current);
-                  setIsMapDeleteModalOpen(false);
-                }}
-              >
-                {tr('Confirm')}
-              </IonButton>
-            </IonButtons>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          {candidateForDeletion.current && (
-            <>
-              {candidateForDeletion.current.is_original ? (
-                <>
-                  {tr(`You are about to delete original map`)}{' '}
-                  {candidateForDeletion.current.map_file_name}
-                  <p>
-                    {tr(
-                      `All related data (translated maps) will be also deleted permanently`,
-                    )}
-                    .
-                  </p>
-                </>
-              ) : (
-                <>
-                  {tr(`You are about to delete translated map`)}{' '}
-                  {candidateForDeletion.current.map_file_name_with_langs}
-                  <p>
-                    {tr(`It will be deleted after confirmation. Note that it will
-                  be re-created on any translation action performed by any user
-                  with original map.`)}
-                  </p>
-                </>
-              )}
-            </>
-          )}
-        </IonContent>
-      </IonModal>
-
-      <IonModal
-        isOpen={isMapResetModalOpen}
-        onDidDismiss={() => setIsMapResetModalOpen(false)}
-      >
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('Reset map data ?')}</IonTitle>
-            <IonButtons slot="start">
-              <IonButton
-                fill="solid"
-                onClick={() => {
-                  setIsMapResetModalOpen(false);
-                }}
-              >
-                {tr('Cancel')}
-              </IonButton>
-            </IonButtons>
-            <IonButtons slot="end">
-              <IonButton
-                fill="solid"
-                color={'danger'}
-                onClick={() => {
-                  resetTranslatedMaps();
-                  setIsMapResetModalOpen(false);
-                }}
-              >
-                {tr('Confirm')}
-              </IonButton>
-            </IonButtons>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          {tr(
-            `You are about to reset map translation data. All original_map_words and translated_maps
-            will be deleted and then they will be recreated by reprocessing every original map,
-            like each one of them was uploaded again.`,
-          )}
-        </IonContent>
-      </IonModal>
     </>
   );
 };

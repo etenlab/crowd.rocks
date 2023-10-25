@@ -14,14 +14,6 @@ export const Textarea = styled(IonTextarea)(() => ({
   '--border-radius': '16px',
 }));
 
-export const CaptionContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 50px;
-  margin-left: -16px;
-`;
-
 export const FilterContainer = styled.div`
   display: flex;
   width: 100%;
@@ -57,7 +49,7 @@ export const FabContainer = styled.div`
 `;
 
 export const FullWidthContainer = styled.div`
-  width: 100%;
+  width: 50%;
 `;
 
 export const StChatIcon = styled(IonIcon)(() => ({

@@ -7,10 +7,12 @@ import { ErrorType } from '../generated/graphql';
 import { updateCacheWithUpsertPericope } from '../cacheUpdators/upsertPericope';
 
 import { useTr } from './useTr';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useUpsertPericopeMutation(documentId: string) {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedUpsertPericopeMutation({
     update(cache, { data, errors }) {
@@ -25,7 +27,7 @@ export function useUpsertPericopeMutation(documentId: string) {
         updateCacheWithUpsertPericope(cache, newPericope, documentId);
 
         present({
-          message: tr('Success at creating new Answer!'),
+          message: tr('Success at creating new Pericope!'),
           duration: 1500,
           position: 'top',
           color: 'success',
@@ -41,6 +43,7 @@ export function useUpsertPericopeMutation(documentId: string) {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.upsertPericopies.error);
       }
     },
   });

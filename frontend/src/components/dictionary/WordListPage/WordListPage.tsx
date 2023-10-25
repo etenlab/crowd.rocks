@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
-  IonModal,
   IonHeader,
   IonTitle,
   IonToolbar,
@@ -28,7 +27,6 @@ import { ErrorType, TableNameType } from '../../../generated/graphql';
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
 import {
-  CaptionContainer,
   FilterContainer,
   CardListContainer,
   CardContainer,
@@ -58,12 +56,12 @@ export function WordListPage({ match }: WordListPageProps) {
         langauges: { targetLang },
       },
     },
-    actions: { setTargetLanguage },
+    actions: { setTargetLanguage, createModal },
   } = useAppContext();
 
   const [present] = useIonToast();
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const { openModal, closeModal } = createModal();
 
   const [filter, setFilter] = useState<string>('');
 
@@ -139,6 +137,12 @@ export function WordListPage({ match }: WordListPageProps) {
       definitionlike_strings: string[];
       downvotes: number;
       upvotes: number;
+      created_at: Date;
+      created_by: {
+        user_id: string;
+        avatar: string;
+        is_bot: boolean;
+      };
     }[] = [];
 
     if (error) {
@@ -166,6 +170,8 @@ export function WordListPage({ match }: WordListPageProps) {
           ) as string[],
           upvotes: node.upvotes,
           downvotes: node.downvotes,
+          created_at: node.created_at,
+          created_by: node.created_by_user,
         });
       }
     }
@@ -185,6 +191,12 @@ export function WordListPage({ match }: WordListPageProps) {
         <CardContainer key={word.word_id}>
           <Card
             key={word.word_id}
+            createdBy={{
+              username: word.created_by.avatar,
+              isBot: word.created_by.is_bot,
+              createdAt:
+                word.created_at && new Date(word.created_at).toDateString(),
+            }}
             content={word.word}
             description={
               <ul style={{ listStyleType: 'circle' }}>
@@ -236,17 +248,36 @@ export function WordListPage({ match }: WordListPageProps) {
     wordsData,
   ]);
 
+  const handleOpenModal = () => {
+    openModal(
+      <>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('Add New Word')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {targetLang ? (
+            <NewWordForm
+              langInfo={targetLang}
+              onCreated={closeModal}
+              onCancel={closeModal}
+            />
+          ) : null}
+        </IonContent>
+      </>,
+      'full',
+    );
+  };
+
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Dictionary')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Dictionary')}</Caption>
 
       <FilterContainer>
         <LangSelector
           title={tr('Select language')}
-          langSelectorId="dictionary-langSelector"
-          selected={targetLang ?? undefined}
+          selected={targetLang}
           onChange={(_sourceLangTag, sourceLangInfo) => {
             setTargetLanguage(sourceLangInfo);
           }}
@@ -275,7 +306,8 @@ export function WordListPage({ match }: WordListPageProps) {
             });
             return;
           }
-          setIsOpenModal(true);
+
+          handleOpenModal();
         }}
       />
 
@@ -287,27 +319,6 @@ export function WordListPage({ match }: WordListPageProps) {
           loadingSpinner="bubbles"
         />
       </IonInfiniteScroll>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('Add New Word')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          {targetLang ? (
-            <NewWordForm
-              langInfo={targetLang}
-              onCreated={() => {
-                setIsOpenModal(false);
-              }}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
-            />
-          ) : null}
-        </IonContent>
-      </IonModal>
     </PageLayout>
   );
 }

@@ -4,10 +4,9 @@ import { useIonToast } from '@ionic/react';
 import { reducer, loadPersistedStore } from './reducers/index';
 
 import { type StateType as GlobalStateType } from './reducers/global.reducer';
+import { type StateType as ComponentsStateType } from './reducers/components.reducer';
 
 import { useGlobal } from './hooks/useGlobal';
-
-import { subTags2LangInfo } from './common/langUtils';
 
 import {
   useGetAllRecommendedSiteTextTranslationListByLanguageLazyQuery,
@@ -16,10 +15,13 @@ import {
   SiteTextLanguageWithTranslationInfo,
   ErrorType,
 } from './generated/graphql';
+import { useGlobalComponents } from './hooks/useGlobalComponents';
+import { subTags2LangInfo } from '../../utils';
 
 export interface ContextType {
   states: {
     global: GlobalStateType;
+    components: ComponentsStateType;
   };
   actions: {
     setSiteTextLanguageList: (
@@ -36,6 +38,16 @@ export interface ContextType {
     setSourceLanguage: (targetLanguage: LanguageInfo | null) => void;
     setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
     setUpdatedTrDefinitionIds: (definitionIds: Array<string>) => void;
+    createModal(): {
+      openModal(component: ReactNode, mode?: 'standard' | 'full'): void;
+      closeModal(): void;
+    };
+    removeModal(id: string): void;
+    setTempTranslation(
+      key: string,
+      value: { translation: string; description: string },
+    ): void;
+    clearTempTranslation(key: string): void;
   };
 }
 
@@ -74,9 +86,12 @@ export function AppContextProvider({ children }: AppProviderProps) {
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
     setUpdatedTrDefinitionIds,
+    setTempTranslation,
+    clearTempTranslation,
   } = useGlobal({
     dispatch,
   });
+  const { createModal, removeModal } = useGlobalComponents({ dispatch });
 
   useEffect(() => {
     getAllRecommendedSiteTextTranslationListByLanguage({
@@ -310,6 +325,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
   const value = {
     states: {
       global: state.global,
+      components: state.components,
     },
     actions: {
       setSiteTextLanguageList,
@@ -321,6 +337,10 @@ export function AppContextProvider({ children }: AppProviderProps) {
       setSourceLanguage,
       setTargetLanguage,
       setUpdatedTrDefinitionIds,
+      createModal,
+      removeModal,
+      setTempTranslation,
+      clearTempTranslation,
     },
   };
 

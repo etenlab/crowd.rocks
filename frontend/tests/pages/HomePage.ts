@@ -1,12 +1,11 @@
 import BasePage from './BasePage';
 
-const headerText = '//div[@class="clickable brand"]/span[@class="rocks"]';
-const expandIcon =
-  '//div[@class="header-content"]//ion-icon[contains(@class, "clickable expand-icon")]';
+const headerText = '#crowd-rock-app #app-name-text';
+const expandIcon = '#crowd-rock-app #app-menu-button';
 
 class HomePage extends BasePage {
   async isHeaderTextPresent() {
-    await this.page.locator(headerText).last().waitFor();
+    await this.page.locator(headerText).first().waitFor();
     const headerTextPresent = await this.page
       .locator(headerText)
       .last()
@@ -15,8 +14,8 @@ class HomePage extends BasePage {
   }
 
   async clickOnExpandMenu() {
-    await this.page.locator(expandIcon).last().waitFor();
-    await this.page.locator(expandIcon).last().click();
+    await this.page.locator(expandIcon).first().waitFor();
+    await this.page.locator(expandIcon).click();
   }
 }
 

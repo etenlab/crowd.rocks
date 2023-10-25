@@ -4,7 +4,6 @@ import {
   IonContent,
   IonBadge,
   useIonRouter,
-  IonModal,
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -31,11 +30,7 @@ import {
   CardListContainer,
 } from './styled';
 
-import {
-  Input,
-  CaptionContainer,
-  LanguageSelectorContainer,
-} from '../../common/styled';
+import { Input, LanguageSelectorContainer } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -43,7 +38,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { NewSiteTextForm } from '../NewSiteTextForm';
 import { TranslatedCard } from './TranslatedCard';
 
-import { sortSiteTextFn } from '../../../common/langUtils';
+import { sortSiteTextFn } from '../../../../../utils';
 import { globals } from '../../../services/globals';
 import { AddListHeader } from '../../common/ListHeader';
 import { PageLayout } from '../../common/PageLayout';
@@ -67,12 +62,12 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
         langauges: { targetLang },
       },
     },
-    actions: { setTargetLanguage },
+    actions: { setTargetLanguage, createModal },
   } = useAppContext();
 
   const [filter, setFilter] = useState<string>('');
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const { openModal, closeModal } = createModal();
 
   const user_id = globals.get_user_id();
   const variables = { input: { user_id: String(user_id) } };
@@ -133,6 +128,12 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
       siteTextlikeString: string;
       definitionlikeString: string;
       definition_id: string;
+      created_at: string;
+      created_by_user: {
+        user_id: string;
+        avatar: string;
+        is_bot: boolean;
+      };
     }[] = [];
 
     if (error) {
@@ -164,6 +165,15 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
             definitionlikeString: siteTextDefinition.word_definition.definition,
             definition_id:
               siteTextDefinition.word_definition.word_definition_id,
+            created_at: siteTextDefinition.word_definition.created_at,
+            created_by_user: {
+              user_id:
+                siteTextDefinition.word_definition.word.created_by_user.user_id,
+              avatar:
+                siteTextDefinition.word_definition.word.created_by_user.avatar,
+              is_bot:
+                siteTextDefinition.word_definition.word.created_by_user.is_bot,
+            },
           });
           break;
         }
@@ -177,6 +187,18 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
               siteTextDefinition.phrase_definition.definition,
             definition_id:
               siteTextDefinition.phrase_definition.phrase_definition_id,
+            created_at: siteTextDefinition.phrase_definition.created_at,
+            created_by_user: {
+              user_id:
+                siteTextDefinition.phrase_definition.phrase.created_by_user
+                  .user_id,
+              avatar:
+                siteTextDefinition.phrase_definition.phrase.created_by_user
+                  .avatar,
+              is_bot:
+                siteTextDefinition.phrase_definition.phrase.created_by_user
+                  .is_bot,
+            },
           });
           break;
         }
@@ -195,6 +217,13 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
           <Card
             content={definition.siteTextlikeString}
             description={definition.definitionlikeString}
+            createdBy={{
+              username: definition.created_by_user.avatar,
+              isBot: definition.created_by_user.is_bot,
+              createdAt:
+                definition.created_at &&
+                new Date(definition.created_at).toDateString(),
+            }}
             onClick={() =>
               handleGoToDefinitionDetail(
                 definition.siteTextId,
@@ -227,11 +256,27 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
     ));
   }, [data, error, handleGoToDefinitionDetail, targetLang]);
 
+  const handleOpenModal = () => {
+    openModal(
+      <>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('Add New Site Text')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {targetLang ? (
+            <NewSiteTextForm onCreated={closeModal} onCancel={closeModal} />
+          ) : null}
+        </IonContent>
+      </>,
+      'full',
+    );
+  };
+
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Site Text')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Site Text')}</Caption>
 
       <LanguageSelectorContainer>
         <AppLanguageShowerContainer>
@@ -247,8 +292,7 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
           </label>
           <LangSelector
             title={tr('Select')}
-            langSelectorId="site-text-targetLangSelector"
-            selected={targetLang ?? undefined}
+            selected={targetLang}
             onChange={(_targetLangTag, targetLangInfo) => {
               setTargetLanguage(targetLangInfo);
             }}
@@ -270,31 +314,11 @@ export function SiteTextListPage({ match }: SiteTextListPageProps) {
       {isAdminRes?.loggedInIsAdmin.isAdmin && (
         <AddListHeader
           title={tr('Site Text Strings')}
-          onClick={() => setIsOpenModal(true)}
+          onClick={() => handleOpenModal()}
         />
       )}
 
       <CardListContainer>{cardListComs}</CardListContainer>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('Add New Site Text')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          {targetLang ? (
-            <NewSiteTextForm
-              onCreated={() => {
-                setIsOpenModal(false);
-              }}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
-            />
-          ) : null}
-        </IonContent>
-      </IonModal>
     </PageLayout>
   );
 }

@@ -8,10 +8,12 @@ import { updateCacheWithUpsertWord } from '../cacheUpdators/upsertWord';
 import { updateCacheWithUpsertWordDefinition } from '../cacheUpdators/upsertWordDefinition';
 
 import { useTr } from './useTr';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useUpsertWordDefinitionFromWordAndDefinitionlikeStringMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedUpsertWordDefinitionFromWordAndDefinitionlikeStringMutation(
     {
@@ -55,6 +57,9 @@ export function useUpsertWordDefinitionFromWordAndDefinitionlikeStringMutation()
             position: 'top',
             color: 'danger',
           });
+          redirectOnUnauth(
+            data?.upsertWordDefinitionFromWordAndDefinitionlikeString.error,
+          );
         }
       },
     },

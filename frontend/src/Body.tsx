@@ -1,26 +1,20 @@
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { Redirect, Route } from 'react-router';
 import {
-  IonBadge,
-  IonButton,
+  IonMenu,
   IonContent,
   IonHeader,
-  IonIcon,
-  IonModal,
   IonPage,
   IonRouterOutlet,
   useIonRouter,
   useIonViewWillEnter,
   useIonViewWillLeave,
 } from '@ionic/react';
-import {
-  menu,
-  moon,
-  sunny,
-  languageOutline,
-  notificationsOutline,
-} from 'ionicons/icons';
 import { Subscription } from 'rxjs';
+
+import { AutocompleteModal } from './components/common/forms/Autocomplete/AutocompleteModal';
+import { OptionItem } from './components/common/forms/Autocomplete';
+import { Tag } from './components/common/chips/Tag';
 
 import './Body.css';
 
@@ -33,19 +27,24 @@ import {
 import { globals } from './services/globals';
 import { login_change } from './services/subscriptions';
 
-import { apollo_client } from './main';
-
 import {
   langInfo2String,
   subTags2LangInfo,
   langInfo2tag,
   tag2langInfo,
-} from './common/langUtils';
+} from '../../utils';
+
+import { MenuList } from './components/common/list/MenuList';
+import { useTr } from './hooks/useTr';
+import { UserCircle } from './components/common/icons/UserCircle';
+import { NavArrowRight } from './components/common/icons/NavArrowRight';
+import { Settings } from './components/common/icons/Settings';
+import { ChatBubbleTranslate } from './components/common/icons/ChatBubbleTranslate';
+import { LogOut } from './components/common/icons/LogOut';
+import { LogIn } from './components/common/icons/LogIn';
+import { AddUser } from './components/common/icons/AddUser';
 
 import { useAppContext } from './hooks/useAppContext';
-import { useTr } from './hooks/useTr';
-
-import AppTypeahead from './components/common/LangSelector/TypeAhead';
 
 import Home from './components/home/Home';
 import Login from './components/authentication/Login';
@@ -84,7 +83,17 @@ import { QADocumentViewerPage } from './components/qa/QADocumentViewerPage';
 import { PericopeDocumentListPage } from './components/pericopies/PericopeDocumentListPage';
 import { PericopeDocumentViewerPage } from './components/pericopies/PericopeDocumentViewerPage';
 
-const Body: React.FC = () => {
+import { Icons } from './components/demo/Icons';
+import { Forms } from './components/demo/Forms';
+
+import { Header } from './components/common/Header';
+
+import { useColorModeContext } from './theme';
+
+import { ApolloClient, ApolloConsumer } from '@apollo/client';
+
+export function Body() {
+  const { tr } = useTr();
   const {
     states: {
       global: {
@@ -92,20 +101,20 @@ const Body: React.FC = () => {
         siteTexts: { languages, originalMap },
       },
     },
-    actions: { changeAppLanguage },
+    actions: { changeAppLanguage, createModal },
   } = useAppContext();
+  const { setColorMode } = useColorModeContext();
+  const { openModal, closeModal } = createModal();
 
   const router = useIonRouter();
-  const { tr } = useTr();
 
   const [show_menu, set_show_menu] = useState(false);
   const [is_logged_in, set_is_logged_in] = useState(false);
-  const [show_dark_mode, set_show_dark_mode] = useState(false);
 
   const modal = useRef<HTMLIonModalElement>(null);
+  const menuRef = useRef<HTMLIonMenuElement>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [logoutMutation, { data, loading, error }] = useLogoutMutation();
+  const [logoutMutation] = useLogoutMutation();
 
   const [getNotifications, { data: nData }] = useListNotificationsLazyQuery();
   const [unreadNotificationCount, setUnreadCount] = useState<
@@ -134,21 +143,21 @@ const Body: React.FC = () => {
     const theme_storage = localStorage.getItem('theme');
     switch (theme_storage) {
       case null:
-        set_show_dark_mode(false);
         localStorage.setItem('theme', 'light');
+        setColorMode('light');
         set_theme_classes(false);
         break;
       case 'light':
-        set_show_dark_mode(false);
         set_theme_classes(false);
+        setColorMode('light');
         break;
       case 'dark':
-        set_show_dark_mode(true);
         set_theme_classes(true);
+        setColorMode('dark');
         break;
       default:
-        set_show_dark_mode(false);
         set_theme_classes(false);
+        setColorMode('light');
     }
 
     set_is_logged_in(globals.get_token() !== null);
@@ -163,69 +172,69 @@ const Body: React.FC = () => {
     sub.unsubscribe();
   });
 
-  const toggleMenu = () => {
+  const toggleMenu = useCallback(() => {
     set_show_menu(!show_menu);
+    menuRef.current?.toggle();
+  }, [show_menu]);
+  const cancelMenu = () => {
+    set_show_menu(false);
+    menuRef.current?.close();
   };
 
-  const click_profile = () => {
+  const click_profile = useCallback(() => {
     toggleMenu();
     router.push(`/US/${appLanguage.lang.tag}/1/profile`);
-  };
+  }, [appLanguage.lang.tag, router, toggleMenu]);
 
-  const click_settings = () => {
+  const click_settings = useCallback(() => {
     toggleMenu();
     router.push(`/US/${appLanguage.lang.tag}/1/settings`);
-  };
+  }, [appLanguage.lang.tag, router, toggleMenu]);
 
-  const click_register = () => {
+  const click_register = useCallback(() => {
     toggleMenu();
     router.push(`/US/${appLanguage.lang.tag}/1/register`);
-  };
+  }, [appLanguage.lang.tag, router, toggleMenu]);
 
-  const click_login = () => {
+  const click_login = useCallback(() => {
     toggleMenu();
     router.push(`/US/${appLanguage.lang.tag}/1/login`);
-  };
+  }, [appLanguage.lang.tag, router, toggleMenu]);
 
-  const click_logout = async () => {
-    toggleMenu();
+  const click_logout = useCallback(
+    async (apollo_client: ApolloClient<object>) => {
+      toggleMenu();
 
-    const token = globals.get_token();
+      const token = globals.get_token();
 
-    if (token !== null) {
-      const result = await logoutMutation({
-        variables: {
-          token: token,
-        },
-        errorPolicy: 'all',
-      });
+      if (token !== null) {
+        const result = await logoutMutation({
+          variables: {
+            token: token,
+          },
+          errorPolicy: 'all',
+        });
 
-      if (result.data?.logout.error !== ErrorType.NoError) {
-        console.error(result.data?.logout.error);
+        if (result.data?.logout.error !== ErrorType.NoError) {
+          console.error(result.data?.logout.error);
+        }
       }
-    }
 
-    globals.clear();
-    login_change.next(false);
+      globals.clear();
+      login_change.next(false);
 
-    await apollo_client.clearStore();
-    await apollo_client.resetStore();
+      if (apollo_client.cache) {
+        await apollo_client.clearStore();
+        await apollo_client.resetStore();
+      }
 
-    router.push(`/US/${appLanguage.lang.tag}/1/home`);
-  };
+      router.push(`/US/${appLanguage.lang.tag}/1/home`);
+    },
+    [appLanguage.lang.tag, logoutMutation, router, toggleMenu],
+  );
 
   const click_notifications = () => {
     router.push(`/US/${appLanguage.lang.tag}/1/notifications`);
-  };
-
-  const toggle_theme = () => {
-    set_show_dark_mode(!show_dark_mode);
-    if (show_dark_mode) {
-      localStorage.setItem('theme', 'light');
-    } else {
-      localStorage.setItem('theme', 'dark');
-    }
-    set_theme_classes(!show_dark_mode);
   };
 
   const set_theme_classes = (is_dark: boolean) => {
@@ -238,10 +247,10 @@ const Body: React.FC = () => {
   };
 
   const handleChangeAppLanguage = useCallback(
-    (value: string | undefined) => {
+    (value: OptionItem | null) => {
       if (value) {
-        changeAppLanguage(tag2langInfo(value));
-        router.push(`/US/${value}/1/home`);
+        changeAppLanguage(tag2langInfo(value.value as string));
+        router.push(`/US/${value.value}/1/home`);
       }
 
       modal.current?.dismiss();
@@ -264,272 +273,288 @@ const Body: React.FC = () => {
       const percent =
         originalCnt > 0 ? (translationCnt / originalCnt) * 100 : 100;
 
-      const badgeColor = percent === 100 ? 'green' : undefined;
+      const badgeColor = percent === 100 ? 'green' : 'gray_stroke';
 
       return {
-        text: `${langInfo2String(langInfo)}`,
+        label: `${langInfo2String(langInfo)}`,
         value: langInfo2tag(langInfo) || '',
-        endBadge: {
-          value: `${Math.round(percent)}%`,
-          color: badgeColor,
-        },
+        endBadge: (
+          <Tag
+            sx={{ minWidth: '40px' }}
+            label={`${Math.round(percent)}%`}
+            color={badgeColor}
+          />
+        ),
       };
     });
   }, [languages, originalMap]);
 
-  return (
-    <IonPage>
-      <IonHeader>
-        <div className="page">
-          <div className="section">
-            <div className="header-content">
-              <div className="clickable brand" onClick={goHome}>
-                <span className="rocks">{tr('crowdrocks')}</span>
-              </div>
-              <div style={{ display: 'flex', gap: '20px' }}>
-                <IonIcon
-                  id="open-language-modal"
-                  icon={languageOutline}
-                  className="clickable"
-                />
-                {show_dark_mode && (
-                  <IonIcon
-                    icon={sunny}
-                    onClick={toggle_theme}
-                    className="clickable theme-icon"
+  const handleOpenLangSelector = useCallback(() => {
+    menuRef.current?.toggle();
+    openModal(
+      <AutocompleteModal
+        label={tr('Select app language')}
+        onClose={closeModal}
+        options={languageList}
+        value={{
+          label: langInfo2String(appLanguage),
+          value: langInfo2tag(appLanguage),
+        }}
+        onChange={handleChangeAppLanguage}
+      />,
+      'full',
+    );
+  }, [
+    appLanguage,
+    closeModal,
+    handleChangeAppLanguage,
+    languageList,
+    openModal,
+    tr,
+  ]);
+
+  const menuList = useCallback(
+    (client: ApolloClient<object>) => {
+      return [
+        {
+          title: tr('Settings'),
+          startIcon: <Settings sx={{ fontSize: 24 }} color="blue" />,
+          endIcon: <NavArrowRight sx={{ fontSize: 24 }} color="gray" />,
+          onClick: click_settings,
+        },
+        {
+          title: tr('App Language'),
+          startIcon: <ChatBubbleTranslate sx={{ fontSize: 24 }} color="blue" />,
+          endIcon: <NavArrowRight sx={{ fontSize: 24 }} color="gray" />,
+          onClick: handleOpenLangSelector,
+        },
+
+        ...(is_logged_in
+          ? [
+              {
+                title: tr('My profile'),
+                startIcon: <UserCircle sx={{ fontSize: 24 }} color="blue" />,
+                endIcon: <NavArrowRight sx={{ fontSize: 24 }} color="gray" />,
+                onClick: click_profile,
+              },
+              {
+                title: tr('Logout'),
+                startIcon: (
+                  <LogOut
+                    sx={{ fontSize: 24 }}
+                    color="blue"
+                    id="app-logout-button"
                   />
-                )}
-                {!show_dark_mode && (
-                  <IonIcon
-                    icon={moon}
-                    onClick={toggle_theme}
-                    className="clickable theme-icon"
-                  />
-                )}
-                <IonButton
-                  size="small"
-                  fill="clear"
-                  buttonType="string"
-                  className="notification"
-                  onClick={click_notifications}
-                >
-                  <IonIcon icon={notificationsOutline} className="theme-icon" />
-                  <IonBadge className="notification-badge">
-                    {unreadNotificationCount === 0
-                      ? undefined
-                      : unreadNotificationCount}
-                  </IonBadge>
-                </IonButton>
-
-                <IonIcon
-                  icon={menu}
-                  onClick={toggleMenu}
-                  className="clickable expand-icon"
-                />
-              </div>
-            </div>
-            <div className="header-menu">
-              {show_menu && (
-                <div className="accordion-group">
-                  <div slot="content" className="header-menu-item-holder">
-                    <div
-                      className="clickable ion-text-end"
-                      onClick={click_settings}
-                    >
-                      Settings
-                    </div>
-                  </div>
-                  {is_logged_in && (
-                    <div slot="content" className="header-menu-item-holder">
-                      <div
-                        className="clickable ion-text-end"
-                        onClick={click_profile}
-                      >
-                        {globals.get_avatar()}
-                      </div>
-
-                      <div
-                        className="clickable ion-text-end logout"
-                        onClick={click_logout}
-                      >
-                        {tr('Logout')}
-                      </div>
-                    </div>
-                  )}
-
-                  {!is_logged_in && (
-                    <div slot="content" className="header-menu-item-holder">
-                      <div
-                        className="clickable ion-text-end"
-                        onClick={click_register}
-                      >
-                        {tr('Register')}
-                      </div>
-
-                      <div
-                        className="clickable ion-text-end"
-                        onClick={click_login}
-                      >
-                        {tr('Login')}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </IonHeader>
-      <IonContent>
-        <IonModal ref={modal} trigger="open-language-modal">
-          <AppTypeahead
-            title={tr('App Language')}
-            items={languageList}
-            selectedItem={langInfo2String(appLanguage)}
-            onSelectionCancel={() => modal.current?.dismiss()}
-            onSelectionChange={handleChangeAppLanguage}
-          />
-        </IonModal>
-        <IonRouterOutlet>
-          <Route
-            path="/:nation_id/:language_id/:cluster_id/profile"
-            component={Profile}
-          />
-          <Route
-            path="/:nation_id/:language_id/:cluster_id/register"
-            component={Register}
-          />
-          <Route
-            path="/:nation_id/:language_id/:cluster_id/login"
-            component={Login}
-          />
-          <Route
-            path="/:nation_id/:language_id/:cluster_id/home"
-            component={Home}
-          />
-          <Route
-            path="/:nation_id/:language_id/:cluster_id/email/:token"
-            component={EmailResponsePage}
-          />
-          <Route
-            path="/:nation_id/:language_id/:cluster_id/reset-email-request"
-            component={ResetEmailRequestPage}
-          />
-          <Route
-            path="/:nation_id/:language_id/:cluster_id/password-reset-form/:token"
-            component={PasswordResetFormPage}
-          />
-          <Route
-            path="/:nation_id/:language_id/:cluster_id/maps"
-            component={MapsPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/site-text-list"
-            component={SiteTextListPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/site-text-detail/:definition_type/:site_text_id"
-            component={SiteTextDetailPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/dictionary-list"
-            component={WordListPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/discussion/:parent/:parent_id"
-            component={DiscussionPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/dictionary-detail/:word_id"
-            component={WordDetailPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/phrase-book-list"
-            component={PhraseListPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/phrase-book-detail/:phrase_id"
-            component={PhraseDetailPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/translation"
-            component={TranslationPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/fast-translation"
-            component={FastTranslationPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/forums"
-            component={ForumListPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/forums/:forum_id/:forum_name"
-            component={ForumDetailPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/notifications"
-            component={NotificationPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/ai-controller"
-            component={AIControllerPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/settings"
-            component={SettingsPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/documents"
-            component={DocumentsPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/documents/:document_id"
-            component={DocumentViewerPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/qa"
-            component={QADocumentListPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/qa/documents/:document_id"
-            component={QADocumentViewerPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/pericopies"
-            component={PericopeDocumentListPage}
-          />
-          <Route
-            exact
-            path="/:nation_id/:language_id/:cluster_id/pericopies/documents/:document_id"
-            component={PericopeDocumentViewerPage}
-          />
-          <Route exact path="/">
-            <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />
-          </Route>
-        </IonRouterOutlet>
-      </IonContent>
-    </IonPage>
+                ),
+                onClick: () => click_logout(client),
+              },
+            ]
+          : [
+              {
+                title: tr('Login'),
+                startIcon: <LogIn sx={{ fontSize: 24 }} color="blue" />,
+                onClick: click_login,
+              },
+              {
+                title: tr('Register'),
+                startIcon: <AddUser sx={{ fontSize: 24 }} color="blue" />,
+                onClick: click_register,
+              },
+            ]),
+      ];
+    },
+    [
+      click_login,
+      click_logout,
+      click_profile,
+      click_register,
+      click_settings,
+      handleOpenLangSelector,
+      is_logged_in,
+      tr,
+    ],
   );
-};
 
-export default Body;
+  return (
+    <ApolloConsumer>
+      {(client) => (
+        <>
+          <IonMenu contentId="crowd-rock-app" ref={menuRef}>
+            <IonHeader>
+              <Header
+                onClickAppName={() => {
+                  menuRef.current?.toggle();
+                  goHome();
+                }}
+                onClickMenu={toggleMenu}
+                onClickDiscussion={() => {}}
+                onClickNotification={click_notifications}
+                notificationCount={unreadNotificationCount || 0}
+                isMenuHeader={true}
+                onCancel={cancelMenu}
+              />
+            </IonHeader>
+
+            <IonContent>
+              <MenuList items={menuList(client)} />
+            </IonContent>
+          </IonMenu>
+          <IonPage id="crowd-rock-app">
+            <IonHeader>
+              <Header
+                onClickAppName={goHome}
+                onClickMenu={toggleMenu}
+                onClickDiscussion={() => {}}
+                onClickNotification={click_notifications}
+                notificationCount={unreadNotificationCount || 0}
+                onCancel={cancelMenu}
+              />
+            </IonHeader>
+
+            <IonContent>
+              <IonRouterOutlet>
+                <Route
+                  path="/:nation_id/:language_id/:cluster_id/profile"
+                  component={Profile}
+                />
+                <Route
+                  path="/:nation_id/:language_id/:cluster_id/register"
+                  component={Register}
+                />
+                <Route
+                  path="/:nation_id/:language_id/:cluster_id/login"
+                  component={Login}
+                />
+                <Route
+                  path="/:nation_id/:language_id/:cluster_id/home"
+                  component={Home}
+                />
+                <Route
+                  path="/:nation_id/:language_id/:cluster_id/email/:token"
+                  component={EmailResponsePage}
+                />
+                <Route
+                  path="/:nation_id/:language_id/:cluster_id/reset-email-request"
+                  component={ResetEmailRequestPage}
+                />
+                <Route
+                  path="/:nation_id/:language_id/:cluster_id/password-reset-form/:token"
+                  component={PasswordResetFormPage}
+                />
+                <Route
+                  path="/:nation_id/:language_id/:cluster_id/maps"
+                  component={MapsPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/site-text-list"
+                  component={SiteTextListPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/site-text-detail/:definition_type/:site_text_id"
+                  component={SiteTextDetailPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/dictionary-list"
+                  component={WordListPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/discussion/:parent/:parent_id"
+                  component={DiscussionPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/dictionary-detail/:word_id"
+                  component={WordDetailPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/phrase-book-list"
+                  component={PhraseListPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/phrase-book-detail/:phrase_id"
+                  component={PhraseDetailPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/translation"
+                  component={TranslationPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/fast-translation"
+                  component={FastTranslationPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/forums"
+                  component={ForumListPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/forums/:forum_id/:forum_name"
+                  component={ForumDetailPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/notifications"
+                  component={NotificationPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/ai-controller"
+                  component={AIControllerPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/settings"
+                  component={SettingsPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/documents"
+                  component={DocumentsPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/documents/:document_id"
+                  component={DocumentViewerPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/qa"
+                  component={QADocumentListPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/qa/documents/:document_id"
+                  component={QADocumentViewerPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/pericopies"
+                  component={PericopeDocumentListPage}
+                />
+                <Route
+                  exact
+                  path="/:nation_id/:language_id/:cluster_id/pericopies/documents/:document_id"
+                  component={PericopeDocumentViewerPage}
+                />
+                <Route exact path="/demos/icons" component={Icons} />
+                <Route exact path="/demos/forms" component={Forms} />
+                <Route exact path="/">
+                  <Redirect to={`/US/${appLanguage.lang.tag}/1/home`} />
+                </Route>
+              </IonRouterOutlet>
+            </IonContent>
+          </IonPage>
+        </>
+      )}
+    </ApolloConsumer>
+  );
+}

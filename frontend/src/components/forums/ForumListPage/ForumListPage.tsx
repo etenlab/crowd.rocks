@@ -1,9 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
   IonHeader,
-  IonModal,
   IonTitle,
   IonToolbar,
   useIonRouter,
@@ -18,16 +17,13 @@ import { useGetForumsLazyQuery } from '../../../generated/graphql';
 
 import { ErrorType } from '../../../generated/graphql';
 
-import {
-  CaptionContainer,
-  CardListContainer,
-  CardContainer,
-} from '../../common/styled';
+import { CardListContainer, CardContainer } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { AddListHeader } from '../../common/ListHeader';
 import { NewForumForm } from '../forms/NewForumForm';
 import { useForumUpdateMutation } from '../../../hooks/useForumUpsertMutation';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 interface ForumListPageProps
   extends RouteComponentProps<{
@@ -39,10 +35,14 @@ export function ForumListPage({ match }: ForumListPageProps) {
   const router = useIonRouter();
   const { tr } = useTr();
 
+  const {
+    actions: { createModal },
+  } = useAppContext();
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [present] = useIonToast();
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const { openModal, closeModal } = createModal();
 
   const [getForums, { data: forumsData, error }] = useGetForumsLazyQuery();
 
@@ -91,38 +91,34 @@ export function ForumListPage({ match }: ForumListPageProps) {
     ));
   }, [error, forumsData, handleEdit, handleGoToForumDetail]);
 
-  return (
-    <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Community')}</Caption>
-      </CaptionContainer>
-
-      <AddListHeader
-        title={tr('Forums')}
-        onClick={() => {
-          setIsOpenModal(true);
-        }}
-      />
-
-      <CardListContainer>{cardListComs}</CardListContainer>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
+  const handleOpenModal = () => {
+    openModal(
+      <>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Forum')}</IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
-          <NewForumForm
-            onCreated={() => {
-              setIsOpenModal(false);
-            }}
-            onCancel={() => {
-              setIsOpenModal(false);
-            }}
-          />
+          <NewForumForm onCreated={closeModal} onCancel={closeModal} />
         </IonContent>
-      </IonModal>
+      </>,
+      'full',
+    );
+  };
+
+  return (
+    <PageLayout>
+      <Caption>{tr('Community')}</Caption>
+
+      <AddListHeader
+        title={tr('Forums')}
+        onClick={() => {
+          handleOpenModal();
+        }}
+      />
+
+      <CardListContainer>{cardListComs}</CardListContainer>
     </PageLayout>
   );
 }

@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
-  IonModal,
   IonToolbar,
   IonHeader,
   IonTitle,
@@ -27,12 +26,7 @@ import { ErrorType, TableNameType } from '../../../generated/graphql';
 
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
-import {
-  CaptionContainer,
-  FilterContainer,
-  CardListContainer,
-  CardContainer,
-} from '../../common/styled';
+import { CardListContainer, CardContainer } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -59,10 +53,10 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
         langauges: { targetLang },
       },
     },
-    actions: { setTargetLanguage },
+    actions: { setTargetLanguage, createModal },
   } = useAppContext();
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const { openModal, closeModal } = createModal();
 
   const [filter, setFilter] = useState<string>('');
 
@@ -132,6 +126,9 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
       definitionlike_strings: string[];
       downvotes: number;
       upvotes: number;
+      username: string;
+      isBot: boolean;
+      createdAt: string;
     }[] = [];
 
     if (error) {
@@ -159,6 +156,9 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
           ) as string[],
           upvotes: node.upvotes,
           downvotes: node.downvotes,
+          username: node.created_by_user.avatar,
+          createdAt: node.created_at,
+          isBot: node.created_by_user.is_bot,
         });
       }
     }
@@ -183,6 +183,12 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
                 ))}
               </ul>
             }
+            createdBy={{
+              username: phrase.username,
+              isBot: phrase.isBot,
+              createdAt:
+                phrase.createdAt && new Date(phrase.createdAt).toDateString(),
+            }}
             vote={{
               upVotes: phrase.upvotes,
               downVotes: phrase.downvotes,
@@ -231,36 +237,53 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
     togglePhraseVoteStatus,
   ]);
 
+  const handleOpenModal = () => {
+    openModal(
+      <>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>{tr('Add New Phrase')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          {targetLang ? (
+            <NewPhraseForm
+              langInfo={targetLang}
+              onCreated={closeModal}
+              onCancel={closeModal}
+            />
+          ) : null}
+        </IonContent>
+      </>,
+      'full',
+    );
+  };
+
   return (
     <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Phrase Book')}</Caption>
-      </CaptionContainer>
+      <Caption>{tr('Phrase Book')}</Caption>
 
-      <FilterContainer>
-        <LangSelector
-          title={tr('Select language')}
-          langSelectorId="phrase-book-langSelector"
-          selected={targetLang ?? undefined}
-          onChange={(_sourceLangTag, sourceLangInfo) => {
-            setTargetLanguage(sourceLangInfo);
-          }}
-          onClearClick={() => setTargetLanguage(null)}
-        />
-        <Input
-          type="text"
-          label={tr('Search')}
-          labelPlacement="floating"
-          fill="outline"
-          debounce={300}
-          value={filter}
-          onIonInput={handleFilterChange}
-        />
-      </FilterContainer>
+      <LangSelector
+        title={tr('Select language')}
+        selected={targetLang}
+        onChange={(_sourceLangTag, sourceLangInfo) => {
+          setTargetLanguage(sourceLangInfo);
+        }}
+        onClearClick={() => setTargetLanguage(null)}
+      />
+      <Input
+        type="text"
+        label={tr('Search')}
+        labelPlacement="floating"
+        fill="outline"
+        debounce={300}
+        value={filter}
+        onIonInput={handleFilterChange}
+      />
 
       <AddListHeader
         title={tr('All Phrases')}
-        onClick={() => setIsOpenModal(true)}
+        onClick={() => handleOpenModal()}
       />
 
       <CardListContainer>{cardListComs}</CardListContainer>
@@ -271,27 +294,6 @@ export function PhraseListPage({ match }: PhraseListPageProps) {
           loadingSpinner="bubbles"
         />
       </IonInfiniteScroll>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('Add New Phrase')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          {targetLang ? (
-            <NewPhraseForm
-              langInfo={targetLang}
-              onCreated={() => {
-                setIsOpenModal(false);
-              }}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
-            />
-          ) : null}
-        </IonContent>
-      </IonModal>
     </PageLayout>
   );
 }

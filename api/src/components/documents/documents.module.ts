@@ -10,12 +10,15 @@ import { DocumentsRepository } from './documents.repository';
 import { DocumentsService } from './documents.service';
 import { DocumentWordEntriesService } from './document-word-entries.service';
 import { WordRangesService } from './word-ranges.service';
+import { AuthorizationModule } from '../authorization/authorization.module';
+import { AuthorizationService } from '../authorization/authorization.service';
 
 @Module({
   imports: [
     forwardRef(() => CoreModule),
     forwardRef(() => AuthenticationModule),
     forwardRef(() => WordsModule),
+    forwardRef(() => AuthorizationModule),
     FileModule,
   ],
   providers: [
@@ -24,6 +27,7 @@ import { WordRangesService } from './word-ranges.service';
     DocumentWordEntriesService,
     WordRangesService,
     DocumentsResolver,
+    AuthorizationService,
   ],
   exports: [DocumentsService, DocumentWordEntriesService, WordRangesService],
 })

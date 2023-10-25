@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import {
   IonButton,
   IonInput,
@@ -11,8 +11,11 @@ import { useHistory } from 'react-router';
 
 import { PageLayout } from '../common/PageLayout';
 
-import { apollo_client } from '../../main';
-import { ErrorType, useLoginMutation } from '../../generated/graphql';
+import {
+  ErrorType,
+  useLoginMutation,
+  useIsAdminLoggedInLazyQuery,
+} from '../../generated/graphql';
 import { globals } from '../../services/globals';
 import { login_change } from '../../services/subscriptions';
 import './Login.css';
@@ -20,6 +23,7 @@ import './Login.css';
 import { useTr } from '../../hooks/useTr';
 import { useAppContext } from '../../hooks/useAppContext';
 import { styled } from 'styled-components';
+import { ApolloClient, ApolloConsumer } from '@apollo/client';
 
 const Login: React.FC = () => {
   const history = useHistory();
@@ -52,14 +56,29 @@ const Login: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [is_unknown_error, set_is_unknown_error] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [loginMutation, { data, loading, error }] = useLoginMutation();
+  const [loginMutation] = useLoginMutation();
+  const [isAdmin, isAdminQueryRes] = useIsAdminLoggedInLazyQuery();
 
-  async function handle_submit(event: FormEvent) {
+  useEffect(() => {
+    try {
+      if (
+        isAdminQueryRes?.data &&
+        isAdminQueryRes.data.loggedInIsAdmin.isAdmin
+      ) {
+        globals.set_admin_user();
+      }
+    } catch (error) {
+      console.log(`Login.tsx#useEffect isAdmin:`, error);
+    }
+  }, [isAdmin, isAdminQueryRes.data]);
+
+  async function handle_submit(
+    event: FormEvent,
+    apollo_client: ApolloClient<object>,
+  ) {
     event.preventDefault();
     event.stopPropagation();
     set_login_disable(true);
-    // present_loading({ message: tr('Logging in...') });
 
     let result;
     try {
@@ -70,8 +89,9 @@ const Login: React.FC = () => {
         },
         errorPolicy: 'all',
       });
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
+    } catch (e) {
+      console.log('loginMutation#handle_submit: ', e);
+    }
 
     const error = result?.data?.login.error;
 
@@ -93,12 +113,16 @@ const Login: React.FC = () => {
         globals.set_profile_url(session.avatar_url);
       }
 
+      isAdmin({ variables: { input: { user_id: session.user_id } } });
+
       login_change.next(true);
 
       const redirect = localStorage.getItem('login-redirect');
 
-      await apollo_client.clearStore();
-      await apollo_client.resetStore();
+      if (apollo_client.cache) {
+        await apollo_client.clearStore();
+        await apollo_client.resetStore();
+      }
 
       set_email('');
       set_password('');
@@ -132,7 +156,7 @@ const Login: React.FC = () => {
       set_is_unknown_error(true);
       console.error(error);
     }
-    // dismiss_loading();
+
     set_login_disable(false);
   }
 
@@ -147,73 +171,76 @@ const Login: React.FC = () => {
   return (
     <PageLayout>
       <h1>{tr('Login')}</h1>
+      <ApolloConsumer>
+        {(client) => (
+          <form onSubmit={(event) => handle_submit(event, client)}>
+            <IonItem>
+              <IonLabel position="floating">{tr('Email')}</IonLabel>
+              <IonInput
+                value={email}
+                inputmode="email"
+                className="login-email"
+                minlength={4}
+                maxlength={255}
+                onIonInput={(e) => set_email(e.detail.value!)}
+                required
+              />
+            </IonItem>
 
-      <form onSubmit={(event) => handle_submit(event)}>
-        <IonItem>
-          <IonLabel position="floating">{tr('Email')}</IonLabel>
-          <IonInput
-            value={email}
-            inputmode="email"
-            className="login-email"
-            minlength={4}
-            maxlength={255}
-            onIonInput={(e) => set_email(e.detail.value!)}
-            required
-          />
-        </IonItem>
+            {is_email_too_long && <div>{tr('Email too long')}</div>}
+            {is_email_too_short && <div>{tr('Email too short')}</div>}
+            {is_email_invalid && <div>{tr('Email Invalid')}</div>}
 
-        {is_email_too_long && <div>{tr('Email too long')}</div>}
-        {is_email_too_short && <div>{tr('Email too short')}</div>}
-        {is_email_invalid && <div>{tr('Email Invalid')}</div>}
+            <IonItem>
+              <IonLabel position="floating">{tr('Password')}</IonLabel>
+              <IonInput
+                value={password}
+                type="password"
+                id="login-password"
+                inputmode="text"
+                onIonInput={(e) => set_password(e.detail.value!)}
+                required
+              />
+            </IonItem>
 
-        <IonItem>
-          <IonLabel position="floating">{tr('Password')}</IonLabel>
-          <IonInput
-            value={password}
-            type="password"
-            id="login-password"
-            inputmode="text"
-            onIonInput={(e) => set_password(e.detail.value!)}
-            required
-          />
-        </IonItem>
+            {is_password_too_long && <div>{tr('Password too long')}</div>}
+            {is_password_too_short && <div>{tr('Password too short')}</div>}
 
-        {is_password_too_long && <div>{tr('Password too long')}</div>}
-        {is_password_too_short && <div>{tr('Password too short')}</div>}
+            <IonButton
+              id="login-login"
+              type="submit"
+              color="primary"
+              disabled={login_disable}
+            >
+              {tr('Login')}
+              {is_spinning && <StIonSpinner />}
+            </IonButton>
 
-        <IonButton
-          id="login-login"
-          type="submit"
-          color="primary"
-          disabled={login_disable}
-        >
-          {tr('Login')}
-          {is_spinning && <StIonSpinner />}
-        </IonButton>
+            <IonButton
+              type="button"
+              color="primary"
+              fill="clear"
+              onClick={click_forgot_password}
+            >
+              {tr('Forgot Password')}
+            </IonButton>
 
-        <IonButton
-          type="button"
-          color="primary"
-          fill="clear"
-          onClick={click_forgot_password}
-        >
-          {tr('Forgot Password')}
-        </IonButton>
+            <IonButton
+              type="button"
+              id="login-register"
+              color="primary"
+              fill="clear"
+              onClick={click_register}
+            >
+              {tr('Register')}
+            </IonButton>
 
-        <IonButton
-          type="button"
-          id="login-register"
-          color="primary"
-          fill="clear"
-          onClick={click_register}
-        >
-          {tr('Register')}
-        </IonButton>
-
-        {is_invalid_email_or_password && (
-          <Invalid>{tr('Invalid email or password')}</Invalid>
+            {is_invalid_email_or_password && (
+              <Invalid>{tr('Invalid email or password')}</Invalid>
+            )}
+          </form>
         )}
-      </form>
+      </ApolloConsumer>
     </PageLayout>
   );
 };

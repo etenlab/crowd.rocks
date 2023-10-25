@@ -1,10 +1,9 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
   IonHeader,
   IonIcon,
-  IonModal,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
@@ -16,11 +15,7 @@ import { useGetForumFoldersLazyQuery } from '../../../generated/graphql';
 
 import { ErrorType } from '../../../generated/graphql';
 
-import {
-  CaptionContainer,
-  CardListContainer,
-  CardContainer,
-} from '../../common/styled';
+import { CardListContainer, CardContainer } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { AddListHeader } from '../../common/ListHeader';
@@ -29,6 +24,7 @@ import { useForumFolderUpdateMutation } from '../../../hooks/useFolderUpsertMuta
 import { ForumFolder } from '../ForumFolderDetail/FolderDetail';
 import { folderOutline } from 'ionicons/icons';
 import { EditableText } from '../../common/EditableText/EditableText';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 interface ForumDetailPageProps
   extends RouteComponentProps<{
@@ -41,7 +37,11 @@ interface ForumDetailPageProps
 export function ForumDetailPage({ match }: ForumDetailPageProps) {
   const { tr } = useTr();
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const {
+    actions: { createModal },
+  } = useAppContext();
+
+  const { openModal, closeModal } = createModal();
 
   const [getFolders, { data: foldersData, error }] =
     useGetForumFoldersLazyQuery();
@@ -111,23 +111,9 @@ export function ForumDetailPage({ match }: ForumDetailPageProps) {
     match.params.nation_id,
   ]);
 
-  return (
-    <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Forum Folders')}</Caption>
-      </CaptionContainer>
-
-      <AddListHeader
-        baseIcon={folderOutline}
-        title={tr(`${match.params.forum_name ?? ''}`)}
-        onClick={() => {
-          setIsOpenModal(true);
-        }}
-      />
-
-      <CardListContainer>{cardListComs}</CardListContainer>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
+  const handleOpenModal = () => {
+    openModal(
+      <>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Folder')}</IonTitle>
@@ -136,15 +122,25 @@ export function ForumDetailPage({ match }: ForumDetailPageProps) {
         <IonContent className="ion-padding">
           <NewFolderForm
             forum_id={match.params.forum_id}
-            onCreated={() => {
-              setIsOpenModal(false);
-            }}
-            onCancel={() => {
-              setIsOpenModal(false);
-            }}
+            onCreated={closeModal}
+            onCancel={closeModal}
           />
         </IonContent>
-      </IonModal>
+      </>,
+      'full',
+    );
+  };
+  return (
+    <PageLayout>
+      <Caption>{tr('Forum Folders')}</Caption>
+
+      <AddListHeader
+        baseIcon={folderOutline}
+        title={tr(`${match.params.forum_name ?? ''}`)}
+        onClick={handleOpenModal}
+      />
+
+      <CardListContainer>{cardListComs}</CardListContainer>
     </PageLayout>
   );
 }

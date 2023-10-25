@@ -654,4 +654,12 @@ export class PhraseToPhraseTranslationsService {
       phrase_to_phrase_tr_with_vote_list: [],
     };
   }
+  getDiscussionTitle = async (id: string): Promise<string> => {
+    const translation = await this.read(+id, null);
+    if (translation.error !== ErrorType.NoError) {
+      console.error(translation.error);
+      return 'Translation:';
+    }
+    return `Translation from '${translation.phrase_to_phrase_translation?.from_phrase_definition.phrase.phrase}' to '${translation.phrase_to_phrase_translation?.to_phrase_definition.phrase.phrase}'`;
+  };
 }

@@ -1,9 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useHistory, useParams } from 'react-router';
 import {
   IonContent,
   IonHeader,
-  IonModal,
   IonTitle,
   IonToolbar,
   useIonToast,
@@ -13,22 +12,18 @@ import {
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
-import {
-  FilterContainer,
-  CaptionContainer,
-  ListCaption,
-} from '../../common/styled';
+import { ListCaption } from '../../common/styled';
 import { RowStack } from '../../common/Layout/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-import { useUploadFileMutation } from '../../../generated/graphql';
 import { useDocumentUploadMutation } from '../../../hooks/useDocumentUploadMutation';
 
 import { DocumentList } from '../DocumentList/DocumentList';
 import { NewDocumentForm } from './NewDocumentForm';
 import { DocumentsTools } from './DocumentsTools';
+import { useUploadFileMutation } from '../../../hooks/useUploadFileMutation';
 
 export function DocumentsPage() {
   const { tr } = useTr();
@@ -38,17 +33,17 @@ export function DocumentsPage() {
         langauges: { sourceLang },
       },
     },
-    actions: { setSourceLanguage },
+    actions: { setSourceLanguage, createModal },
   } = useAppContext();
   const { nation_id, language_id, cluster_id } = useParams<{
     nation_id: string;
     language_id: string;
     cluster_id: string;
   }>();
+  const { openModal, closeModal } = createModal();
 
   const [uploadFile] = useUploadFileMutation();
   const [documentUpload] = useDocumentUploadMutation();
-  const [isOpenModal, setIsOpenModal] = useState(false);
 
   const [toast] = useIonToast();
   const [loader, dismissLoader] = useIonLoading();
@@ -88,12 +83,6 @@ export function DocumentsPage() {
       });
 
       if (!uploadResult.data?.uploadFile.file?.id) {
-        toast({
-          message: tr('Failed at file upload'),
-          duration: 1500,
-          position: 'top',
-          color: 'danger',
-        });
         dismissLoader();
         console.log(`S3 upload error `, uploadResult.data?.uploadFile.error);
         return;
@@ -112,7 +101,7 @@ export function DocumentsPage() {
 
       dismissLoader();
 
-      setIsOpenModal(false);
+      closeModal();
     },
     [
       sourceLang?.lang,
@@ -121,8 +110,9 @@ export function DocumentsPage() {
       loader,
       tr,
       uploadFile,
-      dismissLoader,
       documentUpload,
+      dismissLoader,
+      closeModal,
       toast,
     ],
   );
@@ -136,46 +126,41 @@ export function DocumentsPage() {
     [cluster_id, history, language_id, nation_id],
   );
 
-  return (
-    <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Documents')}</Caption>
-      </CaptionContainer>
-
-      <FilterContainer>
-        <LangSelector
-          title={tr('Select language')}
-          langSelectorId="mapsListLangSelector"
-          selected={sourceLang ?? undefined}
-          onChange={(_sourceLangTag, sourceLangInfo) => {
-            setSourceLanguage(sourceLangInfo);
-          }}
-          onClearClick={() => setSourceLanguage(null)}
-        />
-      </FilterContainer>
-
-      <RowStack>
-        <ListCaption>{tr('Document List')}</ListCaption>
-        <DocumentsTools onAddClick={() => setIsOpenModal(true)} />
-      </RowStack>
-
-      <DocumentList onClickItem={handleGoToDocumentViewer} />
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
+  const handleOpenModal = () => {
+    openModal(
+      <>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('New Document')}</IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
-          <NewDocumentForm
-            onSave={handleAddDocument}
-            onCancel={() => {
-              setIsOpenModal(false);
-            }}
-          />
+          <NewDocumentForm onSave={handleAddDocument} onCancel={closeModal} />
         </IonContent>
-      </IonModal>
+      </>,
+      'full',
+    );
+  };
+
+  return (
+    <PageLayout>
+      <Caption>{tr('Documents')}</Caption>
+
+      <LangSelector
+        title={tr('Select language')}
+        selected={sourceLang}
+        onChange={(_sourceLangTag, sourceLangInfo) => {
+          setSourceLanguage(sourceLangInfo);
+        }}
+        onClearClick={() => setSourceLanguage(null)}
+      />
+
+      <RowStack>
+        <ListCaption>{tr('Document List')}</ListCaption>
+        <DocumentsTools onAddClick={() => handleOpenModal()} />
+      </RowStack>
+
+      <DocumentList onClickItem={handleGoToDocumentViewer} />
     </PageLayout>
   );
 }

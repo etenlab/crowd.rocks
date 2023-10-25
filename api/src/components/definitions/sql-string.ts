@@ -5,6 +5,10 @@ export type GetWordDefinitionObjectById = {
   word_id: string;
   definition: string;
   created_at: string;
+  user_id: string;
+  is_bot: boolean;
+  avatar: string;
+  avatar_url: string | null;
 };
 
 export function getWordDefinitionObjByIds(ids: number[]): [string, [number[]]] {
@@ -14,8 +18,16 @@ export function getWordDefinitionObjByIds(ids: number[]): [string, [number[]]] {
         word_definition_id,
         word_id,
         definition,
-        created_at
+        word_definitions.created_at,
+	      created_by as user_id,
+	      u.is_bot,
+	      a.avatar,
+	      a.url as avatar_url
       from word_definitions
+      join users u
+      	on u.user_id = word_definitions.created_by
+      join avatars a
+      	on u.user_id = a.user_id
       where word_definitions.word_definition_id = any($1)
     `,
     [ids],
@@ -72,6 +84,10 @@ export type GetPhraseDefinitionObjectById = {
   phrase_id: string;
   definition: string;
   created_at: string;
+  user_id: string;
+  avatar: string;
+  avatar_url: string | null;
+  is_bot: boolean;
 };
 
 export function getPhraseDefinitionObjByIds(
@@ -83,8 +99,16 @@ export function getPhraseDefinitionObjByIds(
         phrase_definition_id,
         phrase_id,
         definition,
-        created_at
+        phrase_definitions.created_at,
+	      created_by as user_id,
+	      u.is_bot,
+	      a.avatar,
+	      a.url as avatar_url
       from phrase_definitions
+      join users u
+      	on u.user_id = phrase_definitions.created_by
+      join avatars a
+      	on u.user_id = a.user_id
       where phrase_definitions.phrase_definition_id = any($1)
     `,
     [ids],

@@ -15,6 +15,7 @@ export class Globals {
     localStorage.removeItem('user_id');
     localStorage.removeItem('avatar');
     localStorage.removeItem('profile_url');
+    localStorage.removeItem('is_admin_user');
   }
 
   // token
@@ -35,6 +36,19 @@ export class Globals {
   }
   set_user_id(user_id: number) {
     localStorage.setItem('user_id', user_id.toString());
+  }
+
+  set_admin_user() {
+    localStorage.setItem('is_admin_user', 'true');
+  }
+
+  is_admin_user(): boolean {
+    const value = localStorage.getItem('is_admin_user');
+    if (value === 'true') {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   // avatar

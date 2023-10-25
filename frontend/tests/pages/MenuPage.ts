@@ -1,8 +1,7 @@
 import BasePage from './BasePage';
 
-const headerText = '//div[@class="clickable brand"]/span[@class="rocks"]';
-const logoutOption =
-  '//div[contains(@class, "header-menu")]//div[contains(@class, "logout")]';
+const headerText = '#crowd-rock-app #app-name-text';
+const logoutOption = '#app-logout-button';
 
 class MenuPage extends BasePage {
   async isheaderTextPresent() {

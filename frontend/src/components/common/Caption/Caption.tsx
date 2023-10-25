@@ -1,7 +1,8 @@
-import { IonIcon, IonText, useIonRouter } from '@ionic/react';
-import { arrowBack } from 'ionicons/icons';
 import { ReactElement } from 'react';
-import { styled } from 'styled-components';
+import { useIonRouter } from '@ionic/react';
+
+import { Stack, Typography, IconButton } from '@mui/material';
+import { NavArrowLeft } from '../icons/NavArrowLeft';
 
 export type TCaptionProps = {
   handleBackClick?: () => void;
@@ -20,33 +21,18 @@ export const Caption = ({ handleBackClick, children }: TCaptionProps) => {
   }
 
   return (
-    <CaptionContainer>
-      <StIonIcon
-        color="black"
-        icon={arrowBack}
-        onClick={() => onClickAction()}
-      />
-      <StIonText>{children}</StIonText>
-    </CaptionContainer>
+    <Stack
+      direction="row"
+      gap="10px"
+      justifyContent="flex-start"
+      alignItems="center"
+    >
+      <IconButton onClick={onClickAction} sx={{ padding: 0 }}>
+        <NavArrowLeft color="dark" />
+      </IconButton>
+      <Typography variant="h2" color="dark">
+        {children}
+      </Typography>
+    </Stack>
   );
 };
-
-const CaptionContainer = styled.div`
-  display: flex;
-  padding: 16px;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: flex-start;
-`;
-
-const StIonText = styled(IonText)(() => ({
-  display: 'flex',
-  flexWrap: 'wrap',
-  alignItems: 'center',
-  marginLeft: '10px',
-  fontWeight: '700',
-}));
-
-const StIonIcon = styled(IonIcon)(() => ({
-  cursor: 'pointer',
-}));

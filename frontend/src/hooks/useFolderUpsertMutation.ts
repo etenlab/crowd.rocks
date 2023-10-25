@@ -10,10 +10,12 @@ import {
   updateCacheWithCreateForumFolder,
   updateCacheWithUpdateForumFolder,
 } from '../cacheUpdators/upsertForumFolder';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useForumFolderUpdateMutation(forum_id: string) {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedForumFolderUpdateMutation({
     update(cache, { data, errors }) {
@@ -44,6 +46,7 @@ export function useForumFolderUpdateMutation(forum_id: string) {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.forumFolderUpsert.error);
       }
     },
   });
@@ -52,6 +55,7 @@ export function useForumFolderUpdateMutation(forum_id: string) {
 export function useForumFolderCreateMutation(forum_id: string) {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedForumFolderCreateMutation({
     update(cache, { data, errors }) {
@@ -82,6 +86,7 @@ export function useForumFolderCreateMutation(forum_id: string) {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.forumFolderUpsert.error);
       }
     },
   });

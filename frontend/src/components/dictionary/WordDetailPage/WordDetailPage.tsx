@@ -1,8 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
   IonContent,
-  IonModal,
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -22,11 +21,7 @@ import {
 
 import { ErrorType, TableNameType } from '../../../generated/graphql';
 
-import {
-  CaptionContainer,
-  CardListContainer,
-  CardContainer,
-} from '../../common/styled';
+import { CardListContainer, CardContainer } from '../../common/styled';
 
 import { useTr } from '../../../hooks/useTr';
 import { useToggleWordVoteStatusMutation } from '../../../hooks/useToggleWordVoteStatusMutation';
@@ -38,6 +33,7 @@ import { NewWordDefinitionForm } from '../NewWordDefinitionForm';
 
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 import { Chat } from '../../chat/Chat';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 interface WordDetailPageProps
   extends RouteComponentProps<{
@@ -51,7 +47,11 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
   const router = useIonRouter();
   // const [present] = useIonToast();
 
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const {
+    actions: { createModal },
+  } = useAppContext();
+
+  const { openModal, closeModal } = createModal();
 
   const { data: definitionData, error: definitionError } =
     useGetWordDefinitionsByWordIdQuery({
@@ -77,6 +77,8 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
       upvotes: number;
       downvotes: number;
       created_at: Date;
+      username: string;
+      isBot: boolean;
     }[] = [];
 
     if (definitionError) {
@@ -102,6 +104,8 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
           upvotes: definition.upvotes,
           downvotes: definition.downvotes,
           created_at: new Date(definition.created_at),
+          username: definition.created_by_user.avatar,
+          isBot: definition.created_by_user.is_bot,
         });
       }
     }
@@ -110,6 +114,12 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
       <CardContainer key={definition.word_definition_id}>
         <Card
           description={definition.definition}
+          createdBy={{
+            username: definition.username,
+            isBot: definition.isBot,
+            createdAt:
+              definition.created_at && definition.created_at.toDateString(),
+          }}
           vote={{
             upVotes: definition.upvotes,
             downVotes: definition.downvotes,
@@ -221,22 +231,9 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
     wordError,
   ]);
 
-  return (
-    <PageLayout>
-      <CaptionContainer>
-        <Caption>{tr('Dictionary')}</Caption>
-      </CaptionContainer>
-
-      <CardContainer>{wordCom}</CardContainer>
-
-      <AddListHeader
-        title={tr('Definitions')}
-        onClick={() => setIsOpenModal(true)}
-      />
-
-      <CardListContainer>{definitionsCom}</CardListContainer>
-
-      <IonModal isOpen={isOpenModal} onDidDismiss={() => setIsOpenModal(false)}>
+  const handleOpenModal = () => {
+    openModal(
+      <>
         <IonHeader>
           <IonToolbar>
             <IonTitle>{tr('Add New Word Definition')}</IonTitle>
@@ -246,16 +243,28 @@ export function WordDetailPage({ match }: WordDetailPageProps) {
           {match.params.word_id ? (
             <NewWordDefinitionForm
               word_id={match.params.word_id}
-              onCreated={() => {
-                setIsOpenModal(false);
-              }}
-              onCancel={() => {
-                setIsOpenModal(false);
-              }}
+              onCreated={closeModal}
+              onCancel={closeModal}
             />
           ) : null}
         </IonContent>
-      </IonModal>
+      </>,
+      'full',
+    );
+  };
+
+  return (
+    <PageLayout>
+      <Caption>{tr('Dictionary')}</Caption>
+
+      <CardContainer>{wordCom}</CardContainer>
+
+      <AddListHeader
+        title={tr('Definitions')}
+        onClick={() => handleOpenModal()}
+      />
+
+      <CardListContainer>{definitionsCom}</CardListContainer>
     </PageLayout>
   );
 }

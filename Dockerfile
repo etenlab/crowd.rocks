@@ -5,8 +5,12 @@ WORKDIR /usr/src/etenlab/crowd-rocks
 
 COPY frontend /frontend/
 COPY api /api/
+COPY utils /utils/
 
 ARG BUILD_MODE
+
+WORKDIR /utils
+RUN npm install
 
 WORKDIR /frontend
 

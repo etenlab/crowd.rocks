@@ -8,6 +8,7 @@ import { updateCacheWithUploadDocument } from '../cacheUpdators/uploadDocument';
 
 import { useTr } from './useTr';
 import { useAppContext } from './useAppContext';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useDocumentUploadMutation() {
   const {
@@ -19,6 +20,7 @@ export function useDocumentUploadMutation() {
   } = useAppContext();
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedDocumentUploadMutation({
     update(cache, { data, errors }) {
@@ -49,6 +51,7 @@ export function useDocumentUploadMutation() {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.documentUpload.error);
       }
     },
   });

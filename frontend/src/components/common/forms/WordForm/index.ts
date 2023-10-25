@@ -1,0 +1,1 @@
+export { WordForm } from './WordForm';

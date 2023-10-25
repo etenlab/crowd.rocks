@@ -22,6 +22,7 @@ import {
   OrigMapWordsAndPhrasesOutput,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
+import { GroupedFilterSymbols } from '../../../../utils/dist';
 
 interface ISaveMapParams {
   mapFileName: string;
@@ -204,6 +205,10 @@ export class MapsRepository {
       params.push(lang?.geo_code);
       languageClause += ` and geo_code = $${params.length}`;
     }
+    if (lang?.filter && lang?.filter.length > 0) {
+      params.push(lang.filter);
+      languageClause += ` and lower(om.map_file_name) like concat('%', LOWER($${params.length}),'%')`;
+    }
     const sqlStr = `
         select
           om.original_map_id,
@@ -293,6 +298,11 @@ export class MapsRepository {
       languageClause += ` and tm.original_map_id = $${params.length}`;
     }
 
+    if (lang?.filter && lang?.filter.length > 0) {
+      params.push(lang.filter);
+      languageClause += ` and lower(om.map_file_name) like concat('%', LOWER($${params.length}),'%')`;
+    }
+
     const sqlStr = `
       select
         tm.translated_map_id,
@@ -315,7 +325,7 @@ export class MapsRepository {
       left join files f on
         om.preview_file_id = f.file_id
       left join files f2 on
-        om.content_file_id = f2.file_id
+        tm.content_file_id = f2.file_id
       where
         true
         ${languageClause}
@@ -660,7 +670,16 @@ export class MapsRepository {
         tw.geo_code as t_geo_code,
         tw.word_id as t_word_id,
         up.up_votes_count,
-        down.down_votes_count
+        down.down_votes_count,
+        tw.created_at as t_created_at,
+	      tw.created_by as t_user_id,
+	      tu.is_bot as t_is_bot,
+	      ta.avatar as t_avatar,
+	      ta.url as t_avatar_url,
+        w.created_by as o_user_id,
+	      ou.is_bot as o_is_bot,
+	      oa.avatar as o_avatar,
+	      oa.url as o_avatar_url
       from
         words w
       left join wordlike_strings ws on
@@ -679,6 +698,14 @@ export class MapsRepository {
       	wordlike_strings tws on tw.wordlike_string_id = tws.wordlike_string_id      
       left join v_word_to_word_translations_upvotes_count up on wtwt.word_to_word_translation_id = up.word_to_word_translation_id
       left join v_word_to_word_translations_downvotes_count down on wtwt.word_to_word_translation_id = down.word_to_word_translation_id
+      join users tu
+      	on tu.user_id = tw.created_by
+      join avatars ta
+      	on tu.user_id = ta.user_id
+      join users ou
+        on ou.user_id = w.created_by
+      join avatars oa
+        on ou.user_id = oa.user_id
       where true
     `;
 
@@ -702,7 +729,17 @@ export class MapsRepository {
         tw.geo_code as t_geo_code,
         tw.word_id as t_word_id,
         up.up_votes_count,
-        down.down_votes_count
+        down.down_votes_count,
+        w.created_at as o_created_at,
+	      w.created_by as o_user_id,
+	      ou.is_bot as o_is_bot,
+	      oa.avatar as o_avatar,
+	      oa.url as o_avatar_url,
+		    tph.created_at as t_created_at,
+	      tph.created_by as t_user_id,
+	      tu.is_bot as t_is_bot,
+	      ta.avatar as t_avatar,
+	      ta.url as t_avatar_url
       from
         words w
       left join wordlike_strings ws on
@@ -720,6 +757,14 @@ export class MapsRepository {
       left join v_word_to_phrase_translations_upvotes_count up on wtpt.word_to_phrase_translation_id = up.word_to_phrase_translation_id
       left join v_word_to_phrase_translations_downvotes_count down on wtpt.word_to_phrase_translation_id = down.word_to_phrase_translation_id
       left join words tw on tw.word_id = tph.words[1] ${tLanguageRestrictionClause}
+      join users ou
+      	on ou.user_id = w.created_by
+      join avatars oa
+      	on ou.user_id = oa.user_id
+	    join users tu
+	  	  on tu.user_id = tph.created_by
+	    join avatars ta
+	      on tu.user_id = ta.user_id
       where true
     `;
 
@@ -760,6 +805,13 @@ export class MapsRepository {
         up_votes: r.up_votes_count || 0,
         down_votes: r.down_votes_count || 0,
         translation_id: r.word_to_word_translation_id,
+        created_at: r.t_created_at,
+        created_by_user: {
+          user_id: r.t_user_id,
+          avatar: r.t_avatar,
+          avatar_url: r.t_avatar_url,
+          is_bot: r.t_is_bot,
+        },
       };
 
       const existingWordIdx = words.findIndex(
@@ -779,6 +831,13 @@ export class MapsRepository {
           definition: r.o_definition,
           definition_id: r.o_definition_id,
           translations: currTranslation.language_code ? [currTranslation] : [],
+          created_at: r.o_created_at,
+          created_by_user: {
+            user_id: r.o_user_id,
+            avatar: r.o_avatar,
+            avatar_url: r.o_avatar_url,
+            is_bot: r.o_is_bot,
+          },
         });
       }
     });
@@ -795,6 +854,13 @@ export class MapsRepository {
         up_votes: r.up_votes_count || 0,
         down_votes: r.down_votes_count || 0,
         translation_id: r.word_to_phrase_translation_id,
+        created_at: r.t_created_at,
+        created_by_user: {
+          user_id: r.t_user_id,
+          avatar: r.t_avatar,
+          avatar_url: r.t_avatar_url,
+          is_bot: r.t_is_bot,
+        },
       };
 
       const existingWordIdx = words.findIndex(
@@ -814,6 +880,13 @@ export class MapsRepository {
           definition: r.o_definition,
           definition_id: r.o_definition_id,
           translations: currTranslation.language_code ? [currTranslation] : [],
+          created_at: r.created_at,
+          created_by_user: {
+            user_id: r.o_user_id,
+            avatar: r.avatar,
+            avatar_url: r.avatar_url,
+            is_bot: r.is_bot,
+          },
         });
       }
     });
@@ -869,7 +942,17 @@ export class MapsRepository {
         tphd.phrase_definition_id as t_definition_id,
         tph.phraselike_string as t_phraselike_string,
         up.up_votes_count,
-        down.down_votes_count
+        down.down_votes_count,
+        oph.created_at as o_created_at,
+	      oph.created_by as o_user_id,
+	      ou.is_bot as o_is_bot,
+	      oa.avatar as o_avatar,
+	      oa.url as o_avatar_url,
+		    tph.created_at as t_created_at,
+	      tph.created_by as t_user_id,
+	      tu.is_bot as t_is_bot,
+	      ta.avatar as t_avatar,
+	      ta.url as t_avatar_url
       from
         phrases oph
       left join 
@@ -886,6 +969,14 @@ export class MapsRepository {
       left join v_phrase_to_phrase_translations_downvotes_count down on ptpt.phrase_to_phrase_translation_id = down.phrase_to_phrase_translation_id
       left join words ow on ow.word_id = oph.words[1]
       left join words tw on tw.word_id = tph.words[1] ${tLanguageRestrictionClause}
+      join users ou
+      	on ou.user_id = oph.created_by
+      join avatars oa
+      	on ou.user_id = oa.user_id
+	    join users tu
+      	on tu.user_id = tph.created_by
+      join avatars ta
+      	on tu.user_id = ta.user_id
       where true
 
     `;
@@ -910,7 +1001,17 @@ export class MapsRepository {
         twd.word_definition_id as t_definition_id,
         tws.wordlike_string as t_wordlike_string,
         up.up_votes_count,
-        down.down_votes_count
+        down.down_votes_count,
+        oph.created_at as o_created_at,
+        oph.created_by as o_user_id,
+        ou.is_bot as o_is_bot,
+        oa.avatar as o_avatar,
+        oa.url as o_avatar_url,
+        tw.created_at as t_created_at,
+        tw.created_by as t_user_id,
+        tu.is_bot as t_is_bot,
+        ta.avatar as t_avatar,
+        ta.url as t_avatar_url
       from
         phrases oph
       left join 
@@ -928,7 +1029,15 @@ export class MapsRepository {
       left join v_phrase_to_word_translations_upvotes_count up on ptwt.phrase_to_word_translation_id = up.phrase_to_word_translation_id
       left join v_phrase_to_word_translations_downvotes_count down on ptwt.phrase_to_word_translation_id = down.phrase_to_word_translation_id
       left join words ow on ow.word_id = oph.words[1]
-      where true
+      join users ou
+      	on ou.user_id = oph.created_by
+      join avatars oa
+      	on ou.user_id = oa.user_id
+	    join users tu
+      	on tu.user_id = tw.created_by
+      join avatars ta
+      	on tu.user_id = ta.user_id
+      where true 
     `;
 
     if (original_map_id) {
@@ -968,6 +1077,13 @@ export class MapsRepository {
         up_votes: r.up_votes_count || 0,
         down_votes: r.down_votes_count || 0,
         translation_id: r.phrase_to_phrase_translation_id,
+        created_at: r.t_created_at,
+        created_by_user: {
+          user_id: r.t_user_id,
+          avatar: r.t_avatar,
+          avatar_url: r.t_avatar_url,
+          is_bot: r.t_is_bot,
+        },
       };
       const existingPhraseIdx = phrases.findIndex(
         (ph) =>
@@ -987,6 +1103,13 @@ export class MapsRepository {
           definition: r.o_definition,
           definition_id: r.o_definition_id,
           translations: currTranslation.language_code ? [currTranslation] : [],
+          created_at: r.o_created_at,
+          created_by_user: {
+            user_id: r.o_user_id,
+            avatar: r.o_avatar,
+            avatar_url: r.o_avatar_url,
+            is_bot: r.o_is_bot,
+          },
         });
       }
     });
@@ -1003,6 +1126,13 @@ export class MapsRepository {
         up_votes: r.up_votes_count || 0,
         down_votes: r.down_votes_count || 0,
         translation_id: r.phrase_to_word_translation_id,
+        created_at: r.t_created_at,
+        created_by_user: {
+          user_id: r.t_created_by,
+          avatar: r.t_avatar,
+          avatar_url: r.t_avatar_url,
+          is_bot: r.t_is_bot,
+        },
       };
       const existingPhraseIdx = phrases.findIndex(
         (ph) =>
@@ -1022,6 +1152,13 @@ export class MapsRepository {
           definition: r.o_definition,
           definition_id: r.o_definition_id,
           translations: currTranslation.language_code ? [currTranslation] : [],
+          created_at: r.o_created_at,
+          created_by_user: {
+            user_id: r.o_created_by,
+            avatar: r.o_avatar,
+            avatar_url: r.o_avatar_url,
+            is_bot: r.o_is_bot,
+          },
         });
       }
     });
@@ -1038,7 +1175,7 @@ export class MapsRepository {
       first,
       after,
     }: {
-        input: GetOrigMapWordsAndPhrasesInput;
+      input: GetOrigMapWordsAndPhrasesInput;
       first?: number | null;
       after?: string | null;
     },
@@ -1062,9 +1199,33 @@ export class MapsRepository {
       filterParams.push(input.filter);
       languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${filterParams.length}),'%')`;
     }
+    if (input.quickFilter && input.quickFilter.length > 0) {
+      switch (input.quickFilter) {
+        case GroupedFilterSymbols.Digits:
+          languagesFiltersRestrictionClause += ` and substring(o_like_string from 1 for 1) SIMILAR TO '(0|1|2|3|4|5|6|7|8|9)'`;
+          break;
+
+        case GroupedFilterSymbols.SpecialCharacters:
+          const s = ` and substring(o_like_string from 1 for 1) SIMILAR TO '(\`|\\!|\\@|\\%|\\^|\\&|\\*|\\(|\\)|\\-|\\+)'`;
+          languagesFiltersRestrictionClause += s;
+          break;
+
+        default:
+          filterParams.push(input.quickFilter);
+          languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat(LOWER($${filterParams.length}),'%')`;
+          break;
+      }
+    }
     if (input.original_map_id) {
       filterParams.push(input.original_map_id);
       languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;
+    }
+
+    if (input.onlyTranslated) {
+      languagesFiltersRestrictionClause += ` and (some_to_word_tr_id is not null or some_to_phrase_tr_id is not null) `;
+    }
+    if (input.onlyNotTranslated) {
+      languagesFiltersRestrictionClause += ` and (some_to_word_tr_id is null and some_to_phrase_tr_id is null) `;
     }
 
     const langAndPickParams: string[] = [...filterParams];
@@ -1072,7 +1233,9 @@ export class MapsRepository {
       langAndPickParams.push(String(after));
       pickDataClause += ` and cursor > $${langAndPickParams.length} `;
     }
-    pickDataClause += ` order by cursor `;
+    pickDataClause += ` order by cursor ${
+      input.isSortDescending ? 'DESC' : 'ASC'
+    }`;
     if (first) {
       langAndPickParams.push(String(first));
       pickDataClause += ` limit $${langAndPickParams.length} `;
@@ -1088,7 +1251,12 @@ export class MapsRepository {
         o_definition_id,
         o_language_code,
         o_dialect_code,
-        o_geo_code
+        o_geo_code,
+        o_created_at,
+        o_user_id,
+        o_is_bot,
+        o_avatar,
+        o_avatar_url
       from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
@@ -1098,6 +1266,7 @@ export class MapsRepository {
     const resQ = await dbPoolClient.query(sqlStr, langAndPickParams);
 
     if (!(resQ.rows.length > 0)) {
+      console.log('no data');
       return {
         edges: [],
         pageInfo: {
@@ -1138,6 +1307,13 @@ export class MapsRepository {
         o_language_code: r.o_language_code,
         o_dialect_code: r.o_dialect_code,
         o_geo_code: r.o_geo_code,
+        o_created_at: r.o_created_at,
+        o_created_by_user: {
+          user_id: r.o_user_id,
+          avatar: r.o_avatar,
+          avatar_url: r.o_avatar_url,
+          is_bot: r.o_is_bot,
+        },
       };
       return {
         cursor: r.cursor,
@@ -1258,7 +1434,11 @@ export class MapsRepository {
         o_definition_id,
         o_language_code,
         o_dialect_code,
-        o_geo_code
+        o_geo_code,
+        user_id as o_user_id,
+        is_bot as o_is_bot,
+        avatar as o_avatar,
+        avatar_url as o_avatar_url
       from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
@@ -1285,6 +1465,13 @@ export class MapsRepository {
         o_language_code: r.o_language_code,
         o_dialect_code: r.o_dialect_code,
         o_geo_code: r.o_geo_code,
+        o_created_at: r.o_created_at,
+        o_created_by_user: {
+          user_id: r.o_user_id,
+          avatar: r.o_avatar,
+          avatar_url: r.o_avatar_url,
+          is_bot: r.o_is_bot,
+        },
       };
     });
     return {

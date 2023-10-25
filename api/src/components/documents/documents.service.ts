@@ -15,6 +15,7 @@ import {
   TextyDocumentInput,
   DocumentUploadOutput,
 } from './types';
+import { AuthorizationService } from '../authorization/authorization.service';
 
 @Injectable()
 export class DocumentsService {
@@ -24,6 +25,7 @@ export class DocumentsService {
     private fileService: FileService,
     private wordlikeStringService: WordlikeStringsService,
     private documentWordEntryService: DocumentWordEntriesService,
+    private authService: AuthorizationService,
   ) {}
 
   async saveDocument({
@@ -34,7 +36,12 @@ export class DocumentsService {
     token: string;
   }): Promise<DocumentUploadOutput> {
     const dbPoolClient = await this.pg.pool.connect();
-
+    if (!(await this.authService.is_authorized(token))) {
+      return {
+        error: ErrorType.Unauthorized,
+        document: null,
+      };
+    }
     try {
       const content = await this.fileService.getFileContentAsString(
         document.file_id,
@@ -150,10 +157,28 @@ export class DocumentsService {
   }
 
   async getAllDocuments(lang?: LanguageInput): Promise<GetAllDocumentsOutput> {
-    return this.documentsRepository.getAllDocuments(lang);
+    try {
+      return this.documentsRepository.getAllDocuments(lang);
+    } catch (err) {
+      Logger.log(err);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      documents: [],
+    };
   }
 
   async getDocument(document_id: string): Promise<GetDocumentOutput> {
-    return this.documentsRepository.getDocument(document_id);
+    try {
+      return this.documentsRepository.getDocument(document_id);
+    } catch (err) {
+      Logger.log(err);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      document: null,
+    };
   }
 }

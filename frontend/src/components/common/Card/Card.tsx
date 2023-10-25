@@ -14,12 +14,18 @@ import { Flag } from '../../flags/Flag';
 import { FlagName } from '../../flags/flagGroups';
 import { TableNameType } from '../../../generated/graphql';
 import { Chat } from '../../chat/Chat';
+import { PostAuthor } from '../PostAuthor';
 
 type CardProps = {
   content?: string;
   contentIcon?: string;
   description?: ReactNode;
   voteFor?: 'content' | 'description';
+  createdBy?: {
+    username: string;
+    isBot?: boolean;
+    createdAt: string;
+  };
   vote?: {
     upVotes: number;
     downVotes: number;
@@ -52,6 +58,7 @@ export function Card({
   discussion,
   flags,
   onContentEdit,
+  createdBy,
 }: CardProps) {
   const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
   const [editing, setEditing] = useState(false);
@@ -121,31 +128,40 @@ export function Card({
       routerLink={routerLink}
       style={{ cursor: onClick ? 'pointer' : 'unset' }}
     >
-      {content ? (
-        <CustomCardHeader>
-          <CustomCardTitle>
-            <div style={{ display: 'flex' }}>
-              {contentIcon && (
-                <IonIcon
-                  icon={contentIcon}
-                  style={{ paddingRight: '15px', marginTop: '2px' }}
-                />
-              )}
-              {(!onContentEdit && content) || ''}
-              {onContentEdit && editableContentComp}
-            </div>
-            {onContentEdit && editableIconComp}
-            {voteFor === 'content' ? reactionCom : null}
-          </CustomCardTitle>
-        </CustomCardHeader>
-      ) : null}
+      <div style={{ margin: '10px' }}>
+        {createdBy && createdBy.createdAt && (
+          <PostAuthor
+            date={new Date(createdBy.createdAt)}
+            username={createdBy.username}
+            isCreatedByBot={createdBy.isBot}
+          />
+        )}
+        {content ? (
+          <CustomCardHeader>
+            <CustomCardTitle>
+              <div style={{ display: 'flex' }}>
+                {contentIcon && (
+                  <IonIcon
+                    icon={contentIcon}
+                    style={{ paddingRight: '15px', marginTop: '2px' }}
+                  />
+                )}
+                {(!onContentEdit && content) || ''}
+                {onContentEdit && editableContentComp}
+              </div>
+              {onContentEdit && editableIconComp}
+              {voteFor === 'content' ? reactionCom : null}
+            </CustomCardTitle>
+          </CustomCardHeader>
+        ) : null}
 
-      {description ? (
-        <CustomCardContent>
-          {description}
-          {voteFor === 'description' ? reactionCom : null}
-        </CustomCardContent>
-      ) : null}
+        {description ? (
+          <CustomCardContent>
+            {description}
+            {voteFor === 'description' ? reactionCom : null}
+          </CustomCardContent>
+        ) : null}
+      </div>
     </CustomCard>
   );
 }

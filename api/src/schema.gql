@@ -41,6 +41,15 @@ type AvatarUpdateOutput {
   user: User
 }
 
+enum BotType {
+  DeepL
+  GPT4
+  GPT35
+  Google
+  Lilt
+  Smartcat
+}
+
 input CreateQuestionOnWordRangeUpsertInput {
   begin_document_word_entry_id: ID!
   end_document_word_entry_id: ID!
@@ -107,6 +116,7 @@ enum ErrorType {
   AvatarTooShort
   AvatarUnavailable
   BotTranslationBotNotFound
+  BotTranslationError
   BotTranslationLanguagesListError
   CandidateNotFound
   CandidateNotFoundInBallot
@@ -142,6 +152,7 @@ enum ErrorType {
   MapInsertFailed
   MapNotFound
   MapVoteNotFound
+  MapZippingError
   NoError
   NotificationDeleteFailed
   NotificationInsertFailed
@@ -359,8 +370,12 @@ input GetOrigMapListInput {
 
 input GetOrigMapWordsAndPhrasesInput {
   filter: String
+  isSortDescending: Boolean
   lang: LanguageInput!
+  onlyNotTranslated: Boolean
+  onlyTranslated: Boolean
   original_map_id: String
+  quickFilter: String
 }
 
 type GetOrigMapsListOutput {
@@ -510,6 +525,8 @@ input MapVoteUpsertInput {
 
 type MapWordOrPhrase {
   id: ID!
+  o_created_at: DateTime!
+  o_created_by_user: User!
   o_definition: String!
   o_definition_id: String!
   o_dialect_code: String
@@ -582,8 +599,8 @@ type Mutation {
   siteTextPhraseDefinitionUpsert(phrase_definition_id: ID!): SiteTextPhraseDefinitionOutput!
   siteTextUpsert(input: SiteTextUpsertInput!): SiteTextDefinitionOutput!
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
-  stopGoogleTranslation: GenericOutput!
-  stopLiltTranslation: GenericOutput!
+  startZipMapDownload(input: StartZipMapDownloadInput!): StartZipMapOutput!
+  stopBotTranslation: GenericOutput!
   threadDelete(input: ThreadDeleteInput!): ThreadDeleteOutput!
   threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
@@ -597,10 +614,17 @@ type Mutation {
   toggleWordDefinitionVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
+  translateAllWordsAndPhrasesByDeepL(from_language: LanguageInput!): GenericOutput!
   translateAllWordsAndPhrasesByGoogle(from_language: LanguageInput!): GenericOutput!
   translateAllWordsAndPhrasesByLilt(from_language: LanguageInput!): GenericOutput!
   translateAllWordsAndPhrasesBySmartcat(from_language: LanguageInput!): GenericOutput!
+  translateMissingWordsAndPhrasesByChatGpt(from_language: LanguageInput!, to_language: LanguageInput!, version: String!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateMissingWordsAndPhrasesByDeepL(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateMissingWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateMissingWordsAndPhrasesBySmartcat(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateWordsAndPhrasesByChatGPT4(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateWordsAndPhrasesByChatGPT35(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateWordsAndPhrasesByDeepL(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByLilt(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesBySmartcat(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
@@ -661,6 +685,7 @@ type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: ID
+  totalEdges: Int
 }
 
 input PasswordResetFormInput {
@@ -705,6 +730,8 @@ type PericopiesOutput {
 }
 
 type Phrase {
+  created_at: DateTime!
+  created_by_user: User!
   dialect_code: String
   geo_code: String
   language_code: String!
@@ -713,7 +740,8 @@ type Phrase {
 }
 
 type PhraseDefinition {
-  created_at: String!
+  created_at: DateTime!
+  created_by_user: User!
   definition: String!
   phrase: Phrase!
   phrase_definition_id: ID!
@@ -749,7 +777,8 @@ type PhraseDefinitionVote {
 }
 
 type PhraseDefinitionWithVote {
-  created_at: String!
+  created_at: DateTime!
+  created_by_user: User!
   definition: String!
   downvotes: Int!
   phrase: Phrase!
@@ -878,6 +907,8 @@ input PhraseVoteUpsertInput {
 }
 
 type PhraseWithDefinition {
+  created_at: DateTime!
+  created_by_user: User!
   definition: String
   definition_id: String
   dialect_code: String
@@ -888,6 +919,8 @@ type PhraseWithDefinition {
 }
 
 type PhraseWithDefinitions {
+  created_at: DateTime!
+  created_by_user: User!
   definitions: [PhraseDefinition]!
   dialect_code: String
   downvotes: Int!
@@ -899,6 +932,8 @@ type PhraseWithDefinitions {
 }
 
 type PhraseWithVote {
+  created_at: DateTime!
+  created_by_user: User!
   dialect_code: String
   downvotes: Int!
   geo_code: String
@@ -1014,6 +1049,7 @@ type Query {
   getQuestionOnWordRangesByDocumentId(document_id: ID!): QuestionOnWordRangesOutput!
   getQuestionsByRefs(parent_ids: [ID!]!, parent_tables: [TableNameType!]!): QuestionsOutput!
   getRecommendedTranslationFromDefinitionID(from_definition_id: ID!, from_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteOutput!
+  getRecommendedTranslationFromDefinitionIDs(from_definition_ids: [ID!]!, from_type_is_words: [Boolean!]!, langInfo: LanguageInput!): TranslationWithVoteListOutput!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): TranslationWithVoteOutput!
   getTotalPosts(input: PostsByParentInput!): PostCountOutput!
   getTranslationsByFromDefinitionId(definition_id: ID!, from_definition_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteListOutput!
@@ -1030,9 +1066,7 @@ type Query {
   getWordVoteStatus(word_id: ID!): WordVoteStatusOutputRow!
   getWordWithVoteById(word_id: ID!): WordWithVoteOutput!
   getWordsByLanguage(after: ID, first: Int, input: LanguageInput!): WordWithVoteListConnection!
-  languagesForGoogleTranslate: LanguageListForBotTranslateOutput!
-  languagesForLiltTranslate: LanguageListForBotTranslateOutput!
-  languagesForSmartcatTranslate: LanguageListForBotTranslateOutput!
+  languagesForBotTranslate(botType: BotType!): LanguageListForBotTranslateOutput!
   loggedInIsAdmin(input: IsAdminIdInput!): IsAdminIdOutput!
   notifications: NotificationListOutput!
   phraseDefinitionRead(id: ID!): PhraseDefinitionOutput!
@@ -1223,8 +1257,23 @@ type SiteTextWordDefinitionOutput {
   site_text_word_definition: SiteTextWordDefinition
 }
 
+input StartZipMapDownloadInput {
+  language: LanguageInput!
+}
+
+type StartZipMapOutput {
+  error: ErrorType!
+}
+
 type Subscription {
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
+  ZipMapReport: ZipMapResult!
+}
+
+enum SubscriptionStatus {
+  Completed
+  Error
+  Progressing
 }
 
 enum TableNameType {
@@ -1333,6 +1382,7 @@ input TranslatedLanguageInfoInput {
 }
 
 type TranslatedLanguageInfoOutput {
+  deeplTranslateTotalLangCount: Int!
   error: ErrorType!
   googleTranslateTotalLangCount: Int!
   liltTranslateTotalLangCount: Int!
@@ -1392,6 +1442,7 @@ scalar Upload
 type User {
   avatar: String!
   avatar_url: String
+  is_bot: Boolean!
   user_id: ID!
 }
 
@@ -1424,6 +1475,8 @@ type VersionCreateOutput {
 }
 
 type Word {
+  created_at: DateTime!
+  created_by_user: User!
   dialect_code: String
   geo_code: String
   language_code: String!
@@ -1432,7 +1485,8 @@ type Word {
 }
 
 type WordDefinition {
-  created_at: String!
+  created_at: DateTime!
+  created_by_user: User!
   definition: String!
   word: Word!
   word_definition_id: ID!
@@ -1468,7 +1522,8 @@ type WordDefinitionVote {
 }
 
 type WordDefinitionWithVote {
-  created_at: String!
+  created_at: DateTime!
+  created_by_user: User!
   definition: String!
   downvotes: Int!
   upvotes: Int!
@@ -1623,6 +1678,8 @@ input WordVoteUpsertInput {
 }
 
 type WordWithDefinition {
+  created_at: DateTime!
+  created_by_user: User!
   definition: String
   definition_id: String
   dialect_code: String
@@ -1633,6 +1690,8 @@ type WordWithDefinition {
 }
 
 type WordWithDefinitions {
+  created_at: DateTime!
+  created_by_user: User!
   definitions: [WordDefinition]!
   dialect_code: String
   downvotes: Int!
@@ -1644,6 +1703,8 @@ type WordWithDefinitions {
 }
 
 type WordWithVote {
+  created_at: DateTime!
+  created_by_user: User!
   dialect_code: String
   downvotes: Int!
   geo_code: String
@@ -1672,4 +1733,11 @@ type WordWithVoteOutput {
 type WordlikeString {
   wordlike_string: String!
   wordlike_string_id: ID!
+}
+
+type ZipMapResult {
+  errors: [String!]
+  message: String
+  resultZipUrl: String
+  status: SubscriptionStatus!
 }

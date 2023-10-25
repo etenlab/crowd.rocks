@@ -20,11 +20,11 @@ http://ionicframework.com/docs/theming/ */
 .section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
   flex-grow: 1;
   width: 100%;
   max-width: 777px;
-  padding: 16px;
+  padding: 20px 16px;
 }
 
 /** Ionic CSS Variables **/

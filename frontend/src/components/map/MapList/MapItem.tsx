@@ -1,65 +1,107 @@
-import { MouseEventHandler, useRef } from 'react';
-import { IonBadge, IonItem, IonIcon } from '@ionic/react';
-import { downloadOutline, trashBin } from 'ionicons/icons';
-import { styled } from 'styled-components';
+import { useRef, MouseEventHandler } from 'react';
+import { useHistory } from 'react-router';
+import { Typography, IconButton, Button, Divider, Stack } from '@mui/material';
 
 import {
   MapDetailsInfo,
   useGetMapDetailsLazyQuery,
 } from '../../../generated/graphql';
 
-import { langInfo2String, subTags2LangInfo } from '../../../common/langUtils';
+import { langInfo2String, subTags2LangInfo } from '../../../../../utils';
 import { downloadFromUrl } from '../../../common/utility';
-import { useAppContext } from '../../../hooks/useAppContext';
-import { OrigBadge } from './styled';
+import { DownloadCircle } from '../../common/icons/DownloadCircle';
+import { DeleteCircle } from '../../common/icons/DeleteCircle';
+import { Checkbox } from '../../common/buttons/Checkbox';
+import { Tag } from '../../common/chips/Tag';
+import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 
-export type TMapItemProps = React.HTMLAttributes<HTMLIonItemElement> & {
-  mapItem: MapDetailsInfo;
-  candidateForDeletionRef?: React.MutableRefObject<MapDetailsInfo | undefined>;
-  setIsMapDeleteModalOpen?: React.Dispatch<React.SetStateAction<boolean>>;
-  showDelete: boolean;
-  showDownload?: boolean;
+import { globals } from '../../../services/globals';
+
+import { useAppContext } from '../../../hooks/useAppContext';
+import { useTr } from '../../../hooks/useTr';
+
+import { PreviewContainer } from './styled';
+import { MapDeleteModal } from './MapDeleteModal';
+
+export type ViewMode = 'normal' | 'selection';
+
+export type MapItemProps = {
+  mapInfo: MapDetailsInfo;
+  onChangeViewMode(mode: ViewMode): void;
+  viewMode: ViewMode;
+  checked: boolean;
+  onChangeCheck(checked: boolean): void;
 };
 
-const NotStyledMapItem = ({
-  mapItem,
-  setIsMapDeleteModalOpen,
-  candidateForDeletionRef,
-  showDelete,
-  showDownload = true,
-  ...rest
-}: TMapItemProps) => {
+export function MapItem({
+  mapInfo,
+  viewMode,
+  checked,
+  onChangeCheck,
+}: MapItemProps) {
+  const { tr } = useTr();
+  const history = useHistory();
   const {
     states: {
       global: {
         langauges: { appLanguage },
       },
     },
+    actions: { createModal },
   } = useAppContext();
+  const { openModal, closeModal } = createModal();
+
   const downloadFlagRef = useRef<'original' | 'translated' | null>(null);
+  const singleClickTimerRef = useRef<NodeJS.Timeout>();
+  const clickCountRef = useRef<number>(0);
 
   const [getMapDetails, mapContent] = useGetMapDetailsLazyQuery();
 
-  const routerLink = `/US/${appLanguage.lang.tag}/1/maps/details/${
-    mapItem.is_original ? mapItem.original_map_id : mapItem.translated_map_id
-  }?is_original=${!!mapItem.is_original}`;
-
   const langInfo = subTags2LangInfo({
-    lang: mapItem.language.language_code,
-    dialect: mapItem.language.dialect_code || undefined,
-    region: mapItem.language.geo_code || undefined,
+    lang: mapInfo.language.language_code,
+    dialect: mapInfo.language.dialect_code || undefined,
+    region: mapInfo.language.geo_code || undefined,
   });
 
-  const handleDownloadSvg: MouseEventHandler<HTMLIonIconElement> = (e) => {
-    downloadFlagRef.current = mapItem.is_original ? 'original' : 'translated';
+  const handleGoToSelectedMap: MouseEventHandler<HTMLDivElement> = (e) => {
+    clickCountRef.current++;
+    if (clickCountRef.current === 1) {
+      singleClickTimerRef.current = setTimeout(() => {
+        clickCountRef.current = 0;
+
+        e.stopPropagation();
+
+        history.push(
+          `/US/${appLanguage.lang.tag}/1/maps/details/${
+            mapInfo.is_original
+              ? mapInfo.original_map_id
+              : mapInfo.translated_map_id
+          }?is_original=${!!mapInfo.is_original}`,
+        );
+      }, 400);
+    } else if (clickCountRef.current === 2) {
+      clearTimeout(singleClickTimerRef.current);
+      clickCountRef.current = 0;
+    }
+  };
+
+  const handleDownloadSvg: MouseEventHandler<HTMLButtonElement> = (e) => {
+    downloadFlagRef.current = mapInfo.is_original ? 'original' : 'translated';
     getMapDetails({
       variables: {
-        is_original: mapItem.is_original,
-        map_id: mapItem.is_original
-          ? mapItem.original_map_id!
-          : mapItem.translated_map_id!,
+        is_original: mapInfo.is_original,
+        map_id: mapInfo.is_original
+          ? mapInfo.original_map_id!
+          : mapInfo.translated_map_id!,
       },
     });
+
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDeleteMap: MouseEventHandler<HTMLButtonElement> = (e) => {
+    openModal(<MapDeleteModal mapInfo={mapInfo} onClose={closeModal} />);
 
     e.preventDefault();
     e.stopPropagation();
@@ -93,95 +135,110 @@ const NotStyledMapItem = ({
     downloadFlagRef.current = null;
   }
 
-  return (
-    <IonItem {...rest} routerLink={routerLink}>
-      <StItem>
-        <PreviewBlock>
-          {mapItem.preview_file_url ? (
-            <img src={mapItem.preview_file_url} width="100" height="100" />
-          ) : null}
-        </PreviewBlock>
+  const adminMode = globals.is_admin_user();
 
-        <FileName>
-          {mapItem.is_original
-            ? mapItem.map_file_name.replace('.cf.svg', '')
-            : mapItem.map_file_name_with_langs.replace('.cf.svg', '')}
-        </FileName>
-        <IconRow>
-          {mapItem.is_original ? (
-            <OrigBadge>Original</OrigBadge>
-          ) : (
-            <IonBadge>
-              {langInfo2String(langInfo) +
-                (mapItem.translated_percent
-                  ? ' ' + mapItem.translated_percent + '%'
-                  : ' ? %')}
-            </IonBadge>
-          )}
-          {showDownload && (
-            <DownloadIcon
-              icon={downloadOutline}
-              onClick={handleDownloadSvg}
-              size="large"
-              color="primary"
-              className="clickable theme-icon"
-            />
-          )}
-          {showDelete && candidateForDeletionRef && setIsMapDeleteModalOpen ? (
-            <TrashIcon
-              icon={trashBin}
-              onClick={(e) => {
+  const tagLabel = mapInfo.is_original
+    ? tr('Original')
+    : langInfo2String(langInfo) +
+      (mapInfo.translated_percent
+        ? ' ' + mapInfo.translated_percent + '%'
+        : ' ? %');
+  const tagColor = mapInfo.is_original ? 'orange' : 'green';
+
+  return (
+    <Stack gap="14px" sx={{ width: '162px' }}>
+      <PreviewContainer
+        onClick={handleGoToSelectedMap}
+        onDoubleClick={(e) => {
+          console.log(e);
+        }}
+        sx={{
+          borderColor: (theme) =>
+            checked && viewMode === 'selection'
+              ? theme.palette.text.blue
+              : theme.palette.text.gray_stroke,
+        }}
+      >
+        <img
+          src={mapInfo.preview_file_url || ''}
+          width="165px"
+          height="165px"
+        />
+
+        {viewMode === 'normal' ? (
+          <MoreHorizButton
+            component={
+              <>
+                <Button
+                  variant="text"
+                  startIcon={<DownloadCircle sx={{ fontSize: '24px' }} />}
+                  color="dark"
+                  sx={{ padding: 0, justifyContent: 'flex-start' }}
+                  onClick={handleDownloadSvg}
+                >
+                  {tr('Download')}
+                </Button>
+                {adminMode ? (
+                  <>
+                    <Divider />
+                    <Button
+                      variant="text"
+                      startIcon={
+                        <DeleteCircle sx={{ fontSize: '24px' }} color="red" />
+                      }
+                      color="red"
+                      onClick={handleDeleteMap}
+                      sx={{ padding: 0, justifyContent: 'flex-start' }}
+                    >
+                      {tr('Delete')}
+                    </Button>
+                  </>
+                ) : null}
+              </>
+            }
+            color="gray"
+            sx={(theme) => ({
+              position: 'absolute',
+              top: '6px',
+              right: '6px',
+              padding: '4px',
+              background: theme.palette.text.white,
+              '&:hover': {
+                background: theme.palette.background.gray_stroke,
+              },
+              border: `1.5px solid ${theme.palette.text.gray_stroke}`,
+            })}
+          />
+        ) : (
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            sx={{ position: 'absolute', top: '3px', right: '3px' }}
+          >
+            <Checkbox
+              checked={checked}
+              onChange={(e) => {
+                onChangeCheck(e.target.checked);
                 e.preventDefault();
                 e.stopPropagation();
-                candidateForDeletionRef.current = mapItem;
-                setIsMapDeleteModalOpen(true);
               }}
-              size="large"
-              color="danger"
-              className="clickable theme-icon"
             />
-          ) : null}
-        </IconRow>
-      </StItem>
-    </IonItem>
+          </IconButton>
+        )}
+
+        <Tag
+          label={tagLabel}
+          color={tagColor}
+          sx={{ position: 'absolute', bottom: '8px', left: '8px' }}
+        />
+      </PreviewContainer>
+
+      <Typography variant="body3">
+        {mapInfo.is_original
+          ? mapInfo.map_file_name.replace('.cf.svg', '')
+          : mapInfo.map_file_name_with_langs.replace('.cf.svg', '')}
+      </Typography>
+    </Stack>
   );
-};
-
-export const MapItem = styled(NotStyledMapItem)(() => ({
-  padding: '0px',
-  marginTop: '20px',
-  display: 'flex',
-  alignItems: 'center',
-  float: 'left',
-}));
-
-const PreviewBlock = styled.div`
-  display: flex;
-  align-items: start;
-`;
-
-const FileName = styled.div``;
-
-const StItem = styled.div``;
-
-const IconRow = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const TrashIcon = styled(IonIcon)`
-  padding: 3px;
-  margin: 2px;
-  &:hover {
-    box-shadow: 0px 0px 4px 1px gray;
-    border-radius: 50%;
-  }
-`;
-const DownloadIcon = styled(IonIcon)`
-  padding: 3px;
-  margin: 2px;
-  &:hover {
-    box-shadow: 0px 0px 4px 1px gray;
-    border-radius: 50%;
-  }
-`;
+}

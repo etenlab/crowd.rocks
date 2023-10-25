@@ -6,10 +6,12 @@ import { ErrorType } from '../generated/graphql';
 import { updateCacheWithUpsertWord } from '../cacheUpdators/upsertWord';
 
 import { useTr } from '../hooks/useTr';
+import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useWordUpsertMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedWordUpsertMutation({
     update(cache, { data, errors }) {
@@ -40,6 +42,7 @@ export function useWordUpsertMutation() {
           position: 'top',
           color: 'danger',
         });
+        redirectOnUnauth(data?.wordUpsert.error);
       }
     },
   });

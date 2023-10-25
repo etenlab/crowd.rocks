@@ -22,6 +22,42 @@ dotenv.config();
 export class FileService {
   constructor(private fileRepository: FileRepository) {}
 
+  async uploadTemporaryFile(
+    readStream: ReadStream | Readable,
+    fileName: string,
+    fileType: string,
+  ): Promise<string> {
+    try {
+      const fileKey = `${nanoid()}-${fileName}`;
+      const s3Creds = this.makeS3Creds({ useTemporaryBucket: true });
+      const s3Client = new S3Client(s3Creds);
+
+      const uploadParams: PutObjectCommandInput = {
+        Bucket: s3Creds.bucketName,
+        Key: fileKey,
+        Body: readStream,
+        ContentDisposition: `attachment; filename=${fileName}`,
+        ContentType: fileType,
+      };
+
+      const parallelUploads3 = new Upload({
+        client: s3Client,
+        params: uploadParams,
+        queueSize: 40,
+        partSize: 1024 * 1024 * 5,
+        leavePartsOnError: false,
+      });
+
+      await parallelUploads3.done();
+      const fileUrl = `https://${s3Creds.bucketName}.s3.${s3Creds.region}.amazonaws.com/${fileKey}`;
+      Logger.debug(`Saved temporary file, url ${fileUrl}`);
+      return fileUrl;
+    } catch (e) {
+      Logger.error(e);
+      return '';
+    }
+  }
+
   async uploadFile(
     readStream: ReadStream | Readable,
     fileName: string,
@@ -255,50 +291,70 @@ export class FileService {
   }
 
   async getAll() {
-    return await this.fileRepository.list();
+    try {
+      return await this.fileRepository.list();
+    } catch (e) {
+      Logger.error(e);
+      return [];
+    }
   }
 
   async findOne(id: number): Promise<IFileOutput | null> {
-    return await this.fileRepository.find({
-      where: { file_id: id },
-    });
+    try {
+      return await this.fileRepository.find({
+        where: { file_id: id },
+      });
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        file: null,
+      };
+    }
   }
 
   async getFileContentAsString(fileId: string): Promise<string> {
-    if (isNaN(Number(fileId)))
-      throw new Error(
-        `flieService#getFileContentAsString: Error: Number(fileId) is NaN`,
-      );
-    const p1 = performance.now();
-    const s3Client = new S3Client(this.makeS3Creds().creds);
-    const fileData = await this.fileRepository.find({
-      where: { file_id: Number(fileId) },
-    });
+    try {
+      if (isNaN(Number(fileId)))
+        throw new Error(
+          `flieService#getFileContentAsString: Error: Number(fileId) is NaN`,
+        );
+      const p1 = performance.now();
+      const s3Client = new S3Client(this.makeS3Creds().creds);
+      const fileData = await this.fileRepository.find({
+        where: { file_id: Number(fileId) },
+      });
 
-    const command = new GetObjectCommand({
-      Bucket: this.makeS3Creds().bucketName,
-      Key: fileData?.file?.fileUrl.split('/').at(-1),
-    });
+      const command = new GetObjectCommand({
+        Bucket: this.makeS3Creds().bucketName,
+        Key: fileData?.file?.fileUrl.split('/').at(-1),
+      });
 
-    const response = await s3Client.send(command);
-    if (!response.Body)
-      throw new Error(
-        `flieService#getFileContentAsString: Error: can't get file ${fileData?.file?.fileUrl
-          .split('/')
-          .at(-1)} from S3 bucket`,
+      const response = await s3Client.send(command);
+      if (!response.Body)
+        throw new Error(
+          `flieService#getFileContentAsString: Error: can't get file ${fileData?.file?.fileUrl
+            .split('/')
+            .at(-1)} from S3 bucket`,
+        );
+      Logger.debug(
+        `File id ` +
+          fileId +
+          ` is downloaded from S3 bucket for ${performance.now() - p1} ms.`,
       );
-    Logger.debug(
-      `File id ` +
-        fileId +
-        ` is downloaded from S3 bucket for ${performance.now() - p1} ms.`,
-    );
-    return response?.Body?.transformToString();
+      return response?.Body?.transformToString();
+    } catch (e) {
+      Logger.error(e);
+      return '';
+    }
   }
 
-  makeS3Creds() {
+  makeS3Creds(params?: { useTemporaryBucket?: boolean }) {
     const accessKeyId = process.env.AWS_ACCESS_KEY_ID || '';
     const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || '';
-    const bucketName = process.env.AWS_S3_BUCKET_NAME;
+    const bucketName = params?.useTemporaryBucket
+      ? process.env.AWS_S3_TEMPORARY_BUCKET_NAME
+      : process.env.AWS_S3_BUCKET_NAME;
     const region = process.env.AWS_S3_REGION || '';
     const creds = AWS_ENVIRONMENTS.includes(process.env.NODE_ENV || '')
       ? {
