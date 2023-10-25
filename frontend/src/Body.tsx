@@ -273,7 +273,7 @@ export function Body() {
       const percent =
         originalCnt > 0 ? (translationCnt / originalCnt) * 100 : 100;
 
-      const badgeColor = percent === 100 ? 'green' : 'blue';
+      const badgeColor = percent === 100 ? 'green' : 'gray_stroke';
 
       return {
         label: `${langInfo2String(langInfo)}`,
@@ -339,7 +339,13 @@ export function Body() {
               },
               {
                 title: tr('Logout'),
-                startIcon: <LogOut sx={{ fontSize: 24 }} color="blue" />,
+                startIcon: (
+                  <LogOut
+                    sx={{ fontSize: 24 }}
+                    color="blue"
+                    id="app-logout-button"
+                  />
+                ),
                 onClick: () => click_logout(client),
               },
             ]

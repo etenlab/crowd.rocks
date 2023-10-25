@@ -41,15 +41,6 @@ export function Header({
 
   const username = globals.get_avatar();
 
-  const avatarCom = (
-    <IconButton onClick={onClickMenu} id="app-menu-button">
-      {username ? (
-        <Avatar username={username} mini={false} />
-      ) : (
-        <MuiAvatar sx={{ width: '46px', height: '46px' }} />
-      )}
-    </IconButton>
-  );
   const iconsCom = (
     <Stack
       direction="row"
@@ -126,7 +117,13 @@ export function Header({
           backgroundColor: theme.palette.text.white,
         })}
       >
-        {avatarCom}
+        <IconButton onClick={onClickMenu} id="app-menu-button">
+          {username ? (
+            <Avatar username={username} mini={false} />
+          ) : (
+            <MuiAvatar sx={{ width: '46px', height: '46px' }} />
+          )}
+        </IconButton>
         {headerCom}
         {iconsCom}
       </Stack>
