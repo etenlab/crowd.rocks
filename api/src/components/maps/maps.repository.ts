@@ -23,6 +23,9 @@ import {
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
 import { GroupedFilterSymbols } from '../../../../utils/dist';
+import { UserService } from '../user/user.service';
+import { create } from 'domain';
+import { User } from '../user/types';
 
 interface ISaveMapParams {
   mapFileName: string;
@@ -68,7 +71,7 @@ interface ILangsRestrictions {
 
 @Injectable()
 export class MapsRepository {
-  constructor(private pg: PostgresService) {}
+  constructor(private pg: PostgresService, private userService: UserService) {}
 
   /**
    * dbPoolClient is optional. If providerd, then it will be used to run query (useful for SQL transactions)
@@ -1253,10 +1256,7 @@ export class MapsRepository {
         o_dialect_code,
         o_geo_code,
         o_created_at,
-        o_user_id,
-        o_is_bot,
-        o_avatar,
-        o_avatar_url
+        o_created_by
       from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
@@ -1306,30 +1306,37 @@ export class MapsRepository {
 
     const resCheckBefore = await dbPoolClient.query(sqlBefore, filterParams);
 
-    const edges: MapWordsAndPhrasesEdge[] = resQ.rows.map((r) => {
-      const node: MapWordOrPhrase = {
-        id: r.cursor,
-        type: r.type,
-        o_id: r.o_id,
-        o_like_string: r.o_like_string,
-        o_definition: r.o_definition,
-        o_definition_id: r.o_definition_id,
-        o_language_code: r.o_language_code,
-        o_dialect_code: r.o_dialect_code,
-        o_geo_code: r.o_geo_code,
-        o_created_at: r.o_created_at,
-        o_created_by_user: {
-          user_id: r.o_user_id,
-          avatar: r.o_avatar,
-          avatar_url: r.o_avatar_url,
-          is_bot: r.o_is_bot,
-        },
-      };
-      return {
-        cursor: r.cursor,
-        node,
-      };
-    });
+    const edges: MapWordsAndPhrasesEdge[] = await Promise.all(
+      resQ.rows.map(async (r) => {
+        const createdBy = (
+          await this.userService.read({
+            user_id: r.o_created_by,
+          })
+        ).user;
+        const node: MapWordOrPhrase = {
+          id: r.cursor,
+          type: r.type,
+          o_id: r.o_id,
+          o_like_string: r.o_like_string,
+          o_definition: r.o_definition,
+          o_definition_id: r.o_definition_id,
+          o_language_code: r.o_language_code,
+          o_dialect_code: r.o_dialect_code,
+          o_geo_code: r.o_geo_code,
+          o_created_at: r.o_created_at,
+          o_created_by_user: {
+            user_id: createdBy!.user_id,
+            avatar: createdBy!.avatar,
+            avatar_url: createdBy!.avatar_url,
+            is_bot: createdBy!.is_bot,
+          },
+        };
+        return {
+          cursor: r.cursor,
+          node,
+        };
+      }),
+    );
 
     const pageInfo = {
       startCursor: resQ.rows[0].cursor,
@@ -1445,10 +1452,8 @@ export class MapsRepository {
         o_language_code,
         o_dialect_code,
         o_geo_code,
-        user_id as o_user_id,
-        is_bot as o_is_bot,
-        avatar as o_avatar,
-        avatar_url as o_avatar_url
+        o_created_at,
+        o_created_by
       from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
@@ -1464,26 +1469,33 @@ export class MapsRepository {
       };
     }
 
-    const mapWordsOrPhrases: MapWordOrPhrase[] = resQ.rows.map((r) => {
-      return {
-        id: r.cursor,
-        type: r.type,
-        o_id: r.o_id,
-        o_like_string: r.o_like_string,
-        o_definition: r.o_definition,
-        o_definition_id: r.o_definition_id,
-        o_language_code: r.o_language_code,
-        o_dialect_code: r.o_dialect_code,
-        o_geo_code: r.o_geo_code,
-        o_created_at: r.o_created_at,
-        o_created_by_user: {
-          user_id: r.o_user_id,
-          avatar: r.o_avatar,
-          avatar_url: r.o_avatar_url,
-          is_bot: r.o_is_bot,
-        },
-      };
-    });
+    const mapWordsOrPhrases: MapWordOrPhrase[] = await Promise.all(
+      resQ.rows.map(async (r) => {
+        const createdBy = (
+          await this.userService.read({
+            user_id: r.o_created_by,
+          })
+        ).user;
+        return {
+          id: r.cursor,
+          type: r.type,
+          o_id: r.o_id,
+          o_like_string: r.o_like_string,
+          o_definition: r.o_definition,
+          o_definition_id: r.o_definition_id,
+          o_language_code: r.o_language_code,
+          o_dialect_code: r.o_dialect_code,
+          o_geo_code: r.o_geo_code,
+          o_created_at: r.o_created_at,
+          o_created_by_user: {
+            user_id: createdBy!.user_id,
+            avatar: createdBy!.avatar,
+            avatar_url: createdBy!.avatar_url,
+            is_bot: createdBy!.is_bot,
+          },
+        };
+      }),
+    );
     return {
       error: ErrorType.NoError,
       mapWordsOrPhrases,

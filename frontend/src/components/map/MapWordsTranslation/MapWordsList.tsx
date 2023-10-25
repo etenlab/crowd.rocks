@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router';
 import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
-import { Button, Stack, Typography } from '@mui/material';
+import { Button, CircularProgress, Stack, Typography } from '@mui/material';
 
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -72,25 +72,35 @@ export function MapWordsList() {
     actions: { setTargetLanguage },
   } = useAppContext();
 
-  const [getWordsAndPhrases, { data: wordsAndPhrases, fetchMore }] =
+  const [getWordsAndPhrases, { data: wordsAndPhrases, fetchMore, loading }] =
     useGetOrigMapWordsAndPhrasesLazyQuery();
 
   useEffect(() => {
-    getWordsAndPhrases({
-      variables: {
-        lang: {
-          language_code: DEFAULT_MAP_LANGUAGE_CODE,
+    if (!loading) {
+      getWordsAndPhrases({
+        variables: {
+          lang: {
+            language_code: DEFAULT_MAP_LANGUAGE_CODE,
+          },
+          original_map_id: id && id !== 'all' ? id : null,
+          filter,
+          quickFilter,
+          onlyNotTranslated:
+            filterOption.value === 'not translated' ? true : null,
+          onlyTranslated: filterOption.value === 'translated' ? true : null,
+          first: PAGE_SIZE,
         },
-        original_map_id: id && id !== 'all' ? id : null,
-        filter,
-        quickFilter,
-        onlyNotTranslated:
-          filterOption.value === 'not translated' ? true : null,
-        onlyTranslated: filterOption.value === 'translated' ? true : null,
-        first: PAGE_SIZE,
-      },
-    });
-  }, [getWordsAndPhrases, targetLang, filter, id, filterOption, quickFilter]);
+      });
+    }
+  }, [
+    getWordsAndPhrases,
+    targetLang,
+    filter,
+    id,
+    filterOption,
+    quickFilter,
+    loading,
+  ]);
 
   const handleInfinite = useCallback(
     async (ev: IonInfiniteScrollCustomEvent<void>) => {
@@ -218,6 +228,9 @@ export function MapWordsList() {
       )}
 
       <Stack gap="16px">
+        <div style={{ textAlign: 'center' }}>
+          {loading && <CircularProgress />}
+        </div>
         {wordsAndPhrases &&
           wordsAndPhrases.getOrigMapWordsAndPhrases.edges.map(
             (omw) =>

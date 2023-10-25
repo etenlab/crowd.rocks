@@ -23,7 +23,7 @@ import './Login.css';
 import { useTr } from '../../hooks/useTr';
 import { useAppContext } from '../../hooks/useAppContext';
 import { styled } from 'styled-components';
-import { ApolloClient, ApolloConsumer } from '@apollo/client';
+import { apollo_client } from '../../App';
 
 const Login: React.FC = () => {
   const history = useHistory();
@@ -72,10 +72,7 @@ const Login: React.FC = () => {
     }
   }, [isAdmin, isAdminQueryRes.data]);
 
-  async function handle_submit(
-    event: FormEvent,
-    apollo_client: ApolloClient<object>,
-  ) {
+  async function handle_submit(event: FormEvent) {
     event.preventDefault();
     event.stopPropagation();
     set_login_disable(true);
@@ -171,76 +168,73 @@ const Login: React.FC = () => {
   return (
     <PageLayout>
       <h1>{tr('Login')}</h1>
-      <ApolloConsumer>
-        {(client) => (
-          <form onSubmit={(event) => handle_submit(event, client)}>
-            <IonItem>
-              <IonLabel position="floating">{tr('Email')}</IonLabel>
-              <IonInput
-                value={email}
-                inputmode="email"
-                className="login-email"
-                minlength={4}
-                maxlength={255}
-                onIonInput={(e) => set_email(e.detail.value!)}
-                required
-              />
-            </IonItem>
 
-            {is_email_too_long && <div>{tr('Email too long')}</div>}
-            {is_email_too_short && <div>{tr('Email too short')}</div>}
-            {is_email_invalid && <div>{tr('Email Invalid')}</div>}
+      <form onSubmit={(event) => handle_submit(event)}>
+        <IonItem>
+          <IonLabel position="floating">{tr('Email')}</IonLabel>
+          <IonInput
+            value={email}
+            inputmode="email"
+            className="login-email"
+            minlength={4}
+            maxlength={255}
+            onIonInput={(e) => set_email(e.detail.value!)}
+            required
+          />
+        </IonItem>
 
-            <IonItem>
-              <IonLabel position="floating">{tr('Password')}</IonLabel>
-              <IonInput
-                value={password}
-                type="password"
-                id="login-password"
-                inputmode="text"
-                onIonInput={(e) => set_password(e.detail.value!)}
-                required
-              />
-            </IonItem>
+        {is_email_too_long && <div>{tr('Email too long')}</div>}
+        {is_email_too_short && <div>{tr('Email too short')}</div>}
+        {is_email_invalid && <div>{tr('Email Invalid')}</div>}
 
-            {is_password_too_long && <div>{tr('Password too long')}</div>}
-            {is_password_too_short && <div>{tr('Password too short')}</div>}
+        <IonItem>
+          <IonLabel position="floating">{tr('Password')}</IonLabel>
+          <IonInput
+            value={password}
+            type="password"
+            id="login-password"
+            inputmode="text"
+            onIonInput={(e) => set_password(e.detail.value!)}
+            required
+          />
+        </IonItem>
 
-            <IonButton
-              id="login-login"
-              type="submit"
-              color="primary"
-              disabled={login_disable}
-            >
-              {tr('Login')}
-              {is_spinning && <StIonSpinner />}
-            </IonButton>
+        {is_password_too_long && <div>{tr('Password too long')}</div>}
+        {is_password_too_short && <div>{tr('Password too short')}</div>}
 
-            <IonButton
-              type="button"
-              color="primary"
-              fill="clear"
-              onClick={click_forgot_password}
-            >
-              {tr('Forgot Password')}
-            </IonButton>
+        <IonButton
+          id="login-login"
+          type="submit"
+          color="primary"
+          disabled={login_disable}
+        >
+          {tr('Login')}
+          {is_spinning && <StIonSpinner />}
+        </IonButton>
 
-            <IonButton
-              type="button"
-              id="login-register"
-              color="primary"
-              fill="clear"
-              onClick={click_register}
-            >
-              {tr('Register')}
-            </IonButton>
+        <IonButton
+          type="button"
+          color="primary"
+          fill="clear"
+          onClick={click_forgot_password}
+        >
+          {tr('Forgot Password')}
+        </IonButton>
 
-            {is_invalid_email_or_password && (
-              <Invalid>{tr('Invalid email or password')}</Invalid>
-            )}
-          </form>
+        <IonButton
+          type="button"
+          id="login-register"
+          color="primary"
+          fill="clear"
+          onClick={click_register}
+        >
+          {tr('Register')}
+        </IonButton>
+
+        {is_invalid_email_or_password && (
+          <Invalid>{tr('Invalid email or password')}</Invalid>
         )}
-      </ApolloConsumer>
+      </form>
     </PageLayout>
   );
 };
