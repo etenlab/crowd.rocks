@@ -369,6 +369,11 @@ var LOADING_TAG_PLACEHOLDER = {
   tag: 'loading',
   descriptions: ['Loading data...']
 };
+var GroupedFilterSymbols;
+(function (GroupedFilterSymbols) {
+  GroupedFilterSymbols["Digits"] = "0-9";
+  GroupedFilterSymbols["SpecialCharacters"] = "#";
+})(GroupedFilterSymbols || (GroupedFilterSymbols = {}));
 
 var sortSiteTextFn = function sortSiteTextFn(d1, d2) {
   if (d1.siteTextlikeString && d2.siteTextlikeString && d1.siteTextlikeString.toLowerCase() > d2.siteTextlikeString.toLowerCase()) {
@@ -428,12 +433,10 @@ var X_LANG_TAGS = [{
 }, {
   tag: 'x-liuwa',
   descriptions: ['Liuwa']
-}
-// { tag: 'x-Lambya', descriptions: ['Lambya'] },
-// { tag: 'x-Mukulu', descriptions: ['Mukulu'] },
-// { tag: 'x-Kunda', descriptions: ['Kunda'] },
-];
-
+}, {
+  tag: 'x-Seabo',
+  descriptions: ['Seabo']
+}];
 var TagTypes;
 (function (TagTypes) {
   TagTypes["LANGUAGE"] = "language";
@@ -632,5 +635,5 @@ var languageInput2tag = function languageInput2tag(languageInput) {
   });
 };
 
-export { DESCRIPTIONS_JOINER, LOADING_TAG_PLACEHOLDER, NOT_DEFINED_PLACEHOLDER, X_LANG_TAGS, compareLangInfo, getLangsRegistry, langInfo2String, langInfo2langInput, langInfo2tag, languageInput2tag, sortSiteTextFn, sortTagInfosFn, subTags2LangInfo, subTags2Tag, tag2langInfo, xTag2langInfo };
+export { DESCRIPTIONS_JOINER, GroupedFilterSymbols, LOADING_TAG_PLACEHOLDER, NOT_DEFINED_PLACEHOLDER, X_LANG_TAGS, compareLangInfo, getLangsRegistry, langInfo2String, langInfo2langInput, langInfo2tag, languageInput2tag, sortSiteTextFn, sortTagInfosFn, subTags2LangInfo, subTags2Tag, tag2langInfo, xTag2langInfo };
 //# sourceMappingURL=utils.esm.js.map

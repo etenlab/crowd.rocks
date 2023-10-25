@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ErrorType } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
 import { PostgresService } from 'src/core/postgres.service';
@@ -330,7 +330,11 @@ export class PostService {
         this.wordToPhraseTranslationService.getDiscussionTitle,
     };
     if (parentTableToGetTitle[name]) {
-      return parentTableToGetTitle[name](id);
+      try {
+        return parentTableToGetTitle[name](id);
+      } catch (e) {
+        Logger.error(e);
+      }
     }
     return `Discussion: ${name}`;
   }

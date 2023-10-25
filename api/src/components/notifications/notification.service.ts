@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 import {
@@ -27,21 +27,25 @@ export class NotificationService {
   constructor(private pg: PostgresService) {}
 
   async read(input: NotificationReadInput): Promise<NotificationReadOutput> {
-    const res1 = await this.pg.pool.query<GetNotificationObjectById>(
-      ...getNotificationObjById(+input.notification_id),
-    );
+    try {
+      const res1 = await this.pg.pool.query<GetNotificationObjectById>(
+        ...getNotificationObjById(+input.notification_id),
+      );
 
-    if (res1.rowCount !== 1) {
-      console.error(`no notification for id: ${input.notification_id}`);
-    } else {
-      return {
-        error: ErrorType.NoError,
-        notification: {
-          id: input.notification_id,
-          text: res1.rows[0].text,
-          isNotified: res1.rows[0].is_notified,
-        },
-      };
+      if (res1.rowCount !== 1) {
+        console.error(`no notification for id: ${input.notification_id}`);
+      } else {
+        return {
+          error: ErrorType.NoError,
+          notification: {
+            id: input.notification_id,
+            text: res1.rows[0].text,
+            isNotified: res1.rows[0].is_notified,
+          },
+        };
+      }
+    } catch (e) {
+      Logger.error(e);
     }
 
     return {
@@ -51,47 +55,63 @@ export class NotificationService {
   }
 
   async list(user_id: string): Promise<NotificationListOutput> {
-    const res1 = await this.pg.pool.query(
-      `
-        select
-          notification_id,
-          is_notified,
-          text
-        from 
-          notifications
-        where user_id = $1
-      `,
-      [user_id],
-    );
-    const notifications = res1.rows.map<Notification>(
-      ({ notification_id, is_notified, text }) => ({
-        id: notification_id,
-        isNotified: is_notified,
-        text,
-      }),
-    );
+    try {
+      const res1 = await this.pg.pool.query(
+        `
+          select
+            notification_id,
+            is_notified,
+            text
+          from 
+            notifications
+          where user_id = $1
+        `,
+        [user_id],
+      );
+      const notifications = res1.rows.map<Notification>(
+        ({ notification_id, is_notified, text }) => ({
+          id: notification_id,
+          isNotified: is_notified,
+          text,
+        }),
+      );
 
-    return {
-      error: ErrorType.NoError,
-      notifications,
-    };
+      return {
+        error: ErrorType.NoError,
+        notifications,
+      };
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        notifications: [],
+      };
+    }
   }
 
   async markAsRead(
     input: MarkNotificationReadInput,
     token: string,
   ): Promise<MarkNotificationReadOutput> {
-    const res1 = await this.pg.pool.query(
-      ...callMarkNotificationAsReadProcedure({
-        notification_id: +input.notification_id,
-        token,
-      }),
-    );
+    try {
+      const res1 = await this.pg.pool.query(
+        ...callMarkNotificationAsReadProcedure({
+          notification_id: +input.notification_id,
+          token,
+        }),
+      );
 
-    return {
-      notification_id: input.notification_id,
-      error: res1.rows[0].p_error_type,
-    };
+      return {
+        notification_id: input.notification_id,
+        error: res1.rows[0].p_error_type,
+      };
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        notification_id: '',
+      };
+    }
   }
 
   async insert(
@@ -127,7 +147,7 @@ export class NotificationService {
         notification,
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -140,18 +160,27 @@ export class NotificationService {
     input: NotificationDeleteInput,
     token: string,
   ): Promise<NotificationDeleteOutput> {
-    const res = await this.pg.pool.query<NotificationDeleteProcedureOutputRow>(
-      ...callNotificationDeleteProcedure({
-        id: input.notification_id,
-        token: token,
-      }),
-    );
+    try {
+      const res =
+        await this.pg.pool.query<NotificationDeleteProcedureOutputRow>(
+          ...callNotificationDeleteProcedure({
+            id: input.notification_id,
+            token: token,
+          }),
+        );
 
-    const deletingError = res.rows[0].p_error_type;
+      const deletingError = res.rows[0].p_error_type;
 
-    return {
-      error: deletingError,
-      notification_id: res.rows[0].p_notification_id + '',
-    };
+      return {
+        error: deletingError,
+        notification_id: res.rows[0].p_notification_id + '',
+      };
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        notification_id: '',
+      };
+    }
   }
 }

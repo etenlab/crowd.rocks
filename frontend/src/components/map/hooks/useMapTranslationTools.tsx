@@ -41,6 +41,7 @@ export type Translation = {
     username: string;
     avatar?: string;
     createdAt: Date;
+    createdByBot?: boolean;
   };
   parent: {
     id: string;
@@ -131,6 +132,7 @@ export function useMapTranslationTools() {
             let username: string = '';
             let avatar: string | null | undefined;
             let createdAt: Date = new Date();
+            let createdByBot: boolean = false;
             let parent: { id: string; table: string } = { id: '', table: '' };
 
             if (
@@ -147,6 +149,8 @@ export function useMapTranslationTools() {
               avatar =
                 translation.to_phrase_definition.created_by_user.avatar_url;
               createdAt = new Date(translation.to_phrase_definition.created_at);
+              createdByBot =
+                translation.to_phrase_definition.created_by_user.is_bot;
               parent = {
                 id: translation.phrase_to_phrase_translation_id,
                 table: 'phrase_to_phrase_translations',
@@ -162,6 +166,9 @@ export function useMapTranslationTools() {
               avatar =
                 translation.to_word_definition.created_by_user.avatar_url;
               createdAt = new Date(translation.to_word_definition.created_at);
+              createdByBot =
+                translation.to_word_definition.created_by_user.is_bot;
+
               parent = {
                 id: translation.phrase_to_word_translation_id,
                 table: 'phrase_to_word_translations',
@@ -179,6 +186,9 @@ export function useMapTranslationTools() {
               avatar =
                 translation.to_phrase_definition.created_by_user.avatar_url;
               createdAt = new Date(translation.to_phrase_definition.created_at);
+              createdByBot =
+                translation.to_phrase_definition.created_by_user.is_bot;
+
               parent = {
                 id: translation.word_to_phrase_translation_id,
                 table: 'word_to_phrase_translations',
@@ -194,6 +204,9 @@ export function useMapTranslationTools() {
               avatar =
                 translation.to_word_definition.created_by_user.avatar_url;
               createdAt = new Date(translation.to_word_definition.created_at);
+              createdByBot =
+                translation.to_word_definition.created_by_user.is_bot;
+
               parent = {
                 id: translation.word_to_word_translation_id,
                 table: 'word_to_word_translations',
@@ -213,6 +226,7 @@ export function useMapTranslationTools() {
                 username,
                 avatar,
                 createdAt,
+                createdByBot,
               },
               parent,
             };
@@ -230,6 +244,7 @@ export function useMapTranslationTools() {
             username: string;
             avatar?: string;
             createdAt: Date;
+            createdByBot?: boolean;
           };
           parent: {
             id: string;

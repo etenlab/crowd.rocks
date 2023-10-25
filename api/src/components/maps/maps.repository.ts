@@ -22,6 +22,7 @@ import {
   OrigMapWordsAndPhrasesOutput,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
+import { GroupedFilterSymbols } from '../../../../utils/dist';
 
 interface ISaveMapParams {
   mapFileName: string;
@@ -1199,8 +1200,21 @@ export class MapsRepository {
       languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${filterParams.length}),'%')`;
     }
     if (input.quickFilter && input.quickFilter.length > 0) {
-      filterParams.push(input.quickFilter);
-      languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat(LOWER($${filterParams.length}),'%')`;
+      switch (input.quickFilter) {
+        case GroupedFilterSymbols.Digits:
+          languagesFiltersRestrictionClause += ` and substring(o_like_string from 1 for 1) SIMILAR TO '(0|1|2|3|4|5|6|7|8|9)'`;
+          break;
+
+        case GroupedFilterSymbols.SpecialCharacters:
+          const s = ` and substring(o_like_string from 1 for 1) SIMILAR TO '(\`|\\!|\\@|\\%|\\^|\\&|\\*|\\(|\\)|\\-|\\+)'`;
+          languagesFiltersRestrictionClause += s;
+          break;
+
+        default:
+          filterParams.push(input.quickFilter);
+          languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat(LOWER($${filterParams.length}),'%')`;
+          break;
+      }
     }
     if (input.original_map_id) {
       filterParams.push(input.original_map_id);

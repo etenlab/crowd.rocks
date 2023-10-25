@@ -16,6 +16,7 @@ export function useUnauthorizedRedirect() {
   return (error?: ErrorType) => {
     if (error === ErrorType.Unauthorized) {
       modals.map((modal) => removeModal(modal.id));
+      localStorage.setItem('login-redirect', 'back');
       router.push(`/US/${appLanguage.lang.tag}/1/login`);
     }
   };

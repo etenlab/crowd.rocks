@@ -27,6 +27,7 @@ import {
   getQuestionsObjByRefs,
   GetQuestionsObjectRow,
 } from './sql-string';
+import { AuthorizationService } from '../authorization/authorization.service';
 
 @Injectable()
 export class QuestionsService {
@@ -34,6 +35,7 @@ export class QuestionsService {
     private pg: PostgresService,
     private questionItemService: QuestionItemsService,
     private wordRangesService: WordRangesService,
+    private authService: AuthorizationService,
   ) {}
 
   private async convertQueryResultToQuestions(
@@ -151,6 +153,13 @@ export class QuestionsService {
       };
     }
 
+    if (!(await this.authService.is_authorized(token))) {
+      return {
+        error: ErrorType.Unauthorized,
+        questions: [],
+      };
+    }
+
     try {
       const res = await pgClientOrPool({
         client: pgClient,
@@ -199,6 +208,12 @@ export class QuestionsService {
     token,
     pgClient: PoolClient | null,
   ): Promise<QuestionOnWordRangesOutput> {
+    if (!(await this.authService.is_authorized(token))) {
+      return {
+        error: ErrorType.Unauthorized,
+        questions: [],
+      };
+    }
     try {
       const { error: wordRangeError, word_ranges } =
         await this.wordRangesService.upserts(
@@ -220,7 +235,11 @@ export class QuestionsService {
       }
 
       const { error: questionItemError, question_items } =
-        await this.questionItemService.upserts(input.question_items, pgClient);
+        await this.questionItemService.upserts(
+          input.question_items,
+          pgClient,
+          token,
+        );
 
       if (questionItemError !== ErrorType.NoError) {
         return {

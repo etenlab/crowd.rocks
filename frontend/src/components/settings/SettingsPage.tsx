@@ -92,7 +92,7 @@ export function SettingsPage() {
   const toggleIsOral = useCallback(() => {
     setToolsState({
       ...toolsState,
-      isBetaTools: !toolsState.isBetaTools,
+      isOral: !toolsState.isOral,
     });
   }, [toolsState]);
 

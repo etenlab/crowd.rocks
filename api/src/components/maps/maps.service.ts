@@ -137,61 +137,69 @@ export class MapsService {
     dbPoolClient,
     token,
   }: IParseOrigMapParams): Promise<MapDetailsOutput> {
-    const origMapInfo = await this.mapsRepository.getOrigMapWithContentUrl(
-      map_id,
-    );
-    if (origMapInfo.error !== ErrorType.NoError || !origMapInfo.mapDetails) {
+    try {
+      const origMapInfo = await this.mapsRepository.getOrigMapWithContentUrl(
+        map_id,
+      );
+      if (origMapInfo.error !== ErrorType.NoError || !origMapInfo.mapDetails) {
+        return {
+          error: origMapInfo.error,
+          mapDetails: null,
+        };
+      }
+      const {
+        mapDetails: { language, content_file_id },
+      } = origMapInfo;
+      const { language_code, dialect_code, geo_code } = language;
+      const origMapString = await this.fileService.getFileContentAsString(
+        content_file_id,
+      );
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { transformedSvgINode, foundWords, foundPhrases } =
+        this.parseSvgMapString(origMapString);
+
+      //--save found words with definitions and original map boundng
+
+      for (const word of foundWords) {
+        const wordInput: WordUpsertInput = {
+          wordlike_string: word,
+          language_code,
+          dialect_code,
+          geo_code,
+        };
+        await this.saveOriginalMapWord(wordInput, map_id, token, dbPoolClient);
+      }
+
+      //--save found phrases and  bound them to original map
+
+      for (const phrase of foundPhrases) {
+        const phraseInput: PhraseUpsertInput = {
+          phraselike_string: phrase,
+          language_code,
+          dialect_code,
+          geo_code,
+        };
+        await this.saveOriginalMapPhrase(
+          phraseInput,
+          map_id,
+          token,
+          dbPoolClient,
+        );
+      }
+
+      await dbPoolClient.query('COMMIT');
+
       return {
-        error: origMapInfo.error,
+        error: ErrorType.NoError,
+        mapDetails: origMapInfo.mapDetails,
+      };
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
         mapDetails: null,
       };
     }
-    const {
-      mapDetails: { language, content_file_id },
-    } = origMapInfo;
-    const { language_code, dialect_code, geo_code } = language;
-    const origMapString = await this.fileService.getFileContentAsString(
-      content_file_id,
-    );
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { transformedSvgINode, foundWords, foundPhrases } =
-      this.parseSvgMapString(origMapString);
-
-    //--save found words with definitions and original map boundng
-
-    for (const word of foundWords) {
-      const wordInput: WordUpsertInput = {
-        wordlike_string: word,
-        language_code,
-        dialect_code,
-        geo_code,
-      };
-      await this.saveOriginalMapWord(wordInput, map_id, token, dbPoolClient);
-    }
-
-    //--save found phrases and  bound them to original map
-
-    for (const phrase of foundPhrases) {
-      const phraseInput: PhraseUpsertInput = {
-        phraselike_string: phrase,
-        language_code,
-        dialect_code,
-        geo_code,
-      };
-      await this.saveOriginalMapPhrase(
-        phraseInput,
-        map_id,
-        token,
-        dbPoolClient,
-      );
-    }
-
-    await dbPoolClient.query('COMMIT');
-
-    return {
-      error: ErrorType.NoError,
-      mapDetails: origMapInfo.mapDetails,
-    };
   }
 
   async saveOriginalMapWord(
@@ -200,38 +208,45 @@ export class MapsService {
     token: string,
     dbPoolClient: PoolClient,
   ): Promise<string> {
-    const savedWord = await this.wordsService.upsertInTrn(
-      wordInput,
-      token,
-      dbPoolClient,
-    );
-    if (!savedWord.word_id) {
-      throw new Error(
-        `MapsService#parseAndSaveNewMap: 
-        Error ${savedWord.error} with saving word ${JSON.stringify(wordInput)}`,
+    try {
+      const savedWord = await this.wordsService.upsertInTrn(
+        wordInput,
+        token,
+        dbPoolClient,
       );
-    }
+      if (!savedWord.word_id) {
+        throw new Error(
+          `MapsService#parseAndSaveNewMap: 
+          Error ${savedWord.error} with saving word ${JSON.stringify(
+            wordInput,
+          )}`,
+        );
+      }
 
-    const savedDefinition = await this.wordDefinitionsService.upsertInTrn(
-      {
-        definition: DEFAULT_MAP_WORD_DEFINITION,
-        word_id: savedWord.word_id,
-      },
-      token,
-      dbPoolClient,
-    );
-    if (!savedDefinition.word_definition_id) {
-      throw new Error(
-        `MapsService#parseAndSaveNewMap: Error ${savedDefinition.error} with saving definition for word ${wordInput}`,
+      const savedDefinition = await this.wordDefinitionsService.upsertInTrn(
+        {
+          definition: DEFAULT_MAP_WORD_DEFINITION,
+          word_id: savedWord.word_id,
+        },
+        token,
+        dbPoolClient,
       );
+      if (!savedDefinition.word_definition_id) {
+        throw new Error(
+          `MapsService#parseAndSaveNewMap: Error ${savedDefinition.error} with saving definition for word ${wordInput}`,
+        );
+      }
+
+      await this.mapsRepository.saveOriginalMapWordInTrn(
+        { word_id: savedWord.word_id, original_map_id: map_id },
+        dbPoolClient,
+      );
+
+      return savedWord.word_id;
+    } catch (e) {
+      Logger.error(e);
+      return '';
     }
-
-    await this.mapsRepository.saveOriginalMapWordInTrn(
-      { word_id: savedWord.word_id, original_map_id: map_id },
-      dbPoolClient,
-    );
-
-    return savedWord.word_id;
   }
 
   async saveOriginalMapPhrase(
@@ -240,47 +255,59 @@ export class MapsService {
     token: string,
     dbPoolClient: PoolClient,
   ): Promise<string> {
-    const savedPhrase = await this.phrasesService.upsertInTrn(
-      phraseInput,
-      token,
-      dbPoolClient,
-    );
-    if (!savedPhrase.phrase_id) {
-      throw new Error(
-        `MapsService#parseAndSaveNewMap: 
-        Error ${savedPhrase.error} with saving word ${JSON.stringify(
-          phraseInput,
-        )}`,
-      );
-    }
-
-    const savedPhraseDefinition =
-      await this.phraseDefinitionsService.upsertInTrn(
-        {
-          definition: DEFAULT_MAP_PHRASE_DEFINITION,
-          phrase_id: String(savedPhrase.phrase_id),
-        },
+    try {
+      const savedPhrase = await this.phrasesService.upsertInTrn(
+        phraseInput,
         token,
         dbPoolClient,
       );
-    if (!savedPhraseDefinition.phrase_definition_id) {
-      throw new Error(
-        `MapsService#parseAndSaveNewMap: 
-        Error ${savedPhraseDefinition.error} 
-        with saving definition for phrase ${JSON.stringify(phraseInput)}`,
+      if (!savedPhrase.phrase_id) {
+        throw new Error(
+          `MapsService#parseAndSaveNewMap: 
+          Error ${savedPhrase.error} with saving word ${JSON.stringify(
+            phraseInput,
+          )}`,
+        );
+      }
+
+      const savedPhraseDefinition =
+        await this.phraseDefinitionsService.upsertInTrn(
+          {
+            definition: DEFAULT_MAP_PHRASE_DEFINITION,
+            phrase_id: String(savedPhrase.phrase_id),
+          },
+          token,
+          dbPoolClient,
+        );
+      if (!savedPhraseDefinition.phrase_definition_id) {
+        throw new Error(
+          `MapsService#parseAndSaveNewMap: 
+          Error ${savedPhraseDefinition.error} 
+          with saving definition for phrase ${JSON.stringify(phraseInput)}`,
+        );
+      }
+
+      await this.mapsRepository.saveOriginalMapPhraseInTrn(
+        { phrase_id: String(savedPhrase.phrase_id), original_map_id: map_id },
+        dbPoolClient,
       );
+
+      return String(savedPhrase.phrase_id);
+    } catch (e) {
+      Logger.error(e);
+      return '';
     }
-
-    await this.mapsRepository.saveOriginalMapPhraseInTrn(
-      { phrase_id: String(savedPhrase.phrase_id), original_map_id: map_id },
-      dbPoolClient,
-    );
-
-    return String(savedPhrase.phrase_id);
   }
 
   async getOrigMaps(): Promise<GetOrigMapsListOutput> {
-    return this.mapsRepository.getOrigMaps();
+    try {
+      return this.mapsRepository.getOrigMaps();
+    } catch (e) {
+      Logger.error(e);
+      return {
+        mapList: [],
+      };
+    }
   }
 
   async getAllMapsList({
@@ -396,14 +423,29 @@ export class MapsService {
   }
 
   async getOrigMapWithContentUrl(id: string): Promise<MapDetailsOutput> {
-    return this.mapsRepository.getOrigMapWithContentUrl(id);
+    try {
+      return this.mapsRepository.getOrigMapWithContentUrl(id);
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        mapDetails: null,
+      };
+    }
   }
 
   async getTranslatedMapWithContentUrl(id: string): Promise<MapDetailsOutput> {
-    const mapDetails = await this.mapsRepository.getTranslatedMapWithContentUrl(
-      id,
-    );
-    return mapDetails;
+    try {
+      const mapDetails =
+        await this.mapsRepository.getTranslatedMapWithContentUrl(id);
+      return mapDetails;
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        mapDetails: null,
+      };
+    }
   }
 
   /**
@@ -415,94 +457,122 @@ export class MapsService {
     foundWords: string[];
     foundPhrases: string[];
   } {
-    const svgAsINode = readSvg(originalSvgString);
-    const foundTexts: string[] = [];
-    this.iterateOverINode(svgAsINode, SKIP_INODE_NAMES, (node) => {
-      if (
-        TEXTY_INODE_NAMES.includes(node.name) ||
-        POSSIBLE_TEXTY_INODE_NAMES.includes(node.name)
-      ) {
-        let currNodeAllText = node.value || '';
-        let hasInnerTextyNodes = false;
-        if (node.children && node.children.length > 0) {
-          this.iterateOverINode(node, [], (subNode) => {
-            currNodeAllText += subNode.value;
-            if (
-              POSSIBLE_TEXTY_INODE_NAMES.includes(node.name) &&
-              TEXTY_INODE_NAMES.includes(subNode.name)
-            ) {
-              hasInnerTextyNodes = true;
+    try {
+      const svgAsINode = readSvg(originalSvgString);
+      const foundTexts: string[] = [];
+      this.iterateOverINode(svgAsINode, SKIP_INODE_NAMES, (node) => {
+        if (
+          TEXTY_INODE_NAMES.includes(node.name) ||
+          POSSIBLE_TEXTY_INODE_NAMES.includes(node.name)
+        ) {
+          let currNodeAllText = node.value || '';
+          let hasInnerTextyNodes = false;
+          if (node.children && node.children.length > 0) {
+            this.iterateOverINode(node, [], (subNode) => {
+              currNodeAllText += subNode.value;
+              if (
+                POSSIBLE_TEXTY_INODE_NAMES.includes(node.name) &&
+                TEXTY_INODE_NAMES.includes(subNode.name)
+              ) {
+                hasInnerTextyNodes = true;
+              }
+            });
+            if (!hasInnerTextyNodes) {
+              node.children = [
+                {
+                  value: currNodeAllText,
+                  type: 'text',
+                  name: '',
+                  children: [],
+                  attributes: {},
+                },
+              ]; // mutate svgAsINode, if node is final texty and has children nodes, assign to its text value concatanated value from children's values
+            } else {
+              currNodeAllText = ''; // if possible texty inode has inner texty nodes, do nothing here and dive deeper to inspect these inner nodes.
             }
-          });
-          if (!hasInnerTextyNodes) {
-            node.children = [
-              {
-                value: currNodeAllText,
-                type: 'text',
-                name: '',
-                children: [],
-                attributes: {},
-              },
-            ]; // mutate svgAsINode, if node is final texty and has children nodes, assign to its text value concatanated value from children's values
-          } else {
-            currNodeAllText = ''; // if possible texty inode has inner texty nodes, do nothing here and dive deeper to inspect these inner nodes.
+          }
+
+          if (!currNodeAllText) return;
+          currNodeAllText = currNodeAllText.trim();
+          if (currNodeAllText.length <= 1) return;
+          if (!isNaN(Number(currNodeAllText))) return;
+          const isExist = foundTexts.findIndex((t) => t === currNodeAllText);
+
+          if (isExist < 0) {
+            foundTexts.push(currNodeAllText);
           }
         }
-
-        if (!currNodeAllText) return;
-        currNodeAllText = currNodeAllText.trim();
-        if (currNodeAllText.length <= 1) return;
-        if (!isNaN(Number(currNodeAllText))) return;
-        const isExist = foundTexts.findIndex((t) => t === currNodeAllText);
-
-        if (isExist < 0) {
-          foundTexts.push(currNodeAllText);
+      });
+      const foundWords: string[] = [];
+      const foundPhrases: string[] = [];
+      foundTexts.forEach((text) => {
+        const words = text.split(' ').map((w) => w.trim());
+        if (words.length === 0) return;
+        if (words.length > 1) {
+          // join trimmed words using single space, thus remove multiple spaces
+          foundPhrases.push(words.join(' '));
+        } else if (words[0].length > 1 && isNaN(Number(words[0]))) {
+          // push only words longer than 1 symbol and only not numbers
+          foundWords.push(words[0]);
         }
-      }
-    });
-    const foundWords: string[] = [];
-    const foundPhrases: string[] = [];
-    foundTexts.forEach((text) => {
-      const words = text.split(' ').map((w) => w.trim());
-      if (words.length === 0) return;
-      if (words.length > 1) {
-        // join trimmed words using single space, thus remove multiple spaces
-        foundPhrases.push(words.join(' '));
-      } else if (words[0].length > 1 && isNaN(Number(words[0]))) {
-        // push only words longer than 1 symbol and only not numbers
-        foundWords.push(words[0]);
-      }
-    });
-    return {
-      transformedSvgINode: svgAsINode,
-      foundWords,
-      foundPhrases,
-    };
+      });
+      return {
+        transformedSvgINode: svgAsINode,
+        foundWords,
+        foundPhrases,
+      };
+    } catch (e) {
+      Logger.error(e);
+      return {
+        transformedSvgINode: {
+          name: '',
+          type: '',
+          value: '',
+          attributes: {},
+          children: [],
+        },
+        foundWords: [],
+        foundPhrases: [],
+      };
+    }
   }
 
   async getOrigMapWords(
     input: GetOrigMapWordsInput,
   ): Promise<GetOrigMapWordsOutput> {
-    const { original_map_id, ...langRestrictions } = input;
-    return this.mapsRepository.getOrigMapWords(
-      original_map_id || '',
-      langRestrictions,
-    );
+    try {
+      const { original_map_id, ...langRestrictions } = input;
+      return this.mapsRepository.getOrigMapWords(
+        original_map_id || '',
+        langRestrictions,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        origMapWords: [],
+      };
+    }
   }
 
   async getOrigMapPhrases(
     input: GetOrigMapPhrasesInput,
   ): Promise<GetOrigMapPhrasesOutput> {
-    const { original_map_id, ...langRestrictions } = input;
-    const origMapPhrases = await this.mapsRepository.getOrigMapPhrases(
-      original_map_id || '',
-      langRestrictions,
-    );
-    if (!this.checkForLanguageCodePresence(origMapPhrases.origMapPhrases)) {
-      throw new Error('Phrase or its translation doesnt have language code');
+    try {
+      const { original_map_id, ...langRestrictions } = input;
+      const origMapPhrases = await this.mapsRepository.getOrigMapPhrases(
+        original_map_id || '',
+        langRestrictions,
+      );
+      if (!this.checkForLanguageCodePresence(origMapPhrases.origMapPhrases)) {
+        throw new Error('Phrase or its translation doesnt have language code');
+      }
+      return origMapPhrases;
+    } catch (e) {
+      Logger.error(e);
+      return {
+        origMapPhrases: [],
+      };
     }
-
-    return origMapPhrases;
   }
 
   async getOrigMapWordsAndPhrases(params: {
@@ -574,33 +644,41 @@ export class MapsService {
     definition_id,
     is_word_definition,
   }: GetMapWordOrPhraseByDefinitionIdInput): Promise<MapWordOrPhraseAsOrigOutput> {
-    if (is_word_definition) {
-      const word = await this.wordsService.getWordByDefinitionId(
-        definition_id,
-        null,
-      );
-      if (!word)
+    try {
+      if (is_word_definition) {
+        const word = await this.wordsService.getWordByDefinitionId(
+          definition_id,
+          null,
+        );
+        if (!word)
+          return {
+            error: ErrorType.WordNotFound,
+            wordOrPhrase: null,
+          };
         return {
-          error: ErrorType.WordNotFound,
-          wordOrPhrase: null,
+          error: ErrorType.NoError,
+          wordOrPhrase: word,
         };
-      return {
-        error: ErrorType.NoError,
-        wordOrPhrase: word,
-      };
-    } else {
-      const phrase = await this.phrasesService.getPhraseByDefinitionId(
-        definition_id,
-        null,
-      );
-      if (!phrase)
+      } else {
+        const phrase = await this.phrasesService.getPhraseByDefinitionId(
+          definition_id,
+          null,
+        );
+        if (!phrase)
+          return {
+            error: ErrorType.PhraseNotFound,
+            wordOrPhrase: null,
+          };
         return {
-          error: ErrorType.PhraseNotFound,
-          wordOrPhrase: null,
+          error: ErrorType.NoError,
+          wordOrPhrase: phrase,
         };
+      }
+    } catch (e) {
+      Logger.error(e);
       return {
-        error: ErrorType.NoError,
-        wordOrPhrase: phrase,
+        error: ErrorType.UnknownError,
+        wordOrPhrase: null,
       };
     }
   }
@@ -610,25 +688,30 @@ export class MapsService {
       MapWordWithTranslations | MapPhraseWithTranslations
     >,
   ): boolean {
-    origMapWordsOrPhrases.forEach((wordOrPhrase) => {
-      if (!wordOrPhrase.language_code) {
-        console.log(
-          `Word or phrase ${JSON.stringify(
-            wordOrPhrase,
-          )} doesn't have language tag `,
-        );
-        return false;
-      }
-      wordOrPhrase!.translations!.forEach((tr) => {
-        if (!tr.language_code) {
+    try {
+      origMapWordsOrPhrases.forEach((wordOrPhrase) => {
+        if (!wordOrPhrase.language_code) {
           console.log(
-            `Translation ${JSON.stringify(tr)} doesn't have language tag `,
+            `Word or phrase ${JSON.stringify(
+              wordOrPhrase,
+            )} doesn't have language tag `,
           );
           return false;
         }
+        wordOrPhrase!.translations!.forEach((tr) => {
+          if (!tr.language_code) {
+            console.log(
+              `Translation ${JSON.stringify(tr)} doesn't have language tag `,
+            );
+            return false;
+          }
+        });
       });
-    });
-    return true;
+      return true;
+    } catch (e) {
+      Logger.error(e);
+      return false; //not sure about this...
+    }
   }
 
   async translateMapsWithTranslationId({
@@ -642,27 +725,32 @@ export class MapsService {
     to_definition_type_is_word: boolean;
     token: string;
   }) {
-    const origMapIds =
-      await this.mapsRepository.getOrigMapsIdsByTranslationData({
+    try {
+      const origMapIds =
+        await this.mapsRepository.getOrigMapsIdsByTranslationData({
+          translation_id,
+          from_definition_type_is_word,
+          to_definition_type_is_word,
+        });
+
+      const toLang = await this.translationsService.getTranslationLanguage(
         translation_id,
         from_definition_type_is_word,
         to_definition_type_is_word,
-      });
-
-    const toLang = await this.translationsService.getTranslationLanguage(
-      translation_id,
-      from_definition_type_is_word,
-      to_definition_type_is_word,
-    );
-
-    if (!toLang) {
-      Logger.error(
-        `mapsService#translateMapsWithTranslationId: toLang is not defined`,
       );
+
+      if (!toLang) {
+        Logger.error(
+          `mapsService#translateMapsWithTranslationId: toLang is not defined`,
+        );
+        return [];
+      }
+
+      return this.translateOrigMapsByIds(origMapIds, token, toLang);
+    } catch (e) {
+      Logger.error(e);
       return [];
     }
-
-    return this.translateOrigMapsByIds(origMapIds, token, toLang);
   }
 
   async translateOrigMapsByIds(
@@ -703,17 +791,22 @@ export class MapsService {
     token: string;
     toLang?: LanguageInput;
   }): Promise<Array<string>> {
-    let origMapIds: string[] = [];
-    if (from_definition_type_is_word) {
-      origMapIds = await this.mapsRepository.getOrigMapsIdsByWordDefinition(
-        from_definition_id,
-      );
-    } else {
-      origMapIds = await this.mapsRepository.getOrigMapsIdsByPhraseDefinition(
-        from_definition_id,
-      );
+    try {
+      let origMapIds: string[] = [];
+      if (from_definition_type_is_word) {
+        origMapIds = await this.mapsRepository.getOrigMapsIdsByWordDefinition(
+          from_definition_id,
+        );
+      } else {
+        origMapIds = await this.mapsRepository.getOrigMapsIdsByPhraseDefinition(
+          from_definition_id,
+        );
+      }
+      return this.translateOrigMapsByIds(origMapIds, token, toLang);
+    } catch (e) {
+      Logger.error(e);
+      return [];
     }
-    return this.translateOrigMapsByIds(origMapIds, token, toLang);
   }
 
   async translateMapAndSaveTranslatedTrn(
@@ -722,167 +815,172 @@ export class MapsService {
     dbPoolClient: PoolClient,
     toLang?: LanguageInput,
   ): Promise<Array<string>> {
-    if (!origMapId) {
-      Logger.error(
-        `mapsService#translateMapAndSaveTranslatedTrn: origMapId not provided.`,
-      );
-      return [];
-    }
-    const p0 = performance.now();
-    Logger.log(
-      `START translating of orig map id ${origMapId} to lang ${toLang?.language_code}`,
-    );
-    const translatedMapIds: Array<string> = [];
-    const origMap = await this.mapsRepository.getOrigMapWithContentUrl(
-      origMapId,
-    );
-    if (!origMap.mapDetails) {
-      Logger.error(
-        `mapsService#translateMapAndSaveTranslatedTrn: origMap witn id ${origMapId} not found.`,
-      );
-      return [];
-    }
-    const { content_file_id, map_file_name } = origMap.mapDetails;
-
-    const { origMapWords } = await this.getOrigMapWords({
-      original_map_id: origMapId,
-    });
-
-    const { origMapPhrases } = await this.getOrigMapPhrases({
-      original_map_id: origMapId,
-    });
-
-    const origMapWordsAndPhrases: Array<
-      MapWordWithTranslations | MapPhraseWithTranslations
-    > = [...origMapWords, ...origMapPhrases];
-
-    let targetLanguagesFullTags: Array<string>;
-    if (toLang) {
-      targetLanguagesFullTags = [
-        subTags2Tag({
-          lang: toLang.language_code,
-          dialect: toLang.dialect_code || undefined,
-          region: toLang.geo_code || undefined,
-        }),
-      ];
-    } else {
-      targetLanguagesFullTags = this.getLangFullTags(origMapWordsAndPhrases);
-    }
-
-    Logger.log(`...found ${targetLanguagesFullTags.length} target languages`);
-
-    for (const languageFullTag of targetLanguagesFullTags) {
-      const language_code: string = tag2langInfo(languageFullTag).lang.tag;
-      const dialect_code: string | undefined =
-        tag2langInfo(languageFullTag)?.dialect?.tag || undefined;
-      const geo_code: string | undefined =
-        tag2langInfo(languageFullTag)?.region?.tag || undefined;
-
-      const translations: Array<{
-        source: string;
-        translation: string;
-      }> = [];
-      for (const origMapWordOrPhrase of origMapWordsAndPhrases) {
-        const origWordOrPhraseTranslated =
-          this.wordToWordTranslationsService.chooseBestTranslation(
-            origMapWordOrPhrase,
-            {
-              language_code,
-              dialect_code: dialect_code || null,
-              geo_code: geo_code || null,
-            },
-          );
-        if ('word' in origMapWordOrPhrase) {
-          if (
-            'word' in origWordOrPhraseTranslated! &&
-            origWordOrPhraseTranslated.word.length > 0
-          ) {
-            translations.push({
-              source: origMapWordOrPhrase.word,
-              translation: origWordOrPhraseTranslated.word,
-            });
-          } else if (
-            'phrase' in origWordOrPhraseTranslated! &&
-            origWordOrPhraseTranslated.phrase.length > 0
-          ) {
-            translations.push({
-              source: origMapWordOrPhrase.word,
-              translation: origWordOrPhraseTranslated.phrase,
-            });
-          }
-        } else {
-          if (
-            'word' in origWordOrPhraseTranslated! &&
-            origWordOrPhraseTranslated.word.length > 0
-          ) {
-            translations.push({
-              source: origMapWordOrPhrase.phrase,
-              translation: origWordOrPhraseTranslated.word,
-            });
-          } else if (
-            'phrase' in origWordOrPhraseTranslated! &&
-            origWordOrPhraseTranslated.phrase.length > 0
-          ) {
-            translations.push({
-              source: origMapWordOrPhrase.phrase,
-              translation: origWordOrPhraseTranslated.phrase,
-            });
-          }
-        }
-      }
-      const origMapString = await this.fileService.getFileContentAsString(
-        content_file_id,
-      );
-      const p1 = performance.now();
-      const { translatedMap } = await this.translateMapString(
-        origMapString,
-        translations,
-      )!;
-      Logger.debug(`translation is done in ${performance.now() - p1} ms`);
-
-      const stream = Readable.from([translatedMap]);
-      const translatedContentFile = await this.fileService.uploadFile(
-        stream,
-        putLangCodesToFileName(map_file_name, {
-          language_code: tag2langInfo(languageFullTag).lang.tag,
-          dialect_code: tag2langInfo(languageFullTag).dialect?.tag || null,
-          geo_code: tag2langInfo(languageFullTag).region?.tag || null,
-        }),
-        SVG_MIME_TYPE,
-        translatedMap.length,
-        token,
-      );
-      if (!translatedContentFile?.file?.id) {
+    try {
+      if (!origMapId) {
         Logger.error(
-          `mapsService#translateMapAndSaveTranslatedTrn: Error: translatedContentFile?.file?.id is undefined`,
+          `mapsService#translateMapAndSaveTranslatedTrn: origMapId not provided.`,
         );
         return [];
       }
+      const p0 = performance.now();
+      Logger.log(
+        `START translating of orig map id ${origMapId} to lang ${toLang?.language_code}`,
+      );
+      const translatedMapIds: Array<string> = [];
+      const origMap = await this.mapsRepository.getOrigMapWithContentUrl(
+        origMapId,
+      );
+      if (!origMap.mapDetails) {
+        Logger.error(
+          `mapsService#translateMapAndSaveTranslatedTrn: origMap witn id ${origMapId} not found.`,
+        );
+        return [];
+      }
+      const { content_file_id, map_file_name } = origMap.mapDetails;
 
-      const data = await this.mapsRepository.saveTranslatedMapTrn({
+      const { origMapWords } = await this.getOrigMapWords({
         original_map_id: origMapId,
-        content_file_id: String(translatedContentFile.file.id),
-        token,
-        t_language_code: language_code,
-        t_dialect_code: dialect_code,
-        t_geo_code: geo_code,
-        dbPoolClient,
-        translated_percent:
-          origMapWordsAndPhrases.length > 0
-            ? Math.round(
-                (translations.length / origMapWordsAndPhrases.length) * 100,
-              )
-            : 100,
       });
-      translatedMapIds.push(data!.map_id);
-    }
-    Logger.log(
-      `DONE translating of orig map id ${origMapId} for ${
-        performance.now() - p0
-      } ms.`,
-    );
 
-    return translatedMapIds;
+      const { origMapPhrases } = await this.getOrigMapPhrases({
+        original_map_id: origMapId,
+      });
+
+      const origMapWordsAndPhrases: Array<
+        MapWordWithTranslations | MapPhraseWithTranslations
+      > = [...origMapWords, ...origMapPhrases];
+
+      let targetLanguagesFullTags: Array<string>;
+      if (toLang) {
+        targetLanguagesFullTags = [
+          subTags2Tag({
+            lang: toLang.language_code,
+            dialect: toLang.dialect_code || undefined,
+            region: toLang.geo_code || undefined,
+          }),
+        ];
+      } else {
+        targetLanguagesFullTags = this.getLangFullTags(origMapWordsAndPhrases);
+      }
+
+      Logger.log(`...found ${targetLanguagesFullTags.length} target languages`);
+
+      for (const languageFullTag of targetLanguagesFullTags) {
+        const language_code: string = tag2langInfo(languageFullTag).lang.tag;
+        const dialect_code: string | undefined =
+          tag2langInfo(languageFullTag)?.dialect?.tag || undefined;
+        const geo_code: string | undefined =
+          tag2langInfo(languageFullTag)?.region?.tag || undefined;
+
+        const translations: Array<{
+          source: string;
+          translation: string;
+        }> = [];
+        for (const origMapWordOrPhrase of origMapWordsAndPhrases) {
+          const origWordOrPhraseTranslated =
+            this.wordToWordTranslationsService.chooseBestTranslation(
+              origMapWordOrPhrase,
+              {
+                language_code,
+                dialect_code: dialect_code || null,
+                geo_code: geo_code || null,
+              },
+            );
+          if ('word' in origMapWordOrPhrase) {
+            if (
+              'word' in origWordOrPhraseTranslated! &&
+              origWordOrPhraseTranslated.word.length > 0
+            ) {
+              translations.push({
+                source: origMapWordOrPhrase.word,
+                translation: origWordOrPhraseTranslated.word,
+              });
+            } else if (
+              'phrase' in origWordOrPhraseTranslated! &&
+              origWordOrPhraseTranslated.phrase.length > 0
+            ) {
+              translations.push({
+                source: origMapWordOrPhrase.word,
+                translation: origWordOrPhraseTranslated.phrase,
+              });
+            }
+          } else {
+            if (
+              'word' in origWordOrPhraseTranslated! &&
+              origWordOrPhraseTranslated.word.length > 0
+            ) {
+              translations.push({
+                source: origMapWordOrPhrase.phrase,
+                translation: origWordOrPhraseTranslated.word,
+              });
+            } else if (
+              'phrase' in origWordOrPhraseTranslated! &&
+              origWordOrPhraseTranslated.phrase.length > 0
+            ) {
+              translations.push({
+                source: origMapWordOrPhrase.phrase,
+                translation: origWordOrPhraseTranslated.phrase,
+              });
+            }
+          }
+        }
+        const origMapString = await this.fileService.getFileContentAsString(
+          content_file_id,
+        );
+        const p1 = performance.now();
+        const { translatedMap } = await this.translateMapString(
+          origMapString,
+          translations,
+        )!;
+        Logger.debug(`translation is done in ${performance.now() - p1} ms`);
+
+        const stream = Readable.from([translatedMap]);
+        const translatedContentFile = await this.fileService.uploadFile(
+          stream,
+          putLangCodesToFileName(map_file_name, {
+            language_code: tag2langInfo(languageFullTag).lang.tag,
+            dialect_code: tag2langInfo(languageFullTag).dialect?.tag || null,
+            geo_code: tag2langInfo(languageFullTag).region?.tag || null,
+          }),
+          SVG_MIME_TYPE,
+          translatedMap.length,
+          token,
+        );
+        if (!translatedContentFile?.file?.id) {
+          Logger.error(
+            `mapsService#translateMapAndSaveTranslatedTrn: Error: translatedContentFile?.file?.id is undefined`,
+          );
+          return [];
+        }
+
+        const data = await this.mapsRepository.saveTranslatedMapTrn({
+          original_map_id: origMapId,
+          content_file_id: String(translatedContentFile.file.id),
+          token,
+          t_language_code: language_code,
+          t_dialect_code: dialect_code,
+          t_geo_code: geo_code,
+          dbPoolClient,
+          translated_percent:
+            origMapWordsAndPhrases.length > 0
+              ? Math.round(
+                  (translations.length / origMapWordsAndPhrases.length) * 100,
+                )
+              : 100,
+        });
+        translatedMapIds.push(data!.map_id);
+      }
+      Logger.log(
+        `DONE translating of orig map id ${origMapId} for ${
+          performance.now() - p0
+        } ms.`,
+      );
+
+      return translatedMapIds;
+    } catch (e) {
+      Logger.error(e);
+      return [];
+    }
   }
 
   translateMapString(
@@ -892,47 +990,66 @@ export class MapsService {
       translation: string;
     }>,
   ): MapTranslationResult | undefined {
-    const { transformedSvgINode } = this.parseSvgMapString(sourceSvgString);
-    this.replaceINodeTagValues(transformedSvgINode, translations);
-    const translatedMap = stringify(transformedSvgINode);
-    return { translatedMap, translations };
+    try {
+      const { transformedSvgINode } = this.parseSvgMapString(sourceSvgString);
+      this.replaceINodeTagValues(transformedSvgINode, translations);
+      const translatedMap = stringify(transformedSvgINode);
+      return { translatedMap, translations };
+    } catch (e) {
+      return undefined;
+    }
   }
 
   async deleteMap(mapId: string, is_original: boolean): Promise<string> {
-    return is_original
-      ? await this.deleteOriginalMap(mapId)
-      : await this.deleteTranslatedMap(mapId);
+    try {
+      return is_original
+        ? await this.deleteOriginalMap(mapId)
+        : await this.deleteTranslatedMap(mapId);
+    } catch (e) {
+      Logger.error(e);
+      return '';
+    }
   }
 
   async deleteOriginalMap(mapId: string): Promise<string> {
-    const mapInfo = await this.mapsRepository.getOrigMapWithContentUrl(mapId);
-    const translatedMaps = await this.mapsRepository.getTranslatedMaps({
-      originalMapId: Number(mapId),
-    });
+    try {
+      const mapInfo = await this.mapsRepository.getOrigMapWithContentUrl(mapId);
+      const translatedMaps = await this.mapsRepository.getTranslatedMaps({
+        originalMapId: Number(mapId),
+      });
 
-    for (const translatedMap of translatedMaps.mapList) {
-      translatedMap.mapDetails?.translated_map_id &&
-        (await this.deleteTranslatedMap(
-          translatedMap.mapDetails.translated_map_id,
-        ));
+      for (const translatedMap of translatedMaps.mapList) {
+        translatedMap.mapDetails?.translated_map_id &&
+          (await this.deleteTranslatedMap(
+            translatedMap.mapDetails.translated_map_id,
+          ));
+      }
+
+      const deletedMapId = await this.mapsRepository.deleteOriginalMap(mapId);
+      mapInfo.mapDetails?.preview_file_id &&
+        (await this.fileService.deleteFile(mapInfo.mapDetails.preview_file_id));
+      mapInfo.mapDetails?.content_file_id &&
+        (await this.fileService.deleteFile(mapInfo.mapDetails.content_file_id));
+      return deletedMapId;
+    } catch (e) {
+      Logger.error(e);
+      return '';
     }
-
-    const deletedMapId = await this.mapsRepository.deleteOriginalMap(mapId);
-    mapInfo.mapDetails?.preview_file_id &&
-      (await this.fileService.deleteFile(mapInfo.mapDetails.preview_file_id));
-    mapInfo.mapDetails?.content_file_id &&
-      (await this.fileService.deleteFile(mapInfo.mapDetails.content_file_id));
-    return deletedMapId;
   }
 
   async deleteTranslatedMap(mapId: string): Promise<string> {
-    const mapInfo = await this.mapsRepository.getTranslatedMapWithContentUrl(
-      mapId,
-    );
-    const deletedMapId = await this.mapsRepository.deleteTranslatedMap(mapId);
-    mapInfo.mapDetails?.content_file_id &&
-      (await this.fileService.deleteFile(mapInfo.mapDetails.content_file_id));
-    return deletedMapId;
+    try {
+      const mapInfo = await this.mapsRepository.getTranslatedMapWithContentUrl(
+        mapId,
+      );
+      const deletedMapId = await this.mapsRepository.deleteTranslatedMap(mapId);
+      mapInfo.mapDetails?.content_file_id &&
+        (await this.fileService.deleteFile(mapInfo.mapDetails.content_file_id));
+      return deletedMapId;
+    } catch (e) {
+      Logger.error(e);
+      return '';
+    }
   }
 
   async translationsReset(token): Promise<void> {
@@ -961,7 +1078,7 @@ export class MapsService {
         );
       }
     } catch (error) {
-      throw error;
+      Logger.log(error);
     } finally {
       dbPoolClient.release();
     }
@@ -991,7 +1108,6 @@ export class MapsService {
       }
     } catch (error) {
       Logger.error(`mapsService#reTranslate error: `, error);
-      throw error;
     } finally {
       dbPoolClient.release;
     }
@@ -1140,6 +1256,7 @@ export class MapsService {
       });
       return { error: ErrorType.NoError };
     } catch (error) {
+      Logger.error(error);
       return { error };
     } finally {
       temp.cleanup();

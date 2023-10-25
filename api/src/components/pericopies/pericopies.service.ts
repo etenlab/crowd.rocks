@@ -16,12 +16,14 @@ import {
   getPericopiesObjByIds,
   getPericopiesObjByDocumentId,
 } from './sql-string';
+import { AuthorizationService } from '../authorization/authorization.service';
 
 @Injectable()
 export class PericopiesService {
   constructor(
     private pg: PostgresService,
     private pericopeVoteService: PericopeVotesService,
+    private authService: AuthorizationService,
   ) {}
 
   async reads(
@@ -56,6 +58,13 @@ export class PericopiesService {
     if (startWords.length === 0) {
       return {
         error: ErrorType.NoError,
+        pericopies: [],
+      };
+    }
+
+    if (!(await this.authService.is_authorized(token))) {
+      return {
+        error: ErrorType.Unauthorized,
         pericopies: [],
       };
     }

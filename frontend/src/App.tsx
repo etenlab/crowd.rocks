@@ -36,26 +36,97 @@ import { ThemeProvider } from './theme';
 
 import { Body } from './Body';
 
+import {
+  split,
+  InMemoryCache,
+  ApolloClient,
+  ApolloProvider,
+} from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { createUploadLink } from 'apollo-upload-client';
+import { typePolicies } from './cacheTypePolicies';
+import { createClient } from 'graphql-ws';
+
 console.info('Runninig in environment: ' + import.meta.env.MODE);
+
+const server_url = `${import.meta.env.VITE_APP_SERVER_URL}/graphql`;
+const ws_server_url = `${import.meta.env.VITE_APP_WS_SERVER_URL}/graphql`;
+
+const httpLink = createUploadLink({
+  uri: server_url,
+  headers: {
+    'Apollo-Require-Preflight': 'true',
+  },
+});
+
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: ws_server_url,
+  }),
+);
+
+const splitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    );
+  },
+  wsLink,
+  httpLink,
+);
+
+const authLink = setContext((_, { headers }) => {
+  // get the authentication token from local storage if it exists
+  const token = localStorage.getItem('token');
+  // return the headers to the context so httpLink can read them
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+});
+
+// const client = new ApolloClient({
+//   uri: 'http://localhost:3001/graphql',
+//   cache: new InMemoryCache(),
+// });
 
 setupIonicReact({
   innerHTMLTemplatesEnabled: true,
 });
 
-const App: React.FC = () => (
-  <IonApp>
-    <AppContextProvider>
-      <ThemeProvider autoDetectPrefersDarkMode={false}>
-        <IonReactRouter>
-          <IonRouterOutlet>
-            <Route path="/">
-              <Body />
-            </Route>
-          </IonRouterOutlet>
-        </IonReactRouter>
-      </ThemeProvider>
-    </AppContextProvider>
-  </IonApp>
-);
+const App: React.FC = () => {
+  const cache = new InMemoryCache({
+    typePolicies,
+  });
+
+  const apollo_client = new ApolloClient({
+    cache,
+    link: authLink.concat(splitLink),
+  });
+
+  return (
+    <IonApp>
+      <ApolloProvider client={apollo_client}>
+        <AppContextProvider>
+          <ThemeProvider autoDetectPrefersDarkMode={false}>
+            <IonReactRouter>
+              <IonRouterOutlet>
+                <Route path="/">
+                  <Body />
+                </Route>
+              </IonRouterOutlet>
+            </IonReactRouter>
+          </ThemeProvider>
+        </AppContextProvider>
+      </ApolloProvider>
+    </IonApp>
+  );
+};
 
 export default App;

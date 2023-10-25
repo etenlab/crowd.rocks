@@ -373,6 +373,11 @@ var LOADING_TAG_PLACEHOLDER = {
   tag: 'loading',
   descriptions: ['Loading data...']
 };
+exports.GroupedFilterSymbols = void 0;
+(function (GroupedFilterSymbols) {
+  GroupedFilterSymbols["Digits"] = "0-9";
+  GroupedFilterSymbols["SpecialCharacters"] = "#";
+})(exports.GroupedFilterSymbols || (exports.GroupedFilterSymbols = {}));
 
 var sortSiteTextFn = function sortSiteTextFn(d1, d2) {
   if (d1.siteTextlikeString && d2.siteTextlikeString && d1.siteTextlikeString.toLowerCase() > d2.siteTextlikeString.toLowerCase()) {
@@ -432,12 +437,10 @@ var X_LANG_TAGS = [{
 }, {
   tag: 'x-liuwa',
   descriptions: ['Liuwa']
-}
-// { tag: 'x-Lambya', descriptions: ['Lambya'] },
-// { tag: 'x-Mukulu', descriptions: ['Mukulu'] },
-// { tag: 'x-Kunda', descriptions: ['Kunda'] },
-];
-
+}, {
+  tag: 'x-Seabo',
+  descriptions: ['Seabo']
+}];
 var TagTypes;
 (function (TagTypes) {
   TagTypes["LANGUAGE"] = "language";
