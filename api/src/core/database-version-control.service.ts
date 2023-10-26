@@ -50,6 +50,13 @@ export class DatabaseVersionControlService {
         case 5:
           console.log('Updating database to version 6');
           await this.loadVersion6();
+        case 6:
+          console.log('Updating database to version 7');
+          await this.loadVersion7();
+        case 7:
+          console.log('Updating database to version 8');
+          await this.loadVersion8();
+
         default:
           console.error('Database version is current');
       }
@@ -423,6 +430,16 @@ export class DatabaseVersionControlService {
 
     // set version
     await this.setVersionNumber(6);
+  }
+
+  async loadVersion7(): Promise<void> {
+    // set version
+    await this.setVersionNumber(7);
+  }
+
+  async loadVersion8(): Promise<void> {
+    // set version
+    await this.setVersionNumber(8);
   }
 
   async registerUser(

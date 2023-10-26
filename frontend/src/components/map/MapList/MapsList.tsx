@@ -370,7 +370,7 @@ export function MapList({ match }: MapListProps) {
         }
       />
 
-      <Stack gap="14px" ref={containerRef}>
+      <Stack gap="14px">
         <Stack
           direction="row"
           justifyContent="space-between"
