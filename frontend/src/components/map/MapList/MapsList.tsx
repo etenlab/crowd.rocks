@@ -61,7 +61,7 @@ interface MapListProps
     language_id: string;
   }> {}
 
-export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
+export function MapList({ match }: MapListProps) {
   const { lang_full_tag: url_lang_tag, nation_id, language_id } = match.params;
   const router = useIonRouter();
   const { tr } = useTr();
@@ -69,6 +69,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
 
   const [filter, setFilter] = useState<string>('');
   const [bouncedFilter] = useDebounce(filter, 500);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const timerRef = useRef<NodeJS.Timeout>();
   const singleClickTimerRef = useRef<NodeJS.Timeout>();
@@ -137,6 +138,31 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
 
     getAllMapsList({ variables });
   }, [getAllMapsList, targetLang, bouncedFilter]);
+
+  useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      entries.forEach((entry) => {
+        const containerWidth = entry.contentRect.width;
+
+        const itemWidth = 162;
+        const basicGap = 16;
+
+        const rowBlockCnt = Math.floor(
+          (containerWidth + basicGap) / (itemWidth + basicGap),
+        );
+        const additionalGap =
+          (containerWidth -
+            itemWidth * rowBlockCnt -
+            basicGap * (rowBlockCnt - 1)) /
+          (rowBlockCnt - 1);
+
+        containerRef.current!.style.columnGap = `${basicGap + additionalGap}px`;
+        containerRef.current!.style.rowGap = `${basicGap}px`;
+      });
+    });
+
+    observer.observe(containerRef.current!);
+  }, []);
 
   const handleFilterChange = (value: string) => {
     setFilter(value);
@@ -415,7 +441,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
           value={filter}
           onChange={handleFilterChange}
           onClickSearchButton={() => {}}
-          placeholder={tr('Search by country/city...')}
+          placeholder={tr('Search by...')}
         />
       </Stack>
 
@@ -462,9 +488,10 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
       ) : null}
 
       <Stack
+        ref={containerRef}
         direction="row"
-        justifyContent="space-between"
-        alignItems="center"
+        justifyContent="flex-start"
+        alignItems="flex-start"
         gap="16px"
         sx={{ flexWrap: 'wrap' }}
         onMouseDown={startTimer}
@@ -506,4 +533,4 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
       </IonInfiniteScroll>
     </>
   );
-};
+}
