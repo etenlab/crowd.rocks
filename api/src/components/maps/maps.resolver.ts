@@ -68,7 +68,7 @@ export class MapsResolver {
     file_size: number,
     @Context() req: any,
   ): Promise<MapUploadOutput> {
-    console.log(`mapUpload resolver `, name);
+    console.log(`mapUpload resolver `, map_file_name);
     const bearer = getBearer(req) || '';
     let fileBody = '';
     const readStream = createReadStream();
