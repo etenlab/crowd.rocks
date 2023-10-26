@@ -47,7 +47,11 @@ import { globals } from '../../../services/globals';
 
 import { PAGE_SIZE } from '../../../const/commonConst';
 import { RouteComponentProps } from 'react-router';
-import { langInfo2langInput, langInfo2tag } from '../../../../../utils';
+import {
+  langInfo2langInput,
+  langInfo2tag,
+  tag2langInfo,
+} from '../../../../../utils';
 
 import { MapUploadModal } from './MapUploadModal';
 import { MapResetModal } from './MapResetModal';
@@ -104,6 +108,8 @@ export function MapList({ match }: MapListProps) {
       router.push(
         `/${nation_id}/${language_id}/1/maps/list/${langInfo2tag(targetLang)}`,
       );
+    } else if (!targetLang) {
+      setTargetLanguage(tag2langInfo(url_lang_tag));
     }
   }, [
     setTargetLanguage,
