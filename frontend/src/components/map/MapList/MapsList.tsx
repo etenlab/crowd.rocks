@@ -102,23 +102,11 @@ export function MapList({ match }: MapListProps) {
   useEffect(() => {
     if (
       url_lang_tag &&
-      targetLang &&
-      url_lang_tag !== langInfo2tag(targetLang)
+      (!targetLang || url_lang_tag !== langInfo2tag(targetLang))
     ) {
-      router.push(
-        `/${nation_id}/${language_id}/1/maps/list/${langInfo2tag(targetLang)}`,
-      );
-    } else if (!targetLang) {
       setTargetLanguage(tag2langInfo(url_lang_tag));
     }
-  }, [
-    setTargetLanguage,
-    targetLang,
-    url_lang_tag,
-    router,
-    nation_id,
-    language_id,
-  ]);
+  }, [setTargetLanguage, targetLang, url_lang_tag]);
 
   useEffect(() => {
     if (!targetLang) {
@@ -229,6 +217,21 @@ export function MapList({ match }: MapListProps) {
   const handleChangeAllCheck = (e: ChangeEvent<HTMLInputElement>) => {
     setAllChecked(e.target.checked);
   };
+
+  const updatePageLanguage = useCallback(
+    (targetLang: LanguageInfo | null) => {
+      if (targetLang) {
+        router.push(
+          `/${nation_id}/${language_id}/1/maps/list/${langInfo2tag(
+            targetLang,
+          )}`,
+        );
+      } else {
+        router.push(`/${nation_id}/${language_id}/1/maps/list/en`);
+      }
+    },
+    [language_id, nation_id, router],
+  );
 
   const { data: mapZipResult, error: mapZipError } =
     useSubscribeToZipMapSubscription();
@@ -362,18 +365,9 @@ export function MapList({ match }: MapListProps) {
         title={tr('Select your language')}
         selected={targetLang}
         onChange={(_langTag, langInfo) => {
-          if (langInfo) {
-            setTargetLanguage(langInfo);
-          }
+          updatePageLanguage(langInfo);
         }}
-        onClearClick={() =>
-          setTargetLanguage({
-            lang: {
-              tag: 'en',
-              descriptions: ['English'],
-            },
-          })
-        }
+        onClearClick={() => updatePageLanguage(null)}
       />
 
       <Stack gap="14px">
