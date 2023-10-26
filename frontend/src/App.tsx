@@ -99,17 +99,16 @@ const authLink = setContext((_, { headers }) => {
 setupIonicReact({
   innerHTMLTemplatesEnabled: true,
 });
+const cache = new InMemoryCache({
+  typePolicies,
+});
+
+export const apollo_client = new ApolloClient({
+  cache,
+  link: authLink.concat(splitLink),
+});
 
 const App: React.FC = () => {
-  const cache = new InMemoryCache({
-    typePolicies,
-  });
-
-  const apollo_client = new ApolloClient({
-    cache,
-    link: authLink.concat(splitLink),
-  });
-
   return (
     <IonApp>
       <ApolloProvider client={apollo_client}>

@@ -47,6 +47,12 @@ export class DatabaseVersionControlService {
         case 4:
           console.log('Updating database to version 5');
           await this.loadVersion5();
+        case 5:
+          console.log('Updating database to version 6');
+          await this.loadVersion6();
+        case 6:
+          console.log('Updating database to version 7');
+          await this.loadVersion7();
         default:
           console.error('Database version is current');
       }
@@ -409,6 +415,22 @@ export class DatabaseVersionControlService {
 
     // set version
     await this.setVersionNumber(5);
+  }
+
+  async loadVersion6(): Promise<void> {
+    //maps
+    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v6.sql');
+    await this.runSqlFile(
+      './src/core/sql/map/v_map_words_and_phrases-with-tr-info-v6.sql',
+    );
+
+    // set version
+    await this.setVersionNumber(6);
+  }
+
+  async loadVersion7(): Promise<void> {
+    // set version
+    await this.setVersionNumber(7);
   }
 
   async registerUser(
