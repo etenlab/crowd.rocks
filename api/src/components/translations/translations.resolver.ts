@@ -381,7 +381,7 @@ export class TranslationsResolver {
       'getTranslationsByFromDefinitionIds resolver',
       from_definition_ids,
       from_type_is_words,
-      JSON.stringify(langInfo, null, 2),
+      langInfo,
     );
 
     const fromDefinitionIds: {
