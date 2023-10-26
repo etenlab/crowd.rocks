@@ -89,19 +89,19 @@ export function SettingsPage() {
     });
   }, [toolsState]);
 
-  const toggleIsOral = useCallback(() => {
-    setToolsState({
-      ...toolsState,
-      isOral: !toolsState.isOral,
-    });
-  }, [toolsState]);
+  // const toggleIsOral = useCallback(() => {
+  //   setToolsState({
+  //     ...toolsState,
+  //     isOral: !toolsState.isOral,
+  //   });
+  // }, [toolsState]);
 
-  const toggleIsSign = useCallback(() => {
-    setToolsState({
-      ...toolsState,
-      isSign: !toolsState.isSign,
-    });
-  }, [toolsState]);
+  // const toggleIsSign = useCallback(() => {
+  //   setToolsState({
+  //     ...toolsState,
+  //     isSign: !toolsState.isSign,
+  //   });
+  // }, [toolsState]);
 
   const toolItems = [
     {
@@ -109,16 +109,16 @@ export function SettingsPage() {
       endIcon: <Switch checked={toolsState.isBetaTools} />,
       onClick: toggleIsBetaTools,
     },
-    {
-      title: tr('Oral Tools'),
-      endIcon: <Switch checked={toolsState.isOral} />,
-      onClick: toggleIsOral,
-    },
-    {
-      title: tr('Sign Tools'),
-      endIcon: <Switch checked={toolsState.isSign} />,
-      onClick: toggleIsSign,
-    },
+    // {
+    //   title: tr('Oral Tools'),
+    //   endIcon: <Switch checked={toolsState.isOral} />,
+    //   onClick: toggleIsOral,
+    // },
+    // {
+    //   title: tr('Sign Tools'),
+    //   endIcon: <Switch checked={toolsState.isSign} />,
+    //   onClick: toggleIsSign,
+    // },
   ];
 
   const designItems = [
@@ -141,8 +141,8 @@ export function SettingsPage() {
         {tr('Settings')}
       </Caption>
 
-      <SettingList items={toolItems} title={tr('Tools')} />
       <SettingList items={designItems} title={tr('Design Mode')} />
+      <SettingList items={toolItems} title={tr('Tools')} />
     </PageLayout>
   );
 }
