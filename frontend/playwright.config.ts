@@ -29,7 +29,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: ciEnv ? 'http://localhost:8100/' : 'https://dev.crowd.rocks',
+    baseURL: ciEnv ? 'http://localhost:3000/' : 'https://dev.crowd.rocks',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
