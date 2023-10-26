@@ -353,7 +353,7 @@ export class TranslationsResolver {
     @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
   ): Promise<TranslationWithVoteOutput> {
     console.log(
-      'getTranslationsByFromDefinitionId resolver',
+      'getRecommendedTranslationFromDefinitionID resolver',
       from_definition_id,
       from_type_is_word,
       JSON.stringify(langInfo, null, 2),
@@ -378,10 +378,10 @@ export class TranslationsResolver {
     @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
   ): Promise<TranslationWithVoteListOutput> {
     console.log(
-      'getTranslationsByFromDefinitionId resolver',
+      'getTranslationsByFromDefinitionIds resolver',
       from_definition_ids,
       from_type_is_words,
-      JSON.stringify(langInfo, null, 2),
+      langInfo,
     );
 
     const fromDefinitionIds: {

@@ -11,6 +11,10 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 import { CheckCircle } from '../../common/icons/CheckCircle';
+import {
+  GetRecommendedTranslationFromDefinitionIdDocument,
+  GetTranslationsByFromDefinitionIdDocument,
+} from '../../../generated/graphql';
 
 export type NewTranslationForm = {
   definition_id: string;
@@ -87,7 +91,10 @@ export function NewTranslationForm({
           definition_type === StringContentTypes.WORD,
         is_type_word: typeOfString(translation) === StringContentTypes.WORD,
       },
-      // refetchQueries: [GetTranslationsByFromDefinitionIdDocument],
+      refetchQueries: [
+        GetTranslationsByFromDefinitionIdDocument,
+        GetRecommendedTranslationFromDefinitionIdDocument,
+      ],
     });
     setTranslation('');
     setDescription('');
