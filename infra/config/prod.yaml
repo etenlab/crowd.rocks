@@ -34,6 +34,7 @@ appSecrets: 'prod/crowdrocksApiServer/secrets'
 
 # Whether database is accessible outside of VPC
 dbPublicAccess: true
+dbBackupRetentionDays: 7
 
 # DNS setup
 dns:
