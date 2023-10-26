@@ -19,6 +19,7 @@ export interface EnvConfig {
   dbCredentialSecret: string;
   appSecrets: string;
   dbPublicAccess: boolean;
+  dbBackupRetentionDays: number;
   apiService: FargateServiceConfig;
   docsApp: AppConfig;
   dns: DNSConfig[];

@@ -54,6 +54,7 @@ const databaseStack = new StorageStack(
     dbSecurityGroupSsmParam: config.dbSecurityGroupSsmParam,
     publicFilesBucketName: config.publicFilesBucketName,
     tempPublicFilesBucketName: config.tempPublicFilesBucketName,
+    backupRetentionDays: config.dbBackupRetentionDays
   },
 );
 
