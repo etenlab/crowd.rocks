@@ -2,8 +2,7 @@ import BasePage from './BasePage';
 
 const headerText = '#crowd-rock-app #app-name-text';
 const logoutButton = '#app-logout-button';
-const loginButton =
-  "//ion-list[@class='md list-md']/ion-item//ion-label[text() = 'Login']";
+const loginButton = "//h4[text()='Login']";
 
 class MenuPage extends BasePage {
   async isheaderTextPresent() {
