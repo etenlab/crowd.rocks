@@ -10,6 +10,9 @@ export interface StateType {
       source: LanguageInfo | null;
       target: LanguageInfo | null;
     };
+    siteTextStringPage: {
+      target: LanguageInfo | null;
+    };
     targetLang: LanguageInfo | null;
     sourceLang: LanguageInfo | null;
   };
@@ -37,6 +40,9 @@ export const initialState: StateType = {
     },
     translationPage: {
       source: null,
+      target: null,
+    },
+    siteTextStringPage: {
       target: null,
     },
     targetLang: null,
@@ -120,6 +126,18 @@ export function reducer(
           ...prevState.langauges,
           translationPage: {
             ...prevState.langauges.translationPage,
+            target: action.payload as LanguageInfo | null,
+          },
+        },
+      };
+    }
+    case actions.CHANGE_SITE_TEXT_STRINGS_PAGE_TARGET_LANGAUGE: {
+      return {
+        ...prevState,
+        langauges: {
+          ...prevState.langauges,
+          siteTextStringPage: {
+            ...prevState.langauges.siteTextStringPage,
             target: action.payload as LanguageInfo | null,
           },
         },

@@ -4,6 +4,8 @@ export const actions = {
     'CHANGE_TRANSLATION_PAGE_SOURCE_LANGAUGE',
   CHANGE_TRANSLATION_PAGE_TARGET_LANGAUGE:
     'CHANGE_TRANSLATION_PAGE_TARGET_LANGAUGE',
+  CHANGE_SITE_TEXT_STRINGS_PAGE_TARGET_LANGAUGE:
+    'CHANGE_SITE_TEXT_STRINGS_PAGE_TARGET_LANGAUGE',
   SET_CURRENT_SOURCE_LANG: 'SET_CURRENT_SOURCE_LANGUAGE',
   SET_CURRENT_TARGET_LANG: 'SET_CURRENT_TARGET_LANGUAGE',
   SET_SITE_TEXT_LANGUAGE_LIST: 'SET_SITE_TEXT_LANGUAGE_LIST',
@@ -74,6 +76,13 @@ export function changeTranslationSourceLanguage(langInfo: LanguageInfo | null) {
 export function changeTranslationTargetLanguage(langInfo: LanguageInfo | null) {
   return {
     type: actions.CHANGE_TRANSLATION_PAGE_TARGET_LANGAUGE,
+    payload: langInfo,
+  };
+}
+
+export function changeSiteTextTargetLanguage(langInfo: LanguageInfo | null) {
+  return {
+    type: actions.CHANGE_SITE_TEXT_STRINGS_PAGE_TARGET_LANGAUGE,
     payload: langInfo,
   };
 }

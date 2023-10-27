@@ -35,6 +35,7 @@ export interface ContextType {
     changeAppLanguage: (langInfo: LanguageInfo) => void;
     changeTranslationSourceLanguage: (langInfo: LanguageInfo | null) => void;
     changeTranslationTargetLanguage: (langInfo: LanguageInfo | null) => void;
+    changeSiteTextTargetLanguage: (langInfo: LanguageInfo | null) => void;
     setSourceLanguage: (targetLanguage: LanguageInfo | null) => void;
     setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
     setUpdatedTrDefinitionIds: (definitionIds: Array<string>) => void;
@@ -85,6 +86,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
     setTargetLanguage,
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
+    changeSiteTextTargetLanguage,
     setUpdatedTrDefinitionIds,
     setTempTranslation,
     clearTempTranslation,
@@ -334,6 +336,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
       changeAppLanguage,
       changeTranslationSourceLanguage,
       changeTranslationTargetLanguage,
+      changeSiteTextTargetLanguage,
       setSourceLanguage,
       setTargetLanguage,
       setUpdatedTrDefinitionIds,
