@@ -35,7 +35,7 @@ CREATE UNIQUE INDEX mv_words_languages_unq_idx ON mv_words_languages USING btree
 CREATE INDEX mv_words_languages_full_language_code_idx ON mv_words_languages USING btree (t_language_code, t_dialect_code, t_geo_code);
 CREATE INDEX mv_words_languages_language_code_idx ON mv_words_languages USING btree (t_language_code);
 CREATE INDEX mv_words_languages_t_phrase_id_idx ON mv_words_languages USING btree (t_phrase_id);
-CREATE INDEX mv_words_languages_t_word_id_idx ON mv_words_languages USING btree (t_word_id);-- public.phrases_languages definition
+CREATE INDEX mv_words_languages_t_word_id_idx ON mv_words_languages USING btree (t_word_id);
 
 -- mv_phrases_languages definition
 
