@@ -99,7 +99,7 @@ export function Select({
         <Divider
           orientation="vertical"
           variant="middle"
-          sx={{ height: '24px', marginTop: 0, marginBottom: 0 }}
+          sx={{ height: '16px', marginTop: 0, marginBottom: 0 }}
         />
         <IconButton
           sx={{ padding: 0 }}

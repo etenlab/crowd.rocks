@@ -1,19 +1,12 @@
-import { Box, IconButton, InputBase, Divider } from '@mui/material';
-import { Search } from '../../icons/Search';
+import { Box, InputBase } from '@mui/material';
 
-export type SearchInputProps = {
+export type InputProps = {
   placeholder: string;
   value: string;
   onChange(value: string): void;
-  onClickSearchButton(): void;
 };
 
-export function SearchInput({
-  placeholder,
-  value,
-  onChange,
-  onClickSearchButton,
-}: SearchInputProps) {
+export function Input({ placeholder, value, onChange }: InputProps) {
   return (
     <Box
       sx={(theme) => ({
@@ -26,14 +19,6 @@ export function SearchInput({
         gap: '12px',
       })}
     >
-      <IconButton sx={{ padding: 0 }} onClick={onClickSearchButton}>
-        <Search sx={{ fontSize: 24 }} />
-      </IconButton>
-      <Divider
-        orientation="vertical"
-        variant="middle"
-        sx={{ height: '16px', marginTop: 0, marginBottom: 0 }}
-      />
       <InputBase
         value={value}
         onChange={(e) => {
