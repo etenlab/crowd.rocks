@@ -3,11 +3,14 @@ import { useParams } from 'react-router';
 import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 import { Button, CircularProgress, Stack, Typography } from '@mui/material';
+import { useDebounce } from 'use-debounce';
 
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { SearchInput } from '../../common/forms/SearchInput';
 import { FilterList } from '../../common/icons/FilterList';
+import { NavigationModal } from '../../common/modalContent/NavigationModal';
+
 import { MapWordItem } from './MapWordItem';
 // import { Select, OptionItem } from '../../common/forms/Select';
 
@@ -17,7 +20,6 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
 import { PAGE_SIZE } from '../../../const/commonConst';
-import { MapNavigationModal } from './MapNavigationModal';
 
 export function MapWordsList() {
   const { tr } = useTr();
@@ -53,6 +55,7 @@ export function MapWordsList() {
   const { openModal, closeModal } = createModal();
 
   const [filter, setFilter] = useState<string>('');
+  const [bouncedFilter] = useDebounce(filter, 500);
   const [quickFilter, setQuickFilter] = useState<string | null>('');
   // const [filterOption, setFilterOption] = useState<OptionItem>({
   //   label: tr('All'),
@@ -83,7 +86,7 @@ export function MapWordsList() {
             language_code: DEFAULT_MAP_LANGUAGE_CODE,
           },
           original_map_id: id && id !== 'all' ? id : null,
-          filter,
+          filter: bouncedFilter,
           quickFilter,
           // onlyNotTranslated:
           //   filterOption.value === 'not translated' ? true : null,
@@ -99,7 +102,7 @@ export function MapWordsList() {
   }, [
     getWordsAndPhrases,
     targetLang,
-    filter,
+    bouncedFilter,
     id,
     // filterOption,
     quickFilter,
@@ -114,7 +117,7 @@ export function MapWordsList() {
             language_code: DEFAULT_MAP_LANGUAGE_CODE,
           },
           original_map_id: id && id !== 'all' ? id : null,
-          filter,
+          filter: bouncedFilter,
           quickFilter,
           // onlyNotTranslated:
           //   filterOption.value === 'not translated' ? true : null,
@@ -136,7 +139,7 @@ export function MapWordsList() {
       wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.hasNextPage,
       wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.endCursor,
       id,
-      filter,
+      bouncedFilter,
       quickFilter,
       // filterOption.value,
       fetchMore,
@@ -151,10 +154,7 @@ export function MapWordsList() {
 
   const handleOpenFilterModal = () => {
     openModal(
-      <MapNavigationModal
-        onClose={closeModal}
-        setQuickFilter={setQuickFilter}
-      />,
+      <NavigationModal onClose={closeModal} setQuickFilter={setQuickFilter} />,
     );
   };
 

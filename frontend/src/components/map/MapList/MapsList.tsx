@@ -134,28 +134,34 @@ export function MapList({ match }: MapListProps) {
   }, [getAllMapsList, targetLang, bouncedFilter]);
 
   useEffect(() => {
-    const observer = new ResizeObserver((entries) => {
-      entries.forEach((entry) => {
-        const containerWidth = entry.contentRect.width;
+    if (containerRef.current) {
+      const observer = new ResizeObserver((entries) => {
+        entries.forEach((entry) => {
+          const containerWidth = entry.contentRect.width;
 
-        const itemWidth = 162;
-        const basicGap = 16;
+          const itemWidth = 162;
+          const basicGap = 16;
 
-        const rowBlockCnt = Math.floor(
-          (containerWidth + basicGap) / (itemWidth + basicGap),
-        );
-        const additionalGap =
-          (containerWidth -
-            itemWidth * rowBlockCnt -
-            basicGap * (rowBlockCnt - 1)) /
-          (rowBlockCnt - 1);
+          const rowBlockCnt = Math.floor(
+            (containerWidth + basicGap) / (itemWidth + basicGap),
+          );
+          const additionalGap =
+            (containerWidth -
+              itemWidth * rowBlockCnt -
+              basicGap * (rowBlockCnt - 1)) /
+            (rowBlockCnt - 1);
 
-        containerRef.current!.style.columnGap = `${basicGap + additionalGap}px`;
-        containerRef.current!.style.rowGap = `${basicGap}px`;
+          if (containerRef.current) {
+            containerRef.current.style.columnGap = `${
+              basicGap + additionalGap
+            }px`;
+            containerRef.current.style.rowGap = `${basicGap}px`;
+          }
+        });
       });
-    });
 
-    observer.observe(containerRef.current!);
+      observer.observe(containerRef.current);
+    }
   }, []);
 
   const handleFilterChange = (value: string) => {
@@ -355,7 +361,7 @@ export function MapList({ match }: MapListProps) {
   return (
     <>
       <Caption
-        handleBackClick={() => {
+        onBackClick={() => {
           router.push(`/${nation_id}/${language_id}/1/home`);
         }}
       >
