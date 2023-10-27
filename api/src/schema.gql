@@ -1282,10 +1282,14 @@ enum TableNameType {
   original_maps
   pericopies
   phrase_definitions
+  phrase_to_phrase_translations
+  phrase_to_word_translations
   phrases
   translated_maps
   word_definitions
   word_ranges
+  word_to_phrase_translations
+  word_to_word_translations
   words
 }
 

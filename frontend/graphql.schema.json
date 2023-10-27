@@ -16678,6 +16678,18 @@
             "deprecationReason": null
           },
           {
+            "name": "phrase_to_phrase_translations",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "phrase_to_word_translations",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "phrases",
             "description": null,
             "isDeprecated": false,
@@ -16697,6 +16709,18 @@
           },
           {
             "name": "word_ranges",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "word_to_phrase_translations",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "word_to_word_translations",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

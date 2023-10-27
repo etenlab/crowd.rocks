@@ -2268,10 +2268,14 @@ export enum TableNameType {
   OriginalMaps = 'original_maps',
   Pericopies = 'pericopies',
   PhraseDefinitions = 'phrase_definitions',
+  PhraseToPhraseTranslations = 'phrase_to_phrase_translations',
+  PhraseToWordTranslations = 'phrase_to_word_translations',
   Phrases = 'phrases',
   TranslatedMaps = 'translated_maps',
   WordDefinitions = 'word_definitions',
   WordRanges = 'word_ranges',
+  WordToPhraseTranslations = 'word_to_phrase_translations',
+  WordToWordTranslations = 'word_to_word_translations',
   Words = 'words'
 }
 
