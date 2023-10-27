@@ -176,6 +176,7 @@ export enum ErrorType {
   MapInsertFailed = 'MapInsertFailed',
   MapNotFound = 'MapNotFound',
   MapVoteNotFound = 'MapVoteNotFound',
+  MapWordsAndPhrasesSearchError = 'MapWordsAndPhrasesSearchError',
   MapZippingError = 'MapZippingError',
   NoError = 'NoError',
   NotificationDeleteFailed = 'NotificationDeleteFailed',
@@ -412,8 +413,8 @@ export type GetOrigMapWordsAndPhrasesInput = {
   filter?: InputMaybe<Scalars['String']['input']>;
   isSortDescending?: InputMaybe<Scalars['Boolean']['input']>;
   lang: LanguageInput;
-  onlyNotTranslated?: InputMaybe<Scalars['Boolean']['input']>;
-  onlyTranslated?: InputMaybe<Scalars['Boolean']['input']>;
+  onlyNotTranslatedTo?: InputMaybe<LanguageInput>;
+  onlyTranslatedTo?: InputMaybe<LanguageInput>;
   original_map_id?: InputMaybe<Scalars['String']['input']>;
   quickFilter?: InputMaybe<Scalars['String']['input']>;
 };
@@ -608,6 +609,7 @@ export type MapWordOrPhraseAsOrigOutput = {
 export type MapWordsAndPhrasesConnection = {
   __typename?: 'MapWordsAndPhrasesConnection';
   edges: Array<MapWordsAndPhrasesEdge>;
+  error: ErrorType;
   pageInfo: PageInfo;
 };
 
@@ -3175,8 +3177,8 @@ export type GetOrigMapWordsAndPhrasesQueryVariables = Exact<{
   lang: LanguageInput;
   filter?: InputMaybe<Scalars['String']['input']>;
   quickFilter?: InputMaybe<Scalars['String']['input']>;
-  onlyNotTranslated?: InputMaybe<Scalars['Boolean']['input']>;
-  onlyTranslated?: InputMaybe<Scalars['Boolean']['input']>;
+  onlyNotTranslatedTo?: InputMaybe<LanguageInput>;
+  onlyTranslatedTo?: InputMaybe<LanguageInput>;
   after?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -6192,9 +6194,9 @@ export type DeleteForumMutationHookResult = ReturnType<typeof useDeleteForumMuta
 export type DeleteForumMutationResult = Apollo.MutationResult<DeleteForumMutation>;
 export type DeleteForumMutationOptions = Apollo.BaseMutationOptions<DeleteForumMutation, DeleteForumMutationVariables>;
 export const GetOrigMapWordsAndPhrasesDocument = gql`
-    query GetOrigMapWordsAndPhrases($original_map_id: String, $lang: LanguageInput!, $filter: String, $quickFilter: String, $onlyNotTranslated: Boolean, $onlyTranslated: Boolean, $after: ID, $first: Int) {
+    query GetOrigMapWordsAndPhrases($original_map_id: String, $lang: LanguageInput!, $filter: String, $quickFilter: String, $onlyNotTranslatedTo: LanguageInput, $onlyTranslatedTo: LanguageInput, $after: ID, $first: Int) {
   getOrigMapWordsAndPhrases(
-    input: {lang: $lang, filter: $filter, quickFilter: $quickFilter, original_map_id: $original_map_id, onlyNotTranslated: $onlyNotTranslated, onlyTranslated: $onlyTranslated}
+    input: {lang: $lang, filter: $filter, quickFilter: $quickFilter, original_map_id: $original_map_id, onlyNotTranslatedTo: $onlyNotTranslatedTo, onlyTranslatedTo: $onlyTranslatedTo}
     after: $after
     first: $first
   ) {
@@ -6227,8 +6229,8 @@ export const GetOrigMapWordsAndPhrasesDocument = gql`
  *      lang: // value for 'lang'
  *      filter: // value for 'filter'
  *      quickFilter: // value for 'quickFilter'
- *      onlyNotTranslated: // value for 'onlyNotTranslated'
- *      onlyTranslated: // value for 'onlyTranslated'
+ *      onlyNotTranslatedTo: // value for 'onlyNotTranslatedTo'
+ *      onlyTranslatedTo: // value for 'onlyTranslatedTo'
  *      after: // value for 'after'
  *      first: // value for 'first'
  *   },

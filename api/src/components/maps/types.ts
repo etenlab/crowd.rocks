@@ -88,8 +88,10 @@ export class GetOrigMapWordsAndPhrasesInput {
   @Field(() => String, { nullable: true }) original_map_id: string | null;
   @Field(() => LanguageInput) lang: LanguageInput;
   @Field(() => String, { nullable: true }) filter: string | null;
-  @Field(() => Boolean, { nullable: true }) onlyTranslated?: boolean | null;
-  @Field(() => Boolean, { nullable: true }) onlyNotTranslated?: boolean | null;
+  @Field(() => LanguageInput, { nullable: true })
+  onlyTranslatedTo?: LanguageInput | null;
+  @Field(() => LanguageInput, { nullable: true })
+  onlyNotTranslatedTo?: LanguageInput | null;
   @Field(() => Boolean, { nullable: true }) isSortDescending?: boolean | null;
   @Field(() => String, { nullable: true }) quickFilter?: string | null;
 }
@@ -114,7 +116,7 @@ export class MapWordsAndPhrasesEdge {
 }
 
 @ObjectType()
-export class MapWordsAndPhrasesConnection {
+export class MapWordsAndPhrasesConnection extends GenericOutput {
   @Field(() => [MapWordsAndPhrasesEdge])
   edges: MapWordsAndPhrasesEdge[];
   @Field(() => PageInfo) pageInfo: PageInfo;

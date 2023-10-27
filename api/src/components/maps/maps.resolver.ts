@@ -46,7 +46,7 @@ import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionToken } from '../../common/subscription-token';
 
 @Injectable()
-@Resolver(Map) // todo: wtf with paramenter, looks like `Map` is wrong and redundant here.
+@Resolver()
 export class MapsResolver {
   constructor(
     private mapsService: MapsService,

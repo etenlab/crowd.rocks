@@ -61,7 +61,7 @@ export function WordItemStandard({
             marginTop: '10px',
           }}
         >
-          {original.description}
+          {translation.description}
         </Typography>
       ) : null}
 

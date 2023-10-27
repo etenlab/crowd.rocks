@@ -150,8 +150,12 @@ export function MapList({ match }: MapListProps) {
             basicGap * (rowBlockCnt - 1)) /
           (rowBlockCnt - 1);
 
-        containerRef.current!.style.columnGap = `${basicGap + additionalGap}px`;
-        containerRef.current!.style.rowGap = `${basicGap}px`;
+        if (containerRef?.current?.style) {
+          containerRef.current!.style.columnGap = `${
+            basicGap + additionalGap
+          }px`;
+          containerRef.current!.style.rowGap = `${basicGap}px`;
+        }
       });
     });
 

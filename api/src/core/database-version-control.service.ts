@@ -438,6 +438,34 @@ export class DatabaseVersionControlService {
   }
 
   async loadVersion8(): Promise<void> {
+    //schema
+    await this.runSqlFile('./src/core/sql/schema/v8.schema.sql');
+
+    // translations
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/batch_translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/batch_translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/batch_translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/batch_translation_upsert-v8.sql',
+    );
     // set version
     await this.setVersionNumber(8);
   }
