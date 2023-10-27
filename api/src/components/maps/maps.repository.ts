@@ -1183,11 +1183,8 @@ export class MapsRepository {
       after?: string | null;
     },
   ): Promise<MapWordsAndPhrasesConnection> {
-    if (
-      (input.onlyNotTranslated || input.onlyNotTranslated) &&
-      !input.targetLang.language_code
-    ) {
-      const msg = `mapsRepository#getOrigMapWordsAndPhrases: if translation filter is set, target language must be specified ${JSON.stringify(
+    if (input.onlyTranslatedTo && input.onlyNotTranslatedTo) {
+      const msg = `mapsRepository#getOrigMapWordsAndPhrases: must be set only one of (onlyTranslatedToTo, onlyNotTranslatedToTo) ${JSON.stringify(
         input,
       )}`;
       Logger.error(msg);
@@ -1235,37 +1232,39 @@ export class MapsRepository {
       languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;
     }
 
-    if (input.onlyTranslated) {
-      filterParams.push(input.targetLang.language_code);
+    if (input.onlyTranslatedTo) {
+      filterParams.push(input.onlyTranslatedTo.language_code);
       languagesFiltersRestrictionClause += `
-        and
-          where (
+        and(
+          (
             type='word' and o_id in (
-              select word_id from words_languages wl where t_language_code = 'uk'
+              select word_id from words_languages wl where t_language_code = $${filterParams.length}
             )
           )
           or (
             type='phrase' and o_id in (
-              select phrase_id from phrases_languages wl where t_language_code = 'uk'
+              select phrase_id from phrases_languages wl where t_language_code = $${filterParams.length}
             )
-          );
+          )
+        )
       `;
     }
 
-    if (input.onlyNotTranslated) {
-      filterParams.push(input.targetLang.language_code);
+    if (input.onlyNotTranslatedTo) {
+      filterParams.push(input.onlyNotTranslatedTo.language_code);
       languagesFiltersRestrictionClause += `
-        and
-          where (
+        and(
+          (
             type='word' and o_id not in (
-              select word_id from words_languages wl where t_language_code = 'uk'
+              select word_id from words_languages wl where t_language_code = $${filterParams.length}
             )
           )
           or (
             type='phrase' and o_id not in (
-              select phrase_id from phrases_languages wl where t_language_code = 'uk'
+              select phrase_id from phrases_languages wl where t_language_code = $${filterParams.length}
             )
-          );
+          )
+        )
       `;
     }
 
@@ -1295,11 +1294,7 @@ export class MapsRepository {
         o_geo_code,
         o_created_at,
         o_created_by
-      ${
-        input.onlyTranslated || input.onlyNotTranslated
-          ? ' from v_map_words_and_phrases_with_tr_info'
-          : ' from v_map_words_and_phrases'
-      }
+        from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
       ${pickDataClause}
@@ -1324,11 +1319,7 @@ export class MapsRepository {
     // just to know if there pages after the current selection
     const sqlAfter = `
       select count(*) as count_after
-      ${
-        input.onlyTranslated || input.onlyNotTranslated
-          ? ' from v_map_words_and_phrases_with_tr_info'
-          : ' from v_map_words_and_phrases'
-      }
+      from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
       and cursor>${dbPoolClient.escapeLiteral(resQ.rows.at(-1).cursor)}
@@ -1339,11 +1330,7 @@ export class MapsRepository {
     // just to know if there pages before the current selection
     const sqlBefore = `
       select count(*) as count_before
-      ${
-        input.onlyTranslated || input.onlyNotTranslated
-          ? ' from v_map_words_and_phrases_with_tr_info'
-          : ' from v_map_words_and_phrases'
-      }
+      from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
       and cursor<${dbPoolClient.escapeLiteral(resQ.rows[0].cursor)}

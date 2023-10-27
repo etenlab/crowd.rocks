@@ -373,11 +373,10 @@ input GetOrigMapWordsAndPhrasesInput {
   filter: String
   isSortDescending: Boolean
   lang: LanguageInput!
-  onlyNotTranslated: Boolean
-  onlyTranslated: Boolean
+  onlyNotTranslatedTo: LanguageInput
+  onlyTranslatedTo: LanguageInput
   original_map_id: String
   quickFilter: String
-  targetLang: LanguageInput
 }
 
 type GetOrigMapsListOutput {
