@@ -241,7 +241,12 @@ export class MapsResolver {
     @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
   ): Promise<MapListConnection> {
-    console.log(`getAllMapsList resolver `, input, first, after);
+    console.log(
+      `getAllMapsList resolver `,
+      JSON.stringify(input),
+      first,
+      after,
+    );
     return this.mapsService.getAllMapsList({
       lang: input.lang,
       first,
