@@ -171,6 +171,7 @@ export function MapList({ match }: MapListProps) {
                 language_code: targetLang.lang.tag,
                 dialect_code: targetLang?.dialect?.tag,
                 geo_code: targetLang?.region?.tag,
+                filter: bouncedFilter,
               },
               first: PAGE_SIZE,
               after: allMapsQuery.getAllMapsList.pageInfo.endCursor,
@@ -188,7 +189,7 @@ export function MapList({ match }: MapListProps) {
 
       setTimeout(() => ev.target.complete(), 500);
     },
-    [fetchMore, allMapsQuery, targetLang],
+    [fetchMore, allMapsQuery, targetLang, bouncedFilter],
   );
 
   const handleLongPress = () => {
