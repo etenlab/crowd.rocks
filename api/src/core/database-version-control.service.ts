@@ -438,9 +438,10 @@ export class DatabaseVersionControlService {
   }
 
   async loadVersion8(): Promise<void> {
-    await this.runSqlFile(
-      './src/core/sql/map/mv_words_phrases_languages-v8.sql',
-    );
+    //schema
+    await this.runSqlFile('./src/core/sql/schema/v8.schema.sql');
+
+    // translations
     await this.runSqlFile(
       './src/core/sql/translation/word_to_word/translation_upsert-v8.sql',
     );
