@@ -9,11 +9,13 @@ export type WordItemStandardProps = {
   translation?: Item;
   onDetail(): void;
   onClick(): void;
+  disabledDetail?: boolean;
 };
 
 export function WordItemStandard({
   original,
   translation,
+  disabledDetail,
   onDetail,
   onClick,
 }: WordItemStandardProps) {
@@ -61,11 +63,12 @@ export function WordItemStandard({
             marginTop: '10px',
           }}
         >
-          {original.description}
+          {translation.description}
         </Typography>
       ) : null}
 
       <IconButton
+        disabled={disabledDetail}
         onClick={handleClick}
         sx={(theme) => ({
           position: 'absolute',
