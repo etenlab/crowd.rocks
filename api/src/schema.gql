@@ -152,6 +152,7 @@ enum ErrorType {
   MapInsertFailed
   MapNotFound
   MapVoteNotFound
+  MapWordsAndPhrasesSearchError
   MapZippingError
   NoError
   NotificationDeleteFailed
@@ -376,6 +377,7 @@ input GetOrigMapWordsAndPhrasesInput {
   onlyTranslated: Boolean
   original_map_id: String
   quickFilter: String
+  targetLang: LanguageInput
 }
 
 type GetOrigMapsListOutput {
@@ -546,6 +548,7 @@ type MapWordOrPhraseAsOrigOutput {
 
 type MapWordsAndPhrasesConnection {
   edges: [MapWordsAndPhrasesEdge!]!
+  error: ErrorType!
   pageInfo: PageInfo!
 }
 

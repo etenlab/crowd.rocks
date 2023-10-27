@@ -1183,6 +1183,17 @@ export class MapsRepository {
       after?: string | null;
     },
   ): Promise<MapWordsAndPhrasesConnection> {
+    if (
+      (input.onlyNotTranslated || input.onlyNotTranslated) &&
+      !input.targetLang.language_code
+    ) {
+      const msg = `mapsRepository#getOrigMapWordsAndPhrases: if translation filter is set, target language must be specified ${JSON.stringify(
+        input,
+      )}`;
+      Logger.error(msg);
+      throw new Error(msg);
+    }
+
     const filterParams: string[] = [];
     let languagesFiltersRestrictionClause = '';
     let pickDataClause = '';
@@ -1225,10 +1236,37 @@ export class MapsRepository {
     }
 
     if (input.onlyTranslated) {
-      languagesFiltersRestrictionClause += ` and (some_to_word_tr_id is not null or some_to_phrase_tr_id is not null) `;
+      filterParams.push(input.targetLang.language_code);
+      languagesFiltersRestrictionClause += `
+        and
+          where (
+            type='word' and o_id in (
+              select word_id from words_languages wl where t_language_code = 'uk'
+            )
+          )
+          or (
+            type='phrase' and o_id in (
+              select phrase_id from phrases_languages wl where t_language_code = 'uk'
+            )
+          );
+      `;
     }
+
     if (input.onlyNotTranslated) {
-      languagesFiltersRestrictionClause += ` and (some_to_word_tr_id is null and some_to_phrase_tr_id is null) `;
+      filterParams.push(input.targetLang.language_code);
+      languagesFiltersRestrictionClause += `
+        and
+          where (
+            type='word' and o_id not in (
+              select word_id from words_languages wl where t_language_code = 'uk'
+            )
+          )
+          or (
+            type='phrase' and o_id not in (
+              select phrase_id from phrases_languages wl where t_language_code = 'uk'
+            )
+          );
+      `;
     }
 
     const langAndPickParams: string[] = [...filterParams];
@@ -1279,6 +1317,7 @@ export class MapsRepository {
           hasPreviousPage: false,
           hasNextPage: false,
         },
+        error: ErrorType.NoError,
       };
     }
 
@@ -1366,6 +1405,7 @@ export class MapsRepository {
     return {
       edges,
       pageInfo,
+      error: ErrorType.NoError,
     };
   }
 
