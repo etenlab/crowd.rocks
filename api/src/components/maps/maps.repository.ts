@@ -1238,12 +1238,12 @@ export class MapsRepository {
         and(
           (
             type='word' and o_id in (
-              select word_id from words_languages wl where t_language_code = $${filterParams.length}
+              select word_id from mv_words_languages where t_language_code = $${filterParams.length}
             )
           )
           or (
             type='phrase' and o_id in (
-              select phrase_id from phrases_languages wl where t_language_code = $${filterParams.length}
+              select phrase_id from mv_phrases_languages where t_language_code = $${filterParams.length}
             )
           )
         )
@@ -1256,12 +1256,12 @@ export class MapsRepository {
         and(
           (
             type='word' and o_id not in (
-              select word_id from words_languages wl where t_language_code = $${filterParams.length}
+              select word_id from mv_words_languages where t_language_code = $${filterParams.length}
             )
           )
           or (
             type='phrase' and o_id not in (
-              select phrase_id from phrases_languages wl where t_language_code = $${filterParams.length}
+              select phrase_id from mv_phrases_languages where t_language_code = $${filterParams.length}
             )
           )
         )
