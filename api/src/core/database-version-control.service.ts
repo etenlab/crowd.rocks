@@ -53,6 +53,10 @@ export class DatabaseVersionControlService {
         case 6:
           console.log('Updating database to version 7');
           await this.loadVersion7();
+        case 7:
+          console.log('Updating database to version 8');
+          await this.loadVersion8();
+
         default:
           console.error('Database version is current');
       }
@@ -431,6 +435,39 @@ export class DatabaseVersionControlService {
   async loadVersion7(): Promise<void> {
     // set version
     await this.setVersionNumber(7);
+  }
+
+  async loadVersion8(): Promise<void> {
+    //schema
+    await this.runSqlFile('./src/core/sql/schema/v8.schema.sql');
+
+    // translations
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/batch_translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/batch_translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/batch_translation_upsert-v8.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/batch_translation_upsert-v8.sql',
+    );
+    // set version
+    await this.setVersionNumber(8);
   }
 
   async registerUser(

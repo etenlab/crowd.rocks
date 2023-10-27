@@ -15,15 +15,19 @@ import { Cancel } from '../icons/Cancel';
 
 import { Avatar } from '../Avatar';
 import { globals } from '../../../services/globals';
+import { SunLight } from '../icons/SunLight';
+import { HalfMoon } from '../icons/HalfMoon';
 
 export type HeaderProps = {
   onClickMenu(): void;
   onClickAppName(): void;
   onClickDiscussion(): void;
   onClickNotification(): void;
+  onClickThemeButton(): void;
   onCancel(): void;
   notificationCount: number;
   isMenuHeader?: boolean;
+  themeMode: 'dark' | 'light';
 };
 
 export function Header({
@@ -31,9 +35,11 @@ export function Header({
   onClickAppName,
   onClickDiscussion,
   onClickNotification,
+  onClickThemeButton,
   onCancel,
   notificationCount,
   isMenuHeader,
+  themeMode,
 }: HeaderProps) {
   const { tr } = useTr();
 
@@ -50,12 +56,12 @@ export function Header({
     >
       {!isMenuHeader ? (
         <>
-          <IconButton onClick={onClickDiscussion}>
+          <IconButton onClick={onClickDiscussion} sx={{ display: 'none' }}>
             <ChatBubbleEmpty sx={{ fontSize: 24 }} color="dark" />
           </IconButton>
           <IconButton
             onClick={onClickNotification}
-            sx={{ position: 'relative' }}
+            sx={{ position: 'relative', display: 'none' }}
           >
             <Badge
               badgeContent={notificationCount}
@@ -72,6 +78,16 @@ export function Header({
               }}
             ></Badge>
             <AppNotification sx={{ fontSize: 24 }} color="dark" />
+          </IconButton>
+          <IconButton
+            onClick={onClickThemeButton}
+            sx={{ position: 'relative' }}
+          >
+            {themeMode === 'light' ? (
+              <SunLight sx={{ fontSize: 24 }} color="dark" />
+            ) : (
+              <HalfMoon sx={{ fontSize: 24 }} color="dark" />
+            )}
           </IconButton>
         </>
       ) : (

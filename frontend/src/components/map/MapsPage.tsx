@@ -64,7 +64,7 @@ export const MapsPage: React.FC<MapsPageProps> = ({ match }: MapsPageProps) => {
         <Redirect
           to={`/${match.params.nation_id}/${
             match.params.language_id
-          }/1/maps/list/${langInfo2tag(targetLang || undefined)}`}
+          }/1/maps/list/${targetLang ? langInfo2tag(targetLang) : 'en'}`}
         />
       </Route>
     </PageLayout>

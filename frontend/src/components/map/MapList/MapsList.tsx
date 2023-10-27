@@ -47,7 +47,11 @@ import { globals } from '../../../services/globals';
 
 import { PAGE_SIZE } from '../../../const/commonConst';
 import { RouteComponentProps } from 'react-router';
-import { langInfo2langInput, langInfo2tag } from '../../../../../utils';
+import {
+  langInfo2langInput,
+  langInfo2tag,
+  tag2langInfo,
+} from '../../../../../utils';
 
 import { MapUploadModal } from './MapUploadModal';
 import { MapResetModal } from './MapResetModal';
@@ -61,7 +65,7 @@ interface MapListProps
     language_id: string;
   }> {}
 
-export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
+export function MapList({ match }: MapListProps) {
   const { lang_full_tag: url_lang_tag, nation_id, language_id } = match.params;
   const router = useIonRouter();
   const { tr } = useTr();
@@ -69,6 +73,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
 
   const [filter, setFilter] = useState<string>('');
   const [bouncedFilter] = useDebounce(filter, 500);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const timerRef = useRef<NodeJS.Timeout>();
   const singleClickTimerRef = useRef<NodeJS.Timeout>();
@@ -97,21 +102,11 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   useEffect(() => {
     if (
       url_lang_tag &&
-      targetLang &&
-      url_lang_tag !== langInfo2tag(targetLang)
+      (!targetLang || url_lang_tag !== langInfo2tag(targetLang))
     ) {
-      router.push(
-        `/${nation_id}/${language_id}/1/maps/list/${langInfo2tag(targetLang)}`,
-      );
+      setTargetLanguage(tag2langInfo(url_lang_tag));
     }
-  }, [
-    setTargetLanguage,
-    targetLang,
-    url_lang_tag,
-    router,
-    nation_id,
-    language_id,
-  ]);
+  }, [setTargetLanguage, targetLang, url_lang_tag]);
 
   useEffect(() => {
     if (!targetLang) {
@@ -138,6 +133,35 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
     getAllMapsList({ variables });
   }, [getAllMapsList, targetLang, bouncedFilter]);
 
+  useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      entries.forEach((entry) => {
+        const containerWidth = entry.contentRect.width;
+
+        const itemWidth = 162;
+        const basicGap = 16;
+
+        const rowBlockCnt = Math.floor(
+          (containerWidth + basicGap) / (itemWidth + basicGap),
+        );
+        const additionalGap =
+          (containerWidth -
+            itemWidth * rowBlockCnt -
+            basicGap * (rowBlockCnt - 1)) /
+          (rowBlockCnt - 1);
+
+        if (containerRef?.current?.style) {
+          containerRef.current!.style.columnGap = `${
+            basicGap + additionalGap
+          }px`;
+          containerRef.current!.style.rowGap = `${basicGap}px`;
+        }
+      });
+    });
+
+    observer.observe(containerRef.current!);
+  }, []);
+
   const handleFilterChange = (value: string) => {
     setFilter(value);
   };
@@ -151,6 +175,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
                 language_code: targetLang.lang.tag,
                 dialect_code: targetLang?.dialect?.tag,
                 geo_code: targetLang?.region?.tag,
+                filter: bouncedFilter,
               },
               first: PAGE_SIZE,
               after: allMapsQuery.getAllMapsList.pageInfo.endCursor,
@@ -168,7 +193,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
 
       setTimeout(() => ev.target.complete(), 500);
     },
-    [fetchMore, allMapsQuery, targetLang],
+    [fetchMore, allMapsQuery, targetLang, bouncedFilter],
   );
 
   const handleLongPress = () => {
@@ -197,6 +222,21 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
   const handleChangeAllCheck = (e: ChangeEvent<HTMLInputElement>) => {
     setAllChecked(e.target.checked);
   };
+
+  const updatePageLanguage = useCallback(
+    (targetLang: LanguageInfo | null) => {
+      if (targetLang) {
+        router.push(
+          `/${nation_id}/${language_id}/1/maps/list/${langInfo2tag(
+            targetLang,
+          )}`,
+        );
+      } else {
+        router.push(`/${nation_id}/${language_id}/1/maps/list/en`);
+      }
+    },
+    [language_id, nation_id, router],
+  );
 
   const { data: mapZipResult, error: mapZipError } =
     useSubscribeToZipMapSubscription();
@@ -330,18 +370,9 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
         title={tr('Select your language')}
         selected={targetLang}
         onChange={(_langTag, langInfo) => {
-          if (langInfo) {
-            setTargetLanguage(langInfo);
-          }
+          updatePageLanguage(langInfo);
         }}
-        onClearClick={() =>
-          setTargetLanguage({
-            lang: {
-              tag: 'en',
-              descriptions: ['English'],
-            },
-          })
-        }
+        onClearClick={() => updatePageLanguage(null)}
       />
 
       <Stack gap="14px">
@@ -415,7 +446,7 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
           value={filter}
           onChange={handleFilterChange}
           onClickSearchButton={() => {}}
-          placeholder={tr('Search by country/city...')}
+          placeholder={tr('Search by...')}
         />
       </Stack>
 
@@ -462,9 +493,10 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
       ) : null}
 
       <Stack
+        ref={containerRef}
         direction="row"
-        justifyContent="space-between"
-        alignItems="center"
+        justifyContent="flex-start"
+        alignItems="flex-start"
         gap="16px"
         sx={{ flexWrap: 'wrap' }}
         onMouseDown={startTimer}
@@ -506,4 +538,4 @@ export const MapList: React.FC<MapListProps> = ({ match }: MapListProps) => {
       </IonInfiniteScroll>
     </>
   );
-};
+}

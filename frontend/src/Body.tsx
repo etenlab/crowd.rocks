@@ -110,6 +110,7 @@ export function Body() {
 
   const [show_menu, set_show_menu] = useState(false);
   const [is_logged_in, set_is_logged_in] = useState(false);
+  const [show_dark_mode, set_show_dark_mode] = useState(false);
 
   const modal = useRef<HTMLIonModalElement>(null);
   const menuRef = useRef<HTMLIonMenuElement>(null);
@@ -143,19 +144,23 @@ export function Body() {
     const theme_storage = localStorage.getItem('theme');
     switch (theme_storage) {
       case null:
+        set_show_dark_mode(false);
         localStorage.setItem('theme', 'light');
         setColorMode('light');
         set_theme_classes(false);
         break;
       case 'light':
+        set_show_dark_mode(false);
         set_theme_classes(false);
         setColorMode('light');
         break;
       case 'dark':
+        set_show_dark_mode(true);
         set_theme_classes(true);
         setColorMode('dark');
         break;
       default:
+        set_show_dark_mode(false);
         set_theme_classes(false);
         setColorMode('light');
     }
@@ -179,6 +184,18 @@ export function Body() {
   const cancelMenu = () => {
     set_show_menu(false);
     menuRef.current?.close();
+  };
+
+  const toggle_theme = (checked: boolean) => {
+    set_show_dark_mode(checked);
+    if (!checked) {
+      localStorage.setItem('theme', 'light');
+      setColorMode('light');
+    } else {
+      localStorage.setItem('theme', 'dark');
+      setColorMode('dark');
+    }
+    set_theme_classes(checked);
   };
 
   const click_profile = useCallback(() => {
@@ -384,6 +401,8 @@ export function Body() {
             notificationCount={unreadNotificationCount || 0}
             isMenuHeader={true}
             onCancel={cancelMenu}
+            themeMode={show_dark_mode ? 'dark' : 'light'}
+            onClickThemeButton={() => toggle_theme(!show_dark_mode)}
           />
         </IonHeader>
 
@@ -400,6 +419,8 @@ export function Body() {
             onClickNotification={click_notifications}
             notificationCount={unreadNotificationCount || 0}
             onCancel={cancelMenu}
+            themeMode={show_dark_mode ? 'dark' : 'light'}
+            onClickThemeButton={() => toggle_theme(!show_dark_mode)}
           />
         </IonHeader>
 
