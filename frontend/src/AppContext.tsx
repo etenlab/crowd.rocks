@@ -232,19 +232,10 @@ export function AppContextProvider({ children }: AppProviderProps) {
         return;
       }
 
-      const siteTextDefinitionList =
-        stData.getAllSiteTextDefinitions.site_text_definition_list;
-
-      if (!siteTextDefinitionList) {
-        return;
-      }
-
       const originalMap: Record<string, string> = {};
 
-      for (const siteTextDefinition of siteTextDefinitionList) {
-        if (!siteTextDefinition) {
-          continue;
-        }
+      for (const edge of stData.getAllSiteTextDefinitions.edges) {
+        const siteTextDefinition = edge.node;
 
         switch (siteTextDefinition.__typename) {
           case 'SiteTextWordDefinition': {

@@ -106,9 +106,9 @@ export function Autocomplete({
           disabled={disabled}
         >
           {value === null ? (
-            <NavArrowDown sx={{ fontSize: 24 }} color="dark" />
+            <NavArrowDown sx={{ fontSize: 22 }} color="dark" />
           ) : (
-            <Cancel sx={{ fontSize: 24 }} color="red" />
+            <Cancel sx={{ fontSize: 22 }} color="red" />
           )}
         </IconButton>
       </StyledPaper>

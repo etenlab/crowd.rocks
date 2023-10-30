@@ -27,7 +27,7 @@ export function SearchInput({
       })}
     >
       <IconButton sx={{ padding: 0 }} onClick={onClickSearchButton}>
-        <Search sx={{ fontSize: 24 }} />
+        <Search sx={{ fontSize: 22 }} />
       </IconButton>
       <Divider
         orientation="vertical"
