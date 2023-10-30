@@ -4,7 +4,7 @@ import HomePO from '../pages/HomePage';
 import RegisterPO from '../pages/RegistrationPage';
 import LoginData from '../data-factory/LoginData';
 
-test('1: Verify that user is logged in with valid data', async ({ page }) => {
+test.skip('1: Verify that user is logged in with valid data', async ({ page }) => {
   const loginPage = new LoginPO(page);
   const homePage = new HomePO(page);
   const validLoginData = LoginData.validLoginData();

@@ -6,8 +6,8 @@ const expandIcon = '#app-menu-button';
 
 class HomePage extends BasePage {
   async isHomePageVisible() {
-    await this.page.locator(homePageTitle).first().waitFor();
-    return await this.page.locator(homePageTitle).last().isVisible();
+    await this.page.locator(homePageTitle).waitFor();
+    return await this.page.locator(homePageTitle).isVisible();
   }
 
   async clickOnExpandMenu() {

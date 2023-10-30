@@ -28,7 +28,7 @@ test('Verify that all the settings options are available on the setting page', a
   const homePage = new HomePage(page);
   const leftMenu = new MenuPage(page);
   const settingsPage = new SettingsPage(page);
-  const settingsDataList = SettingsData.settingsNameList();
+  const settingsDataList = SettingsData.allSettingsList();
 
   //Navigate to the URL
   await page.goto('/US/en/1/home');

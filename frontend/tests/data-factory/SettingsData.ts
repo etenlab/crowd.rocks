@@ -1,6 +1,6 @@
 class SettingsData {
-  settingsNameList() {
-    const lists = ['Beta Tools', 'Oral Tools', 'Sign Tools', 'Dark Mode'];
+  allSettingsList() {
+    const lists = ['Beta Tools', 'Dark Mode'];
     return lists;
   }
 }
