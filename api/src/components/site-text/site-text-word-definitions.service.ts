@@ -10,7 +10,7 @@ import { WordDefinitionsService } from 'src/components/definitions/word-definiti
 
 import {
   SiteTextWordDefinitionOutput,
-  SiteTextWordDefinitionListOutput,
+  SiteTextWordDefinitionListConnection,
   SiteTextWordDefinitionsOutput,
   SiteTextWordDefinition,
 } from './types';
@@ -229,17 +229,25 @@ export class SiteTextWordDefinitionsService {
 
   async getAllSiteTextWordDefinitions({
     pgClient,
+    first,
+    after,
     filter,
   }: {
     pgClient: PoolClient | null;
+    first: number | null;
+    after: string | null;
     filter?: string;
-  }): Promise<SiteTextWordDefinitionListOutput> {
+  }): Promise<SiteTextWordDefinitionListConnection> {
     try {
       const res = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
       }).query<GetAllSiteTextWordDefinition>(
-        ...getAllSiteTextWordDefinition(filter),
+        ...getAllSiteTextWordDefinition({
+          filter,
+          first: first ? first * 2 : null,
+          after,
+        }),
       );
 
       const siteTextIds = res.rows.map((row) => +row.site_text_id);
@@ -252,15 +260,38 @@ export class SiteTextWordDefinitionsService {
       if (error !== ErrorType.NoError) {
         return {
           error,
-          site_text_word_definition_list: [],
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+          },
         };
       }
 
+      const edges = site_text_word_definitions
+        .filter(
+          (definition): definition is SiteTextWordDefinition =>
+            definition !== null,
+        )
+        .map((definition) => {
+          return {
+            cursor: definition.word_definition.word.word,
+            node: definition,
+          };
+        });
+
       return {
         error: ErrorType.NoError,
-        site_text_word_definition_list: site_text_word_definitions.filter(
-          (definition) => definition,
-        ) as SiteTextWordDefinition[],
+        edges,
+        pageInfo: {
+          hasNextPage: first ? res.rowCount > first : false,
+          hasPreviousPage: false,
+          startCursor: edges.length > 0 ? edges[0].cursor : null,
+          endCursor:
+            edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
+        },
       };
     } catch (e) {
       console.error(e);
@@ -268,7 +299,13 @@ export class SiteTextWordDefinitionsService {
 
     return {
       error: ErrorType.UnknownError,
-      site_text_word_definition_list: [],
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+      },
     };
   }
 }

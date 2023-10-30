@@ -8,6 +8,7 @@ import {
 } from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
+import { PageInfo } from '../common/types';
 import {
   WordDefinition,
   PhraseDefinition,
@@ -104,22 +105,43 @@ export class SiteTextTranslationsToInput {
 }
 
 @ObjectType()
-export class SiteTextPhraseDefinitionListOutput extends GenericOutput {
-  @Field(() => [SiteTextPhraseDefinition], { nullable: 'items' })
-  site_text_phrase_definition_list: SiteTextPhraseDefinition[];
+export class SiteTextPhraseDefinitionEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => SiteTextPhraseDefinition) node: SiteTextPhraseDefinition;
 }
 
 @ObjectType()
-export class SiteTextWordDefinitionListOutput extends GenericOutput {
-  @Field(() => [SiteTextWordDefinition])
-  site_text_word_definition_list: SiteTextWordDefinition[];
+export class SiteTextPhraseDefinitionListConnection extends GenericOutput {
+  @Field(() => [SiteTextPhraseDefinitionEdge])
+  edges: SiteTextPhraseDefinitionEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
 }
 
 @ObjectType()
-export class SiteTextDefinitionListOutput extends GenericOutput {
-  @Field(() => [SiteTextDefinition], { nullable: 'items' })
-  site_text_definition_list:
-    | (SiteTextWordDefinition | SiteTextPhraseDefinition | null)[];
+export class SiteTextWordDefinitionEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => SiteTextWordDefinition) node: SiteTextWordDefinition;
+}
+
+@ObjectType()
+export class SiteTextWordDefinitionListConnection extends GenericOutput {
+  @Field(() => [SiteTextWordDefinitionEdge])
+  edges: SiteTextWordDefinitionEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
+}
+
+@ObjectType()
+export class SiteTextDefinitionEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => SiteTextDefinition) node:
+    | SiteTextWordDefinition
+    | SiteTextPhraseDefinition;
+}
+
+@ObjectType()
+export class SiteTextDefinitionListConnection extends GenericOutput {
+  @Field(() => [SiteTextDefinitionEdge]) edges: SiteTextDefinitionEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
 }
 
 @InputType()

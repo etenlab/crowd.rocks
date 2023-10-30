@@ -1017,7 +1017,7 @@ type Query {
   getAllMapsList(after: ID, first: Int, input: GetAllMapsListInput!): MapListConnection!
   getAllRecommendedSiteTextTranslationList: TranslationWithVoteListByLanguageListOutput!
   getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): TranslationWithVoteListByLanguageOutput!
-  getAllSiteTextDefinitions(filter: String): SiteTextDefinitionListOutput!
+  getAllSiteTextDefinitions(after: ID, filter: String, first: Int): SiteTextDefinitionListConnection!
   getAllSiteTextLanguageList: SiteTextLanguageListOutput!
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput!
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): TranslationWithVoteListOutput!
@@ -1172,9 +1172,15 @@ type Session {
 
 union SiteTextDefinition = SiteTextPhraseDefinition | SiteTextWordDefinition
 
-type SiteTextDefinitionListOutput {
+type SiteTextDefinitionEdge {
+  cursor: ID!
+  node: SiteTextDefinition!
+}
+
+type SiteTextDefinitionListConnection {
+  edges: [SiteTextDefinitionEdge!]!
   error: ErrorType!
-  site_text_definition_list: [SiteTextDefinition]!
+  pageInfo: PageInfo!
 }
 
 type SiteTextDefinitionOutput {
@@ -1209,6 +1215,11 @@ type SiteTextLanguageWithTranslationInfoListOutput {
 type SiteTextPhraseDefinition {
   phrase_definition: PhraseDefinition!
   site_text_id: ID!
+}
+
+type SiteTextPhraseDefinitionEdge {
+  cursor: ID!
+  node: SiteTextPhraseDefinition!
 }
 
 type SiteTextPhraseDefinitionOutput {
@@ -1250,6 +1261,11 @@ input SiteTextUpsertInput {
 type SiteTextWordDefinition {
   site_text_id: ID!
   word_definition: WordDefinition!
+}
+
+type SiteTextWordDefinitionEdge {
+  cursor: ID!
+  node: SiteTextWordDefinition!
 }
 
 type SiteTextWordDefinitionOutput {

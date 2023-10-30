@@ -84,68 +84,108 @@ export type GetAllSiteTextWordDefinition = {
   site_text_id: string;
 };
 
-export function getAllSiteTextWordDefinition(
-  filter?: string,
-): [string, [string] | []] {
+export function getAllSiteTextWordDefinition({
+  filter,
+  after,
+  first,
+}: {
+  filter?: string;
+  first: number | null;
+  after: string | null;
+}): [string, unknown[]] {
+  const returnArr: unknown[] = [];
+  let filterStr = '';
+  let limitStr = '';
+  let cursorStr = '';
+
   if (filter) {
-    return [
-      `
-        select distinct
-          site_text_id
-        from site_text_word_definitions as stwds
-        join word_definitions as wds
-        on stwds.word_definition_id = wds.word_definition_id
-        join words as ws
-        on ws.word_id = wds.word_id
-        join wordlike_strings as wlss
-        on wlss.wordlike_string_id = ws.wordlike_string_id
-        where wlss.wordlike_string like $1;
-      `,
-      [`%${filter.trim()}%`],
-    ];
-  } else {
-    return [
-      `
-        select distinct
-          site_text_id
-        from site_text_word_definitions;
-      `,
-      [],
-    ];
+    returnArr.push(`%${filter.trim().toLowerCase()}%`);
+    filterStr = `lower(wlss.wordlike_string) like $${returnArr.length}`;
   }
+
+  if (first) {
+    returnArr.push(first);
+    limitStr = `limit $${returnArr.length}`;
+  }
+
+  if (after) {
+    returnArr.push(after);
+    cursorStr = `and lower(wlss.wordlike_string) > $${returnArr.length}`;
+  }
+
+  return [
+    `
+      select distinct
+        site_text_id,
+        lower(wlss.wordlike_string)
+      from site_text_word_definitions as stwds
+      join word_definitions as wds
+      on stwds.word_definition_id = wds.word_definition_id
+      join words as ws
+      on ws.word_id = wds.word_id
+      join wordlike_strings as wlss
+      on wlss.wordlike_string_id = ws.wordlike_string_id
+      ${filterStr.trim() === '' && cursorStr.trim() === '' ? '' : 'where'}
+        ${filterStr}
+        ${cursorStr}
+      order by lower(wlss.wordlike_string)
+      ${limitStr};
+      `,
+    [...returnArr],
+  ];
 }
 
 export type GetAllSiteTextPhraseDefinition = {
   site_text_id: string;
 };
 
-export function getAllSiteTextPhraseDefinition(
-  filter?: string,
-): [string, [string] | []] {
+export function getAllSiteTextPhraseDefinition({
+  filter,
+  first,
+  after,
+}: {
+  filter?: string;
+  first: number | null;
+  after: string | null;
+}): [string, unknown[]] {
+  const returnArr: unknown[] = [];
+  let filterStr = '';
+  let limitStr = '';
+  let cursorStr = '';
+
   if (filter) {
-    return [
-      `
-        select distinct
-          site_text_id
-        from site_text_phrase_definitions as stpds
-        join phrase_definitions as pds
-        on pds.phrase_definition_id = stpds.phrase_definition_id
-        join phrases as ps
-        on ps.phrase_id = pds.phrase_id
-        where ps.phraselike_string like $1;
-      `,
-      [`%${filter.trim()}%`],
-    ];
-  } else {
-    return [
-      `
-        select distinct
-          site_text_id
-        from site_text_phrase_definitions;      
-      `,
-      [],
-    ];
+    returnArr.push(`%${filter.trim().toLowerCase()}%`);
+    filterStr = `lower(ps.phraselike_string) like $${returnArr.length}`;
   }
+
+  if (first) {
+    returnArr.push(first);
+    limitStr = `limit $${returnArr.length}`;
+  }
+
+  if (after) {
+    returnArr.push(after);
+    cursorStr = `and lower(ps.phraselike_string) > $${returnArr.length}`;
+  }
+
+  return [
+    `
+      select distinct
+        site_text_id,
+        lower(ps.phraselike_string)
+      from site_text_phrase_definitions as stpds
+      join phrase_definitions as pds
+      on pds.phrase_definition_id = stpds.phrase_definition_id
+      join phrases as ps
+      on ps.phrase_id = pds.phrase_id
+      ${filterStr.trim() === '' && cursorStr.trim() === '' ? '' : 'where'}
+        ${filterStr}
+        ${cursorStr}
+      order by lower(ps.phraselike_string)
+      ${limitStr};
+      `,
+    [...returnArr],
+  ];
 }
 
 export type GetDefinitionIdBySiteTextId = {

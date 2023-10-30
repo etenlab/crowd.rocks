@@ -11,7 +11,7 @@ import { PhraseDefinitionsService } from 'src/components/definitions/phrase-defi
 import {
   SiteTextPhraseDefinitionOutput,
   SiteTextPhraseDefinitionsOutput,
-  SiteTextPhraseDefinitionListOutput,
+  SiteTextPhraseDefinitionListConnection,
   SiteTextPhraseDefinition,
 } from './types';
 import { PhraseDefinition } from 'src/components/definitions/types';
@@ -228,17 +228,25 @@ export class SiteTextPhraseDefinitionsService {
 
   async getAllSiteTextPhraseDefinitions({
     filter,
+    first,
+    after,
     pgClient,
   }: {
     filter?: string;
+    first: number | null;
+    after: string | null;
     pgClient: PoolClient | null;
-  }): Promise<SiteTextPhraseDefinitionListOutput> {
+  }): Promise<SiteTextPhraseDefinitionListConnection> {
     try {
       const res = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
       }).query<GetAllSiteTextPhraseDefinition>(
-        ...getAllSiteTextPhraseDefinition(filter),
+        ...getAllSiteTextPhraseDefinition({
+          filter,
+          first: first ? first * 2 : null,
+          after,
+        }),
       );
 
       const siteTextIds = res.rows.map((row) => +row.site_text_id);
@@ -251,15 +259,38 @@ export class SiteTextPhraseDefinitionsService {
       if (error !== ErrorType.NoError) {
         return {
           error,
-          site_text_phrase_definition_list: [],
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+          },
         };
       }
 
+      const edges = site_text_phrase_definitions
+        .filter(
+          (definition): definition is SiteTextPhraseDefinition =>
+            definition !== null,
+        )
+        .map((definition) => {
+          return {
+            cursor: definition.phrase_definition.phrase.phrase,
+            node: definition,
+          };
+        });
+
       return {
         error: ErrorType.NoError,
-        site_text_phrase_definition_list: site_text_phrase_definitions.filter(
-          (definition) => definition,
-        ) as SiteTextPhraseDefinition[],
+        edges,
+        pageInfo: {
+          hasNextPage: first ? res.rowCount > first : false,
+          hasPreviousPage: false,
+          startCursor: edges.length > 0 ? edges[0].cursor : null,
+          endCursor:
+            edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
+        },
       };
     } catch (e) {
       console.error(e);
@@ -267,7 +298,13 @@ export class SiteTextPhraseDefinitionsService {
 
     return {
       error: ErrorType.UnknownError,
-      site_text_phrase_definition_list: [],
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+      },
     };
   }
 }
