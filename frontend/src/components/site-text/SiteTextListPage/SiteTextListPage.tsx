@@ -1,5 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router';
+import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
+
 import { Stack, Button, CircularProgress, Box } from '@mui/material';
 import { useDebounce } from 'use-debounce';
 
@@ -25,6 +28,8 @@ import { OriginalData } from '../../translation/hooks/useTranslationTools';
 import { subTags2LangInfo } from '../../../../../utils';
 import { globals } from '../../../services/globals';
 import { PageLayout } from '../../common/PageLayout';
+
+import { PAGE_SIZE } from '../../../const/commonConst';
 
 export function SiteTextListPage() {
   const { tr } = useTr();
@@ -58,13 +63,15 @@ export function SiteTextListPage() {
 
   const isAdminUser = globals.is_admin_user();
 
-  const [getAllSiteTextDefinitions, { data, error, loading }] =
+  const [getAllSiteTextDefinitions, { data, error, loading, fetchMore }] =
     useGetAllSiteTextDefinitionsLazyQuery();
 
   useEffect(() => {
     getAllSiteTextDefinitions({
       variables: {
         filter: bouncedFilter,
+        first: PAGE_SIZE,
+        after: null,
       },
     });
   }, [getAllSiteTextDefinitions, bouncedFilter]);
@@ -103,6 +110,23 @@ export function SiteTextListPage() {
     );
   };
 
+  const handleInfinite = useCallback(
+    async (ev: IonInfiniteScrollCustomEvent<void>) => {
+      if (data?.getAllSiteTextDefinitions.pageInfo.hasNextPage) {
+        await fetchMore({
+          variables: {
+            first: PAGE_SIZE,
+            after: data.getAllSiteTextDefinitions.pageInfo.endCursor,
+            filter: filter.trim(),
+          },
+        });
+      }
+
+      setTimeout(() => ev.target.complete(), 500);
+    },
+    [fetchMore, filter, data],
+  );
+
   const cardListComs = useMemo(() => {
     const originals: OriginalData[] = [];
 
@@ -114,11 +138,8 @@ export function SiteTextListPage() {
       return null;
     }
 
-    for (const siteTextDefinition of data.getAllSiteTextDefinitions
-      .site_text_definition_list) {
-      if (!siteTextDefinition) {
-        continue;
-      }
+    for (const edge of data.getAllSiteTextDefinitions.edges) {
+      const siteTextDefinition = edge.node;
 
       switch (siteTextDefinition.__typename) {
         case 'SiteTextWordDefinition': {
@@ -271,7 +292,7 @@ export function SiteTextListPage() {
               border: (theme) => `1px solid ${theme.palette.text.gray_stroke}`,
             }}
           >
-            <FilterList sx={{ fontSize: 24 }} />
+            <FilterList sx={{ fontSize: 22 }} />
           </Button>
           {isAdminUser ? (
             <Button
@@ -285,7 +306,7 @@ export function SiteTextListPage() {
               }}
               onClick={handleClickNewSiteTextButton}
             >
-              <AddCircle sx={{ fontSize: '24px' }} />
+              <AddCircle sx={{ fontSize: '22px' }} />
             </Button>
           ) : null}
         </Stack>
@@ -302,6 +323,13 @@ export function SiteTextListPage() {
           {loading && <CircularProgress />}
         </Box>
         {cardListComs}
+
+        <IonInfiniteScroll onIonInfinite={handleInfinite}>
+          <IonInfiniteScrollContent
+            loadingText={`${tr('Loading')}...`}
+            loadingSpinner="bubbles"
+          />
+        </IonInfiniteScroll>
       </Stack>
     </PageLayout>
   );
