@@ -24,8 +24,6 @@ import {
 import { putLangCodesToFileName } from '../../common/utility';
 import { GroupedFilterSymbols } from '../../../../utils/dist';
 import { UserService } from '../user/user.service';
-import { create } from 'domain';
-import { User } from '../user/types';
 
 interface ISaveMapParams {
   mapFileName: string;
