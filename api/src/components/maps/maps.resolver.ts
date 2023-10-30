@@ -46,7 +46,7 @@ import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionToken } from '../../common/subscription-token';
 
 @Injectable()
-@Resolver(Map) // todo: wtf with paramenter, looks like `Map` is wrong and redundant here.
+@Resolver()
 export class MapsResolver {
   constructor(
     private mapsService: MapsService,
@@ -68,6 +68,7 @@ export class MapsResolver {
     file_size: number,
     @Context() req: any,
   ): Promise<MapUploadOutput> {
+    console.log(`mapUpload resolver `, map_file_name);
     const bearer = getBearer(req) || '';
     let fileBody = '';
     const readStream = createReadStream();
@@ -143,6 +144,7 @@ export class MapsResolver {
     @Args('input') { mapId, is_original }: MapDeleteInput,
     @Context() req: any,
   ): Promise<MapDeleteOutput> {
+    console.log(`mapDelete resolver `, mapId, is_original);
     const userToken = getBearer(req) || '';
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       userToken,
@@ -154,7 +156,6 @@ export class MapsResolver {
         error: ErrorType.Unauthorized,
       };
     }
-    Logger.debug(`Mutation mapDelete, id: ` + mapId);
     try {
       const deletedMapId = await this.mapsService.deleteMap(mapId, is_original);
 
@@ -172,6 +173,7 @@ export class MapsResolver {
 
   @Mutation(() => GenericOutput)
   async mapsTranslationsReset(@Context() req: any): Promise<GenericOutput> {
+    console.log(`mapDelete resolver `);
     const userToken = getBearer(req);
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       userToken || '',
@@ -200,6 +202,7 @@ export class MapsResolver {
     @Args({ name: 'forLangTag', type: () => String, nullable: true })
     forLangTag?: string,
   ): Promise<GenericOutput> {
+    console.log(`mapsReTranslate resolver `, forLangTag);
     const userToken = getBearer(req) || '';
     const user_id = await this.authenticationService.get_user_id_from_bearer(
       userToken,
@@ -227,6 +230,7 @@ export class MapsResolver {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Args('input') input: GetOrigMapListInput,
   ): Promise<GetOrigMapsListOutput> {
+    console.log(`getOrigMapsList resolver `);
     const maps = await this.mapsService.getOrigMaps();
     return maps;
   }
@@ -237,6 +241,12 @@ export class MapsResolver {
     @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
   ): Promise<MapListConnection> {
+    console.log(
+      `getAllMapsList resolver `,
+      JSON.stringify(input),
+      first,
+      after,
+    );
     return this.mapsService.getAllMapsList({
       lang: input.lang,
       first,
@@ -248,6 +258,8 @@ export class MapsResolver {
   async getMapDetails(
     @Args('input') input: GetMapDetailsInput,
   ): Promise<MapDetailsOutput> {
+    console.log(`getMapDetails resolver `, input);
+
     return input.is_original
       ? this.mapsService.getOrigMapWithContentUrl(input.map_id)
       : this.mapsService.getTranslatedMapWithContentUrl(input.map_id);
@@ -260,6 +272,7 @@ export class MapsResolver {
     @Args('after', { type: () => ID, nullable: true })
     after?: string | null,
   ): Promise<MapWordsAndPhrasesConnection | undefined> {
+    console.log(`getOrigMapWordsAndPhrases resolver `, input, first, after);
     return this.mapsService.getOrigMapWordsAndPhrases({ input, first, after });
   }
 
@@ -267,6 +280,7 @@ export class MapsResolver {
   async getOrigMapWordsAndPhrasesCount(
     @Args('input') input: GetOrigMapWordsAndPhrasesInput,
   ): Promise<MapWordsAndPhrasesCountOutput | undefined> {
+    console.log(`getOrigMapWordsAndPhrasesCount resolver `, input);
     return this.mapsService.getOrigMapWordsAndPhrasesCount(input);
   }
 
@@ -276,6 +290,12 @@ export class MapsResolver {
     @Args('offset', { type: () => Int, nullable: true }) offset?: number | null,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number | null,
   ): Promise<OrigMapWordsAndPhrasesOutput | undefined> {
+    console.log(
+      `getOrigMapWordsAndPhrasesPaginated resolver `,
+      input,
+      offset,
+      limit,
+    );
     return this.mapsService.getOrigMapWordsAndPhrasesPaginated(
       input,
       offset,
@@ -287,6 +307,7 @@ export class MapsResolver {
   async getMapWordOrPhraseAsOrigByDefinitionId(
     @Args('input') input: GetMapWordOrPhraseByDefinitionIdInput,
   ): Promise<MapWordOrPhraseAsOrigOutput | undefined> {
+    console.log(`getMapWordOrPhraseAsOrigByDefinitionId resolver `, input);
     return this.mapsService.getMapWordOrPhraseUnionByDefinitionId(input);
   }
 
@@ -299,7 +320,7 @@ export class MapsResolver {
     @Args('input') input: MapVoteUpsertInput,
     @Context() req: any,
   ): Promise<MapVoteOutput> {
-    console.log('map vote upsert resolver: ', JSON.stringify(input, null, 2));
+    console.log('mapVoteUpsert resolver: ', input);
 
     return this.mapVotesService.upsert(input, getBearer(req)! || '', null);
   }
@@ -309,7 +330,7 @@ export class MapsResolver {
     @Args('map_id', { type: () => ID }) map_id: string,
     @Args('is_original', { type: () => Boolean }) is_original: boolean,
   ): Promise<MapVoteStatusOutputRow> {
-    console.log('get map vote status resolver, map_id:', map_id);
+    console.log('getMapVoteStatus resolver, map_id:', map_id, is_original);
 
     return this.mapVotesService.getVoteStatus(+map_id, is_original, null);
   }
@@ -321,7 +342,7 @@ export class MapsResolver {
     @Args('vote', { type: () => Boolean }) vote: boolean,
     @Context() req: any,
   ): Promise<MapVoteStatusOutputRow> {
-    console.log(`toggle map vote resolver: map_id=${map_id} vote=${vote} `);
+    console.log(`toggleMapVoteStatus resolver`, map_id, is_original, vote);
 
     return this.mapVotesService.toggleVoteStatus(
       +map_id,
@@ -337,7 +358,7 @@ export class MapsResolver {
     @Args('input', { type: () => StartZipMapDownloadInput })
     input: StartZipMapDownloadInput,
   ): Promise<StartZipMapOutput> {
-    console.log(`startMapZipDownload, input:${JSON.stringify(input)}`);
+    console.log(`startMapZipDownload`, input);
     return this.mapsService.startZipMap(input);
   }
 

@@ -589,6 +589,17 @@ export class MapsService {
       return res;
     } catch (e) {
       Logger.error(`mapsService#getOrigMapWordsAndPhrases: ${e}`);
+      return {
+        edges: [],
+        pageInfo: {
+          endCursor: null,
+          startCursor: null,
+          totalEdges: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+        error: ErrorType.MapWordsAndPhrasesSearchError,
+      };
     } finally {
       dbPoolClient.release();
     }

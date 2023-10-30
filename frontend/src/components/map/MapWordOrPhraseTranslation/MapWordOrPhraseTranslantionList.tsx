@@ -64,6 +64,7 @@ export function MapWordOrPhraseTranslationList({
       dialect_code: targetLang?.dialect?.tag,
       geo_code: targetLang?.region?.tag,
     },
+    fetchPolicy: 'no-cache',
   }).data?.getTranslationsByFromDefinitionId.translation_with_vote_list;
 
   useEffect(() => {

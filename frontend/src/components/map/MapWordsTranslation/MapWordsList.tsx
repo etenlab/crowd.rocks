@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
@@ -9,7 +9,7 @@ import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { SearchInput } from '../../common/forms/SearchInput';
 import { FilterList } from '../../common/icons/FilterList';
 import { MapWordItem } from './MapWordItem';
-import { Select, OptionItem } from '../../common/forms/Select';
+import { Select } from '../../common/forms/Select';
 
 import { useGetOrigMapWordsAndPhrasesLazyQuery } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
@@ -18,6 +18,8 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
 import { PAGE_SIZE } from '../../../const/commonConst';
 import { MapNavigationModal } from './MapNavigationModal';
+import { OptionItem } from '../../common/forms/Autocomplete';
+import { langInfo2langInput } from '../../../../../utils';
 
 export function MapWordsList() {
   const { tr } = useTr();
@@ -85,9 +87,15 @@ export function MapWordsList() {
           original_map_id: id && id !== 'all' ? id : null,
           filter,
           quickFilter,
-          onlyNotTranslated:
-            filterOption.value === 'not translated' ? true : null,
-          onlyTranslated: filterOption.value === 'translated' ? true : null,
+          onlyNotTranslatedTo:
+            filterOption.value === 'not translated' && targetLang
+              ? langInfo2langInput(targetLang)
+              : null,
+          onlyTranslatedTo:
+            filterOption.value === 'translated' && targetLang
+              ? langInfo2langInput(targetLang)
+              : null,
+
           first: PAGE_SIZE,
         },
       });
@@ -112,9 +120,14 @@ export function MapWordsList() {
           original_map_id: id && id !== 'all' ? id : null,
           filter,
           quickFilter,
-          onlyNotTranslated:
-            filterOption.value === 'not translated' ? true : null,
-          onlyTranslated: filterOption.value === 'translated' ? true : null,
+          onlyNotTranslatedTo:
+            filterOption.value === 'not translated' && targetLang
+              ? langInfo2langInput(targetLang)
+              : null,
+          onlyTranslatedTo:
+            filterOption.value === 'translated' && targetLang
+              ? langInfo2langInput(targetLang)
+              : null,
           first: PAGE_SIZE,
           after: wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.endCursor,
         };
@@ -133,6 +146,7 @@ export function MapWordsList() {
       filter,
       quickFilter,
       filterOption.value,
+      targetLang,
       fetchMore,
     ],
   );

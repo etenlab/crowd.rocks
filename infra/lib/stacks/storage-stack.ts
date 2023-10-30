@@ -33,6 +33,9 @@ export interface StorageStackProps extends cdk.StackProps {
   readonly publicFilesBucketName: string;
 
   readonly tempPublicFilesBucketName: string;
+
+  /** How long automated backups are stored */
+  readonly backupRetentionDays: number;
 }
 
 /**
@@ -101,6 +104,9 @@ export class StorageStack extends cdk.Stack {
           publiclyAccessible: props.isPubliclyAccessible,
         }),
         monitoringInterval: cdk.Duration.seconds(30),
+        backup: {
+          retention: cdk.Duration.days(props.backupRetentionDays),
+        },
       },
     );
 

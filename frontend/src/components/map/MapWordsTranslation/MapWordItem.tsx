@@ -4,6 +4,7 @@ import { useParams, useHistory } from 'react-router';
 import { typeOfString, StringContentTypes } from '../../../common/utility';
 import {
   ErrorType,
+  GetRecommendedTranslationFromDefinitionIdDocument,
   MapWordOrPhrase,
   useGetRecommendedTranslationFromDefinitionIdLazyQuery,
   useGetTranslationsByFromDefinitionIdLazyQuery,
@@ -50,14 +51,13 @@ export function MapWordItem({ original }: MapWordItemProps) {
   const [upsertTranslation] =
     useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
 
-  const [getTranslationsQ, { data: dataTrs }] =
-    useGetTranslationsByFromDefinitionIdLazyQuery();
+  const [getTranslationsQ] = useGetTranslationsByFromDefinitionIdLazyQuery();
 
   useEffect(() => {
     if (targetLang) {
       getRecommendedTranslationFromDefinitionId({
         variables: {
-          from_definition_id: original.o_id, // todo maybe original.o_definition_id ??
+          from_definition_id: original.o_definition_id,
           from_type_is_word: original.type === StringContentTypes.WORD,
           language_code: targetLang.lang.tag,
           dialect_code: targetLang.dialect?.tag,
@@ -68,21 +68,7 @@ export function MapWordItem({ original }: MapWordItemProps) {
   }, [getRecommendedTranslationFromDefinitionId, targetLang, original]);
 
   useEffect(() => {
-    if (!targetLang) return;
-    getTranslationsQ({
-      variables: {
-        definition_id: original.o_definition_id,
-        from_definition_type_is_word: original.type === StringContentTypes.WORD,
-        language_code: targetLang.lang.tag,
-        dialect_code: targetLang.dialect?.tag,
-        geo_code: targetLang.region?.tag,
-      },
-    });
-  }, [getTranslationsQ, original.o_definition_id, original.type, targetLang]);
-
-  useEffect(() => {
     if (!saving) return;
-    if (!dataTrs) return;
 
     const formData =
       tempTranslations[`${original.o_definition_id}:${original.type}`];
@@ -93,9 +79,24 @@ export function MapWordItem({ original }: MapWordItemProps) {
     }
 
     (async () => {
-      const translationsQ =
-        dataTrs.getTranslationsByFromDefinitionId.translation_with_vote_list;
-      const t = getTransformedTranslations(null, translationsQ);
+      const translationsQ = await getTranslationsQ({
+        variables: {
+          definition_id: original.o_definition_id,
+          from_definition_type_is_word:
+            original.type === StringContentTypes.WORD,
+          language_code: targetLang.lang.tag,
+          dialect_code: targetLang.dialect?.tag,
+          geo_code: targetLang.region?.tag,
+        },
+      });
+
+      // dataTrs.getTranslationsByFromDefinitionId.translation_with_vote_list;
+      if (!translationsQ?.data?.getTranslationsByFromDefinitionId) return;
+      const t = getTransformedTranslations(
+        null,
+        translationsQ.data.getTranslationsByFromDefinitionId
+          .translation_with_vote_list,
+      );
       if (!t?.translations) return;
 
       const exists = t.translations.find(
@@ -127,6 +128,7 @@ export function MapWordItem({ original }: MapWordItemProps) {
             is_type_word:
               typeOfString(formData.translation) === StringContentTypes.WORD,
           },
+          refetchQueries: [GetRecommendedTranslationFromDefinitionIdDocument],
         });
 
         setUpdatedTrDefinitionIds([
@@ -153,7 +155,7 @@ export function MapWordItem({ original }: MapWordItemProps) {
     setUpdatedTrDefinitionIds,
     updatedTrDefinitionIds,
     clearTempTranslation,
-    dataTrs,
+    getTranslationsQ,
   ]);
 
   const handleDetail = useCallback(() => {
