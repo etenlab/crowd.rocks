@@ -18,6 +18,7 @@ import {
 } from '../../../generated/graphql';
 import { useQuery } from '../../../hooks/useQuery';
 
+import { PageLayout } from '../../common/PageLayout';
 import { InfoFill } from '../../common/icons/InfoFill';
 import { AddCircle } from '../../common/icons/AddCircle';
 import { WordItemViewer } from '../../common/WordItem';
@@ -27,14 +28,10 @@ export function NewTranslationConfirmPage() {
   const { tr } = useTr();
   const history = useHistory();
   const [present] = useIonToast();
-  const {
-    lang_full_tag,
-    definition_id,
-    type: definition_type,
-  } = useParams<{
+  const { lang_full_tag, definition_id, definition_type } = useParams<{
     definition_id: string;
     lang_full_tag: string;
-    type: string;
+    definition_type: string;
   }>();
   const searchParams = useQuery();
   const [saving, setSaving] = useState<boolean>(false);
@@ -245,7 +242,7 @@ export function NewTranslationConfirmPage() {
   const viewData = tempTranslations[`${definition_id}:${definition_type}`];
 
   return (
-    <>
+    <PageLayout>
       <Stack gap="8px">
         <Stack direction="row" gap="8px" alignItems="center">
           <InfoFill color="orange" />
@@ -308,6 +305,6 @@ export function NewTranslationConfirmPage() {
           {tr('Cancel')}
         </Button>
       </Stack>
-    </>
+    </PageLayout>
   );
 }

@@ -33,13 +33,9 @@ export function TranslationDetailPage() {
   const { tr } = useTr();
   const [present] = useIonToast();
   const history = useHistory();
-  const {
-    definition_id,
-    type: definition_type,
-    lang_full_tag,
-  } = useParams<{
+  const { definition_id, definition_type, lang_full_tag } = useParams<{
     definition_id: string;
-    type: string;
+    definition_type: string;
     lang_full_tag: string;
   }>();
   const searchParams = useQuery();

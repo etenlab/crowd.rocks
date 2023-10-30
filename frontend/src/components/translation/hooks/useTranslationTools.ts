@@ -155,7 +155,7 @@ export function useTranslationTools() {
                   tableName: TableNameType.WordToWordTranslations,
                 };
                 fromDefinitionIsWord = true;
-                toDefinitionIsWord = false;
+                toDefinitionIsWord = true;
                 wordOrPhrase = {
                   id: translation.to_word_definition.word.word_id,
                   likeString: translation.to_word_definition.word.word,

@@ -6,6 +6,7 @@ import {
   ErrorType,
   useGetRecommendedTranslationFromDefinitionIdLazyQuery,
   useGetTranslationsByFromDefinitionIdLazyQuery,
+  GetRecommendedTranslationFromDefinitionIdDocument,
 } from '../../../generated/graphql';
 import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 
@@ -54,17 +55,17 @@ export function TranslationItem({
   const [getTranslationsQ] = useGetTranslationsByFromDefinitionIdLazyQuery();
 
   useEffect(() => {
-    // if (targetLang) {
-    //   getRecommendedTranslationFromDefinitionId({
-    //     variables: {
-    //       from_definition_id: original.definition.id,
-    //       from_type_is_word: original.isWord,
-    //       language_code: targetLang.lang.tag,
-    //       dialect_code: targetLang.dialect?.tag,
-    //       geo_code: targetLang.region?.tag,
-    //     },
-    //   });
-    // }
+    if (targetLang) {
+      getRecommendedTranslationFromDefinitionId({
+        variables: {
+          from_definition_id: original.definition.id,
+          from_type_is_word: original.isWord,
+          language_code: targetLang.lang.tag,
+          dialect_code: targetLang.dialect?.tag || null,
+          geo_code: targetLang.region?.tag || null,
+        },
+      });
+    }
   }, [getRecommendedTranslationFromDefinitionId, targetLang, original]);
 
   useEffect(() => {
@@ -88,8 +89,8 @@ export function TranslationItem({
           definition_id: original.definition.id,
           from_definition_type_is_word: original.isWord,
           language_code: targetLang.lang.tag,
-          dialect_code: targetLang.dialect?.tag,
-          geo_code: targetLang.region?.tag,
+          dialect_code: targetLang.dialect?.tag || null,
+          geo_code: targetLang.region?.tag || null,
         },
       });
 
@@ -132,6 +133,7 @@ export function TranslationItem({
             is_type_word:
               typeOfString(formData.translation) === StringContentTypes.WORD,
           },
+          refetchQueries: [GetRecommendedTranslationFromDefinitionIdDocument],
         });
 
         clearTempTranslation(

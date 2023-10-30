@@ -10,10 +10,7 @@ import { useTr } from '../../../hooks/useTr';
 
 import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 import { CheckCircle } from '../../common/icons/CheckCircle';
-import {
-  GetRecommendedTranslationFromDefinitionIdDocument,
-  GetTranslationsByFromDefinitionIdDocument,
-} from '../../../generated/graphql';
+import { GetRecommendedTranslationFromDefinitionIdDocument } from '../../../generated/graphql';
 
 export type NewTranslationForm = {
   definition_id: string;
@@ -83,10 +80,7 @@ export function NewTranslationForm({
           definition_type === StringContentTypes.WORD,
         is_type_word: typeOfString(translation) === StringContentTypes.WORD,
       },
-      refetchQueries: [
-        GetTranslationsByFromDefinitionIdDocument,
-        GetRecommendedTranslationFromDefinitionIdDocument,
-      ],
+      refetchQueries: [GetRecommendedTranslationFromDefinitionIdDocument],
     });
     setTranslation('');
     setDescription('');

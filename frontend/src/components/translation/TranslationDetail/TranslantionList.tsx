@@ -4,6 +4,7 @@ import { Stack, CircularProgress } from '@mui/material';
 import {
   TableNameType,
   useGetTranslationsByFromDefinitionIdQuery,
+  GetRecommendedTranslationFromDefinitionIdDocument,
 } from '../../../generated/graphql';
 
 import { useTranslationTools } from '../hooks/useTranslationTools';
@@ -34,8 +35,8 @@ export function TranslationList({
       definition_id,
       from_definition_type_is_word: definition_type === StringContentTypes.WORD,
       language_code: targetLang?.lang.tag || '',
-      dialect_code: targetLang?.dialect?.tag,
-      geo_code: targetLang?.region?.tag,
+      dialect_code: targetLang?.dialect?.tag || null,
+      geo_code: targetLang?.region?.tag || null,
     },
   });
 
@@ -55,6 +56,7 @@ export function TranslationList({
           translation_id,
           vote,
         },
+        refetchQueries: [GetRecommendedTranslationFromDefinitionIdDocument],
       });
     },
     [toggleTrVoteStatus],

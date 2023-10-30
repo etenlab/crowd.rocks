@@ -4,6 +4,8 @@ import {
   useUpsertTranslationFromWordAndDefinitionlikeStringMutation as useGeneratedUpsertTranslationFromWordAndDefinitionlikeStringMutation,
 } from '../generated/graphql';
 
+import { updateCacheWithUpsertTranslation } from '../cacheUpdators/upsertTranslation';
+
 import { useTr } from './useTr';
 import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
@@ -41,6 +43,15 @@ export function useUpsertTranslationFromWordAndDefinitionlikeStringMutation() {
         redirectOnUnauth(
           data?.upsertTranslationFromWordAndDefinitionlikeString.error,
         );
+      } else {
+        const newTranslation =
+          data.upsertTranslationFromWordAndDefinitionlikeString.translation;
+
+        if (!newTranslation) {
+          return;
+        }
+
+        updateCacheWithUpsertTranslation(cache, newTranslation);
       }
     },
   });
