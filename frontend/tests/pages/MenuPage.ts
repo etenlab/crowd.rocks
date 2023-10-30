@@ -3,6 +3,7 @@ import BasePage from './BasePage';
 const headerText = '#crowd-rock-app #app-name-text';
 const logoutButton = '#app-logout-button';
 const loginButton = "//h4[text()='Login']";
+const settingsButton = '//h4[text()="Settings"]';
 
 class MenuPage extends BasePage {
   async isheaderTextPresent() {
@@ -20,6 +21,10 @@ class MenuPage extends BasePage {
 
   async clickOnLoginButton() {
     await this.page.locator(loginButton).first().click();
+  }
+
+  async clickOnSettingButton() {
+    await this.page.locator(settingsButton).first().click();
   }
 }
 

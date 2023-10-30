@@ -1,7 +1,7 @@
 import BasePage from './BasePage';
 
 const homePageTitle =
-  "//div[@class='section']/ion-item-group//ion-label[text() = 'Media']";
+  '//div[@class="section"]/ion-item-group//ion-label[text() = "Media"]';
 const expandIcon = '#app-menu-button';
 
 class HomePage extends BasePage {
