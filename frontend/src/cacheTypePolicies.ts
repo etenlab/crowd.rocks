@@ -11,6 +11,7 @@ export const typePolicies: TypePolicies = {
       getAllMapsList: relayStylePagination(['input']),
       getOrigMapWordsAndPhrases: relayStylePagination(['input']),
       getSingleMapWordsAndPhrases: relayStylePagination(['input']),
+      getAllSiteTextDefinitions: relayStylePagination(['filter']),
     },
   },
   WordWithDefinitions: {
@@ -60,6 +61,15 @@ export const typePolicies: TypePolicies = {
   },
   SiteTextWordDefinition: {
     keyFields: ['site_text_id'],
+  },
+  SiteTextWordDefinitionEdge: {
+    keyFields: ['cursor'],
+  },
+  SiteTextPhraseDefinitionEdge: {
+    keyFields: ['cursor'],
+  },
+  SiteTextDefinitionEdge: {
+    keyFields: ['cursor'],
   },
   WordToWordTranslationWithVote: {
     keyFields: ['word_to_word_translation_id'],

@@ -1555,7 +1555,7 @@ export type Query = {
   getAllMapsList: MapListConnection;
   getAllRecommendedSiteTextTranslationList: TranslationWithVoteListByLanguageListOutput;
   getAllRecommendedSiteTextTranslationListByLanguage: TranslationWithVoteListByLanguageOutput;
-  getAllSiteTextDefinitions: SiteTextDefinitionListOutput;
+  getAllSiteTextDefinitions: SiteTextDefinitionListConnection;
   getAllSiteTextLanguageList: SiteTextLanguageListOutput;
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput;
   getAllTranslationFromSiteTextDefinitionID: TranslationWithVoteListOutput;
@@ -1676,7 +1676,9 @@ export type QueryGetAllRecommendedSiteTextTranslationListByLanguageArgs = {
 
 
 export type QueryGetAllSiteTextDefinitionsArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
   filter?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2146,10 +2148,17 @@ export type Session = {
 
 export type SiteTextDefinition = SiteTextPhraseDefinition | SiteTextWordDefinition;
 
-export type SiteTextDefinitionListOutput = {
-  __typename?: 'SiteTextDefinitionListOutput';
+export type SiteTextDefinitionEdge = {
+  __typename?: 'SiteTextDefinitionEdge';
+  cursor: Scalars['ID']['output'];
+  node: SiteTextDefinition;
+};
+
+export type SiteTextDefinitionListConnection = {
+  __typename?: 'SiteTextDefinitionListConnection';
+  edges: Array<SiteTextDefinitionEdge>;
   error: ErrorType;
-  site_text_definition_list: Array<Maybe<SiteTextDefinition>>;
+  pageInfo: PageInfo;
 };
 
 export type SiteTextDefinitionOutput = {
@@ -2190,6 +2199,12 @@ export type SiteTextPhraseDefinition = {
   __typename?: 'SiteTextPhraseDefinition';
   phrase_definition: PhraseDefinition;
   site_text_id: Scalars['ID']['output'];
+};
+
+export type SiteTextPhraseDefinitionEdge = {
+  __typename?: 'SiteTextPhraseDefinitionEdge';
+  cursor: Scalars['ID']['output'];
+  node: SiteTextPhraseDefinition;
 };
 
 export type SiteTextPhraseDefinitionOutput = {
@@ -2233,6 +2248,12 @@ export type SiteTextWordDefinition = {
   __typename?: 'SiteTextWordDefinition';
   site_text_id: Scalars['ID']['output'];
   word_definition: WordDefinition;
+};
+
+export type SiteTextWordDefinitionEdge = {
+  __typename?: 'SiteTextWordDefinitionEdge';
+  cursor: Scalars['ID']['output'];
+  node: SiteTextWordDefinition;
 };
 
 export type SiteTextWordDefinitionOutput = {
@@ -3506,6 +3527,12 @@ export type SiteTextPhraseDefinitionFragmentFragment = { __typename?: 'SiteTextP
 
 export type SiteTextWordDefinitionFragmentFragment = { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } };
 
+export type SiteTextWordDefinitionEdgeFragmentFragment = { __typename?: 'SiteTextWordDefinitionEdge', cursor: string, node: { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } };
+
+export type SiteTextPhraseDefinitionEdgeFragmentFragment = { __typename?: 'SiteTextPhraseDefinitionEdge', cursor: string, node: { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } };
+
+export type SiteTextDefinitionEdgeFragmentFragment = { __typename?: 'SiteTextDefinitionEdge', cursor: string, node: { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } };
+
 export type SiteTextLanguageFragmentFragment = { __typename?: 'SiteTextLanguage', language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
 export type TranslationWithVoteListByLanguageFragmentFragment = { __typename?: 'TranslationWithVoteListByLanguage', dialect_code?: string | null, geo_code?: string | null, language_code: string, translation_with_vote_list: Array<{ __typename?: 'PhraseToPhraseTranslationWithVote', phrase_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'PhraseToWordTranslationWithVote', phrase_to_word_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'WordToPhraseTranslationWithVote', word_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'WordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | null> };
@@ -3514,10 +3541,12 @@ export type SiteTextLanguageWithTranslationInfoFragmentFragment = { __typename?:
 
 export type GetAllSiteTextDefinitionsQueryVariables = Exact<{
   filter?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
-export type GetAllSiteTextDefinitionsQuery = { __typename?: 'Query', getAllSiteTextDefinitions: { __typename?: 'SiteTextDefinitionListOutput', error: ErrorType, site_text_definition_list: Array<{ __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | null> } };
+export type GetAllSiteTextDefinitionsQuery = { __typename?: 'Query', getAllSiteTextDefinitions: { __typename?: 'SiteTextDefinitionListConnection', error: ErrorType, edges: Array<{ __typename?: 'SiteTextDefinitionEdge', cursor: string, node: { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
 
 export type GetAllTranslationFromSiteTextDefinitionIdQueryVariables = Exact<{
   site_text_id: Scalars['ID']['input'];
@@ -4381,14 +4410,6 @@ export const QuestionOnWordRangeFragmentFragmentDoc = gql`
 }
     ${QuestionItemFragmentFragmentDoc}
 ${DocumentWordEntryFragmentFragmentDoc}`;
-export const SiteTextPhraseDefinitionFragmentFragmentDoc = gql`
-    fragment SiteTextPhraseDefinitionFragment on SiteTextPhraseDefinition {
-  site_text_id
-  phrase_definition {
-    ...PhraseDefinitionFragment
-  }
-}
-    ${PhraseDefinitionFragmentFragmentDoc}`;
 export const SiteTextWordDefinitionFragmentFragmentDoc = gql`
     fragment SiteTextWordDefinitionFragment on SiteTextWordDefinition {
   site_text_id
@@ -4397,6 +4418,40 @@ export const SiteTextWordDefinitionFragmentFragmentDoc = gql`
   }
 }
     ${WordDefinitionFragmentFragmentDoc}`;
+export const SiteTextWordDefinitionEdgeFragmentFragmentDoc = gql`
+    fragment SiteTextWordDefinitionEdgeFragment on SiteTextWordDefinitionEdge {
+  cursor
+  node {
+    ...SiteTextWordDefinitionFragment
+  }
+}
+    ${SiteTextWordDefinitionFragmentFragmentDoc}`;
+export const SiteTextPhraseDefinitionFragmentFragmentDoc = gql`
+    fragment SiteTextPhraseDefinitionFragment on SiteTextPhraseDefinition {
+  site_text_id
+  phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+}
+    ${PhraseDefinitionFragmentFragmentDoc}`;
+export const SiteTextPhraseDefinitionEdgeFragmentFragmentDoc = gql`
+    fragment SiteTextPhraseDefinitionEdgeFragment on SiteTextPhraseDefinitionEdge {
+  cursor
+  node {
+    ...SiteTextPhraseDefinitionFragment
+  }
+}
+    ${SiteTextPhraseDefinitionFragmentFragmentDoc}`;
+export const SiteTextDefinitionEdgeFragmentFragmentDoc = gql`
+    fragment SiteTextDefinitionEdgeFragment on SiteTextDefinitionEdge {
+  cursor
+  node {
+    ...SiteTextPhraseDefinitionFragment
+    ...SiteTextWordDefinitionFragment
+  }
+}
+    ${SiteTextPhraseDefinitionFragmentFragmentDoc}
+${SiteTextWordDefinitionFragmentFragmentDoc}`;
 export const SiteTextLanguageFragmentFragmentDoc = gql`
     fragment SiteTextLanguageFragment on SiteTextLanguage {
   language_code
@@ -7628,17 +7683,19 @@ export type UpsertAnswerMutationHookResult = ReturnType<typeof useUpsertAnswerMu
 export type UpsertAnswerMutationResult = Apollo.MutationResult<UpsertAnswerMutation>;
 export type UpsertAnswerMutationOptions = Apollo.BaseMutationOptions<UpsertAnswerMutation, UpsertAnswerMutationVariables>;
 export const GetAllSiteTextDefinitionsDocument = gql`
-    query GetAllSiteTextDefinitions($filter: String) {
-  getAllSiteTextDefinitions(filter: $filter) {
+    query GetAllSiteTextDefinitions($filter: String, $first: Int, $after: ID) {
+  getAllSiteTextDefinitions(filter: $filter, first: $first, after: $after) {
     error
-    site_text_definition_list {
-      ...SiteTextPhraseDefinitionFragment
-      ...SiteTextWordDefinitionFragment
+    edges {
+      ...SiteTextDefinitionEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
-    ${SiteTextPhraseDefinitionFragmentFragmentDoc}
-${SiteTextWordDefinitionFragmentFragmentDoc}`;
+    ${SiteTextDefinitionEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
 
 /**
  * __useGetAllSiteTextDefinitionsQuery__
@@ -7653,6 +7710,8 @@ ${SiteTextWordDefinitionFragmentFragmentDoc}`;
  * const { data, loading, error } = useGetAllSiteTextDefinitionsQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *   },
  * });
  */
@@ -9591,6 +9650,9 @@ export const namedOperations = {
     QuestionOnWordRangeFragment: 'QuestionOnWordRangeFragment',
     SiteTextPhraseDefinitionFragment: 'SiteTextPhraseDefinitionFragment',
     SiteTextWordDefinitionFragment: 'SiteTextWordDefinitionFragment',
+    SiteTextWordDefinitionEdgeFragment: 'SiteTextWordDefinitionEdgeFragment',
+    SiteTextPhraseDefinitionEdgeFragment: 'SiteTextPhraseDefinitionEdgeFragment',
+    SiteTextDefinitionEdgeFragment: 'SiteTextDefinitionEdgeFragment',
     SiteTextLanguageFragment: 'SiteTextLanguageFragment',
     TranslationWithVoteListByLanguageFragment: 'TranslationWithVoteListByLanguageFragment',
     SiteTextLanguageWithTranslationInfoFragment: 'SiteTextLanguageWithTranslationInfoFragment',
