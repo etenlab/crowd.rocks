@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
@@ -12,7 +12,7 @@ import { FilterList } from '../../common/icons/FilterList';
 import { NavigationModal } from '../../common/modalContent/NavigationModal';
 
 import { MapWordItem } from './MapWordItem';
-// import { Select, OptionItem } from '../../common/forms/Select';
+import { Select, OptionItem } from '../../common/forms/Select';
 
 import { useGetOrigMapWordsAndPhrasesLazyQuery } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
@@ -20,6 +20,8 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
 import { PAGE_SIZE } from '../../../const/commonConst';
+
+import { langInfo2langInput } from '../../../../../utils';
 
 export function MapWordsList() {
   const { tr } = useTr();
@@ -30,23 +32,23 @@ export function MapWordsList() {
     cluster_id: string;
   }>();
 
-  // const filterOptions = useMemo(
-  //   () => [
-  //     {
-  //       label: tr('All'),
-  //       value: 'all',
-  //     },
-  //     {
-  //       label: tr('Translated'),
-  //       value: 'translated',
-  //     },
-  //     {
-  //       label: tr('Not Translated'),
-  //       value: 'not translated',
-  //     },
-  //   ],
-  //   [tr],
-  // );
+  const filterOptions = useMemo(
+    () => [
+      {
+        label: tr('All'),
+        value: 'all',
+      },
+      {
+        label: tr('Translated'),
+        value: 'translated',
+      },
+      {
+        label: tr('Not Translated'),
+        value: 'not translated',
+      },
+    ],
+    [tr],
+  );
 
   const {
     actions: { createModal },
@@ -57,10 +59,10 @@ export function MapWordsList() {
   const [filter, setFilter] = useState<string>('');
   const [bouncedFilter] = useDebounce(filter, 500);
   const [quickFilter, setQuickFilter] = useState<string | null>('');
-  // const [filterOption, setFilterOption] = useState<OptionItem>({
-  //   label: tr('All'),
-  //   value: 'all',
-  // });
+  const [filterOption, setFilterOption] = useState<OptionItem>({
+    label: tr('All'),
+    value: 'all',
+  });
 
   const handleFilterChange = (value: string) => {
     setFilter(value);
@@ -88,12 +90,14 @@ export function MapWordsList() {
           original_map_id: id && id !== 'all' ? id : null,
           filter: bouncedFilter,
           quickFilter,
-          // onlyNotTranslated:
-          //   filterOption.value === 'not translated' ? true : null,
-          // onlyTranslated: filterOption.value === 'translated' ? true : null,
-          onlyNotTranslated: null,
-
-          onlyTranslated: null,
+          onlyNotTranslatedTo:
+            filterOption.value === 'not translated' && targetLang
+              ? langInfo2langInput(targetLang)
+              : null,
+          onlyTranslatedTo:
+            filterOption.value === 'translated' && targetLang
+              ? langInfo2langInput(targetLang)
+              : null,
 
           first: PAGE_SIZE,
         },
@@ -104,7 +108,7 @@ export function MapWordsList() {
     targetLang,
     bouncedFilter,
     id,
-    // filterOption,
+    filterOption,
     quickFilter,
     loading,
   ]);
@@ -119,11 +123,14 @@ export function MapWordsList() {
           original_map_id: id && id !== 'all' ? id : null,
           filter: bouncedFilter,
           quickFilter,
-          // onlyNotTranslated:
-          //   filterOption.value === 'not translated' ? true : null,
-          // onlyTranslated: filterOption.value === 'translated' ? true : null,
-          onlyNotTranslated: null,
-          onlyTranslated: null,
+          onlyNotTranslatedTo:
+            filterOption.value === 'not translated' && targetLang
+              ? langInfo2langInput(targetLang)
+              : null,
+          onlyTranslatedTo:
+            filterOption.value === 'translated' && targetLang
+              ? langInfo2langInput(targetLang)
+              : null,
           first: PAGE_SIZE,
           after: wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.endCursor,
         };
@@ -141,16 +148,17 @@ export function MapWordsList() {
       id,
       bouncedFilter,
       quickFilter,
-      // filterOption.value,
+      filterOption.value,
+      targetLang,
       fetchMore,
     ],
   );
 
-  // const handleChangeFilterOption = useCallback((value: OptionItem | null) => {
-  //   if (value) {
-  //     setFilterOption(value);
-  //   }
-  // }, []);
+  const handleChangeFilterOption = useCallback((value: OptionItem | null) => {
+    if (value) {
+      setFilterOption(value);
+    }
+  }, []);
 
   const handleOpenFilterModal = () => {
     openModal(
@@ -188,7 +196,7 @@ export function MapWordsList() {
           gap="16px"
         >
           <Stack sx={{ flex: 1 }}>
-            {/* <Select
+            <Select
               placeholder={tr('Select sort filter')}
               options={filterOptions}
               value={filterOption}
@@ -199,7 +207,7 @@ export function MapWordsList() {
                   value: 'all',
                 });
               }}
-            /> */}
+            />
           </Stack>
           <Button
             variant="contained"

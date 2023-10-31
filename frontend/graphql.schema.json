@@ -1205,6 +1205,12 @@
             "deprecationReason": null
           },
           {
+            "name": "MapWordsAndPhrasesSearchError",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "MapZippingError",
             "description": null,
             "isDeprecated": false,
@@ -2939,11 +2945,11 @@
             "deprecationReason": null
           },
           {
-            "name": "onlyNotTranslated",
+            "name": "onlyNotTranslatedTo",
             "description": null,
             "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
+              "kind": "INPUT_OBJECT",
+              "name": "LanguageInput",
               "ofType": null
             },
             "defaultValue": null,
@@ -2951,11 +2957,11 @@
             "deprecationReason": null
           },
           {
-            "name": "onlyTranslated",
+            "name": "onlyTranslatedTo",
             "description": null,
             "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
+              "kind": "INPUT_OBJECT",
+              "name": "LanguageInput",
               "ofType": null
             },
             "defaultValue": null,
@@ -4625,6 +4631,22 @@
                     "ofType": null
                   }
                 }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "error",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "ErrorType",
+                "ofType": null
               }
             },
             "isDeprecated": false,

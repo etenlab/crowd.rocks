@@ -699,14 +699,14 @@ export class MapsRepository {
       	wordlike_strings tws on tw.wordlike_string_id = tws.wordlike_string_id      
       left join v_word_to_word_translations_upvotes_count up on wtwt.word_to_word_translation_id = up.word_to_word_translation_id
       left join v_word_to_word_translations_downvotes_count down on wtwt.word_to_word_translation_id = down.word_to_word_translation_id
-      join users tu
-      	on tu.user_id = tw.created_by
-      join avatars ta
-      	on tu.user_id = ta.user_id
       join users ou
         on ou.user_id = w.created_by
       join avatars oa
         on ou.user_id = oa.user_id
+      left join users tu
+      	on tu.user_id = tw.created_by
+      left join avatars ta
+      	on tu.user_id = ta.user_id
       where true
     `;
 
@@ -762,9 +762,9 @@ export class MapsRepository {
       	on ou.user_id = w.created_by
       join avatars oa
       	on ou.user_id = oa.user_id
-	    join users tu
+	    left join users tu
 	  	  on tu.user_id = tph.created_by
-	    join avatars ta
+	    left join avatars ta
 	      on tu.user_id = ta.user_id
       where true
     `;
@@ -974,9 +974,9 @@ export class MapsRepository {
       	on ou.user_id = oph.created_by
       join avatars oa
       	on ou.user_id = oa.user_id
-	    join users tu
+	    left join users tu
       	on tu.user_id = tph.created_by
-      join avatars ta
+      left join avatars ta
       	on tu.user_id = ta.user_id
       where true
 
@@ -1034,9 +1034,9 @@ export class MapsRepository {
       	on ou.user_id = oph.created_by
       join avatars oa
       	on ou.user_id = oa.user_id
-	    join users tu
+	    left join users tu
       	on tu.user_id = tw.created_by
-      join avatars ta
+      left join avatars ta
       	on tu.user_id = ta.user_id
       where true 
     `;
@@ -1181,6 +1181,14 @@ export class MapsRepository {
       after?: string | null;
     },
   ): Promise<MapWordsAndPhrasesConnection> {
+    if (input.onlyTranslatedTo && input.onlyNotTranslatedTo) {
+      const msg = `mapsRepository#getOrigMapWordsAndPhrases: must be set only one of (onlyTranslatedToTo, onlyNotTranslatedToTo) ${JSON.stringify(
+        input,
+      )}`;
+      Logger.error(msg);
+      throw new Error(msg);
+    }
+
     const filterParams: string[] = [];
     let languagesFiltersRestrictionClause = '';
     let pickDataClause = '';
@@ -1222,11 +1230,40 @@ export class MapsRepository {
       languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;
     }
 
-    if (input.onlyTranslated) {
-      languagesFiltersRestrictionClause += ` and (some_to_word_tr_id is not null or some_to_phrase_tr_id is not null) `;
+    if (input.onlyTranslatedTo) {
+      filterParams.push(input.onlyTranslatedTo.language_code);
+      languagesFiltersRestrictionClause += `
+        and(
+          (
+            type='word' and o_id in (
+              select word_id from mv_words_languages where t_language_code = $${filterParams.length}
+            )
+          )
+          or (
+            type='phrase' and o_id in (
+              select phrase_id from mv_phrases_languages where t_language_code = $${filterParams.length}
+            )
+          )
+        )
+      `;
     }
-    if (input.onlyNotTranslated) {
-      languagesFiltersRestrictionClause += ` and (some_to_word_tr_id is null and some_to_phrase_tr_id is null) `;
+
+    if (input.onlyNotTranslatedTo) {
+      filterParams.push(input.onlyNotTranslatedTo.language_code);
+      languagesFiltersRestrictionClause += `
+        and(
+          (
+            type='word' and o_id not in (
+              select word_id from mv_words_languages where t_language_code = $${filterParams.length}
+            )
+          )
+          or (
+            type='phrase' and o_id not in (
+              select phrase_id from mv_phrases_languages where t_language_code = $${filterParams.length}
+            )
+          )
+        )
+      `;
     }
 
     const langAndPickParams: string[] = [...filterParams];
@@ -1255,11 +1292,7 @@ export class MapsRepository {
         o_geo_code,
         o_created_at,
         o_created_by
-      ${
-        input.onlyTranslated || input.onlyNotTranslated
-          ? ' from v_map_words_and_phrases_with_tr_info'
-          : ' from v_map_words_and_phrases'
-      }
+        from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
       ${pickDataClause}
@@ -1277,17 +1310,14 @@ export class MapsRepository {
           hasPreviousPage: false,
           hasNextPage: false,
         },
+        error: ErrorType.NoError,
       };
     }
 
     // just to know if there pages after the current selection
     const sqlAfter = `
       select count(*) as count_after
-      ${
-        input.onlyTranslated || input.onlyNotTranslated
-          ? ' from v_map_words_and_phrases_with_tr_info'
-          : ' from v_map_words_and_phrases'
-      }
+      from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
       and cursor>${dbPoolClient.escapeLiteral(resQ.rows.at(-1).cursor)}
@@ -1298,11 +1328,7 @@ export class MapsRepository {
     // just to know if there pages before the current selection
     const sqlBefore = `
       select count(*) as count_before
-      ${
-        input.onlyTranslated || input.onlyNotTranslated
-          ? ' from v_map_words_and_phrases_with_tr_info'
-          : ' from v_map_words_and_phrases'
-      }
+      from v_map_words_and_phrases
       where true
       ${languagesFiltersRestrictionClause}
       and cursor<${dbPoolClient.escapeLiteral(resQ.rows[0].cursor)}
@@ -1364,6 +1390,7 @@ export class MapsRepository {
     return {
       edges,
       pageInfo,
+      error: ErrorType.NoError,
     };
   }
 

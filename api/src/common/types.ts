@@ -108,6 +108,7 @@ export enum ErrorType {
   MapNotFound = 'MapNotFound',
   MapVoteNotFound = 'MapVoteNotFound',
   MapZippingError = 'MapZippingError',
+  MapWordsAndPhrasesSearchError = 'MapWordsAndPhrasesSearchError',
 
   DocumentIdNotProvided = 'DocumentIdNotProvided',
   DocumentNotFound = 'DocumentNotFound',
