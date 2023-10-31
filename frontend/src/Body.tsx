@@ -56,7 +56,6 @@ import PasswordResetFormPage from './components/authentication/PasswordResetForm
 import { MapsPage } from './components/map/MapsPage';
 
 import { SiteTextListPage } from './components/site-text/SiteTextListPage';
-import { SiteTextDetailPage } from './components/site-text/SiteTextDetailPage';
 
 import { WordListPage } from './components/dictionary/WordListPage';
 import { WordDetailPage } from './components/dictionary/WordDetailPage';
@@ -464,11 +463,6 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/site-text-list"
               component={SiteTextListPage}
-            />
-            <Route
-              exact
-              path="/:nation_id/:language_id/:cluster_id/site-text-detail/:definition_type/:site_text_id"
-              component={SiteTextDetailPage}
             />
             <Route
               exact
