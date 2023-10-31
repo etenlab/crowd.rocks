@@ -8,6 +8,7 @@ import { GetAllSiteTextDefinitionsDocument } from '../generated/graphql';
 
 export function updateCacheWithUpsertSiteText(
   cache: ApolloCache<unknown>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   newSiteTextDefinition: SiteTextDefinition,
 ) {
   cache.updateQuery<GetAllSiteTextDefinitionsQuery>(
@@ -16,35 +17,36 @@ export function updateCacheWithUpsertSiteText(
       variables: {},
     },
     (data) => {
-      if (data && data.getAllSiteTextDefinitions.site_text_definition_list) {
-        const alreadyExists =
-          data.getAllSiteTextDefinitions.site_text_definition_list
-            .filter((site_text_definition) => !!site_text_definition)
-            .filter(
-              (site_text_definition) =>
-                site_text_definition!.__typename ===
-                  newSiteTextDefinition.__typename &&
-                site_text_definition!.site_text_id ===
-                  newSiteTextDefinition.site_text_id,
-            );
+      return data;
+      // if (data && data.getAllSiteTextDefinitions.site_text_definition_list) {
+      //   const alreadyExists =
+      //     data.getAllSiteTextDefinitions.site_text_definition_list
+      //       .filter((site_text_definition) => !!site_text_definition)
+      //       .filter(
+      //         (site_text_definition) =>
+      //           site_text_definition!.__typename ===
+      //             newSiteTextDefinition.__typename &&
+      //           site_text_definition!.site_text_id ===
+      //             newSiteTextDefinition.site_text_id,
+      //       );
 
-        if (alreadyExists.length > 0) {
-          return data;
-        }
+      //   if (alreadyExists.length > 0) {
+      //     return data;
+      //   }
 
-        return {
-          ...data,
-          getAllSiteTextDefinitions: {
-            ...data.getAllSiteTextDefinitions,
-            site_text_definition_list: [
-              ...data.getAllSiteTextDefinitions.site_text_definition_list,
-              newSiteTextDefinition,
-            ],
-          },
-        };
-      } else {
-        return data;
-      }
+      //   return {
+      //     ...data,
+      //     getAllSiteTextDefinitions: {
+      //       ...data.getAllSiteTextDefinitions,
+      //       site_text_definition_list: [
+      //         ...data.getAllSiteTextDefinitions.site_text_definition_list,
+      //         newSiteTextDefinition,
+      //       ],
+      //     },
+      //   };
+      // } else {
+      //   return data;
+      // }
     },
   );
 }
