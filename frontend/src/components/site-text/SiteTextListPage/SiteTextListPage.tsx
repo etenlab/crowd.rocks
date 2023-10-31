@@ -3,7 +3,13 @@ import { useParams } from 'react-router';
 import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 
-import { Stack, Button, CircularProgress, Box } from '@mui/material';
+import {
+  Stack,
+  Button,
+  CircularProgress,
+  Box,
+  Typography,
+} from '@mui/material';
 import { useDebounce } from 'use-debounce';
 
 import { Caption } from '../../common/Caption/Caption';
@@ -66,15 +72,34 @@ export function SiteTextListPage() {
   const [getAllSiteTextDefinitions, { data, error, loading, fetchMore }] =
     useGetAllSiteTextDefinitionsLazyQuery();
 
+  console.log(data);
+
   useEffect(() => {
     getAllSiteTextDefinitions({
       variables: {
         filter: bouncedFilter,
+        quickFilter,
+        onlyNotTranslated:
+          filterOption.value === 'not translated' ? true : null,
+        onlyTranslated: filterOption.value === 'translated' ? true : null,
+        targetLanguage: target
+          ? {
+              language_code: target.lang.tag,
+              dialect_code: target.dialect?.tag || null,
+              geo_code: target.region?.tag || null,
+            }
+          : null,
         first: PAGE_SIZE,
         after: null,
       },
     });
-  }, [getAllSiteTextDefinitions, bouncedFilter]);
+  }, [
+    getAllSiteTextDefinitions,
+    bouncedFilter,
+    quickFilter,
+    filterOption.value,
+    target,
+  ]);
 
   const handleChangeFilterOption = useCallback((value: OptionItem | null) => {
     if (value) {
@@ -317,6 +342,17 @@ export function SiteTextListPage() {
           placeholder={tr('Search by...')}
         />
       </Stack>
+
+      {quickFilter && (
+        <Stack>
+          <Typography
+            variant="h2"
+            sx={{ color: (theme) => theme.palette.text.gray }}
+          >
+            {quickFilter}
+          </Typography>
+        </Stack>
+      )}
 
       <Stack gap="16px">
         <Box style={{ textAlign: 'center' }}>
