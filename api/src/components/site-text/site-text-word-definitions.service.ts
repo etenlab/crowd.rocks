@@ -13,6 +13,8 @@ import {
   SiteTextWordDefinitionListConnection,
   SiteTextWordDefinitionsOutput,
   SiteTextWordDefinition,
+  SiteTextDefinitionListFilterInput,
+  SiteTextWordDefinitionEdge,
 } from './types';
 
 import {
@@ -24,6 +26,8 @@ import {
   GetAllSiteTextWordDefinition,
   GetDefinitionIdFromWordId,
   getDefinitionIdFromWordId,
+  SiteTextTranslationCountRow,
+  getSiteTextTranslationCountByIds,
 } from './sql-string';
 import { WordDefinition } from '../definitions/types';
 
@@ -236,57 +240,135 @@ export class SiteTextWordDefinitionsService {
     pgClient: PoolClient | null;
     first: number | null;
     after: string | null;
-    filter?: string;
+    filter?: SiteTextDefinitionListFilterInput;
   }): Promise<SiteTextWordDefinitionListConnection> {
     try {
-      const res = await pgClientOrPool({
-        client: pgClient,
-        pool: this.pg.pool,
-      }).query<GetAllSiteTextWordDefinition>(
-        ...getAllSiteTextWordDefinition({
-          filter,
-          first: first ? first * 2 : null,
-          after,
-        }),
-      );
+      let afterCursor = after;
+      let hasNextPage = true;
+      const tempEdges: SiteTextWordDefinitionEdge[] = [];
 
-      const siteTextIds = res.rows.map((row) => +row.site_text_id);
+      while (true) {
+        const res = await pgClientOrPool({
+          client: pgClient,
+          pool: this.pg.pool,
+        }).query<GetAllSiteTextWordDefinition>(
+          ...getAllSiteTextWordDefinition({
+            filter,
+            first: first ? first * 2 : null,
+            after: afterCursor,
+          }),
+        );
 
-      const { error, site_text_word_definitions } = await this.reads(
-        siteTextIds,
-        pgClient,
-      );
+        if (res.rowCount === 0) {
+          hasNextPage = false;
+          break;
+        }
 
-      if (error !== ErrorType.NoError) {
-        return {
-          error,
-          edges: [],
-          pageInfo: {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            startCursor: null,
-            endCursor: null,
-          },
-        };
+        const siteTextIds = res.rows.map((row) => +row.site_text_id);
+
+        const { error, site_text_word_definitions } = await this.reads(
+          siteTextIds,
+          pgClient,
+        );
+
+        if (error !== ErrorType.NoError) {
+          return {
+            error,
+            edges: [],
+            pageInfo: {
+              hasNextPage: false,
+              hasPreviousPage: false,
+              startCursor: null,
+              endCursor: null,
+            },
+          };
+        }
+
+        if (
+          !filter ||
+          !filter.targetLanguage ||
+          (!filter.onlyNotTranslated && !filter.onlyTranslated)
+        ) {
+          tempEdges.push(
+            ...site_text_word_definitions
+              .filter(
+                (definition): definition is SiteTextWordDefinition =>
+                  definition !== null,
+              )
+              .map((definition) => {
+                return {
+                  cursor: definition.word_definition.word.word,
+                  node: definition,
+                };
+              }),
+          );
+        } else {
+          const res1 = await pgClientOrPool({
+            client: pgClient,
+            pool: this.pg.pool,
+          }).query<SiteTextTranslationCountRow>(
+            ...getSiteTextTranslationCountByIds({
+              refs: siteTextIds.map((siteTextId) => ({
+                site_text_id: siteTextId,
+                is_word_definition: true,
+              })),
+              language_code: filter.targetLanguage.language_code,
+              dialect_code: filter.targetLanguage.dialect_code,
+              geo_code: filter.targetLanguage.geo_code,
+            }),
+          );
+
+          const trCountMap = new Map<number, number>();
+
+          for (const row of res1.rows) {
+            trCountMap.set(+row.site_text_id, +row.count);
+          }
+
+          for (const definition of site_text_word_definitions) {
+            if (!definition) {
+              continue;
+            }
+
+            const count = trCountMap.get(+definition.site_text_id) || 0;
+
+            if (filter.onlyNotTranslated && count === 0) {
+              tempEdges.push({
+                cursor: definition.word_definition.word.word,
+                node: definition,
+              });
+              continue;
+            }
+
+            if (filter.onlyTranslated && count > 0) {
+              tempEdges.push({
+                cursor: definition.word_definition.word.word,
+                node: definition,
+              });
+              continue;
+            }
+          }
+        }
+
+        if (
+          first === null ||
+          (tempEdges.length < first && res.rowCount === first * 2)
+        ) {
+          afterCursor = tempEdges[tempEdges.length - 1].cursor;
+        } else {
+          break;
+        }
       }
 
-      const edges = site_text_word_definitions
-        .filter(
-          (definition): definition is SiteTextWordDefinition =>
-            definition !== null,
-        )
-        .map((definition) => {
-          return {
-            cursor: definition.word_definition.word.word,
-            node: definition,
-          };
-        });
+      const edges: SiteTextWordDefinitionEdge[] =
+        first && tempEdges.length > first
+          ? tempEdges.slice(0, first - 1)
+          : tempEdges;
 
       return {
         error: ErrorType.NoError,
-        edges,
+        edges: edges,
         pageInfo: {
-          hasNextPage: first ? res.rowCount > first : false,
+          hasNextPage: hasNextPage,
           hasPreviousPage: false,
           startCursor: edges.length > 0 ? edges[0].cursor : null,
           endCursor:

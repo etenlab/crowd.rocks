@@ -8,7 +8,7 @@ import {
 } from '@nestjs/graphql';
 
 import { GenericOutput } from 'src/common/types';
-import { PageInfo } from '../common/types';
+import { PageInfo, LanguageInput } from '../common/types';
 import {
   WordDefinition,
   PhraseDefinition,
@@ -208,4 +208,15 @@ export class TranslationWithVoteListByLanguageListOutput extends GenericOutput {
   translation_with_vote_list_by_language_list:
     | TranslationWithVoteListByLanguage[]
     | null;
+}
+
+@InputType()
+export class SiteTextDefinitionListFilterInput {
+  @Field(() => LanguageInput, { nullable: true })
+  targetLanguage: LanguageInput | null;
+  @Field(() => String, { nullable: true }) filter: string | null;
+  @Field(() => Boolean, { nullable: true }) onlyTranslated: boolean | null;
+  @Field(() => Boolean, { nullable: true }) onlyNotTranslated: boolean | null;
+  @Field(() => Boolean, { nullable: true }) isSortDescending: boolean | null;
+  @Field(() => String, { nullable: true }) quickFilter: string | null;
 }

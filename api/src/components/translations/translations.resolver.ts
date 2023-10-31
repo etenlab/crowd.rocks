@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Args, Query, Mutation, Resolver, Context, ID } from '@nestjs/graphql';
 
 import { getBearer } from 'src/common/utility';
@@ -52,7 +52,7 @@ export class TranslationsResolver {
   async wordToWordTranslationRead(
     @Args('id', { type: () => ID }) id: string,
   ): Promise<WordToWordTranslationOutput> {
-    console.log(
+    Logger.log(
       'word-to-word-translation read resolver, word_to_word_translation_id:',
       id,
     );
@@ -65,7 +65,7 @@ export class TranslationsResolver {
     @Args('input') input: WordToWordTranslationUpsertInput,
     @Context() req: any,
   ): Promise<WordToWordTranslationOutput> {
-    console.log(
+    Logger.log(
       `word-to-word-translation upsert resolver, from_word_definition_id: ${input.from_word_definition_id}, to_word_definition_id: ${input.to_word_definition_id}`,
     );
 
@@ -81,7 +81,7 @@ export class TranslationsResolver {
   async wordToPhraseTranslationRead(
     @Args('id', { type: () => ID }) id: string,
   ): Promise<WordToPhraseTranslationOutput> {
-    console.log(
+    Logger.log(
       'word-to-phrase-translation read resolver, word_to_phrase_translation_id:',
       id,
     );
@@ -94,7 +94,7 @@ export class TranslationsResolver {
     @Args('input') input: WordToPhraseTranslationUpsertInput,
     @Context() req: any,
   ): Promise<WordToPhraseTranslationOutput> {
-    console.log(
+    Logger.log(
       `word-to-phrase-translation upsert resolver, from_word_definition_id: ${input.from_word_definition_id}, to_phrase_definition_id: ${input.to_phrase_definition_id}`,
     );
 
@@ -110,7 +110,7 @@ export class TranslationsResolver {
   async phraseToPhraseTranslationRead(
     @Args('id', { type: () => ID }) id: string,
   ): Promise<PhraseToPhraseTranslationOutput> {
-    console.log(
+    Logger.log(
       'phrase-to-phrase-translation read resolver, phrase_to_phrase_translation_id:',
       id,
     );
@@ -123,7 +123,7 @@ export class TranslationsResolver {
     @Args('input') input: PhraseToPhraseTranslationUpsertInput,
     @Context() req: any,
   ): Promise<PhraseToPhraseTranslationOutput> {
-    console.log(
+    Logger.log(
       `phrase-to-phrase-translation upsert resolver, from_phrase_definition_id: ${input.from_phrase_definition_id}, to_phrase_definition_id: ${input.to_phrase_definition_id}`,
     );
 
@@ -140,7 +140,7 @@ export class TranslationsResolver {
     @Args('word_to_word_translation_id', { type: () => ID })
     word_to_word_translation_id: string,
   ): Promise<WordTrVoteStatusOutputRow> {
-    console.log(
+    Logger.log(
       'get word-to-word-translation resolver, word_to_word_translation_id:',
       word_to_word_translation_id,
     );
@@ -156,7 +156,7 @@ export class TranslationsResolver {
     @Args('word_to_phrase_translation_id', { type: () => ID })
     word_to_phrase_translation_id: string,
   ): Promise<WordToPhraseTranslationVoteStatusOutputRow> {
-    console.log(
+    Logger.log(
       'getWordToPhraseTrVoteStatus resolver',
       word_to_phrase_translation_id,
     );
@@ -174,7 +174,7 @@ export class TranslationsResolver {
     @Args('vote', { type: () => Boolean }) vote: boolean,
     @Context() req: any,
   ): Promise<WordToPhraseTranslationVoteStatusOutputRow> {
-    console.log('toggleWordToPhraseTrVoteStatus');
+    Logger.log('toggleWordToPhraseTrVoteStatus');
 
     return this.wordToPhraseTranslationService.toggleVoteStatus(
       +word_to_phrase_translation_id,
@@ -189,7 +189,7 @@ export class TranslationsResolver {
     @Args('phrase_to_word_translation_id', { type: () => ID })
     phrase_to_word_translation_id: string,
   ): Promise<PhraseToWordTranslationVoteStatusOutputRow> {
-    console.log(
+    Logger.log(
       'getPhraseToWordTrVoteStatus resolver',
       phrase_to_word_translation_id,
     );
@@ -207,7 +207,7 @@ export class TranslationsResolver {
     @Args('vote', { type: () => Boolean }) vote: boolean,
     @Context() req: any,
   ): Promise<PhraseToWordTranslationVoteStatusOutputRow> {
-    console.log('togglePhraseToWordTrVoteStatus');
+    Logger.log('togglePhraseToWordTrVoteStatus');
 
     return this.phraseToWordTranslationService.toggleVoteStatus(
       +phrase_to_word_translation_id,
@@ -222,7 +222,7 @@ export class TranslationsResolver {
     @Args('phrase_to_phrase_translation_id', { type: () => ID })
     phrase_to_phrase_translation_id: string,
   ): Promise<PhraseToPhraseTranslationVoteStatusOutputRow> {
-    console.log(
+    Logger.log(
       'getPhraseToPhraseTrVoteStatus resolver',
       phrase_to_phrase_translation_id,
     );
@@ -240,7 +240,7 @@ export class TranslationsResolver {
     @Args('vote', { type: () => Boolean }) vote: boolean,
     @Context() req: any,
   ): Promise<PhraseToPhraseTranslationVoteStatusOutputRow> {
-    console.log('togglePhraseToPhraseTrVoteStatus');
+    Logger.log('togglePhraseToPhraseTrVoteStatus');
 
     return this.phraseToPhraseTranslationService.toggleVoteStatus(
       +phrase_to_phrase_translation_id,
@@ -256,7 +256,7 @@ export class TranslationsResolver {
     from_word_definition_id: string,
     @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
   ): Promise<WordToWordTranslationWithVoteListOutput> {
-    console.log(
+    Logger.log(
       'getWordToWordTranslationsByFromWordDefinitionId resolver',
       from_word_definition_id,
       JSON.stringify(langInfo, null, 2),
@@ -275,7 +275,7 @@ export class TranslationsResolver {
     from_word_definition_id: string,
     @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
   ): Promise<WordToPhraseTranslationWithVoteListOutput> {
-    console.log(
+    Logger.log(
       'getWordToPhraseTranslationsByFromWordDefinitionId resolver',
       from_word_definition_id,
       JSON.stringify(langInfo, null, 2),
@@ -294,7 +294,7 @@ export class TranslationsResolver {
     from_phrase_definition_id: string,
     @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
   ): Promise<PhraseToWordTranslationWithVoteListOutput> {
-    console.log(
+    Logger.log(
       'getPhraseToWordTranslationsByFromPhraseDefinitionId resolver',
       from_phrase_definition_id,
       JSON.stringify(langInfo, null, 2),
@@ -313,7 +313,7 @@ export class TranslationsResolver {
     from_phrase_definition_id: string,
     @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
   ): Promise<PhraseToPhraseTranslationWithVoteListOutput> {
-    console.log(
+    Logger.log(
       'getPhraseToPhraseTranslationsByFromPhraseDefinitionId resolver',
       from_phrase_definition_id,
       JSON.stringify(langInfo, null, 2),
@@ -334,7 +334,7 @@ export class TranslationsResolver {
     from_definition_type_is_word: boolean,
     @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
   ): Promise<TranslationWithVoteListOutput> {
-    console.log('getTranslationsByFromDefinitionId resolver');
+    Logger.log('getTranslationsByFromDefinitionId resolver');
 
     return this.translationService.getTranslationsByFromDefinitionId(
       +definition_id,
@@ -352,7 +352,7 @@ export class TranslationsResolver {
     from_type_is_word: boolean,
     @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
   ): Promise<TranslationWithVoteOutput> {
-    console.log(
+    Logger.log(
       'getRecommendedTranslationFromDefinitionID resolver',
       from_definition_id,
       from_type_is_word,
@@ -377,7 +377,7 @@ export class TranslationsResolver {
     from_type_is_words: boolean[],
     @Args('langInfo', { type: () => LanguageInput }) langInfo: LanguageInput,
   ): Promise<TranslationWithVoteListOutput> {
-    console.log(
+    Logger.log(
       'getTranslationsByFromDefinitionIds resolver',
       from_definition_ids,
       from_type_is_words,
@@ -417,7 +417,7 @@ export class TranslationsResolver {
     @Context()
     req: any,
   ): Promise<TranslationVoteStatusOutputRow> {
-    console.log('toggleTranslationVoteStatus');
+    Logger.log('toggleTranslationVoteStatus');
 
     const res = await this.translationService.toggleTranslationVoteStatus(
       +translation_id,
@@ -451,7 +451,7 @@ export class TranslationsResolver {
     to_definition_type_is_word: boolean,
     @Context() req: any,
   ): Promise<TranslationOutput> {
-    console.log('upsertTranslation');
+    Logger.log('upsertTranslation');
 
     const res = await this.translationService.upsertTranslation(
       +from_definition_id,
@@ -481,7 +481,7 @@ export class TranslationsResolver {
     to_definition_input: ToDefinitionInput,
     @Context() req: any,
   ): Promise<TranslationOutput> {
-    console.log('upsertTranslationFromWordAndDefinitionlikeString');
+    Logger.log('upsertTranslationFromWordAndDefinitionlikeString');
 
     const res =
       await this.translationService.upsertTranslationFromWordAndDefinitionlikeString(

@@ -35,6 +35,7 @@ import {
   SiteTextLanguageWithTranslationInfoListOutput,
   TranslationWithVoteListByLanguageOutput,
   TranslationWithVoteListByLanguageListOutput,
+  SiteTextDefinitionListFilterInput,
 } from './types';
 
 @Injectable()
@@ -233,8 +234,11 @@ export class SiteTextsResolver {
 
   @Query(() => SiteTextDefinitionListConnection)
   async getAllSiteTextDefinitions(
-    @Args('filter', { type: () => String, nullable: true })
-    filter: string | null,
+    @Args('filters', {
+      type: () => SiteTextDefinitionListFilterInput,
+      nullable: true,
+    })
+    filter: SiteTextDefinitionListFilterInput | null,
     @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true })
     after: string | null,

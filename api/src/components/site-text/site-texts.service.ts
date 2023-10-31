@@ -22,6 +22,7 @@ import {
   SiteTextLanguageWithTranslationInfoListOutput,
   SiteTextLanguageWithTranslationInfo,
   SiteTextDefinitionEdge,
+  SiteTextDefinitionListFilterInput,
 } from './types';
 
 import {
@@ -207,7 +208,7 @@ export class SiteTextsService {
     after,
     pgClient,
   }: {
-    filter?: string;
+    filter?: SiteTextDefinitionListFilterInput;
     first: number | null;
     after: string | null;
     pgClient: PoolClient | null;
