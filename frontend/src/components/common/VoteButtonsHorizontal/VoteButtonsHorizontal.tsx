@@ -4,7 +4,7 @@ import { ThumbsUp } from '../icons/ThumbsUp';
 import { ThumbsDown } from '../icons/ThumbsDown';
 
 const VoteButton = styled(Button)({
-  padding: '4px 10px',
+  padding: '5px 10px',
   borderRadius: '6px',
   fontSize: '13px',
   letterSpacing: '-0.26px',
@@ -26,9 +26,9 @@ export function VoteButtonsHorizontal({
   return (
     <Stack direction="row" gap="16px">
       <VoteButton
-        variant="contained"
+        variant="outlined"
         color="green"
-        startIcon={<ThumbsUp sx={{ fontSize: 24 }} />}
+        startIcon={<ThumbsUp sx={{ fontSize: 20 }} />}
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
@@ -39,9 +39,9 @@ export function VoteButtonsHorizontal({
         {upVotes}
       </VoteButton>
       <VoteButton
-        variant="contained"
+        variant="outlined"
         color="red"
-        startIcon={<ThumbsDown sx={{ fontSize: 24 }} />}
+        startIcon={<ThumbsDown sx={{ fontSize: 20 }} />}
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();

@@ -67,6 +67,8 @@ import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
 import { TranslationPage } from './components/translation/TranslationPage';
 import { AIControllerPage } from './components/translation/AIControllerPage';
 import { FastTranslationPage } from './components/translation/FastTranslationPage';
+import { TranslationDetailPage } from './components/translation/TranslationDetail/TranslationDetailPage';
+import { NewTranslationConfirmPage } from './components/translation/TranslationDetail/NewTranslationConfirmPage';
 
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
 import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
@@ -497,6 +499,16 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/translation"
               component={TranslationPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/translation-details/:lang_full_tag/:definition_id/:definition_type"
+              component={TranslationDetailPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/translation-confirm/:lang_full_tag/:definition_id/:definition_type"
+              component={NewTranslationConfirmPage}
             />
             <Route
               exact

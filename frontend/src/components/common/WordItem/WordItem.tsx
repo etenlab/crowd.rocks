@@ -17,6 +17,7 @@ export type WordItemProps = {
   onDetail(): void;
   onConfirm(translation: string, description: string): void;
   onCancel(): void;
+  disabledDetail?: boolean;
 };
 
 export function WordItem({
@@ -25,6 +26,7 @@ export function WordItem({
   original,
   translation,
   initFormData,
+  disabledDetail,
   onDetail,
   onConfirm,
   onCancel,
@@ -95,6 +97,7 @@ export function WordItem({
         translation={translation}
         onDetail={onDetail}
         onClick={handleClick}
+        disabledDetail={disabledDetail}
       />
     );
   }
