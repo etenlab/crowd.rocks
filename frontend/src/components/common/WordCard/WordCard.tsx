@@ -93,7 +93,7 @@ export function WordCard({
         <Stack
           gap="16px"
           direction="row"
-          justifyContent="flex-start"
+          justifyContent="space-between"
           alignItems="center"
         >
           {voteButtonCom}

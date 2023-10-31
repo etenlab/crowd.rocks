@@ -328,7 +328,10 @@ export class SiteTextsService {
           continue;
         }
 
-        if (wordEdges[wordTop].cursor > phraseEdges[phraseTop].cursor) {
+        if (
+          wordEdges[wordTop].cursor.toLowerCase() >
+          phraseEdges[phraseTop].cursor.toLowerCase()
+        ) {
           edges.push({
             cursor: JSON.stringify({
               wordCursor: wordTop > 0 ? wordEdges[wordTop - 1].cursor : null,
@@ -340,7 +343,10 @@ export class SiteTextsService {
           continue;
         }
 
-        if (wordEdges[wordTop].cursor <= phraseEdges[phraseTop].cursor) {
+        if (
+          wordEdges[wordTop].cursor.toLowerCase() <=
+          phraseEdges[phraseTop].cursor.toLowerCase()
+        ) {
           edges.push({
             cursor: JSON.stringify({
               wordCursor: wordEdges[wordTop].cursor,

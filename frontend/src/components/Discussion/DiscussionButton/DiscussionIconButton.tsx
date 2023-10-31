@@ -45,6 +45,7 @@ export function DiscussionIconButton({
       sx={{
         padding: `5px ${postCountData?.getTotalPosts.total ? '10px' : ''}`,
         minWidth: '22px',
+        maxWidth: '160px',
         borderRadius: '6px',
         fontSize: '13px',
         gap: '4px',
