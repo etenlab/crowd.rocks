@@ -17,10 +17,12 @@ import { PhrasesService } from 'src/components/phrases/phrases.service';
 import {
   SiteTextUpsertInput,
   SiteTextDefinitionOutput,
-  SiteTextDefinitionListOutput,
+  SiteTextDefinitionListConnection,
   SiteTextLanguageListOutput,
   SiteTextLanguageWithTranslationInfoListOutput,
   SiteTextLanguageWithTranslationInfo,
+  SiteTextDefinitionEdge,
+  SiteTextDefinitionListFilterInput,
 } from './types';
 
 import {
@@ -202,29 +204,51 @@ export class SiteTextsService {
 
   async getAllSiteTextDefinitions({
     filter,
+    first,
+    after,
     pgClient,
   }: {
-    filter?: string;
+    filter?: SiteTextDefinitionListFilterInput;
+    first: number | null;
+    after: string | null;
     pgClient: PoolClient | null;
-  }): Promise<SiteTextDefinitionListOutput> {
+  }): Promise<SiteTextDefinitionListConnection> {
     try {
-      const { error: wordError, site_text_word_definition_list } =
+      let wordAfter: string | null = null;
+      let phraseAfter: string | null = null;
+
+      if (after) {
+        wordAfter = JSON.parse(after).wordCursor;
+        phraseAfter = JSON.parse(after).phraseCursor;
+      }
+
+      const { error: wordError, edges: wordEdges } =
         await this.siteTextWordDefinitionService.getAllSiteTextWordDefinitions({
           filter,
+          first,
+          after: wordAfter,
           pgClient,
         });
 
       if (wordError !== ErrorType.NoError) {
         return {
           error: wordError,
-          site_text_definition_list: [],
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+          },
         };
       }
 
-      const { error: phraseError, site_text_phrase_definition_list } =
+      const { error: phraseError, edges: phraseEdges } =
         await this.siteTextPhraseDefinitionService.getAllSiteTextPhraseDefinitions(
           {
             filter,
+            first,
+            after: phraseAfter,
             pgClient,
           },
         );
@@ -232,16 +256,116 @@ export class SiteTextsService {
       if (phraseError !== ErrorType.NoError) {
         return {
           error: phraseError,
-          site_text_definition_list: [],
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+          },
         };
+      }
+
+      const edges: SiteTextDefinitionEdge[] = [];
+      let wordTop = 0;
+      let phraseTop = 0;
+
+      while (true) {
+        if (first && edges.length === first) {
+          break;
+        }
+
+        if (wordTop === wordEdges.length && phraseTop === phraseEdges.length) {
+          break;
+        }
+
+        if (wordEdges.length === 0) {
+          edges.push({
+            cursor: JSON.stringify({
+              wordCursor: null,
+              phraseCursor: phraseEdges[phraseTop].cursor,
+            }),
+            node: phraseEdges[phraseTop].node,
+          });
+          phraseTop++;
+          continue;
+        }
+
+        if (phraseEdges.length === 0) {
+          edges.push({
+            cursor: JSON.stringify({
+              wordCursor: wordEdges[wordTop].cursor,
+              phraseCursor: null,
+            }),
+            node: wordEdges[wordTop].node,
+          });
+          wordTop++;
+          continue;
+        }
+
+        if (wordTop === wordEdges.length) {
+          edges.push({
+            cursor: JSON.stringify({
+              wordCursor: wordTop > 0 ? wordEdges[wordTop - 1].cursor : null,
+              phraseCursor: phraseEdges[phraseTop].cursor,
+            }),
+            node: phraseEdges[phraseTop].node,
+          });
+          phraseTop++;
+          continue;
+        }
+
+        if (phraseTop === phraseEdges.length) {
+          edges.push({
+            cursor: JSON.stringify({
+              wordCursor: wordEdges[wordTop].cursor,
+              phraseCursor:
+                phraseTop > 0 ? phraseEdges[phraseTop - 1].cursor : null,
+            }),
+            node: wordEdges[wordTop].node,
+          });
+          wordTop++;
+          continue;
+        }
+
+        if (wordEdges[wordTop].cursor > phraseEdges[phraseTop].cursor) {
+          edges.push({
+            cursor: JSON.stringify({
+              wordCursor: wordTop > 0 ? wordEdges[wordTop - 1].cursor : null,
+              phraseCursor: phraseEdges[phraseTop].cursor,
+            }),
+            node: phraseEdges[phraseTop].node,
+          });
+          phraseTop++;
+          continue;
+        }
+
+        if (wordEdges[wordTop].cursor <= phraseEdges[phraseTop].cursor) {
+          edges.push({
+            cursor: JSON.stringify({
+              wordCursor: wordEdges[wordTop].cursor,
+              phraseCursor:
+                phraseTop > 0 ? phraseEdges[phraseTop - 1].cursor : null,
+            }),
+            node: wordEdges[wordTop].node,
+          });
+          wordTop++;
+          continue;
+        }
       }
 
       return {
         error: ErrorType.NoError,
-        site_text_definition_list: [
-          ...site_text_word_definition_list,
-          ...site_text_phrase_definition_list,
-        ],
+        edges,
+        pageInfo: {
+          hasNextPage: first
+            ? wordEdges.length + phraseEdges.length > first
+            : false,
+          hasPreviousPage: false,
+          startCursor: edges.length > 0 ? edges[0].cursor : null,
+          endCursor:
+            edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
+        },
       };
     } catch (e) {
       console.error(e);
@@ -249,7 +373,13 @@ export class SiteTextsService {
 
     return {
       error: ErrorType.UnknownError,
-      site_text_definition_list: [],
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+      },
     };
   }
 
@@ -372,13 +502,15 @@ export class SiteTextsService {
       const res2 = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
-      }).query<GetAllSiteTextWordDefinition>(...getAllSiteTextWordDefinition());
+      }).query<GetAllSiteTextWordDefinition>(
+        ...getAllSiteTextWordDefinition({ first: null, after: null }),
+      );
 
       const res3 = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
       }).query<GetAllSiteTextPhraseDefinition>(
-        ...getAllSiteTextPhraseDefinition(),
+        ...getAllSiteTextPhraseDefinition({ first: null, after: null }),
       );
 
       const total_count = res2.rowCount + res3.rowCount;

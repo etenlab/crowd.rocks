@@ -35,6 +35,7 @@ export interface ContextType {
     changeAppLanguage: (langInfo: LanguageInfo) => void;
     changeTranslationSourceLanguage: (langInfo: LanguageInfo | null) => void;
     changeTranslationTargetLanguage: (langInfo: LanguageInfo | null) => void;
+    changeSiteTextTargetLanguage: (langInfo: LanguageInfo | null) => void;
     setSourceLanguage: (targetLanguage: LanguageInfo | null) => void;
     setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
     setUpdatedTrDefinitionIds: (definitionIds: Array<string>) => void;
@@ -85,6 +86,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
     setTargetLanguage,
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
+    changeSiteTextTargetLanguage,
     setUpdatedTrDefinitionIds,
     setTempTranslation,
     clearTempTranslation,
@@ -230,19 +232,10 @@ export function AppContextProvider({ children }: AppProviderProps) {
         return;
       }
 
-      const siteTextDefinitionList =
-        stData.getAllSiteTextDefinitions.site_text_definition_list;
-
-      if (!siteTextDefinitionList) {
-        return;
-      }
-
       const originalMap: Record<string, string> = {};
 
-      for (const siteTextDefinition of siteTextDefinitionList) {
-        if (!siteTextDefinition) {
-          continue;
-        }
+      for (const edge of stData.getAllSiteTextDefinitions.edges) {
+        const siteTextDefinition = edge.node;
 
         switch (siteTextDefinition.__typename) {
           case 'SiteTextWordDefinition': {
@@ -334,6 +327,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
       changeAppLanguage,
       changeTranslationSourceLanguage,
       changeTranslationTargetLanguage,
+      changeSiteTextTargetLanguage,
       setSourceLanguage,
       setTargetLanguage,
       setUpdatedTrDefinitionIds,

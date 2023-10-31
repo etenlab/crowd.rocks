@@ -12,6 +12,28 @@ fragment SiteTextWordDefinitionFragment on SiteTextWordDefinition {
   }
 }
 
+fragment SiteTextWordDefinitionEdgeFragment on SiteTextWordDefinitionEdge {
+  cursor
+  node {
+    ...SiteTextWordDefinitionFragment
+  }
+}
+
+fragment SiteTextPhraseDefinitionEdgeFragment on SiteTextPhraseDefinitionEdge {
+  cursor
+  node {
+    ...SiteTextPhraseDefinitionFragment
+  }
+}
+
+fragment SiteTextDefinitionEdgeFragment on SiteTextDefinitionEdge {
+  cursor
+  node {
+    ...SiteTextPhraseDefinitionFragment
+    ...SiteTextWordDefinitionFragment
+  }
+}
+
 fragment SiteTextLanguageFragment on SiteTextLanguage {
   language_code
   dialect_code
@@ -38,12 +60,32 @@ fragment SiteTextLanguageWithTranslationInfoFragment on SiteTextLanguageWithTran
   translated_count
 }
 
-query GetAllSiteTextDefinitions($filter: String) {
-  getAllSiteTextDefinitions(filter: $filter) {
+query GetAllSiteTextDefinitions(
+  $filter: String
+  $onlyNotTranslated: Boolean
+  $onlyTranslated: Boolean
+  $quickFilter: String
+  $targetLanguage: LanguageInput
+  $first: Int
+  $after: ID
+) {
+  getAllSiteTextDefinitions(
+    filters: {
+      filter: $filter
+      targetLanguage: $targetLanguage
+      onlyNotTranslated: $onlyNotTranslated
+      onlyTranslated: $onlyTranslated
+      quickFilter: $quickFilter
+    }
+    first: $first
+    after: $after
+  ) {
     error
-    site_text_definition_list {
-      ...SiteTextPhraseDefinitionFragment
-      ...SiteTextWordDefinitionFragment
+    edges {
+      ...SiteTextDefinitionEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }

@@ -65,7 +65,7 @@ export function getFlagsFromRefsQuery(
 ): [string, [TableNameType[], number[]]] {
   return [
     `
-      with paris (parent_table, parent_id) as (
+      with pairs (parent_table, parent_id) as (
         select unnest($1::text[]), unnest($2::int[])
       )
       select

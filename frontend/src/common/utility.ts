@@ -93,3 +93,7 @@ export const typeOfString = (wordOrPhrase: string): StringContentTypes => {
   if (parts.length === 1) return StringContentTypes.WORD;
   return StringContentTypes.PHRASE;
 };
+
+export function calc_vote_weight(upvotes: number, downvotes: number): number {
+  return upvotes * 2 - downvotes;
+}
