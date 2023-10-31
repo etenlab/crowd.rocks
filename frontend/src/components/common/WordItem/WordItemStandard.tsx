@@ -77,7 +77,7 @@ export function WordItemStandard({
           padding: '4px',
           border: `1px solid ${theme.palette.text.gray_stroke}`,
           borderRadius: '50%',
-          background: '#fff',
+          background: theme.palette.background.white,
           color: theme.palette.text.gray,
         })}
       >

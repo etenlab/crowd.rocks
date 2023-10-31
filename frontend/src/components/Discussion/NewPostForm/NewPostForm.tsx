@@ -4,7 +4,7 @@ import { usePostCreateMutation } from '../../../hooks/useCreatePostMutation';
 import { useEffect, useState } from 'react';
 import { ErrorType } from '../../../generated/graphql';
 import { useIonToast } from '@ionic/react';
-import { Container } from '../../site-text/NewSiteTextForm/styled';
+import { Container } from './styled';
 
 interface NewPostFormParams {
   parent_id: string;

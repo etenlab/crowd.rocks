@@ -219,7 +219,7 @@ export function MapWordsList() {
               border: (theme) => `1px solid ${theme.palette.text.gray_stroke}`,
             }}
           >
-            <FilterList sx={{ fontSize: 24 }} />
+            <FilterList sx={{ fontSize: 22 }} />
           </Button>
         </Stack>
 
