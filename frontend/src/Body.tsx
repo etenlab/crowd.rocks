@@ -93,6 +93,7 @@ import { Header } from './components/common/Header';
 import { useColorModeContext } from './theme';
 
 import { apollo_client } from './App';
+import { DataGeneratorPage } from './components/data-generator/DataGeneratorPage';
 
 export function Body() {
   const { tr } = useTr();
@@ -534,6 +535,11 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/ai-controller"
               component={AIControllerPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/data-generator"
+              component={DataGeneratorPage}
             />
             <Route
               exact

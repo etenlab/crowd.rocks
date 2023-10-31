@@ -64,9 +64,9 @@ export class MapsResolver {
     previewFileId: string | undefined | null,
     @Args({ name: 'file_type', type: () => String })
     file_type: string,
-    @Args({ name: 'file_size', type: () => Int })
-    file_size: number,
     @Context() req: any,
+    @Args({ name: 'file_size', type: () => Int })
+    file_size?: number,
   ): Promise<MapUploadOutput> {
     console.log(`mapUpload resolver `, map_file_name);
     const bearer = getBearer(req) || '';
@@ -76,8 +76,8 @@ export class MapsResolver {
       readStream,
       map_file_name,
       file_type,
-      file_size,
       bearer,
+      file_size,
     );
     for await (const chunk of readStream) {
       if (!fileBody) {

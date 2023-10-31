@@ -22,6 +22,7 @@ import {
   helpCircleOutline,
   logoGoogle,
   brushOutline,
+  cogOutline,
 } from 'ionicons/icons';
 import { RouteComponentProps } from 'react-router';
 import './Home.css';
@@ -122,6 +123,15 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           title: tr('Pericope Tool'),
           description: tr('Pericope Tool'),
           isShown: () => !!settings?.isBetaTools,
+        },
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/data-generator`,
+          icon: cogOutline,
+          title: tr('Data Generator (For development only)'),
+          description: tr('Generate fake data to test performance'),
+          isShown: () =>
+            !!isAdminRes?.loggedInIsAdmin.isAdmin &&
+            process.env.NODE_ENV === 'development',
         },
       ],
     },
