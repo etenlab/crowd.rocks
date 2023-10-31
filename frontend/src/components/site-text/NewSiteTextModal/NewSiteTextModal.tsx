@@ -45,7 +45,16 @@ export function NewSiteTextModal({ onClose }: NewSiteTextModalProps) {
         geo_code: null,
       },
     });
-  }, [siteTextlikeString, siteTextUpsert, definitionString, present, tr]);
+
+    onClose();
+  }, [
+    siteTextlikeString,
+    siteTextUpsert,
+    definitionString,
+    onClose,
+    present,
+    tr,
+  ]);
 
   return (
     <Stack gap="24px">
