@@ -72,8 +72,6 @@ export function SiteTextListPage() {
   const [getAllSiteTextDefinitions, { data, error, loading, fetchMore }] =
     useGetAllSiteTextDefinitionsLazyQuery();
 
-  console.log(data);
-
   useEffect(() => {
     getAllSiteTextDefinitions({
       variables: {

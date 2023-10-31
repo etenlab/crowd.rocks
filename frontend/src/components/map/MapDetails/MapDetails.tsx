@@ -15,7 +15,7 @@ import { Caption } from '../../common/Caption/Caption';
 import { Tag } from '../../common/chips/Tag';
 import { FlagV2 } from '../../flags/Flag';
 import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
-import { DiscussionButton } from '../../Discussion/DiscussionButton';
+import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import { DownloadCircle } from '../../common/icons/DownloadCircle';
 
@@ -205,22 +205,14 @@ export function MapDetails() {
         >
           {tr('Translate This Map')}
         </Button>
-
-        <DiscussionButton
-          parent_table={
-            isOriginal
-              ? TableNameType.OriginalMaps
-              : TableNameType.TranslatedMaps
-          }
-          parent_id={id}
-          label={tr('Go to Discussion')}
-        />
       </Stack>
 
-      <Divider />
-
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="h4">{tr('Voting')}</Typography>
+      <Stack
+        gap="16px"
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+      >
         <VoteButtonsHorizontal
           downVotes={
             currentMapVoteStatus.data?.getMapVoteStatus.vote_status
@@ -248,6 +240,15 @@ export function MapDetails() {
               },
             });
           }}
+        />
+
+        <DiscussionIconButton
+          parent_table={
+            isOriginal
+              ? TableNameType.OriginalMaps
+              : TableNameType.TranslatedMaps
+          }
+          parent_id={id}
         />
       </Stack>
 

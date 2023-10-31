@@ -52,7 +52,7 @@ export const colors = {
   },
   gray_bg: {
     light: designColors['gray_bg'],
-    dark: designColors['white'],
+    dark: designColors['dark'],
   },
 };
 

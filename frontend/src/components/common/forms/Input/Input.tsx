@@ -4,9 +4,11 @@ export type InputProps = {
   placeholder: string;
   value: string;
   onChange(value: string): void;
+  multiline?: boolean;
+  rows?: number;
 };
 
-export function Input({ placeholder, value, onChange }: InputProps) {
+export function Input({ placeholder, value, onChange, ...props }: InputProps) {
   return (
     <Box
       sx={(theme) => ({
@@ -34,6 +36,7 @@ export function Input({ placeholder, value, onChange }: InputProps) {
           },
           flex: 1,
         }}
+        {...props}
         placeholder={placeholder}
       />
     </Box>
