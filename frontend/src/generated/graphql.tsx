@@ -1677,7 +1677,7 @@ export type QueryGetAllRecommendedSiteTextTranslationListByLanguageArgs = {
 
 export type QueryGetAllSiteTextDefinitionsArgs = {
   after?: InputMaybe<Scalars['ID']['input']>;
-  filter?: InputMaybe<Scalars['String']['input']>;
+  filters?: InputMaybe<SiteTextDefinitionListFilterInput>;
   first?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -2159,6 +2159,15 @@ export type SiteTextDefinitionListConnection = {
   edges: Array<SiteTextDefinitionEdge>;
   error: ErrorType;
   pageInfo: PageInfo;
+};
+
+export type SiteTextDefinitionListFilterInput = {
+  filter?: InputMaybe<Scalars['String']['input']>;
+  isSortDescending?: InputMaybe<Scalars['Boolean']['input']>;
+  onlyNotTranslated?: InputMaybe<Scalars['Boolean']['input']>;
+  onlyTranslated?: InputMaybe<Scalars['Boolean']['input']>;
+  quickFilter?: InputMaybe<Scalars['String']['input']>;
+  targetLanguage?: InputMaybe<LanguageInput>;
 };
 
 export type SiteTextDefinitionOutput = {
@@ -3541,6 +3550,10 @@ export type SiteTextLanguageWithTranslationInfoFragmentFragment = { __typename?:
 
 export type GetAllSiteTextDefinitionsQueryVariables = Exact<{
   filter?: InputMaybe<Scalars['String']['input']>;
+  onlyNotTranslated?: InputMaybe<Scalars['Boolean']['input']>;
+  onlyTranslated?: InputMaybe<Scalars['Boolean']['input']>;
+  quickFilter?: InputMaybe<Scalars['String']['input']>;
+  targetLanguage?: InputMaybe<LanguageInput>;
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['ID']['input']>;
 }>;
@@ -7683,8 +7696,12 @@ export type UpsertAnswerMutationHookResult = ReturnType<typeof useUpsertAnswerMu
 export type UpsertAnswerMutationResult = Apollo.MutationResult<UpsertAnswerMutation>;
 export type UpsertAnswerMutationOptions = Apollo.BaseMutationOptions<UpsertAnswerMutation, UpsertAnswerMutationVariables>;
 export const GetAllSiteTextDefinitionsDocument = gql`
-    query GetAllSiteTextDefinitions($filter: String, $first: Int, $after: ID) {
-  getAllSiteTextDefinitions(filter: $filter, first: $first, after: $after) {
+    query GetAllSiteTextDefinitions($filter: String, $onlyNotTranslated: Boolean, $onlyTranslated: Boolean, $quickFilter: String, $targetLanguage: LanguageInput, $first: Int, $after: ID) {
+  getAllSiteTextDefinitions(
+    filters: {filter: $filter, targetLanguage: $targetLanguage, onlyNotTranslated: $onlyNotTranslated, onlyTranslated: $onlyTranslated, quickFilter: $quickFilter}
+    first: $first
+    after: $after
+  ) {
     error
     edges {
       ...SiteTextDefinitionEdgeFragment
@@ -7710,6 +7727,10 @@ ${PageInfoFragmentFragmentDoc}`;
  * const { data, loading, error } = useGetAllSiteTextDefinitionsQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      onlyNotTranslated: // value for 'onlyNotTranslated'
+ *      onlyTranslated: // value for 'onlyTranslated'
+ *      quickFilter: // value for 'quickFilter'
+ *      targetLanguage: // value for 'targetLanguage'
  *      first: // value for 'first'
  *      after: // value for 'after'
  *   },

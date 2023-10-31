@@ -11,7 +11,7 @@ export const typePolicies: TypePolicies = {
       getAllMapsList: relayStylePagination(['input']),
       getOrigMapWordsAndPhrases: relayStylePagination(['input']),
       getSingleMapWordsAndPhrases: relayStylePagination(['input']),
-      getAllSiteTextDefinitions: relayStylePagination(['filter']),
+      getAllSiteTextDefinitions: relayStylePagination(['filters']),
     },
   },
   WordWithDefinitions: {

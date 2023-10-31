@@ -1017,7 +1017,7 @@ type Query {
   getAllMapsList(after: ID, first: Int, input: GetAllMapsListInput!): MapListConnection!
   getAllRecommendedSiteTextTranslationList: TranslationWithVoteListByLanguageListOutput!
   getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): TranslationWithVoteListByLanguageOutput!
-  getAllSiteTextDefinitions(after: ID, filter: String, first: Int): SiteTextDefinitionListConnection!
+  getAllSiteTextDefinitions(after: ID, filters: SiteTextDefinitionListFilterInput, first: Int): SiteTextDefinitionListConnection!
   getAllSiteTextLanguageList: SiteTextLanguageListOutput!
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput!
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): TranslationWithVoteListOutput!
@@ -1181,6 +1181,15 @@ type SiteTextDefinitionListConnection {
   edges: [SiteTextDefinitionEdge!]!
   error: ErrorType!
   pageInfo: PageInfo!
+}
+
+input SiteTextDefinitionListFilterInput {
+  filter: String
+  isSortDescending: Boolean
+  onlyNotTranslated: Boolean
+  onlyTranslated: Boolean
+  quickFilter: String
+  targetLanguage: LanguageInput
 }
 
 type SiteTextDefinitionOutput {

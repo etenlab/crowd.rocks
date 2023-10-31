@@ -60,8 +60,26 @@ fragment SiteTextLanguageWithTranslationInfoFragment on SiteTextLanguageWithTran
   translated_count
 }
 
-query GetAllSiteTextDefinitions($filter: String, $first: Int, $after: ID) {
-  getAllSiteTextDefinitions(filter: $filter, first: $first, after: $after) {
+query GetAllSiteTextDefinitions(
+  $filter: String
+  $onlyNotTranslated: Boolean
+  $onlyTranslated: Boolean
+  $quickFilter: String
+  $targetLanguage: LanguageInput
+  $first: Int
+  $after: ID
+) {
+  getAllSiteTextDefinitions(
+    filters: {
+      filter: $filter
+      targetLanguage: $targetLanguage
+      onlyNotTranslated: $onlyNotTranslated
+      onlyTranslated: $onlyTranslated
+      quickFilter: $quickFilter
+    }
+    first: $first
+    after: $after
+  ) {
     error
     edges {
       ...SiteTextDefinitionEdgeFragment
