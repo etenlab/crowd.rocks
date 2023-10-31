@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
-import { pgClientOrPool } from 'src/common/utility';
+import { calc_vote_weight, pgClientOrPool } from 'src/common/utility';
 
 import { ErrorType, GenericOutput } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
@@ -502,40 +502,21 @@ export class WordToWordTranslationsService {
 
   chooseBestTranslation(
     wordOrPhraseTranslated: MapWordWithTranslations | MapPhraseWithTranslations,
-    langRestrictions?: LanguageInput,
   ): MapWordAsTranslation | MapPhraseAsTranslation | undefined {
     const res = wordOrPhraseTranslated?.translations?.reduce(
       (bestTr, currTr) => {
-        if (
-          langRestrictions?.language_code &&
-          currTr.language_code !== langRestrictions.language_code
-        ) {
-          return bestTr;
-        }
-
-        if (
-          langRestrictions?.dialect_code &&
-          currTr.dialect_code !== langRestrictions.dialect_code
-        ) {
-          return bestTr;
-        }
-
-        if (
-          langRestrictions?.geo_code &&
-          currTr.geo_code !== langRestrictions.geo_code
-        ) {
-          return bestTr;
-        }
-
         if (bestTr?.up_votes === undefined) {
           return currTr;
         }
-
-        const bestTrTotal =
-          Number(bestTr?.up_votes || 0) - Number(bestTr?.down_votes || 0);
-        const currTrTotal =
-          Number(currTr?.up_votes || 0) - Number(currTr?.down_votes || 0);
-        if (currTrTotal > bestTrTotal) {
+        const bestTrWeight = calc_vote_weight(
+          Number(bestTr?.up_votes || 0),
+          Number(bestTr?.down_votes || 0),
+        );
+        const currTrWeight = calc_vote_weight(
+          Number(currTr?.up_votes || 0),
+          Number(currTr?.down_votes || 0),
+        );
+        if (currTrWeight > bestTrWeight) {
           return currTr;
         }
         return bestTr;

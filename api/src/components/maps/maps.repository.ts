@@ -4,9 +4,9 @@ import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
 import { LanguageInput } from 'src/components/common/types';
 import {
-  GetOrigMapPhrasesOutput,
+  GetOrigMapPhrasesWithTrOutput,
   GetOrigMapsListOutput,
-  GetOrigMapWordsOutput,
+  GetOrigMapWordsWithTrOutput,
   MapDetailsOutput,
   MapPhraseWithTranslations,
   MapPhraseAsTranslation,
@@ -39,9 +39,7 @@ export interface ISaveTranslatedMapParams {
   original_map_id: string;
   content_file_id: string;
   token: string;
-  t_language_code: string;
-  t_dialect_code?: string;
-  t_geo_code?: string;
+  toLang: LanguageInput;
   dbPoolClient: PoolClient | null;
   translated_percent: number;
 }
@@ -59,12 +57,12 @@ interface ISaveTranslatedMapRes {
 }
 
 interface ILangsRestrictions {
-  o_language_code?: string;
-  o_dialect_code?: string;
-  o_geo_code?: string;
-  t_language_code?: string;
-  t_dialect_code?: string;
-  t_geo_code?: string;
+  o_language_code: string;
+  o_dialect_code?: string | null;
+  o_geo_code?: string | null;
+  t_language_code: string;
+  t_dialect_code?: string | null;
+  t_geo_code?: string | null;
 }
 
 @Injectable()
@@ -125,14 +123,12 @@ export class MapsRepository {
    * dbPoolClient is optional. If providerd, then it will be used to run query (useful for SQL transactions)
    * if not - then new client will be get from pg.pool
    */
-  async saveTranslatedMapTrn({
+  async saveTranslatedMap({
     original_map_id,
     content_file_id,
     dbPoolClient,
     token,
-    t_language_code,
-    t_dialect_code,
-    t_geo_code,
+    toLang,
     translated_percent,
   }: ISaveTranslatedMapParams): Promise<ISaveTranslatedMapRes | null> {
     const poolClient = dbPoolClient
@@ -150,11 +146,11 @@ export class MapsRepository {
       original_map_id,
       content_file_id,
       userId,
-      t_language_code,
+      toLang.language_code,
       translated_percent,
     ];
-    params.push(t_dialect_code ? t_dialect_code : null);
-    params.push(t_geo_code ? t_geo_code : null);
+    params.push(toLang.dialect_code ? toLang.dialect_code : null);
+    params.push(toLang.geo_code ? toLang.geo_code : null);
     const sqlStr = `
       insert into
         translated_maps(
@@ -630,7 +626,7 @@ export class MapsRepository {
       t_dialect_code,
       t_geo_code,
     }: ILangsRestrictions,
-  ): Promise<GetOrigMapWordsOutput> {
+  ): Promise<GetOrigMapWordsWithTrOutput> {
     const params: string[] = [];
     let tLanguageRestrictionClause = '';
     if (t_language_code) {
@@ -907,7 +903,7 @@ export class MapsRepository {
       t_dialect_code,
       t_geo_code,
     }: ILangsRestrictions,
-  ): Promise<GetOrigMapPhrasesOutput> {
+  ): Promise<GetOrigMapPhrasesWithTrOutput> {
     const params: string[] = [];
     let tLanguageRestrictionClause = '';
     if (t_language_code) {
@@ -1730,5 +1726,28 @@ export class MapsRepository {
         translated_maps
     `;
     await dbPoolClient.query(sqlStr);
+  }
+
+  async getPossibleMapLanguages(mapId: string): Promise<LanguageInput[]> {
+    const params = [mapId];
+    const sqlStr = `
+      select t_language_code from mv_words_languages mwl
+        join original_map_words omw on omw.word_id = mwl.word_id
+        where omw.original_map_id = $${params.length} 
+      union
+        select t_language_code from mv_phrases_languages mpl
+        join original_map_phrases omp on omp.phrase_id = mpl.phrase_id
+        where omp.original_map_id = $${params.length}
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    const langs = resQ.rows.map(
+      (row) =>
+        ({
+          language_code: row.t_language_code,
+          dialect_code: row.t_dialect_code,
+          geo_code: row.t_geo_code,
+        } as LanguageInput),
+    );
+    return langs;
   }
 }
