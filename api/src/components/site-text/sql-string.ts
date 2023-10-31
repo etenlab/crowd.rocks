@@ -103,15 +103,36 @@ export function getAllSiteTextWordDefinition({
     filterStr = `lower(wlss.wordlike_string) like $${returnArr.length}`;
   }
 
+  if (after) {
+    returnArr.push(after);
+    cursorStr = `lower(wlss.wordlike_string) > $${returnArr.length}`;
+  }
+
   if (first) {
     returnArr.push(first);
     limitStr = `limit $${returnArr.length}`;
   }
 
-  if (after) {
-    returnArr.push(after);
-    cursorStr = `and lower(wlss.wordlike_string) > $${returnArr.length}`;
-  }
+  console.log([
+    `
+      select distinct
+        site_text_id,
+        lower(wlss.wordlike_string)
+      from site_text_word_definitions as stwds
+      join word_definitions as wds
+      on stwds.word_definition_id = wds.word_definition_id
+      join words as ws
+      on ws.word_id = wds.word_id
+      join wordlike_strings as wlss
+      on wlss.wordlike_string_id = ws.wordlike_string_id
+      ${filterStr.trim() === '' && cursorStr.trim() === '' ? '' : 'where'}
+        ${filterStr}
+        ${filterStr.trim() !== '' ? 'and ' : ''} ${cursorStr}
+      order by lower(wlss.wordlike_string)
+      ${limitStr};
+      `,
+    [...returnArr],
+  ]);
 
   return [
     `
@@ -127,7 +148,7 @@ export function getAllSiteTextWordDefinition({
       on wlss.wordlike_string_id = ws.wordlike_string_id
       ${filterStr.trim() === '' && cursorStr.trim() === '' ? '' : 'where'}
         ${filterStr}
-        ${cursorStr}
+        ${filterStr.trim() !== '' ? 'and ' : ''} ${cursorStr}
       order by lower(wlss.wordlike_string)
       ${limitStr};
       `,
@@ -158,14 +179,14 @@ export function getAllSiteTextPhraseDefinition({
     filterStr = `lower(ps.phraselike_string) like $${returnArr.length}`;
   }
 
+  if (after) {
+    returnArr.push(after);
+    cursorStr = `lower(ps.phraselike_string) > $${returnArr.length}`;
+  }
+
   if (first) {
     returnArr.push(first);
     limitStr = `limit $${returnArr.length}`;
-  }
-
-  if (after) {
-    returnArr.push(after);
-    cursorStr = `and lower(ps.phraselike_string) > $${returnArr.length}`;
   }
 
   return [
@@ -180,7 +201,7 @@ export function getAllSiteTextPhraseDefinition({
       on ps.phrase_id = pds.phrase_id
       ${filterStr.trim() === '' && cursorStr.trim() === '' ? '' : 'where'}
         ${filterStr}
-        ${cursorStr}
+        ${filterStr.trim() !== '' ? 'and ' : ''} ${cursorStr}
       order by lower(ps.phraselike_string)
       ${limitStr};
       `,

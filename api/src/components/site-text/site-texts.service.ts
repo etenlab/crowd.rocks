@@ -217,9 +217,10 @@ export class SiteTextsService {
       let phraseAfter: string | null = null;
 
       if (after) {
-        wordAfter = JSON.parse(after).wordAfter;
-        phraseAfter = JSON.parse(after).phraseAfter;
+        wordAfter = JSON.parse(after).wordCursor;
+        phraseAfter = JSON.parse(after).phraseCursor;
       }
+
       const { error: wordError, edges: wordEdges } =
         await this.siteTextWordDefinitionService.getAllSiteTextWordDefinitions({
           filter,

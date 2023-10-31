@@ -239,7 +239,12 @@ export class SiteTextsResolver {
     @Args('after', { type: () => ID, nullable: true })
     after: string | null,
   ): Promise<SiteTextDefinitionListConnection> {
-    Logger.log('site text getAllSiteTextDefinitions resolver');
+    Logger.log(
+      'site text getAllSiteTextDefinitions resolver',
+      filter,
+      first,
+      after,
+    );
 
     return this.siteTextService.getAllSiteTextDefinitions({
       filter: filter || undefined,
