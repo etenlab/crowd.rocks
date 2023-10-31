@@ -8,6 +8,11 @@ import {
   initialState as componentsInitialState,
   reducer as componentsReducer,
 } from './components.reducer';
+import {
+  type StateType as NonPersistentStateType,
+  initialState as nonPersistentInitialState,
+  reducer as nonPersistentReducer,
+} from './non-persistent.reducer';
 
 export interface ActionType<T> {
   type: string;
@@ -17,11 +22,13 @@ export interface ActionType<T> {
 export interface StateType {
   global: GlobalStateType;
   components: ComponentsStateType;
+  nonPersistent: NonPersistentStateType;
 }
 
 export const initialState = {
   global: globalInitialState,
   components: componentsInitialState,
+  nonPersistent: nonPersistentInitialState,
 };
 
 const CROWD_ROCKS_STATE = 'CROWD_ROCKS_STATE';
@@ -36,6 +43,7 @@ export function persistStore(state: StateType) {
           ...state.global,
         },
         components: {},
+        nonPersistent: nonPersistentInitialState,
       }),
     );
   } catch (err) {
@@ -60,6 +68,7 @@ export function loadPersistedStore(): StateType {
         ...newState.global,
       },
       components: componentsInitialState,
+      nonPersistent: nonPersistentInitialState,
     };
   } catch (err) {
     console.log(err);
@@ -75,6 +84,7 @@ export function reducer(
   const newState = {
     global: globalReducer(state.global, action),
     components: componentsReducer(state.components, action),
+    nonPersistent: nonPersistentReducer(state.nonPersistent, action),
   };
 
   persistStore(newState);
