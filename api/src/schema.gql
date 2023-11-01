@@ -586,6 +586,7 @@ type Mutation {
   mapUpload(file: Upload!, file_size: Int!, file_type: String!, previewFileId: String): MapUploadOutput!
   mapVoteUpsert(input: MapVoteUpsertInput!): MapVoteOutput!
   mapsReTranslate(forLangTag: String): GenericOutput!
+  mapsReTranslateToLangs(forLangTags: [String!]!): GenericOutput!
   mapsTranslationsReset: GenericOutput!
   markNotificationAsRead(input: MarkNotificationReadInput!): MarkNotificationReadOutput!
   notificationDelete(input: NotificationDeleteInput!): NotificationDeleteOutput!

@@ -225,6 +225,37 @@ export class MapsResolver {
     }
   }
 
+  @Mutation(() => GenericOutput)
+  async mapsReTranslateToLangs(
+    @Context() req: any,
+    @Args({ name: 'forLangTags', type: () => [String] })
+    forLangTags: string[],
+  ): Promise<GenericOutput> {
+    console.log(`mapsReTranslate resolver `, forLangTags);
+    const userToken = getBearer(req) || '';
+    const user_id = await this.authenticationService.get_user_id_from_bearer(
+      userToken,
+    );
+    const admin_id = await this.authenticationService.get_admin_id();
+    if (admin_id !== user_id) {
+      return {
+        error: ErrorType.Unauthorized,
+      };
+    }
+    try {
+      for (let i = 0; i < forLangTags!.length; i++) {
+        await this.mapsService.reTranslate(userToken, forLangTags[i]!);
+      }
+      return {
+        error: ErrorType.NoError,
+      };
+    } catch (error) {
+      return {
+        error: error,
+      };
+    }
+  }
+
   @Query(() => GetOrigMapsListOutput)
   async getOrigMapsList(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
