@@ -209,11 +209,20 @@ export async function setTranslationsVotes(
   vote: boolean | null,
   pgClient: PoolClient | Pool,
 ) {
+  // console.log(`fromTypeIsWord: ${fromTypeIsWord}`);
+  // console.log(`toTypeIsWord: ${toTypeIsWord}`);
   if (translationIds && translationIds.length > 0) {
     if (fromTypeIsWord) {
       if (toTypeIsWord) {
         // call word to word procedure
         //console.log('w2w');
+        // console.log(
+        //   ...callWordToWordTranslationVoteSetProcedure({
+        //     translationIds,
+        //     token,
+        //     vote,
+        //   }),
+        // );
         await pgClient.query(
           ...callWordToWordTranslationVoteSetProcedure({
             translationIds,
@@ -224,6 +233,13 @@ export async function setTranslationsVotes(
       } else {
         // call word to phrase reset procedure
         //console.log('w2p');
+        // console.log(
+        //   ...callWordToPhraseTranslationVoteSetProcedure({
+        //     translationIds,
+        //     token,
+        //     vote,
+        //   }),
+        // );
         await pgClient.query(
           ...callWordToPhraseTranslationVoteSetProcedure({
             translationIds,
@@ -236,6 +252,13 @@ export async function setTranslationsVotes(
       if (toTypeIsWord) {
         // phrase to word reset procedure
         //console.log('p2w');
+        // console.log(
+        //   ...callPhraseToWordTranslationVoteSetProcedure({
+        //     translationIds,
+        //     token,
+        //     vote,
+        //   }),
+        // );
         await pgClient.query(
           ...callPhraseToWordTranslationVoteSetProcedure({
             translationIds,
@@ -246,6 +269,13 @@ export async function setTranslationsVotes(
       } else {
         // phrase to phrase reset
         // console.log('p2p');
+        // console.log(
+        //   ...callPhraseToPhraseTranslationVoteSetProcedure({
+        //     translationIds,
+        //     token,
+        //     vote,
+        //   }),
+        // );
         await pgClient.query(
           ...callPhraseToPhraseTranslationVoteSetProcedure({
             translationIds,
