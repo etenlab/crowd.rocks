@@ -157,6 +157,7 @@ export enum TableNameType {
 
   words = 'words',
   phrases = 'phrases',
+  threads = 'threads',
 
   word_to_word_translations = 'word_to_word_translations',
   word_to_phrase_translations = 'word_to_phrase_translations',

@@ -2303,6 +2303,7 @@ export enum TableNameType {
   PhraseToPhraseTranslations = 'phrase_to_phrase_translations',
   PhraseToWordTranslations = 'phrase_to_word_translations',
   Phrases = 'phrases',
+  Threads = 'threads',
   TranslatedMaps = 'translated_maps',
   WordDefinitions = 'word_definitions',
   WordRanges = 'word_ranges',

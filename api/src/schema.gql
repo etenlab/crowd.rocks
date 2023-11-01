@@ -1312,6 +1312,7 @@ enum TableNameType {
   phrase_to_phrase_translations
   phrase_to_word_translations
   phrases
+  threads
   translated_maps
   word_definitions
   word_ranges
