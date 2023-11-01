@@ -85,7 +85,7 @@ export function MapItem({
     }
   };
 
-  const handleDownloadSvg: MouseEventHandler<HTMLButtonElement> = (e) => {
+  const handleDownloadSvg: MouseEventHandler<HTMLButtonElement> = () => {
     downloadFlagRef.current = mapInfo.is_original ? 'original' : 'translated';
     getMapDetails({
       variables: {
@@ -95,16 +95,10 @@ export function MapItem({
           : mapInfo.translated_map_id!,
       },
     });
-
-    e.preventDefault();
-    e.stopPropagation();
   };
 
-  const handleDeleteMap: MouseEventHandler<HTMLButtonElement> = (e) => {
+  const handleDeleteMap: MouseEventHandler<HTMLButtonElement> = () => {
     openModal(<MapDeleteModal mapInfo={mapInfo} onClose={closeModal} />);
-
-    e.preventDefault();
-    e.stopPropagation();
   };
 
   if (

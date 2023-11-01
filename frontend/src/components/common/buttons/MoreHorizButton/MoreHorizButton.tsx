@@ -6,11 +6,13 @@ import { MoreHoriz } from '../../icons/MoreHoriz';
 export type MoreHorizButtonProps = Omit<IconButtonProps, 'component'> & {
   component: ReactNode;
   popoverWidth?: string;
+  keepAfterClickItem?: boolean;
 };
 
 export function MoreHorizButton({
   component,
   popoverWidth,
+  keepAfterClickItem,
   ...props
 }: MoreHorizButtonProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -48,6 +50,9 @@ export function MoreHorizButton({
       </IconButton>
       <Popover
         onClick={(e) => {
+          if (!keepAfterClickItem) {
+            handleClose();
+          }
           e.stopPropagation();
           e.preventDefault();
         }}

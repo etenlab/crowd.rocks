@@ -249,6 +249,7 @@ export function MapDetails() {
               : TableNameType.TranslatedMaps
           }
           parent_id={id}
+          flex="1"
         />
       </Stack>
 

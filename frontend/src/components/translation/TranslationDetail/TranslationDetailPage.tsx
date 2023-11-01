@@ -178,6 +178,7 @@ export function TranslationDetailPage() {
                 ? TableNameType.Words
                 : TableNameType.Phrases
             }
+            flex="1"
           />
           <Box
             sx={{

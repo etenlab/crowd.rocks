@@ -47,7 +47,7 @@ export function WordCard({
 }: WordCardProps) {
   const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
   const discussionBtnCom = discussion ? (
-    <DiscussionIconButton {...discussion} />
+    <DiscussionIconButton {...discussion} flex="1" />
   ) : null;
 
   return (

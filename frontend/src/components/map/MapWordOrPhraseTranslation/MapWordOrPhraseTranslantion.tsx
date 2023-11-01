@@ -105,6 +105,7 @@ export function MapWordOrPhraseTranslation() {
             parent_table={
               original.isWord ? TableNameType.Words : TableNameType.Phrases
             }
+            flex="1"
           />
           <Box
             sx={{
