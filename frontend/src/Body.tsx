@@ -70,8 +70,11 @@ import { TranslationDetailPage } from './components/translation/TranslationDetai
 import { NewTranslationConfirmPage } from './components/translation/TranslationDetail/NewTranslationConfirmPage';
 
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
+
 import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
-import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
+import { FolderListPage } from './components/forums/FolderListPage/FolderListPage';
+import { ThreadListPage } from './components/forums/ThreadListPage/ThreadListPage';
+
 import { NotificationPage } from './components/notifications/NotificationPage';
 import { SettingsPage } from './components/settings/SettingsPage';
 
@@ -517,7 +520,12 @@ export function Body() {
             <Route
               exact
               path="/:nation_id/:language_id/:cluster_id/forums/:forum_id/:forum_name"
-              component={ForumDetailPage}
+              component={FolderListPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/folders/:folder_id/:folder_name"
+              component={ThreadListPage}
             />
             <Route
               exact
