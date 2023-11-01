@@ -51,8 +51,8 @@ export class FileResolver {
       createReadStream(),
       file_name,
       file_type,
-      file_size,
       bearer,
+      file_size,
     );
     console.log('[file]:', JSON.stringify(file));
     return file!;

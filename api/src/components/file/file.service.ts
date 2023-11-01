@@ -62,8 +62,8 @@ export class FileService {
     readStream: ReadStream | Readable,
     fileName: string,
     fileType: string,
-    fileSize: number,
     token: string,
+    fileSize?: number,
   ): Promise<IFileOutput | undefined> {
     Logger.log(`Uploading file ` + fileName);
     try {
@@ -71,11 +71,13 @@ export class FileService {
 
       const hash = createHash('sha256');
       let hashValue: string | null = null;
+      let totalCalcSize = 0;
 
       const calcHashTr = new Transform({
         transform(chunk, _encoding, callback) {
           hash.update(chunk);
           this.push(chunk);
+          totalCalcSize += chunk.length;
           callback();
         },
         flush(callback) {
@@ -141,7 +143,7 @@ export class FileService {
           file_id: fileEntity.file.id,
           file_name: fileName,
           file_type: fileType,
-          file_size: fileSize,
+          file_size: fileSize ?? totalCalcSize,
           file_url: `https://${this.makeS3Creds().bucketName}.s3.${
             this.makeS3Creds().region
           }.amazonaws.com/${fileKey}`,
@@ -153,7 +155,7 @@ export class FileService {
       return await this.fileRepository.save({
         file_name: fileName,
         file_type: fileType,
-        file_size: fileSize,
+        file_size: fileSize ?? totalCalcSize,
         file_url: `https://${this.makeS3Creds().bucketName}.s3.${
           this.makeS3Creds().region
         }.amazonaws.com/${fileKey}`,

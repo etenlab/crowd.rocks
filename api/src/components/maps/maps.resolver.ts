@@ -64,9 +64,9 @@ export class MapsResolver {
     previewFileId: string | undefined | null,
     @Args({ name: 'file_type', type: () => String })
     file_type: string,
-    @Args({ name: 'file_size', type: () => Int })
-    file_size: number,
     @Context() req: any,
+    @Args({ name: 'file_size', type: () => Int })
+    file_size?: number,
   ): Promise<MapUploadOutput> {
     console.log(`mapUpload resolver `, map_file_name);
     const bearer = getBearer(req) || '';
@@ -76,8 +76,8 @@ export class MapsResolver {
       readStream,
       map_file_name,
       file_type,
-      file_size,
       bearer,
+      file_size,
     );
     for await (const chunk of readStream) {
       if (!fileBody) {
@@ -215,6 +215,37 @@ export class MapsResolver {
     }
     try {
       await this.mapsService.reTranslate(userToken, forLangTag!);
+      return {
+        error: ErrorType.NoError,
+      };
+    } catch (error) {
+      return {
+        error: error,
+      };
+    }
+  }
+
+  @Mutation(() => GenericOutput)
+  async mapsReTranslateToLangs(
+    @Context() req: any,
+    @Args({ name: 'forLangTags', type: () => [String] })
+    forLangTags: string[],
+  ): Promise<GenericOutput> {
+    console.log(`mapsReTranslate resolver `, forLangTags);
+    const userToken = getBearer(req) || '';
+    const user_id = await this.authenticationService.get_user_id_from_bearer(
+      userToken,
+    );
+    const admin_id = await this.authenticationService.get_admin_id();
+    if (admin_id !== user_id) {
+      return {
+        error: ErrorType.Unauthorized,
+      };
+    }
+    try {
+      for (let i = 0; i < forLangTags!.length; i++) {
+        await this.mapsService.reTranslate(userToken, forLangTags[i]!);
+      }
       return {
         error: ErrorType.NoError,
       };
