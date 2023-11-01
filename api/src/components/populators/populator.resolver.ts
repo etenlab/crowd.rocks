@@ -13,6 +13,8 @@ import { Octokit } from '@octokit/rest';
 import { lastValueFrom } from 'rxjs';
 import { AiTranslationsService } from '../translator-bots/ai-translations.service';
 import { LanguageInput } from '../common/types';
+import fetch from 'node-fetch';
+import { PostgresService } from 'src/core/postgres.service';
 
 @Injectable()
 @Resolver(Populator)
@@ -23,6 +25,7 @@ export class PopulatorResolver {
     private fileService: FileService,
     private authService: AuthorizationService,
     private aiTranslationService: AiTranslationsService,
+    private pg: PostgresService,
   ) {}
 
   @Mutation(() => GenericOutput)
@@ -73,7 +76,11 @@ export class PopulatorResolver {
         error: ErrorType.Unauthorized,
       };
     }
-    const octokit = new Octokit();
+    const octokit = new Octokit({
+      request: {
+        fetch: fetch,
+      },
+    });
 
     const { data } = await octokit.rest.repos.getContent({
       owner: 'etenlab',
@@ -90,6 +97,12 @@ export class PopulatorResolver {
       mapAmount = data.length;
     }
     for (let i = 0; i < mapAmount; i++) {
+      if (i === data.length) {
+        console.log(
+          'reached limit of maps in dataset. continuing with execution...',
+        );
+        break;
+      }
       if (!data[i].download_url) {
         console.log('no download url. skipping...');
         continue;
@@ -98,6 +111,26 @@ export class PopulatorResolver {
         console.log('no download url. skipping...');
         continue;
       }
+
+      console.log(`checking if ${data[i].name} exists...`);
+      const res1 = await this.pg.pool.query(
+        `
+        select
+          original_map_id
+        from
+          original_maps
+        where
+          map_file_name = $1;
+        `,
+        [data[i].name],
+      );
+      if (res1.rowCount === 1) {
+        console.log(`${data[i].name} already exists. Skipping...`);
+        mapAmount++;
+        continue;
+      }
+
+      console.log(`${data[i].name} does NOT exist yet`);
       console.log('processing thumb file');
       const thumb_file = createReadStream(
         join(process.cwd(), 'test-thumb.png'),
@@ -140,9 +173,7 @@ export class PopulatorResolver {
       );
       console.log('upload finished. errors:');
       console.log(upload.error);
-      if (upload.error === ErrorType.MapFilenameAlreadyExists) {
-        console.log('Map exists. skipping...');
-      }
+      console.log(upload.error == ErrorType.MapFilenameAlreadyExists);
     }
 
     return { error: ErrorType.NoError };
