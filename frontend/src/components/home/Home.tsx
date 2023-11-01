@@ -131,7 +131,7 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           description: tr('Generate fake data to test performance'),
           isShown: () =>
             !!isAdminRes?.loggedInIsAdmin.isAdmin &&
-            process.env.NODE_ENV === 'development',
+            import.meta.env.MODE !== 'production',
         },
       ],
     },
