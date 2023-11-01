@@ -25,7 +25,11 @@ import {
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
 import { WordsService } from '../words/words.service';
-import { MapsRepository } from './maps.repository';
+import {
+  MapsRepository,
+  MapTrOfWordOrPhrase,
+  MapTrWordsPhrases,
+} from './maps.repository';
 import { WordUpsertInput } from '../words/types';
 import {
   ErrorType,
@@ -536,24 +540,22 @@ export class MapsService {
     }
   }
 
-  async GetOrigMapWordsWithTr(
+  async GetOrigMapTrWords(
     input: GetOrigMapWordsWithTrInput,
-  ): Promise<GetOrigMapWordsWithTrOutput> {
+  ): Promise<MapTrWordsPhrases> {
     try {
       const { original_map_id, ...langRestrictions } = input;
-      return this.mapsRepository.getOrigMapWordsWithTr(
+      return this.mapsRepository.getOrigMapTrWords(
         original_map_id || '',
         langRestrictions,
       );
     } catch (e) {
       Logger.error(e);
-      return {
-        origMapWords: [],
-      };
+      return [];
     }
   }
 
-  async GetOrigMapPhrasesWithTr(
+  async GetOrigMapTrPhrases(
     input: GetOrigMapPhrasesWithTrInput,
   ): Promise<GetOrigMapPhrasesWithTrOutput> {
     try {
@@ -917,9 +919,9 @@ export class MapsService {
         t_geo_code: toLang.geo_code,
         t_dialect_code: toLang.dialect_code,
       };
-      const wPromise = this.GetOrigMapWordsWithTr(WPParams);
-      const pPromise = this.GetOrigMapPhrasesWithTr(WPParams);
-      const [{ origMapWords }, { origMapPhrases }] = await Promise.all([
+      const wPromise = this.GetOrigMapTrWords(WPParams);
+      const pPromise = this.GetOrigMapTrPhrases(WPParams);
+      const [origMapWords, { origMapPhrases }] = await Promise.all([
         wPromise,
         pPromise,
       ]);

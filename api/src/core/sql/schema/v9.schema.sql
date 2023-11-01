@@ -4,6 +4,7 @@ DROP materialized view if exists mv_words_languages;
 CREATE materialized view  mv_words_languages as
 select
   w.word_id,
+  wtwt.word_to_word_translation_id as translation_id,
   w2.language_code as t_language_code,
   w2.dialect_code as t_dialect_code,
   w2.geo_code as t_geo_code,
@@ -17,6 +18,7 @@ select
 union all 
 select
   w.word_id,
+  wtpt.word_to_phrase_translation_id as translation_id,
   w2.language_code as t_language_code,
   w2.dialect_code as t_dialect_code,
   w2.geo_code as t_geo_code,
@@ -43,6 +45,7 @@ DROP materialized view  if exists mv_phrases_languages;
 CREATE materialized view  mv_phrases_languages as 
 select 
   p.phrase_id,
+  ptwt.phrase_to_word_translation_id as translation_id,
   w2.language_code as t_language_code,
   w2.dialect_code as t_dialect_code,
   w2.geo_code as t_geo_code,
@@ -56,6 +59,7 @@ select
 union all 
 select
   p.phrase_id,
+  ptpt.phrase_to_phrase_translation_id as translation_id,  
   w2.language_code as t_language_code,
   w2.dialect_code as t_dialect_code,
   w2.geo_code as t_geo_code,

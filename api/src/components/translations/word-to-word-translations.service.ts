@@ -42,6 +42,12 @@ import {
   MapWordAsTranslation,
 } from '../maps/types';
 
+export type SomethingVoted = {
+  [key: string]: any;
+  up_votes: string;
+  down_votes: string;
+};
+
 @Injectable()
 export class WordToWordTranslationsService {
   constructor(
@@ -500,9 +506,11 @@ export class WordToWordTranslationsService {
     };
   }
 
-  chooseBestTranslation(
-    wordOrPhraseTranslated: MapWordWithTranslations | MapPhraseWithTranslations,
-  ): MapWordAsTranslation | MapPhraseAsTranslation | undefined {
+  chooseBestTranslation<
+    T extends {
+      translations?: Array<SomethingVoted> | undefined;
+    },
+  >(wordOrPhraseTranslated: T): SomethingVoted | undefined {
     const res = wordOrPhraseTranslated?.translations?.reduce(
       (bestTr, currTr) => {
         if (bestTr?.up_votes === undefined) {
@@ -521,9 +529,8 @@ export class WordToWordTranslationsService {
         }
         return bestTr;
       },
-      {} as MapWordAsTranslation | MapPhraseAsTranslation,
+      {} as SomethingVoted,
     );
-
     return res;
   }
 

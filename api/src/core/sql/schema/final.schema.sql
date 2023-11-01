@@ -735,9 +735,13 @@ create table answers (
 );
 
 
+-- mv_words_languages definition
+
+DROP materialized view if exists mv_words_languages;
 CREATE materialized view  mv_words_languages as
 select
   w.word_id,
+  wtwt.word_to_word_translation_id as translation_id,
   w2.language_code as t_language_code,
   w2.dialect_code as t_dialect_code,
   w2.geo_code as t_geo_code,
@@ -751,6 +755,7 @@ select
 union all 
 select
   w.word_id,
+  wtpt.word_to_phrase_translation_id as translation_id,
   w2.language_code as t_language_code,
   w2.dialect_code as t_dialect_code,
   w2.geo_code as t_geo_code,
@@ -763,7 +768,8 @@ select
   join phrases p2 on pd.phrase_id = p2.phrase_id 
   join words w2 on w2.word_id = p2.words[1];
 
-CREATE INDEX mv_words_languages_idx ON mv_words_languages USING btree (word_id, t_language_code, t_dialect_code, t_geo_code, t_word_id,t_phrase_id) nulls not DISTINCT;
+CREATE unique INDEX mv_words_languages_unq_idx ON mv_words_languages USING btree (word_id, t_language_code, t_dialect_code, t_geo_code, t_word_id,t_phrase_id) nulls not DISTINCT;
+CREATE INDEX mv_words_languages_word_id_idx ON mv_words_languages USING btree (word_id);
 CREATE INDEX mv_words_languages_full_language_code_idx ON mv_words_languages USING btree (t_language_code, t_dialect_code, t_geo_code);
 CREATE INDEX mv_words_languages_language_code_idx ON mv_words_languages USING btree (t_language_code);
 CREATE INDEX mv_words_languages_t_phrase_id_idx ON mv_words_languages USING btree (t_phrase_id);
@@ -776,6 +782,7 @@ DROP materialized view  if exists mv_phrases_languages;
 CREATE materialized view  mv_phrases_languages as 
 select 
   p.phrase_id,
+  ptwt.phrase_to_word_translation_id as translation_id,
   w2.language_code as t_language_code,
   w2.dialect_code as t_dialect_code,
   w2.geo_code as t_geo_code,
@@ -789,6 +796,7 @@ select
 union all 
 select
   p.phrase_id,
+  ptpt.phrase_to_phrase_translation_id as translation_id,  
   w2.language_code as t_language_code,
   w2.dialect_code as t_dialect_code,
   w2.geo_code as t_geo_code,
@@ -801,7 +809,8 @@ select
   join phrases p2 on pd3.phrase_id = p2.phrase_id 
   join words w2 on w2.word_id = p2.words[1];
 
-CREATE INDEX mv_phrases_languages_idx ON mv_phrases_languages USING btree (phrase_id, t_language_code, t_dialect_code, t_geo_code, t_word_id,t_phrase_id) nulls not DISTINCT;
+CREATE unique INDEX mv_phrases_languages_unq_idx ON mv_phrases_languages USING btree (phrase_id, t_language_code, t_dialect_code, t_geo_code, t_word_id,t_phrase_id) nulls not DISTINCT;
+CREATE INDEX mv_phrases_languages_phrase_id_idx ON mv_phrases_languages USING btree (phrase_id);
 CREATE INDEX mv_phrases_languages_full_language_code_idx ON mv_phrases_languages USING btree (t_language_code, t_dialect_code, t_geo_code);
 CREATE INDEX mv_phrases_languages_language_code_idx ON mv_phrases_languages USING btree (t_language_code);
 CREATE INDEX mv_phrases_languages_t_phrase_id_idx ON mv_phrases_languages USING btree (t_phrase_id);
