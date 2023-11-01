@@ -175,6 +175,8 @@ export enum ErrorType {
   MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
   MapInsertFailed = 'MapInsertFailed',
   MapNotFound = 'MapNotFound',
+  MapParsingError = 'MapParsingError',
+  MapSavingError = 'MapSavingError',
   MapVoteNotFound = 'MapVoteNotFound',
   MapWordsAndPhrasesSearchError = 'MapWordsAndPhrasesSearchError',
   MapZippingError = 'MapZippingError',

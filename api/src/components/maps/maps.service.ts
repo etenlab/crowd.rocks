@@ -29,6 +29,7 @@ import { MapsRepository } from './maps.repository';
 import { WordUpsertInput } from '../words/types';
 import {
   ErrorType,
+  GenericOutput,
   LanguageInfo,
   SubscriptionStatus,
 } from '../../common/types';
@@ -41,7 +42,11 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
-import { downloadFile, putLangCodesToFileName } from '../../common/utility';
+import {
+  downloadFile,
+  getPgClient,
+  putLangCodesToFileName,
+} from '../../common/utility';
 import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
 import { Readable } from 'stream';
@@ -78,7 +83,7 @@ interface IParseOrigMapParams {
   mapString: string;
   mapDetails: MapDetailsInfo;
   token: string;
-  dbPoolClient: PoolClient;
+  dbPoolClient?: PoolClient;
 }
 @Injectable()
 export class MapsService {
@@ -97,21 +102,20 @@ export class MapsService {
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
-  async saveAndParseNewMap({
+  async saveNewMapInfo({
     content_file_id,
     mapFileName,
     previewFileId,
     mapLanguage = DEFAULT_NEW_MAP_LANGUAGE,
     token,
-  }: IParseAndSaveNewMapParams) {
+  }: IParseAndSaveNewMapParams): Promise<string | null> {
     const language_code = mapLanguage.lang.tag;
     const dialect_code = mapLanguage.dialect?.tag;
     const geo_code = mapLanguage.region?.tag;
 
     const dbPoolClient = await this.pg.pool.connect();
     try {
-      //-- Save map
-      const { map_id } = await this.mapsRepository.saveOriginalMapTrn({
+      const saveMapRes = await this.mapsRepository.saveOriginalMapTrn({
         mapFileName,
         content_file_id,
         previewFileId: previewFileId!,
@@ -121,28 +125,32 @@ export class MapsService {
         dialect_code: dialect_code || undefined,
         geo_code: geo_code || undefined,
       });
-      const { str: mapString, details: mapDetails } =
-        await this.getMapAsStringById(map_id);
-      const res = await this.parseOrigMap({
-        mapString,
-        mapDetails,
-        dbPoolClient,
-        token,
-      });
-      return res;
+      if (!saveMapRes.map_id) {
+        throw new Error(ErrorType.MapSavingError);
+      }
+      return saveMapRes.map_id;
     } catch (error) {
-      throw error;
+      Logger.error(`mapsService#saveNewMapInfo: ${JSON.stringify(error)}`);
+      return null;
     } finally {
       dbPoolClient.release();
     }
   }
 
-  async parseOrigMap({
+  async parseOrigMapAndSaveFoundWordsPhrases({
     mapString,
     mapDetails,
-    dbPoolClient,
+    dbPoolClient: dbPoolClientIn,
     token,
-  }: IParseOrigMapParams): Promise<MapDetailsOutput> {
+  }: IParseOrigMapParams): Promise<GenericOutput> {
+    let isDbConnectionCreated = false;
+    let dbPoolClient: PoolClient;
+    if (!dbPoolClientIn) {
+      dbPoolClient = await this.pg.pool.connect();
+      isDbConnectionCreated = true;
+    } else {
+      dbPoolClient = dbPoolClientIn;
+    }
     try {
       const { language_code, dialect_code, geo_code } = mapDetails.language;
       const map_id = mapDetails.original_map_id;
@@ -177,18 +185,18 @@ export class MapsService {
         );
       }
 
-      await dbPoolClient.query('COMMIT');
-
       return {
         error: ErrorType.NoError,
-        mapDetails,
       };
     } catch (e) {
       Logger.error(e);
       return {
         error: ErrorType.UnknownError,
-        mapDetails: null,
       };
+    } finally {
+      if (isDbConnectionCreated) {
+        dbPoolClient.release();
+      }
     }
   }
 
@@ -827,13 +835,22 @@ export class MapsService {
     origMapString,
     origMapDetails,
     token,
-    dbPoolClient,
+    dbPoolClient: dbPoolClientIn,
   }: {
     origMapString: string;
     origMapDetails: MapDetailsInfo;
     token: string;
-    dbPoolClient: PoolClient;
+    dbPoolClient?: PoolClient;
   }): Promise<Array<string>> {
+    let isDbConnectionCreated = false;
+    let dbPoolClient: PoolClient;
+    if (!dbPoolClientIn) {
+      dbPoolClient = await this.pg.pool.connect();
+      isDbConnectionCreated = true;
+    } else {
+      dbPoolClient = dbPoolClientIn;
+    }
+
     try {
       const languages: LanguageInput[] =
         await this.mapsRepository.getPossibleMapLanguages(
@@ -857,6 +874,10 @@ export class MapsService {
     } catch (e) {
       Logger.error(e);
       return [];
+    } finally {
+      if (isDbConnectionCreated) {
+        dbPoolClient.release();
+      }
     }
   }
 
@@ -953,9 +974,9 @@ export class MapsService {
       if (!data?.map_id) throw `Error saving translated map ${data}`;
 
       Logger.log(
-        `DONE translating&saving map to lang ${JSON.stringify(
+        `DONE translating&saving map id ${origMapId} to lang ${JSON.stringify(
           toLang,
-        )} of orig map id ${origMapId} for ${performance.now() - p0} ms.`,
+        )} for ${performance.now() - p0} ms.`,
       );
 
       return data.map_id;
@@ -1051,7 +1072,7 @@ export class MapsService {
         const { str: mapString, details: mapDetails } =
           await this.getMapAsStringById(origMap.mapDetails.original_map_id);
 
-        await this.parseOrigMap({
+        await this.parseOrigMapAndSaveFoundWordsPhrases({
           mapDetails,
           mapString,
           token,
