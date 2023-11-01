@@ -8,3 +8,9 @@ mutation GenerateMapTranslations($to_languages: [LanguageInput!]!){
       error
     }
 }
+
+mutation MapsReTranslateToLangs($forLangTags: [String!]!) {
+  mapsReTranslateToLangs(forLangTags: $forLangTags) {
+    error
+  }
+}

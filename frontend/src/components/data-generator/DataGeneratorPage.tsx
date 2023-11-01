@@ -4,9 +4,10 @@ import {
   LanguageInput,
   useGenerateMapTranslationsMutation,
   useGenerateMapsMutation,
+  useMapsReTranslateToLangsMutation,
 } from '../../generated/graphql';
 import { useCallback, useEffect, useState } from 'react';
-import { getLangsRegistry } from '../../../../utils/dist';
+import { getLangsRegistry } from '../../../../utils';
 
 export function DataGeneratorPage() {
   const [generateMaps, { loading: mapLoading, data: mapData }] =
@@ -15,9 +16,16 @@ export function DataGeneratorPage() {
     generateMapTranslations,
     { loading: translationLoading, data: translationData },
   ] = useGenerateMapTranslationsMutation();
+  const [
+    reTranslateMaps,
+    { loading: retranslateLoading, data: retranslateData },
+  ] = useMapsReTranslateToLangsMutation();
   const [mapCount, setMapCount] = useState<number | null>(null);
   const [mapUpdateStatus, setMapUpdateStatus] = useState('Not started yet');
   const [mapTranslationStatus, setMapTranslationStatus] =
+    useState('Not started yet');
+
+  const [mapReTranslationStatus, setMapReTranslationStatus] =
     useState('Not started yet');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [toLanguageCount, setToLanguageCount] = useState(0);
@@ -37,8 +45,24 @@ export function DataGeneratorPage() {
         `Done! Error: ${translationData.populateMapTranslations.error}`,
       );
     }
+    if (retranslateLoading) {
+      setMapReTranslationStatus('Generating....');
+    }
+    if (retranslateData) {
+      setMapReTranslationStatus(
+        `Done! Error: ${retranslateData.mapsReTranslateToLangs.error}`,
+      );
+    }
+
     return;
-  }, [mapLoading, mapData, translationLoading, translationData]);
+  }, [
+    mapLoading,
+    mapData,
+    translationLoading,
+    translationData,
+    retranslateLoading,
+    retranslateData,
+  ]);
 
   const handleGenerateData = useCallback(async () => {
     await generateMaps({ variables: { map_amount: mapCount } });
@@ -52,8 +76,18 @@ export function DataGeneratorPage() {
       await generateMapTranslations({
         variables: { to_languages: toLanguages },
       });
+
+      await reTranslateMaps({
+        variables: { forLangTags: toLanguages.map((l) => l.language_code) },
+      });
     }
-  }, [generateMapTranslations, generateMaps, mapCount, toLanguageCount]);
+  }, [
+    generateMapTranslations,
+    generateMaps,
+    mapCount,
+    reTranslateMaps,
+    toLanguageCount,
+  ]);
 
   return (
     <PageLayout>
@@ -104,8 +138,12 @@ export function DataGeneratorPage() {
           <Typography variant="body1">{mapUpdateStatus}</Typography>
         </Stack>
         <Stack direction="row">
-          <Typography variant="body1">Map Translation Generation: </Typography>
+          <Typography variant="body1">Map Translations: </Typography>
           <Typography variant="body1">{mapTranslationStatus}</Typography>
+        </Stack>
+        <Stack direction="row">
+          <Typography variant="body1">ReTranslate Maps: </Typography>
+          <Typography variant="body1">{mapReTranslationStatus}</Typography>
         </Stack>
 
         {/* <Button>Cancel</Button> */}

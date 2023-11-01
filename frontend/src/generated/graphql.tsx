@@ -652,6 +652,7 @@ export type Mutation = {
   mapUpload: MapUploadOutput;
   mapVoteUpsert: MapVoteOutput;
   mapsReTranslate: GenericOutput;
+  mapsReTranslateToLangs: GenericOutput;
   mapsTranslationsReset: GenericOutput;
   markNotificationAsRead: MarkNotificationReadOutput;
   notificationDelete: NotificationDeleteOutput;
@@ -796,6 +797,11 @@ export type MutationMapVoteUpsertArgs = {
 
 export type MutationMapsReTranslateArgs = {
   forLangTag?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationMapsReTranslateToLangsArgs = {
+  forLangTags: Array<Scalars['String']['input']>;
 };
 
 
@@ -2913,6 +2919,13 @@ export type GenerateMapTranslationsMutationVariables = Exact<{
 
 export type GenerateMapTranslationsMutation = { __typename?: 'Mutation', populateMapTranslations: { __typename?: 'GenericOutput', error: ErrorType } };
 
+export type MapsReTranslateToLangsMutationVariables = Exact<{
+  forLangTags: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type MapsReTranslateToLangsMutation = { __typename?: 'Mutation', mapsReTranslateToLangs: { __typename?: 'GenericOutput', error: ErrorType } };
+
 export type WordlikeStringFragmentFragment = { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string };
 
 export type WordFragmentFragment = { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } };
@@ -5015,6 +5028,39 @@ export function useGenerateMapTranslationsMutation(baseOptions?: Apollo.Mutation
 export type GenerateMapTranslationsMutationHookResult = ReturnType<typeof useGenerateMapTranslationsMutation>;
 export type GenerateMapTranslationsMutationResult = Apollo.MutationResult<GenerateMapTranslationsMutation>;
 export type GenerateMapTranslationsMutationOptions = Apollo.BaseMutationOptions<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>;
+export const MapsReTranslateToLangsDocument = gql`
+    mutation MapsReTranslateToLangs($forLangTags: [String!]!) {
+  mapsReTranslateToLangs(forLangTags: $forLangTags) {
+    error
+  }
+}
+    `;
+export type MapsReTranslateToLangsMutationFn = Apollo.MutationFunction<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>;
+
+/**
+ * __useMapsReTranslateToLangsMutation__
+ *
+ * To run a mutation, you first call `useMapsReTranslateToLangsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMapsReTranslateToLangsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mapsReTranslateToLangsMutation, { data, loading, error }] = useMapsReTranslateToLangsMutation({
+ *   variables: {
+ *      forLangTags: // value for 'forLangTags'
+ *   },
+ * });
+ */
+export function useMapsReTranslateToLangsMutation(baseOptions?: Apollo.MutationHookOptions<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>(MapsReTranslateToLangsDocument, options);
+      }
+export type MapsReTranslateToLangsMutationHookResult = ReturnType<typeof useMapsReTranslateToLangsMutation>;
+export type MapsReTranslateToLangsMutationResult = Apollo.MutationResult<MapsReTranslateToLangsMutation>;
+export type MapsReTranslateToLangsMutationOptions = Apollo.BaseMutationOptions<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>;
 export const WordDefinitionReadDocument = gql`
     query WordDefinitionRead($id: ID!) {
   wordDefinitionRead(id: $id) {
@@ -9658,6 +9704,7 @@ export const namedOperations = {
     PasswordResetFormRequest: 'PasswordResetFormRequest',
     GenerateMaps: 'GenerateMaps',
     GenerateMapTranslations: 'GenerateMapTranslations',
+    MapsReTranslateToLangs: 'MapsReTranslateToLangs',
     WordDefinitionUpsert: 'WordDefinitionUpsert',
     ToggleWordDefinitionVoteStatus: 'ToggleWordDefinitionVoteStatus',
     ToggleWordVoteStatus: 'ToggleWordVoteStatus',
