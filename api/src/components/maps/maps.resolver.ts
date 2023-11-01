@@ -214,7 +214,7 @@ export class MapsResolver {
       };
     }
     try {
-      await this.mapsService.reTranslate(userToken, forLangTag!);
+      await this.mapsService.reTranslate(userToken, forLangTag);
       return {
         error: ErrorType.NoError,
       };
@@ -258,7 +258,7 @@ export class MapsResolver {
   async getMapDetails(
     @Args('input') input: GetMapDetailsInput,
   ): Promise<MapDetailsOutput> {
-    console.log(`getMapDetails resolver `, input);
+    console.log(`getMapDetails resolver `, JSON.stringify(input));
 
     return input.is_original
       ? this.mapsService.getOrigMapWithContentUrl(input.map_id)
@@ -272,7 +272,12 @@ export class MapsResolver {
     @Args('after', { type: () => ID, nullable: true })
     after?: string | null,
   ): Promise<MapWordsAndPhrasesConnection | undefined> {
-    console.log(`getOrigMapWordsAndPhrases resolver `, input, first, after);
+    console.log(
+      `getOrigMapWordsAndPhrases resolver `,
+      JSON.stringify(input),
+      first,
+      after,
+    );
     return this.mapsService.getOrigMapWordsAndPhrases({ input, first, after });
   }
 
@@ -280,7 +285,10 @@ export class MapsResolver {
   async getOrigMapWordsAndPhrasesCount(
     @Args('input') input: GetOrigMapWordsAndPhrasesInput,
   ): Promise<MapWordsAndPhrasesCountOutput | undefined> {
-    console.log(`getOrigMapWordsAndPhrasesCount resolver `, input);
+    console.log(
+      `getOrigMapWordsAndPhrasesCount resolver `,
+      JSON.stringify(input),
+    );
     return this.mapsService.getOrigMapWordsAndPhrasesCount(input);
   }
 
@@ -292,7 +300,7 @@ export class MapsResolver {
   ): Promise<OrigMapWordsAndPhrasesOutput | undefined> {
     console.log(
       `getOrigMapWordsAndPhrasesPaginated resolver `,
-      input,
+      JSON.stringify(input),
       offset,
       limit,
     );
@@ -307,7 +315,10 @@ export class MapsResolver {
   async getMapWordOrPhraseAsOrigByDefinitionId(
     @Args('input') input: GetMapWordOrPhraseByDefinitionIdInput,
   ): Promise<MapWordOrPhraseAsOrigOutput | undefined> {
-    console.log(`getMapWordOrPhraseAsOrigByDefinitionId resolver `, input);
+    console.log(
+      `getMapWordOrPhraseAsOrigByDefinitionId resolver `,
+      JSON.stringify(input),
+    );
     return this.mapsService.getMapWordOrPhraseUnionByDefinitionId(input);
   }
 
@@ -320,7 +331,7 @@ export class MapsResolver {
     @Args('input') input: MapVoteUpsertInput,
     @Context() req: any,
   ): Promise<MapVoteOutput> {
-    console.log('mapVoteUpsert resolver: ', input);
+    console.log('mapVoteUpsert resolver: ', JSON.stringify(input));
 
     return this.mapVotesService.upsert(input, getBearer(req)! || '', null);
   }
@@ -358,7 +369,7 @@ export class MapsResolver {
     @Args('input', { type: () => StartZipMapDownloadInput })
     input: StartZipMapDownloadInput,
   ): Promise<StartZipMapOutput> {
-    console.log(`startMapZipDownload`, input);
+    console.log(`startMapZipDownload`, JSON.stringify(input));
     return this.mapsService.startZipMap(input);
   }
 

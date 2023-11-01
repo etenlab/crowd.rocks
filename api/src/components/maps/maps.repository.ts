@@ -616,7 +616,7 @@ export class MapsRepository {
    * Note that orginal language params restrict whole selection on language that pass this params
    * instead target language params restrict only left join words.
    */
-  async getOrigMapWords(
+  async getOrigMapWordsWithTr(
     original_map_id: string,
     {
       o_language_code,
@@ -627,6 +627,12 @@ export class MapsRepository {
       t_geo_code,
     }: ILangsRestrictions,
   ): Promise<GetOrigMapWordsWithTrOutput> {
+    if (!o_language_code || !t_language_code) {
+      Logger.error(
+        `mapsRepository#getOrigMapWords: o_language_code and t_language_code must be specified.`,
+      );
+    }
+
     const params: string[] = [];
     let tLanguageRestrictionClause = '';
     if (t_language_code) {
@@ -893,7 +899,7 @@ export class MapsRepository {
     };
   }
 
-  async getOrigMapPhrases(
+  async getOrigMapPhrasesWithTr(
     original_map_id: string,
     {
       o_language_code,

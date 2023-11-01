@@ -20,6 +20,7 @@ import {
   StartZipMapOutput,
   ZipMapResult,
   StartZipMapDownloadInput,
+  MapDetailsInfo,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
@@ -75,7 +76,7 @@ interface IParseAndSaveNewMapParams {
 }
 interface IParseOrigMapParams {
   mapString: string;
-  mapDetails: MapDetailsOutput;
+  mapDetails: MapDetailsInfo;
   token: string;
   dbPoolClient: PoolClient;
 }
@@ -143,9 +144,8 @@ export class MapsService {
     token,
   }: IParseOrigMapParams): Promise<MapDetailsOutput> {
     try {
-      const { language_code, dialect_code, geo_code } =
-        mapDetails.mapDetails!.language;
-      const map_id = mapDetails.mapDetails!.original_map_id;
+      const { language_code, dialect_code, geo_code } = mapDetails.language;
+      const map_id = mapDetails.original_map_id;
       const { foundWords, foundPhrases } = this.parseSvgMapString(mapString);
 
       //--save found words with definitions and original map boundng
@@ -181,7 +181,7 @@ export class MapsService {
 
       return {
         error: ErrorType.NoError,
-        mapDetails: mapDetails.mapDetails,
+        mapDetails,
       };
     } catch (e) {
       Logger.error(e);
@@ -533,7 +533,7 @@ export class MapsService {
   ): Promise<GetOrigMapWordsWithTrOutput> {
     try {
       const { original_map_id, ...langRestrictions } = input;
-      return this.mapsRepository.getOrigMapWords(
+      return this.mapsRepository.getOrigMapWordsWithTr(
         original_map_id || '',
         langRestrictions,
       );
@@ -550,7 +550,7 @@ export class MapsService {
   ): Promise<GetOrigMapPhrasesWithTrOutput> {
     try {
       const { original_map_id, ...langRestrictions } = input;
-      const origMapPhrases = await this.mapsRepository.getOrigMapPhrases(
+      const origMapPhrases = await this.mapsRepository.getOrigMapPhrasesWithTr(
         original_map_id || '',
         langRestrictions,
       );
@@ -830,26 +830,14 @@ export class MapsService {
     dbPoolClient,
   }: {
     origMapString: string;
-    origMapDetails: MapDetailsOutput;
+    origMapDetails: MapDetailsInfo;
     token: string;
     dbPoolClient: PoolClient;
   }): Promise<Array<string>> {
     try {
-      if (
-        !origMapDetails.mapDetails?.original_map_id ||
-        !origMapDetails.mapDetails?.content_file_id
-      ) {
-        Logger.error(
-          `mapsService#translateMapToAllLangsAndSaveTranslated: original_map_id or content_file_id isn't provided. ${JSON.stringify(
-            origMapDetails,
-          )}`,
-        );
-        return [];
-      }
-
       const languages: LanguageInput[] =
         await this.mapsRepository.getPossibleMapLanguages(
-          origMapDetails.mapDetails.original_map_id,
+          origMapDetails.original_map_id,
         );
 
       const trPromises: Array<Promise<string | null>> = [];
@@ -880,22 +868,13 @@ export class MapsService {
     dbPoolClient,
   }: {
     origMapString: string;
-    origMapDetails: MapDetailsOutput;
+    origMapDetails: MapDetailsInfo;
     toLang: LanguageInput;
     token: string;
     dbPoolClient: PoolClient;
   }): Promise<string | null> {
     try {
-      if (
-        !origMapDetails?.mapDetails?.original_map_id ||
-        !origMapDetails?.mapDetails?.map_file_name
-      ) {
-        Logger.error(
-          `mapsService#translateMapToLangAndSaveTranslated: original_map_id or map_file_name not found in origMapDetails`,
-        );
-        return null;
-      }
-      const origMapId = origMapDetails.mapDetails.original_map_id;
+      const origMapId = origMapDetails.original_map_id;
       if (!toLang) {
         Logger.error(
           `mapsService#translateMapToLangAndSaveTranslated: toLang isn't provided.`,
@@ -908,17 +887,6 @@ export class MapsService {
           toLang,
         )}`,
       );
-
-      const origMap = origMapDetails
-        ? origMapDetails
-        : await this.mapsRepository.getOrigMapWithContentUrl(origMapId);
-
-      if (!origMap.mapDetails) {
-        Logger.error(
-          `mapsService#translateMapAndSaveTranslatedTrn: origMap not found.`,
-        );
-        return null;
-      }
 
       //----
       const WPParams = {
@@ -938,7 +906,7 @@ export class MapsService {
 
       const origMapWordsAndPhrases: Array<
         MapWordWithTranslations | MapPhraseWithTranslations
-        > = [...origMapWords, ...origMapPhrases];
+      > = [...origMapWords, ...origMapPhrases];
 
       const translations: Array<{
         source: string;
@@ -957,7 +925,7 @@ export class MapsService {
       const stream = Readable.from([translatedMap]);
       const translatedContentFile = await this.fileService.uploadFile(
         stream,
-        putLangCodesToFileName(origMapDetails.mapDetails.map_file_name, toLang),
+        putLangCodesToFileName(origMapDetails.map_file_name, toLang),
         SVG_MIME_TYPE,
         translatedMap.length,
         token,
@@ -978,16 +946,16 @@ export class MapsService {
         translated_percent:
           origMapWordsAndPhrases.length > 0
             ? Math.round(
-              (translations.length / origMapWordsAndPhrases.length) * 100,
-            )
+                (translations.length / origMapWordsAndPhrases.length) * 100,
+              )
             : 100,
       });
       if (!data?.map_id) throw `Error saving translated map ${data}`;
 
       Logger.log(
-        `DONE translating of orig map id ${origMapId} for ${
-          performance.now() - p0
-        } ms.`,
+        `DONE translating&saving map to lang ${JSON.stringify(
+          toLang,
+        )} of orig map id ${origMapId} for ${performance.now() - p0} ms.`,
       );
 
       return data.map_id;
@@ -1080,16 +1048,21 @@ export class MapsService {
           );
           continue;
         }
+        const { str: mapString, details: mapDetails } =
+          await this.getMapAsStringById(origMap.mapDetails.original_map_id);
+
         await this.parseOrigMap({
-          map_id: origMap.mapDetails.original_map_id,
+          mapDetails,
+          mapString,
           token,
           dbPoolClient,
         });
-        await this.translateMapStringToAllLangsAndSaveTranslated(
-          origMap.mapDetails.original_map_id,
+        await this.translateMapStringToAllLangsAndSaveTranslated({
+          origMapDetails: mapDetails,
+          origMapString: mapString,
           token,
           dbPoolClient,
-        );
+        });
       }
     } catch (error) {
       Logger.log(error);
@@ -1098,27 +1071,39 @@ export class MapsService {
     }
   }
 
-  async reTranslate(token: string, forLangTag: string): Promise<void> {
-    const langInfo = tag2langInfo(forLangTag);
-    const lang: LanguageInput = {
-      language_code: langInfo.lang.tag,
-      dialect_code: langInfo.dialect?.tag || null,
-      geo_code: langInfo.region?.tag || null,
-    };
-    const originalMaps = await this.mapsRepository.getOrigMaps();
-    if (!(originalMaps.mapList?.length > 0)) return;
-    const origMapIds = originalMaps.mapList.map(
-      (m) => m.mapDetails?.original_map_id,
-    );
+  async reTranslate(token: string, forLangTag?: string | null): Promise<void> {
     const dbPoolClient = await this.pg.pool.connect();
     try {
+      const originalMaps = await this.mapsRepository.getOrigMaps();
+      if (!(originalMaps.mapList?.length > 0)) return;
+      const origMapIds = originalMaps.mapList.map(
+        (m) => m.mapDetails!.original_map_id,
+      );
       for (const origMapId of origMapIds) {
-        this.translateMapStringToLangAndSaveTranslated(
-          origMapId,
-          token,
-          dbPoolClient,
-          lang,
-        );
+        const { str: origMapString, details: origMapDetails } =
+          await this.getMapAsStringById(origMapId);
+        if (forLangTag) {
+          const langInfo = tag2langInfo(forLangTag);
+          const toLang: LanguageInput = {
+            language_code: langInfo.lang.tag,
+            dialect_code: langInfo.dialect?.tag || null,
+            geo_code: langInfo.region?.tag || null,
+          };
+          await this.translateMapStringToLangAndSaveTranslated({
+            origMapDetails,
+            origMapString,
+            dbPoolClient,
+            token,
+            toLang,
+          });
+        } else {
+          this.translateMapStringToAllLangsAndSaveTranslated({
+            origMapDetails,
+            origMapString,
+            dbPoolClient,
+            token,
+          });
+        }
       }
     } catch (error) {
       Logger.error(`mapsService#reTranslate error: `, error);
@@ -1348,26 +1333,27 @@ export class MapsService {
 
   async getMapAsStringById(
     map_id: string,
-  ): Promise<{ str: string; details: MapDetailsOutput }> {
-    const details = await this.mapsRepository.getOrigMapWithContentUrl(map_id);
+  ): Promise<{ str: string; details: MapDetailsInfo }> {
+    const mapDetatilsOutput =
+      await this.mapsRepository.getOrigMapWithContentUrl(map_id);
     if (
-      !details?.mapDetails?.original_map_id ||
-      !details?.mapDetails?.content_file_id
+      !mapDetatilsOutput?.mapDetails?.original_map_id ||
+      !mapDetatilsOutput?.mapDetails?.content_file_id
     ) {
       throw new Error(
         `mapsService#getMapAsStringById: original_map_id or content_file_id not found. ${JSON.stringify(
-          details,
+          mapDetatilsOutput,
         )}`,
       );
     }
     const str = await this.fileService.getFileContentAsString(
-      details.mapDetails.content_file_id,
+      mapDetatilsOutput.mapDetails.content_file_id,
     );
     if (!str) {
       throw new Error(
         `mapsService#getMapAsStringById: can't get map string from map file`,
       );
     }
-    return { str, details };
+    return { str, details: mapDetatilsOutput.mapDetails };
   }
 }
