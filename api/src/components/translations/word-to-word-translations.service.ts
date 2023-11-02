@@ -35,17 +35,12 @@ import { WordsService } from '../words/words.service';
 
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 import { LanguageInput } from 'src/components/common/types';
-import {
-  MapPhraseWithTranslations,
-  MapPhraseAsTranslation,
-  MapWordWithTranslations,
-  MapWordAsTranslation,
-} from '../maps/types';
+import { MapTrWordsPhrases } from '../maps/maps.repository';
 
 export type SomethingVoted = {
   [key: string]: any;
-  up_votes: string;
-  down_votes: string;
+  up_votes: number;
+  down_votes: number;
 };
 
 @Injectable()
@@ -506,31 +501,26 @@ export class WordToWordTranslationsService {
     };
   }
 
-  chooseBestTranslation<
-    T extends {
-      translations?: Array<SomethingVoted> | undefined;
-    },
-  >(wordOrPhraseTranslated: T): SomethingVoted | undefined {
-    const res = wordOrPhraseTranslated?.translations?.reduce(
-      (bestTr, currTr) => {
-        if (bestTr?.up_votes === undefined) {
-          return currTr;
-        }
-        const bestTrWeight = calc_vote_weight(
-          Number(bestTr?.up_votes || 0),
-          Number(bestTr?.down_votes || 0),
-        );
-        const currTrWeight = calc_vote_weight(
-          Number(currTr?.up_votes || 0),
-          Number(currTr?.down_votes || 0),
-        );
-        if (currTrWeight > bestTrWeight) {
-          return currTr;
-        }
-        return bestTr;
-      },
-      {} as SomethingVoted,
-    );
+  chooseBestTranslation<T extends SomethingVoted>(
+    wordOrPhraseTranslated: T[],
+  ): T {
+    const res = wordOrPhraseTranslated.reduce((bestTr, currTr) => {
+      if (bestTr?.up_votes === undefined) {
+        return currTr;
+      }
+      const bestTrWeight = calc_vote_weight(
+        Number(bestTr?.up_votes || 0),
+        Number(bestTr?.down_votes || 0),
+      );
+      const currTrWeight = calc_vote_weight(
+        Number(currTr?.up_votes || 0),
+        Number(currTr?.down_votes || 0),
+      );
+      if (currTrWeight > bestTrWeight) {
+        return currTr;
+      }
+      return bestTr;
+    }, {} as T);
     return res;
   }
 

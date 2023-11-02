@@ -4,12 +4,8 @@ import { ErrorType, GenericOutput } from '../../common/types';
 import { PostgresService } from '../../core/postgres.service';
 import { LanguageInput } from 'src/components/common/types';
 import {
-  GetOrigMapPhrasesWithTrOutput,
   GetOrigMapsListOutput,
   MapDetailsOutput,
-  MapPhraseWithTranslations,
-  MapPhraseAsTranslation,
-  MapWordAsTranslation,
   OriginalMapPhraseInput,
   OriginalMapWordInput,
   MapWordsAndPhrasesConnection,
@@ -54,15 +50,6 @@ interface ISaveTranslatedMapRes {
   created_by: string;
 }
 
-interface ILangsRestrictions {
-  o_language_code: string;
-  o_dialect_code?: string | null;
-  o_geo_code?: string | null;
-  t_language_code: string;
-  t_dialect_code?: string | null;
-  t_geo_code?: string | null;
-}
-
 export type MapTrOfWordOrPhrase = {
   t_like_string: string;
   translation_id: string;
@@ -71,7 +58,9 @@ export type MapTrOfWordOrPhrase = {
   down_votes: number;
 };
 export type MapTrWordsPhrases = Array<{
-  o_like_string;
+  o_id: string;
+  o_type: string;
+  o_like_string: string;
   translations: Array<MapTrOfWordOrPhrase>;
 }>;
 
@@ -648,7 +637,7 @@ export class MapsRepository {
           select 
             up_votes.up_count as up_votes, 
             down_votes.down_count as down_votes 
-          from phrase_to_phrase_translations wxwx 
+          from ${prefix}_translations wxwx 
           left join (
               SELECT count(v.user_id) as up_count, v.${prefix}_translation_id as up_translation_id
               FROM ${prefix}_translations_votes v 
@@ -673,39 +662,43 @@ export class MapsRepository {
     }
 
     return {
-      up_votes: resQ.rows[0].up_votes,
-      down_votes: resQ.rows[0].down_votes,
+      up_votes: resQ.rows[0].up_votes || 0,
+      down_votes: resQ.rows[0].down_votes || 0,
     };
   }
 
-  async getOrigMapTrWords(
+  /**
+   * Use to get simple not-paginated information about words and phrases for maps translation
+   */
+  async getOrigMapTrWordsPhrases(
     original_map_id: string,
-    { t_language_code, t_dialect_code, t_geo_code }: ILangsRestrictions,
+    { language_code, dialect_code, geo_code }: LanguageInput,
   ): Promise<MapTrWordsPhrases> {
-    if (!t_language_code) {
+    if (!language_code) {
       Logger.error(`t_language_code must be specified.`);
     }
     const params: string[] = [];
     let mapAndTLanguageRestrictionClause = '';
     params.push(original_map_id);
-    mapAndTLanguageRestrictionClause += ` and omp.original_map_id = $${params.length} `;
+    mapAndTLanguageRestrictionClause += ` and omx.original_map_id = $${params.length} `;
 
-    params.push(t_language_code);
+    params.push(language_code);
     mapAndTLanguageRestrictionClause += ` and t_language_code =  $${params.length} `;
 
-    if (t_dialect_code) {
-      params.push(t_dialect_code);
+    if (dialect_code) {
+      params.push(dialect_code);
       mapAndTLanguageRestrictionClause += ` and t_dialect_code =  $${params.length} `;
     }
-    if (t_geo_code) {
-      params.push(t_geo_code);
+    if (geo_code) {
+      params.push(geo_code);
       mapAndTLanguageRestrictionClause += ` and t_geo_code =  $${params.length} `;
     }
 
     // note that 'disctinct' because of same word can be at several original maps.
     const w_tr_sqlStr = `
      select distinct on (o_w.word_id, t_w.word_id, t_p.phrase_id) 
-        o_w.word_id,
+        o_w.word_id as o_id,
+        'word'::VARCHAR(6) as o_type,
         o_ws.wordlike_string as o_like_string,
         mwl.translation_id,
         CASE 
@@ -713,11 +706,11 @@ export class MapsRepository {
            when mwl.t_phrase_id is not null then 'wtpt'
            ELSE null
 	       END AS translation_type,
-        ws.wordlike_string as t_like_string
-      from original_map_words omw
-      join words o_w on o_w.word_id = omw.word_id 
+	    coalesce(ws.wordlike_string, t_p.phraselike_string) as t_like_string
+      from original_map_words omx
+      join words o_w on o_w.word_id = omx.word_id 
       join wordlike_strings o_ws on o_w.wordlike_string_id = o_ws.wordlike_string_id
-      left join mv_words_languages mwl on omw.word_id = mwl.word_id
+      left join mv_words_languages mwl on omx.word_id = mwl.word_id
       left join phrases t_p on mwl.t_phrase_id = t_p.phrase_id
       left join words t_w on mwl.t_word_id = t_w.word_id
       left join wordlike_strings ws on t_w.wordlike_string_id = ws.wordlike_string_id 
@@ -725,29 +718,58 @@ export class MapsRepository {
       ${mapAndTLanguageRestrictionClause}
     `;
 
-    const resQ_w_tr = await this.pg.pool.query(w_tr_sqlStr, params);
-    const words: MapTrWordsPhrases = [];
+    const p_tr_sqlStr = `
+     select distinct on (o_p.phrase_id, t_w.word_id, t_p.phrase_id) 
+        o_p.phrase_id as o_id,
+        'phrase'::VARCHAR(6) as o_type,
+        o_p.phraselike_string  as o_like_string,
+        mpl.translation_id,
+        CASE 
+           WHEN mpl.t_word_id is not null THEN 'ptwt'
+           when mpl.t_phrase_id is not null then 'ptpt'
+           ELSE null
+	       END AS translation_type,
+        t_w.word_id,
+	    coalesce(ws.wordlike_string, t_p.phraselike_string) as t_like_string
+      from original_map_phrases omx
+      join phrases o_p on o_p.phrase_id  = omx.phrase_id 
+      left join mv_phrases_languages mpl on omx.phrase_id = mpl.phrase_id
+      left join phrases t_p on mpl.t_phrase_id = t_p.phrase_id
+      left join words t_w on mpl.t_word_id = t_w.word_id
+      left join wordlike_strings ws on t_w.wordlike_string_id = ws.wordlike_string_id 
+      where true 
+      ${mapAndTLanguageRestrictionClause}
+    `;
 
-    for (const word_tr_row of resQ_w_tr.rows) {
-      const existingWordIndex = words.findIndex(
-        (w) => w.o_like_string === word_tr_row.o_like_string,
+    const resQ_w_tr_promise = this.pg.pool.query(w_tr_sqlStr, params);
+    const resQ_p_tr_promise = this.pg.pool.query(p_tr_sqlStr, params);
+    const [w, p] = await Promise.all([resQ_w_tr_promise, resQ_p_tr_promise]);
+
+    const wordsAndPhrases_rows = [...w.rows, ...p.rows];
+    const wordsAndPhrases: MapTrWordsPhrases = [];
+
+    for (const wordphrase_tr_row of wordsAndPhrases_rows) {
+      const existingIndex = wordsAndPhrases.findIndex(
+        (wp) => wp.o_like_string === wordphrase_tr_row.o_like_string,
       );
-      if (existingWordIndex >= 0) {
-        words[existingWordIndex].translations.push({
-          t_like_string: word_tr_row.t_like_string,
-          translation_type: word_tr_row.translation_type,
-          translation_id: word_tr_row.translation_id,
+      if (existingIndex >= 0) {
+        wordsAndPhrases[existingIndex].translations.push({
+          t_like_string: wordphrase_tr_row.t_like_string,
+          translation_type: wordphrase_tr_row.translation_type,
+          translation_id: wordphrase_tr_row.translation_id,
           up_votes: 0, //calc later only for multiple translations
           down_votes: 0, //calc later only for multiple translations
         });
       } else {
-        words.push({
-          o_like_string: word_tr_row.o_wordlike_string,
+        wordsAndPhrases.push({
+          o_id: wordphrase_tr_row.o_id,
+          o_type: wordphrase_tr_row.o_type,
+          o_like_string: wordphrase_tr_row.o_like_string,
           translations: [
             {
-              t_like_string: word_tr_row.t_like_string,
-              translation_type: word_tr_row.translation_type,
-              translation_id: word_tr_row.translation_id,
+              t_like_string: wordphrase_tr_row.t_like_string,
+              translation_type: wordphrase_tr_row.translation_type,
+              translation_id: wordphrase_tr_row.translation_id,
               up_votes: 0, //calc later only for multiple translations
               down_votes: 0, //calc later only for multiple translations
             },
@@ -756,9 +778,9 @@ export class MapsRepository {
       }
     }
 
-    for (const word of words) {
-      if (word.translations.length > 1) {
-        for (const translation of word.translations) {
+    for (const wp of wordsAndPhrases) {
+      if (wp.translations.length > 1) {
+        for (const translation of wp.translations) {
           const { up_votes, down_votes } = await this.getVotesOnTranslation(
             translation,
           );
@@ -768,281 +790,12 @@ export class MapsRepository {
       }
     }
 
-    return words;
+    return wordsAndPhrases;
   }
 
-  async getOrigMapPhrasesWithTr(
-    original_map_id: string,
-    {
-      o_language_code,
-      o_dialect_code,
-      o_geo_code,
-      t_language_code,
-      t_dialect_code,
-      t_geo_code,
-    }: ILangsRestrictions,
-  ): Promise<GetOrigMapPhrasesWithTrOutput> {
-    const params: string[] = [];
-    let tLanguageRestrictionClause = '';
-    if (t_language_code) {
-      params.push(t_language_code);
-      tLanguageRestrictionClause += ` and tw.language_code =  $${params.length} `;
-    }
-    if (t_dialect_code) {
-      params.push(t_dialect_code);
-      tLanguageRestrictionClause += ` and tw.dialect_code =  $${params.length} `;
-    }
-    if (t_geo_code) {
-      params.push(t_geo_code);
-      tLanguageRestrictionClause += ` and tw.geo_code =  $${params.length} `;
-    }
-
-    // search for phrase to phrase translations and its votes note that 'disctinct' because of same phrase can be at several original maps.
-    let ptpt_sqlStr = ` 
-      select distinct
-        oph.phrase_id,
-        oph.phraselike_string as phrase,
-        ophd.definition as o_definition,
-        ophd.phrase_definition_id  as o_definition_id,
-        ow.language_code as o_language_code,
-        ow.dialect_code as o_dialect_code,
-        ow.geo_code as o_geo_code,
-        tw.language_code as t_language_code,
-        tw.dialect_code as t_dialect_code,
-        tw.geo_code as t_geo_code,
-        ptpt.to_phrase_definition_id,
-        ptpt.phrase_to_phrase_translation_id,
-        tphd.phrase_id as t_phrase_id,
-        tphd.definition as t_definition,
-        tphd.phrase_definition_id as t_definition_id,
-        tph.phraselike_string as t_phraselike_string,
-        up.up_votes_count,
-        down.down_votes_count,
-        oph.created_at as o_created_at,
-	      oph.created_by as o_user_id,
-	      ou.is_bot as o_is_bot,
-	      oa.avatar as o_avatar,
-	      oa.url as o_avatar_url,
-		    tph.created_at as t_created_at,
-	      tph.created_by as t_user_id,
-	      tu.is_bot as t_is_bot,
-	      ta.avatar as t_avatar,
-	      ta.url as t_avatar_url
-      from
-        phrases oph
-      left join 
-      	phrase_definitions ophd on oph.phrase_id= ophd.phrase_id
-      inner join 
-      	original_map_phrases omph on oph.phrase_id = omph.phrase_id
-      left join 
-      	phrase_to_phrase_translations ptpt on ptpt.from_phrase_definition_id = ophd.phrase_definition_id
-      left join
-      	phrase_definitions tphd  on ptpt.to_phrase_definition_id  = tphd.phrase_definition_id 
-      left join 
-      	phrases tph on tphd.phrase_id  = tph.phrase_id
-      left join v_phrase_to_phrase_translations_upvotes_count up on ptpt.phrase_to_phrase_translation_id = up.phrase_to_phrase_translation_id
-      left join v_phrase_to_phrase_translations_downvotes_count down on ptpt.phrase_to_phrase_translation_id = down.phrase_to_phrase_translation_id
-      left join words ow on ow.word_id = oph.words[1]
-      left join words tw on tw.word_id = tph.words[1] ${tLanguageRestrictionClause}
-      join users ou
-      	on ou.user_id = oph.created_by
-      join avatars oa
-      	on ou.user_id = oa.user_id
-	    left join users tu
-      	on tu.user_id = tph.created_by
-      left join avatars ta
-      	on tu.user_id = ta.user_id
-      where true
-
-    `;
-
-    // search for phrase to word translations and its votes note that 'disctinct' because of same phrase can be at several original maps.
-    let ptwt_sqlStr = ` 
-      select distinct
-        oph.phrase_id,
-        oph.phraselike_string as phrase,
-        ophd.definition as o_definition,
-        ophd.phrase_definition_id  as o_definition_id,
-        ow.language_code as o_language_code,
-        ow.dialect_code as o_dialect_code,
-        ow.geo_code as o_geo_code,
-        tw.language_code as t_language_code,
-        tw.dialect_code as t_dialect_code,
-        tw.geo_code as t_geo_code,
-        ptwt.to_word_definition_id,
-        ptwt.phrase_to_word_translation_id,
-        twd.word_id as t_word_id,
-        twd.definition as t_definition,
-        twd.word_definition_id as t_definition_id,
-        tws.wordlike_string as t_wordlike_string,
-        up.up_votes_count,
-        down.down_votes_count,
-        oph.created_at as o_created_at,
-        oph.created_by as o_user_id,
-        ou.is_bot as o_is_bot,
-        oa.avatar as o_avatar,
-        oa.url as o_avatar_url,
-        tw.created_at as t_created_at,
-        tw.created_by as t_user_id,
-        tu.is_bot as t_is_bot,
-        ta.avatar as t_avatar,
-        ta.url as t_avatar_url
-      from
-        phrases oph
-      left join 
-      	phrase_definitions ophd on oph.phrase_id= ophd.phrase_id
-      inner join 
-      	original_map_phrases omph on oph.phrase_id = omph.phrase_id
-      left join 
-      	phrase_to_word_translations ptwt on ptwt.from_phrase_definition_id = ophd.phrase_definition_id
-      left join
-      	word_definitions twd  on ptwt.to_word_definition_id  = twd.word_definition_id 
-      left join 
-      	words tw on twd.word_id  = tw.word_id ${tLanguageRestrictionClause}
-      left join 
-      	wordlike_strings tws on tw.wordlike_string_id = tws.wordlike_string_id
-      left join v_phrase_to_word_translations_upvotes_count up on ptwt.phrase_to_word_translation_id = up.phrase_to_word_translation_id
-      left join v_phrase_to_word_translations_downvotes_count down on ptwt.phrase_to_word_translation_id = down.phrase_to_word_translation_id
-      left join words ow on ow.word_id = oph.words[1]
-      join users ou
-      	on ou.user_id = oph.created_by
-      join avatars oa
-      	on ou.user_id = oa.user_id
-	    left join users tu
-      	on tu.user_id = tw.created_by
-      left join avatars ta
-      	on tu.user_id = ta.user_id
-      where true 
-    `;
-
-    if (original_map_id) {
-      params.push(original_map_id);
-      ptpt_sqlStr += ` and omph.original_map_id = $${params.length}`;
-      ptwt_sqlStr += ` and omph.original_map_id = $${params.length}`;
-    }
-    if (o_language_code) {
-      params.push(o_language_code);
-      ptpt_sqlStr += ` and ow.language_code = $${params.length}`;
-      ptwt_sqlStr += ` and ow.language_code = $${params.length}`;
-    }
-    if (o_dialect_code) {
-      params.push(o_dialect_code);
-      ptpt_sqlStr += ` and ow.dialect_code = $${params.length}`;
-      ptwt_sqlStr += ` and ow.dialect_code = $${params.length}`;
-    }
-    if (o_geo_code) {
-      params.push(o_geo_code);
-      ptpt_sqlStr += ` and ow.geo_code = $${params.length}`;
-      ptwt_sqlStr += ` and ow.geo_code = $${params.length}`;
-    }
-
-    const resQptpt = await this.pg.pool.query(ptpt_sqlStr, params);
-    const resQptwt = await this.pg.pool.query(ptwt_sqlStr, params);
-    const phrases: Array<MapPhraseWithTranslations> = [];
-
-    resQptpt.rows.forEach((r) => {
-      const currTranslation: MapPhraseAsTranslation = {
-        phrase_id: r.t_phrase_id,
-        phrase: r.t_phraselike_string,
-        definition: r.t_definition,
-        definition_id: r.t_definition_id,
-        language_code: r.t_language_code,
-        dialect_code: r.t_dialect_code,
-        geo_code: r.t_geo_code,
-        up_votes: r.up_votes_count || 0,
-        down_votes: r.down_votes_count || 0,
-        translation_id: r.phrase_to_phrase_translation_id,
-        created_at: r.t_created_at,
-        created_by_user: {
-          user_id: r.t_user_id,
-          avatar: r.t_avatar,
-          avatar_url: r.t_avatar_url,
-          is_bot: r.t_is_bot,
-        },
-      };
-      const existingPhraseIdx = phrases.findIndex(
-        (ph) =>
-          ph.phrase_id === r.phrase_id &&
-          ph.definition_id === r.o_definition_id,
-      );
-      if (existingPhraseIdx >= 0) {
-        currTranslation.language_code &&
-          phrases[existingPhraseIdx]!.translations!.push(currTranslation);
-      } else {
-        phrases.push({
-          phrase_id: r.phrase_id,
-          phrase: r.phrase,
-          language_code: r.o_language_code,
-          dialect_code: r.o_dialect_code,
-          geo_code: r.o_geo_code,
-          definition: r.o_definition,
-          definition_id: r.o_definition_id,
-          translations: currTranslation.language_code ? [currTranslation] : [],
-          created_at: r.o_created_at,
-          created_by_user: {
-            user_id: r.o_user_id,
-            avatar: r.o_avatar,
-            avatar_url: r.o_avatar_url,
-            is_bot: r.o_is_bot,
-          },
-        });
-      }
-    });
-
-    resQptwt.rows.forEach((r) => {
-      const currTranslation: MapWordAsTranslation = {
-        word_id: r.t_word_id,
-        word: r.t_wordlike_string,
-        definition: r.t_definition,
-        definition_id: r.t_definition_id,
-        language_code: r.t_language_code,
-        dialect_code: r.t_dialect_code,
-        geo_code: r.t_geo_code,
-        up_votes: r.up_votes_count || 0,
-        down_votes: r.down_votes_count || 0,
-        translation_id: r.phrase_to_word_translation_id,
-        created_at: r.t_created_at,
-        created_by_user: {
-          user_id: r.t_created_by,
-          avatar: r.t_avatar,
-          avatar_url: r.t_avatar_url,
-          is_bot: r.t_is_bot,
-        },
-      };
-      const existingPhraseIdx = phrases.findIndex(
-        (ph) =>
-          ph.phrase_id === r.phrase_id &&
-          ph.definition_id === r.o_definition_id,
-      );
-      if (existingPhraseIdx >= 0) {
-        currTranslation.language_code &&
-          phrases[existingPhraseIdx]!.translations!.push(currTranslation);
-      } else {
-        phrases.push({
-          phrase_id: r.phrase_id,
-          phrase: r.phrase,
-          language_code: r.o_language_code,
-          dialect_code: r.o_dialect_code,
-          geo_code: r.o_geo_code,
-          definition: r.o_definition,
-          definition_id: r.o_definition_id,
-          translations: currTranslation.language_code ? [currTranslation] : [],
-          created_at: r.o_created_at,
-          created_by_user: {
-            user_id: r.o_created_by,
-            avatar: r.o_avatar,
-            avatar_url: r.o_avatar_url,
-            is_bot: r.o_is_bot,
-          },
-        });
-      }
-    });
-
-    return {
-      origMapPhrases: phrases,
-    };
-  }
-
+  /**
+   * Use to get extended and paginated information about words and phrases for UI
+   */
   async getOrigMapWordsAndPhrases(
     dbPoolClient: PoolClient,
     {

@@ -56,6 +56,9 @@ export class DatabaseVersionControlService {
         case 7:
           console.log('Updating database to version 8');
           await this.loadVersion8();
+        case 8:
+          console.log('Updating database to version 9');
+          await this.loadVersion9();
 
         default:
           console.error('Database version is current');
@@ -468,6 +471,16 @@ export class DatabaseVersionControlService {
     );
     // set version
     await this.setVersionNumber(8);
+  }
+
+  async loadVersion9(): Promise<void> {
+    // schema
+    await this.runSqlFile('./src/core/sql/schema/v9.schema.sql');
+
+    // maps
+    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v9.sql');
+    // set version
+    await this.setVersionNumber(9);
   }
 
   async registerUser(

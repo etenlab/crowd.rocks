@@ -153,6 +153,7 @@ enum ErrorType {
   MapNotFound
   MapParsingError
   MapSavingError
+  MapTranslationError
   MapVoteNotFound
   MapWordsAndPhrasesSearchError
   MapZippingError

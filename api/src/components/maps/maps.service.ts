@@ -540,42 +540,6 @@ export class MapsService {
     }
   }
 
-  async GetOrigMapTrWords(
-    input: GetOrigMapWordsWithTrInput,
-  ): Promise<MapTrWordsPhrases> {
-    try {
-      const { original_map_id, ...langRestrictions } = input;
-      return this.mapsRepository.getOrigMapTrWords(
-        original_map_id || '',
-        langRestrictions,
-      );
-    } catch (e) {
-      Logger.error(e);
-      return [];
-    }
-  }
-
-  async GetOrigMapTrPhrases(
-    input: GetOrigMapPhrasesWithTrInput,
-  ): Promise<GetOrigMapPhrasesWithTrOutput> {
-    try {
-      const { original_map_id, ...langRestrictions } = input;
-      const origMapPhrases = await this.mapsRepository.getOrigMapPhrasesWithTr(
-        original_map_id || '',
-        langRestrictions,
-      );
-      if (!this.checkForLanguageCodePresence(origMapPhrases.origMapPhrases)) {
-        throw new Error('Phrase or its translation doesnt have language code');
-      }
-      return origMapPhrases;
-    } catch (e) {
-      Logger.error(e);
-      return {
-        origMapPhrases: [],
-      };
-    }
-  }
-
   async getOrigMapWordsAndPhrases(params: {
     input: GetOrigMapWordsAndPhrasesInput;
     first?: number | null;
@@ -911,32 +875,16 @@ export class MapsService {
         )}`,
       );
 
-      //----
-      const WPParams = {
-        original_map_id: origMapId,
-        o_language_code: DEFAULT_NEW_MAP_LANGUAGE.lang.tag,
-        t_language_code: toLang.language_code,
-        t_geo_code: toLang.geo_code,
-        t_dialect_code: toLang.dialect_code,
-      };
-      const wPromise = this.GetOrigMapTrWords(WPParams);
-      const pPromise = this.GetOrigMapTrPhrases(WPParams);
-      const [origMapWords, { origMapPhrases }] = await Promise.all([
-        wPromise,
-        pPromise,
-      ]);
-      //----
-
-      const origMapWordsAndPhrases: Array<
-        MapWordWithTranslations | MapPhraseWithTranslations
-      > = [...origMapWords, ...origMapPhrases];
+      const mapTrWordsAndPhrases =
+        await this.mapsRepository.getOrigMapTrWordsPhrases(origMapId, toLang);
 
       const translations: Array<{
         source: string;
         translation: string;
-      }> = this.prepareTranslationsFromOrigMapsAndPhrases(
-        origMapWordsAndPhrases,
-      );
+      }> =
+        this.prepareTranslationsArrayFromMapTrWordsPhrases(
+          mapTrWordsAndPhrases,
+        );
 
       const p1 = performance.now();
       const { translatedMap } = await this.translateMapString(
@@ -967,9 +915,9 @@ export class MapsService {
         toLang,
         dbPoolClient,
         translated_percent:
-          origMapWordsAndPhrases.length > 0
+          mapTrWordsAndPhrases.length > 0
             ? Math.round(
-                (translations.length / origMapWordsAndPhrases.length) * 100,
+                (translations.length / mapTrWordsAndPhrases.length) * 100,
               )
             : 100,
       });
@@ -1296,10 +1244,8 @@ export class MapsService {
       .join(' ');
   }
 
-  prepareTranslationsFromOrigMapsAndPhrases(
-    origMapWordsAndPhrases: Array<
-      MapWordWithTranslations | MapPhraseWithTranslations
-    >,
+  prepareTranslationsArrayFromMapTrWordsPhrases(
+    mapWordsPhrases: MapTrWordsPhrases,
   ): Array<{
     source: string;
     translation: string;
@@ -1308,48 +1254,15 @@ export class MapsService {
       source: string;
       translation: string;
     }> = [];
-    for (const origMapWordOrPhrase of origMapWordsAndPhrases) {
+    for (const origMapWordOrPhrase of mapWordsPhrases) {
       const origWordOrPhraseTranslated =
-        this.wordToWordTranslationsService.chooseBestTranslation(
-          origMapWordOrPhrase,
+        this.wordToWordTranslationsService.chooseBestTranslation<MapTrOfWordOrPhrase>(
+          origMapWordOrPhrase.translations,
         );
-      if ('word' in origMapWordOrPhrase) {
-        if (
-          'word' in origWordOrPhraseTranslated! &&
-          origWordOrPhraseTranslated.word.length > 0
-        ) {
-          translations.push({
-            source: origMapWordOrPhrase.word,
-            translation: origWordOrPhraseTranslated.word,
-          });
-        } else if (
-          'phrase' in origWordOrPhraseTranslated! &&
-          origWordOrPhraseTranslated.phrase.length > 0
-        ) {
-          translations.push({
-            source: origMapWordOrPhrase.word,
-            translation: origWordOrPhraseTranslated.phrase,
-          });
-        }
-      } else {
-        if (
-          'word' in origWordOrPhraseTranslated! &&
-          origWordOrPhraseTranslated.word.length > 0
-        ) {
-          translations.push({
-            source: origMapWordOrPhrase.phrase,
-            translation: origWordOrPhraseTranslated.word,
-          });
-        } else if (
-          'phrase' in origWordOrPhraseTranslated! &&
-          origWordOrPhraseTranslated.phrase.length > 0
-        ) {
-          translations.push({
-            source: origMapWordOrPhrase.phrase,
-            translation: origWordOrPhraseTranslated.phrase,
-          });
-        }
-      }
+      translations.push({
+        source: origMapWordOrPhrase.o_like_string,
+        translation: origWordOrPhraseTranslated.t_like_string,
+      });
     }
     return translations;
   }
