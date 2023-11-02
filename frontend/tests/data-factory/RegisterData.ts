@@ -4,9 +4,8 @@ class RegisterData {
   validRegisterData() {
     const registerData = RegisterDto;
     const x = Math.random() * 100;
-
     registerData.email = 'AutomationUser' + x + '@mailinator.com';
-    registerData.avatar = 'Automation Avatar URL';
+    registerData.username = 'Automation Avatar URL';
     registerData.password = 'automation@123';
     return registerData;
   }
@@ -14,43 +13,31 @@ class RegisterData {
   registerDataWithoutEmail() {
     const registerData = RegisterDto;
     registerData.email = '';
-    registerData.avatar = 'Automation Avatar URL';
-    registerData.password = 'automation@123';
-    return registerData;
-  }
-
-  registerDataWithoutAvatar() {
-    const registerData = RegisterDto;
-    const x = Math.random() * 100;
-
-    registerData.email = 'AutomationUser' + x + '@mailinator.com';
-    registerData.avatar = '';
+    registerData.username = 'Automation Avatar URL';
     registerData.password = 'automation@123';
     return registerData;
   }
 
   registerDataWithoutPassword() {
     const registerData = RegisterDto;
-    const x = Math.random() * 100;
-
-    registerData.email = 'AutomationUser' + x + '@mailinator.com';
-    registerData.avatar = 'Automation Avatar URL';
+    registerData.email = 'AutomationUser12333@mailinator.com';
+    registerData.username = 'Automation Avatar URL';
     registerData.password = '';
+    return registerData;
+  }
+
+  registerDataWithoutUserName() {
+    const registerData = RegisterDto;
+    registerData.email = 'AutomationUser@mailinator.com';
+    registerData.username = '';
+    registerData.password = 'automation@123';
     return registerData;
   }
 
   registerDataWithInvalidEmailFormat() {
     const registerData = RegisterDto;
-    registerData.email = 'AutomationUser';
-    registerData.avatar = 'Automation Avatar URL';
-    registerData.password = 'automation@123';
-    return registerData;
-  }
-
-  registerDataWithExistingUser() {
-    const registerData = RegisterDto;
-    registerData.email = 'AutomationUser@mailinator.com';
-    registerData.avatar = 'Automation Avatar URL';
+    registerData.email = 'Aut';
+    registerData.username = 'Automation Avatar URL';
     registerData.password = 'automation@123';
     return registerData;
   }
