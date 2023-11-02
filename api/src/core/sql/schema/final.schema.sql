@@ -181,17 +181,22 @@ create table flags(
 create table forums(
   forum_id bigserial primary key,
   name varchar(128) not null,
+  description text,
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__name_gin__forums on forums using gin(name gin_trgm_ops);
 
 create table forum_folders (
   forum_folder_id bigserial primary key,
   forum_id bigint not null references forums(forum_id),
   name varchar(128) not null,
+  description text,
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__name_gin__forum_folders on forum_folders using gin(name gin_trgm_ops);
+create index idx__forum_id__forum_folders on forum_folders (forum_id);
 
 create table threads (
   thread_id bigserial primary key,
@@ -200,6 +205,8 @@ create table threads (
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__name_gin__threads on threads using gin(name gin_trgm_ops);
+create index idx__forum_folder_id__threads on threads (forum_folder_id);
 
 -- DISCUSSION --------------------------------------------------------------
 

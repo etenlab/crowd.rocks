@@ -143,6 +143,7 @@ enum ErrorType {
   ForumFolderDeleteFailed
   ForumFolderUpsertFailed
   ForumForFolderNotExists
+  ForumIdNotDefined
   ForumUpsertFailed
   InvalidEmailOrPassword
   InvalidInputs

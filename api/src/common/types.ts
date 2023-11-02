@@ -44,6 +44,7 @@ export enum ErrorType {
   ForumForFolderNotExists = 'ForumForFolderNotExists',
   ForumFolderUpsertFailed = 'ForumFolderUpsertFailed',
   ForumFolderDeleteFailed = 'ForumFolderDeleteFailed',
+  ForumIdNotDefined = 'ForumIdNotDefined',
 
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
   InvalidInputs = 'InvalidInputs',
