@@ -33,6 +33,7 @@ import { PhraseDefinition, WordDefinition } from '../definitions/types';
 import { PostgresService } from '../../core/postgres.service';
 import { setTranslationsVotes } from './translations.repository';
 import { getTranslationLangSqlStr } from './sql-string';
+import { from } from 'rxjs';
 
 export function makeStr(
   word_definition_id: number,
@@ -999,28 +1000,45 @@ export class TranslationsService {
           ),
           translations[i],
         );
+        if (!upsertInput[i].valid) {
+          continue;
+        }
 
         let translationId: string;
+        let from_is_word: boolean;
+        let to_is_word: boolean;
         if (isWtoW(translations[i]!)) {
           translationId = (translations[i]! as WordToWordTranslation)
             .word_to_word_translation_id!;
+          from_is_word = true;
+          to_is_word = true;
+          // console.log('w2w');
         } else if (isWtoP(translations[i]!)) {
           translationId = (translations[i]! as WordToPhraseTranslation)
             .word_to_phrase_translation_id!;
+          from_is_word = true;
+          to_is_word = false;
+          // console.log('w2p');
         } else if (isPtoP(translations[i]!)) {
           translationId = (translations[i]! as PhraseToPhraseTranslation)
             .phrase_to_phrase_translation_id!;
+          from_is_word = false;
+          to_is_word = false;
+          // console.log('p2p');
         } else if (isPtoW(translations[i]!)) {
           translationId = (translations[i]! as PhraseToWordTranslation)
             .phrase_to_word_translation_id!;
+          from_is_word = false;
+          to_is_word = true;
+          // console.log('p2w');
         } else {
           continue;
         }
-        //console.log(`upvote: ${translationId}`);
+        // console.log(`upvote: ${translationId}`);
 
         await setTranslationsVotes(
-          upsertInput[i].from_definition_type_is_word,
-          upsertInput[i].to_definition_type_is_word,
+          from_is_word,
+          to_is_word,
           [+translationId],
           token,
           true,
