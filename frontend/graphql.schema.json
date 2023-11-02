@@ -1199,6 +1199,24 @@
             "deprecationReason": null
           },
           {
+            "name": "MapParsingError",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "MapSavingError",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "MapTranslationError",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "MapVoteNotFound",
             "description": null,
             "isDeprecated": false,

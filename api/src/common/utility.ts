@@ -142,21 +142,6 @@ export async function getPgClient({
   };
 }
 
-// export function substituteN<T extends string | Array<string>>(inStr: T): T {
-//   if (Array.isArray(inStr)) {
-//     return inStr.map((chunk) => chunk.replaceAll('\n', N_PLACEHOLDER)) as T;
-//   } else {
-//     return inStr.replaceAll('\n', N_PLACEHOLDER) as T;
-//   }
-// }
-// export function unSubstituteN<T extends string | Array<string>>(inStr: T): T {
-//   if (Array.isArray(inStr)) {
-//     return inStr.map((chunk) => chunk.replaceAll(N_PLACEHOLDER, '\n')) as T;
-//   } else {
-//     return inStr.replaceAll(N_PLACEHOLDER, '\n') as T;
-//   }
-// }
-
 export function compareObject(
   obj1: object | undefined | null,
   obj2: object | undefined | null,

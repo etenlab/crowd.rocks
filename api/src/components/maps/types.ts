@@ -220,38 +220,38 @@ export type OriginalMapPhraseInput = {
 
 // for internal purposes (map translation routines)
 // @ObjectType()
-export class GetOrigMapWordsOutput {
+export class GetOrigMapWordsWithTrOutput {
   @Field(() => [MapWordWithTranslations])
   origMapWords: MapWordWithTranslations[];
 }
 //for internal purposes (map translation routines)
 // @ObjectType()
-export class GetOrigMapPhrasesOutput {
+export class GetOrigMapPhrasesWithTrOutput {
   @Field(() => [MapPhraseWithTranslations])
   origMapPhrases: MapPhraseWithTranslations[];
 }
 
 // for internal purposes (map translation routines)
 // @InputType()
-export class GetOrigMapWordsInput {
+export class GetOrigMapWordsWithTrInput {
   @Field(() => ID) original_map_id: string;
-  @Field(() => String, { nullable: true }) o_language_code?: string;
-  @Field(() => String, { nullable: true }) o_dialect_code?: string;
-  @Field(() => String, { nullable: true }) o_geo_code?: string;
-  @Field(() => String, { nullable: true }) t_language_code?: string;
-  @Field(() => String, { nullable: true }) t_dialect_code?: string;
-  @Field(() => String, { nullable: true }) t_geo_code?: string;
+  @Field(() => String) o_language_code: string;
+  @Field(() => String, { nullable: true }) o_dialect_code?: string | null;
+  @Field(() => String, { nullable: true }) o_geo_code?: string | null;
+  @Field(() => String) t_language_code: string;
+  @Field(() => String, { nullable: true }) t_dialect_code?: string | null;
+  @Field(() => String, { nullable: true }) t_geo_code?: string | null;
 }
 // for internal purposes (map translation routines)
 // @InputType()
-export class GetOrigMapPhrasesInput {
+export class GetOrigMapPhrasesWithTrInput {
   @Field(() => ID, { nullable: true }) original_map_id?: string;
-  @Field(() => String, { nullable: true }) o_language_code?: string;
-  @Field(() => String, { nullable: true }) o_dialect_code?: string;
-  @Field(() => String, { nullable: true }) o_geo_code?: string;
-  @Field(() => String, { nullable: true }) t_language_code?: string;
-  @Field(() => String, { nullable: true }) t_dialect_code?: string;
-  @Field(() => String, { nullable: true }) t_geo_code?: string;
+  @Field(() => String) o_language_code: string;
+  @Field(() => String, { nullable: true }) o_dialect_code?: string | null;
+  @Field(() => String, { nullable: true }) o_geo_code?: string | null;
+  @Field(() => String) t_language_code: string;
+  @Field(() => String, { nullable: true }) t_dialect_code?: string | null;
+  @Field(() => String, { nullable: true }) t_geo_code?: string | null;
 }
 
 ////////////////////////////////////////////////////

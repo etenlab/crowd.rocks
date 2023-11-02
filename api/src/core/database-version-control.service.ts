@@ -474,6 +474,11 @@ export class DatabaseVersionControlService {
   }
 
   async loadVersion9(): Promise<void> {
+    // schema
+    await this.runSqlFile('./src/core/sql/schema/v9.schema.sql');
+
+    // maps
+    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v9.sql');
     // set version
     await this.setVersionNumber(9);
   }

@@ -151,6 +151,9 @@ enum ErrorType {
   MapFilenameAlreadyExists
   MapInsertFailed
   MapNotFound
+  MapParsingError
+  MapSavingError
+  MapTranslationError
   MapVoteNotFound
   MapWordsAndPhrasesSearchError
   MapZippingError
