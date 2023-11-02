@@ -518,13 +518,15 @@ export class SiteTextTranslationsService {
       const res = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
-      }).query<GetAllSiteTextWordDefinition>(...getAllSiteTextWordDefinition());
+      }).query<GetAllSiteTextWordDefinition>(
+        ...getAllSiteTextWordDefinition({ first: null, after: null }),
+      );
 
       const res2 = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
       }).query<GetAllSiteTextPhraseDefinition>(
-        ...getAllSiteTextPhraseDefinition(),
+        ...getAllSiteTextPhraseDefinition({ first: null, after: null }),
       );
 
       const { error: wordError, translation_with_vote_list } =
@@ -661,7 +663,7 @@ export class SiteTextTranslationsService {
           client: pgClient,
           pool: this.pg.pool,
         }).query<GetAllSiteTextWordDefinition>(
-          ...getAllSiteTextWordDefinition(),
+          ...getAllSiteTextWordDefinition({ first: null, after: null }),
         );
 
         const siteTextWordDefinitionIds = res.rows.map((row) => ({
@@ -673,7 +675,7 @@ export class SiteTextTranslationsService {
           client: pgClient,
           pool: this.pg.pool,
         }).query<GetAllSiteTextPhraseDefinition>(
-          ...getAllSiteTextPhraseDefinition(),
+          ...getAllSiteTextPhraseDefinition({ first: null, after: null }),
         );
 
         const siteTextPhraseDefinitionIds = res2.rows.map((row) => ({

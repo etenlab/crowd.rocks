@@ -1,5 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
+import { Injectable, Logger } from '@nestjs/common';
+import {
+  Args,
+  Query,
+  Resolver,
+  Mutation,
+  Context,
+  ID,
+  Int,
+} from '@nestjs/graphql';
 
 import { getBearer } from 'src/common/utility';
 
@@ -21,12 +29,13 @@ import {
   SiteTextPhraseDefinitionOutput,
   SiteTextTranslationsFromInput,
   SiteTextTranslationsToInput,
-  SiteTextDefinitionListOutput,
+  SiteTextDefinitionListConnection,
   SiteTextTranslationUpsertInput,
   SiteTextLanguageListOutput,
   SiteTextLanguageWithTranslationInfoListOutput,
   TranslationWithVoteListByLanguageOutput,
   TranslationWithVoteListByLanguageListOutput,
+  SiteTextDefinitionListFilterInput,
 } from './types';
 
 @Injectable()
@@ -43,7 +52,7 @@ export class SiteTextsResolver {
   async siteTextWordDefinitionRead(
     @Args('id') id: string,
   ): Promise<SiteTextWordDefinitionOutput> {
-    console.log('site text word definition resolver, site_text_id:', id);
+    Logger.log('site text word definition resolver, site_text_id:', id);
 
     return this.siteTextWordDefinitionService.read(+id, null);
   }
@@ -54,7 +63,7 @@ export class SiteTextsResolver {
     word_definition_id: string,
     @Context() req: any,
   ): Promise<SiteTextWordDefinitionOutput> {
-    console.log(
+    Logger.log(
       'site text word definition upsert resolver, string: word_definition_id: ',
       word_definition_id,
     );
@@ -70,7 +79,7 @@ export class SiteTextsResolver {
   async siteTextPhraseDefinitionRead(
     @Args('id') id: string,
   ): Promise<SiteTextPhraseDefinitionOutput> {
-    console.log('site text word definition resolver, site_text_id:', id);
+    Logger.log('site text word definition resolver, site_text_id:', id);
 
     return this.siteTextPhraseDefinitionService.read(+id, null);
   }
@@ -81,7 +90,7 @@ export class SiteTextsResolver {
     phrase_definition_id: string,
     @Context() req: any,
   ): Promise<SiteTextPhraseDefinitionOutput> {
-    console.log(
+    Logger.log(
       'site text word definition upsert resolver, string: phrase_definition_id: ',
       phrase_definition_id,
     );
@@ -98,7 +107,7 @@ export class SiteTextsResolver {
     @Args('input') input: SiteTextUpsertInput,
     @Context() req: any,
   ): Promise<SiteTextDefinitionOutput> {
-    console.log(
+    Logger.log(
       `site text upsert resolver, string: siteTextlike_string: ${input.siteTextlike_string}, definitionlike_string: ${input.definitionlike_string} `,
     );
 
@@ -111,7 +120,7 @@ export class SiteTextsResolver {
     @Args('toInput') toInput: SiteTextTranslationsToInput,
     @Context() req: any,
   ): Promise<TranslationOutput> {
-    console.log(
+    Logger.log(
       `site text upsertFromTranslationlikeString resolver`,
       JSON.stringify(fromInput, null, 2),
       JSON.stringify(toInput, null, 2),
@@ -130,7 +139,7 @@ export class SiteTextsResolver {
     @Args('input') input: SiteTextTranslationUpsertInput,
     @Context() req: any,
   ): Promise<TranslationOutput> {
-    console.log(
+    Logger.log(
       `site text upsertTranslation upsert resolver`,
       JSON.stringify(input, null, 2),
     );
@@ -153,7 +162,7 @@ export class SiteTextsResolver {
     @Args('geo_code', { type: () => String, nullable: true })
     geo_code: string | null,
   ): Promise<TranslationWithVoteListOutput> {
-    console.log(
+    Logger.log(
       'site text translation getAllTranslationFromSiteTextDefinitionID resolver',
     );
 
@@ -178,7 +187,7 @@ export class SiteTextsResolver {
     @Args('geo_code', { type: () => String, nullable: true })
     geo_code: string | null,
   ): Promise<TranslationWithVoteOutput> {
-    console.log(
+    Logger.log(
       'site text translation getRecommendedTranslationFromSiteTextDefinitionID resolver',
     );
 
@@ -200,7 +209,7 @@ export class SiteTextsResolver {
     @Args('geo_code', { type: () => String, nullable: true })
     geo_code: string | null,
   ): Promise<TranslationWithVoteListByLanguageOutput> {
-    console.log(
+    Logger.log(
       'site text translation getAllRecommendedTranslationByLanguage resolver',
     );
 
@@ -214,7 +223,7 @@ export class SiteTextsResolver {
 
   @Query(() => TranslationWithVoteListByLanguageListOutput)
   async getAllRecommendedSiteTextTranslationList(): Promise<TranslationWithVoteListByLanguageListOutput> {
-    console.log(
+    Logger.log(
       'site text translation getAllRecommendedSiteTextTranslationList resolver',
     );
 
@@ -223,29 +232,42 @@ export class SiteTextsResolver {
     );
   }
 
-  @Query(() => SiteTextDefinitionListOutput)
+  @Query(() => SiteTextDefinitionListConnection)
   async getAllSiteTextDefinitions(
-    @Args('filter', { type: () => String, nullable: true })
-    filter: string | null,
-  ): Promise<SiteTextDefinitionListOutput> {
-    console.log('site text getAllSiteTextDefinitions resolver');
+    @Args('filters', {
+      type: () => SiteTextDefinitionListFilterInput,
+      nullable: true,
+    })
+    filter: SiteTextDefinitionListFilterInput | null,
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true })
+    after: string | null,
+  ): Promise<SiteTextDefinitionListConnection> {
+    Logger.log(
+      'site text getAllSiteTextDefinitions resolver',
+      filter,
+      first,
+      after,
+    );
 
     return this.siteTextService.getAllSiteTextDefinitions({
       filter: filter || undefined,
+      first,
+      after,
       pgClient: null,
     });
   }
 
   @Query(() => SiteTextLanguageListOutput)
   async getAllSiteTextLanguageList(): Promise<SiteTextLanguageListOutput> {
-    console.log('site text getAllSiteTextLanguageList resolver');
+    Logger.log('site text getAllSiteTextLanguageList resolver');
 
     return this.siteTextService.getAllSiteTextLanguageList(null);
   }
 
   @Query(() => SiteTextLanguageWithTranslationInfoListOutput)
   async getAllSiteTextLanguageListWithRate(): Promise<SiteTextLanguageWithTranslationInfoListOutput> {
-    console.log('site text getAllSiteTextLanguageListWithRate resolver');
+    Logger.log('site text getAllSiteTextLanguageListWithRate resolver');
 
     return this.siteTextService.getAllSiteTextLanguageListWithRate(null);
   }

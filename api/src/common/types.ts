@@ -161,6 +161,11 @@ export enum TableNameType {
   words = 'words',
   phrases = 'phrases',
 
+  word_to_word_translations = 'word_to_word_translations',
+  word_to_phrase_translations = 'word_to_phrase_translations',
+  phrase_to_word_translations = 'phrase_to_word_translations',
+  phrase_to_phrase_translations = 'phrase_to_phrase_translations',
+
   documents = 'documents',
   document_word_entries = 'document_word_entries',
   word_ranges = 'word_ranges',

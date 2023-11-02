@@ -40,17 +40,20 @@ export function DiscussionIconButton({
 
   return (
     <Button
-      variant="contained"
+      variant="outlined"
       onClick={handleClick}
       sx={{
-        padding: `4px ${postCountData?.getTotalPosts.total ? '10px' : ''}`,
+        padding: `5px ${postCountData?.getTotalPosts.total ? '10px' : ''}`,
         minWidth: '22px',
+        maxWidth: '160px',
+        borderRadius: '6px',
         fontSize: '13px',
         gap: '4px',
+        flex: 1,
       }}
       color="blue"
     >
-      <ChatLines sx={{ fontSize: 20 }} />
+      <ChatLines sx={{ fontSize: 20, marginTop: '1px', marginBottom: '1px' }} />
       {postCountData?.getTotalPosts.total || ''}
     </Button>
   );

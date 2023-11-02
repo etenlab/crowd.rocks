@@ -3,13 +3,16 @@ import { useParams } from 'react-router';
 import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
 import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 import { Button, CircularProgress, Stack, Typography } from '@mui/material';
+import { useDebounce } from 'use-debounce';
 
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { SearchInput } from '../../common/forms/SearchInput';
 import { FilterList } from '../../common/icons/FilterList';
+import { NavigationModal } from '../../common/modalContent/NavigationModal';
+
 import { MapWordItem } from './MapWordItem';
-import { Select } from '../../common/forms/Select';
+import { Select, OptionItem } from '../../common/forms/Select';
 
 import { useGetOrigMapWordsAndPhrasesLazyQuery } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
@@ -17,8 +20,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 import { DEFAULT_MAP_LANGUAGE_CODE } from '../../../const/mapsConst';
 import { PAGE_SIZE } from '../../../const/commonConst';
-import { MapNavigationModal } from './MapNavigationModal';
-import { OptionItem } from '../../common/forms/Autocomplete';
+
 import { langInfo2langInput } from '../../../../../utils';
 
 export function MapWordsList() {
@@ -55,6 +57,7 @@ export function MapWordsList() {
   const { openModal, closeModal } = createModal();
 
   const [filter, setFilter] = useState<string>('');
+  const [bouncedFilter] = useDebounce(filter, 500);
   const [quickFilter, setQuickFilter] = useState<string | null>('');
   const [filterOption, setFilterOption] = useState<OptionItem>({
     label: tr('All'),
@@ -85,7 +88,7 @@ export function MapWordsList() {
             language_code: DEFAULT_MAP_LANGUAGE_CODE,
           },
           original_map_id: id && id !== 'all' ? id : null,
-          filter,
+          filter: bouncedFilter,
           quickFilter,
           onlyNotTranslatedTo:
             filterOption.value === 'not translated' && targetLang
@@ -103,7 +106,7 @@ export function MapWordsList() {
   }, [
     getWordsAndPhrases,
     targetLang,
-    filter,
+    bouncedFilter,
     id,
     filterOption,
     quickFilter,
@@ -118,7 +121,7 @@ export function MapWordsList() {
             language_code: DEFAULT_MAP_LANGUAGE_CODE,
           },
           original_map_id: id && id !== 'all' ? id : null,
-          filter,
+          filter: bouncedFilter,
           quickFilter,
           onlyNotTranslatedTo:
             filterOption.value === 'not translated' && targetLang
@@ -143,7 +146,7 @@ export function MapWordsList() {
       wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.hasNextPage,
       wordsAndPhrases?.getOrigMapWordsAndPhrases.pageInfo.endCursor,
       id,
-      filter,
+      bouncedFilter,
       quickFilter,
       filterOption.value,
       targetLang,
@@ -159,10 +162,7 @@ export function MapWordsList() {
 
   const handleOpenFilterModal = () => {
     openModal(
-      <MapNavigationModal
-        onClose={closeModal}
-        setQuickFilter={setQuickFilter}
-      />,
+      <NavigationModal onClose={closeModal} setQuickFilter={setQuickFilter} />,
     );
   };
 
@@ -219,7 +219,7 @@ export function MapWordsList() {
               border: (theme) => `1px solid ${theme.palette.text.gray_stroke}`,
             }}
           >
-            <FilterList sx={{ fontSize: 24 }} />
+            <FilterList sx={{ fontSize: 22 }} />
           </Button>
         </Stack>
 

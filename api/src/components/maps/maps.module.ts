@@ -24,6 +24,6 @@ import { UserModule } from '../user/user.module';
     forwardRef(() => UserModule),
   ],
   providers: [MapsService, MapVotesService, MapsResolver, MapsRepository],
-  exports: [MapsService],
+  exports: [MapsService, MapsResolver],
 })
 export class MapsModule {}
