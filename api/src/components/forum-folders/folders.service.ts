@@ -7,15 +7,16 @@ import {
   ForumFolderDeleteProcedureOutputRow,
   ForumFolderUpsertProcedureOutputRow,
   getForumFolderObjById,
+  getForumFolders,
   GetForumFolderObjectById,
+  getForumFoldersTotalSize,
+  GetForumFoldersTotalSize,
 } from '../forum-folders/sql-string';
 import {
-  ForumFolderReadInput,
-  ForumFolderReadOutput,
-  ForumFolderListOutput,
-  ForumFolder,
+  ForumFolderOutput,
+  ForumFolderListConnection,
+  ForumFolderEdge,
   ForumFolderUpsertInput,
-  ForumFolderDeleteInput,
   ForumFolderDeleteOutput,
 } from './types';
 
@@ -23,20 +24,23 @@ import {
 export class ForumFoldersService {
   constructor(private pg: PostgresService) {}
 
-  async read(input: ForumFolderReadInput): Promise<ForumFolderReadOutput> {
+  async read(forum_folder_id: number): Promise<ForumFolderOutput> {
     try {
-      const res1 = await this.pg.pool.query<GetForumFolderObjectById>(
-        ...getForumFolderObjById(+input.folder_id),
+      const res = await this.pg.pool.query<GetForumFolderObjectById>(
+        ...getForumFolderObjById(forum_folder_id),
       );
 
-      if (res1.rowCount !== 1) {
-        Logger.error(`no forum for id: ${input.folder_id}`);
+      if (res.rowCount !== 1) {
+        Logger.error(`no forum for id: ${forum_folder_id}`);
       } else {
         return {
           error: ErrorType.NoError,
           folder: {
-            folder_id: input.folder_id,
-            name: res1.rows[0].name,
+            forum_folder_id: res.rows[0].forum_folder_id,
+            forum_id: res.rows[0].forum_id,
+            name: res.rows[0].name,
+            description: res.rows[0].description,
+            created_by: res.rows[0].created_by,
           },
         };
       }
@@ -50,70 +54,91 @@ export class ForumFoldersService {
     };
   }
 
-  async listByForumId(forum_id: number): Promise<ForumFolderListOutput> {
+  async listByForumId(input: {
+    forum_id: number;
+    filter: string | null;
+    first: number | null;
+    after: string | null;
+  }): Promise<ForumFolderListConnection> {
     try {
-      const res1 = await this.pg.pool.query(
-        `
-          select
-            fr.forum_folder_id,
-            fr.name
-          from 
-            forums f
-          join forum_folders fr
-            on f.forum_id = fr.forum_id
-          where f.forum_id = $1
-        `,
-        [forum_id + ''],
-      );
-      const folders = res1.rows.map<ForumFolder>(
-        ({ name, forum_folder_id }) => ({
-          name: name,
-          folder_id: forum_folder_id,
+      const res = await this.pg.pool.query<GetForumFolderObjectById>(
+        ...getForumFolders({
+          forum_id: input.forum_id,
+          filter: input.filter,
+          first: input.first ? input.first * 2 : null,
+          after: input.after,
         }),
       );
 
+      const res1 = await this.pg.pool.query<GetForumFoldersTotalSize>(
+        ...getForumFoldersTotalSize(input.forum_id, input.filter),
+      );
+
+      const tempEdges: ForumFolderEdge[] = res.rows.map((item) => ({
+        cursor: item.name,
+        node: item,
+      }));
+
+      const edges =
+        input.first && tempEdges.length > input.first
+          ? tempEdges.slice(0, input.first - 1)
+          : tempEdges;
+
       return {
         error: ErrorType.NoError,
-        folders,
+        edges,
+        pageInfo: {
+          hasNextPage: input.first ? edges.length > input.first : false,
+          hasPreviousPage: false,
+          startCursor: edges.length > 0 ? edges[0].cursor : null,
+          endCursor:
+            edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
+          totalEdges: res1.rowCount > 0 ? res1.rows[0].totalRecords : 0,
+        },
       };
     } catch (e) {
       Logger.error(e);
-      return {
-        error: ErrorType.UnknownError,
-        folders: [],
-      };
     }
+
+    return {
+      error: ErrorType.UnknownError,
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+        totalEdges: 0,
+      },
+    };
   }
 
   async upsert(
     input: ForumFolderUpsertInput,
     token: string,
-  ): Promise<ForumFolderReadOutput> {
+  ): Promise<ForumFolderOutput> {
     try {
       const res = await this.pg.pool.query<ForumFolderUpsertProcedureOutputRow>(
         ...callForumFolderUpsertProcedure({
           name: input.name,
+          description: input.description,
           forum_id: input.forum_id,
-          forum_folder_id: input.folder_id,
+          forum_folder_id: input.forum_folder_id,
           token: token,
         }),
       );
 
       const creatingError = res.rows[0].p_error_type;
-      const folder_id = res.rows[0].p_forum_folder_id;
-      Logger.debug(creatingError);
-      Logger.debug(folder_id);
+      const forum_folder_id = res.rows[0].p_forum_folder_id;
 
-      if (creatingError !== ErrorType.NoError || !folder_id) {
+      if (creatingError !== ErrorType.NoError || !forum_folder_id) {
         return {
           error: creatingError,
           folder: null,
         };
       }
 
-      const { error: readingError, folder } = await this.read({
-        folder_id: folder_id + '',
-      });
+      const { error: readingError, folder } = await this.read(+forum_folder_id);
 
       return {
         error: readingError,
@@ -130,13 +155,13 @@ export class ForumFoldersService {
   }
 
   async delete(
-    input: ForumFolderDeleteInput,
+    forum_folder_id: number,
     token: string,
   ): Promise<ForumFolderDeleteOutput> {
     try {
       const res = await this.pg.pool.query<ForumFolderDeleteProcedureOutputRow>(
         ...callForumFolderDeleteProcedure({
-          id: input.folder_id,
+          id: forum_folder_id,
           token: token,
         }),
       );
