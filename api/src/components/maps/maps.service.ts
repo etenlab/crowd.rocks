@@ -899,8 +899,8 @@ export class MapsService {
         stream,
         putLangCodesToFileName(origMapDetails.map_file_name, toLang),
         SVG_MIME_TYPE,
-        translatedMap.length,
         token,
+        translatedMap.length,
       );
       if (!translatedContentFile?.file?.id) {
         Logger.error(
