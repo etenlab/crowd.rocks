@@ -678,21 +678,22 @@ export class MapsRepository {
       Logger.error(`t_language_code must be specified.`);
     }
     const params: string[] = [];
-    let mapAndTLanguageRestrictionClause = '';
-    params.push(original_map_id);
-    mapAndTLanguageRestrictionClause += ` and omx.original_map_id = $${params.length} `;
+    let languageRestrictionClause = '';
 
     params.push(language_code);
-    mapAndTLanguageRestrictionClause += ` and t_language_code =  $${params.length} `;
+    languageRestrictionClause += ` and mxl.t_language_code =  $${params.length} `;
 
     if (dialect_code) {
       params.push(dialect_code);
-      mapAndTLanguageRestrictionClause += ` and t_dialect_code =  $${params.length} `;
+      languageRestrictionClause += ` and mxl.t_dialect_code =  $${params.length} `;
     }
     if (geo_code) {
       params.push(geo_code);
-      mapAndTLanguageRestrictionClause += ` and t_geo_code =  $${params.length} `;
+      languageRestrictionClause += ` and mxl.t_geo_code =  $${params.length} `;
     }
+
+    params.push(original_map_id);
+    const mapRestrictionClause = ` and omx.original_map_id = $${params.length}`;
 
     // note that 'disctinct' because of same word can be at several original maps.
     const w_tr_sqlStr = `
@@ -700,22 +701,22 @@ export class MapsRepository {
         o_w.word_id as o_id,
         'word'::VARCHAR(6) as o_type,
         o_ws.wordlike_string as o_like_string,
-        mwl.translation_id,
+        mxl.translation_id,
         CASE 
-           WHEN mwl.t_word_id is not null THEN 'wtwt'
-           when mwl.t_phrase_id is not null then 'wtpt'
+           WHEN mxl.t_word_id is not null THEN 'wtwt'
+           when mxl.t_phrase_id is not null then 'wtpt'
            ELSE null
 	       END AS translation_type,
 	    coalesce(ws.wordlike_string, t_p.phraselike_string) as t_like_string
       from original_map_words omx
       join words o_w on o_w.word_id = omx.word_id 
       join wordlike_strings o_ws on o_w.wordlike_string_id = o_ws.wordlike_string_id
-      left join mv_words_languages mwl on omx.word_id = mwl.word_id
-      left join phrases t_p on mwl.t_phrase_id = t_p.phrase_id
-      left join words t_w on mwl.t_word_id = t_w.word_id
+      left join mv_words_languages mxl on omx.word_id = mxl.word_id ${languageRestrictionClause}
+      left join phrases t_p on mxl.t_phrase_id = t_p.phrase_id
+      left join words t_w on mxl.t_word_id = t_w.word_id
       left join wordlike_strings ws on t_w.wordlike_string_id = ws.wordlike_string_id 
       where true
-      ${mapAndTLanguageRestrictionClause}
+      ${mapRestrictionClause}
     `;
 
     const p_tr_sqlStr = `
@@ -723,22 +724,22 @@ export class MapsRepository {
         o_p.phrase_id as o_id,
         'phrase'::VARCHAR(6) as o_type,
         o_p.phraselike_string  as o_like_string,
-        mpl.translation_id,
+        mxl.translation_id,
         CASE 
-           WHEN mpl.t_word_id is not null THEN 'ptwt'
-           when mpl.t_phrase_id is not null then 'ptpt'
+           WHEN mxl.t_word_id is not null THEN 'ptwt'
+           when mxl.t_phrase_id is not null then 'ptpt'
            ELSE null
 	       END AS translation_type,
         t_w.word_id,
 	    coalesce(ws.wordlike_string, t_p.phraselike_string) as t_like_string
       from original_map_phrases omx
       join phrases o_p on o_p.phrase_id  = omx.phrase_id 
-      left join mv_phrases_languages mpl on omx.phrase_id = mpl.phrase_id
-      left join phrases t_p on mpl.t_phrase_id = t_p.phrase_id
-      left join words t_w on mpl.t_word_id = t_w.word_id
+      left join mv_phrases_languages mxl on omx.phrase_id = mxl.phrase_id ${languageRestrictionClause}
+      left join phrases t_p on mxl.t_phrase_id = t_p.phrase_id
+      left join words t_w on mxl.t_word_id = t_w.word_id
       left join wordlike_strings ws on t_w.wordlike_string_id = ws.wordlike_string_id 
       where true 
-      ${mapAndTLanguageRestrictionClause}
+      ${mapRestrictionClause}
     `;
 
     const resQ_w_tr_promise = this.pg.pool.query(w_tr_sqlStr, params);
@@ -753,6 +754,10 @@ export class MapsRepository {
         (wp) => wp.o_like_string === wordphrase_tr_row.o_like_string,
       );
       if (existingIndex >= 0) {
+        if (!(wordphrase_tr_row.t_like_string?.length > 0)) {
+          //translation is nullish - do nething
+          continue;
+        }
         wordsAndPhrases[existingIndex].translations.push({
           t_like_string: wordphrase_tr_row.t_like_string,
           translation_type: wordphrase_tr_row.translation_type,
@@ -761,6 +766,16 @@ export class MapsRepository {
           down_votes: 0, //calc later only for multiple translations
         });
       } else {
+        if (!(wordphrase_tr_row.t_like_string?.length > 0)) {
+          //translation is nullish - create empty array
+          wordsAndPhrases.push({
+            o_id: wordphrase_tr_row.o_id,
+            o_type: wordphrase_tr_row.o_type,
+            o_like_string: wordphrase_tr_row.o_like_string,
+            translations: [],
+          });
+          continue;
+        }
         wordsAndPhrases.push({
           o_id: wordphrase_tr_row.o_id,
           o_type: wordphrase_tr_row.o_type,
@@ -907,7 +922,7 @@ export class MapsRepository {
     }
 
     const sqlStr = `
-      select distinct 
+      select distinct on ("cursor")
         cursor,
         type,
         o_id,

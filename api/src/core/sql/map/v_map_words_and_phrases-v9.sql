@@ -3,7 +3,7 @@ drop view if exists v_map_words_and_phrases;
 
 CREATE OR REPLACE VIEW v_map_words_and_phrases as
 SELECT DISTINCT ON ('word'::text, ow.word_id, original_map_id) 
-	concat(ws.wordlike_string, owd.word_definition_id, omw.original_map_id) AS cursor,
+	concat(ws.wordlike_string, owd.word_definition_id) AS cursor,
     'word'::text AS type,
     ow.word_id AS o_id,
     ws.wordlike_string AS o_like_string,
@@ -22,7 +22,7 @@ SELECT DISTINCT ON ('word'::text, ow.word_id, original_map_id)
      JOIN original_map_words omw ON ow.word_id = omw.word_id
 UNION ALL
  SELECT DISTINCT ON ('phrase'::text, oph.phrase_id, original_map_id) 
- 	concat(oph.phraselike_string, ophd.phrase_definition_id, omph.original_map_id) AS cursor,
+ 	concat(oph.phraselike_string, ophd.phrase_definition_id) AS cursor,
     'phrase'::text AS type,
     oph.phrase_id AS o_id,
     oph.phraselike_string AS o_like_string,

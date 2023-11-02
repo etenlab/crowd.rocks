@@ -21,6 +21,7 @@ import {
   ZipMapResult,
   StartZipMapDownloadInput,
   MapDetailsInfo,
+  MapWordOrPhrase,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
@@ -1255,6 +1256,9 @@ export class MapsService {
       translation: string;
     }> = [];
     for (const origMapWordOrPhrase of mapWordsPhrases) {
+      if (!(origMapWordOrPhrase.translations.length > 0)) {
+        continue;
+      }
       const origWordOrPhraseTranslated =
         this.wordToWordTranslationsService.chooseBestTranslation<MapTrOfWordOrPhrase>(
           origMapWordOrPhrase.translations,
