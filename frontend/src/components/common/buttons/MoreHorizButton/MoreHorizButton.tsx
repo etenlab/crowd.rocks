@@ -36,7 +36,7 @@ export function MoreHorizButton({
         color="gray"
         sx={(theme) => ({
           padding: '4px',
-          background: theme.palette.text.white,
+          background: theme.palette.background.white,
           '&:hover': {
             background: theme.palette.background.gray_stroke,
           },

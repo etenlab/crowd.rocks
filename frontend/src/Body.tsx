@@ -56,7 +56,6 @@ import PasswordResetFormPage from './components/authentication/PasswordResetForm
 import { MapsPage } from './components/map/MapsPage';
 
 import { SiteTextListPage } from './components/site-text/SiteTextListPage';
-import { SiteTextDetailPage } from './components/site-text/SiteTextDetailPage';
 
 import { WordListPage } from './components/dictionary/WordListPage';
 import { WordDetailPage } from './components/dictionary/WordDetailPage';
@@ -93,6 +92,7 @@ import { Header } from './components/common/Header';
 import { useColorModeContext } from './theme';
 
 import { apollo_client } from './App';
+import { DataGeneratorPage } from './components/data-generator/DataGeneratorPage';
 
 export function Body() {
   const { tr } = useTr();
@@ -467,11 +467,6 @@ export function Body() {
             />
             <Route
               exact
-              path="/:nation_id/:language_id/:cluster_id/site-text-detail/:definition_type/:site_text_id"
-              component={SiteTextDetailPage}
-            />
-            <Route
-              exact
               path="/:nation_id/:language_id/:cluster_id/dictionary-list"
               component={WordListPage}
             />
@@ -534,6 +529,11 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/ai-controller"
               component={AIControllerPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/data-generator"
+              component={DataGeneratorPage}
             />
             <Route
               exact

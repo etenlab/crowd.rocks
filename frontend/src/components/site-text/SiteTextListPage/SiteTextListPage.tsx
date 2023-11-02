@@ -53,7 +53,11 @@ export function SiteTextListPage() {
         },
       },
     },
-    actions: { changeSiteTextTargetLanguage, createModal },
+    actions: {
+      changeSiteTextTargetLanguage,
+      createModal,
+      addPaginationVariableForGetAllSiteTextDefinitions,
+    },
   } = useAppContext();
 
   const [filter, setFilter] = useState<string>('');
@@ -71,8 +75,6 @@ export function SiteTextListPage() {
 
   const [getAllSiteTextDefinitions, { data, error, loading, fetchMore }] =
     useGetAllSiteTextDefinitionsLazyQuery();
-
-  console.log(data);
 
   useEffect(() => {
     getAllSiteTextDefinitions({
@@ -93,12 +95,26 @@ export function SiteTextListPage() {
         after: null,
       },
     });
+    addPaginationVariableForGetAllSiteTextDefinitions({
+      filter: bouncedFilter,
+      quickFilter,
+      onlyNotTranslated: filterOption.value === 'not translated' ? true : null,
+      onlyTranslated: filterOption.value === 'translated' ? true : null,
+      targetLanguage: target
+        ? {
+            language_code: target.lang.tag,
+            dialect_code: target.dialect?.tag || null,
+            geo_code: target.region?.tag || null,
+          }
+        : null,
+    });
   }, [
     getAllSiteTextDefinitions,
     bouncedFilter,
     quickFilter,
     filterOption.value,
     target,
+    addPaginationVariableForGetAllSiteTextDefinitions,
   ]);
 
   const handleChangeFilterOption = useCallback((value: OptionItem | null) => {
@@ -241,32 +257,14 @@ export function SiteTextListPage() {
       }
     }
 
-    return originals
-      .sort((a, b) => {
-        if (
-          a.wordOrPhrase.likeString.toLowerCase() >
-          b.wordOrPhrase.likeString.toLowerCase()
-        ) {
-          return 1;
-        } else if (
-          a.wordOrPhrase.likeString.toLowerCase() <
-          b.wordOrPhrase.likeString.toLowerCase()
-        ) {
-          return -1;
-        } else {
-          return 0;
-        }
-      })
-      .map((original) => (
-        <TranslationItem
-          key={`${original.isWord ? 'word' : 'phrase'}-${
-            original.definition.id
-          }`}
-          original={original}
-          targetLang={target}
-          redirectUrl={`/${nation_id}/${language_id}/${cluster_id}/site-text-list`}
-        />
-      ));
+    return originals.map((original) => (
+      <TranslationItem
+        key={`${original.isWord ? 'word' : 'phrase'}-${original.definition.id}`}
+        original={original}
+        targetLang={target}
+        redirectUrl={`/${nation_id}/${language_id}/${cluster_id}/site-text-list`}
+      />
+    ));
   }, [cluster_id, data, error, language_id, nation_id, target]);
 
   const handleClickNewSiteTextButton = () => {

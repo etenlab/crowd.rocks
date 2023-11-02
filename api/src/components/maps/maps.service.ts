@@ -955,8 +955,8 @@ export class MapsService {
             geo_code: tag2langInfo(languageFullTag).region?.tag || null,
           }),
           SVG_MIME_TYPE,
-          translatedMap.length,
           token,
+          translatedMap.length,
         );
         if (!translatedContentFile?.file?.id) {
           Logger.error(

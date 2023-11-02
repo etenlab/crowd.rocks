@@ -8,11 +8,19 @@ import { updateCacheWithUpsertSiteText } from '../cacheUpdators/upsertSiteText';
 
 import { useTr } from '../hooks/useTr';
 import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
+import { useAppContext } from './useAppContext';
 
 export function useSiteTextUpsertMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
   const redirectOnUnauth = useUnauthorizedRedirect();
+  const {
+    states: {
+      nonPersistent: {
+        paginationVariables: { getAllSiteTextDefinitions },
+      },
+    },
+  } = useAppContext();
 
   return useGeneratedSiteTextUpsertMutation({
     update(cache, { data: upsertData, errors }) {
@@ -28,7 +36,13 @@ export function useSiteTextUpsertMutation() {
           return;
         }
 
-        updateCacheWithUpsertSiteText(cache, newSiteTextDefinition);
+        const variablesList = Object.values(getAllSiteTextDefinitions);
+
+        updateCacheWithUpsertSiteText(
+          cache,
+          variablesList,
+          newSiteTextDefinition,
+        );
 
         present({
           message: tr('Success at creating new site text!'),

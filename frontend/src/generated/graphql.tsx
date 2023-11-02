@@ -652,6 +652,7 @@ export type Mutation = {
   mapUpload: MapUploadOutput;
   mapVoteUpsert: MapVoteOutput;
   mapsReTranslate: GenericOutput;
+  mapsReTranslateToLangs: GenericOutput;
   mapsTranslationsReset: GenericOutput;
   markNotificationAsRead: MarkNotificationReadOutput;
   notificationDelete: NotificationDeleteOutput;
@@ -661,6 +662,8 @@ export type Mutation = {
   phraseToPhraseTranslationUpsert: PhraseToPhraseTranslationOutput;
   phraseUpsert: PhraseOutput;
   phraseVoteUpsert: PhraseVoteOutput;
+  populateMapTranslations: GenericOutput;
+  populateMaps: GenericOutput;
   postCreateResolver: PostCreateOutput;
   register: RegisterOutput;
   resetEmailRequest: ResetEmailRequestOutput;
@@ -797,6 +800,11 @@ export type MutationMapsReTranslateArgs = {
 };
 
 
+export type MutationMapsReTranslateToLangsArgs = {
+  forLangTags: Array<Scalars['String']['input']>;
+};
+
+
 export type MutationMarkNotificationAsReadArgs = {
   input: MarkNotificationReadInput;
 };
@@ -834,6 +842,16 @@ export type MutationPhraseUpsertArgs = {
 
 export type MutationPhraseVoteUpsertArgs = {
   input: PhraseVoteUpsertInput;
+};
+
+
+export type MutationPopulateMapTranslationsArgs = {
+  to_languages: Array<LanguageInput>;
+};
+
+
+export type MutationPopulateMapsArgs = {
+  map_amount?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2887,6 +2905,27 @@ export type PasswordResetFormRequestMutationVariables = Exact<{
 
 export type PasswordResetFormRequestMutation = { __typename?: 'Mutation', passwordResetFormResolver: { __typename?: 'LoginOutput', error: ErrorType, session?: { __typename?: 'Session', user_id: string, token: string, avatar: string, avatar_url?: string | null } | null } };
 
+export type GenerateMapsMutationVariables = Exact<{
+  map_amount?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GenerateMapsMutation = { __typename?: 'Mutation', populateMaps: { __typename?: 'GenericOutput', error: ErrorType } };
+
+export type GenerateMapTranslationsMutationVariables = Exact<{
+  to_languages: Array<LanguageInput> | LanguageInput;
+}>;
+
+
+export type GenerateMapTranslationsMutation = { __typename?: 'Mutation', populateMapTranslations: { __typename?: 'GenericOutput', error: ErrorType } };
+
+export type MapsReTranslateToLangsMutationVariables = Exact<{
+  forLangTags: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type MapsReTranslateToLangsMutation = { __typename?: 'Mutation', mapsReTranslateToLangs: { __typename?: 'GenericOutput', error: ErrorType } };
+
 export type WordlikeStringFragmentFragment = { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string };
 
 export type WordFragmentFragment = { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } };
@@ -4923,6 +4962,105 @@ export function usePasswordResetFormRequestMutation(baseOptions?: Apollo.Mutatio
 export type PasswordResetFormRequestMutationHookResult = ReturnType<typeof usePasswordResetFormRequestMutation>;
 export type PasswordResetFormRequestMutationResult = Apollo.MutationResult<PasswordResetFormRequestMutation>;
 export type PasswordResetFormRequestMutationOptions = Apollo.BaseMutationOptions<PasswordResetFormRequestMutation, PasswordResetFormRequestMutationVariables>;
+export const GenerateMapsDocument = gql`
+    mutation GenerateMaps($map_amount: Int) {
+  populateMaps(map_amount: $map_amount) {
+    error
+  }
+}
+    `;
+export type GenerateMapsMutationFn = Apollo.MutationFunction<GenerateMapsMutation, GenerateMapsMutationVariables>;
+
+/**
+ * __useGenerateMapsMutation__
+ *
+ * To run a mutation, you first call `useGenerateMapsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGenerateMapsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [generateMapsMutation, { data, loading, error }] = useGenerateMapsMutation({
+ *   variables: {
+ *      map_amount: // value for 'map_amount'
+ *   },
+ * });
+ */
+export function useGenerateMapsMutation(baseOptions?: Apollo.MutationHookOptions<GenerateMapsMutation, GenerateMapsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GenerateMapsMutation, GenerateMapsMutationVariables>(GenerateMapsDocument, options);
+      }
+export type GenerateMapsMutationHookResult = ReturnType<typeof useGenerateMapsMutation>;
+export type GenerateMapsMutationResult = Apollo.MutationResult<GenerateMapsMutation>;
+export type GenerateMapsMutationOptions = Apollo.BaseMutationOptions<GenerateMapsMutation, GenerateMapsMutationVariables>;
+export const GenerateMapTranslationsDocument = gql`
+    mutation GenerateMapTranslations($to_languages: [LanguageInput!]!) {
+  populateMapTranslations(to_languages: $to_languages) {
+    error
+  }
+}
+    `;
+export type GenerateMapTranslationsMutationFn = Apollo.MutationFunction<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>;
+
+/**
+ * __useGenerateMapTranslationsMutation__
+ *
+ * To run a mutation, you first call `useGenerateMapTranslationsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGenerateMapTranslationsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [generateMapTranslationsMutation, { data, loading, error }] = useGenerateMapTranslationsMutation({
+ *   variables: {
+ *      to_languages: // value for 'to_languages'
+ *   },
+ * });
+ */
+export function useGenerateMapTranslationsMutation(baseOptions?: Apollo.MutationHookOptions<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>(GenerateMapTranslationsDocument, options);
+      }
+export type GenerateMapTranslationsMutationHookResult = ReturnType<typeof useGenerateMapTranslationsMutation>;
+export type GenerateMapTranslationsMutationResult = Apollo.MutationResult<GenerateMapTranslationsMutation>;
+export type GenerateMapTranslationsMutationOptions = Apollo.BaseMutationOptions<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>;
+export const MapsReTranslateToLangsDocument = gql`
+    mutation MapsReTranslateToLangs($forLangTags: [String!]!) {
+  mapsReTranslateToLangs(forLangTags: $forLangTags) {
+    error
+  }
+}
+    `;
+export type MapsReTranslateToLangsMutationFn = Apollo.MutationFunction<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>;
+
+/**
+ * __useMapsReTranslateToLangsMutation__
+ *
+ * To run a mutation, you first call `useMapsReTranslateToLangsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMapsReTranslateToLangsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mapsReTranslateToLangsMutation, { data, loading, error }] = useMapsReTranslateToLangsMutation({
+ *   variables: {
+ *      forLangTags: // value for 'forLangTags'
+ *   },
+ * });
+ */
+export function useMapsReTranslateToLangsMutation(baseOptions?: Apollo.MutationHookOptions<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>(MapsReTranslateToLangsDocument, options);
+      }
+export type MapsReTranslateToLangsMutationHookResult = ReturnType<typeof useMapsReTranslateToLangsMutation>;
+export type MapsReTranslateToLangsMutationResult = Apollo.MutationResult<MapsReTranslateToLangsMutation>;
+export type MapsReTranslateToLangsMutationOptions = Apollo.BaseMutationOptions<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>;
 export const WordDefinitionReadDocument = gql`
     query WordDefinitionRead($id: ID!) {
   wordDefinitionRead(id: $id) {
@@ -9564,6 +9702,9 @@ export const namedOperations = {
     Logout: 'Logout',
     ResetEmailRequest: 'ResetEmailRequest',
     PasswordResetFormRequest: 'PasswordResetFormRequest',
+    GenerateMaps: 'GenerateMaps',
+    GenerateMapTranslations: 'GenerateMapTranslations',
+    MapsReTranslateToLangs: 'MapsReTranslateToLangs',
     WordDefinitionUpsert: 'WordDefinitionUpsert',
     ToggleWordDefinitionVoteStatus: 'ToggleWordDefinitionVoteStatus',
     ToggleWordVoteStatus: 'ToggleWordVoteStatus',

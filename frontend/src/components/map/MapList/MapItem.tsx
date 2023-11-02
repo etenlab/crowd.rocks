@@ -146,7 +146,7 @@ export function MapItem({
   const tagColor = mapInfo.is_original ? 'orange' : 'green';
 
   return (
-    <Stack gap="14px" sx={{ width: '162px' }}>
+    <Stack gap="14px" sx={{ width: '162px', cursor: 'pointer' }}>
       <PreviewContainer
         onClick={handleGoToSelectedMap}
         onDoubleClick={(e) => {

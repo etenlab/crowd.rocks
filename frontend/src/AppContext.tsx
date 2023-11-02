@@ -5,8 +5,12 @@ import { reducer, loadPersistedStore } from './reducers/index';
 
 import { type StateType as GlobalStateType } from './reducers/global.reducer';
 import { type StateType as ComponentsStateType } from './reducers/components.reducer';
+import { type StateType as NonPersistentStateType } from './reducers/non-persistent.reducer';
+import { GetAllSiteTextDefinitionsVariable } from './reducers/non-persistent.reducer';
 
 import { useGlobal } from './hooks/useGlobal';
+import { useGlobalComponents } from './hooks/useGlobalComponents';
+import { useNonPersistent } from './hooks/useNonPersistent';
 
 import {
   useGetAllRecommendedSiteTextTranslationListByLanguageLazyQuery,
@@ -15,13 +19,14 @@ import {
   SiteTextLanguageWithTranslationInfo,
   ErrorType,
 } from './generated/graphql';
-import { useGlobalComponents } from './hooks/useGlobalComponents';
+
 import { subTags2LangInfo } from '../../utils';
 
 export interface ContextType {
   states: {
     global: GlobalStateType;
     components: ComponentsStateType;
+    nonPersistent: NonPersistentStateType;
   };
   actions: {
     setSiteTextLanguageList: (
@@ -49,6 +54,9 @@ export interface ContextType {
       value: { translation: string; description: string },
     ): void;
     clearTempTranslation(key: string): void;
+    addPaginationVariableForGetAllSiteTextDefinitions(
+      variable: GetAllSiteTextDefinitionsVariable,
+    ): void;
   };
 }
 
@@ -94,6 +102,8 @@ export function AppContextProvider({ children }: AppProviderProps) {
     dispatch,
   });
   const { createModal, removeModal } = useGlobalComponents({ dispatch });
+  const { addPaginationVariableForGetAllSiteTextDefinitions } =
+    useNonPersistent({ dispatch });
 
   useEffect(() => {
     getAllRecommendedSiteTextTranslationListByLanguage({
@@ -319,6 +329,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
     states: {
       global: state.global,
       components: state.components,
+      nonPersistent: state.nonPersistent,
     },
     actions: {
       setSiteTextLanguageList,
@@ -335,6 +346,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
       removeModal,
       setTempTranslation,
       clearTempTranslation,
+      addPaginationVariableForGetAllSiteTextDefinitions,
     },
   };
 
