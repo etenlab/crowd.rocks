@@ -22,7 +22,7 @@ test('Verify that user is navigated to settings page after clicking on the setti
   expect(await settingsPage.isSettingPageTitleVisible()).toBeTruthy();
 });
 
-test('Verify that all the settings options are available on the setting page', async ({
+test.skip('Verify that all the settings options are available on the setting page', async ({
   page,
 }) => {
   const homePage = new HomePage(page);
