@@ -3,6 +3,7 @@ import BasePage from './BasePage';
 const homePageTitle =
   '//div[@class="section"]/ion-item-group//ion-label[text() = "Media"]';
 const expandIcon = '#app-menu-button';
+const languageText = '//ion-label[text() = "Language"]';
 
 class HomePage extends BasePage {
   async isHomePageVisible() {
@@ -12,6 +13,14 @@ class HomePage extends BasePage {
 
   async clickOnExpandMenu() {
     await this.page.locator(expandIcon).last().click();
+  }
+
+  async isLanguageTextVisible(visible = true) {
+    if (visible == false) {
+      return await this.page.locator(languageText).isHidden();
+    }
+    await this.page.locator(languageText).waitFor();
+    return await this.page.locator(languageText).isVisible();
   }
 }
 
