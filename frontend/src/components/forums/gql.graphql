@@ -1,7 +1,7 @@
 # Threads
 
 mutation CreateThread($name: String!, $folder_id: ID!) {
-  threadUpsert(input: {name: $name, folder_id: $folder_id}) {
+  threadUpsert(input: { name: $name, folder_id: $folder_id }) {
     error
     thread {
       thread_id
@@ -10,8 +10,8 @@ mutation CreateThread($name: String!, $folder_id: ID!) {
   }
 }
 
-query GetThreadById($id: ID!){
-  threadRead(input: {thread_id: $id}) {
+query GetThreadById($id: ID!) {
+  threadRead(input: { thread_id: $id }) {
     error
     thread {
       thread_id
@@ -20,9 +20,8 @@ query GetThreadById($id: ID!){
   }
 }
 
-query GetThreads($folder_id: ID!)
-{
-  threads(input: {folder_id: $folder_id}) {
+query GetThreads($folder_id: ID!) {
+  threads(input: { folder_id: $folder_id }) {
     error
     threads {
       __typename
@@ -32,8 +31,10 @@ query GetThreads($folder_id: ID!)
   }
 }
 
-mutation UpdateThread($thread_id:ID, $name: String!, $folder_id: ID!){
-  threadUpsert(input: { folder_id: $folder_id, name:$name, thread_id:$thread_id }) {
+mutation UpdateThread($thread_id: ID, $name: String!, $folder_id: ID!) {
+  threadUpsert(
+    input: { folder_id: $folder_id, name: $name, thread_id: $thread_id }
+  ) {
     error
     thread {
       thread_id
@@ -43,7 +44,7 @@ mutation UpdateThread($thread_id:ID, $name: String!, $folder_id: ID!){
 }
 
 mutation DeleteThread($id: ID!) {
-  threadDelete(input: {thread_id: $id}) {
+  threadDelete(input: { thread_id: $id }) {
     error
     thread_id
   }
@@ -52,12 +53,12 @@ mutation DeleteThread($id: ID!) {
 # Forum Folders
 
 fragment ForumFolderFragment on ForumFolder {
-    folder_id
-    name
+  folder_id
+  name
 }
 
 mutation CreateForumFolder($name: String!, $forum_id: ID!) {
-  forumFolderUpsert(input: {name: $name, forum_id: $forum_id}) {
+  forumFolderUpsert(input: { name: $name, forum_id: $forum_id }) {
     error
     folder {
       ...ForumFolderFragment
@@ -65,8 +66,8 @@ mutation CreateForumFolder($name: String!, $forum_id: ID!) {
   }
 }
 
-query GetForumFolderById($id: ID!){
-  forumFolderRead(input: {folder_id: $id}) {
+query GetForumFolderById($id: ID!) {
+  forumFolderRead(input: { folder_id: $id }) {
     error
     folder {
       ...ForumFolderFragment
@@ -74,9 +75,8 @@ query GetForumFolderById($id: ID!){
   }
 }
 
-query GetForumFolders($forum_id: ID!)
-{
-  forumFolders(input: {forum_id: $forum_id}) {
+query GetForumFolders($forum_id: ID!) {
+  forumFolders(input: { forum_id: $forum_id }) {
     error
     folders {
       ...ForumFolderFragment
@@ -84,8 +84,10 @@ query GetForumFolders($forum_id: ID!)
   }
 }
 
-mutation UpdateForumFolder($id:ID!, $name: String!, $forum_id: ID!){
-  forumFolderUpsert(input: { forum_id: $forum_id, name: $name, folder_id: $id }) {
+mutation UpdateForumFolder($id: ID!, $name: String!, $forum_id: ID!) {
+  forumFolderUpsert(
+    input: { forum_id: $forum_id, name: $name, folder_id: $id }
+  ) {
     error
     folder {
       ...ForumFolderFragment
@@ -94,7 +96,7 @@ mutation UpdateForumFolder($id:ID!, $name: String!, $forum_id: ID!){
 }
 
 mutation DeleteForumFolder($id: ID!) {
-  forumFolderDelete(input: {folder_id: $id}) {
+  forumFolderDelete(input: { folder_id: $id }) {
     error
     folder_id
   }
@@ -103,12 +105,12 @@ mutation DeleteForumFolder($id: ID!) {
 # Forums
 
 fragment ForumFragment on Forum {
-    forum_id
-    name
+  forum_id
+  name
 }
 
 mutation CreateForum($name: String!) {
-  forumUpsert(input: {name: $name}) {
+  forumUpsert(input: { name: $name }) {
     error
     forum {
       ...ForumFragment
@@ -116,8 +118,8 @@ mutation CreateForum($name: String!) {
   }
 }
 
-query GetForumById($id: ID!){
-  forumRead(input: {forum_id: $id}) {
+query GetForumById($id: ID!) {
+  forumRead(input: { forum_id: $id }) {
     error
     forum {
       ...ForumFragment
@@ -125,8 +127,7 @@ query GetForumById($id: ID!){
   }
 }
 
-query GetForums
-{
+query GetForums {
   forums {
     error
     forums {
@@ -135,7 +136,7 @@ query GetForums
   }
 }
 
-mutation UpdateForum($id:ID $name: String!){
+mutation UpdateForum($id: ID, $name: String!) {
   forumUpsert(input: { forum_id: $id, name: $name }) {
     error
     forum {
@@ -145,7 +146,7 @@ mutation UpdateForum($id:ID $name: String!){
 }
 
 mutation DeleteForum($id: ID!) {
-  forumDelete(input: {forum_id: $id}) {
+  forumDelete(input: { forum_id: $id }) {
     error
     forum_id
   }

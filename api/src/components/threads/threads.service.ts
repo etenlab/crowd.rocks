@@ -8,14 +8,15 @@ import {
   GetThreadObjectById,
   ThreadDeleteProcedureOutputRow,
   ThreadUpsertProcedureOutputRow,
+  getTheads,
+  GetThreadsTotalSize,
+  getThreadsTotalSize,
 } from './sql-string';
 import {
-  ThreadReadInput,
-  ThreadReadOutput,
-  ThreadListOutput,
-  Thread,
+  ThreadOutput,
+  ThreadListConnection,
+  ThreadEdge,
   ThreadUpsertInput,
-  ThreadDeleteInput,
   ThreadDeleteOutput,
 } from './types';
 
@@ -23,20 +24,22 @@ import {
 export class ThreadsService {
   constructor(private pg: PostgresService) {}
 
-  async getThread(input: ThreadReadInput): Promise<ThreadReadOutput> {
+  async getThread(thread_id: number): Promise<ThreadOutput> {
     try {
-      const res1 = await this.pg.pool.query<GetThreadObjectById>(
-        ...getThreadObjById(+input.thread_id),
+      const res = await this.pg.pool.query<GetThreadObjectById>(
+        ...getThreadObjById(thread_id),
       );
 
-      if (res1.rowCount !== 1) {
-        console.error(`no thread for id: ${input.thread_id}`);
+      if (res.rowCount !== 1) {
+        console.error(`no thread for id: ${thread_id}`);
       } else {
         return {
           error: ErrorType.NoError,
           thread: {
-            thread_id: input.thread_id,
-            name: res1.rows[0].name,
+            thread_id: res.rows[0].thread_id,
+            forum_folder_id: res.rows[0].forum_folder_id,
+            name: res.rows[0].name,
+            created_by: res.rows[0].created_by,
           },
         };
       }
@@ -50,57 +53,78 @@ export class ThreadsService {
     };
   }
 
-  async listByFolderId(folder_id: number): Promise<ThreadListOutput> {
+  async listByFolderId(input: {
+    forum_folder_id: number;
+    filter: string | null;
+    after: string | null;
+    first: number | null;
+  }): Promise<ThreadListConnection> {
     try {
-      const res1 = await this.pg.pool.query(
-        `
-          select
-            t.thread_id,
-            t.name
-          from 
-            threads t
-          join forum_folders fr
-            on t.forum_folder_id = fr.forum_folder_id
-          where fr.forum_folder_id = $1
-        `,
-        [folder_id + ''],
+      const res = await this.pg.pool.query<GetThreadObjectById>(
+        ...getTheads({
+          forum_folder_id: input.forum_folder_id,
+          filter: input.filter,
+          first: input.first ? input.first * 2 : null,
+          after: input.after,
+        }),
       );
-      const threads = res1.rows.map<Thread>(({ name, thread_id }) => ({
-        name: name,
-        thread_id: thread_id,
+
+      const res1 = await this.pg.pool.query<GetThreadsTotalSize>(
+        ...getThreadsTotalSize(input.forum_folder_id, input.filter),
+      );
+
+      const tempEdges: ThreadEdge[] = res.rows.map((item) => ({
+        cursor: item.name,
+        node: item,
       }));
+
+      const edges =
+        input.first && tempEdges.length > input.first
+          ? tempEdges.slice(0, input.first - 1)
+          : tempEdges;
 
       return {
         error: ErrorType.NoError,
-        threads,
+        edges,
+        pageInfo: {
+          hasNextPage: input.first ? edges.length > input.first : false,
+          hasPreviousPage: false,
+          startCursor: edges.length > 0 ? edges[0].cursor : null,
+          endCursor:
+            edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
+          totalEdges: res1.rowCount > 0 ? res1.rows[0].totalRecords : 0,
+        },
       };
     } catch (e) {
       Logger.error(e);
-      return {
-        error: ErrorType.UnknownError,
-        threads: [],
-      };
     }
+
+    return {
+      error: ErrorType.UnknownError,
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+        totalEdges: 0,
+      },
+    };
   }
 
-  async upsert(
-    input: ThreadUpsertInput,
-    token: string,
-  ): Promise<ThreadReadOutput> {
+  async upsert(input: ThreadUpsertInput, token: string): Promise<ThreadOutput> {
     try {
       const res = await this.pg.pool.query<ThreadUpsertProcedureOutputRow>(
         ...callThreadUpsertProcedure({
           name: input.name,
-          folder_id: input.folder_id,
-          thread_id: input.thread_id,
+          forum_folder_id: +input.forum_folder_id,
+          thread_id: input.thread_id ? +input.thread_id : null,
           token: token,
         }),
       );
 
       const creatingError = res.rows[0].p_error_type;
       const thread_id = res.rows[0].p_thread_id;
-      console.log(creatingError);
-      console.log(thread_id);
 
       if (creatingError !== ErrorType.NoError || !thread_id) {
         return {
@@ -109,9 +133,7 @@ export class ThreadsService {
         };
       }
 
-      const { error: readingError, thread } = await this.getThread({
-        thread_id: thread_id + '',
-      });
+      const { error: readingError, thread } = await this.getThread(+thread_id);
 
       return {
         error: readingError,
@@ -127,14 +149,11 @@ export class ThreadsService {
     };
   }
 
-  async delete(
-    input: ThreadDeleteInput,
-    token: string,
-  ): Promise<ThreadDeleteOutput> {
+  async delete(thread_id: number, token: string): Promise<ThreadDeleteOutput> {
     try {
       const res = await this.pg.pool.query<ThreadDeleteProcedureOutputRow>(
         ...callThreadDeleteProcedure({
-          id: input.thread_id,
+          id: thread_id,
           token: token,
         }),
       );
@@ -155,7 +174,7 @@ export class ThreadsService {
   }
 
   getDiscussionTitle = async (id: string): Promise<string> => {
-    const thread = await this.getThread({ thread_id: id });
+    const thread = await this.getThread(+id);
     if (thread.error !== ErrorType.NoError || thread.thread == null) {
       Logger.error(thread.error);
       return 'Thread';
