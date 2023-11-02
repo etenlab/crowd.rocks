@@ -1,1 +1,0 @@
-export { SiteTextDetailPage } from './SiteTextDetailPage';

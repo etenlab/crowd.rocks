@@ -478,6 +478,9 @@ export class MapsService {
               }
             });
             if (!hasInnerTextyNodes) {
+              // no more inner texty nodes - do cleaning of the final text and remember it
+              currNodeAllText =
+                this.cleanFromUnmeaningfulChars(currNodeAllText);
               node.children = [
                 {
                   value: currNodeAllText,
@@ -486,14 +489,13 @@ export class MapsService {
                   children: [],
                   attributes: {},
                 },
-              ]; // mutate svgAsINode, if node is final texty and has children nodes, assign to its text value concatanated value from children's values
+              ]; // mutate svgAsINode, if node is final texty and has children nodes, assign to its text value concatanated and cleaned value
             } else {
               currNodeAllText = ''; // if possible texty inode has inner texty nodes, do nothing here and dive deeper to inspect these inner nodes.
             }
           }
 
           if (!currNodeAllText) return;
-          currNodeAllText = currNodeAllText.trim();
           if (currNodeAllText.length <= 1) return;
           if (!isNaN(Number(currNodeAllText))) return;
           const isExist = foundTexts.findIndex((t) => t === currNodeAllText);
@@ -506,10 +508,9 @@ export class MapsService {
       const foundWords: string[] = [];
       const foundPhrases: string[] = [];
       foundTexts.forEach((text) => {
-        const words = text.split(' ').map((w) => w.trim());
+        const words = text.split(' ');
         if (words.length === 0) return;
         if (words.length > 1) {
-          // join trimmed words using single space, thus remove multiple spaces
           foundPhrases.push(words.join(' '));
         } else if (words[0].length > 1 && isNaN(Number(words[0]))) {
           // push only words longer than 1 symbol and only not numbers
@@ -954,8 +955,8 @@ export class MapsService {
             geo_code: tag2langInfo(languageFullTag).region?.tag || null,
           }),
           SVG_MIME_TYPE,
-          translatedMap.length,
           token,
+          translatedMap.length,
         );
         if (!translatedContentFile?.file?.id) {
           Logger.error(
@@ -1272,5 +1273,13 @@ export class MapsService {
     } finally {
       temp.cleanup();
     }
+  }
+
+  cleanFromUnmeaningfulChars(inStr: string): string {
+    return inStr
+      .split(' ')
+      .map((w) => w.trim())
+      .filter((w) => w.length > 0)
+      .join(' ');
   }
 }

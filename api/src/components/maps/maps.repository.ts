@@ -24,8 +24,6 @@ import {
 import { putLangCodesToFileName } from '../../common/utility';
 import { GroupedFilterSymbols } from '../../../../utils/dist';
 import { UserService } from '../user/user.service';
-import { create } from 'domain';
-import { User } from '../user/types';
 
 interface ISaveMapParams {
   mapFileName: string;
@@ -701,14 +699,14 @@ export class MapsRepository {
       	wordlike_strings tws on tw.wordlike_string_id = tws.wordlike_string_id      
       left join v_word_to_word_translations_upvotes_count up on wtwt.word_to_word_translation_id = up.word_to_word_translation_id
       left join v_word_to_word_translations_downvotes_count down on wtwt.word_to_word_translation_id = down.word_to_word_translation_id
-      join users tu
-      	on tu.user_id = tw.created_by
-      join avatars ta
-      	on tu.user_id = ta.user_id
       join users ou
         on ou.user_id = w.created_by
       join avatars oa
         on ou.user_id = oa.user_id
+      left join users tu
+      	on tu.user_id = tw.created_by
+      left join avatars ta
+      	on tu.user_id = ta.user_id
       where true
     `;
 
@@ -764,9 +762,9 @@ export class MapsRepository {
       	on ou.user_id = w.created_by
       join avatars oa
       	on ou.user_id = oa.user_id
-	    join users tu
+	    left join users tu
 	  	  on tu.user_id = tph.created_by
-	    join avatars ta
+	    left join avatars ta
 	      on tu.user_id = ta.user_id
       where true
     `;
@@ -976,9 +974,9 @@ export class MapsRepository {
       	on ou.user_id = oph.created_by
       join avatars oa
       	on ou.user_id = oa.user_id
-	    join users tu
+	    left join users tu
       	on tu.user_id = tph.created_by
-      join avatars ta
+      left join avatars ta
       	on tu.user_id = ta.user_id
       where true
 
@@ -1036,9 +1034,9 @@ export class MapsRepository {
       	on ou.user_id = oph.created_by
       join avatars oa
       	on ou.user_id = oa.user_id
-	    join users tu
+	    left join users tu
       	on tu.user_id = tw.created_by
-      join avatars ta
+      left join avatars ta
       	on tu.user_id = ta.user_id
       where true 
     `;

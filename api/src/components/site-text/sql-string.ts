@@ -1,4 +1,6 @@
 import { ErrorType } from 'src/common/types';
+import { SiteTextDefinitionListFilterInput } from './types';
+import { GroupedFilterSymbols } from '../../../../utils/dist';
 
 export type GetSiteTextWordDefinitionObjectById = {
   site_text_id: string;
@@ -84,68 +86,172 @@ export type GetAllSiteTextWordDefinition = {
   site_text_id: string;
 };
 
-export function getAllSiteTextWordDefinition(
-  filter?: string,
-): [string, [string] | []] {
-  if (filter) {
-    return [
-      `
-        select distinct
-          site_text_id
-        from site_text_word_definitions as stwds
-        join word_definitions as wds
-        on stwds.word_definition_id = wds.word_definition_id
-        join words as ws
-        on ws.word_id = wds.word_id
-        join wordlike_strings as wlss
-        on wlss.wordlike_string_id = ws.wordlike_string_id
-        where wlss.wordlike_string like $1;
-      `,
-      [`%${filter.trim()}%`],
-    ];
-  } else {
-    return [
-      `
-        select distinct
-          site_text_id
-        from site_text_word_definitions;
-      `,
-      [],
-    ];
+export function getAllSiteTextWordDefinition({
+  filter,
+  after,
+  first,
+}: {
+  filter?: SiteTextDefinitionListFilterInput;
+  first: number | null;
+  after: string | null;
+}): [string, unknown[]] {
+  const returnArr: unknown[] = [];
+  let filterStr = '';
+  let quickFilterStr = '';
+  let limitStr = '';
+  let cursorStr = '';
+
+  if (filter?.filter) {
+    returnArr.push(`%${filter.filter.trim().toLowerCase()}%`);
+    filterStr = `lower(wlss.wordlike_string) like $${returnArr.length}`;
   }
+
+  if (after) {
+    returnArr.push(after);
+    cursorStr = `lower(wlss.wordlike_string) > $${returnArr.length}`;
+  }
+
+  if (filter?.quickFilter && filter.quickFilter.length > 0) {
+    switch (filter.quickFilter) {
+      case GroupedFilterSymbols.Digits:
+        quickFilterStr = `substring(wlss.wordlike_string from 1 for 1) SIMILAR TO '(0|1|2|3|4|5|6|7|8|9)'`;
+        break;
+
+      case GroupedFilterSymbols.SpecialCharacters:
+        quickFilterStr = ` substring(wlss.wordlike_string from 1 for 1) SIMILAR TO '(\`|\\!|\\@|\\%|\\^|\\&|\\*|\\(|\\)|\\-|\\+)'`;
+        break;
+
+      default:
+        returnArr.push(filter.quickFilter);
+        quickFilterStr = `lower(wlss.wordlike_string) like concat(lower($${returnArr.length}),'%')`;
+        break;
+    }
+  }
+
+  if (first) {
+    returnArr.push(first);
+    limitStr = `limit $${returnArr.length}`;
+  }
+
+  return [
+    `
+      select distinct
+        site_text_id,
+        lower(wlss.wordlike_string)
+      from site_text_word_definitions as stwds
+      join word_definitions as wds
+      on stwds.word_definition_id = wds.word_definition_id
+      join words as ws
+      on ws.word_id = wds.word_id
+      join wordlike_strings as wlss
+      on wlss.wordlike_string_id = ws.wordlike_string_id
+      ${
+        filterStr.trim() === '' &&
+        cursorStr.trim() === '' &&
+        quickFilterStr.trim() === ''
+          ? ''
+          : 'where'
+      }
+        ${filterStr}
+        ${
+          filterStr.trim() !== '' && cursorStr.trim() !== '' ? 'and ' : ''
+        } ${cursorStr}
+        ${
+          (filterStr.trim() !== '' || cursorStr.trim() !== '') &&
+          quickFilterStr.trim() !== ''
+            ? 'and'
+            : ''
+        } ${quickFilterStr}
+      order by lower(wlss.wordlike_string)
+      ${limitStr};
+      `,
+    [...returnArr],
+  ];
 }
 
 export type GetAllSiteTextPhraseDefinition = {
   site_text_id: string;
 };
 
-export function getAllSiteTextPhraseDefinition(
-  filter?: string,
-): [string, [string] | []] {
-  if (filter) {
-    return [
-      `
-        select distinct
-          site_text_id
-        from site_text_phrase_definitions as stpds
-        join phrase_definitions as pds
-        on pds.phrase_definition_id = stpds.phrase_definition_id
-        join phrases as ps
-        on ps.phrase_id = pds.phrase_id
-        where ps.phraselike_string like $1;
-      `,
-      [`%${filter.trim()}%`],
-    ];
-  } else {
-    return [
-      `
-        select distinct
-          site_text_id
-        from site_text_phrase_definitions;      
-      `,
-      [],
-    ];
+export function getAllSiteTextPhraseDefinition({
+  filter,
+  first,
+  after,
+}: {
+  filter?: SiteTextDefinitionListFilterInput;
+  first: number | null;
+  after: string | null;
+}): [string, unknown[]] {
+  const returnArr: unknown[] = [];
+  let filterStr = '';
+  let quickFilterStr = '';
+  let limitStr = '';
+  let cursorStr = '';
+
+  if (filter?.filter) {
+    returnArr.push(`%${filter.filter.trim().toLowerCase()}%`);
+    filterStr = `lower(ps.phraselike_string) like $${returnArr.length}`;
   }
+
+  if (after) {
+    returnArr.push(after);
+    cursorStr = `lower(ps.phraselike_string) > $${returnArr.length}`;
+  }
+
+  if (filter?.quickFilter && filter.quickFilter.length > 0) {
+    switch (filter.quickFilter) {
+      case GroupedFilterSymbols.Digits:
+        quickFilterStr = `substring(ps.phraselike_string from 1 for 1) SIMILAR TO '(0|1|2|3|4|5|6|7|8|9)'`;
+        break;
+
+      case GroupedFilterSymbols.SpecialCharacters:
+        quickFilterStr = `substring(ps.phraselike_string from 1 for 1) SIMILAR TO '(\`|\\!|\\@|\\%|\\^|\\&|\\*|\\(|\\)|\\-|\\+)'`;
+        break;
+
+      default:
+        returnArr.push(filter.quickFilter);
+        quickFilterStr = `lower(ps.phraselike_string) like concat(lower($${returnArr.length}),'%')`;
+        break;
+    }
+  }
+
+  if (first) {
+    returnArr.push(first);
+    limitStr = `limit $${returnArr.length}`;
+  }
+
+  return [
+    `
+      select distinct
+        site_text_id,
+        lower(ps.phraselike_string)
+      from site_text_phrase_definitions as stpds
+      join phrase_definitions as pds
+      on pds.phrase_definition_id = stpds.phrase_definition_id
+      join phrases as ps
+      on ps.phrase_id = pds.phrase_id
+      ${
+        filterStr.trim() === '' &&
+        cursorStr.trim() === '' &&
+        quickFilterStr.trim() === ''
+          ? ''
+          : 'where'
+      }
+        ${filterStr}
+        ${
+          filterStr.trim() !== '' && cursorStr.trim() !== '' ? 'and ' : ''
+        } ${cursorStr}
+        ${
+          (filterStr.trim() !== '' || cursorStr.trim() !== '') &&
+          quickFilterStr.trim() !== ''
+            ? 'and'
+            : ''
+        } ${quickFilterStr}
+      order by lower(ps.phraselike_string)
+      ${limitStr};
+      `,
+    [...returnArr],
+  ];
 }
 
 export type GetDefinitionIdBySiteTextId = {
@@ -391,5 +497,80 @@ export function getSiteTextTranslationCount(): [string, []] {
       order by language_code, dialect_code, geo_code;
     `,
     [],
+  ];
+}
+
+export function getSiteTextTranslationCountByIds({
+  refs,
+  language_code,
+  dialect_code,
+  geo_code,
+}: {
+  refs: {
+    site_text_id: number;
+    is_word_definition: boolean;
+  }[];
+  language_code: string;
+  dialect_code: string | null;
+  geo_code: string | null;
+}): [
+  string,
+  (
+    | [number[], boolean[], string, string, string]
+    | [number[], boolean[], string, string]
+    | [number[], boolean[], string]
+  ),
+] {
+  let wherePlsStr = '';
+  let returnArr:
+    | [number[], boolean[], string, string, string]
+    | [number[], boolean[], string, string]
+    | [number[], boolean[], string] = [
+    refs.map((item) => item.site_text_id),
+    refs.map((item) => item.is_word_definition),
+    language_code,
+  ];
+
+  if (dialect_code && geo_code) {
+    wherePlsStr = `
+      and dialect_code = $3
+      and geo_code = $4
+    `;
+    returnArr = [...returnArr, dialect_code, geo_code];
+  } else if (dialect_code && !geo_code) {
+    wherePlsStr = `
+      and dialect_code = $3
+    `;
+    returnArr = [...returnArr, dialect_code];
+  } else if (!dialect_code && geo_code) {
+    wherePlsStr = `
+      and geo_code = $3
+    `;
+    returnArr = [...returnArr, geo_code];
+  } else if (!dialect_code && !geo_code) {
+    wherePlsStr = ``;
+    returnArr = [...returnArr];
+  }
+  return [
+    `
+      with pairs (site_text_id, is_word_definition) as (
+        select unnest($1::int[]), unnest($2::bool[])
+      )
+      select 
+        site_text_translation_count_id,
+        site_text_id,
+        is_word_definition,
+        language_code,
+        dialect_code,
+        geo_code,
+        count
+      from site_text_translation_counts
+      where (site_text_id, is_word_definition) in (
+        select site_text_id, is_word_definition
+        from pairs
+      ) and language_code = $3
+        ${wherePlsStr}
+    `,
+    [...returnArr],
   ];
 }

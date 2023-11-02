@@ -11,8 +11,10 @@ import { PhraseDefinitionsService } from 'src/components/definitions/phrase-defi
 import {
   SiteTextPhraseDefinitionOutput,
   SiteTextPhraseDefinitionsOutput,
-  SiteTextPhraseDefinitionListOutput,
+  SiteTextPhraseDefinitionListConnection,
   SiteTextPhraseDefinition,
+  SiteTextPhraseDefinitionEdge,
+  SiteTextDefinitionListFilterInput,
 } from './types';
 import { PhraseDefinition } from 'src/components/definitions/types';
 
@@ -25,6 +27,8 @@ import {
   getAllSiteTextPhraseDefinition,
   GetDefinitionIdFromPhraseId,
   getDefinitionIdFromPhraseId,
+  SiteTextTranslationCountRow,
+  getSiteTextTranslationCountByIds,
 } from './sql-string';
 
 @Injectable()
@@ -228,38 +232,147 @@ export class SiteTextPhraseDefinitionsService {
 
   async getAllSiteTextPhraseDefinitions({
     filter,
+    first,
+    after,
     pgClient,
   }: {
-    filter?: string;
+    filter?: SiteTextDefinitionListFilterInput;
+    first: number | null;
+    after: string | null;
     pgClient: PoolClient | null;
-  }): Promise<SiteTextPhraseDefinitionListOutput> {
+  }): Promise<SiteTextPhraseDefinitionListConnection> {
     try {
-      const res = await pgClientOrPool({
-        client: pgClient,
-        pool: this.pg.pool,
-      }).query<GetAllSiteTextPhraseDefinition>(
-        ...getAllSiteTextPhraseDefinition(filter),
-      );
+      let afterCursor = after;
+      let hasNextPage = true;
+      const tempEdges: SiteTextPhraseDefinitionEdge[] = [];
 
-      const siteTextIds = res.rows.map((row) => +row.site_text_id);
+      while (true) {
+        const res = await pgClientOrPool({
+          client: pgClient,
+          pool: this.pg.pool,
+        }).query<GetAllSiteTextPhraseDefinition>(
+          ...getAllSiteTextPhraseDefinition({
+            filter,
+            first: first ? first * 2 : null,
+            after: afterCursor,
+          }),
+        );
 
-      const { error, site_text_phrase_definitions } = await this.reads(
-        siteTextIds,
-        pgClient,
-      );
+        if (res.rowCount === 0) {
+          hasNextPage = false;
+          break;
+        }
 
-      if (error !== ErrorType.NoError) {
-        return {
-          error,
-          site_text_phrase_definition_list: [],
-        };
+        const siteTextIds = res.rows.map((row) => +row.site_text_id);
+
+        const { error, site_text_phrase_definitions } = await this.reads(
+          siteTextIds,
+          pgClient,
+        );
+
+        if (error !== ErrorType.NoError) {
+          return {
+            error,
+            edges: [],
+            pageInfo: {
+              hasNextPage: false,
+              hasPreviousPage: false,
+              startCursor: null,
+              endCursor: null,
+            },
+          };
+        }
+
+        if (
+          !filter ||
+          !filter.targetLanguage ||
+          (!filter.onlyNotTranslated && !filter.onlyTranslated)
+        ) {
+          tempEdges.push(
+            ...site_text_phrase_definitions
+              .filter(
+                (definition): definition is SiteTextPhraseDefinition =>
+                  definition !== null,
+              )
+              .map((definition) => {
+                return {
+                  cursor: definition.phrase_definition.phrase.phrase,
+                  node: definition,
+                };
+              }),
+          );
+        } else {
+          const res1 = await pgClientOrPool({
+            client: pgClient,
+            pool: this.pg.pool,
+          }).query<SiteTextTranslationCountRow>(
+            ...getSiteTextTranslationCountByIds({
+              refs: siteTextIds.map((siteTextId) => ({
+                site_text_id: siteTextId,
+                is_word_definition: false,
+              })),
+              language_code: filter.targetLanguage.language_code,
+              dialect_code: filter.targetLanguage.dialect_code,
+              geo_code: filter.targetLanguage.geo_code,
+            }),
+          );
+
+          const trCountMap = new Map<number, number>();
+
+          for (const row of res1.rows) {
+            trCountMap.set(+row.site_text_id, +row.count);
+          }
+
+          for (const definition of site_text_phrase_definitions) {
+            if (!definition) {
+              continue;
+            }
+
+            const count = trCountMap.get(+definition.site_text_id) || 0;
+
+            if (filter.onlyNotTranslated && count === 0) {
+              tempEdges.push({
+                cursor: definition.phrase_definition.phrase.phrase,
+                node: definition,
+              });
+              continue;
+            }
+
+            if (filter.onlyTranslated && count > 0) {
+              tempEdges.push({
+                cursor: definition.phrase_definition.phrase.phrase,
+                node: definition,
+              });
+              continue;
+            }
+          }
+        }
+
+        if (
+          first === null ||
+          (tempEdges.length < first && res.rowCount === first * 2)
+        ) {
+          afterCursor = tempEdges[tempEdges.length - 1].cursor;
+        } else {
+          break;
+        }
       }
+
+      const edges: SiteTextPhraseDefinitionEdge[] =
+        first && tempEdges.length > first
+          ? tempEdges.slice(0, first - 1)
+          : tempEdges;
 
       return {
         error: ErrorType.NoError,
-        site_text_phrase_definition_list: site_text_phrase_definitions.filter(
-          (definition) => definition,
-        ) as SiteTextPhraseDefinition[],
+        edges: edges,
+        pageInfo: {
+          hasNextPage: hasNextPage,
+          hasPreviousPage: false,
+          startCursor: edges.length > 0 ? edges[0].cursor : null,
+          endCursor:
+            edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
+        },
       };
     } catch (e) {
       console.error(e);
@@ -267,7 +380,13 @@ export class SiteTextPhraseDefinitionsService {
 
     return {
       error: ErrorType.UnknownError,
-      site_text_phrase_definition_list: [],
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+      },
     };
   }
 }

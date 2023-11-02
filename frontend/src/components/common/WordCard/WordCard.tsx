@@ -45,11 +45,7 @@ export function WordCard({
   flags,
   author,
 }: WordCardProps) {
-  const voteButtonCom = vote ? (
-    <VoteButtonsHorizontal {...vote} />
-  ) : (
-    <div></div>
-  );
+  const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
   const discussionBtnCom = discussion ? (
     <DiscussionIconButton {...discussion} />
   ) : null;
@@ -95,6 +91,7 @@ export function WordCard({
         </Stack>
 
         <Stack
+          gap="16px"
           direction="row"
           justifyContent="space-between"
           alignItems="center"

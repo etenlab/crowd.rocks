@@ -5,6 +5,7 @@ import { LanguageInput } from 'src/components/common/types';
 export const LIMITS = 6000000 - 1000000;
 
 export const GOOGLE_BOT_EMAIL = 'googlebot@crowd.rocks';
+export const FAKER_BOT_EMAIL = 'faker@crowd.rocks';
 
 export enum ChatGPTVersion {
   Three = 'gpt-3.5-turbo',

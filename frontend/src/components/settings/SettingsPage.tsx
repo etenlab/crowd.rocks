@@ -134,7 +134,7 @@ export function SettingsPage() {
   return (
     <PageLayout>
       <Caption
-        handleBackClick={() => {
+        onBackClick={() => {
           history.push(`/${nation_id}/${language_id}/1/home`);
         }}
       >

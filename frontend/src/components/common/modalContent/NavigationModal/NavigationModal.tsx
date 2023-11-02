@@ -1,19 +1,19 @@
 import { Stack, Typography, Divider, Button, IconButton } from '@mui/material';
 
-import { useTr } from '../../../hooks/useTr';
+import { useTr } from '../../../../hooks/useTr';
 
-import { Cancel } from '../../common/icons/Cancel';
-import { GroupedFilterSymbols } from '../../../../../utils';
+import { Cancel } from '../../icons/Cancel';
+import { GroupedFilterSymbols } from '../../../../../../utils';
 
-type MapNavigationModalProps = {
+type NavigationModalProps = {
   onClose(): void;
   setQuickFilter: (quickFilterValue: string | null) => void;
 };
 
-export function MapNavigationModal({
+export function NavigationModal({
   onClose,
   setQuickFilter,
-}: MapNavigationModalProps) {
+}: NavigationModalProps) {
   const { tr } = useTr();
 
   const handleCancel = () => {

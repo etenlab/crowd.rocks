@@ -99,7 +99,7 @@ export function Select({
         <Divider
           orientation="vertical"
           variant="middle"
-          sx={{ height: '24px', marginTop: 0, marginBottom: 0 }}
+          sx={{ height: '16px', marginTop: 0, marginBottom: 0 }}
         />
         <IconButton
           sx={{ padding: 0 }}
@@ -115,9 +115,9 @@ export function Select({
           disabled={disabled}
         >
           {value === null ? (
-            <NavArrowDown sx={{ fontSize: 24 }} color="dark" />
+            <NavArrowDown sx={{ fontSize: 22 }} color="dark" />
           ) : (
-            <Cancel sx={{ fontSize: 24 }} color="red" />
+            <Cancel sx={{ fontSize: 22 }} color="red" />
           )}
         </IconButton>
       </StyledPaper>
