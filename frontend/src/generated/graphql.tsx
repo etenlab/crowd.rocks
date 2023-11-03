@@ -200,6 +200,7 @@ export enum ErrorType {
   PhraseVoteNotFound = 'PhraseVoteNotFound',
   PositionInvalid = 'PositionInvalid',
   PostCreateFailed = 'PostCreateFailed',
+  PostDeleteFailed = 'PostDeleteFailed',
   PostNotFound = 'PostNotFound',
   PrefixInvalid = 'PrefixInvalid',
   PrefixTooLong = 'PrefixTooLong',
@@ -292,7 +293,7 @@ export type ForumFolder = {
 export type ForumFolderDeleteOutput = {
   __typename?: 'ForumFolderDeleteOutput';
   error: ErrorType;
-  folder_id: Scalars['ID']['output'];
+  forum_folder_id: Scalars['ID']['output'];
 };
 
 export type ForumFolderEdge = {
@@ -3169,7 +3170,7 @@ export type DeleteForumFolderMutationVariables = Exact<{
 }>;
 
 
-export type DeleteForumFolderMutation = { __typename?: 'Mutation', forumFolderDelete: { __typename?: 'ForumFolderDeleteOutput', error: ErrorType, folder_id: string } };
+export type DeleteForumFolderMutation = { __typename?: 'Mutation', forumFolderDelete: { __typename?: 'ForumFolderDeleteOutput', error: ErrorType, forum_folder_id: string } };
 
 export type GetForumByIdQueryVariables = Exact<{
   forum_id: Scalars['ID']['input'];
@@ -6134,7 +6135,7 @@ export const DeleteForumFolderDocument = gql`
     mutation DeleteForumFolder($forum_folder_id: ID!) {
   forumFolderDelete(forum_folder_id: $forum_folder_id) {
     error
-    folder_id
+    forum_folder_id
   }
 }
     `;

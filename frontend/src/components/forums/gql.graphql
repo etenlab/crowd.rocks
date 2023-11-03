@@ -177,7 +177,7 @@ mutation UpdateForumFolder(
 mutation DeleteForumFolder($forum_folder_id: ID!) {
   forumFolderDelete(forum_folder_id: $forum_folder_id) {
     error
-    folder_id
+    forum_folder_id
   }
 }
 
