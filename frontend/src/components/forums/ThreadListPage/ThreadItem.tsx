@@ -5,6 +5,7 @@ import { Edit } from '../../common/icons/Edit';
 import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 
 import { useTr } from '../../../hooks/useTr';
+import { useDeleteThreadMutation } from '../../../hooks/useDeleteThreadMutation';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 import { ThreadModal } from '../modals/ThreadModal';
@@ -34,6 +35,8 @@ export function ThreadItem({
 
   const { openModal, closeModal } = createModal();
 
+  const [deleteThread] = useDeleteThreadMutation(forum_folder_id);
+
   const handleEdit = () => {
     openModal(
       <ThreadModal
@@ -42,6 +45,14 @@ export function ThreadItem({
         onClose={closeModal}
       />,
     );
+  };
+
+  const handleDelete = () => {
+    deleteThread({
+      variables: {
+        thread_id: id,
+      },
+    });
   };
 
   const dropDownList =
@@ -70,7 +81,7 @@ export function ThreadItem({
                   <DeleteCircle sx={{ fontSize: '22px' }} color="red" />
                 }
                 color="red"
-                onClick={() => {}}
+                onClick={handleDelete}
                 sx={{ padding: 0, justifyContent: 'flex-start' }}
               >
                 {tr('Delete')}

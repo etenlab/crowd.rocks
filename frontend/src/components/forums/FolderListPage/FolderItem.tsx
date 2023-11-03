@@ -8,6 +8,7 @@ import { Folder } from '../../common/icons/Folder';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { useDeleteForumFolderMutation } from '../../../hooks/useDeleteForumFolderMutation';
 
 import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 import { FolderModal } from '../modals/FolderModal';
@@ -47,6 +48,8 @@ export function FolderItem({
 
   const { openModal, closeModal } = createModal();
 
+  const [deleteForumFolder] = useDeleteForumFolderMutation(forum_id);
+
   const handleGoToFolderDetail = useCallback(() => {
     history.push(
       `/${nation_id}/${language_id}/${cluster_id}/folders/${id}/${name}`,
@@ -61,6 +64,14 @@ export function FolderItem({
         onClose={closeModal}
       />,
     );
+  };
+
+  const handleDelete = () => {
+    deleteForumFolder({
+      variables: {
+        forum_folder_id: id,
+      },
+    });
   };
 
   const dropDownList =
@@ -89,7 +100,7 @@ export function FolderItem({
                   <DeleteCircle sx={{ fontSize: '22px' }} color="red" />
                 }
                 color="red"
-                onClick={() => {}}
+                onClick={handleDelete}
                 sx={{ padding: 0, justifyContent: 'flex-start' }}
               >
                 {tr('Delete')}

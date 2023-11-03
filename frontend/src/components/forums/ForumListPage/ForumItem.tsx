@@ -7,6 +7,7 @@ import { Edit } from '../../common/icons/Edit';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { useDeleteForumMutation } from '../../../hooks/useDeleteForumMutation';
 
 import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 import { ForumModal } from '../modals/ForumModal';
@@ -46,6 +47,8 @@ export function ForumItem({
 
   const { openModal, closeModal } = createModal();
 
+  const [deleteForum] = useDeleteForumMutation();
+
   const handleGoToForumDetail = useCallback(() => {
     history.push(
       `/${nation_id}/${language_id}/${cluster_id}/forums/${id}/${name}`,
@@ -56,6 +59,14 @@ export function ForumItem({
     openModal(
       <ForumModal forumData={{ id, name, description }} onClose={closeModal} />,
     );
+  };
+
+  const handleDelete = () => {
+    deleteForum({
+      variables: {
+        forum_id: id,
+      },
+    });
   };
 
   const dropDownList =
@@ -84,7 +95,7 @@ export function ForumItem({
                   <DeleteCircle sx={{ fontSize: '22px' }} color="red" />
                 }
                 color="red"
-                onClick={() => {}}
+                onClick={handleDelete}
                 sx={{ padding: 0, justifyContent: 'flex-start' }}
               >
                 {tr('Delete')}
