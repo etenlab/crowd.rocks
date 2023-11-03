@@ -866,9 +866,9 @@ export class MapsService {
           toLang,
         )}`,
       );
-
       const mapTrWordsAndPhrases =
         await this.mapsRepository.getOrigMapTrWordsPhrases(origMapId, toLang);
+      const p1 = performance.now();
 
       const translations: Array<{
         source: string;
@@ -877,13 +877,17 @@ export class MapsService {
         this.prepareTranslationsArrayFromMapTrWordsPhrases(
           mapTrWordsAndPhrases,
         );
+      const p2 = performance.now();
 
-      const p1 = performance.now();
       const { translatedMap } = await this.translateMapString(
         origMapString,
         translations,
       )!;
-      Logger.debug(`translation is done in ${performance.now() - p1} ms`);
+      const p3 = performance.now();
+      Logger.log(`get originals with translations from DB: ${p1 - p0} ms`);
+      Logger.log(`translation without saving: ${p3 - p0} ms`);
+      Logger.log(`translation without saving: ${p3 - p0} ms`);
+      Logger.log(`translation without saving: ${p3 - p0} ms`);
 
       const stream = Readable.from([translatedMap]);
       const translatedContentFile = await this.fileService.uploadFile(
@@ -936,9 +940,16 @@ export class MapsService {
     }>,
   ): MapTranslationResult | undefined {
     try {
+      const p0 = performance.now();
       const { transformedSvgINode } = this.parseSvgMapString(sourceSvgString);
+      const p1 = performance.now();
       this.replaceINodeTagValues(transformedSvgINode, translations);
+      const p2 = performance.now();
       const translatedMap = stringify(transformedSvgINode);
+      const p3 = performance.now();
+      Logger.log(`parsing: ${p1 - p0}`);
+      Logger.log(`replace originals with translations: ${p2 - p1}`);
+      Logger.log(`stringification: ${p3 - p2}`);
       return { translatedMap, translations };
     } catch (e) {
       return undefined;
