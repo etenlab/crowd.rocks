@@ -39,3 +39,5 @@ UNION ALL
      JOIN phrase_definitions ophd ON oph.phrase_id = ophd.phrase_id
      JOIN original_map_phrases omph ON oph.phrase_id = omph.phrase_id
      JOIN words ow ON ow.word_id = oph.words[1];
+
+
