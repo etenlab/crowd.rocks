@@ -1,6 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useParams } from 'react-router';
-import { Stack, Typography, Button } from '@mui/material';
+import {
+  Stack,
+  Typography,
+  Button,
+  Box,
+  CircularProgress,
+} from '@mui/material';
+import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 import { useDebounce } from 'use-debounce';
 
 import { PageLayout } from '../../common/PageLayout';
@@ -8,7 +16,7 @@ import { Caption } from '../../common/Caption/Caption';
 import { AddCircle } from '../../common/icons/AddCircle';
 import { SearchInput } from '../../common/forms/SearchInput';
 
-import { useGetForumFoldersLazyQuery } from '../../../generated/graphql';
+import { useGetForumFoldersListLazyQuery } from '../../../generated/graphql';
 
 import { ErrorType } from '../../../generated/graphql';
 
@@ -17,6 +25,8 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 import { FolderModal } from '../modals/FolderModal';
 import { FolderItem } from './FolderItem';
+
+import { PAGE_SIZE } from '../../../const/commonConst';
 
 export function FolderListPage() {
   const { tr } = useTr();
@@ -33,43 +43,78 @@ export function FolderListPage() {
   const [bouncedFilter] = useDebounce(filter, 500);
 
   const {
-    actions: { createModal },
+    actions: { createModal, addPaginationVariableForGetForumFoldersList },
   } = useAppContext();
 
   const { openModal, closeModal } = createModal();
 
-  const [getFolders, { data: foldersData, error }] =
-    useGetForumFoldersLazyQuery();
+  const [
+    getForumFoldersList,
+    { data: foldersData, error, loading, fetchMore },
+  ] = useGetForumFoldersListLazyQuery();
 
   useEffect(() => {
-    getFolders({
+    getForumFoldersList({
       variables: {
         forum_id: forum_id,
+        filter: bouncedFilter,
+        first: PAGE_SIZE,
+        after: null,
       },
     });
-  }, [getFolders, forum_id]);
+    addPaginationVariableForGetForumFoldersList({
+      filter,
+      forum_id,
+    });
+  }, [
+    getForumFoldersList,
+    forum_id,
+    bouncedFilter,
+    addPaginationVariableForGetForumFoldersList,
+    filter,
+  ]);
 
   const cardListComs = useMemo(() => {
     if (error) {
       return null;
     }
 
-    if (!foldersData || foldersData.forumFolders.error !== ErrorType.NoError) {
+    if (
+      !foldersData ||
+      foldersData.getForumFoldersList.error !== ErrorType.NoError
+    ) {
       return null;
     }
 
-    return foldersData.forumFolders.folders.map((folder) => (
+    return foldersData.getForumFoldersList.edges.map((edge) => (
       <FolderItem
-        key={folder.folder_id}
+        key={edge.node.forum_folder_id}
         forum_id={forum_id}
-        id={folder.folder_id}
-        name={folder.name}
-        description="Lorem ipsum is placeholder text used in the graphic, print, and publishing."
+        id={edge.node.forum_folder_id}
+        name={edge.node.name}
+        description={edge.node.description || ''}
         totalThreads={47}
         totalPosts={500}
       />
     ));
   }, [error, foldersData, forum_id]);
+
+  const handleInfinite = useCallback(
+    async (ev: IonInfiniteScrollCustomEvent<void>) => {
+      if (foldersData?.getForumFoldersList.pageInfo.hasNextPage) {
+        await fetchMore({
+          variables: {
+            first: PAGE_SIZE,
+            after: foldersData.getForumFoldersList.pageInfo.endCursor,
+            filter: bouncedFilter.trim(),
+          },
+        });
+      }
+
+      setTimeout(() => ev.target.complete(), 500);
+    },
+    [fetchMore, bouncedFilter, foldersData],
+  );
 
   const handleOpenModal = () => {
     openModal(<FolderModal forum_id={forum_id} onClose={closeModal} />);
@@ -86,7 +131,9 @@ export function FolderListPage() {
           alignItems="center"
         >
           <Typography variant="h3" color="dark">
-            {`${3} ${tr('Folders')}`}
+            {`${foldersData?.getForumFoldersList.pageInfo.totalEdges || 0} ${tr(
+              'Topics',
+            )}`}
           </Typography>
 
           <Button
@@ -106,7 +153,18 @@ export function FolderListPage() {
         />
       </Stack>
 
-      <Stack gap="16px">{cardListComs}</Stack>
+      <Stack gap="16px">
+        <Box style={{ textAlign: 'center' }}>
+          {loading && <CircularProgress />}
+        </Box>
+        {cardListComs}
+        <IonInfiniteScroll onIonInfinite={handleInfinite}>
+          <IonInfiniteScrollContent
+            loadingText={`${tr('Loading')}...`}
+            loadingSpinner="bubbles"
+          />
+        </IonInfiniteScroll>
+      </Stack>
     </PageLayout>
   );
 }

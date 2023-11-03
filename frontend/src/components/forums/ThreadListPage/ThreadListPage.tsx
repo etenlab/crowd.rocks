@@ -1,6 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useParams } from 'react-router';
-import { Stack, Typography, Button } from '@mui/material';
+import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
+import {
+  Stack,
+  Typography,
+  Button,
+  Box,
+  CircularProgress,
+} from '@mui/material';
 import { useDebounce } from 'use-debounce';
 
 import { PageLayout } from '../../common/PageLayout';
@@ -8,7 +16,10 @@ import { Caption } from '../../common/Caption/Caption';
 import { AddCircle } from '../../common/icons/AddCircle';
 import { SearchInput } from '../../common/forms/SearchInput';
 
-import { ErrorType, useGetThreadsLazyQuery } from '../../../generated/graphql';
+import {
+  ErrorType,
+  useGetThreadsListLazyQuery,
+} from '../../../generated/graphql';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -16,13 +27,15 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { ThreadModal } from '../modals/ThreadModal';
 import { ThreadItem } from './ThreadItem';
 
+import { PAGE_SIZE } from '../../../const/commonConst';
+
 export function ThreadListPage() {
   const { tr } = useTr();
-  const { folder_id, folder_name } = useParams<{
+  const { forum_folder_id, folder_name } = useParams<{
     nation_id: string;
     language_id: string;
     cluster_id: string;
-    folder_id: string;
+    forum_folder_id: string;
     folder_name: string;
   }>();
 
@@ -31,37 +44,76 @@ export function ThreadListPage() {
   const [bouncedFilter] = useDebounce(filter, 500);
 
   const {
-    actions: { createModal },
+    actions: { createModal, addPaginationVariableForGetTheadsList },
   } = useAppContext();
 
   const { openModal, closeModal } = createModal();
 
-  const [getThreads, { data: threadsData, error }] = useGetThreadsLazyQuery();
+  const [getThreadsList, { data: threadsData, error, loading, fetchMore }] =
+    useGetThreadsListLazyQuery();
 
   useEffect(() => {
-    getThreads({ variables: { folder_id } });
-  }, [getThreads, folder_id]);
+    getThreadsList({
+      variables: {
+        filter: bouncedFilter,
+        forum_folder_id: forum_folder_id,
+        first: PAGE_SIZE,
+        after: null,
+      },
+    });
+    addPaginationVariableForGetTheadsList({
+      filter: bouncedFilter,
+      forum_folder_id,
+    });
+  }, [
+    getThreadsList,
+    forum_folder_id,
+    bouncedFilter,
+    addPaginationVariableForGetTheadsList,
+  ]);
+
+  const handleInfinite = useCallback(
+    async (ev: IonInfiniteScrollCustomEvent<void>) => {
+      if (threadsData?.getThreadsList.pageInfo.hasNextPage) {
+        await fetchMore({
+          variables: {
+            first: PAGE_SIZE,
+            after: threadsData.getThreadsList.pageInfo.endCursor,
+            filter: bouncedFilter.trim(),
+          },
+        });
+      }
+
+      setTimeout(() => ev.target.complete(), 500);
+    },
+    [fetchMore, bouncedFilter, threadsData],
+  );
 
   const cardListComs = useMemo(() => {
     if (error) {
       return null;
     }
 
-    if (!threadsData || threadsData.threads.error !== ErrorType.NoError) {
+    if (
+      !threadsData ||
+      threadsData.getThreadsList.error !== ErrorType.NoError
+    ) {
       return null;
     }
-    return threadsData.threads.threads.map((thread) => (
+    return threadsData.getThreadsList.edges.map((edge) => (
       <ThreadItem
-        key={thread.thread_id}
-        folder_id={folder_id}
-        id={thread.thread_id}
-        name={thread.name}
+        key={edge.node.thread_id}
+        forum_folder_id={edge.node.forum_folder_id}
+        id={edge.node.thread_id}
+        name={edge.node.name}
       />
     ));
-  }, [error, threadsData, folder_id]);
+  }, [error, threadsData]);
 
   const handleOpenModal = () => {
-    openModal(<ThreadModal folder_id={folder_id} onClose={closeModal} />);
+    openModal(
+      <ThreadModal forum_folder_id={forum_folder_id} onClose={closeModal} />,
+    );
   };
 
   return (
@@ -75,7 +127,9 @@ export function ThreadListPage() {
           alignItems="center"
         >
           <Typography variant="h3" color="dark">
-            {`${3} ${tr('Threads')}`}
+            {`${threadsData?.getThreadsList.pageInfo.totalEdges || 0} ${tr(
+              'Threads',
+            )}`}
           </Typography>
 
           <Button
@@ -95,7 +149,20 @@ export function ThreadListPage() {
         />
       </Stack>
 
-      <Stack gap="16px">{cardListComs}</Stack>
+      <Stack gap="16px">
+        <Box style={{ textAlign: 'center' }}>
+          {loading && <CircularProgress />}
+        </Box>
+
+        {cardListComs}
+
+        <IonInfiniteScroll onIonInfinite={handleInfinite}>
+          <IonInfiniteScrollContent
+            loadingText={`${tr('Loading')}...`}
+            loadingSpinner="bubbles"
+          />
+        </IonInfiniteScroll>
+      </Stack>
     </PageLayout>
   );
 }
