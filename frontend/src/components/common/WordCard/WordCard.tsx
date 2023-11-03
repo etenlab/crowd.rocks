@@ -69,7 +69,9 @@ export function WordCard({
               ? undefined
               : 'none',
           }}
-          component={flags ? <FlagV2 {...flags} /> : null}
+          dropDownList={
+            flags ? [{ key: 'flag', component: <FlagV2 {...flags} /> }] : []
+          }
         />
       </Stack>
 
