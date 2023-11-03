@@ -102,6 +102,8 @@ export class StorageStack extends cdk.Stack {
         serverlessV2MaxCapacity: 4,
         writer: rds.ClusterInstance.serverlessV2('writer', {
           publiclyAccessible: props.isPubliclyAccessible,
+          enablePerformanceInsights: true,
+          performanceInsightRetention: rds.PerformanceInsightRetention.DEFAULT
         }),
         monitoringInterval: cdk.Duration.seconds(30),
         backup: {

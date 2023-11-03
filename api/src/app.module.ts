@@ -28,6 +28,7 @@ import { FileModule } from './components/file/file.module';
 import { QuestionAndAnswersModule } from './components/question-answer/question-answer.module';
 import { PericopiesModule } from './components/pericopies/pericopies.module';
 import { BotsModule } from './components/translator-bots/bots.module';
+import { PopulatorModule } from './components/populators/populator.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { BotsModule } from './components/translator-bots/bots.module';
     QuestionAndAnswersModule,
     PericopiesModule,
     BotsModule,
+    PopulatorModule,
   ],
   controllers: [],
   providers: [],

@@ -152,6 +152,9 @@ enum ErrorType {
   MapFilenameAlreadyExists
   MapInsertFailed
   MapNotFound
+  MapParsingError
+  MapSavingError
+  MapTranslationError
   MapVoteNotFound
   MapWordsAndPhrasesSearchError
   MapZippingError
@@ -577,6 +580,7 @@ type Mutation {
   mapUpload(file: Upload!, file_size: Int!, file_type: String!, previewFileId: String): MapUploadOutput!
   mapVoteUpsert(input: MapVoteUpsertInput!): MapVoteOutput!
   mapsReTranslate(forLangTag: String): GenericOutput!
+  mapsReTranslateToLangs(forLangTags: [String!]!): GenericOutput!
   mapsTranslationsReset: GenericOutput!
   markNotificationAsRead(input: MarkNotificationReadInput!): MarkNotificationReadOutput!
   notificationDelete(input: NotificationDeleteInput!): NotificationDeleteOutput!
@@ -586,6 +590,8 @@ type Mutation {
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationOutput!
   phraseUpsert(input: PhraseUpsertInput!): PhraseOutput!
   phraseVoteUpsert(input: PhraseVoteUpsertInput!): PhraseVoteOutput!
+  populateMapTranslations(to_languages: [LanguageInput!]!): GenericOutput!
+  populateMaps(map_amount: Int): GenericOutput!
   postCreateResolver(input: PostCreateInput!): PostCreateOutput!
   register(input: RegisterInput!): RegisterOutput!
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!

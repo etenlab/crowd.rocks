@@ -500,6 +500,9 @@ export class DatabaseVersionControlService {
       './src/core/sql/threads/post_delete_from_thread_delete_trigger-v9.sql',
     );
 
+    // maps
+    await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v9.sql');
+
     // set version
     await this.setVersionNumber(9);
   }

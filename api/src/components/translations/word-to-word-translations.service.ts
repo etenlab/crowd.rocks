@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
-import { pgClientOrPool } from 'src/common/utility';
+import { calc_vote_weight, pgClientOrPool } from 'src/common/utility';
 
 import { ErrorType, GenericOutput } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
@@ -35,12 +35,13 @@ import { WordsService } from '../words/words.service';
 
 import { WordToWordTranslationRepository } from './word-to-word-translation.repository';
 import { LanguageInput } from 'src/components/common/types';
-import {
-  MapPhraseWithTranslations,
-  MapPhraseAsTranslation,
-  MapWordWithTranslations,
-  MapWordAsTranslation,
-} from '../maps/types';
+import { MapTrWordsPhrases } from '../maps/maps.repository';
+
+export type SomethingVoted = {
+  [key: string]: any;
+  up_votes: number;
+  down_votes: number;
+};
 
 @Injectable()
 export class WordToWordTranslationsService {
@@ -500,49 +501,26 @@ export class WordToWordTranslationsService {
     };
   }
 
-  chooseBestTranslation(
-    wordOrPhraseTranslated: MapWordWithTranslations | MapPhraseWithTranslations,
-    langRestrictions?: LanguageInput,
-  ): MapWordAsTranslation | MapPhraseAsTranslation | undefined {
-    const res = wordOrPhraseTranslated?.translations?.reduce(
-      (bestTr, currTr) => {
-        if (
-          langRestrictions?.language_code &&
-          currTr.language_code !== langRestrictions.language_code
-        ) {
-          return bestTr;
-        }
-
-        if (
-          langRestrictions?.dialect_code &&
-          currTr.dialect_code !== langRestrictions.dialect_code
-        ) {
-          return bestTr;
-        }
-
-        if (
-          langRestrictions?.geo_code &&
-          currTr.geo_code !== langRestrictions.geo_code
-        ) {
-          return bestTr;
-        }
-
-        if (bestTr?.up_votes === undefined) {
-          return currTr;
-        }
-
-        const bestTrTotal =
-          Number(bestTr?.up_votes || 0) - Number(bestTr?.down_votes || 0);
-        const currTrTotal =
-          Number(currTr?.up_votes || 0) - Number(currTr?.down_votes || 0);
-        if (currTrTotal > bestTrTotal) {
-          return currTr;
-        }
-        return bestTr;
-      },
-      {} as MapWordAsTranslation | MapPhraseAsTranslation,
-    );
-
+  chooseBestTranslation<T extends SomethingVoted>(
+    wordOrPhraseTranslated: T[],
+  ): T {
+    const res = wordOrPhraseTranslated.reduce((bestTr, currTr) => {
+      if (bestTr?.up_votes === undefined) {
+        return currTr;
+      }
+      const bestTrWeight = calc_vote_weight(
+        Number(bestTr?.up_votes || 0),
+        Number(bestTr?.down_votes || 0),
+      );
+      const currTrWeight = calc_vote_weight(
+        Number(currTr?.up_votes || 0),
+        Number(currTr?.down_votes || 0),
+      );
+      if (currTrWeight > bestTrWeight) {
+        return currTr;
+      }
+      return bestTr;
+    }, {} as T);
     return res;
   }
 
