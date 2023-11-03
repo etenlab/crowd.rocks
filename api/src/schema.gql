@@ -58,6 +58,17 @@ input CreateQuestionOnWordRangeUpsertInput {
   question_type_is_multiselect: Boolean!
 }
 
+input DataGenInput {
+  mapAmount: Int!
+  mapsToLanguages: [LanguageInput!]!
+}
+
+type DataGenProgress {
+  mapTranslationsStatus: SubscriptionStatus!
+  mapUpload: String!
+  mapUploadStatus: SubscriptionStatus!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -574,6 +585,7 @@ type Mutation {
   forumFolderDelete(forum_folder_id: ID!): ForumFolderDeleteOutput!
   forumFolderUpsert(input: ForumFolderUpsertInput!): ForumFolderOutput!
   forumUpsert(input: ForumUpsertInput!): ForumOutput!
+  generateData(input: DataGenInput!): GenericOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
   mapDelete(input: MapDeleteInput!): MapDeleteOutput!
@@ -590,8 +602,6 @@ type Mutation {
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationOutput!
   phraseUpsert(input: PhraseUpsertInput!): PhraseOutput!
   phraseVoteUpsert(input: PhraseVoteUpsertInput!): PhraseVoteOutput!
-  populateMapTranslations(to_languages: [LanguageInput!]!): GenericOutput!
-  populateMaps(map_amount: Int): GenericOutput!
   postCreateResolver(input: PostCreateInput!): PostCreateOutput!
   register(input: RegisterInput!): RegisterOutput!
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
@@ -1290,6 +1300,7 @@ type StartZipMapOutput {
 }
 
 type Subscription {
+  DataGenerationReport: DataGenProgress!
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
   ZipMapReport: ZipMapResult!
 }
@@ -1297,6 +1308,7 @@ type Subscription {
 enum SubscriptionStatus {
   Completed
   Error
+  NotStarted
   Progressing
 }
 

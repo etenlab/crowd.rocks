@@ -6,6 +6,7 @@ import { FileModule } from '../file/file.module';
 import { MapsModule } from '../maps/maps.module';
 import { BotsModule } from '../translator-bots/bots.module';
 import { PopulatorResolver } from './populator.resolver';
+import { PopulatorService } from './populator.service';
 
 @Module({
   imports: [
@@ -16,6 +17,6 @@ import { PopulatorResolver } from './populator.resolver';
     BotsModule,
     CoreModule,
   ],
-  providers: [PopulatorResolver],
+  providers: [PopulatorResolver, PopulatorService],
 })
 export class PopulatorModule {}

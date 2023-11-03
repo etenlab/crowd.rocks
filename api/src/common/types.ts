@@ -189,6 +189,7 @@ export enum SubscriptionStatus {
   Completed = 'Completed',
   Progressing = 'Progressing',
   Error = 'Error',
+  NotStarted = 'Not Started',
 }
 
 registerEnumType(SubscriptionStatus, {
