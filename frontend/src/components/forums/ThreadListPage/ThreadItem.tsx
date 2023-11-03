@@ -1,4 +1,4 @@
-import { Divider, Stack, Typography, Button } from '@mui/material';
+import { Stack, Typography, Button } from '@mui/material';
 
 import { DeleteCircle } from '../../common/icons/DeleteCircle';
 import { Edit } from '../../common/icons/Edit';
@@ -11,13 +11,21 @@ import { ThreadModal } from '../modals/ThreadModal';
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { TableNameType } from '../../../generated/graphql';
 
+import { globals } from '../../../services/globals';
+
 export type ThreadItemProps = {
   forum_folder_id: string;
   id: string;
   name: string;
+  created_by: string;
 };
 
-export function ThreadItem({ forum_folder_id, id, name }: ThreadItemProps) {
+export function ThreadItem({
+  forum_folder_id,
+  id,
+  name,
+  created_by,
+}: ThreadItemProps) {
   const { tr } = useTr();
 
   const {
@@ -36,6 +44,42 @@ export function ThreadItem({ forum_folder_id, id, name }: ThreadItemProps) {
     );
   };
 
+  const dropDownList =
+    globals.get_user_id() === +created_by
+      ? [
+          {
+            key: 'edit_button',
+            component: (
+              <Button
+                variant="text"
+                startIcon={<Edit sx={{ fontSize: '22px' }} />}
+                color="dark"
+                sx={{ padding: 0, justifyContent: 'flex-start' }}
+                onClick={handleEdit}
+              >
+                {tr('Edit')}
+              </Button>
+            ),
+          },
+          {
+            key: 'delete_button',
+            component: (
+              <Button
+                variant="text"
+                startIcon={
+                  <DeleteCircle sx={{ fontSize: '22px' }} color="red" />
+                }
+                color="red"
+                onClick={() => {}}
+                sx={{ padding: 0, justifyContent: 'flex-start' }}
+              >
+                {tr('Delete')}
+              </Button>
+            ),
+          },
+        ]
+      : [];
+
   return (
     <Stack
       sx={(theme) => ({
@@ -50,34 +94,7 @@ export function ThreadItem({ forum_folder_id, id, name }: ThreadItemProps) {
           parent_id={id}
           parent_table={TableNameType.Threads}
         />
-        <MoreHorizButton
-          component={
-            <>
-              <Button
-                variant="text"
-                startIcon={<Edit sx={{ fontSize: '22px' }} />}
-                color="dark"
-                sx={{ padding: 0, justifyContent: 'flex-start' }}
-                onClick={handleEdit}
-              >
-                {tr('Edit')}
-              </Button>
-
-              <Divider />
-              <Button
-                variant="text"
-                startIcon={
-                  <DeleteCircle sx={{ fontSize: '22px' }} color="red" />
-                }
-                color="red"
-                onClick={() => {}}
-                sx={{ padding: 0, justifyContent: 'flex-start' }}
-              >
-                {tr('Delete')}
-              </Button>
-            </>
-          }
-        />
+        <MoreHorizButton dropDownList={dropDownList} />
       </Stack>
 
       <Typography variant="h3">{name}</Typography>

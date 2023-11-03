@@ -72,6 +72,7 @@ export function ForumListPage() {
         id={edge.node.forum_id}
         name={edge.node.name}
         description={edge.node.description || ''}
+        created_by={edge.node.created_by}
         totalTopics={100}
         totalThreads={47}
         totalPosts={500}

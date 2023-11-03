@@ -106,6 +106,7 @@ export function ThreadListPage() {
         forum_folder_id={edge.node.forum_folder_id}
         id={edge.node.thread_id}
         name={edge.node.name}
+        created_by={edge.node.created_by}
       />
     ));
   }, [error, threadsData]);

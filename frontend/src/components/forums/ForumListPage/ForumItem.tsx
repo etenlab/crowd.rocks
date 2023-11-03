@@ -11,10 +11,13 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 import { ForumModal } from '../modals/ForumModal';
 
+import { globals } from '../../../services/globals';
+
 export type ForumItemProps = {
   id: string;
   name: string;
   description: string;
+  created_by: string;
   totalTopics: number;
   totalThreads: number;
   totalPosts: number;
@@ -24,6 +27,7 @@ export function ForumItem({
   id,
   name,
   description,
+  created_by,
   totalTopics,
   totalThreads,
   totalPosts,
@@ -54,6 +58,42 @@ export function ForumItem({
     );
   };
 
+  const dropDownList =
+    globals.get_user_id() === +created_by
+      ? [
+          {
+            key: 'edit_button',
+            component: (
+              <Button
+                variant="text"
+                startIcon={<Edit sx={{ fontSize: '22px' }} />}
+                color="dark"
+                sx={{ padding: 0, justifyContent: 'flex-start' }}
+                onClick={handleEdit}
+              >
+                {tr('Edit')}
+              </Button>
+            ),
+          },
+          {
+            key: 'delete_button',
+            component: (
+              <Button
+                variant="text"
+                startIcon={
+                  <DeleteCircle sx={{ fontSize: '22px' }} color="red" />
+                }
+                color="red"
+                onClick={() => {}}
+                sx={{ padding: 0, justifyContent: 'flex-start' }}
+              >
+                {tr('Delete')}
+              </Button>
+            ),
+          },
+        ]
+      : [];
+
   return (
     <Stack
       sx={(theme) => ({
@@ -75,34 +115,7 @@ export function ForumItem({
           alignItems="center"
         >
           <Typography variant="h3">{name}</Typography>
-          <MoreHorizButton
-            component={
-              <>
-                <Button
-                  variant="text"
-                  startIcon={<Edit sx={{ fontSize: '22px' }} />}
-                  color="dark"
-                  sx={{ padding: 0, justifyContent: 'flex-start' }}
-                  onClick={handleEdit}
-                >
-                  {tr('Edit')}
-                </Button>
-
-                <Divider />
-                <Button
-                  variant="text"
-                  startIcon={
-                    <DeleteCircle sx={{ fontSize: '22px' }} color="red" />
-                  }
-                  color="red"
-                  onClick={() => {}}
-                  sx={{ padding: 0, justifyContent: 'flex-start' }}
-                >
-                  {tr('Delete')}
-                </Button>
-              </>
-            }
-          />
+          <MoreHorizButton dropDownList={dropDownList} />
         </Stack>
         <Typography variant="body2" color="text.gray">
           {description}

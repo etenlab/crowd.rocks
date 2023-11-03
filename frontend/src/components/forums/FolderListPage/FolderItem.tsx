@@ -12,11 +12,14 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 import { FolderModal } from '../modals/FolderModal';
 
+import { globals } from '../../../services/globals';
+
 export type FolderItemProps = {
   forum_id: string;
   id: string;
   name: string;
   description: string;
+  created_by: string;
   totalThreads: number;
   totalPosts: number;
 };
@@ -26,6 +29,7 @@ export function FolderItem({
   id,
   name,
   description,
+  created_by,
   totalThreads,
   totalPosts,
 }: FolderItemProps) {
@@ -59,6 +63,42 @@ export function FolderItem({
     );
   };
 
+  const dropDownList =
+    globals.get_user_id() === +created_by
+      ? [
+          {
+            key: 'edit_button',
+            component: (
+              <Button
+                variant="text"
+                startIcon={<Edit sx={{ fontSize: '22px' }} />}
+                color="dark"
+                sx={{ padding: 0, justifyContent: 'flex-start' }}
+                onClick={handleEdit}
+              >
+                {tr('Edit')}
+              </Button>
+            ),
+          },
+          {
+            key: 'delete_button',
+            component: (
+              <Button
+                variant="text"
+                startIcon={
+                  <DeleteCircle sx={{ fontSize: '22px' }} color="red" />
+                }
+                color="red"
+                onClick={() => {}}
+                sx={{ padding: 0, justifyContent: 'flex-start' }}
+              >
+                {tr('Delete')}
+              </Button>
+            ),
+          },
+        ]
+      : [];
+
   return (
     <Stack
       sx={(theme) => ({
@@ -80,34 +120,7 @@ export function FolderItem({
           alignItems="center"
         >
           <Folder sx={{ fontSize: 24 }} color="blue" />
-          <MoreHorizButton
-            component={
-              <>
-                <Button
-                  variant="text"
-                  startIcon={<Edit sx={{ fontSize: '22px' }} />}
-                  color="dark"
-                  sx={{ padding: 0, justifyContent: 'flex-start' }}
-                  onClick={handleEdit}
-                >
-                  {tr('Edit')}
-                </Button>
-
-                <Divider />
-                <Button
-                  variant="text"
-                  startIcon={
-                    <DeleteCircle sx={{ fontSize: '22px' }} color="red" />
-                  }
-                  color="red"
-                  onClick={() => {}}
-                  sx={{ padding: 0, justifyContent: 'flex-start' }}
-                >
-                  {tr('Delete')}
-                </Button>
-              </>
-            }
-          />
+          <MoreHorizButton dropDownList={dropDownList} />
         </Stack>
         <Stack gap="6px">
           <Typography variant="h3">{name}</Typography>

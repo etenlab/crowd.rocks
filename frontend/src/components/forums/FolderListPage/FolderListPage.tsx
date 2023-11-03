@@ -92,6 +92,7 @@ export function FolderListPage() {
         forum_id={forum_id}
         id={edge.node.forum_folder_id}
         name={edge.node.name}
+        created_by={edge.node.created_by}
         description={edge.node.description || ''}
         totalThreads={47}
         totalPosts={500}
