@@ -63,6 +63,7 @@ export enum ErrorType {
 
   PositionInvalid = 'PositionInvalid',
   PostCreateFailed = 'PostCreateFailed',
+  PostDeleteFailed = 'PostDeleteFailed',
 
   PrefixInvalid = 'PrefixInvalid',
   PrefixTooLong = 'PrefixTooLong',

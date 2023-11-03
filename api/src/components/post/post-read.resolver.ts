@@ -4,7 +4,6 @@ import { PostgresService } from 'src/core/postgres.service';
 import { UserReadResolver } from '../user/user-read.resolver';
 import { PostService } from './post.service';
 import {
-  Post,
   PostCountOutput,
   PostReadInput,
   PostReadOutput,
@@ -13,7 +12,7 @@ import {
 } from './types';
 
 @Injectable()
-@Resolver(Post)
+@Resolver()
 export class PostReadResolver {
   constructor(
     private pg: PostgresService,

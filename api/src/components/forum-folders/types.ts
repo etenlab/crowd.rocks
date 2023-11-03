@@ -27,7 +27,7 @@ export class ForumFolderOutput extends GenericOutput {
 
 @ObjectType()
 export class ForumFolderDeleteOutput extends GenericOutput {
-  @Field(() => ID) folder_id: string;
+  @Field(() => ID) forum_folder_id: string;
 }
 
 @ObjectType()

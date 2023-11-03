@@ -176,6 +176,7 @@ enum ErrorType {
   PhraseVoteNotFound
   PositionInvalid
   PostCreateFailed
+  PostDeleteFailed
   PostNotFound
   PrefixInvalid
   PrefixTooLong
@@ -260,7 +261,7 @@ type ForumFolder {
 
 type ForumFolderDeleteOutput {
   error: ErrorType!
-  folder_id: ID!
+  forum_folder_id: ID!
 }
 
 type ForumFolderEdge {

@@ -170,13 +170,13 @@ export class ForumFoldersService {
 
       return {
         error: deletingError,
-        folder_id: res.rows[0].p_forum_folder_id + '',
+        forum_folder_id: res.rows[0].p_forum_folder_id + '',
       };
     } catch (e) {
       Logger.error(e);
       return {
         error: ErrorType.UnknownError,
-        folder_id: '',
+        forum_folder_id: '',
       };
     }
   }
