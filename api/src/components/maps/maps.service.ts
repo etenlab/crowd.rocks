@@ -2,11 +2,7 @@ import { Injectable, Inject, forwardRef, Logger } from '@nestjs/common';
 
 import {
   MapListConnection,
-  GetOrigMapPhrasesWithTrInput,
-  GetOrigMapPhrasesWithTrOutput,
   GetOrigMapsListOutput,
-  GetOrigMapWordsWithTrInput,
-  GetOrigMapWordsWithTrOutput,
   MapDetailsOutput,
   MapPhraseWithTranslations,
   MapWordWithTranslations,
@@ -21,7 +17,6 @@ import {
   ZipMapResult,
   StartZipMapDownloadInput,
   MapDetailsInfo,
-  MapWordOrPhrase,
 } from './types';
 import { type INode } from 'svgson';
 import { parseSync as readSvg, stringify } from 'svgson';
@@ -47,11 +42,7 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhraseUpsertInput } from '../phrases/types';
 import { PhrasesService } from '../phrases/phrases.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
-import {
-  downloadFile,
-  getPgClient,
-  putLangCodesToFileName,
-} from '../../common/utility';
+import { downloadFile, putLangCodesToFileName } from '../../common/utility';
 import { FileService } from '../file/file.service';
 import { TranslationsService } from '../translations/translations.service';
 import { Readable } from 'stream';
