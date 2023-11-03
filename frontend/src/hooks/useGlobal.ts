@@ -7,6 +7,7 @@ import {
   changeAppLanguage as changeAppLanguageAction,
   changeTranslationSourceLanguage as changeTranslationSourceLanguageAction,
   changeTranslationTargetLanguage as changeTranslationTargetLanguageAction,
+  changeSiteTextTargetLanguage as changeSiteTextTargetLanguageAction,
   setTargetLanguage as setTargetLangAction,
   setSourceLanguage as setSourceLangAction,
   setUpdatedTrDefinitionIds as setUpdatedTrDefinitionIdsAction,
@@ -72,6 +73,15 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     [],
   );
 
+  const changeSiteTextTargetLanguage = useCallback(
+    (langInfo: LanguageInfo | null) => {
+      dispatchRef.current.dispatch(
+        changeSiteTextTargetLanguageAction(langInfo),
+      );
+    },
+    [],
+  );
+
   const setTargetLanguage = useCallback((language: LanguageInfo | null) => {
     dispatchRef.current.dispatch(setTargetLangAction(language));
   }, []);
@@ -107,6 +117,7 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     changeAppLanguage,
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
+    changeSiteTextTargetLanguage,
     setSourceLanguage,
     setTargetLanguage,
     setUpdatedTrDefinitionIds,

@@ -6,14 +6,23 @@ import { useUpdateForumFolderMutation as useGeneratedForumFolderUpdateMutation }
 import { ErrorType } from '../generated/graphql';
 
 import { useTr } from './useTr';
+import { useAppContext } from './useAppContext';
+
 import {
   updateCacheWithCreateForumFolder,
   updateCacheWithUpdateForumFolder,
 } from '../cacheUpdators/upsertForumFolder';
 import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
-export function useForumFolderUpdateMutation(forum_id: string) {
+export function useForumFolderUpdateMutation() {
   const { tr } = useTr();
+  const {
+    states: {
+      nonPersistent: {
+        paginationVariables: { getForumFoldersLists },
+      },
+    },
+  } = useAppContext();
   const [present] = useIonToast();
   const redirectOnUnauth = useUnauthorizedRedirect();
 
@@ -27,7 +36,15 @@ export function useForumFolderUpdateMutation(forum_id: string) {
       ) {
         const updatedForumFolder = data.forumFolderUpsert.folder;
 
-        updateCacheWithUpdateForumFolder(cache, updatedForumFolder, forum_id);
+        const variablesList = Object.values(getForumFoldersLists).filter(
+          (variables) => variables.forum_id === updatedForumFolder.forum_id,
+        );
+
+        updateCacheWithUpdateForumFolder(
+          cache,
+          updatedForumFolder,
+          variablesList,
+        );
 
         present({
           message: tr('Success at updating forum folder!'),
@@ -52,8 +69,15 @@ export function useForumFolderUpdateMutation(forum_id: string) {
   });
 }
 
-export function useForumFolderCreateMutation(forum_id: string) {
+export function useForumFolderCreateMutation() {
   const { tr } = useTr();
+  const {
+    states: {
+      nonPersistent: {
+        paginationVariables: { getForumFoldersLists },
+      },
+    },
+  } = useAppContext();
   const [present] = useIonToast();
   const redirectOnUnauth = useUnauthorizedRedirect();
 
@@ -67,7 +91,11 @@ export function useForumFolderCreateMutation(forum_id: string) {
       ) {
         const newForumFolder = data.forumFolderUpsert.folder;
 
-        updateCacheWithCreateForumFolder(cache, newForumFolder, forum_id);
+        const variablesList = Object.values(getForumFoldersLists).filter(
+          (variables) => variables.forum_id === newForumFolder.forum_id,
+        );
+
+        updateCacheWithCreateForumFolder(cache, newForumFolder, variablesList);
 
         present({
           message: tr('Success at creating new forum folder!'),

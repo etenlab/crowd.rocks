@@ -1,324 +1,371 @@
-import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
-import { RouteComponentProps } from 'react-router';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useParams } from 'react-router';
+import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
+
 import {
-  IonContent,
-  IonBadge,
-  useIonRouter,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  useIonToast,
-  InputCustomEvent,
-  InputChangeEventDetail,
-} from '@ionic/react';
+  Stack,
+  Button,
+  CircularProgress,
+  Box,
+  Typography,
+} from '@mui/material';
+import { useDebounce } from 'use-debounce';
 
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
-import { Card } from '../../common/Card';
+import { SearchInput } from '../../common/forms/SearchInput';
+import { FilterList } from '../../common/icons/FilterList';
+import { AddCircle } from '../../common/icons/AddCircle';
+import { NavigationModal } from '../../common/modalContent/NavigationModal';
+import { Select, OptionItem } from '../../common/forms/Select';
 
 import { useGetAllSiteTextDefinitionsLazyQuery } from '../../../generated/graphql';
 
-import {
-  ErrorType,
-  useIsAdminLoggedInQuery,
-  TableNameType,
-} from '../../../generated/graphql';
-
-import {
-  AppLanguageShowerContainer,
-  CardContainer,
-  CardListContainer,
-} from './styled';
-
-import { Input, LanguageSelectorContainer } from '../../common/styled';
+import { ErrorType } from '../../../generated/graphql';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-import { NewSiteTextForm } from '../NewSiteTextForm';
-import { TranslatedCard } from './TranslatedCard';
+import { NewSiteTextModal } from '../NewSiteTextModal';
+import { TranslationItem } from '../../translation/TranslationItem';
+import { OriginalData } from '../../translation/hooks/useTranslationTools';
 
-import { sortSiteTextFn } from '../../../../../utils';
+import { subTags2LangInfo } from '../../../../../utils';
 import { globals } from '../../../services/globals';
-import { AddListHeader } from '../../common/ListHeader';
 import { PageLayout } from '../../common/PageLayout';
 
-import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
+import { PAGE_SIZE } from '../../../const/commonConst';
 
-interface SiteTextListPageProps
-  extends RouteComponentProps<{
+export function SiteTextListPage() {
+  const { tr } = useTr();
+  const { nation_id, language_id, cluster_id } = useParams<{
     nation_id: string;
     language_id: string;
-  }> {}
-
-export function SiteTextListPage({ match }: SiteTextListPageProps) {
-  const router = useIonRouter();
-  const [present] = useIonToast();
-  const { tr } = useTr();
+    cluster_id: string;
+  }>();
 
   const {
     states: {
       global: {
-        langauges: { targetLang },
+        langauges: {
+          siteTextStringPage: { target },
+        },
       },
     },
-    actions: { setTargetLanguage, createModal },
+    actions: {
+      changeSiteTextTargetLanguage,
+      createModal,
+      addPaginationVariableForGetAllSiteTextDefinitions,
+    },
   } = useAppContext();
 
   const [filter, setFilter] = useState<string>('');
+  const [bouncedFilter] = useDebounce(filter, 500);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [quickFilter, setQuickFilter] = useState<string | null>('');
+  const [filterOption, setFilterOption] = useState<OptionItem>({
+    label: tr('All'),
+    value: 'all',
+  });
 
   const { openModal, closeModal } = createModal();
 
-  const user_id = globals.get_user_id();
-  const variables = { input: { user_id: String(user_id) } };
-  const { data: isAdminRes } = useIsAdminLoggedInQuery({
-    variables: variables,
-  });
+  const isAdminUser = globals.is_admin_user();
 
-  const [getAllSiteTextDefinitions, { data, error }] =
+  const [getAllSiteTextDefinitions, { data, error, loading, fetchMore }] =
     useGetAllSiteTextDefinitionsLazyQuery();
 
   useEffect(() => {
     getAllSiteTextDefinitions({
       variables: {
-        filter,
+        filter: bouncedFilter,
+        quickFilter,
+        onlyNotTranslated:
+          filterOption.value === 'not translated' ? true : null,
+        onlyTranslated: filterOption.value === 'translated' ? true : null,
+        targetLanguage: target
+          ? {
+              language_code: target.lang.tag,
+              dialect_code: target.dialect?.tag || null,
+              geo_code: target.region?.tag || null,
+            }
+          : null,
+        first: PAGE_SIZE,
+        after: null,
       },
     });
-  }, [getAllSiteTextDefinitions, filter]);
+    addPaginationVariableForGetAllSiteTextDefinitions({
+      filter: bouncedFilter,
+      quickFilter,
+      onlyNotTranslated: filterOption.value === 'not translated' ? true : null,
+      onlyTranslated: filterOption.value === 'translated' ? true : null,
+      targetLanguage: target
+        ? {
+            language_code: target.lang.tag,
+            dialect_code: target.dialect?.tag || null,
+            geo_code: target.region?.tag || null,
+          }
+        : null,
+    });
+  }, [
+    getAllSiteTextDefinitions,
+    bouncedFilter,
+    quickFilter,
+    filterOption.value,
+    target,
+    addPaginationVariableForGetAllSiteTextDefinitions,
+  ]);
 
-  const handleGoToDefinitionDetail = useCallback(
-    (siteTextId: string, isWord: boolean) => {
-      if (!targetLang) {
-        present({
-          message: tr('Should select target language!'),
-          duration: 1500,
-          position: 'top',
-          color: 'danger',
-        });
+  const handleChangeFilterOption = useCallback((value: OptionItem | null) => {
+    if (value) {
+      setFilterOption(value);
+    }
+  }, []);
 
-        return;
-      }
-
-      router.push(
-        `/${match.params.nation_id}/${
-          match.params.language_id
-        }/1/site-text-detail/${isWord ? 'word' : 'phrase'}/${siteTextId}`,
-      );
-    },
-    [
-      targetLang,
-      router,
-      match.params.nation_id,
-      match.params.language_id,
-      present,
-      tr,
+  const filterOptions = useMemo(
+    () => [
+      {
+        label: tr('All'),
+        value: 'all',
+      },
+      {
+        label: tr('Translated'),
+        value: 'translated',
+      },
+      {
+        label: tr('Not Translated'),
+        value: 'not translated',
+      },
     ],
+    [tr],
   );
 
-  const handleFilterChange = (
-    event: InputCustomEvent<InputChangeEventDetail>,
-  ) => {
-    setFilter(event.detail.value!);
+  const handleFilterChange = (value: string) => {
+    setFilter(value);
   };
 
-  const cardListComs = useMemo(() => {
-    const tempDefinitions: {
-      siteTextId: string;
-      isWord: boolean;
-      siteTextlikeString: string;
-      definitionlikeString: string;
-      definition_id: string;
-      created_at: string;
-      created_by_user: {
-        user_id: string;
-        avatar: string;
-        is_bot: boolean;
-      };
-    }[] = [];
+  const handleOpenFilterModal = () => {
+    openModal(
+      <NavigationModal onClose={closeModal} setQuickFilter={setQuickFilter} />,
+    );
+  };
 
-    if (error) {
-      return null;
-    }
-
-    if (!data || data.getAllSiteTextDefinitions.error !== ErrorType.NoError) {
-      return null;
-    }
-
-    const allSiteTextDefinitions =
-      data.getAllSiteTextDefinitions.site_text_definition_list;
-
-    if (!allSiteTextDefinitions) {
-      return null;
-    }
-
-    for (const siteTextDefinition of allSiteTextDefinitions) {
-      if (!siteTextDefinition) {
-        continue;
+  const handleInfinite = useCallback(
+    async (ev: IonInfiniteScrollCustomEvent<void>) => {
+      if (data?.getAllSiteTextDefinitions.pageInfo.hasNextPage) {
+        await fetchMore({
+          variables: {
+            first: PAGE_SIZE,
+            after: data.getAllSiteTextDefinitions.pageInfo.endCursor,
+            filter: bouncedFilter.trim(),
+          },
+        });
       }
+
+      setTimeout(() => ev.target.complete(), 500);
+    },
+    [fetchMore, bouncedFilter, data],
+  );
+
+  const cardListComs = useMemo(() => {
+    const originals: OriginalData[] = [];
+
+    if (
+      error ||
+      !data ||
+      data.getAllSiteTextDefinitions.error !== ErrorType.NoError
+    ) {
+      return null;
+    }
+
+    for (const edge of data.getAllSiteTextDefinitions.edges) {
+      const siteTextDefinition = edge.node;
 
       switch (siteTextDefinition.__typename) {
         case 'SiteTextWordDefinition': {
-          tempDefinitions.push({
-            siteTextId: siteTextDefinition.site_text_id,
+          originals.push({
             isWord: true,
-            siteTextlikeString: siteTextDefinition.word_definition.word.word,
-            definitionlikeString: siteTextDefinition.word_definition.definition,
-            definition_id:
-              siteTextDefinition.word_definition.word_definition_id,
-            created_at: siteTextDefinition.word_definition.created_at,
-            created_by_user: {
-              user_id:
-                siteTextDefinition.word_definition.word.created_by_user.user_id,
-              avatar:
+            wordOrPhrase: {
+              id: siteTextDefinition.word_definition.word.word_id,
+              likeString: siteTextDefinition.word_definition.word.word,
+            },
+            definition: {
+              id: siteTextDefinition.word_definition.word_definition_id,
+              likeString: siteTextDefinition.word_definition.definition,
+            },
+            author: {
+              username:
                 siteTextDefinition.word_definition.word.created_by_user.avatar,
-              is_bot:
+              avatar:
+                siteTextDefinition.word_definition.word.created_by_user
+                  .avatar_url || undefined,
+              createdAt: new Date(
+                siteTextDefinition.word_definition.created_at,
+              ),
+              createdByBot:
                 siteTextDefinition.word_definition.word.created_by_user.is_bot,
             },
+            language: subTags2LangInfo({
+              lang: siteTextDefinition.word_definition.word.language_code,
+              dialect:
+                siteTextDefinition.word_definition.word.dialect_code ||
+                undefined,
+              region:
+                siteTextDefinition.word_definition.word.geo_code || undefined,
+            }),
           });
           break;
         }
         case 'SiteTextPhraseDefinition': {
-          tempDefinitions.push({
-            siteTextId: siteTextDefinition.site_text_id,
+          originals.push({
             isWord: false,
-            siteTextlikeString:
-              siteTextDefinition.phrase_definition.phrase.phrase,
-            definitionlikeString:
-              siteTextDefinition.phrase_definition.definition,
-            definition_id:
-              siteTextDefinition.phrase_definition.phrase_definition_id,
-            created_at: siteTextDefinition.phrase_definition.created_at,
-            created_by_user: {
-              user_id:
-                siteTextDefinition.phrase_definition.phrase.created_by_user
-                  .user_id,
-              avatar:
+            wordOrPhrase: {
+              id: siteTextDefinition.phrase_definition.phrase.phrase_id,
+              likeString: siteTextDefinition.phrase_definition.phrase.phrase,
+            },
+            definition: {
+              id: siteTextDefinition.phrase_definition.phrase_definition_id,
+              likeString: siteTextDefinition.phrase_definition.definition,
+            },
+            author: {
+              username:
                 siteTextDefinition.phrase_definition.phrase.created_by_user
                   .avatar,
-              is_bot:
+              avatar:
+                siteTextDefinition.phrase_definition.phrase.created_by_user
+                  .avatar_url || undefined,
+              createdAt: new Date(
+                siteTextDefinition.phrase_definition.created_at,
+              ),
+              createdByBot:
                 siteTextDefinition.phrase_definition.phrase.created_by_user
                   .is_bot,
             },
+            language: subTags2LangInfo({
+              lang: siteTextDefinition.phrase_definition.phrase.language_code,
+              dialect:
+                siteTextDefinition.phrase_definition.phrase.dialect_code ||
+                undefined,
+              region:
+                siteTextDefinition.phrase_definition.phrase.geo_code ||
+                undefined,
+            }),
           });
           break;
         }
       }
     }
 
-    tempDefinitions.sort(sortSiteTextFn);
-
-    return tempDefinitions.map((definition) => (
-      <Fragment
-        key={`${definition.isWord ? 'word' : 'phrase'}-${
-          definition.siteTextId
-        }`}
-      >
-        <CardContainer>
-          <Card
-            content={definition.siteTextlikeString}
-            description={definition.definitionlikeString}
-            createdBy={{
-              username: definition.created_by_user.avatar,
-              isBot: definition.created_by_user.is_bot,
-              createdAt:
-                definition.created_at &&
-                new Date(definition.created_at).toDateString(),
-            }}
-            onClick={() =>
-              handleGoToDefinitionDetail(
-                definition.siteTextId,
-                definition.isWord,
-              )
-            }
-            flags={{
-              parent_table: definition.isWord
-                ? TableNameType.WordDefinitions
-                : TableNameType.PhraseDefinitions,
-              parent_id: definition.definition_id,
-              flag_names: WORD_AND_PHRASE_FLAGS,
-            }}
-          />
-        </CardContainer>
-        <CardContainer>
-          <TranslatedCard
-            siteTextId={definition.siteTextId}
-            isWord={definition.isWord}
-            languageInfo={targetLang}
-            onClick={() =>
-              handleGoToDefinitionDetail(
-                definition.siteTextId,
-                definition.isWord,
-              )
-            }
-          />
-        </CardContainer>
-      </Fragment>
+    return originals.map((original) => (
+      <TranslationItem
+        key={`${original.isWord ? 'word' : 'phrase'}-${original.definition.id}`}
+        original={original}
+        targetLang={target}
+        redirectUrl={`/${nation_id}/${language_id}/${cluster_id}/site-text-list`}
+      />
     ));
-  }, [data, error, handleGoToDefinitionDetail, targetLang]);
+  }, [cluster_id, data, error, language_id, nation_id, target]);
 
-  const handleOpenModal = () => {
-    openModal(
-      <>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('Add New Site Text')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          {targetLang ? (
-            <NewSiteTextForm onCreated={closeModal} onCancel={closeModal} />
-          ) : null}
-        </IonContent>
-      </>,
-      'full',
-    );
+  const handleClickNewSiteTextButton = () => {
+    openModal(<NewSiteTextModal onClose={closeModal} />);
   };
 
   return (
     <PageLayout>
-      <Caption>{tr('Site Text')}</Caption>
+      <Caption>{tr('Site Text Strings')}</Caption>
 
-      <LanguageSelectorContainer>
-        <AppLanguageShowerContainer>
-          <label style={{ fontSize: '14px', display: 'flex' }}>
-            {tr('App Language')}:
-          </label>
-          <IonBadge color="primary">English</IonBadge>
-        </AppLanguageShowerContainer>
-
-        <AppLanguageShowerContainer>
-          <label style={{ fontSize: '14px', display: 'flex' }}>
-            {tr('Translation')}:
-          </label>
-          <LangSelector
-            title={tr('Select')}
-            selected={targetLang}
-            onChange={(_targetLangTag, targetLangInfo) => {
-              setTargetLanguage(targetLangInfo);
-            }}
-            onClearClick={() => setTargetLanguage(null)}
-          />
-        </AppLanguageShowerContainer>
-      </LanguageSelectorContainer>
-
-      <Input
-        type="text"
-        label={tr('Search')}
-        labelPlacement="floating"
-        fill="outline"
-        debounce={300}
-        value={filter}
-        onIonInput={handleFilterChange}
+      <LangSelector
+        title={tr('Select target language')}
+        selected={target}
+        onChange={(_targetLangTag, targetLangInfo) => {
+          changeSiteTextTargetLanguage(targetLangInfo);
+        }}
+        onClearClick={() => changeSiteTextTargetLanguage(null)}
       />
 
-      {isAdminRes?.loggedInIsAdmin.isAdmin && (
-        <AddListHeader
-          title={tr('Site Text Strings')}
-          onClick={() => handleOpenModal()}
+      <Stack gap="16px">
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          gap="16px"
+        >
+          <Stack sx={{ flex: 1 }}>
+            <Select
+              placeholder={tr('Select sort filter')}
+              options={filterOptions}
+              value={filterOption}
+              onChange={handleChangeFilterOption}
+              onClear={() => {
+                setFilterOption({
+                  label: tr('All'),
+                  value: 'all',
+                });
+              }}
+            />
+          </Stack>
+          <Button
+            variant="contained"
+            onClick={handleOpenFilterModal}
+            color="gray_bg"
+            sx={{
+              padding: '10px',
+              minWidth: '0',
+              border: (theme) => `1px solid ${theme.palette.text.gray_stroke}`,
+            }}
+          >
+            <FilterList sx={{ fontSize: 22 }} />
+          </Button>
+          {isAdminUser ? (
+            <Button
+              variant="contained"
+              color="gray_bg"
+              sx={{
+                padding: '10px',
+                minWidth: 0,
+                border: (theme) =>
+                  `1px solid ${theme.palette.text.gray_stroke}`,
+              }}
+              onClick={handleClickNewSiteTextButton}
+            >
+              <AddCircle sx={{ fontSize: '22px' }} />
+            </Button>
+          ) : null}
+        </Stack>
+        <SearchInput
+          value={filter}
+          onChange={handleFilterChange}
+          onClickSearchButton={() => {}}
+          placeholder={tr('Search by...')}
         />
+      </Stack>
+
+      {quickFilter && (
+        <Stack>
+          <Typography
+            variant="h2"
+            sx={{ color: (theme) => theme.palette.text.gray }}
+          >
+            {quickFilter}
+          </Typography>
+        </Stack>
       )}
 
-      <CardListContainer>{cardListComs}</CardListContainer>
+      <Stack gap="16px">
+        <Box style={{ textAlign: 'center' }}>
+          {loading && <CircularProgress />}
+        </Box>
+
+        {cardListComs}
+
+        <IonInfiniteScroll onIonInfinite={handleInfinite}>
+          <IonInfiniteScrollContent
+            loadingText={`${tr('Loading')}...`}
+            loadingSpinner="bubbles"
+          />
+        </IonInfiniteScroll>
+      </Stack>
     </PageLayout>
   );
 }

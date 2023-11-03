@@ -167,6 +167,7 @@ export enum ErrorType {
   ForumFolderDeleteFailed = 'ForumFolderDeleteFailed',
   ForumFolderUpsertFailed = 'ForumFolderUpsertFailed',
   ForumForFolderNotExists = 'ForumForFolderNotExists',
+  ForumIdNotDefined = 'ForumIdNotDefined',
   ForumUpsertFailed = 'ForumUpsertFailed',
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
   InvalidInputs = 'InvalidInputs',
@@ -175,6 +176,9 @@ export enum ErrorType {
   MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
   MapInsertFailed = 'MapInsertFailed',
   MapNotFound = 'MapNotFound',
+  MapParsingError = 'MapParsingError',
+  MapSavingError = 'MapSavingError',
+  MapTranslationError = 'MapTranslationError',
   MapVoteNotFound = 'MapVoteNotFound',
   MapWordsAndPhrasesSearchError = 'MapWordsAndPhrasesSearchError',
   MapZippingError = 'MapZippingError',
@@ -199,6 +203,7 @@ export enum ErrorType {
   PhraseVoteNotFound = 'PhraseVoteNotFound',
   PositionInvalid = 'PositionInvalid',
   PostCreateFailed = 'PostCreateFailed',
+  PostDeleteFailed = 'PostDeleteFailed',
   PostNotFound = 'PostNotFound',
   PrefixInvalid = 'PrefixInvalid',
   PrefixTooLong = 'PrefixTooLong',
@@ -261,12 +266,10 @@ export type FlagsOutput = {
 
 export type Forum = {
   __typename?: 'Forum';
+  created_by: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
   forum_id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
-};
-
-export type ForumDeleteInput = {
-  forum_id: Scalars['ID']['input'];
 };
 
 export type ForumDeleteOutput = {
@@ -275,79 +278,70 @@ export type ForumDeleteOutput = {
   forum_id: Scalars['ID']['output'];
 };
 
-export type ForumFolder = {
-  __typename?: 'ForumFolder';
-  folder_id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
+export type ForumEdge = {
+  __typename?: 'ForumEdge';
+  cursor: Scalars['ID']['output'];
+  node: Forum;
 };
 
-export type ForumFolderDeleteInput = {
-  folder_id: Scalars['ID']['input'];
+export type ForumFolder = {
+  __typename?: 'ForumFolder';
+  created_by: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  forum_folder_id: Scalars['ID']['output'];
+  forum_id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type ForumFolderDeleteOutput = {
   __typename?: 'ForumFolderDeleteOutput';
   error: ErrorType;
-  folder_id: Scalars['ID']['output'];
+  forum_folder_id: Scalars['ID']['output'];
 };
 
-export type ForumFolderListInput = {
-  forum_id: Scalars['ID']['input'];
+export type ForumFolderEdge = {
+  __typename?: 'ForumFolderEdge';
+  cursor: Scalars['ID']['output'];
+  node: ForumFolder;
 };
 
-export type ForumFolderListOutput = {
-  __typename?: 'ForumFolderListOutput';
+export type ForumFolderListConnection = {
+  __typename?: 'ForumFolderListConnection';
+  edges: Array<ForumFolderEdge>;
   error: ErrorType;
-  folders: Array<ForumFolder>;
+  pageInfo: PageInfo;
 };
 
-export type ForumFolderReadInput = {
-  folder_id: Scalars['ID']['input'];
-};
-
-export type ForumFolderReadOutput = {
-  __typename?: 'ForumFolderReadOutput';
+export type ForumFolderOutput = {
+  __typename?: 'ForumFolderOutput';
   error: ErrorType;
   folder?: Maybe<ForumFolder>;
 };
 
 export type ForumFolderUpsertInput = {
-  folder_id?: InputMaybe<Scalars['ID']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  forum_folder_id?: InputMaybe<Scalars['ID']['input']>;
   forum_id: Scalars['ID']['input'];
   name: Scalars['String']['input'];
 };
 
-export type ForumFolderUpsertOutput = {
-  __typename?: 'ForumFolderUpsertOutput';
+export type ForumListConnection = {
+  __typename?: 'ForumListConnection';
+  edges: Array<ForumEdge>;
   error: ErrorType;
-  folder?: Maybe<ForumFolder>;
+  pageInfo: PageInfo;
 };
 
-export type ForumListOutput = {
-  __typename?: 'ForumListOutput';
-  error: ErrorType;
-  forums: Array<Forum>;
-};
-
-export type ForumReadInput = {
-  forum_id: Scalars['ID']['input'];
-};
-
-export type ForumReadOutput = {
-  __typename?: 'ForumReadOutput';
+export type ForumOutput = {
+  __typename?: 'ForumOutput';
   error: ErrorType;
   forum?: Maybe<Forum>;
 };
 
 export type ForumUpsertInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
   forum_id?: InputMaybe<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
-};
-
-export type ForumUpsertOutput = {
-  __typename?: 'ForumUpsertOutput';
-  error: ErrorType;
-  forum?: Maybe<Forum>;
 };
 
 export type FromPhraseAndDefintionlikeStringUpsertInput = {
@@ -644,14 +638,15 @@ export type Mutation = {
   emailResponseResolver: EmailResponseOutput;
   forumDelete: ForumDeleteOutput;
   forumFolderDelete: ForumFolderDeleteOutput;
-  forumFolderUpsert: ForumFolderUpsertOutput;
-  forumUpsert: ForumUpsertOutput;
+  forumFolderUpsert: ForumFolderOutput;
+  forumUpsert: ForumOutput;
   login: LoginOutput;
   logout: LogoutOutput;
   mapDelete: MapDeleteOutput;
   mapUpload: MapUploadOutput;
   mapVoteUpsert: MapVoteOutput;
   mapsReTranslate: GenericOutput;
+  mapsReTranslateToLangs: GenericOutput;
   mapsTranslationsReset: GenericOutput;
   markNotificationAsRead: MarkNotificationReadOutput;
   notificationDelete: NotificationDeleteOutput;
@@ -661,6 +656,8 @@ export type Mutation = {
   phraseToPhraseTranslationUpsert: PhraseToPhraseTranslationOutput;
   phraseUpsert: PhraseOutput;
   phraseVoteUpsert: PhraseVoteOutput;
+  populateMapTranslations: GenericOutput;
+  populateMaps: GenericOutput;
   postCreateResolver: PostCreateOutput;
   register: RegisterOutput;
   resetEmailRequest: ResetEmailRequestOutput;
@@ -670,7 +667,7 @@ export type Mutation = {
   startZipMapDownload: StartZipMapOutput;
   stopBotTranslation: GenericOutput;
   threadDelete: ThreadDeleteOutput;
-  threadUpsert: ThreadUpsertOutput;
+  threadUpsert: ThreadOutput;
   toggleFlagWithRef: FlagsOutput;
   toggleMapVoteStatus: MapVoteStatusOutputRow;
   togglePericopeVoteStatus: PericopeVoteStatusOutput;
@@ -745,12 +742,12 @@ export type MutationEmailResponseResolverArgs = {
 
 
 export type MutationForumDeleteArgs = {
-  input: ForumDeleteInput;
+  forum_id: Scalars['ID']['input'];
 };
 
 
 export type MutationForumFolderDeleteArgs = {
-  input: ForumFolderDeleteInput;
+  forum_folder_id: Scalars['ID']['input'];
 };
 
 
@@ -797,6 +794,11 @@ export type MutationMapsReTranslateArgs = {
 };
 
 
+export type MutationMapsReTranslateToLangsArgs = {
+  forLangTags: Array<Scalars['String']['input']>;
+};
+
+
 export type MutationMarkNotificationAsReadArgs = {
   input: MarkNotificationReadInput;
 };
@@ -837,6 +839,16 @@ export type MutationPhraseVoteUpsertArgs = {
 };
 
 
+export type MutationPopulateMapTranslationsArgs = {
+  to_languages: Array<LanguageInput>;
+};
+
+
+export type MutationPopulateMapsArgs = {
+  map_amount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type MutationPostCreateResolverArgs = {
   input: PostCreateInput;
 };
@@ -873,7 +885,7 @@ export type MutationStartZipMapDownloadArgs = {
 
 
 export type MutationThreadDeleteArgs = {
-  input: ThreadDeleteInput;
+  thread_id: Scalars['ID']['input'];
 };
 
 
@@ -1549,15 +1561,13 @@ export type Query = {
   file: IFileOutput;
   fileList: Array<IFile>;
   fileUploadUrlRequest: FileUploadUrlResponse;
-  forumFolderRead: ForumFolderReadOutput;
-  forumFolders: ForumFolderListOutput;
-  forumRead: ForumReadOutput;
-  forums: ForumListOutput;
+  forumFolderRead: ForumFolderOutput;
+  forumRead: ForumOutput;
   getAllDocuments: GetAllDocumentsOutput;
   getAllMapsList: MapListConnection;
   getAllRecommendedSiteTextTranslationList: TranslationWithVoteListByLanguageListOutput;
   getAllRecommendedSiteTextTranslationListByLanguage: TranslationWithVoteListByLanguageOutput;
-  getAllSiteTextDefinitions: SiteTextDefinitionListOutput;
+  getAllSiteTextDefinitions: SiteTextDefinitionListConnection;
   getAllSiteTextLanguageList: SiteTextLanguageListOutput;
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput;
   getAllTranslationFromSiteTextDefinitionID: TranslationWithVoteListOutput;
@@ -1565,6 +1575,8 @@ export type Query = {
   getDocument: GetDocumentOutput;
   getDocumentWordEntriesByDocumentId: DocumentWordEntriesOutput;
   getFlagsFromRef: FlagsOutput;
+  getForumFoldersList: ForumFolderListConnection;
+  getForumsList: ForumListConnection;
   getLanguageTranslationInfo: TranslatedLanguageInfoOutput;
   getMapDetails: MapDetailsOutput;
   getMapVoteStatus: MapVoteStatusOutputRow;
@@ -1591,6 +1603,7 @@ export type Query = {
   getRecommendedTranslationFromDefinitionID: TranslationWithVoteOutput;
   getRecommendedTranslationFromDefinitionIDs: TranslationWithVoteListOutput;
   getRecommendedTranslationFromSiteTextDefinitionID: TranslationWithVoteOutput;
+  getThreadsList: ThreadListConnection;
   getTotalPosts: PostCountOutput;
   getTranslationsByFromDefinitionId: TranslationWithVoteListOutput;
   getWordDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
@@ -1622,8 +1635,7 @@ export type Query = {
   readWordRanges: WordRangesOutput;
   siteTextPhraseDefinitionRead: SiteTextPhraseDefinitionOutput;
   siteTextWordDefinitionRead: SiteTextWordDefinitionOutput;
-  threadRead: ThreadReadOutput;
-  threads: ThreadListOutput;
+  threadRead: ThreadOutput;
   userReadResolver: UserReadOutput;
   wordDefinitionRead: WordDefinitionOutput;
   wordRead: WordOutput;
@@ -1644,17 +1656,12 @@ export type QueryFileUploadUrlRequestArgs = {
 
 
 export type QueryForumFolderReadArgs = {
-  input: ForumFolderReadInput;
-};
-
-
-export type QueryForumFoldersArgs = {
-  input: ForumFolderListInput;
+  forum_folder_id: Scalars['ID']['input'];
 };
 
 
 export type QueryForumReadArgs = {
-  input: ForumReadInput;
+  forum_id: Scalars['ID']['input'];
 };
 
 
@@ -1678,7 +1685,9 @@ export type QueryGetAllRecommendedSiteTextTranslationListByLanguageArgs = {
 
 
 export type QueryGetAllSiteTextDefinitionsArgs = {
-  filter?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['ID']['input']>;
+  filters?: InputMaybe<SiteTextDefinitionListFilterInput>;
+  first?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1709,6 +1718,21 @@ export type QueryGetDocumentWordEntriesByDocumentIdArgs = {
 export type QueryGetFlagsFromRefArgs = {
   parent_id: Scalars['String']['input'];
   parent_table: TableNameType;
+};
+
+
+export type QueryGetForumFoldersListArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
+  filter?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  forum_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetForumsListArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
+  filter?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1859,6 +1883,14 @@ export type QueryGetRecommendedTranslationFromSiteTextDefinitionIdArgs = {
   language_code: Scalars['String']['input'];
   site_text_id: Scalars['ID']['input'];
   site_text_type_is_word: Scalars['Boolean']['input'];
+};
+
+
+export type QueryGetThreadsListArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
+  filter?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  forum_folder_id: Scalars['String']['input'];
 };
 
 
@@ -2021,12 +2053,7 @@ export type QuerySiteTextWordDefinitionReadArgs = {
 
 
 export type QueryThreadReadArgs = {
-  input: ThreadReadInput;
-};
-
-
-export type QueryThreadsArgs = {
-  input: ThreadListInput;
+  thread_id: Scalars['ID']['input'];
 };
 
 
@@ -2148,10 +2175,26 @@ export type Session = {
 
 export type SiteTextDefinition = SiteTextPhraseDefinition | SiteTextWordDefinition;
 
-export type SiteTextDefinitionListOutput = {
-  __typename?: 'SiteTextDefinitionListOutput';
+export type SiteTextDefinitionEdge = {
+  __typename?: 'SiteTextDefinitionEdge';
+  cursor: Scalars['ID']['output'];
+  node: SiteTextDefinition;
+};
+
+export type SiteTextDefinitionListConnection = {
+  __typename?: 'SiteTextDefinitionListConnection';
+  edges: Array<SiteTextDefinitionEdge>;
   error: ErrorType;
-  site_text_definition_list: Array<Maybe<SiteTextDefinition>>;
+  pageInfo: PageInfo;
+};
+
+export type SiteTextDefinitionListFilterInput = {
+  filter?: InputMaybe<Scalars['String']['input']>;
+  isSortDescending?: InputMaybe<Scalars['Boolean']['input']>;
+  onlyNotTranslated?: InputMaybe<Scalars['Boolean']['input']>;
+  onlyTranslated?: InputMaybe<Scalars['Boolean']['input']>;
+  quickFilter?: InputMaybe<Scalars['String']['input']>;
+  targetLanguage?: InputMaybe<LanguageInput>;
 };
 
 export type SiteTextDefinitionOutput = {
@@ -2192,6 +2235,12 @@ export type SiteTextPhraseDefinition = {
   __typename?: 'SiteTextPhraseDefinition';
   phrase_definition: PhraseDefinition;
   site_text_id: Scalars['ID']['output'];
+};
+
+export type SiteTextPhraseDefinitionEdge = {
+  __typename?: 'SiteTextPhraseDefinitionEdge';
+  cursor: Scalars['ID']['output'];
+  node: SiteTextPhraseDefinition;
 };
 
 export type SiteTextPhraseDefinitionOutput = {
@@ -2237,6 +2286,12 @@ export type SiteTextWordDefinition = {
   word_definition: WordDefinition;
 };
 
+export type SiteTextWordDefinitionEdge = {
+  __typename?: 'SiteTextWordDefinitionEdge';
+  cursor: Scalars['ID']['output'];
+  node: SiteTextWordDefinition;
+};
+
 export type SiteTextWordDefinitionOutput = {
   __typename?: 'SiteTextWordDefinitionOutput';
   error: ErrorType;
@@ -2270,10 +2325,15 @@ export enum TableNameType {
   OriginalMaps = 'original_maps',
   Pericopies = 'pericopies',
   PhraseDefinitions = 'phrase_definitions',
+  PhraseToPhraseTranslations = 'phrase_to_phrase_translations',
+  PhraseToWordTranslations = 'phrase_to_word_translations',
   Phrases = 'phrases',
+  Threads = 'threads',
   TranslatedMaps = 'translated_maps',
   WordDefinitions = 'word_definitions',
   WordRanges = 'word_ranges',
+  WordToPhraseTranslations = 'word_to_phrase_translations',
+  WordToWordTranslations = 'word_to_word_translations',
   Words = 'words'
 }
 
@@ -2297,12 +2357,10 @@ export type TextyDocumentInput = {
 
 export type Thread = {
   __typename?: 'Thread';
+  created_by: Scalars['String']['output'];
+  forum_folder_id: Scalars['String']['output'];
   name: Scalars['String']['output'];
   thread_id: Scalars['ID']['output'];
-};
-
-export type ThreadDeleteInput = {
-  thread_id: Scalars['ID']['input'];
 };
 
 export type ThreadDeleteOutput = {
@@ -2311,36 +2369,29 @@ export type ThreadDeleteOutput = {
   thread_id: Scalars['ID']['output'];
 };
 
-export type ThreadListInput = {
-  folder_id: Scalars['ID']['input'];
+export type ThreadEdge = {
+  __typename?: 'ThreadEdge';
+  cursor: Scalars['ID']['output'];
+  node: Thread;
 };
 
-export type ThreadListOutput = {
-  __typename?: 'ThreadListOutput';
+export type ThreadListConnection = {
+  __typename?: 'ThreadListConnection';
+  edges: Array<ThreadEdge>;
   error: ErrorType;
-  threads: Array<Thread>;
+  pageInfo: PageInfo;
 };
 
-export type ThreadReadInput = {
-  thread_id: Scalars['ID']['input'];
-};
-
-export type ThreadReadOutput = {
-  __typename?: 'ThreadReadOutput';
+export type ThreadOutput = {
+  __typename?: 'ThreadOutput';
   error: ErrorType;
   thread?: Maybe<Thread>;
 };
 
 export type ThreadUpsertInput = {
-  folder_id: Scalars['ID']['input'];
+  forum_folder_id: Scalars['String']['input'];
   name: Scalars['String']['input'];
   thread_id?: InputMaybe<Scalars['ID']['input']>;
-};
-
-export type ThreadUpsertOutput = {
-  __typename?: 'ThreadUpsertOutput';
-  error: ErrorType;
-  thread?: Maybe<Thread>;
 };
 
 export type ToDefinitionInput = {
@@ -2853,6 +2904,27 @@ export type PasswordResetFormRequestMutationVariables = Exact<{
 
 export type PasswordResetFormRequestMutation = { __typename?: 'Mutation', passwordResetFormResolver: { __typename?: 'LoginOutput', error: ErrorType, session?: { __typename?: 'Session', user_id: string, token: string, avatar: string, avatar_url?: string | null } | null } };
 
+export type GenerateMapsMutationVariables = Exact<{
+  map_amount?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GenerateMapsMutation = { __typename?: 'Mutation', populateMaps: { __typename?: 'GenericOutput', error: ErrorType } };
+
+export type GenerateMapTranslationsMutationVariables = Exact<{
+  to_languages: Array<LanguageInput> | LanguageInput;
+}>;
+
+
+export type GenerateMapTranslationsMutation = { __typename?: 'Mutation', populateMapTranslations: { __typename?: 'GenericOutput', error: ErrorType } };
+
+export type MapsReTranslateToLangsMutationVariables = Exact<{
+  forLangTags: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type MapsReTranslateToLangsMutation = { __typename?: 'Mutation', mapsReTranslateToLangs: { __typename?: 'GenericOutput', error: ErrorType } };
+
 export type WordlikeStringFragmentFragment = { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string };
 
 export type WordFragmentFragment = { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } };
@@ -3046,115 +3118,137 @@ export type ToggleFlagWithRefMutationVariables = Exact<{
 
 export type ToggleFlagWithRefMutation = { __typename?: 'Mutation', toggleFlagWithRef: { __typename?: 'FlagsOutput', error: ErrorType, flags: Array<{ __typename?: 'Flag', flag_id: string, parent_table: string, parent_id: string, name: FlagType, created_at: string, created_by: string }> } };
 
-export type CreateThreadMutationVariables = Exact<{
-  name: Scalars['String']['input'];
-  folder_id: Scalars['ID']['input'];
-}>;
+export type ThreadFragmentFragment = { __typename?: 'Thread', thread_id: string, forum_folder_id: string, name: string, created_by: string };
 
+export type ForumFolderFragmentFragment = { __typename?: 'ForumFolder', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string };
 
-export type CreateThreadMutation = { __typename?: 'Mutation', threadUpsert: { __typename?: 'ThreadUpsertOutput', error: ErrorType, thread?: { __typename?: 'Thread', thread_id: string, name: string } | null } };
+export type ForumFragmentFragment = { __typename?: 'Forum', forum_id: string, name: string, description?: string | null, created_by: string };
+
+export type ThreadEdgeFragmentFragment = { __typename?: 'ThreadEdge', cursor: string, node: { __typename?: 'Thread', thread_id: string, forum_folder_id: string, name: string, created_by: string } };
+
+export type ForumFolderEdgeFragmentFragment = { __typename?: 'ForumFolderEdge', cursor: string, node: { __typename?: 'ForumFolder', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string } };
+
+export type ForumEdgeFragmentFragment = { __typename?: 'ForumEdge', cursor: string, node: { __typename?: 'Forum', forum_id: string, name: string, description?: string | null, created_by: string } };
 
 export type GetThreadByIdQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
+  thread_id: Scalars['ID']['input'];
 }>;
 
 
-export type GetThreadByIdQuery = { __typename?: 'Query', threadRead: { __typename?: 'ThreadReadOutput', error: ErrorType, thread?: { __typename?: 'Thread', thread_id: string, name: string } | null } };
+export type GetThreadByIdQuery = { __typename?: 'Query', threadRead: { __typename?: 'ThreadOutput', error: ErrorType, thread?: { __typename?: 'Thread', thread_id: string, forum_folder_id: string, name: string, created_by: string } | null } };
 
-export type GetThreadsQueryVariables = Exact<{
-  folder_id: Scalars['ID']['input'];
+export type GetThreadsListQueryVariables = Exact<{
+  forum_folder_id: Scalars['String']['input'];
+  filter?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetThreadsQuery = { __typename?: 'Query', threads: { __typename?: 'ThreadListOutput', error: ErrorType, threads: Array<{ __typename: 'Thread', thread_id: string, name: string }> } };
+export type GetThreadsListQuery = { __typename?: 'Query', getThreadsList: { __typename?: 'ThreadListConnection', error: ErrorType, edges: Array<{ __typename?: 'ThreadEdge', cursor: string, node: { __typename?: 'Thread', thread_id: string, forum_folder_id: string, name: string, created_by: string } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+
+export type CreateThreadMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  forum_folder_id: Scalars['String']['input'];
+}>;
+
+
+export type CreateThreadMutation = { __typename?: 'Mutation', threadUpsert: { __typename?: 'ThreadOutput', error: ErrorType, thread?: { __typename?: 'Thread', thread_id: string, forum_folder_id: string, name: string, created_by: string } | null } };
 
 export type UpdateThreadMutationVariables = Exact<{
   thread_id?: InputMaybe<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
-  folder_id: Scalars['ID']['input'];
+  forum_folder_id: Scalars['String']['input'];
 }>;
 
 
-export type UpdateThreadMutation = { __typename?: 'Mutation', threadUpsert: { __typename?: 'ThreadUpsertOutput', error: ErrorType, thread?: { __typename?: 'Thread', thread_id: string, name: string } | null } };
+export type UpdateThreadMutation = { __typename?: 'Mutation', threadUpsert: { __typename?: 'ThreadOutput', error: ErrorType, thread?: { __typename?: 'Thread', thread_id: string, forum_folder_id: string, name: string, created_by: string } | null } };
 
 export type DeleteThreadMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
+  thread_id: Scalars['ID']['input'];
 }>;
 
 
 export type DeleteThreadMutation = { __typename?: 'Mutation', threadDelete: { __typename?: 'ThreadDeleteOutput', error: ErrorType, thread_id: string } };
 
-export type ForumFolderFragmentFragment = { __typename?: 'ForumFolder', folder_id: string, name: string };
+export type GetForumFolderByIdQueryVariables = Exact<{
+  forum_folder_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetForumFolderByIdQuery = { __typename?: 'Query', forumFolderRead: { __typename?: 'ForumFolderOutput', error: ErrorType, folder?: { __typename?: 'ForumFolder', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string } | null } };
+
+export type GetForumFoldersListQueryVariables = Exact<{
+  forum_id: Scalars['ID']['input'];
+  filter?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetForumFoldersListQuery = { __typename?: 'Query', getForumFoldersList: { __typename?: 'ForumFolderListConnection', error: ErrorType, edges: Array<{ __typename?: 'ForumFolderEdge', cursor: string, node: { __typename?: 'ForumFolder', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
 
 export type CreateForumFolderMutationVariables = Exact<{
   name: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
   forum_id: Scalars['ID']['input'];
 }>;
 
 
-export type CreateForumFolderMutation = { __typename?: 'Mutation', forumFolderUpsert: { __typename?: 'ForumFolderUpsertOutput', error: ErrorType, folder?: { __typename?: 'ForumFolder', folder_id: string, name: string } | null } };
-
-export type GetForumFolderByIdQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type GetForumFolderByIdQuery = { __typename?: 'Query', forumFolderRead: { __typename?: 'ForumFolderReadOutput', error: ErrorType, folder?: { __typename?: 'ForumFolder', folder_id: string, name: string } | null } };
-
-export type GetForumFoldersQueryVariables = Exact<{
-  forum_id: Scalars['ID']['input'];
-}>;
-
-
-export type GetForumFoldersQuery = { __typename?: 'Query', forumFolders: { __typename?: 'ForumFolderListOutput', error: ErrorType, folders: Array<{ __typename?: 'ForumFolder', folder_id: string, name: string }> } };
+export type CreateForumFolderMutation = { __typename?: 'Mutation', forumFolderUpsert: { __typename?: 'ForumFolderOutput', error: ErrorType, folder?: { __typename?: 'ForumFolder', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string } | null } };
 
 export type UpdateForumFolderMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
+  forum_folder_id?: InputMaybe<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
   forum_id: Scalars['ID']['input'];
 }>;
 
 
-export type UpdateForumFolderMutation = { __typename?: 'Mutation', forumFolderUpsert: { __typename?: 'ForumFolderUpsertOutput', error: ErrorType, folder?: { __typename?: 'ForumFolder', folder_id: string, name: string } | null } };
+export type UpdateForumFolderMutation = { __typename?: 'Mutation', forumFolderUpsert: { __typename?: 'ForumFolderOutput', error: ErrorType, folder?: { __typename?: 'ForumFolder', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string } | null } };
 
 export type DeleteForumFolderMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
+  forum_folder_id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteForumFolderMutation = { __typename?: 'Mutation', forumFolderDelete: { __typename?: 'ForumFolderDeleteOutput', error: ErrorType, folder_id: string } };
+export type DeleteForumFolderMutation = { __typename?: 'Mutation', forumFolderDelete: { __typename?: 'ForumFolderDeleteOutput', error: ErrorType, forum_folder_id: string } };
 
-export type ForumFragmentFragment = { __typename?: 'Forum', forum_id: string, name: string };
+export type GetForumByIdQueryVariables = Exact<{
+  forum_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetForumByIdQuery = { __typename?: 'Query', forumRead: { __typename?: 'ForumOutput', error: ErrorType, forum?: { __typename?: 'Forum', forum_id: string, name: string, description?: string | null, created_by: string } | null } };
+
+export type GetForumsListQueryVariables = Exact<{
+  filter?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type GetForumsListQuery = { __typename?: 'Query', getForumsList: { __typename?: 'ForumListConnection', error: ErrorType, edges: Array<{ __typename?: 'ForumEdge', cursor: string, node: { __typename?: 'Forum', forum_id: string, name: string, description?: string | null, created_by: string } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
 
 export type CreateForumMutationVariables = Exact<{
   name: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type CreateForumMutation = { __typename?: 'Mutation', forumUpsert: { __typename?: 'ForumUpsertOutput', error: ErrorType, forum?: { __typename?: 'Forum', forum_id: string, name: string } | null } };
-
-export type GetForumByIdQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type GetForumByIdQuery = { __typename?: 'Query', forumRead: { __typename?: 'ForumReadOutput', error: ErrorType, forum?: { __typename?: 'Forum', forum_id: string, name: string } | null } };
-
-export type GetForumsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetForumsQuery = { __typename?: 'Query', forums: { __typename?: 'ForumListOutput', error: ErrorType, forums: Array<{ __typename?: 'Forum', forum_id: string, name: string }> } };
+export type CreateForumMutation = { __typename?: 'Mutation', forumUpsert: { __typename?: 'ForumOutput', error: ErrorType, forum?: { __typename?: 'Forum', forum_id: string, name: string, description?: string | null, created_by: string } | null } };
 
 export type UpdateForumMutationVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type UpdateForumMutation = { __typename?: 'Mutation', forumUpsert: { __typename?: 'ForumUpsertOutput', error: ErrorType, forum?: { __typename?: 'Forum', forum_id: string, name: string } | null } };
+export type UpdateForumMutation = { __typename?: 'Mutation', forumUpsert: { __typename?: 'ForumOutput', error: ErrorType, forum?: { __typename?: 'Forum', forum_id: string, name: string, description?: string | null, created_by: string } | null } };
 
 export type DeleteForumMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
+  forum_id: Scalars['ID']['input'];
 }>;
 
 
@@ -3504,6 +3598,12 @@ export type SiteTextPhraseDefinitionFragmentFragment = { __typename?: 'SiteTextP
 
 export type SiteTextWordDefinitionFragmentFragment = { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } };
 
+export type SiteTextWordDefinitionEdgeFragmentFragment = { __typename?: 'SiteTextWordDefinitionEdge', cursor: string, node: { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } };
+
+export type SiteTextPhraseDefinitionEdgeFragmentFragment = { __typename?: 'SiteTextPhraseDefinitionEdge', cursor: string, node: { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } };
+
+export type SiteTextDefinitionEdgeFragmentFragment = { __typename?: 'SiteTextDefinitionEdge', cursor: string, node: { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } };
+
 export type SiteTextLanguageFragmentFragment = { __typename?: 'SiteTextLanguage', language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
 export type TranslationWithVoteListByLanguageFragmentFragment = { __typename?: 'TranslationWithVoteListByLanguage', dialect_code?: string | null, geo_code?: string | null, language_code: string, translation_with_vote_list: Array<{ __typename?: 'PhraseToPhraseTranslationWithVote', phrase_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'PhraseToWordTranslationWithVote', phrase_to_word_translation_id: string, downvotes: number, upvotes: number, from_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'WordToPhraseTranslationWithVote', word_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'WordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | null> };
@@ -3512,10 +3612,16 @@ export type SiteTextLanguageWithTranslationInfoFragmentFragment = { __typename?:
 
 export type GetAllSiteTextDefinitionsQueryVariables = Exact<{
   filter?: InputMaybe<Scalars['String']['input']>;
+  onlyNotTranslated?: InputMaybe<Scalars['Boolean']['input']>;
+  onlyTranslated?: InputMaybe<Scalars['Boolean']['input']>;
+  quickFilter?: InputMaybe<Scalars['String']['input']>;
+  targetLanguage?: InputMaybe<LanguageInput>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
-export type GetAllSiteTextDefinitionsQuery = { __typename?: 'Query', getAllSiteTextDefinitions: { __typename?: 'SiteTextDefinitionListOutput', error: ErrorType, site_text_definition_list: Array<{ __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | null> } };
+export type GetAllSiteTextDefinitionsQuery = { __typename?: 'Query', getAllSiteTextDefinitions: { __typename?: 'SiteTextDefinitionListConnection', error: ErrorType, edges: Array<{ __typename?: 'SiteTextDefinitionEdge', cursor: string, node: { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
 
 export type GetAllTranslationFromSiteTextDefinitionIdQueryVariables = Exact<{
   site_text_id: Scalars['ID']['input'];
@@ -4132,18 +4238,55 @@ export const PhraseDefinitionListEdgeFragmentFragmentDoc = gql`
   }
 }
     ${PhraseDefinitionFragmentFragmentDoc}`;
-export const ForumFolderFragmentFragmentDoc = gql`
-    fragment ForumFolderFragment on ForumFolder {
-  folder_id
+export const ThreadFragmentFragmentDoc = gql`
+    fragment ThreadFragment on Thread {
+  thread_id
+  forum_folder_id
   name
+  created_by
 }
     `;
+export const ThreadEdgeFragmentFragmentDoc = gql`
+    fragment ThreadEdgeFragment on ThreadEdge {
+  cursor
+  node {
+    ...ThreadFragment
+  }
+}
+    ${ThreadFragmentFragmentDoc}`;
+export const ForumFolderFragmentFragmentDoc = gql`
+    fragment ForumFolderFragment on ForumFolder {
+  forum_folder_id
+  forum_id
+  name
+  description
+  created_by
+}
+    `;
+export const ForumFolderEdgeFragmentFragmentDoc = gql`
+    fragment ForumFolderEdgeFragment on ForumFolderEdge {
+  cursor
+  node {
+    ...ForumFolderFragment
+  }
+}
+    ${ForumFolderFragmentFragmentDoc}`;
 export const ForumFragmentFragmentDoc = gql`
     fragment ForumFragment on Forum {
   forum_id
   name
+  description
+  created_by
 }
     `;
+export const ForumEdgeFragmentFragmentDoc = gql`
+    fragment ForumEdgeFragment on ForumEdge {
+  cursor
+  node {
+    ...ForumFragment
+  }
+}
+    ${ForumFragmentFragmentDoc}`;
 export const MapDetailsOutputFragmentFragmentDoc = gql`
     fragment MapDetailsOutputFragment on MapDetailsOutput {
   error
@@ -4379,14 +4522,6 @@ export const QuestionOnWordRangeFragmentFragmentDoc = gql`
 }
     ${QuestionItemFragmentFragmentDoc}
 ${DocumentWordEntryFragmentFragmentDoc}`;
-export const SiteTextPhraseDefinitionFragmentFragmentDoc = gql`
-    fragment SiteTextPhraseDefinitionFragment on SiteTextPhraseDefinition {
-  site_text_id
-  phrase_definition {
-    ...PhraseDefinitionFragment
-  }
-}
-    ${PhraseDefinitionFragmentFragmentDoc}`;
 export const SiteTextWordDefinitionFragmentFragmentDoc = gql`
     fragment SiteTextWordDefinitionFragment on SiteTextWordDefinition {
   site_text_id
@@ -4395,6 +4530,40 @@ export const SiteTextWordDefinitionFragmentFragmentDoc = gql`
   }
 }
     ${WordDefinitionFragmentFragmentDoc}`;
+export const SiteTextWordDefinitionEdgeFragmentFragmentDoc = gql`
+    fragment SiteTextWordDefinitionEdgeFragment on SiteTextWordDefinitionEdge {
+  cursor
+  node {
+    ...SiteTextWordDefinitionFragment
+  }
+}
+    ${SiteTextWordDefinitionFragmentFragmentDoc}`;
+export const SiteTextPhraseDefinitionFragmentFragmentDoc = gql`
+    fragment SiteTextPhraseDefinitionFragment on SiteTextPhraseDefinition {
+  site_text_id
+  phrase_definition {
+    ...PhraseDefinitionFragment
+  }
+}
+    ${PhraseDefinitionFragmentFragmentDoc}`;
+export const SiteTextPhraseDefinitionEdgeFragmentFragmentDoc = gql`
+    fragment SiteTextPhraseDefinitionEdgeFragment on SiteTextPhraseDefinitionEdge {
+  cursor
+  node {
+    ...SiteTextPhraseDefinitionFragment
+  }
+}
+    ${SiteTextPhraseDefinitionFragmentFragmentDoc}`;
+export const SiteTextDefinitionEdgeFragmentFragmentDoc = gql`
+    fragment SiteTextDefinitionEdgeFragment on SiteTextDefinitionEdge {
+  cursor
+  node {
+    ...SiteTextPhraseDefinitionFragment
+    ...SiteTextWordDefinitionFragment
+  }
+}
+    ${SiteTextPhraseDefinitionFragmentFragmentDoc}
+${SiteTextWordDefinitionFragmentFragmentDoc}`;
 export const SiteTextLanguageFragmentFragmentDoc = gql`
     fragment SiteTextLanguageFragment on SiteTextLanguage {
   language_code
@@ -4851,6 +5020,105 @@ export function usePasswordResetFormRequestMutation(baseOptions?: Apollo.Mutatio
 export type PasswordResetFormRequestMutationHookResult = ReturnType<typeof usePasswordResetFormRequestMutation>;
 export type PasswordResetFormRequestMutationResult = Apollo.MutationResult<PasswordResetFormRequestMutation>;
 export type PasswordResetFormRequestMutationOptions = Apollo.BaseMutationOptions<PasswordResetFormRequestMutation, PasswordResetFormRequestMutationVariables>;
+export const GenerateMapsDocument = gql`
+    mutation GenerateMaps($map_amount: Int) {
+  populateMaps(map_amount: $map_amount) {
+    error
+  }
+}
+    `;
+export type GenerateMapsMutationFn = Apollo.MutationFunction<GenerateMapsMutation, GenerateMapsMutationVariables>;
+
+/**
+ * __useGenerateMapsMutation__
+ *
+ * To run a mutation, you first call `useGenerateMapsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGenerateMapsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [generateMapsMutation, { data, loading, error }] = useGenerateMapsMutation({
+ *   variables: {
+ *      map_amount: // value for 'map_amount'
+ *   },
+ * });
+ */
+export function useGenerateMapsMutation(baseOptions?: Apollo.MutationHookOptions<GenerateMapsMutation, GenerateMapsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GenerateMapsMutation, GenerateMapsMutationVariables>(GenerateMapsDocument, options);
+      }
+export type GenerateMapsMutationHookResult = ReturnType<typeof useGenerateMapsMutation>;
+export type GenerateMapsMutationResult = Apollo.MutationResult<GenerateMapsMutation>;
+export type GenerateMapsMutationOptions = Apollo.BaseMutationOptions<GenerateMapsMutation, GenerateMapsMutationVariables>;
+export const GenerateMapTranslationsDocument = gql`
+    mutation GenerateMapTranslations($to_languages: [LanguageInput!]!) {
+  populateMapTranslations(to_languages: $to_languages) {
+    error
+  }
+}
+    `;
+export type GenerateMapTranslationsMutationFn = Apollo.MutationFunction<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>;
+
+/**
+ * __useGenerateMapTranslationsMutation__
+ *
+ * To run a mutation, you first call `useGenerateMapTranslationsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGenerateMapTranslationsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [generateMapTranslationsMutation, { data, loading, error }] = useGenerateMapTranslationsMutation({
+ *   variables: {
+ *      to_languages: // value for 'to_languages'
+ *   },
+ * });
+ */
+export function useGenerateMapTranslationsMutation(baseOptions?: Apollo.MutationHookOptions<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>(GenerateMapTranslationsDocument, options);
+      }
+export type GenerateMapTranslationsMutationHookResult = ReturnType<typeof useGenerateMapTranslationsMutation>;
+export type GenerateMapTranslationsMutationResult = Apollo.MutationResult<GenerateMapTranslationsMutation>;
+export type GenerateMapTranslationsMutationOptions = Apollo.BaseMutationOptions<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>;
+export const MapsReTranslateToLangsDocument = gql`
+    mutation MapsReTranslateToLangs($forLangTags: [String!]!) {
+  mapsReTranslateToLangs(forLangTags: $forLangTags) {
+    error
+  }
+}
+    `;
+export type MapsReTranslateToLangsMutationFn = Apollo.MutationFunction<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>;
+
+/**
+ * __useMapsReTranslateToLangsMutation__
+ *
+ * To run a mutation, you first call `useMapsReTranslateToLangsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMapsReTranslateToLangsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mapsReTranslateToLangsMutation, { data, loading, error }] = useMapsReTranslateToLangsMutation({
+ *   variables: {
+ *      forLangTags: // value for 'forLangTags'
+ *   },
+ * });
+ */
+export function useMapsReTranslateToLangsMutation(baseOptions?: Apollo.MutationHookOptions<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>(MapsReTranslateToLangsDocument, options);
+      }
+export type MapsReTranslateToLangsMutationHookResult = ReturnType<typeof useMapsReTranslateToLangsMutation>;
+export type MapsReTranslateToLangsMutationResult = Apollo.MutationResult<MapsReTranslateToLangsMutation>;
+export type MapsReTranslateToLangsMutationOptions = Apollo.BaseMutationOptions<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>;
 export const WordDefinitionReadDocument = gql`
     query WordDefinitionRead($id: ID!) {
   wordDefinitionRead(id: $id) {
@@ -5636,17 +5904,104 @@ export function useToggleFlagWithRefMutation(baseOptions?: Apollo.MutationHookOp
 export type ToggleFlagWithRefMutationHookResult = ReturnType<typeof useToggleFlagWithRefMutation>;
 export type ToggleFlagWithRefMutationResult = Apollo.MutationResult<ToggleFlagWithRefMutation>;
 export type ToggleFlagWithRefMutationOptions = Apollo.BaseMutationOptions<ToggleFlagWithRefMutation, ToggleFlagWithRefMutationVariables>;
-export const CreateThreadDocument = gql`
-    mutation CreateThread($name: String!, $folder_id: ID!) {
-  threadUpsert(input: {name: $name, folder_id: $folder_id}) {
+export const GetThreadByIdDocument = gql`
+    query GetThreadById($thread_id: ID!) {
+  threadRead(thread_id: $thread_id) {
     error
     thread {
-      thread_id
-      name
+      ...ThreadFragment
     }
   }
 }
-    `;
+    ${ThreadFragmentFragmentDoc}`;
+
+/**
+ * __useGetThreadByIdQuery__
+ *
+ * To run a query within a React component, call `useGetThreadByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetThreadByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetThreadByIdQuery({
+ *   variables: {
+ *      thread_id: // value for 'thread_id'
+ *   },
+ * });
+ */
+export function useGetThreadByIdQuery(baseOptions: Apollo.QueryHookOptions<GetThreadByIdQuery, GetThreadByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetThreadByIdQuery, GetThreadByIdQueryVariables>(GetThreadByIdDocument, options);
+      }
+export function useGetThreadByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetThreadByIdQuery, GetThreadByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetThreadByIdQuery, GetThreadByIdQueryVariables>(GetThreadByIdDocument, options);
+        }
+export type GetThreadByIdQueryHookResult = ReturnType<typeof useGetThreadByIdQuery>;
+export type GetThreadByIdLazyQueryHookResult = ReturnType<typeof useGetThreadByIdLazyQuery>;
+export type GetThreadByIdQueryResult = Apollo.QueryResult<GetThreadByIdQuery, GetThreadByIdQueryVariables>;
+export const GetThreadsListDocument = gql`
+    query GetThreadsList($forum_folder_id: String!, $filter: String, $after: ID, $first: Int) {
+  getThreadsList(
+    forum_folder_id: $forum_folder_id
+    filter: $filter
+    after: $after
+    first: $first
+  ) {
+    error
+    edges {
+      ...ThreadEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+    ${ThreadEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
+
+/**
+ * __useGetThreadsListQuery__
+ *
+ * To run a query within a React component, call `useGetThreadsListQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetThreadsListQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetThreadsListQuery({
+ *   variables: {
+ *      forum_folder_id: // value for 'forum_folder_id'
+ *      filter: // value for 'filter'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function useGetThreadsListQuery(baseOptions: Apollo.QueryHookOptions<GetThreadsListQuery, GetThreadsListQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetThreadsListQuery, GetThreadsListQueryVariables>(GetThreadsListDocument, options);
+      }
+export function useGetThreadsListLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetThreadsListQuery, GetThreadsListQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetThreadsListQuery, GetThreadsListQueryVariables>(GetThreadsListDocument, options);
+        }
+export type GetThreadsListQueryHookResult = ReturnType<typeof useGetThreadsListQuery>;
+export type GetThreadsListLazyQueryHookResult = ReturnType<typeof useGetThreadsListLazyQuery>;
+export type GetThreadsListQueryResult = Apollo.QueryResult<GetThreadsListQuery, GetThreadsListQueryVariables>;
+export const CreateThreadDocument = gql`
+    mutation CreateThread($name: String!, $forum_folder_id: String!) {
+  threadUpsert(input: {name: $name, forum_folder_id: $forum_folder_id}) {
+    error
+    thread {
+      ...ThreadFragment
+    }
+  }
+}
+    ${ThreadFragmentFragmentDoc}`;
 export type CreateThreadMutationFn = Apollo.MutationFunction<CreateThreadMutation, CreateThreadMutationVariables>;
 
 /**
@@ -5663,7 +6018,7 @@ export type CreateThreadMutationFn = Apollo.MutationFunction<CreateThreadMutatio
  * const [createThreadMutation, { data, loading, error }] = useCreateThreadMutation({
  *   variables: {
  *      name: // value for 'name'
- *      folder_id: // value for 'folder_id'
+ *      forum_folder_id: // value for 'forum_folder_id'
  *   },
  * });
  */
@@ -5674,96 +6029,18 @@ export function useCreateThreadMutation(baseOptions?: Apollo.MutationHookOptions
 export type CreateThreadMutationHookResult = ReturnType<typeof useCreateThreadMutation>;
 export type CreateThreadMutationResult = Apollo.MutationResult<CreateThreadMutation>;
 export type CreateThreadMutationOptions = Apollo.BaseMutationOptions<CreateThreadMutation, CreateThreadMutationVariables>;
-export const GetThreadByIdDocument = gql`
-    query GetThreadById($id: ID!) {
-  threadRead(input: {thread_id: $id}) {
-    error
-    thread {
-      thread_id
-      name
-    }
-  }
-}
-    `;
-
-/**
- * __useGetThreadByIdQuery__
- *
- * To run a query within a React component, call `useGetThreadByIdQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetThreadByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetThreadByIdQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useGetThreadByIdQuery(baseOptions: Apollo.QueryHookOptions<GetThreadByIdQuery, GetThreadByIdQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetThreadByIdQuery, GetThreadByIdQueryVariables>(GetThreadByIdDocument, options);
-      }
-export function useGetThreadByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetThreadByIdQuery, GetThreadByIdQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetThreadByIdQuery, GetThreadByIdQueryVariables>(GetThreadByIdDocument, options);
-        }
-export type GetThreadByIdQueryHookResult = ReturnType<typeof useGetThreadByIdQuery>;
-export type GetThreadByIdLazyQueryHookResult = ReturnType<typeof useGetThreadByIdLazyQuery>;
-export type GetThreadByIdQueryResult = Apollo.QueryResult<GetThreadByIdQuery, GetThreadByIdQueryVariables>;
-export const GetThreadsDocument = gql`
-    query GetThreads($folder_id: ID!) {
-  threads(input: {folder_id: $folder_id}) {
-    error
-    threads {
-      __typename
-      thread_id
-      name
-    }
-  }
-}
-    `;
-
-/**
- * __useGetThreadsQuery__
- *
- * To run a query within a React component, call `useGetThreadsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetThreadsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetThreadsQuery({
- *   variables: {
- *      folder_id: // value for 'folder_id'
- *   },
- * });
- */
-export function useGetThreadsQuery(baseOptions: Apollo.QueryHookOptions<GetThreadsQuery, GetThreadsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetThreadsQuery, GetThreadsQueryVariables>(GetThreadsDocument, options);
-      }
-export function useGetThreadsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetThreadsQuery, GetThreadsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetThreadsQuery, GetThreadsQueryVariables>(GetThreadsDocument, options);
-        }
-export type GetThreadsQueryHookResult = ReturnType<typeof useGetThreadsQuery>;
-export type GetThreadsLazyQueryHookResult = ReturnType<typeof useGetThreadsLazyQuery>;
-export type GetThreadsQueryResult = Apollo.QueryResult<GetThreadsQuery, GetThreadsQueryVariables>;
 export const UpdateThreadDocument = gql`
-    mutation UpdateThread($thread_id: ID, $name: String!, $folder_id: ID!) {
-  threadUpsert(input: {folder_id: $folder_id, name: $name, thread_id: $thread_id}) {
+    mutation UpdateThread($thread_id: ID, $name: String!, $forum_folder_id: String!) {
+  threadUpsert(
+    input: {forum_folder_id: $forum_folder_id, name: $name, thread_id: $thread_id}
+  ) {
     error
     thread {
-      thread_id
-      name
+      ...ThreadFragment
     }
   }
 }
-    `;
+    ${ThreadFragmentFragmentDoc}`;
 export type UpdateThreadMutationFn = Apollo.MutationFunction<UpdateThreadMutation, UpdateThreadMutationVariables>;
 
 /**
@@ -5781,7 +6058,7 @@ export type UpdateThreadMutationFn = Apollo.MutationFunction<UpdateThreadMutatio
  *   variables: {
  *      thread_id: // value for 'thread_id'
  *      name: // value for 'name'
- *      folder_id: // value for 'folder_id'
+ *      forum_folder_id: // value for 'forum_folder_id'
  *   },
  * });
  */
@@ -5793,8 +6070,8 @@ export type UpdateThreadMutationHookResult = ReturnType<typeof useUpdateThreadMu
 export type UpdateThreadMutationResult = Apollo.MutationResult<UpdateThreadMutation>;
 export type UpdateThreadMutationOptions = Apollo.BaseMutationOptions<UpdateThreadMutation, UpdateThreadMutationVariables>;
 export const DeleteThreadDocument = gql`
-    mutation DeleteThread($id: ID!) {
-  threadDelete(input: {thread_id: $id}) {
+    mutation DeleteThread($thread_id: ID!) {
+  threadDelete(thread_id: $thread_id) {
     error
     thread_id
   }
@@ -5815,7 +6092,7 @@ export type DeleteThreadMutationFn = Apollo.MutationFunction<DeleteThreadMutatio
  * @example
  * const [deleteThreadMutation, { data, loading, error }] = useDeleteThreadMutation({
  *   variables: {
- *      id: // value for 'id'
+ *      thread_id: // value for 'thread_id'
  *   },
  * });
  */
@@ -5826,9 +6103,99 @@ export function useDeleteThreadMutation(baseOptions?: Apollo.MutationHookOptions
 export type DeleteThreadMutationHookResult = ReturnType<typeof useDeleteThreadMutation>;
 export type DeleteThreadMutationResult = Apollo.MutationResult<DeleteThreadMutation>;
 export type DeleteThreadMutationOptions = Apollo.BaseMutationOptions<DeleteThreadMutation, DeleteThreadMutationVariables>;
+export const GetForumFolderByIdDocument = gql`
+    query GetForumFolderById($forum_folder_id: ID!) {
+  forumFolderRead(forum_folder_id: $forum_folder_id) {
+    error
+    folder {
+      ...ForumFolderFragment
+    }
+  }
+}
+    ${ForumFolderFragmentFragmentDoc}`;
+
+/**
+ * __useGetForumFolderByIdQuery__
+ *
+ * To run a query within a React component, call `useGetForumFolderByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetForumFolderByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetForumFolderByIdQuery({
+ *   variables: {
+ *      forum_folder_id: // value for 'forum_folder_id'
+ *   },
+ * });
+ */
+export function useGetForumFolderByIdQuery(baseOptions: Apollo.QueryHookOptions<GetForumFolderByIdQuery, GetForumFolderByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetForumFolderByIdQuery, GetForumFolderByIdQueryVariables>(GetForumFolderByIdDocument, options);
+      }
+export function useGetForumFolderByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetForumFolderByIdQuery, GetForumFolderByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetForumFolderByIdQuery, GetForumFolderByIdQueryVariables>(GetForumFolderByIdDocument, options);
+        }
+export type GetForumFolderByIdQueryHookResult = ReturnType<typeof useGetForumFolderByIdQuery>;
+export type GetForumFolderByIdLazyQueryHookResult = ReturnType<typeof useGetForumFolderByIdLazyQuery>;
+export type GetForumFolderByIdQueryResult = Apollo.QueryResult<GetForumFolderByIdQuery, GetForumFolderByIdQueryVariables>;
+export const GetForumFoldersListDocument = gql`
+    query GetForumFoldersList($forum_id: ID!, $filter: String, $after: ID, $first: Int) {
+  getForumFoldersList(
+    forum_id: $forum_id
+    filter: $filter
+    after: $after
+    first: $first
+  ) {
+    error
+    edges {
+      ...ForumFolderEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+    ${ForumFolderEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
+
+/**
+ * __useGetForumFoldersListQuery__
+ *
+ * To run a query within a React component, call `useGetForumFoldersListQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetForumFoldersListQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetForumFoldersListQuery({
+ *   variables: {
+ *      forum_id: // value for 'forum_id'
+ *      filter: // value for 'filter'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function useGetForumFoldersListQuery(baseOptions: Apollo.QueryHookOptions<GetForumFoldersListQuery, GetForumFoldersListQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetForumFoldersListQuery, GetForumFoldersListQueryVariables>(GetForumFoldersListDocument, options);
+      }
+export function useGetForumFoldersListLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetForumFoldersListQuery, GetForumFoldersListQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetForumFoldersListQuery, GetForumFoldersListQueryVariables>(GetForumFoldersListDocument, options);
+        }
+export type GetForumFoldersListQueryHookResult = ReturnType<typeof useGetForumFoldersListQuery>;
+export type GetForumFoldersListLazyQueryHookResult = ReturnType<typeof useGetForumFoldersListLazyQuery>;
+export type GetForumFoldersListQueryResult = Apollo.QueryResult<GetForumFoldersListQuery, GetForumFoldersListQueryVariables>;
 export const CreateForumFolderDocument = gql`
-    mutation CreateForumFolder($name: String!, $forum_id: ID!) {
-  forumFolderUpsert(input: {name: $name, forum_id: $forum_id}) {
+    mutation CreateForumFolder($name: String!, $description: String, $forum_id: ID!) {
+  forumFolderUpsert(
+    input: {name: $name, description: $description, forum_id: $forum_id}
+  ) {
     error
     folder {
       ...ForumFolderFragment
@@ -5852,6 +6219,7 @@ export type CreateForumFolderMutationFn = Apollo.MutationFunction<CreateForumFol
  * const [createForumFolderMutation, { data, loading, error }] = useCreateForumFolderMutation({
  *   variables: {
  *      name: // value for 'name'
+ *      description: // value for 'description'
  *      forum_id: // value for 'forum_id'
  *   },
  * });
@@ -5863,85 +6231,11 @@ export function useCreateForumFolderMutation(baseOptions?: Apollo.MutationHookOp
 export type CreateForumFolderMutationHookResult = ReturnType<typeof useCreateForumFolderMutation>;
 export type CreateForumFolderMutationResult = Apollo.MutationResult<CreateForumFolderMutation>;
 export type CreateForumFolderMutationOptions = Apollo.BaseMutationOptions<CreateForumFolderMutation, CreateForumFolderMutationVariables>;
-export const GetForumFolderByIdDocument = gql`
-    query GetForumFolderById($id: ID!) {
-  forumFolderRead(input: {folder_id: $id}) {
-    error
-    folder {
-      ...ForumFolderFragment
-    }
-  }
-}
-    ${ForumFolderFragmentFragmentDoc}`;
-
-/**
- * __useGetForumFolderByIdQuery__
- *
- * To run a query within a React component, call `useGetForumFolderByIdQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetForumFolderByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetForumFolderByIdQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useGetForumFolderByIdQuery(baseOptions: Apollo.QueryHookOptions<GetForumFolderByIdQuery, GetForumFolderByIdQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetForumFolderByIdQuery, GetForumFolderByIdQueryVariables>(GetForumFolderByIdDocument, options);
-      }
-export function useGetForumFolderByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetForumFolderByIdQuery, GetForumFolderByIdQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetForumFolderByIdQuery, GetForumFolderByIdQueryVariables>(GetForumFolderByIdDocument, options);
-        }
-export type GetForumFolderByIdQueryHookResult = ReturnType<typeof useGetForumFolderByIdQuery>;
-export type GetForumFolderByIdLazyQueryHookResult = ReturnType<typeof useGetForumFolderByIdLazyQuery>;
-export type GetForumFolderByIdQueryResult = Apollo.QueryResult<GetForumFolderByIdQuery, GetForumFolderByIdQueryVariables>;
-export const GetForumFoldersDocument = gql`
-    query GetForumFolders($forum_id: ID!) {
-  forumFolders(input: {forum_id: $forum_id}) {
-    error
-    folders {
-      ...ForumFolderFragment
-    }
-  }
-}
-    ${ForumFolderFragmentFragmentDoc}`;
-
-/**
- * __useGetForumFoldersQuery__
- *
- * To run a query within a React component, call `useGetForumFoldersQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetForumFoldersQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetForumFoldersQuery({
- *   variables: {
- *      forum_id: // value for 'forum_id'
- *   },
- * });
- */
-export function useGetForumFoldersQuery(baseOptions: Apollo.QueryHookOptions<GetForumFoldersQuery, GetForumFoldersQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetForumFoldersQuery, GetForumFoldersQueryVariables>(GetForumFoldersDocument, options);
-      }
-export function useGetForumFoldersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetForumFoldersQuery, GetForumFoldersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetForumFoldersQuery, GetForumFoldersQueryVariables>(GetForumFoldersDocument, options);
-        }
-export type GetForumFoldersQueryHookResult = ReturnType<typeof useGetForumFoldersQuery>;
-export type GetForumFoldersLazyQueryHookResult = ReturnType<typeof useGetForumFoldersLazyQuery>;
-export type GetForumFoldersQueryResult = Apollo.QueryResult<GetForumFoldersQuery, GetForumFoldersQueryVariables>;
 export const UpdateForumFolderDocument = gql`
-    mutation UpdateForumFolder($id: ID!, $name: String!, $forum_id: ID!) {
-  forumFolderUpsert(input: {forum_id: $forum_id, name: $name, folder_id: $id}) {
+    mutation UpdateForumFolder($forum_folder_id: ID, $name: String!, $description: String, $forum_id: ID!) {
+  forumFolderUpsert(
+    input: {forum_id: $forum_id, name: $name, description: $description, forum_folder_id: $forum_folder_id}
+  ) {
     error
     folder {
       ...ForumFolderFragment
@@ -5964,8 +6258,9 @@ export type UpdateForumFolderMutationFn = Apollo.MutationFunction<UpdateForumFol
  * @example
  * const [updateForumFolderMutation, { data, loading, error }] = useUpdateForumFolderMutation({
  *   variables: {
- *      id: // value for 'id'
+ *      forum_folder_id: // value for 'forum_folder_id'
  *      name: // value for 'name'
+ *      description: // value for 'description'
  *      forum_id: // value for 'forum_id'
  *   },
  * });
@@ -5978,10 +6273,10 @@ export type UpdateForumFolderMutationHookResult = ReturnType<typeof useUpdateFor
 export type UpdateForumFolderMutationResult = Apollo.MutationResult<UpdateForumFolderMutation>;
 export type UpdateForumFolderMutationOptions = Apollo.BaseMutationOptions<UpdateForumFolderMutation, UpdateForumFolderMutationVariables>;
 export const DeleteForumFolderDocument = gql`
-    mutation DeleteForumFolder($id: ID!) {
-  forumFolderDelete(input: {folder_id: $id}) {
+    mutation DeleteForumFolder($forum_folder_id: ID!) {
+  forumFolderDelete(forum_folder_id: $forum_folder_id) {
     error
-    folder_id
+    forum_folder_id
   }
 }
     `;
@@ -6000,7 +6295,7 @@ export type DeleteForumFolderMutationFn = Apollo.MutationFunction<DeleteForumFol
  * @example
  * const [deleteForumFolderMutation, { data, loading, error }] = useDeleteForumFolderMutation({
  *   variables: {
- *      id: // value for 'id'
+ *      forum_folder_id: // value for 'forum_folder_id'
  *   },
  * });
  */
@@ -6011,9 +6306,91 @@ export function useDeleteForumFolderMutation(baseOptions?: Apollo.MutationHookOp
 export type DeleteForumFolderMutationHookResult = ReturnType<typeof useDeleteForumFolderMutation>;
 export type DeleteForumFolderMutationResult = Apollo.MutationResult<DeleteForumFolderMutation>;
 export type DeleteForumFolderMutationOptions = Apollo.BaseMutationOptions<DeleteForumFolderMutation, DeleteForumFolderMutationVariables>;
+export const GetForumByIdDocument = gql`
+    query GetForumById($forum_id: ID!) {
+  forumRead(forum_id: $forum_id) {
+    error
+    forum {
+      ...ForumFragment
+    }
+  }
+}
+    ${ForumFragmentFragmentDoc}`;
+
+/**
+ * __useGetForumByIdQuery__
+ *
+ * To run a query within a React component, call `useGetForumByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetForumByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetForumByIdQuery({
+ *   variables: {
+ *      forum_id: // value for 'forum_id'
+ *   },
+ * });
+ */
+export function useGetForumByIdQuery(baseOptions: Apollo.QueryHookOptions<GetForumByIdQuery, GetForumByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetForumByIdQuery, GetForumByIdQueryVariables>(GetForumByIdDocument, options);
+      }
+export function useGetForumByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetForumByIdQuery, GetForumByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetForumByIdQuery, GetForumByIdQueryVariables>(GetForumByIdDocument, options);
+        }
+export type GetForumByIdQueryHookResult = ReturnType<typeof useGetForumByIdQuery>;
+export type GetForumByIdLazyQueryHookResult = ReturnType<typeof useGetForumByIdLazyQuery>;
+export type GetForumByIdQueryResult = Apollo.QueryResult<GetForumByIdQuery, GetForumByIdQueryVariables>;
+export const GetForumsListDocument = gql`
+    query GetForumsList($filter: String, $first: Int, $after: ID) {
+  getForumsList(filter: $filter, after: $after, first: $first) {
+    error
+    edges {
+      ...ForumEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+    ${ForumEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
+
+/**
+ * __useGetForumsListQuery__
+ *
+ * To run a query within a React component, call `useGetForumsListQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetForumsListQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetForumsListQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useGetForumsListQuery(baseOptions?: Apollo.QueryHookOptions<GetForumsListQuery, GetForumsListQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetForumsListQuery, GetForumsListQueryVariables>(GetForumsListDocument, options);
+      }
+export function useGetForumsListLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetForumsListQuery, GetForumsListQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetForumsListQuery, GetForumsListQueryVariables>(GetForumsListDocument, options);
+        }
+export type GetForumsListQueryHookResult = ReturnType<typeof useGetForumsListQuery>;
+export type GetForumsListLazyQueryHookResult = ReturnType<typeof useGetForumsListLazyQuery>;
+export type GetForumsListQueryResult = Apollo.QueryResult<GetForumsListQuery, GetForumsListQueryVariables>;
 export const CreateForumDocument = gql`
-    mutation CreateForum($name: String!) {
-  forumUpsert(input: {name: $name}) {
+    mutation CreateForum($name: String!, $description: String) {
+  forumUpsert(input: {name: $name, description: $description}) {
     error
     forum {
       ...ForumFragment
@@ -6037,6 +6414,7 @@ export type CreateForumMutationFn = Apollo.MutationFunction<CreateForumMutation,
  * const [createForumMutation, { data, loading, error }] = useCreateForumMutation({
  *   variables: {
  *      name: // value for 'name'
+ *      description: // value for 'description'
  *   },
  * });
  */
@@ -6047,84 +6425,9 @@ export function useCreateForumMutation(baseOptions?: Apollo.MutationHookOptions<
 export type CreateForumMutationHookResult = ReturnType<typeof useCreateForumMutation>;
 export type CreateForumMutationResult = Apollo.MutationResult<CreateForumMutation>;
 export type CreateForumMutationOptions = Apollo.BaseMutationOptions<CreateForumMutation, CreateForumMutationVariables>;
-export const GetForumByIdDocument = gql`
-    query GetForumById($id: ID!) {
-  forumRead(input: {forum_id: $id}) {
-    error
-    forum {
-      ...ForumFragment
-    }
-  }
-}
-    ${ForumFragmentFragmentDoc}`;
-
-/**
- * __useGetForumByIdQuery__
- *
- * To run a query within a React component, call `useGetForumByIdQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetForumByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetForumByIdQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useGetForumByIdQuery(baseOptions: Apollo.QueryHookOptions<GetForumByIdQuery, GetForumByIdQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetForumByIdQuery, GetForumByIdQueryVariables>(GetForumByIdDocument, options);
-      }
-export function useGetForumByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetForumByIdQuery, GetForumByIdQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetForumByIdQuery, GetForumByIdQueryVariables>(GetForumByIdDocument, options);
-        }
-export type GetForumByIdQueryHookResult = ReturnType<typeof useGetForumByIdQuery>;
-export type GetForumByIdLazyQueryHookResult = ReturnType<typeof useGetForumByIdLazyQuery>;
-export type GetForumByIdQueryResult = Apollo.QueryResult<GetForumByIdQuery, GetForumByIdQueryVariables>;
-export const GetForumsDocument = gql`
-    query GetForums {
-  forums {
-    error
-    forums {
-      ...ForumFragment
-    }
-  }
-}
-    ${ForumFragmentFragmentDoc}`;
-
-/**
- * __useGetForumsQuery__
- *
- * To run a query within a React component, call `useGetForumsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetForumsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetForumsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetForumsQuery(baseOptions?: Apollo.QueryHookOptions<GetForumsQuery, GetForumsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetForumsQuery, GetForumsQueryVariables>(GetForumsDocument, options);
-      }
-export function useGetForumsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetForumsQuery, GetForumsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetForumsQuery, GetForumsQueryVariables>(GetForumsDocument, options);
-        }
-export type GetForumsQueryHookResult = ReturnType<typeof useGetForumsQuery>;
-export type GetForumsLazyQueryHookResult = ReturnType<typeof useGetForumsLazyQuery>;
-export type GetForumsQueryResult = Apollo.QueryResult<GetForumsQuery, GetForumsQueryVariables>;
 export const UpdateForumDocument = gql`
-    mutation UpdateForum($id: ID, $name: String!) {
-  forumUpsert(input: {forum_id: $id, name: $name}) {
+    mutation UpdateForum($id: ID, $name: String!, $description: String) {
+  forumUpsert(input: {forum_id: $id, name: $name, description: $description}) {
     error
     forum {
       ...ForumFragment
@@ -6149,6 +6452,7 @@ export type UpdateForumMutationFn = Apollo.MutationFunction<UpdateForumMutation,
  *   variables: {
  *      id: // value for 'id'
  *      name: // value for 'name'
+ *      description: // value for 'description'
  *   },
  * });
  */
@@ -6160,8 +6464,8 @@ export type UpdateForumMutationHookResult = ReturnType<typeof useUpdateForumMuta
 export type UpdateForumMutationResult = Apollo.MutationResult<UpdateForumMutation>;
 export type UpdateForumMutationOptions = Apollo.BaseMutationOptions<UpdateForumMutation, UpdateForumMutationVariables>;
 export const DeleteForumDocument = gql`
-    mutation DeleteForum($id: ID!) {
-  forumDelete(input: {forum_id: $id}) {
+    mutation DeleteForum($forum_id: ID!) {
+  forumDelete(forum_id: $forum_id) {
     error
     forum_id
   }
@@ -6182,7 +6486,7 @@ export type DeleteForumMutationFn = Apollo.MutationFunction<DeleteForumMutation,
  * @example
  * const [deleteForumMutation, { data, loading, error }] = useDeleteForumMutation({
  *   variables: {
- *      id: // value for 'id'
+ *      forum_id: // value for 'forum_id'
  *   },
  * });
  */
@@ -7626,17 +7930,23 @@ export type UpsertAnswerMutationHookResult = ReturnType<typeof useUpsertAnswerMu
 export type UpsertAnswerMutationResult = Apollo.MutationResult<UpsertAnswerMutation>;
 export type UpsertAnswerMutationOptions = Apollo.BaseMutationOptions<UpsertAnswerMutation, UpsertAnswerMutationVariables>;
 export const GetAllSiteTextDefinitionsDocument = gql`
-    query GetAllSiteTextDefinitions($filter: String) {
-  getAllSiteTextDefinitions(filter: $filter) {
+    query GetAllSiteTextDefinitions($filter: String, $onlyNotTranslated: Boolean, $onlyTranslated: Boolean, $quickFilter: String, $targetLanguage: LanguageInput, $first: Int, $after: ID) {
+  getAllSiteTextDefinitions(
+    filters: {filter: $filter, targetLanguage: $targetLanguage, onlyNotTranslated: $onlyNotTranslated, onlyTranslated: $onlyTranslated, quickFilter: $quickFilter}
+    first: $first
+    after: $after
+  ) {
     error
-    site_text_definition_list {
-      ...SiteTextPhraseDefinitionFragment
-      ...SiteTextWordDefinitionFragment
+    edges {
+      ...SiteTextDefinitionEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
-    ${SiteTextPhraseDefinitionFragmentFragmentDoc}
-${SiteTextWordDefinitionFragmentFragmentDoc}`;
+    ${SiteTextDefinitionEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
 
 /**
  * __useGetAllSiteTextDefinitionsQuery__
@@ -7651,6 +7961,12 @@ ${SiteTextWordDefinitionFragmentFragmentDoc}`;
  * const { data, loading, error } = useGetAllSiteTextDefinitionsQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      onlyNotTranslated: // value for 'onlyNotTranslated'
+ *      onlyTranslated: // value for 'onlyTranslated'
+ *      quickFilter: // value for 'quickFilter'
+ *      targetLanguage: // value for 'targetLanguage'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *   },
  * });
  */
@@ -9433,11 +9749,11 @@ export const namedOperations = {
     GetWordDefinitionsByFlag: 'GetWordDefinitionsByFlag',
     GetPhraseDefinitionsByFlag: 'GetPhraseDefinitionsByFlag',
     GetThreadById: 'GetThreadById',
-    GetThreads: 'GetThreads',
+    GetThreadsList: 'GetThreadsList',
     GetForumFolderById: 'GetForumFolderById',
-    GetForumFolders: 'GetForumFolders',
+    GetForumFoldersList: 'GetForumFoldersList',
     GetForumById: 'GetForumById',
-    GetForums: 'GetForums',
+    GetForumsList: 'GetForumsList',
     GetOrigMapWordsAndPhrases: 'GetOrigMapWordsAndPhrases',
     GetOrigMapWordsAndPhrasesCount: 'GetOrigMapWordsAndPhrasesCount',
     GetOrigMapWordsAndPhrasesPaginated: 'GetOrigMapWordsAndPhrasesPaginated',
@@ -9480,6 +9796,9 @@ export const namedOperations = {
     Logout: 'Logout',
     ResetEmailRequest: 'ResetEmailRequest',
     PasswordResetFormRequest: 'PasswordResetFormRequest',
+    GenerateMaps: 'GenerateMaps',
+    GenerateMapTranslations: 'GenerateMapTranslations',
+    MapsReTranslateToLangs: 'MapsReTranslateToLangs',
     WordDefinitionUpsert: 'WordDefinitionUpsert',
     ToggleWordDefinitionVoteStatus: 'ToggleWordDefinitionVoteStatus',
     ToggleWordVoteStatus: 'ToggleWordVoteStatus',
@@ -9564,8 +9883,12 @@ export const namedOperations = {
     FlagFragment: 'FlagFragment',
     WordDefinitionListEdgeFragment: 'WordDefinitionListEdgeFragment',
     PhraseDefinitionListEdgeFragment: 'PhraseDefinitionListEdgeFragment',
+    ThreadFragment: 'ThreadFragment',
     ForumFolderFragment: 'ForumFolderFragment',
     ForumFragment: 'ForumFragment',
+    ThreadEdgeFragment: 'ThreadEdgeFragment',
+    ForumFolderEdgeFragment: 'ForumFolderEdgeFragment',
+    ForumEdgeFragment: 'ForumEdgeFragment',
     MapDetailsOutputFragment: 'MapDetailsOutputFragment',
     MapDetailsOutputEdgeFragment: 'MapDetailsOutputEdgeFragment',
     MapWordOrPhraseFragment: 'MapWordOrPhraseFragment',
@@ -9589,6 +9912,9 @@ export const namedOperations = {
     QuestionOnWordRangeFragment: 'QuestionOnWordRangeFragment',
     SiteTextPhraseDefinitionFragment: 'SiteTextPhraseDefinitionFragment',
     SiteTextWordDefinitionFragment: 'SiteTextWordDefinitionFragment',
+    SiteTextWordDefinitionEdgeFragment: 'SiteTextWordDefinitionEdgeFragment',
+    SiteTextPhraseDefinitionEdgeFragment: 'SiteTextPhraseDefinitionEdgeFragment',
+    SiteTextDefinitionEdgeFragment: 'SiteTextDefinitionEdgeFragment',
     SiteTextLanguageFragment: 'SiteTextLanguageFragment',
     TranslationWithVoteListByLanguageFragment: 'TranslationWithVoteListByLanguageFragment',
     SiteTextLanguageWithTranslationInfoFragment: 'SiteTextLanguageWithTranslationInfoFragment',

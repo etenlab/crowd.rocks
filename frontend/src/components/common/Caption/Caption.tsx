@@ -5,17 +5,17 @@ import { Stack, Typography, IconButton } from '@mui/material';
 import { NavArrowLeft } from '../icons/NavArrowLeft';
 
 export type TCaptionProps = {
-  handleBackClick?: () => void;
+  onBackClick?: () => void;
   children: ReactElement | string | string[];
 };
 
-export const Caption = ({ handleBackClick, children }: TCaptionProps) => {
+export const Caption = ({ onBackClick, children }: TCaptionProps) => {
   const router = useIonRouter();
 
   let onClickAction: () => void;
 
-  if (handleBackClick) {
-    onClickAction = handleBackClick;
+  if (onBackClick) {
+    onClickAction = onBackClick;
   } else {
     onClickAction = router.goBack;
   }

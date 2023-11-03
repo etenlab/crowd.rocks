@@ -1,45 +1,54 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context } from '@nestjs/graphql';
+import {
+  Args,
+  Query,
+  Resolver,
+  Mutation,
+  Context,
+  ID,
+  Int,
+} from '@nestjs/graphql';
 
 import { ForumsService } from './forums.service';
 
 import {
-  Forum,
-  ForumDeleteInput,
+  ForumOutput,
   ForumDeleteOutput,
-  ForumListOutput,
-  ForumReadInput,
-  ForumReadOutput,
+  ForumListConnection,
   ForumUpsertInput,
-  ForumUpsertOutput,
 } from './types';
 import { getBearer } from 'src/common/utility';
 
 @Injectable()
-@Resolver(Forum)
+@Resolver()
 export class ForumsResolver {
   constructor(private forumsService: ForumsService) {}
 
-  @Query(() => ForumReadOutput)
+  @Query(() => ForumOutput)
   async forumRead(
-    @Args('input') input: ForumReadInput,
-  ): Promise<ForumReadOutput> {
-    Logger.log('forum read resolver, word_id:', input.forum_id);
+    @Args('forum_id', { type: () => ID }) forum_id: string,
+  ): Promise<ForumOutput> {
+    Logger.log('forum read resolver, forum_id:', forum_id);
 
-    return this.forumsService.read(input);
+    return this.forumsService.read(+forum_id);
   }
 
-  @Query(() => ForumListOutput)
-  async forums(): Promise<ForumListOutput> {
-    Logger.log('forum list resolver');
-    return this.forumsService.list();
+  @Query(() => ForumListConnection)
+  async getForumsList(
+    @Args('filter', { type: () => String, nullable: true })
+    filter: string | null,
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<ForumListConnection> {
+    Logger.log('forum list resolver', { filter, first, after });
+    return this.forumsService.list({ filter, first, after });
   }
 
-  @Mutation(() => ForumUpsertOutput)
+  @Mutation(() => ForumOutput)
   async forumUpsert(
     @Args('input') input: ForumUpsertInput,
     @Context() req: any,
-  ): Promise<ForumUpsertOutput> {
+  ): Promise<ForumOutput> {
     Logger.log('forum upsert resolver, name: ', input.name);
 
     return this.forumsService.upsert(input, getBearer(req) || '');
@@ -47,10 +56,10 @@ export class ForumsResolver {
 
   @Mutation(() => ForumDeleteOutput)
   async forumDelete(
-    @Args('input') input: ForumDeleteInput,
+    @Args('forum_id', { type: () => ID }) forum_id: string,
     @Context() req: any,
   ): Promise<ForumDeleteOutput> {
-    Logger.log('forum delete resolver, forum_id: ', input.forum_id);
-    return this.forumsService.delete(input, getBearer(req) || '');
+    Logger.log('forum delete resolver, forum_id: ', forum_id);
+    return this.forumsService.delete(+forum_id, getBearer(req) || '');
   }
 }

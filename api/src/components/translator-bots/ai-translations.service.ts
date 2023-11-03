@@ -46,6 +46,7 @@ import {
   validateTranslateByBotInput,
 } from './utility';
 import { langInfo2String, subTags2LangInfo } from '../../../../utils';
+import { FakerTranslateService } from './faker-translate.service';
 
 interface ItranslateAllWordsAndPhrasesByBot {
   translateWordsAndPhrases: (
@@ -69,6 +70,7 @@ export class AiTranslationsService {
     private lTrService: LiltTranslateService,
     private scTrService: SmartcatTranslateService,
     private deepLTrService: DeepLTranslateService,
+    private fakerService: FakerTranslateService,
     private phraseToWordTrService: PhraseToWordTranslationsService,
     private phraseToPhraseTrService: PhraseToPhraseTranslationsService,
     private pg: PostgresService,
@@ -740,6 +742,28 @@ export class AiTranslationsService {
         to_language,
         pgClient,
         ChatGPTVersion.Four,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
+  };
+
+  translateWordsAndPhrasesByFaker = async (
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
+    try {
+      return this.translateWordsAndPhrasesByBot(
+        this.fakerService,
+        from_language,
+        to_language,
+        pgClient,
       );
     } catch (e) {
       Logger.error(e);

@@ -134,32 +134,34 @@ export function MapList({ match }: MapListProps) {
   }, [getAllMapsList, targetLang, bouncedFilter]);
 
   useEffect(() => {
-    const observer = new ResizeObserver((entries) => {
-      entries.forEach((entry) => {
-        const containerWidth = entry.contentRect.width;
+    if (containerRef.current) {
+      const observer = new ResizeObserver((entries) => {
+        entries.forEach((entry) => {
+          const containerWidth = entry.contentRect.width;
 
-        const itemWidth = 162;
-        const basicGap = 16;
+          const itemWidth = 162;
+          const basicGap = 16;
 
-        const rowBlockCnt = Math.floor(
-          (containerWidth + basicGap) / (itemWidth + basicGap),
-        );
-        const additionalGap =
-          (containerWidth -
-            itemWidth * rowBlockCnt -
-            basicGap * (rowBlockCnt - 1)) /
-          (rowBlockCnt - 1);
+          const rowBlockCnt = Math.floor(
+            (containerWidth + basicGap) / (itemWidth + basicGap),
+          );
+          const additionalGap =
+            (containerWidth -
+              itemWidth * rowBlockCnt -
+              basicGap * (rowBlockCnt - 1)) /
+            (rowBlockCnt - 1);
 
-        if (containerRef?.current?.style) {
-          containerRef.current!.style.columnGap = `${
-            basicGap + additionalGap
-          }px`;
-          containerRef.current!.style.rowGap = `${basicGap}px`;
-        }
+          if (containerRef.current) {
+            containerRef.current.style.columnGap = `${
+              basicGap + additionalGap
+            }px`;
+            containerRef.current.style.rowGap = `${basicGap}px`;
+          }
+        });
       });
-    });
 
-    observer.observe(containerRef.current!);
+      observer.observe(containerRef.current);
+    }
   }, []);
 
   const handleFilterChange = (value: string) => {
@@ -356,10 +358,54 @@ export function MapList({ match }: MapListProps) {
 
   const isAdminUser = globals.is_admin_user();
 
+  const dropDownList = [
+    {
+      key: 'zip_download_button',
+      component: (
+        <Button
+          variant="text"
+          startIcon={
+            mapZipResult?.ZipMapReport.status ===
+            SubscriptionStatus.Progressing ? (
+              <CircularProgress color={'primary'} size={18} />
+            ) : (
+              <DownloadCircle sx={{ fontSize: '24px' }} />
+            )
+          }
+          color="dark"
+          sx={{
+            padding: '0 5px',
+            justifyContent: 'flex-start',
+          }}
+          onClick={handleStartZipMap}
+        >
+          <Typography
+            variant="h4"
+            sx={{
+              textOverflow: 'ellipsis',
+              width: '180px',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {mapZipResult?.ZipMapReport.status ===
+            SubscriptionStatus.Progressing
+              ? tr(mapZipResult.ZipMapReport.message || '')
+              : tr(
+                  `Download All Maps (${
+                    allMapsQuery?.getAllMapsList.pageInfo.totalEdges || 0
+                  })`,
+                )}
+          </Typography>
+        </Button>
+      ),
+    },
+  ];
+
   return (
     <>
       <Caption
-        handleBackClick={() => {
+        onBackClick={() => {
           router.push(`/${nation_id}/${language_id}/1/home`);
         }}
       >
@@ -396,50 +442,7 @@ export function MapList({ match }: MapListProps) {
                 <AddCircle sx={{ fontSize: '18px' }} />
               </Button>
             ) : null}
-            <MoreHorizButton
-              popoverWidth="250px"
-              component={
-                <>
-                  <Button
-                    variant="text"
-                    startIcon={
-                      mapZipResult?.ZipMapReport.status ===
-                      SubscriptionStatus.Progressing ? (
-                        <CircularProgress color={'primary'} size={18} />
-                      ) : (
-                        <DownloadCircle sx={{ fontSize: '24px' }} />
-                      )
-                    }
-                    color="dark"
-                    sx={{
-                      padding: '0 5px',
-                      justifyContent: 'flex-start',
-                    }}
-                    onClick={handleStartZipMap}
-                  >
-                    <Typography
-                      variant="h4"
-                      sx={{
-                        textOverflow: 'ellipsis',
-                        width: '180px',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {mapZipResult?.ZipMapReport.status ===
-                      SubscriptionStatus.Progressing
-                        ? tr(mapZipResult.ZipMapReport.message || '')
-                        : tr(
-                            `Download All Maps (${
-                              allMapsQuery?.getAllMapsList.pageInfo
-                                .totalEdges || 0
-                            })`,
-                          )}
-                    </Typography>
-                  </Button>
-                </>
-              }
-            />
+            <MoreHorizButton popoverWidth="250px" dropDownList={dropDownList} />
           </Stack>
         </Stack>
         <SearchInput

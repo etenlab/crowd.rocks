@@ -5,8 +5,17 @@ import { reducer, loadPersistedStore } from './reducers/index';
 
 import { type StateType as GlobalStateType } from './reducers/global.reducer';
 import { type StateType as ComponentsStateType } from './reducers/components.reducer';
+import { type StateType as NonPersistentStateType } from './reducers/non-persistent.reducer';
+import {
+  GetAllSiteTextDefinitionsVariable,
+  GetForumsListVariable,
+  GetForumFoldersListVariable,
+  GetThreadsListVariable,
+} from './reducers/non-persistent.reducer';
 
 import { useGlobal } from './hooks/useGlobal';
+import { useGlobalComponents } from './hooks/useGlobalComponents';
+import { useNonPersistent } from './hooks/useNonPersistent';
 
 import {
   useGetAllRecommendedSiteTextTranslationListByLanguageLazyQuery,
@@ -15,13 +24,14 @@ import {
   SiteTextLanguageWithTranslationInfo,
   ErrorType,
 } from './generated/graphql';
-import { useGlobalComponents } from './hooks/useGlobalComponents';
+
 import { subTags2LangInfo } from '../../utils';
 
 export interface ContextType {
   states: {
     global: GlobalStateType;
     components: ComponentsStateType;
+    nonPersistent: NonPersistentStateType;
   };
   actions: {
     setSiteTextLanguageList: (
@@ -35,6 +45,7 @@ export interface ContextType {
     changeAppLanguage: (langInfo: LanguageInfo) => void;
     changeTranslationSourceLanguage: (langInfo: LanguageInfo | null) => void;
     changeTranslationTargetLanguage: (langInfo: LanguageInfo | null) => void;
+    changeSiteTextTargetLanguage: (langInfo: LanguageInfo | null) => void;
     setSourceLanguage: (targetLanguage: LanguageInfo | null) => void;
     setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
     setUpdatedTrDefinitionIds: (definitionIds: Array<string>) => void;
@@ -48,6 +59,18 @@ export interface ContextType {
       value: { translation: string; description: string },
     ): void;
     clearTempTranslation(key: string): void;
+    addPaginationVariableForGetAllSiteTextDefinitions(
+      variable: GetAllSiteTextDefinitionsVariable,
+    ): void;
+    addPaginationVariableForGetForumsList(
+      variable: GetForumsListVariable,
+    ): void;
+    addPaginationVariableForGetForumFoldersList(
+      variable: GetForumFoldersListVariable,
+    ): void;
+    addPaginationVariableForGetTheadsList(
+      variable: GetThreadsListVariable,
+    ): void;
   };
 }
 
@@ -85,6 +108,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
     setTargetLanguage,
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
+    changeSiteTextTargetLanguage,
     setUpdatedTrDefinitionIds,
     setTempTranslation,
     clearTempTranslation,
@@ -92,6 +116,12 @@ export function AppContextProvider({ children }: AppProviderProps) {
     dispatch,
   });
   const { createModal, removeModal } = useGlobalComponents({ dispatch });
+  const {
+    addPaginationVariableForGetAllSiteTextDefinitions,
+    addPaginationVariableForGetForumsList,
+    addPaginationVariableForGetForumFoldersList,
+    addPaginationVariableForGetTheadsList,
+  } = useNonPersistent({ dispatch });
 
   useEffect(() => {
     getAllRecommendedSiteTextTranslationListByLanguage({
@@ -230,19 +260,10 @@ export function AppContextProvider({ children }: AppProviderProps) {
         return;
       }
 
-      const siteTextDefinitionList =
-        stData.getAllSiteTextDefinitions.site_text_definition_list;
-
-      if (!siteTextDefinitionList) {
-        return;
-      }
-
       const originalMap: Record<string, string> = {};
 
-      for (const siteTextDefinition of siteTextDefinitionList) {
-        if (!siteTextDefinition) {
-          continue;
-        }
+      for (const edge of stData.getAllSiteTextDefinitions.edges) {
+        const siteTextDefinition = edge.node;
 
         switch (siteTextDefinition.__typename) {
           case 'SiteTextWordDefinition': {
@@ -326,6 +347,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
     states: {
       global: state.global,
       components: state.components,
+      nonPersistent: state.nonPersistent,
     },
     actions: {
       setSiteTextLanguageList,
@@ -334,6 +356,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
       changeAppLanguage,
       changeTranslationSourceLanguage,
       changeTranslationTargetLanguage,
+      changeSiteTextTargetLanguage,
       setSourceLanguage,
       setTargetLanguage,
       setUpdatedTrDefinitionIds,
@@ -341,6 +364,10 @@ export function AppContextProvider({ children }: AppProviderProps) {
       removeModal,
       setTempTranslation,
       clearTempTranslation,
+      addPaginationVariableForGetAllSiteTextDefinitions,
+      addPaginationVariableForGetForumsList,
+      addPaginationVariableForGetForumFoldersList,
+      addPaginationVariableForGetTheadsList,
     },
   };
 

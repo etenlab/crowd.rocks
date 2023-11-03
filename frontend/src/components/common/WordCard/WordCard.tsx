@@ -45,13 +45,9 @@ export function WordCard({
   flags,
   author,
 }: WordCardProps) {
-  const voteButtonCom = vote ? (
-    <VoteButtonsHorizontal {...vote} />
-  ) : (
-    <div></div>
-  );
+  const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
   const discussionBtnCom = discussion ? (
-    <DiscussionIconButton {...discussion} />
+    <DiscussionIconButton {...discussion} flex="1" />
   ) : null;
 
   return (
@@ -73,7 +69,9 @@ export function WordCard({
               ? undefined
               : 'none',
           }}
-          component={flags ? <FlagV2 {...flags} /> : null}
+          dropDownList={
+            flags ? [{ key: 'flag', component: <FlagV2 {...flags} /> }] : []
+          }
         />
       </Stack>
 
@@ -95,6 +93,7 @@ export function WordCard({
         </Stack>
 
         <Stack
+          gap="16px"
           direction="row"
           justifyContent="space-between"
           alignItems="center"

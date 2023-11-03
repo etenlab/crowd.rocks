@@ -15,7 +15,7 @@ import { Caption } from '../../common/Caption/Caption';
 import { Tag } from '../../common/chips/Tag';
 import { FlagV2 } from '../../flags/Flag';
 import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
-import { DiscussionButton } from '../../Discussion/DiscussionButton';
+import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import { DownloadCircle } from '../../common/icons/DownloadCircle';
 
@@ -151,6 +151,38 @@ export function MapDetails() {
     !!currentMapWithContent.loading ||
     !currentMapWithContent.data;
 
+  const dropDownList = [
+    {
+      key: 'flag_button',
+      component: authorizedForAnyFlag(MAPS_FLAGS) ? (
+        <FlagV2
+          parent_table={
+            isOriginal
+              ? TableNameType.OriginalMaps
+              : TableNameType.TranslatedMaps
+          }
+          parent_id={id}
+          flag_names={MAPS_FLAGS}
+        />
+      ) : null,
+    },
+    {
+      key: 'download_button',
+      component: (
+        <Button
+          variant="text"
+          startIcon={<DownloadCircle sx={{ fontSize: '24px' }} />}
+          color="dark"
+          sx={{ padding: 0, justifyContent: 'flex-start' }}
+          onClick={handleDownloadSvg}
+          disabled={loadingOrError}
+        >
+          {tr('Download')}
+        </Button>
+      ),
+    },
+  ].filter((item) => item.component !== null);
+
   return (
     <>
       <Caption>{tr('Map Details')}</Caption>
@@ -163,33 +195,7 @@ export function MapDetails() {
         >
           <Tag label={tagLabel} color={tagColor} />
 
-          <MoreHorizButton
-            component={
-              <>
-                {authorizedForAnyFlag(MAPS_FLAGS) ? (
-                  <FlagV2
-                    parent_table={
-                      isOriginal
-                        ? TableNameType.OriginalMaps
-                        : TableNameType.TranslatedMaps
-                    }
-                    parent_id={id}
-                    flag_names={MAPS_FLAGS}
-                  />
-                ) : null}
-                <Button
-                  variant="text"
-                  startIcon={<DownloadCircle sx={{ fontSize: '24px' }} />}
-                  color="dark"
-                  sx={{ padding: 0, justifyContent: 'flex-start' }}
-                  onClick={handleDownloadSvg}
-                  disabled={loadingOrError}
-                >
-                  {tr('Download')}
-                </Button>
-              </>
-            }
-          />
+          <MoreHorizButton dropDownList={dropDownList} />
         </Stack>
 
         <Typography variant="h5">
@@ -205,22 +211,14 @@ export function MapDetails() {
         >
           {tr('Translate This Map')}
         </Button>
-
-        <DiscussionButton
-          parent_table={
-            isOriginal
-              ? TableNameType.OriginalMaps
-              : TableNameType.TranslatedMaps
-          }
-          parent_id={id}
-          label={tr('Go to Discussion')}
-        />
       </Stack>
 
-      <Divider />
-
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="h4">{tr('Voting')}</Typography>
+      <Stack
+        gap="16px"
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+      >
         <VoteButtonsHorizontal
           downVotes={
             currentMapVoteStatus.data?.getMapVoteStatus.vote_status
@@ -248,6 +246,16 @@ export function MapDetails() {
               },
             });
           }}
+        />
+
+        <DiscussionIconButton
+          parent_table={
+            isOriginal
+              ? TableNameType.OriginalMaps
+              : TableNameType.TranslatedMaps
+          }
+          parent_id={id}
+          flex="1"
         />
       </Stack>
 

@@ -1,18 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context } from '@nestjs/graphql';
+import {
+  Args,
+  Query,
+  Resolver,
+  Mutation,
+  Context,
+  ID,
+  Int,
+} from '@nestjs/graphql';
 
 import { ForumFoldersService } from './folders.service';
 
 import {
   ForumFolder,
-  ForumFolderDeleteInput,
-  ForumFolderDeleteOutput,
-  ForumFolderListInput,
-  ForumFolderListOutput,
-  ForumFolderReadInput,
-  ForumFolderReadOutput,
+  ForumFolderOutput,
   ForumFolderUpsertInput,
-  ForumFolderUpsertOutput,
+  ForumFolderDeleteOutput,
+  ForumFolderListConnection,
 } from './types';
 import { getBearer } from 'src/common/utility';
 
@@ -21,40 +25,53 @@ import { getBearer } from 'src/common/utility';
 export class ForumFolderResolver {
   constructor(private folderService: ForumFoldersService) {}
 
-  @Query(() => ForumFolderReadOutput)
+  @Query(() => ForumFolderOutput)
   async forumFolderRead(
-    @Args('input') input: ForumFolderReadInput,
-  ): Promise<ForumFolderReadOutput> {
-    Logger.log('forum read resolver, word_id:', input.folder_id);
+    @Args('forum_folder_id', { type: () => ID }) forum_folder_id: string,
+  ): Promise<ForumFolderOutput> {
+    Logger.log('forum read resolver, forum_folder_id:', forum_folder_id);
 
-    return this.folderService.read(input);
+    return this.folderService.read(+forum_folder_id);
   }
 
-  @Query(() => ForumFolderListOutput)
-  async forumFolders(
-    @Args('input') input: ForumFolderListInput,
-  ): Promise<ForumFolderListOutput> {
-    Logger.log('forum list resolver');
-    return this.folderService.listByForumId(+input.forum_id);
+  @Query(() => ForumFolderListConnection)
+  async getForumFoldersList(
+    @Args('filter', { type: () => String, nullable: true })
+    filter: string | null,
+    @Args('forum_id', { type: () => ID }) forum_id: string,
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<ForumFolderListConnection> {
+    Logger.log('getForumFoldersList resolver', {
+      filter,
+      forum_id,
+      first,
+      after,
+    });
+    return this.folderService.listByForumId({
+      forum_id: +forum_id,
+      filter,
+      first,
+      after,
+    });
   }
 
-  @Mutation(() => ForumFolderUpsertOutput)
+  @Mutation(() => ForumFolderOutput)
   async forumFolderUpsert(
     @Args('input') input: ForumFolderUpsertInput,
     @Context() req: any,
-  ): Promise<ForumFolderUpsertOutput> {
-    Logger.log('forum upsert resolver, name: ', input.name);
-    Logger.log('forum_id', input.forum_id);
+  ): Promise<ForumFolderOutput> {
+    Logger.log('forum upsert resolver, name: ', input);
 
     return this.folderService.upsert(input, getBearer(req) || '');
   }
 
   @Mutation(() => ForumFolderDeleteOutput)
   async forumFolderDelete(
-    @Args('input') input: ForumFolderDeleteInput,
+    @Args('forum_folder_id', { type: () => ID }) forum_folder_id: string,
     @Context() req: any,
   ): Promise<ForumFolderDeleteOutput> {
-    Logger.log('forum delete resolver, forum_id: ', input.folder_id);
-    return this.folderService.delete(input, getBearer(req) || '');
+    Logger.log('forum delete resolver, forum_id: ', forum_folder_id);
+    return this.folderService.delete(+forum_folder_id, getBearer(req) || '');
   }
 }

@@ -56,7 +56,6 @@ import PasswordResetFormPage from './components/authentication/PasswordResetForm
 import { MapsPage } from './components/map/MapsPage';
 
 import { SiteTextListPage } from './components/site-text/SiteTextListPage';
-import { SiteTextDetailPage } from './components/site-text/SiteTextDetailPage';
 
 import { WordListPage } from './components/dictionary/WordListPage';
 import { WordDetailPage } from './components/dictionary/WordDetailPage';
@@ -67,10 +66,15 @@ import { PhraseDetailPage } from './components/phrase-book/PhraseDetailPage';
 import { TranslationPage } from './components/translation/TranslationPage';
 import { AIControllerPage } from './components/translation/AIControllerPage';
 import { FastTranslationPage } from './components/translation/FastTranslationPage';
+import { TranslationDetailPage } from './components/translation/TranslationDetail/TranslationDetailPage';
+import { NewTranslationConfirmPage } from './components/translation/TranslationDetail/NewTranslationConfirmPage';
 
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
+
 import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
-import { ForumDetailPage } from './components/forums/ForumDetailPage/ForumDetailPage';
+import { FolderListPage } from './components/forums/FolderListPage/FolderListPage';
+import { ThreadListPage } from './components/forums/ThreadListPage/ThreadListPage';
+
 import { NotificationPage } from './components/notifications/NotificationPage';
 import { SettingsPage } from './components/settings/SettingsPage';
 
@@ -91,6 +95,7 @@ import { Header } from './components/common/Header';
 import { useColorModeContext } from './theme';
 
 import { apollo_client } from './App';
+import { DataGeneratorPage } from './components/data-generator/DataGeneratorPage';
 
 export function Body() {
   const { tr } = useTr();
@@ -465,11 +470,6 @@ export function Body() {
             />
             <Route
               exact
-              path="/:nation_id/:language_id/:cluster_id/site-text-detail/:definition_type/:site_text_id"
-              component={SiteTextDetailPage}
-            />
-            <Route
-              exact
               path="/:nation_id/:language_id/:cluster_id/dictionary-list"
               component={WordListPage}
             />
@@ -500,6 +500,16 @@ export function Body() {
             />
             <Route
               exact
+              path="/:nation_id/:language_id/:cluster_id/translation-details/:lang_full_tag/:definition_id/:definition_type"
+              component={TranslationDetailPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/translation-confirm/:lang_full_tag/:definition_id/:definition_type"
+              component={NewTranslationConfirmPage}
+            />
+            <Route
+              exact
               path="/:nation_id/:language_id/:cluster_id/fast-translation"
               component={FastTranslationPage}
             />
@@ -511,7 +521,12 @@ export function Body() {
             <Route
               exact
               path="/:nation_id/:language_id/:cluster_id/forums/:forum_id/:forum_name"
-              component={ForumDetailPage}
+              component={FolderListPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/folders/:forum_folder_id/:folder_name"
+              component={ThreadListPage}
             />
             <Route
               exact
@@ -522,6 +537,11 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/ai-controller"
               component={AIControllerPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/data-generator"
+              component={DataGeneratorPage}
             />
             <Route
               exact

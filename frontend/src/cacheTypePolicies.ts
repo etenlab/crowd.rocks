@@ -11,6 +11,10 @@ export const typePolicies: TypePolicies = {
       getAllMapsList: relayStylePagination(['input']),
       getOrigMapWordsAndPhrases: relayStylePagination(['input']),
       getSingleMapWordsAndPhrases: relayStylePagination(['input']),
+      getAllSiteTextDefinitions: relayStylePagination(['filters']),
+      getForumsList: relayStylePagination(['filter']),
+      getForumFoldersList: relayStylePagination(['forum_id', 'filter']),
+      getThreadsList: relayStylePagination(['forum_folder_id', 'filter']),
     },
   },
   WordWithDefinitions: {
@@ -60,6 +64,15 @@ export const typePolicies: TypePolicies = {
   },
   SiteTextWordDefinition: {
     keyFields: ['site_text_id'],
+  },
+  SiteTextWordDefinitionEdge: {
+    keyFields: ['cursor'],
+  },
+  SiteTextPhraseDefinitionEdge: {
+    keyFields: ['cursor'],
+  },
+  SiteTextDefinitionEdge: {
+    keyFields: ['cursor'],
   },
   WordToWordTranslationWithVote: {
     keyFields: ['word_to_word_translation_id'],
@@ -117,5 +130,23 @@ export const typePolicies: TypePolicies = {
   },
   PericopeVoteStatus: {
     keyFields: ['pericope_id'],
+  },
+  Forum: {
+    keyFields: ['forum_id'],
+  },
+  ForumFolder: {
+    keyFields: ['forum_folder_id'],
+  },
+  Thread: {
+    keyFields: ['thread_id'],
+  },
+  ForumEdge: {
+    keyFields: ['cursor'],
+  },
+  ForumFolderEdge: {
+    keyFields: ['cursor'],
+  },
+  ThreadEdge: {
+    keyFields: ['cursor'],
   },
 };

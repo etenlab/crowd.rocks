@@ -111,9 +111,7 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
 
   return (
     <PageLayout>
-      <Caption handleBackClick={() => router.goBack()}>
-        {tr('Discussion')}
-      </Caption>
+      <Caption onBackClick={() => router.goBack()}>{tr('Discussion')}</Caption>
 
       <Typography variant="h3" letterSpacing="-2%">
         {postData?.postsByParent.title}

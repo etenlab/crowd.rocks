@@ -10,7 +10,7 @@ export function BpIcon({ color }: { color: string }) {
         width: 22,
         height: 22,
         boxShadow: `inset 0 0 0 1px ${color}, inset 0 -1px 0 ${color}`,
-        backgroundColor: '#ffffff',
+        backgroundColor: (theme) => theme.palette.background.white,
       }}
     />
   );
