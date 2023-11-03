@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 import {
@@ -7,37 +7,39 @@ import {
   ForumDeleteProcedureOutputRow,
   ForumUpsertProcedureOutputRow,
   getForumObjById,
+  getForums,
   GetForumObjectById,
+  getForumsTotalSize,
+  GetForumsTotalSize,
 } from './sql-string';
 import {
-  Forum,
-  ForumDeleteInput,
+  ForumOutput,
+  ForumListConnection,
   ForumDeleteOutput,
-  ForumListOutput,
-  ForumReadInput,
-  ForumReadOutput,
   ForumUpsertInput,
+  ForumEdge,
 } from './types';
 
 @Injectable()
 export class ForumsService {
   constructor(private pg: PostgresService) {}
 
-  async read(input: ForumReadInput): Promise<ForumReadOutput> {
-    const res1 = await this.pg.pool.query<GetForumObjectById>(
-      ...getForumObjById(+input.forum_id),
-    );
+  async read(forum_id: number): Promise<ForumOutput> {
+    try {
+      const res = await this.pg.pool.query<GetForumObjectById>(
+        ...getForumObjById(forum_id),
+      );
 
-    if (res1.rowCount !== 1) {
-      console.error(`no forum for id: ${input.forum_id}`);
-    } else {
-      return {
-        error: ErrorType.NoError,
-        forum: {
-          forum_id: input.forum_id,
-          name: res1.rows[0].name,
-        },
-      };
+      if (res.rowCount !== 1) {
+        Logger.error(`no forum for id: ${forum_id}`);
+      } else {
+        return {
+          error: ErrorType.NoError,
+          forum: res.rows[0],
+        };
+      }
+    } catch (err) {
+      Logger.error(err);
     }
 
     return {
@@ -46,33 +48,69 @@ export class ForumsService {
     };
   }
 
-  async list(): Promise<ForumListOutput> {
-    const res1 = await this.pg.pool.query(`
-        select
-          forum_id,
-          name
-        from 
-          forums
-      `);
-    const forums = res1.rows.map<Forum>(({ name, forum_id }) => ({
-      name: name,
-      forum_id: forum_id,
-    }));
+  async list(input: {
+    filter: string | null;
+    first: number | null;
+    after: string | null;
+  }): Promise<ForumListConnection> {
+    try {
+      const res = await this.pg.pool.query<GetForumObjectById>(
+        ...getForums({
+          filter: input.filter,
+          first: input.first ? input.first * 2 : null,
+          after: input.after,
+        }),
+      );
+
+      const res1 = await this.pg.pool.query<GetForumsTotalSize>(
+        ...getForumsTotalSize(input.filter),
+      );
+
+      const tempEdges: ForumEdge[] = res.rows.map((item) => ({
+        cursor: item.name,
+        node: item,
+      }));
+
+      const edges =
+        input.first && tempEdges.length > input.first
+          ? tempEdges.slice(0, input.first)
+          : tempEdges;
+
+      return {
+        error: ErrorType.NoError,
+        edges,
+        pageInfo: {
+          hasNextPage: input.first ? res.rowCount > input.first : false,
+          hasPreviousPage: false,
+          startCursor: edges.length > 0 ? edges[0].cursor : null,
+          endCursor:
+            edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
+          totalEdges: res1.rowCount > 0 ? res1.rows[0].total_records : 0,
+        },
+      };
+    } catch (err) {
+      Logger.error(err);
+    }
 
     return {
-      error: ErrorType.NoError,
-      forums,
+      error: ErrorType.UnknownError,
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+        totalEdges: 0,
+      },
     };
   }
 
-  async upsert(
-    input: ForumUpsertInput,
-    token: string,
-  ): Promise<ForumReadOutput> {
+  async upsert(input: ForumUpsertInput, token: string): Promise<ForumOutput> {
     try {
       const res = await this.pg.pool.query<ForumUpsertProcedureOutputRow>(
         ...callForumUpsertProcedure({
           name: input.name,
+          description: input.description,
           forum_id: input.forum_id,
           token: token,
         }),
@@ -88,16 +126,14 @@ export class ForumsService {
         };
       }
 
-      const { error: readingError, forum } = await this.read({
-        forum_id: forum_id + '',
-      });
+      const { error: readingError, forum } = await this.read(+forum_id);
 
       return {
         error: readingError,
         forum,
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -106,13 +142,10 @@ export class ForumsService {
     };
   }
 
-  async delete(
-    input: ForumDeleteInput,
-    token: string,
-  ): Promise<ForumDeleteOutput> {
+  async delete(forum_id: number, token: string): Promise<ForumDeleteOutput> {
     const res = await this.pg.pool.query<ForumDeleteProcedureOutputRow>(
       ...callForumDeleteProcedure({
-        id: input.forum_id,
+        id: forum_id,
         token: token,
       }),
     );

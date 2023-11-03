@@ -157,6 +157,23 @@ export function TranslationDetailPage() {
     </Button>
   ) : null;
 
+  const dropDownList = [
+    {
+      key: 'flag_button',
+      component: (
+        <FlagV2
+          parent_id={definition_id}
+          parent_table={
+            definition_type === StringContentTypes.WORD
+              ? TableNameType.WordDefinitions
+              : TableNameType.PhraseDefinitions
+          }
+          flag_names={WORD_AND_PHRASE_FLAGS}
+        />
+      ),
+    },
+  ];
+
   return (
     <PageLayout>
       <Caption onBackClick={handleBackClick}>{tr('Details')}</Caption>
@@ -178,6 +195,7 @@ export function TranslationDetailPage() {
                 ? TableNameType.Words
                 : TableNameType.Phrases
             }
+            flex="1"
           />
           <Box
             sx={{
@@ -186,19 +204,7 @@ export function TranslationDetailPage() {
                 : 'none',
             }}
           >
-            <MoreHorizButton
-              component={
-                <FlagV2
-                  parent_id={definition_id}
-                  parent_table={
-                    definition_type === StringContentTypes.WORD
-                      ? TableNameType.WordDefinitions
-                      : TableNameType.PhraseDefinitions
-                  }
-                  flag_names={WORD_AND_PHRASE_FLAGS}
-                />
-              }
-            />
+            <MoreHorizButton dropDownList={dropDownList} />
           </Box>
         </Stack>
       </Stack>

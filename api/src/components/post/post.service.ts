@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ErrorType } from 'src/common/types';
-import { getBearer } from 'src/common/utility';
+import { PoolClient } from 'pg';
+import { ErrorType, GenericOutput } from 'src/common/types';
+import { getBearer, pgClientOrPool } from 'src/common/utility';
 import { PostgresService } from 'src/core/postgres.service';
 import { AuthenticationService } from '../authentication/authentication.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
@@ -24,6 +25,12 @@ import {
   PostsByParentInput,
   PostsByParentOutput,
 } from './types';
+import {
+  PostDeletesProcedureOutput,
+  callPostDeletesProcedure,
+  GetPostById,
+  getPostsFromRefsQuery,
+} from './sql-string';
 
 @Injectable()
 export class PostService {
@@ -241,6 +248,88 @@ export class PostService {
     return {
       error: ErrorType.UnknownError,
       total: 0,
+    };
+  }
+
+  async deletePostsByRefs(
+    refs: {
+      parent_id: string;
+      parent_table: string;
+    }[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<GenericOutput> {
+    if (refs.length === 0) {
+      return {
+        error: ErrorType.NoError,
+      };
+    }
+
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetPostById>(...getPostsFromRefsQuery(refs));
+
+      return this.deletePostsByIds(
+        res.rows.map((item) => +item.post_id),
+        token,
+        pgClient,
+      );
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+    };
+  }
+
+  async deletePostsByIds(
+    post_ids: number[],
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<GenericOutput> {
+    if (post_ids.length === 0) {
+      return {
+        error: ErrorType.NoError,
+      };
+    }
+
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<PostDeletesProcedureOutput>(
+        ...callPostDeletesProcedure({
+          token,
+          post_ids,
+        }),
+      );
+
+      if (res.rowCount === 0) {
+        return {
+          error: ErrorType.PostDeleteFailed,
+        };
+      }
+
+      for (const p_error of res.rows[0].p_error_types) {
+        if (p_error !== ErrorType.NoError) {
+          return {
+            error: p_error,
+          };
+        }
+      }
+
+      return {
+        error: ErrorType.NoError,
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
     };
   }
 

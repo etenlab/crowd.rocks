@@ -158,14 +158,14 @@ export function SiteTextListPage() {
           variables: {
             first: PAGE_SIZE,
             after: data.getAllSiteTextDefinitions.pageInfo.endCursor,
-            filter: filter.trim(),
+            filter: bouncedFilter.trim(),
           },
         });
       }
 
       setTimeout(() => ev.target.complete(), 500);
     },
-    [fetchMore, filter, data],
+    [fetchMore, bouncedFilter, data],
   );
 
   const cardListComs = useMemo(() => {
@@ -356,6 +356,7 @@ export function SiteTextListPage() {
         <Box style={{ textAlign: 'center' }}>
           {loading && <CircularProgress />}
         </Box>
+
         {cardListComs}
 
         <IonInfiniteScroll onIonInfinite={handleInfinite}>
