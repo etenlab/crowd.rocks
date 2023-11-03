@@ -39,3 +39,21 @@ UNION ALL
      JOIN phrase_definitions ophd ON oph.phrase_id = ophd.phrase_id
      JOIN original_map_phrases omph ON oph.phrase_id = omph.phrase_id
      JOIN words ow ON ow.word_id = oph.words[1];
+
+---
+ALTER TABLE public.original_maps_votes DROP CONSTRAINT if exists words_votes_map_id_fkey;
+ALTER TABLE public.original_maps_votes DROP CONSTRAINT if exists original_map_votes_id_fkey;
+ALTER TABLE public.original_maps_votes ADD CONSTRAINT original_map_votes_id_fkey FOREIGN KEY (map_id) REFERENCES public.original_maps(original_map_id) ON DELETE CASCADE;
+
+ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists words_votes_map_id_fkey;
+ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists translated_map_votes_fkey;
+ALTER TABLE public.translated_maps_votes ADD CONSTRAINT translated_map_votes_fkey FOREIGN KEY (map_id) REFERENCES public.translated_maps(translated_map_id) ON DELETE CASCADE;
+---
+ALTER TABLE public.original_maps_votes DROP CONSTRAINT if exists words_votes_user_id_fkey;
+ALTER TABLE public.original_maps_votes DROP CONSTRAINT if exists original_map_votes_user_id_fkey;
+ALTER TABLE public.original_maps_votes ADD CONSTRAINT original_map_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE;
+
+ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists words_votes_user_id_fkey;
+ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists translated_map_votes_user_id_fkey;
+ALTER TABLE public.translated_maps_votes ADD CONSTRAINT translated_map_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE;;
+
