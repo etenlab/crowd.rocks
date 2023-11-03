@@ -31,7 +31,7 @@ export class ForumsService {
       );
 
       if (res.rowCount !== 1) {
-        console.error(`no forum for id: ${forum_id}`);
+        Logger.error(`no forum for id: ${forum_id}`);
       } else {
         return {
           error: ErrorType.NoError,
@@ -73,19 +73,19 @@ export class ForumsService {
 
       const edges =
         input.first && tempEdges.length > input.first
-          ? tempEdges.slice(0, input.first - 1)
+          ? tempEdges.slice(0, input.first)
           : tempEdges;
 
       return {
         error: ErrorType.NoError,
         edges,
         pageInfo: {
-          hasNextPage: input.first ? edges.length > input.first : false,
+          hasNextPage: input.first ? res.rowCount > input.first : false,
           hasPreviousPage: false,
           startCursor: edges.length > 0 ? edges[0].cursor : null,
           endCursor:
             edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
-          totalEdges: res1.rowCount > 0 ? res1.rows[0].totalRecords : 0,
+          totalEdges: res1.rowCount > 0 ? res1.rows[0].total_records : 0,
         },
       };
     } catch (err) {
@@ -133,7 +133,7 @@ export class ForumsService {
         forum,
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {

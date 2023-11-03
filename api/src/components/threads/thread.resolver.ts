@@ -35,7 +35,7 @@ export class ThreadResolver {
   }
 
   @Query(() => ThreadListConnection)
-  async threads(
+  async getThreadsList(
     @Args('filter', { type: () => String, nullable: true })
     filter: string | null,
     @Args('forum_folder_id', { type: () => String })

@@ -35,13 +35,13 @@ export function getForumFolders({
   first: number | null;
   after: string | null;
 }): [string, unknown[]] {
-  const returnArr: unknown[] = [forum_id, filter || ''];
+  const returnArr: unknown[] = [forum_id, `%${filter || ''}%`];
   let limitStr = '';
   let cursorStr = '';
 
   if (after) {
     returnArr.push(after);
-    cursorStr = `lower(forum_folders.name) > $${returnArr.length}`;
+    cursorStr = `and lower(forum_folders.name) > $${returnArr.length}`;
   }
 
   if (first) {
@@ -69,7 +69,7 @@ export function getForumFolders({
 }
 
 export type GetForumFoldersTotalSize = {
-  totalRecords: number;
+  total_records: number;
 };
 
 export function getForumFoldersTotalSize(
@@ -78,12 +78,12 @@ export function getForumFoldersTotalSize(
 ): [string, [number, string]] {
   return [
     `
-      select count(*) as totalRecords
+      select count(*) as total_records
       from forum_folders
       where forum_folders.forum_id = $1 
         and lower(forum_folders.name) like $2;
     `,
-    [forum_id, filter || ''],
+    [forum_id, `%${filter || ''}%`],
   ];
 }
 

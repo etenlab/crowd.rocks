@@ -80,19 +80,19 @@ export class ThreadsService {
 
       const edges =
         input.first && tempEdges.length > input.first
-          ? tempEdges.slice(0, input.first - 1)
+          ? tempEdges.slice(0, input.first)
           : tempEdges;
 
       return {
         error: ErrorType.NoError,
         edges,
         pageInfo: {
-          hasNextPage: input.first ? edges.length > input.first : false,
+          hasNextPage: input.first ? res.rowCount > input.first : false,
           hasPreviousPage: false,
           startCursor: edges.length > 0 ? edges[0].cursor : null,
           endCursor:
             edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
-          totalEdges: res1.rowCount > 0 ? res1.rows[0].totalRecords : 0,
+          totalEdges: res1.rowCount > 0 ? res1.rows[0].total_records : 0,
         },
       };
     } catch (e) {

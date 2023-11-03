@@ -31,13 +31,13 @@ export function getForums({
   first: number | null;
   after: string | null;
 }): [string, unknown[]] {
-  const returnArr: unknown[] = [filter || ''];
+  const returnArr: unknown[] = [`%${filter || ''}%`];
   let limitStr = '';
   let cursorStr = '';
 
   if (after) {
     returnArr.push(after);
-    cursorStr = `lower(forums.name) > $${returnArr.length}`;
+    cursorStr = `and lower(forums.name) > $${returnArr.length}`;
   }
 
   if (first) {
@@ -63,17 +63,17 @@ export function getForums({
 }
 
 export type GetForumsTotalSize = {
-  totalRecords: number;
+  total_records: number;
 };
 
 export function getForumsTotalSize(filter: string | null): [string, [string]] {
   return [
     `
-      select count(*) as totalRecords
+      select count(*) as total_records
       from forums
       where lower(forums.name) like $1
     `,
-    [filter || ''],
+    [`%${filter || ''}%`],
   ];
 }
 

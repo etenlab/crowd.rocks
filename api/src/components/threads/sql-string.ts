@@ -33,13 +33,13 @@ export function getTheads({
   first: number | null;
   after: string | null;
 }): [string, unknown[]] {
-  const returnArr: unknown[] = [forum_folder_id, filter || ''];
+  const returnArr: unknown[] = [forum_folder_id, `%${filter || ''}%`];
   let limitStr = '';
   let cursorStr = '';
 
   if (after) {
     returnArr.push(after);
-    cursorStr = `lower(threads.name) > $${returnArr.length}`;
+    cursorStr = `and lower(threads.name) > $${returnArr.length}`;
   }
 
   if (first) {
@@ -49,11 +49,10 @@ export function getTheads({
 
   return [
     `
-      select 
+      select
+        thread_id,
         forum_folder_id,
-        forum_id,
         name,
-        description,
         created_by
       from threads
       where threads.forum_folder_id = $1 
@@ -67,7 +66,7 @@ export function getTheads({
 }
 
 export type GetThreadsTotalSize = {
-  totalRecords: number;
+  total_records: number;
 };
 
 export function getThreadsTotalSize(
@@ -76,12 +75,12 @@ export function getThreadsTotalSize(
 ): [string, [number, string]] {
   return [
     `
-      select count(*) as totalRecords
+      select count(*) as total_records
       from threads
       where threads.forum_folder_id = $1 
         and lower(threads.name) like $2;
     `,
-    [forum_folder_id, filter || ''],
+    [forum_folder_id, `%${filter || ''}%`],
   ];
 }
 
