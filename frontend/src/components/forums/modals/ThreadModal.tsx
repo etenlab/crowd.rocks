@@ -10,7 +10,7 @@ import { useThreadCreateMutation } from '../../../hooks/useThreadUpsertMutation'
 import { useThreadUpdateMutation } from '../../../hooks/useThreadUpsertMutation';
 
 type ThreadModalProps = {
-  folder_id: string;
+  forum_folder_id: string;
   threadData?: {
     id: string;
     name: string;
@@ -20,7 +20,7 @@ type ThreadModalProps = {
 
 export function ThreadModal({
   onClose,
-  folder_id,
+  forum_folder_id,
   threadData,
 }: ThreadModalProps) {
   const [present] = useIonToast();
@@ -28,8 +28,8 @@ export function ThreadModal({
 
   const [threadName, setThreadName] = useState<string>(threadData?.name || '');
 
-  const [upsertThread] = useThreadCreateMutation(folder_id);
-  const [updateThread] = useThreadUpdateMutation(folder_id);
+  const [upsertThread] = useThreadCreateMutation();
+  const [updateThread] = useThreadUpdateMutation();
 
   const handleSave = useCallback(async () => {
     if (threadName.trim() === '') {
@@ -45,7 +45,7 @@ export function ThreadModal({
     if (threadData) {
       updateThread({
         variables: {
-          folder_id: folder_id,
+          forum_folder_id: forum_folder_id,
           thread_id: threadData.id,
           name: threadName.trim(),
         },
@@ -53,7 +53,7 @@ export function ThreadModal({
     } else {
       upsertThread({
         variables: {
-          folder_id: folder_id,
+          forum_folder_id: forum_folder_id,
           name: threadName.trim(),
         },
       });
@@ -67,7 +67,7 @@ export function ThreadModal({
     present,
     tr,
     updateThread,
-    folder_id,
+    forum_folder_id,
     upsertThread,
   ]);
 

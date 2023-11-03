@@ -524,7 +524,7 @@ export function Body() {
             />
             <Route
               exact
-              path="/:nation_id/:language_id/:cluster_id/folders/:folder_id/:folder_name"
+              path="/:nation_id/:language_id/:cluster_id/folders/:forum_folder_id/:folder_name"
               component={ThreadListPage}
             />
             <Route

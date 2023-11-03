@@ -42,17 +42,35 @@ export function ForumModal({ forumData, onClose }: ForumModalProps) {
     }
 
     if (forumData) {
-      updateForum({ variables: { id: forumData.id, name: forumName.trim() } });
+      updateForum({
+        variables: {
+          id: forumData.id,
+          name: forumName.trim(),
+          description:
+            forumDescription.trim() !== '' ? forumDescription.trim() : null,
+        },
+      });
     } else {
       upsertForum({
         variables: {
           name: forumName.trim(),
+          description:
+            forumDescription.trim() !== '' ? forumDescription.trim() : null,
         },
       });
     }
 
     onClose();
-  }, [forumName, forumData, onClose, present, tr, updateForum, upsertForum]);
+  }, [
+    forumName,
+    forumData,
+    onClose,
+    present,
+    tr,
+    updateForum,
+    upsertForum,
+    forumDescription,
+  ]);
 
   const title = !forumData ? tr('Add new forum') : tr('Edit Forum');
   const content = !forumData

@@ -12,12 +12,12 @@ import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { TableNameType } from '../../../generated/graphql';
 
 export type ThreadItemProps = {
-  folder_id: string;
+  forum_folder_id: string;
   id: string;
   name: string;
 };
 
-export function ThreadItem({ folder_id, id, name }: ThreadItemProps) {
+export function ThreadItem({ forum_folder_id, id, name }: ThreadItemProps) {
   const { tr } = useTr();
 
   const {
@@ -29,7 +29,7 @@ export function ThreadItem({ folder_id, id, name }: ThreadItemProps) {
   const handleEdit = () => {
     openModal(
       <ThreadModal
-        folder_id={folder_id}
+        forum_folder_id={forum_folder_id}
         threadData={{ id, name }}
         onClose={closeModal}
       />,

@@ -32,8 +32,8 @@ export function FolderModal({
     folderData?.description || '',
   );
 
-  const [upsertFolder] = useForumFolderCreateMutation(forum_id);
-  const [updateFolder] = useForumFolderUpdateMutation(forum_id);
+  const [upsertFolder] = useForumFolderCreateMutation();
+  const [updateFolder] = useForumFolderUpdateMutation();
 
   const handleSave = useCallback(async () => {
     if (folderName.trim() === '') {
@@ -50,8 +50,9 @@ export function FolderModal({
       updateFolder({
         variables: {
           forum_id: forum_id,
-          id: folderData.id,
+          forum_folder_id: folderData.id,
           name: folderName.trim(),
+          description: description.trim() !== '' ? description.trim() : null,
         },
       });
     } else {
@@ -59,6 +60,7 @@ export function FolderModal({
         variables: {
           forum_id: forum_id,
           name: folderName.trim(),
+          description: description.trim() !== '' ? description.trim() : null,
         },
       });
     }
@@ -72,6 +74,7 @@ export function FolderModal({
     tr,
     updateFolder,
     forum_id,
+    description,
     upsertFolder,
   ]);
 
