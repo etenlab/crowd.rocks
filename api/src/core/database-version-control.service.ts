@@ -477,11 +477,15 @@ export class DatabaseVersionControlService {
     //schema
     await this.runSqlFile('./src/core/sql/schema/v9.schema.sql');
 
+    // posts
+    await this.runSqlFile('./src/core/sql/post/post_delete-v9.sql');
+    await this.runSqlFile('./src/core/sql/post/batch_post_delete-v9.sql');
+
     // forums
     await this.runSqlFile('./src/core/sql/forums/forum_upsert-v9.sql');
     await this.runSqlFile('./src/core/sql/forums/forum_delete-v9.sql');
 
-    // forums
+    // forum_folders
     await this.runSqlFile(
       './src/core/sql/forum_folders/forum_folder_upsert-v9.sql',
     );
@@ -489,9 +493,12 @@ export class DatabaseVersionControlService {
       './src/core/sql/forum_folders/forum_folder_delete-v9.sql',
     );
 
-    // forums
+    // threads
     await this.runSqlFile('./src/core/sql/threads/thread_upsert-v9.sql');
     await this.runSqlFile('./src/core/sql/threads/thread_delete-v9.sql');
+    await this.runSqlFile(
+      './src/core/sql/threads/post_delete_from_thread_delete_trigger-v9.sql',
+    );
 
     // set version
     await this.setVersionNumber(9);

@@ -190,7 +190,7 @@ create index idx__name_gin__forums on forums using gin(name gin_trgm_ops);
 
 create table forum_folders (
   forum_folder_id bigserial primary key,
-  forum_id bigint not null references forums(forum_id),
+  forum_id bigint not null references forums(forum_id) on delete cascade,
   name varchar(128) not null,
   description text,
   created_at timestamp not null default CURRENT_TIMESTAMP,
@@ -202,7 +202,7 @@ create index idx__forum_id__forum_folders on forum_folders (forum_id);
 
 create table threads (
   thread_id bigserial primary key,
-  forum_folder_id bigint not null references forum_folders(forum_folder_id),
+  forum_folder_id bigint not null references forum_folders(forum_folder_id) on delete cascade,
   name varchar(128) not null,
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
@@ -223,7 +223,7 @@ create table posts(
 
 create table versions(
   version_id bigserial primary key,
-  post_id bigint not null references posts(post_id),
+  post_id bigint not null references posts(post_id) on delete cascade,
   created_at timestamp not null default CURRENT_TIMESTAMP,
   license_title varchar(128) references license_options(license_title),
   file_id bigint references files(file_id),
