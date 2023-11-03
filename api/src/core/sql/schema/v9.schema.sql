@@ -78,3 +78,20 @@ CREATE INDEX mv_phrases_languages_full_language_code_idx ON mv_phrases_languages
 CREATE INDEX mv_phrases_languages_language_code_idx ON mv_phrases_languages USING btree (t_language_code);
 CREATE INDEX mv_phrases_languages_t_phrase_id_idx ON mv_phrases_languages USING btree (t_phrase_id);
 CREATE INDEX mv_phrases_languages_t_word_id_idx ON mv_phrases_languages USING btree (t_word_id);
+
+---
+ALTER TABLE public.original_maps_votes DROP CONSTRAINT if exists words_votes_map_id_fkey;
+ALTER TABLE public.original_maps_votes DROP CONSTRAINT if exists original_map_votes_id_fkey;
+ALTER TABLE public.original_maps_votes ADD CONSTRAINT original_map_votes_id_fkey FOREIGN KEY (map_id) REFERENCES public.original_maps(original_map_id) ON DELETE CASCADE;
+
+ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists words_votes_map_id_fkey;
+ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists translated_map_votes_fkey;
+ALTER TABLE public.translated_maps_votes ADD CONSTRAINT translated_map_votes_fkey FOREIGN KEY (map_id) REFERENCES public.translated_maps(translated_map_id) ON DELETE CASCADE;
+---
+ALTER TABLE public.original_maps_votes DROP CONSTRAINT if exists words_votes_user_id_fkey;
+ALTER TABLE public.original_maps_votes DROP CONSTRAINT if exists original_map_votes_user_id_fkey;
+ALTER TABLE public.original_maps_votes ADD CONSTRAINT original_map_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE;
+
+ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists words_votes_user_id_fkey;
+ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists translated_map_votes_user_id_fkey;
+ALTER TABLE public.translated_maps_votes ADD CONSTRAINT translated_map_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE;;
