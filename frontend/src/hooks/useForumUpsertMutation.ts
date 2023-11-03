@@ -6,6 +6,8 @@ import { useUpdateForumMutation as useGeneratedForumUpdateMutation } from '../ge
 import { ErrorType } from '../generated/graphql';
 
 import { useTr } from './useTr';
+import { useAppContext } from './useAppContext';
+
 import {
   updateCacheWithCreateForum,
   updateCacheWithUpdateForum,
@@ -14,6 +16,13 @@ import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function useForumUpdateMutation() {
   const { tr } = useTr();
+  const {
+    states: {
+      nonPersistent: {
+        paginationVariables: { getForumsLists },
+      },
+    },
+  } = useAppContext();
   const [present] = useIonToast();
   const redirectOnUnauth = useUnauthorizedRedirect();
 
@@ -27,7 +36,9 @@ export function useForumUpdateMutation() {
       ) {
         const updatedForum = data.forumUpsert.forum;
 
-        updateCacheWithUpdateForum(cache, updatedForum);
+        const variablesList = Object.values(getForumsLists);
+
+        updateCacheWithUpdateForum(cache, updatedForum, variablesList);
 
         present({
           message: tr('Success at updating forum!'),
@@ -54,6 +65,13 @@ export function useForumUpdateMutation() {
 
 export function useForumCreateMutation() {
   const { tr } = useTr();
+  const {
+    states: {
+      nonPersistent: {
+        paginationVariables: { getForumsLists },
+      },
+    },
+  } = useAppContext();
   const [present] = useIonToast();
   const redirectOnUnauth = useUnauthorizedRedirect();
 
@@ -67,7 +85,9 @@ export function useForumCreateMutation() {
       ) {
         const newForum = data.forumUpsert.forum;
 
-        updateCacheWithCreateForum(cache, newForum);
+        const variablesList = Object.values(getForumsLists);
+
+        updateCacheWithCreateForum(cache, newForum, variablesList);
 
         present({
           message: tr('Success at creating new forum!'),
