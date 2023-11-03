@@ -1,64 +1,114 @@
-# Threads
+fragment ThreadFragment on Thread {
+  thread_id
+  forum_folder_id
+  name
+  created_by
+}
 
-mutation CreateThread($name: String!, $folder_id: ID!) {
-  threadUpsert(input: { name: $name, folder_id: $folder_id }) {
+fragment ForumFolderFragment on ForumFolder {
+  forum_folder_id
+  forum_id
+  name
+  description
+  created_by
+}
+
+fragment ForumFragment on Forum {
+  forum_id
+  name
+  description
+  created_by
+}
+
+fragment ThreadEdgeFragment on ThreadEdge {
+  cursor
+  node {
+    ...ThreadFragment
+  }
+}
+
+fragment ForumFolderEdgeFragment on ForumFolderEdge {
+  cursor
+  node {
+    ...ForumFolderFragment
+  }
+}
+
+fragment ForumEdgeFragment on ForumEdge {
+  cursor
+  node {
+    ...ForumFragment
+  }
+}
+
+query GetThreadById($thread_id: ID!) {
+  threadRead(thread_id: $thread_id) {
     error
     thread {
-      thread_id
-      name
+      ...ThreadFragment
     }
   }
 }
 
-query GetThreadById($id: ID!) {
-  threadRead(input: { thread_id: $id }) {
+query GetThreadsList(
+  $forum_folder_id: String!
+  $filter: String
+  $after: ID
+  $first: Int
+) {
+  getThreadsList(
+    forum_folder_id: $forum_folder_id
+    filter: $filter
+    after: $after
+    first: $first
+  ) {
+    error
+    edges {
+      ...ThreadEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+
+mutation CreateThread($name: String!, $forum_folder_id: String!) {
+  threadUpsert(input: { name: $name, forum_folder_id: $forum_folder_id }) {
     error
     thread {
-      thread_id
-      name
+      ...ThreadFragment
     }
   }
 }
 
-query GetThreads($folder_id: ID!) {
-  threads(input: { folder_id: $folder_id }) {
-    error
-    threads {
-      __typename
-      thread_id
-      name
-    }
-  }
-}
-
-mutation UpdateThread($thread_id: ID, $name: String!, $folder_id: ID!) {
+mutation UpdateThread(
+  $thread_id: ID
+  $name: String!
+  $forum_folder_id: String!
+) {
   threadUpsert(
-    input: { folder_id: $folder_id, name: $name, thread_id: $thread_id }
+    input: {
+      forum_folder_id: $forum_folder_id
+      name: $name
+      thread_id: $thread_id
+    }
   ) {
     error
     thread {
-      thread_id
-      name
+      ...ThreadFragment
     }
   }
 }
 
-mutation DeleteThread($id: ID!) {
-  threadDelete(input: { thread_id: $id }) {
+mutation DeleteThread($thread_id: ID!) {
+  threadDelete(thread_id: $thread_id) {
     error
     thread_id
   }
 }
 
-# Forum Folders
-
-fragment ForumFolderFragment on ForumFolder {
-  folder_id
-  name
-}
-
-mutation CreateForumFolder($name: String!, $forum_id: ID!) {
-  forumFolderUpsert(input: { name: $name, forum_id: $forum_id }) {
+query GetForumFolderById($forum_folder_id: ID!) {
+  forumFolderRead(forum_folder_id: $forum_folder_id) {
     error
     folder {
       ...ForumFolderFragment
@@ -66,27 +116,35 @@ mutation CreateForumFolder($name: String!, $forum_id: ID!) {
   }
 }
 
-query GetForumFolderById($id: ID!) {
-  forumFolderRead(input: { folder_id: $id }) {
+query GetForumFoldersList(
+  $forum_id: ID!
+  $filter: String
+  $after: ID
+  $first: Int
+) {
+  getForumFoldersList(
+    forum_id: $forum_id
+    filter: $filter
+    after: $after
+    first: $first
+  ) {
     error
-    folder {
-      ...ForumFolderFragment
+    edges {
+      ...ForumFolderEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
 
-query GetForumFolders($forum_id: ID!) {
-  forumFolders(input: { forum_id: $forum_id }) {
-    error
-    folders {
-      ...ForumFolderFragment
-    }
-  }
-}
-
-mutation UpdateForumFolder($id: ID!, $name: String!, $forum_id: ID!) {
+mutation CreateForumFolder(
+  $name: String!
+  $description: String
+  $forum_id: ID!
+) {
   forumFolderUpsert(
-    input: { forum_id: $forum_id, name: $name, folder_id: $id }
+    input: { name: $name, description: $description, forum_id: $forum_id }
   ) {
     error
     folder {
@@ -95,22 +153,36 @@ mutation UpdateForumFolder($id: ID!, $name: String!, $forum_id: ID!) {
   }
 }
 
-mutation DeleteForumFolder($id: ID!) {
-  forumFolderDelete(input: { folder_id: $id }) {
+mutation UpdateForumFolder(
+  $forum_folder_id: ID
+  $name: String!
+  $description: String
+  $forum_id: ID!
+) {
+  forumFolderUpsert(
+    input: {
+      forum_id: $forum_id
+      name: $name
+      description: $description
+      forum_folder_id: $forum_folder_id
+    }
+  ) {
+    error
+    folder {
+      ...ForumFolderFragment
+    }
+  }
+}
+
+mutation DeleteForumFolder($forum_folder_id: ID!) {
+  forumFolderDelete(forum_folder_id: $forum_folder_id) {
     error
     folder_id
   }
 }
 
-# Forums
-
-fragment ForumFragment on Forum {
-  forum_id
-  name
-}
-
-mutation CreateForum($name: String!) {
-  forumUpsert(input: { name: $name }) {
+query GetForumById($forum_id: ID!) {
+  forumRead(forum_id: $forum_id) {
     error
     forum {
       ...ForumFragment
@@ -118,8 +190,20 @@ mutation CreateForum($name: String!) {
   }
 }
 
-query GetForumById($id: ID!) {
-  forumRead(input: { forum_id: $id }) {
+query GetForumsList($filter: String, $first: Int, $after: ID) {
+  getForumsList(filter: $filter, after: $after, first: $first) {
+    error
+    edges {
+      ...ForumEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+
+mutation CreateForum($name: String!, $description: String) {
+  forumUpsert(input: { name: $name, description: $description }) {
     error
     forum {
       ...ForumFragment
@@ -127,17 +211,10 @@ query GetForumById($id: ID!) {
   }
 }
 
-query GetForums {
-  forums {
-    error
-    forums {
-      ...ForumFragment
-    }
-  }
-}
-
-mutation UpdateForum($id: ID, $name: String!) {
-  forumUpsert(input: { forum_id: $id, name: $name }) {
+mutation UpdateForum($id: ID, $name: String!, $description: String) {
+  forumUpsert(
+    input: { forum_id: $id, name: $name, description: $description }
+  ) {
     error
     forum {
       ...ForumFragment
@@ -145,8 +222,8 @@ mutation UpdateForum($id: ID, $name: String!) {
   }
 }
 
-mutation DeleteForum($id: ID!) {
-  forumDelete(input: { forum_id: $id }) {
+mutation DeleteForum($forum_id: ID!) {
+  forumDelete(forum_id: $forum_id) {
     error
     forum_id
   }
