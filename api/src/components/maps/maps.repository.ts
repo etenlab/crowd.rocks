@@ -90,7 +90,7 @@ export class MapsRepository {
     const poolClient = dbPoolClient
       ? dbPoolClient // use given pool client
       : this.pg.pool; //some `random` client from pool will be used
-
+!!!!!!!!!!!!!possible problem - connection is not released!!!!!!!
     const res = await poolClient.query(
       `
           call original_map_create($1,$2,$3,$4,$5,$6,$7, null,null,null,null)
@@ -133,6 +133,7 @@ export class MapsRepository {
     const poolClient = dbPoolClient
       ? dbPoolClient // use given pool client
       : this.pg.pool; //some `random` client from pool will be used
+!!!!!!!!!!!!!possible problem - connection is not released!!!!!!!
 
     const userQ = await poolClient.query(
       `select user_id from tokens where token = $1`,

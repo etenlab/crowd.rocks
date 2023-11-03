@@ -451,10 +451,13 @@ export class MapsService {
     foundWords: string[];
     foundPhrases: string[];
   } {
+    let passes1 = 0;
+    let passes2 = 0;
     try {
       const svgAsINode = readSvg(originalSvgString);
       const foundTexts: string[] = [];
       this.iterateOverINode(svgAsINode, SKIP_INODE_NAMES, (node) => {
+        passes1++;
         if (
           TEXTY_INODE_NAMES.includes(node.name) ||
           POSSIBLE_TEXTY_INODE_NAMES.includes(node.name)
@@ -462,7 +465,8 @@ export class MapsService {
           let currNodeAllText = node.value || '';
           let hasInnerTextyNodes = false;
           if (node.children && node.children.length > 0) {
-            this.iterateOverINode(node, [], (subNode) => {
+            this.iterateOverINode(node, SKIP_INODE_NAMES, (subNode) => {
+              passes2++;
               currNodeAllText += subNode.value;
               if (
                 POSSIBLE_TEXTY_INODE_NAMES.includes(node.name) &&
@@ -511,6 +515,8 @@ export class MapsService {
           foundWords.push(words[0]);
         }
       });
+      // console.log('[passes through texty nodes]', passes1);
+      // console.log('[passes through possible texty nodes]', passes2);
       return {
         transformedSvgINode: svgAsINode,
         foundWords,
@@ -860,12 +866,12 @@ export class MapsService {
         );
         return null;
       }
-      const p0 = performance.now();
       Logger.log(
         `START translating of orig map id ${origMapId} to ${JSON.stringify(
           toLang,
         )}`,
       );
+      const p0 = performance.now();
       const mapTrWordsAndPhrases =
         await this.mapsRepository.getOrigMapTrWordsPhrases(origMapId, toLang);
       const p1 = performance.now();
@@ -884,10 +890,12 @@ export class MapsService {
         translations,
       )!;
       const p3 = performance.now();
-      Logger.log(`get originals with translations from DB: ${p1 - p0} ms`);
-      Logger.log(`translation without saving: ${p3 - p0} ms`);
-      Logger.log(`translation without saving: ${p3 - p0} ms`);
-      Logger.log(`translation without saving: ${p3 - p0} ms`);
+      // Logger.log(
+      //   `get original words/phrases with translations from DB: ${p1 - p0} ms`,
+      // );
+      // Logger.log(`prepare translations array: ${p2 - p1} ms`);
+      // Logger.log(`translate map string: ${p3 - p2} ms`);
+      Logger.debug(`translation is done in ${p3 - p1} ms(${p3}-${p1})`);
 
       const stream = Readable.from([translatedMap]);
       const translatedContentFile = await this.fileService.uploadFile(
@@ -947,9 +955,9 @@ export class MapsService {
       const p2 = performance.now();
       const translatedMap = stringify(transformedSvgINode);
       const p3 = performance.now();
-      Logger.log(`parsing: ${p1 - p0}`);
-      Logger.log(`replace originals with translations: ${p2 - p1}`);
-      Logger.log(`stringification: ${p3 - p2}`);
+      // Logger.log(`parsing: ${p1 - p0}`);
+      // Logger.log(`replace originals with translations: ${p2 - p1}`);
+      // Logger.log(`stringification: ${p3 - p2}`);
       return { translatedMap, translations };
     } catch (e) {
       return undefined;
@@ -1071,7 +1079,7 @@ export class MapsService {
             toLang,
           });
         } else {
-          this.translateMapStringToAllLangsAndSaveTranslated({
+          await this.translateMapStringToAllLangsAndSaveTranslated({
             origMapDetails,
             origMapString,
             dbPoolClient,
