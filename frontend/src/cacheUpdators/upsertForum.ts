@@ -1,73 +1,106 @@
 import { ApolloCache } from '@apollo/client';
 
-import { Forum, GetForumsDocument, GetForumsQuery } from '../generated/graphql';
+import {
+  Forum,
+  ForumEdge,
+  GetForumsListDocument,
+  GetForumsListQuery,
+} from '../generated/graphql';
+import { GetForumsListVariable } from '../reducers/non-persistent.reducer';
 
 export function updateCacheWithUpdateForum(
   cache: ApolloCache<unknown>,
   updatedForum: Forum,
+  variablesList: GetForumsListVariable[],
 ) {
-  cache.updateQuery<GetForumsQuery>(
-    {
-      query: GetForumsDocument,
-    },
-    (data) => {
-      if (data) {
-        const updatedForums = data.forums.forums.map((forum) => {
-          if (forum.forum_id != updatedForum.forum_id) return forum;
+  for (const variables of variablesList) {
+    cache.updateQuery<GetForumsListQuery>(
+      {
+        query: GetForumsListDocument,
+        variables,
+      },
+      (data) => {
+        if (data) {
           return {
-            ...updatedForum,
-          };
-        });
+            ...data,
+            getForumsList: {
+              ...data.getForumsList,
+              edges: [
+                ...data.getForumsList.edges.map((edge) => {
+                  if (edge.node.forum_id !== updatedForum.forum_id) {
+                    return edge;
+                  }
 
-        return {
-          ...data,
-          forums: {
-            ...data.forums,
-            forums: [...updatedForums],
-          },
-        };
-      } else {
-        return data;
-      }
-    },
-  );
+                  return {
+                    ...edge,
+                    cursor: updatedForum.name,
+                    node: updatedForum,
+                  };
+                }),
+              ],
+            },
+          };
+        } else {
+          return data;
+        }
+      },
+    );
+  }
 }
 
 export function updateCacheWithCreateForum(
   cache: ApolloCache<unknown>,
   newForum: Forum,
+  variablesList: GetForumsListVariable[],
 ) {
-  cache.updateQuery<GetForumsQuery>(
-    {
-      query: GetForumsDocument,
-    },
-    (data) => {
-      if (data) {
-        const alreadyExists = data.forums.forums.filter(
-          (forum) => forum?.forum_id === newForum.forum_id,
-        );
+  for (const variables of variablesList) {
+    cache.updateQuery<GetForumsListQuery>(
+      {
+        query: GetForumsListDocument,
+        variables,
+      },
+      (data) => {
+        if (data) {
+          const alreadyExists = data.getForumsList.edges.filter(
+            (edge) => edge.node.forum_id === newForum.forum_id,
+          );
 
-        if (alreadyExists.length > 0) {
+          if (alreadyExists.length > 0) {
+            return data;
+          }
+
+          const edges: ForumEdge[] = [
+            ...data.getForumsList.edges,
+            {
+              __typename: 'ForumEdge',
+              cursor: newForum.name,
+              node: newForum,
+            } as ForumEdge,
+          ].sort((a, b) => {
+            if (a.cursor.toLowerCase() < b.cursor.toLowerCase()) {
+              return -1;
+            } else if (a.cursor.toLowerCase() > b.cursor.toLowerCase()) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+
+          return {
+            ...data,
+            getForumsList: {
+              ...data.getForumsList,
+              edges: [...edges],
+              pageInfo: {
+                ...data.getForumsList.pageInfo,
+                totalEdges: (data.getForumsList.pageInfo.totalEdges || 0) + 1,
+              },
+            },
+          };
+        } else {
           return data;
         }
-
-        return {
-          ...data,
-          forums: {
-            ...data.forums,
-            forums: [
-              ...data.forums.forums,
-              {
-                ...newForum,
-                __typename: 'Forum',
-                created_at: new Date().toISOString(),
-              },
-            ],
-          },
-        };
-      } else {
-        return data;
-      }
-    },
-  );
+      },
+    );
+  }
 }

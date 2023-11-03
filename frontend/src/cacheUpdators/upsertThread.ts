@@ -2,85 +2,105 @@ import { ApolloCache } from '@apollo/client';
 
 import {
   Thread,
-  GetThreadsDocument,
-  GetThreadsQuery,
+  GetThreadsListDocument,
+  GetThreadsListQuery,
+  ThreadEdge,
 } from '../generated/graphql';
+import { GetThreadsListVariable } from '../reducers/non-persistent.reducer';
 
 export function updateCacheWithUpdateThread(
   cache: ApolloCache<unknown>,
   updatedThread: Thread,
-  folder_id: string,
+  variablesList: GetThreadsListVariable[],
 ) {
-  cache.updateQuery<GetThreadsQuery>(
-    {
-      query: GetThreadsDocument,
-      variables: {
-        folder_id: folder_id,
+  for (const variables of variablesList) {
+    cache.updateQuery<GetThreadsListQuery>(
+      {
+        query: GetThreadsListDocument,
+        variables,
       },
-    },
-    (data) => {
-      if (data) {
-        const updatedThreads = data.threads.threads.map((thread) => {
-          if (thread.thread_id != updatedThread.thread_id) return thread;
+      (data) => {
+        if (data) {
           return {
-            ...updatedThread,
-            __typename: 'Thread' as typeof thread.__typename,
-          };
-        });
+            ...data,
+            getThreadsList: {
+              ...data.getThreadsList,
+              edges: [
+                ...data.getThreadsList.edges.map((edge) => {
+                  if (edge.node.thread_id !== updatedThread.thread_id) {
+                    return edge;
+                  }
 
-        return {
-          ...data,
-          threads: {
-            ...data.threads,
-            threads: [...updatedThreads],
-          },
-        };
-      } else {
-        return data;
-      }
-    },
-  );
+                  return {
+                    ...edge,
+                    cursor: updatedThread.name,
+                    node: updatedThread,
+                  };
+                }),
+              ],
+            },
+          };
+        } else {
+          return data;
+        }
+      },
+    );
+  }
 }
 
 export function updateCacheWithCreateThread(
   cache: ApolloCache<unknown>,
   newThread: Thread,
-  folder_id: string,
+  variablesList: GetThreadsListVariable[],
 ) {
-  cache.updateQuery<GetThreadsQuery>(
-    {
-      query: GetThreadsDocument,
-      variables: {
-        folder_id: folder_id,
+  for (const variables of variablesList) {
+    cache.updateQuery<GetThreadsListQuery>(
+      {
+        query: GetThreadsListDocument,
+        variables,
       },
-    },
-    (data) => {
-      if (data) {
-        const alreadyExists = data.threads.threads.filter(
-          (thread) => thread?.thread_id === newThread.thread_id,
-        );
+      (data) => {
+        if (data) {
+          const alreadyExists = data.getThreadsList.edges.filter(
+            (edge) => edge.node.thread_id === newThread.thread_id,
+          );
 
-        if (alreadyExists.length > 0) {
+          if (alreadyExists.length > 0) {
+            return data;
+          }
+
+          const edges: ThreadEdge[] = [
+            ...data.getThreadsList.edges,
+            {
+              __typename: 'ThreadEdge',
+              cursor: newThread.name,
+              node: newThread,
+            } as ThreadEdge,
+          ].sort((a, b) => {
+            if (a.cursor.toLowerCase() < b.cursor.toLowerCase()) {
+              return -1;
+            } else if (a.cursor.toLowerCase() > b.cursor.toLowerCase()) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+
+          return {
+            ...data,
+            getThreadsList: {
+              ...data.getThreadsList,
+              edges: [...edges],
+              pageInfo: {
+                ...data.getThreadsList.pageInfo,
+                totalEdges: (data.getThreadsList.pageInfo.totalEdges || 0) + 1,
+              },
+            },
+          };
+        } else {
           return data;
         }
-
-        return {
-          ...data,
-          threads: {
-            ...data.threads,
-            threads: [
-              ...data.threads.threads,
-              {
-                ...newThread,
-                __typename: 'Thread',
-                created_at: new Date().toISOString(),
-              },
-            ],
-          },
-        };
-      } else {
-        return data;
-      }
-    },
-  );
+      },
+    );
+  }
 }
