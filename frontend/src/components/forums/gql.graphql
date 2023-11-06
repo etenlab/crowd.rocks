@@ -13,11 +13,31 @@ fragment ForumFolderFragment on ForumFolder {
   created_by
 }
 
+fragment ForumFolderNodeFragment on ForumFolderNode {
+  forum_folder_id
+  forum_id
+  name
+  description
+  created_by
+  total_posts
+  total_threads
+}
+
 fragment ForumFragment on Forum {
   forum_id
   name
   description
   created_by
+}
+
+fragment ForumNodeFragment on ForumNode {
+  forum_id
+  name
+  description
+  created_by
+  total_posts
+  total_threads
+  total_topics
 }
 
 fragment ThreadEdgeFragment on ThreadEdge {
@@ -30,14 +50,14 @@ fragment ThreadEdgeFragment on ThreadEdge {
 fragment ForumFolderEdgeFragment on ForumFolderEdge {
   cursor
   node {
-    ...ForumFolderFragment
+    ...ForumFolderNodeFragment
   }
 }
 
 fragment ForumEdgeFragment on ForumEdge {
   cursor
   node {
-    ...ForumFragment
+    ...ForumNodeFragment
   }
 }
 
