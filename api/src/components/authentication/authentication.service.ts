@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PostgresService } from '../../core/postgres.service';
 
 @Injectable()
@@ -38,17 +38,24 @@ export class AuthenticationService {
     return null;
   }
   async get_admin_id(): Promise<number | null> {
-    const res1 = await this.pg.pool.query(
-      `
+    try {
+      const res1 = await this.pg.pool.query(
+        `
       select user_id
       from users 
       where email='admin@crowd.rocks';
       `,
-    );
-    if (res1.rowCount == 1) {
-      return res1.rows[0].user_id;
+      );
+      if (res1.rowCount == 1) {
+        return res1.rows[0].user_id;
+      }
+      return null;
+    } catch (error) {
+      Logger.error(
+        `AuthenticationService#get_admin_id: ` + JSON.stringify(error),
+      );
+      return null;
     }
-    return null;
   }
 
   async isAdmin(token): Promise<boolean> {
