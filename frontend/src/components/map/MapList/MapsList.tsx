@@ -358,6 +358,50 @@ export function MapList({ match }: MapListProps) {
 
   const isAdminUser = globals.is_admin_user();
 
+  const dropDownList = [
+    {
+      key: 'zip_download_button',
+      component: (
+        <Button
+          variant="text"
+          startIcon={
+            mapZipResult?.ZipMapReport.status ===
+            SubscriptionStatus.Progressing ? (
+              <CircularProgress color={'primary'} size={18} />
+            ) : (
+              <DownloadCircle sx={{ fontSize: '24px' }} />
+            )
+          }
+          color="dark"
+          sx={{
+            padding: '0 5px',
+            justifyContent: 'flex-start',
+          }}
+          onClick={handleStartZipMap}
+        >
+          <Typography
+            variant="h4"
+            sx={{
+              textOverflow: 'ellipsis',
+              width: '180px',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {mapZipResult?.ZipMapReport.status ===
+            SubscriptionStatus.Progressing
+              ? tr(mapZipResult.ZipMapReport.message || '')
+              : tr(
+                  `Download All Maps (${
+                    allMapsQuery?.getAllMapsList.pageInfo.totalEdges || 0
+                  })`,
+                )}
+          </Typography>
+        </Button>
+      ),
+    },
+  ];
+
   return (
     <>
       <Caption
@@ -398,50 +442,7 @@ export function MapList({ match }: MapListProps) {
                 <AddCircle sx={{ fontSize: '18px' }} />
               </Button>
             ) : null}
-            <MoreHorizButton
-              popoverWidth="250px"
-              component={
-                <>
-                  <Button
-                    variant="text"
-                    startIcon={
-                      mapZipResult?.ZipMapReport.status ===
-                      SubscriptionStatus.Progressing ? (
-                        <CircularProgress color={'primary'} size={18} />
-                      ) : (
-                        <DownloadCircle sx={{ fontSize: '24px' }} />
-                      )
-                    }
-                    color="dark"
-                    sx={{
-                      padding: '0 5px',
-                      justifyContent: 'flex-start',
-                    }}
-                    onClick={handleStartZipMap}
-                  >
-                    <Typography
-                      variant="h4"
-                      sx={{
-                        textOverflow: 'ellipsis',
-                        width: '180px',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {mapZipResult?.ZipMapReport.status ===
-                      SubscriptionStatus.Progressing
-                        ? tr(mapZipResult.ZipMapReport.message || '')
-                        : tr(
-                            `Download All Maps (${
-                              allMapsQuery?.getAllMapsList.pageInfo
-                                .totalEdges || 0
-                            })`,
-                          )}
-                    </Typography>
-                  </Button>
-                </>
-              }
-            />
+            <MoreHorizButton popoverWidth="250px" dropDownList={dropDownList} />
           </Stack>
         </Stack>
         <SearchInput

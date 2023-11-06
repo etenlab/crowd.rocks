@@ -1,9 +1,19 @@
 import { useRef, type Dispatch, useCallback } from 'react';
 
-import { addPaginationVariableForGetAllSiteTextDefinitions as addPaginationVariableForGetAllSiteTextDefinitionsAction } from '../reducers/non-persistent.action';
+import {
+  addPaginationVariableForGetAllSiteTextDefinitions as addPaginationVariableForGetAllSiteTextDefinitionsAction,
+  addPaginationVariableForGetForumsList as addPaginationVariableForGetForumsListAction,
+  addPaginationVariableForGetForumFoldersList as addPaginationVariableForGetForumFoldersListAction,
+  addPaginationVariableForGetTheadsList as addPaginationVariableForGetTheadsListAction,
+} from '../reducers/non-persistent.action';
 
 import { type ActionType } from '../reducers/index';
-import { GetAllSiteTextDefinitionsVariable } from '../reducers/non-persistent.reducer';
+import {
+  GetAllSiteTextDefinitionsVariable,
+  GetForumsListVariable,
+  GetForumFoldersListVariable,
+  GetThreadsListVariable,
+} from '../reducers/non-persistent.reducer';
 
 interface UseNonPersistentProps {
   dispatch: Dispatch<ActionType<unknown>>;
@@ -23,7 +33,37 @@ export function useNonPersistent({ dispatch }: UseNonPersistentProps) {
     [],
   );
 
+  const addPaginationVariableForGetForumsList = useCallback(
+    (variable: GetForumsListVariable) => {
+      dispatchRef.current.dispatch(
+        addPaginationVariableForGetForumsListAction(variable),
+      );
+    },
+    [],
+  );
+
+  const addPaginationVariableForGetForumFoldersList = useCallback(
+    (variable: GetForumFoldersListVariable) => {
+      dispatchRef.current.dispatch(
+        addPaginationVariableForGetForumFoldersListAction(variable),
+      );
+    },
+    [],
+  );
+
+  const addPaginationVariableForGetTheadsList = useCallback(
+    (variable: GetThreadsListVariable) => {
+      dispatchRef.current.dispatch(
+        addPaginationVariableForGetTheadsListAction(variable),
+      );
+    },
+    [],
+  );
+
   return {
     addPaginationVariableForGetAllSiteTextDefinitions,
+    addPaginationVariableForGetForumsList,
+    addPaginationVariableForGetForumFoldersList,
+    addPaginationVariableForGetTheadsList,
   };
 }

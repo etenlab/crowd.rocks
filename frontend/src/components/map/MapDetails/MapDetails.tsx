@@ -151,6 +151,38 @@ export function MapDetails() {
     !!currentMapWithContent.loading ||
     !currentMapWithContent.data;
 
+  const dropDownList = [
+    {
+      key: 'flag_button',
+      component: authorizedForAnyFlag(MAPS_FLAGS) ? (
+        <FlagV2
+          parent_table={
+            isOriginal
+              ? TableNameType.OriginalMaps
+              : TableNameType.TranslatedMaps
+          }
+          parent_id={id}
+          flag_names={MAPS_FLAGS}
+        />
+      ) : null,
+    },
+    {
+      key: 'download_button',
+      component: (
+        <Button
+          variant="text"
+          startIcon={<DownloadCircle sx={{ fontSize: '24px' }} />}
+          color="dark"
+          sx={{ padding: 0, justifyContent: 'flex-start' }}
+          onClick={handleDownloadSvg}
+          disabled={loadingOrError}
+        >
+          {tr('Download')}
+        </Button>
+      ),
+    },
+  ].filter((item) => item.component !== null);
+
   return (
     <>
       <Caption>{tr('Map Details')}</Caption>
@@ -163,33 +195,7 @@ export function MapDetails() {
         >
           <Tag label={tagLabel} color={tagColor} />
 
-          <MoreHorizButton
-            component={
-              <>
-                {authorizedForAnyFlag(MAPS_FLAGS) ? (
-                  <FlagV2
-                    parent_table={
-                      isOriginal
-                        ? TableNameType.OriginalMaps
-                        : TableNameType.TranslatedMaps
-                    }
-                    parent_id={id}
-                    flag_names={MAPS_FLAGS}
-                  />
-                ) : null}
-                <Button
-                  variant="text"
-                  startIcon={<DownloadCircle sx={{ fontSize: '24px' }} />}
-                  color="dark"
-                  sx={{ padding: 0, justifyContent: 'flex-start' }}
-                  onClick={handleDownloadSvg}
-                  disabled={loadingOrError}
-                >
-                  {tr('Download')}
-                </Button>
-              </>
-            }
-          />
+          <MoreHorizButton dropDownList={dropDownList} />
         </Stack>
 
         <Typography variant="h5">
@@ -249,6 +255,7 @@ export function MapDetails() {
               : TableNameType.TranslatedMaps
           }
           parent_id={id}
+          flex="1"
         />
       </Stack>
 

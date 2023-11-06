@@ -11,11 +11,13 @@ type DiscussionIconButtonProps = {
   parent_table: string;
   parent_id: string;
   onClick?: () => void;
+  flex?: string;
 };
 
 export function DiscussionIconButton({
   parent_id,
   parent_table,
+  flex,
   onClick,
 }: DiscussionIconButtonProps) {
   const history = useHistory();
@@ -38,18 +40,24 @@ export function DiscussionIconButton({
     e.preventDefault();
   };
 
+  const flexObj = flex
+    ? {
+        flex: flex,
+      }
+    : {};
+
   return (
     <Button
       variant="outlined"
       onClick={handleClick}
       sx={{
         padding: `5px ${postCountData?.getTotalPosts.total ? '10px' : ''}`,
-        minWidth: '22px',
+        minWidth: '34px',
         maxWidth: '160px',
         borderRadius: '6px',
         fontSize: '13px',
         gap: '4px',
-        flex: 1,
+        ...flexObj,
       }}
       color="blue"
     >

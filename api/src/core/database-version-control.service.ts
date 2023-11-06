@@ -59,6 +59,9 @@ export class DatabaseVersionControlService {
         case 8:
           console.log('Updating database to version 9');
           await this.loadVersion9();
+        case 9:
+          console.log('Updating database to version 10');
+          await this.loadVersion10();
 
         default:
           console.error('Database version is current');
@@ -474,13 +477,42 @@ export class DatabaseVersionControlService {
   }
 
   async loadVersion9(): Promise<void> {
-    // schema
+    //schema
     await this.runSqlFile('./src/core/sql/schema/v9.schema.sql');
+
+    // posts
+    await this.runSqlFile('./src/core/sql/post/post_delete-v9.sql');
+    await this.runSqlFile('./src/core/sql/post/batch_post_delete-v9.sql');
+
+    // forums
+    await this.runSqlFile('./src/core/sql/forums/forum_upsert-v9.sql');
+    await this.runSqlFile('./src/core/sql/forums/forum_delete-v9.sql');
+
+    // forum_folders
+    await this.runSqlFile(
+      './src/core/sql/forum_folders/forum_folder_upsert-v9.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/forum_folders/forum_folder_delete-v9.sql',
+    );
+
+    // threads
+    await this.runSqlFile('./src/core/sql/threads/thread_upsert-v9.sql');
+    await this.runSqlFile('./src/core/sql/threads/thread_delete-v9.sql');
+    await this.runSqlFile(
+      './src/core/sql/threads/post_delete_from_thread_delete_trigger-v9.sql',
+    );
 
     // maps
     await this.runSqlFile('./src/core/sql/map/v_map_words_and_phrases-v9.sql');
+
     // set version
     await this.setVersionNumber(9);
+  }
+
+  async loadVersion10(): Promise<void> {
+    // set version
+    await this.setVersionNumber(10);
   }
 
   async registerUser(

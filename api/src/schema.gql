@@ -143,6 +143,7 @@ enum ErrorType {
   ForumFolderDeleteFailed
   ForumFolderUpsertFailed
   ForumForFolderNotExists
+  ForumIdNotDefined
   ForumUpsertFailed
   InvalidEmailOrPassword
   InvalidInputs
@@ -178,6 +179,7 @@ enum ErrorType {
   PhraseVoteNotFound
   PositionInvalid
   PostCreateFailed
+  PostDeleteFailed
   PostNotFound
   PrefixInvalid
   PrefixTooLong
@@ -236,12 +238,10 @@ type FlagsOutput {
 }
 
 type Forum {
+  created_by: String!
+  description: String
   forum_id: ID!
   name: String!
-}
-
-input ForumDeleteInput {
-  forum_id: ID!
 }
 
 type ForumDeleteOutput {
@@ -249,71 +249,62 @@ type ForumDeleteOutput {
   forum_id: ID!
 }
 
-type ForumFolder {
-  folder_id: ID!
-  name: String!
+type ForumEdge {
+  cursor: ID!
+  node: Forum!
 }
 
-input ForumFolderDeleteInput {
-  folder_id: ID!
+type ForumFolder {
+  created_by: String!
+  description: String
+  forum_folder_id: ID!
+  forum_id: String!
+  name: String!
 }
 
 type ForumFolderDeleteOutput {
   error: ErrorType!
-  folder_id: ID!
+  forum_folder_id: ID!
 }
 
-input ForumFolderListInput {
-  forum_id: ID!
+type ForumFolderEdge {
+  cursor: ID!
+  node: ForumFolder!
 }
 
-type ForumFolderListOutput {
+type ForumFolderListConnection {
+  edges: [ForumFolderEdge!]!
   error: ErrorType!
-  folders: [ForumFolder!]!
+  pageInfo: PageInfo!
 }
 
-input ForumFolderReadInput {
-  folder_id: ID!
-}
-
-type ForumFolderReadOutput {
+type ForumFolderOutput {
   error: ErrorType!
   folder: ForumFolder
 }
 
 input ForumFolderUpsertInput {
-  folder_id: ID
+  description: String
+  forum_folder_id: ID
   forum_id: ID!
   name: String!
 }
 
-type ForumFolderUpsertOutput {
+type ForumListConnection {
+  edges: [ForumEdge!]!
   error: ErrorType!
-  folder: ForumFolder
+  pageInfo: PageInfo!
 }
 
-type ForumListOutput {
-  error: ErrorType!
-  forums: [Forum!]!
-}
-
-input ForumReadInput {
-  forum_id: ID!
-}
-
-type ForumReadOutput {
+type ForumOutput {
   error: ErrorType!
   forum: Forum
 }
 
 input ForumUpsertInput {
+  description: String
   forum_id: ID
   name: String!
-}
-
-type ForumUpsertOutput {
-  error: ErrorType!
-  forum: Forum
 }
 
 input FromPhraseAndDefintionlikeStringUpsertInput {
@@ -579,10 +570,10 @@ type Mutation {
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
-  forumDelete(input: ForumDeleteInput!): ForumDeleteOutput!
-  forumFolderDelete(input: ForumFolderDeleteInput!): ForumFolderDeleteOutput!
-  forumFolderUpsert(input: ForumFolderUpsertInput!): ForumFolderUpsertOutput!
-  forumUpsert(input: ForumUpsertInput!): ForumUpsertOutput!
+  forumDelete(forum_id: ID!): ForumDeleteOutput!
+  forumFolderDelete(forum_folder_id: ID!): ForumFolderDeleteOutput!
+  forumFolderUpsert(input: ForumFolderUpsertInput!): ForumFolderOutput!
+  forumUpsert(input: ForumUpsertInput!): ForumOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
   mapDelete(input: MapDeleteInput!): MapDeleteOutput!
@@ -609,8 +600,8 @@ type Mutation {
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
   startZipMapDownload(input: StartZipMapDownloadInput!): StartZipMapOutput!
   stopBotTranslation: GenericOutput!
-  threadDelete(input: ThreadDeleteInput!): ThreadDeleteOutput!
-  threadUpsert(input: ThreadUpsertInput!): ThreadUpsertOutput!
+  threadDelete(thread_id: ID!): ThreadDeleteOutput!
+  threadUpsert(input: ThreadUpsertInput!): ThreadOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   toggleMapVoteStatus(is_original: Boolean!, map_id: ID!, vote: Boolean!): MapVoteStatusOutputRow!
   togglePericopeVoteStatus(pericope_id: ID!, vote: Boolean!): PericopeVoteStatusOutput!
@@ -1017,10 +1008,8 @@ type Query {
   file(id: Int!): IFileOutput!
   fileList: [IFile!]!
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
-  forumFolderRead(input: ForumFolderReadInput!): ForumFolderReadOutput!
-  forumFolders(input: ForumFolderListInput!): ForumFolderListOutput!
-  forumRead(input: ForumReadInput!): ForumReadOutput!
-  forums: ForumListOutput!
+  forumFolderRead(forum_folder_id: ID!): ForumFolderOutput!
+  forumRead(forum_id: ID!): ForumOutput!
   getAllDocuments(input: GetAllDocumentsInput!): GetAllDocumentsOutput!
   getAllMapsList(after: ID, first: Int, input: GetAllMapsListInput!): MapListConnection!
   getAllRecommendedSiteTextTranslationList: TranslationWithVoteListByLanguageListOutput!
@@ -1033,6 +1022,8 @@ type Query {
   getDocument(input: GetDocumentInput!): GetDocumentOutput!
   getDocumentWordEntriesByDocumentId(document_id: ID!): DocumentWordEntriesOutput!
   getFlagsFromRef(parent_id: String!, parent_table: TableNameType!): FlagsOutput!
+  getForumFoldersList(after: ID, filter: String, first: Int, forum_id: ID!): ForumFolderListConnection!
+  getForumsList(after: ID, filter: String, first: Int): ForumListConnection!
   getLanguageTranslationInfo(input: TranslatedLanguageInfoInput!): TranslatedLanguageInfoOutput!
   getMapDetails(input: GetMapDetailsInput!): MapDetailsOutput!
   getMapVoteStatus(is_original: Boolean!, map_id: ID!): MapVoteStatusOutputRow!
@@ -1059,6 +1050,7 @@ type Query {
   getRecommendedTranslationFromDefinitionID(from_definition_id: ID!, from_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteOutput!
   getRecommendedTranslationFromDefinitionIDs(from_definition_ids: [ID!]!, from_type_is_words: [Boolean!]!, langInfo: LanguageInput!): TranslationWithVoteListOutput!
   getRecommendedTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): TranslationWithVoteOutput!
+  getThreadsList(after: ID, filter: String, first: Int, forum_folder_id: String!): ThreadListConnection!
   getTotalPosts(input: PostsByParentInput!): PostCountOutput!
   getTranslationsByFromDefinitionId(definition_id: ID!, from_definition_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteListOutput!
   getWordDefinitionVoteStatus(word_definition_id: ID!): DefinitionVoteStatusOutputRow!
@@ -1090,8 +1082,7 @@ type Query {
   readWordRanges(ids: [ID!]!): WordRangesOutput!
   siteTextPhraseDefinitionRead(id: String!): SiteTextPhraseDefinitionOutput!
   siteTextWordDefinitionRead(id: String!): SiteTextWordDefinitionOutput!
-  threadRead(input: ThreadReadInput!): ThreadReadOutput!
-  threads(input: ThreadListInput!): ThreadListOutput!
+  threadRead(thread_id: ID!): ThreadOutput!
   userReadResolver(input: UserReadInput!): UserReadOutput!
   wordDefinitionRead(id: ID!): WordDefinitionOutput!
   wordRead(input: WordReadInput!): WordOutput!
@@ -1318,6 +1309,7 @@ enum TableNameType {
   phrase_to_phrase_translations
   phrase_to_word_translations
   phrases
+  threads
   translated_maps
   word_definitions
   word_ranges
@@ -1344,11 +1336,9 @@ input TextyDocumentInput {
 }
 
 type Thread {
+  created_by: String!
+  forum_folder_id: String!
   name: String!
-  thread_id: ID!
-}
-
-input ThreadDeleteInput {
   thread_id: ID!
 }
 
@@ -1357,33 +1347,26 @@ type ThreadDeleteOutput {
   thread_id: ID!
 }
 
-input ThreadListInput {
-  folder_id: ID!
+type ThreadEdge {
+  cursor: ID!
+  node: Thread!
 }
 
-type ThreadListOutput {
+type ThreadListConnection {
+  edges: [ThreadEdge!]!
   error: ErrorType!
-  threads: [Thread!]!
+  pageInfo: PageInfo!
 }
 
-input ThreadReadInput {
-  thread_id: ID!
-}
-
-type ThreadReadOutput {
+type ThreadOutput {
   error: ErrorType!
   thread: Thread
 }
 
 input ThreadUpsertInput {
-  folder_id: ID!
+  forum_folder_id: String!
   name: String!
   thread_id: ID
-}
-
-type ThreadUpsertOutput {
-  error: ErrorType!
-  thread: Thread
 }
 
 input ToDefinitionInput {

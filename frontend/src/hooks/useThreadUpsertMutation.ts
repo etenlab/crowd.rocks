@@ -6,14 +6,23 @@ import { useUpdateThreadMutation as useGeneratedThreadUpdateMutation } from '../
 import { ErrorType } from '../generated/graphql';
 
 import { useTr } from './useTr';
+import { useAppContext } from './useAppContext';
+
 import {
   updateCacheWithCreateThread,
   updateCacheWithUpdateThread,
 } from '../cacheUpdators/upsertThread';
 import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
-export function useThreadUpdateMutation(folder_id: string) {
+export function useThreadUpdateMutation() {
   const { tr } = useTr();
+  const {
+    states: {
+      nonPersistent: {
+        paginationVariables: { getThreadsLists },
+      },
+    },
+  } = useAppContext();
   const [present] = useIonToast();
   const redirectOnUnauth = useUnauthorizedRedirect();
 
@@ -27,7 +36,12 @@ export function useThreadUpdateMutation(folder_id: string) {
       ) {
         const updatedThread = data.threadUpsert.thread;
 
-        updateCacheWithUpdateThread(cache, updatedThread, folder_id);
+        const variablesList = Object.values(getThreadsLists).filter(
+          (variables) =>
+            variables.forum_folder_id === updatedThread.forum_folder_id,
+        );
+
+        updateCacheWithUpdateThread(cache, updatedThread, variablesList);
 
         present({
           message: tr('Success at updating thread!'),
@@ -52,8 +66,15 @@ export function useThreadUpdateMutation(folder_id: string) {
   });
 }
 
-export function useThreadCreateMutation(folder_id: string) {
+export function useThreadCreateMutation() {
   const { tr } = useTr();
+  const {
+    states: {
+      nonPersistent: {
+        paginationVariables: { getThreadsLists },
+      },
+    },
+  } = useAppContext();
   const [present] = useIonToast();
   const redirectOnUnauth = useUnauthorizedRedirect();
 
@@ -67,7 +88,12 @@ export function useThreadCreateMutation(folder_id: string) {
       ) {
         const newThread = data.threadUpsert.thread;
 
-        updateCacheWithCreateThread(cache, newThread, folder_id);
+        const variablesList = Object.values(getThreadsLists).filter(
+          (variables) =>
+            variables.forum_folder_id === newThread.forum_folder_id,
+        );
+
+        updateCacheWithCreateThread(cache, newThread, variablesList);
 
         present({
           message: tr('Success at creating new thread!'),

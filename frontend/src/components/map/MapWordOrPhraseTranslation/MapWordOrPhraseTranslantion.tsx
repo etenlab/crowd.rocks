@@ -86,6 +86,23 @@ export function MapWordOrPhraseTranslation() {
     </Button>
   ) : null;
 
+  const dropDownList = [
+    {
+      key: 'flag_button',
+      component: (
+        <FlagV2
+          parent_id={definition_id}
+          parent_table={
+            original.isWord
+              ? TableNameType.WordDefinitions
+              : TableNameType.PhraseDefinitions
+          }
+          flag_names={WORD_AND_PHRASE_FLAGS}
+        />
+      ),
+    },
+  ];
+
   return (
     <>
       <Caption>{tr('Details')}</Caption>
@@ -105,6 +122,7 @@ export function MapWordOrPhraseTranslation() {
             parent_table={
               original.isWord ? TableNameType.Words : TableNameType.Phrases
             }
+            flex="1"
           />
           <Box
             sx={{
@@ -113,19 +131,7 @@ export function MapWordOrPhraseTranslation() {
                 : 'none',
             }}
           >
-            <MoreHorizButton
-              component={
-                <FlagV2
-                  parent_id={definition_id}
-                  parent_table={
-                    original.isWord
-                      ? TableNameType.WordDefinitions
-                      : TableNameType.PhraseDefinitions
-                  }
-                  flag_names={WORD_AND_PHRASE_FLAGS}
-                />
-              }
-            />
+            <MoreHorizButton dropDownList={dropDownList} />
           </Box>
         </Stack>
       </Stack>
