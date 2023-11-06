@@ -22,6 +22,16 @@ export function getForumObjById(id: number): [string, [number]] {
   ];
 }
 
+export type GetForums = {
+  forum_id: string;
+  name: string;
+  description: string | null;
+  created_by: string;
+  total_topics: number;
+  total_threads: number;
+  total_posts: number;
+};
+
 export function getForums({
   filter,
   first,
@@ -48,13 +58,39 @@ export function getForums({
   return [
     `
       select 
-        forum_id,
-        name,
-        description,
-        created_by
+        forums.forum_id,
+        forums.name,
+        forums.description,
+        coalesce(count(forum_folders_v2.forum_folder_id), 0) as total_topics,
+        coalesce(sum(forum_folders_v2.total_threads), 0) as total_threads,
+        coalesce(sum(forum_folders_v2.total_posts), 0) as total_posts,
+        forums.created_by
       from forums
+      left join (
+        select
+          forum_folders.forum_folder_id,
+          forum_folders.forum_id,
+          coalesce(count(threads_v2.thread_id), 0) as total_threads,
+          coalesce(sum(threads_v2.post_count), 0) as total_posts
+        from forum_folders
+        left join (
+          select 
+            threads.thread_id,
+            threads.forum_folder_id,
+            coalesce(count(posts.post_id), 0) as post_count
+          from threads
+          left join posts
+          on posts.parent_table = 'threads'
+            and posts.parent_id = threads.thread_id
+          group by threads.thread_id
+        ) as threads_v2
+        on threads_v2.forum_folder_id = forum_folders.forum_folder_id
+        group by forum_folders.forum_folder_id
+      ) as forum_folders_v2
+      on forums.forum_id = forum_folders_v2.forum_id
       where lower(forums.name) like $1
-        ${cursorStr}
+      ${cursorStr}
+      group by forums.forum_id
       order by lower(forums.name)
       ${limitStr}
     `,
