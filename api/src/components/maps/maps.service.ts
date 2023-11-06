@@ -79,7 +79,6 @@ interface IParseOrigMapParams {
   mapString: string;
   mapDetails: MapDetailsInfo;
   token: string;
-  dbPoolClient?: PoolClient;
 }
 @Injectable()
 export class MapsService {
@@ -136,17 +135,9 @@ export class MapsService {
   async parseOrigMapAndSaveFoundWordsPhrases({
     mapString,
     mapDetails,
-    dbPoolClient: dbPoolClientIn,
     token,
   }: IParseOrigMapParams): Promise<GenericOutput> {
-    let isDbConnectionCreated = false;
-    let dbPoolClient: PoolClient;
-    if (!dbPoolClientIn) {
-      dbPoolClient = await this.pg.pool.connect();
-      isDbConnectionCreated = true;
-    } else {
-      dbPoolClient = dbPoolClientIn;
-    }
+    const dbPoolClient = await this.pg.pool.connect();
     try {
       const { language_code, dialect_code, geo_code } = mapDetails.language;
       const map_id = mapDetails.original_map_id;
@@ -185,14 +176,12 @@ export class MapsService {
         error: ErrorType.NoError,
       };
     } catch (e) {
-      Logger.error(e);
+      Logger.error(JSON.stringify(e));
       return {
         error: ErrorType.UnknownError,
       };
     } finally {
-      if (isDbConnectionCreated) {
-        dbPoolClient.release();
-      }
+      dbPoolClient.release();
     }
   }
 
@@ -733,7 +722,6 @@ export class MapsService {
     toLang?: LanguageInput,
   ): Promise<Array<string>> {
     const translatedMapsIds: Array<string | null> = [];
-    const dbPoolClient = await this.pg.pool.connect();
     try {
       for (const origMapId of origMapIds) {
         const { str, details } = await this.getMapAsStringById(origMapId);
@@ -743,7 +731,6 @@ export class MapsService {
               origMapString: str,
               origMapDetails: details,
               token,
-              dbPoolClient,
               toLang,
             }),
           );
@@ -753,16 +740,14 @@ export class MapsService {
               origMapString: str,
               origMapDetails: details,
               token,
-              dbPoolClient,
             })),
           );
         }
       }
+      return translatedMapsIds.filter((tmid) => !!tmid) as string[];
     } catch (error) {
       Logger.error(error);
-    } finally {
-      dbPoolClient.release();
-      return translatedMapsIds.filter((tmid) => !!tmid) as string[];
+      return [];
     }
   }
 
@@ -799,22 +784,11 @@ export class MapsService {
     origMapString,
     origMapDetails,
     token,
-    dbPoolClient: dbPoolClientIn,
   }: {
     origMapString: string;
     origMapDetails: MapDetailsInfo;
     token: string;
-    dbPoolClient?: PoolClient;
   }): Promise<Array<string>> {
-    let isDbConnectionCreated = false;
-    let dbPoolClient: PoolClient;
-    if (!dbPoolClientIn) {
-      dbPoolClient = await this.pg.pool.connect();
-      isDbConnectionCreated = true;
-    } else {
-      dbPoolClient = dbPoolClientIn;
-    }
-
     try {
       const languages: LanguageInput[] =
         await this.mapsRepository.getPossibleMapLanguages(
@@ -828,7 +802,6 @@ export class MapsService {
             origMapString,
             origMapDetails,
             token,
-            dbPoolClient,
             toLang,
           }),
         );
@@ -838,10 +811,6 @@ export class MapsService {
     } catch (e) {
       Logger.error(e);
       return [];
-    } finally {
-      if (isDbConnectionCreated) {
-        dbPoolClient.release();
-      }
     }
   }
 
@@ -850,13 +819,11 @@ export class MapsService {
     origMapDetails,
     toLang,
     token,
-    dbPoolClient,
   }: {
     origMapString: string;
     origMapDetails: MapDetailsInfo;
     toLang: LanguageInput;
     token: string;
-    dbPoolClient: PoolClient;
   }): Promise<string | null> {
     try {
       const origMapId = origMapDetails.original_map_id;
@@ -917,7 +884,6 @@ export class MapsService {
         content_file_id: String(translatedContentFile.file.id),
         token,
         toLang,
-        dbPoolClient,
         translated_percent:
           mapTrWordsAndPhrases.length > 0
             ? Math.round(
@@ -1017,11 +983,10 @@ export class MapsService {
   }
 
   async translationsReset(token): Promise<void> {
-    const dbPoolClient = await this.pg.pool.connect();
     try {
-      await this.mapsRepository.deleteAllOriginalMapWordsTrn(dbPoolClient);
-      await this.mapsRepository.deleteAllOriginalMapPhrasesTrn(dbPoolClient);
-      await this.mapsRepository.deleteAllTranslatedMapsTrn(dbPoolClient);
+      await this.mapsRepository.deleteAllOriginalMapWordsTrn();
+      await this.mapsRepository.deleteAllOriginalMapPhrasesTrn();
+      await this.mapsRepository.deleteAllTranslatedMapsTrn();
       const allOriginalMaps = await this.mapsRepository.getOrigMaps();
       for (const origMap of allOriginalMaps.mapList) {
         if (!origMap.mapDetails?.original_map_id) {
@@ -1037,19 +1002,15 @@ export class MapsService {
           mapDetails,
           mapString,
           token,
-          dbPoolClient,
         });
         await this.translateMapStringToAllLangsAndSaveTranslated({
           origMapDetails: mapDetails,
           origMapString: mapString,
           token,
-          dbPoolClient,
         });
       }
     } catch (error) {
       Logger.log(error);
-    } finally {
-      dbPoolClient.release();
     }
   }
 
@@ -1074,7 +1035,6 @@ export class MapsService {
           await this.translateMapStringToLangAndSaveTranslated({
             origMapDetails,
             origMapString,
-            dbPoolClient,
             token,
             toLang,
           });
@@ -1082,7 +1042,6 @@ export class MapsService {
           await this.translateMapStringToAllLangsAndSaveTranslated({
             origMapDetails,
             origMapString,
-            dbPoolClient,
             token,
           });
         }

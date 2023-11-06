@@ -34,7 +34,7 @@ export interface ISaveTranslatedMapParams {
   content_file_id: string;
   token: string;
   toLang: LanguageInput;
-  dbPoolClient: PoolClient | null;
+  // dbPoolClient: PoolClient | null;
   translated_percent: number;
 }
 
@@ -77,7 +77,7 @@ export class MapsRepository {
     content_file_id,
     previewFileId,
     token,
-    dbPoolClient,
+    dbPoolClient: dbPoolClientIn,
     language_code,
     dialect_code,
     geo_code,
@@ -87,35 +87,51 @@ export class MapsRepository {
     if (isNaN(previewFileIdN) || isNaN(content_file_idN)) {
       throw new Error(ErrorType.ProvidedIdIsMalformed);
     }
-    const poolClient = dbPoolClient
-      ? dbPoolClient // use given pool client
-      : this.pg.pool; //some `random` client from pool will be used
-!!!!!!!!!!!!!possible problem - connection is not released!!!!!!!
-    const res = await poolClient.query(
-      `
-          call original_map_create($1,$2,$3,$4,$5,$6,$7, null,null,null,null)
-        `,
-      [
-        mapFileName,
-        content_file_idN,
-        previewFileIdN,
-        token,
-        language_code,
-        dialect_code,
-        geo_code,
-      ],
-    );
-
-    if (!res.rows[0].p_map_id) {
-      throw new Error(res.rows[0].p_error_type);
+    let isDbConnectionCreated = false;
+    let dbPoolClient: PoolClient;
+    if (!dbPoolClientIn) {
+      dbPoolClient = await this.pg.pool.connect();
+      isDbConnectionCreated = true;
+    } else {
+      dbPoolClient = dbPoolClientIn;
     }
 
-    return {
-      map_file_name: mapFileName,
-      map_id: res.rows[0].p_map_id,
-      created_at: res.rows[0].p_created_at,
-      created_by: res.rows[0].p_created_by,
-    };
+    try {
+      const res = await dbPoolClient.query(
+        `
+          call original_map_create($1,$2,$3,$4,$5,$6,$7, null,null,null,null)
+        `,
+        [
+          mapFileName,
+          content_file_idN,
+          previewFileIdN,
+          token,
+          language_code,
+          dialect_code,
+          geo_code,
+        ],
+      );
+
+      if (!res.rows[0].p_map_id) {
+        throw new Error(res.rows[0].p_error_type);
+      }
+
+      return {
+        map_file_name: mapFileName,
+        map_id: res.rows[0].p_map_id,
+        created_at: res.rows[0].p_created_at,
+        created_by: res.rows[0].p_created_by,
+      };
+    } catch (error) {
+      Logger.error(
+        `mapsReposigory#saveOriginalMapTrn: ` + JSON.stringify(error),
+      );
+      throw error;
+    } finally {
+      if (isDbConnectionCreated) {
+        dbPoolClient.release();
+      }
+    }
   }
 
   /**
@@ -125,33 +141,29 @@ export class MapsRepository {
   async saveTranslatedMap({
     original_map_id,
     content_file_id,
-    dbPoolClient,
+    // dbPoolClient: dbPoolClientIn,
     token,
     toLang,
     translated_percent,
   }: ISaveTranslatedMapParams): Promise<ISaveTranslatedMapRes | null> {
-    const poolClient = dbPoolClient
-      ? dbPoolClient // use given pool client
-      : this.pg.pool; //some `random` client from pool will be used
-!!!!!!!!!!!!!possible problem - connection is not released!!!!!!!
+    try {
+      const userQ = await this.pg.pool.query(
+        `select user_id from tokens where token = $1`,
+        [token],
+      );
+      const userId = userQ.rows[0].user_id;
+      if (!userId) throw new Error('not Authorized');
 
-    const userQ = await poolClient.query(
-      `select user_id from tokens where token = $1`,
-      [token],
-    );
-    const userId = userQ.rows[0].user_id;
-    if (!userId) throw new Error('not Authorized');
-
-    const params = [
-      original_map_id,
-      content_file_id,
-      userId,
-      toLang.language_code,
-      translated_percent,
-    ];
-    params.push(toLang.dialect_code ? toLang.dialect_code : null);
-    params.push(toLang.geo_code ? toLang.geo_code : null);
-    const sqlStr = `
+      const params = [
+        original_map_id,
+        content_file_id,
+        userId,
+        toLang.language_code,
+        translated_percent,
+      ];
+      params.push(toLang.dialect_code ? toLang.dialect_code : null);
+      params.push(toLang.geo_code ? toLang.geo_code : null);
+      const sqlStr = `
       insert into
         translated_maps(
           original_map_id,
@@ -178,13 +190,19 @@ export class MapsRepository {
         returning 
           translated_map_id, created_by, created_at
       `;
-    const res = await poolClient.query(sqlStr, params);
+      const res = await this.pg.pool.query(sqlStr, params);
 
-    return {
-      map_id: res.rows[0].translated_map_id,
-      created_at: res.rows[0].created_at,
-      created_by: res.rows[0].created_by,
-    };
+      return {
+        map_id: res.rows[0].translated_map_id,
+        created_at: res.rows[0].created_at,
+        created_by: res.rows[0].created_by,
+      };
+    } catch (error) {
+      Logger.error(
+        `mapsReposigory#saveTranslatedMap: ` + JSON.stringify(error),
+      );
+      throw error;
+    }
   }
 
   async getOrigMaps(lang?: LanguageInput): Promise<GetOrigMapsListOutput> {
@@ -1346,33 +1364,61 @@ export class MapsRepository {
     return resQ.rows[0].original_map_id;
   }
 
-  async deleteAllOriginalMapWordsTrn(dbPoolClient: PoolClient): Promise<void> {
-    const sqlStr = `
+  async deleteAllOriginalMapWordsTrn(): Promise<void> {
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      const sqlStr = `
       delete
       from
         original_map_words
     `;
-    await dbPoolClient.query(sqlStr);
+      await dbPoolClient.query(sqlStr);
+    } catch (error) {
+      Logger.error(
+        `MapsRepository#deleteAllOriginalMapWordsTrn: ` + JSON.stringify(error),
+      );
+      throw error;
+    } finally {
+      await dbPoolClient.release();
+    }
   }
 
-  async deleteAllOriginalMapPhrasesTrn(
-    dbPoolClient: PoolClient,
-  ): Promise<void> {
-    const sqlStr = `
+  async deleteAllOriginalMapPhrasesTrn(): Promise<void> {
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      const sqlStr = `
       delete
       from
         original_map_phrases
     `;
-    await dbPoolClient.query(sqlStr);
+      await dbPoolClient.query(sqlStr);
+    } catch (error) {
+      Logger.error(
+        `MapsRepository#deleteAllOriginalMapWordsTrn: ` + JSON.stringify(error),
+      );
+      throw error;
+    } finally {
+      await dbPoolClient.release();
+    }
   }
 
-  async deleteAllTranslatedMapsTrn(dbPoolClient: PoolClient): Promise<void> {
-    const sqlStr = `
+  async deleteAllTranslatedMapsTrn(): Promise<void> {
+    const dbPoolClient = await this.pg.pool.connect();
+    try {
+      const sqlStr = `
       delete
       from
         translated_maps
     `;
-    await dbPoolClient.query(sqlStr);
+      await dbPoolClient.query(sqlStr);
+    } catch (error) {
+      Logger.error(
+        `MapsRepository#deleteAllOriginalMapWordsTrn: ` + JSON.stringify(error),
+      );
+      throw error;
+    } finally {
+      await dbPoolClient.release();
+    }
   }
 
   async getPossibleMapLanguages(mapId: string): Promise<LanguageInput[]> {
