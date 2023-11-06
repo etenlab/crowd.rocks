@@ -13,18 +13,38 @@ export type GetAllSiteTextDefinitionsVariable = {
   } | null;
 };
 
+export type GetForumsListVariable = {
+  filter: string | null;
+};
+
+export type GetForumFoldersListVariable = {
+  filter: string | null;
+  forum_id: string;
+};
+
+export type GetThreadsListVariable = {
+  filter: string | null;
+  forum_folder_id: string;
+};
+
 export interface StateType {
   paginationVariables: {
     getAllSiteTextDefinitions: Record<
       string,
       GetAllSiteTextDefinitionsVariable
     >;
+    getForumsLists: Record<string, GetForumsListVariable>;
+    getForumFoldersLists: Record<string, GetForumFoldersListVariable>;
+    getThreadsLists: Record<string, GetThreadsListVariable>;
   };
 }
 
 export const initialState: StateType = {
   paginationVariables: {
     getAllSiteTextDefinitions: {},
+    getForumsLists: {},
+    getForumFoldersLists: {},
+    getThreadsLists: {},
   },
 };
 
@@ -62,6 +82,58 @@ export function reducer(
           ...prevState.paginationVariables,
           getAllSiteTextDefinitions: {
             ...prevState.paginationVariables.getAllSiteTextDefinitions,
+            [keyStr]: variable,
+          },
+        },
+      };
+    }
+    case actions.ADD_PAGINATION_VARIABLE_FOR_GET_FORUMS_LIST: {
+      const variable = payload as GetForumsListVariable;
+
+      const keyStr = [variable.filter].map((item) => item + '').join('//--//');
+
+      return {
+        ...prevState,
+        paginationVariables: {
+          ...prevState.paginationVariables,
+          getForumsLists: {
+            ...prevState.paginationVariables.getForumsLists,
+            [keyStr]: variable,
+          },
+        },
+      };
+    }
+    case actions.ADD_PAGINATION_VARIABLE_FOR_GET_FORUM_FOLDERS_LIST: {
+      const variable = payload as GetForumFoldersListVariable;
+
+      const keyStr = [variable.forum_id, variable.filter]
+        .map((item) => item + '')
+        .join('//--//');
+
+      return {
+        ...prevState,
+        paginationVariables: {
+          ...prevState.paginationVariables,
+          getForumFoldersLists: {
+            ...prevState.paginationVariables.getForumFoldersLists,
+            [keyStr]: variable,
+          },
+        },
+      };
+    }
+    case actions.ADD_PAGINATION_VARIABLE_FOR_GET_THREADS_LIST: {
+      const variable = payload as GetThreadsListVariable;
+
+      const keyStr = [variable.forum_folder_id, variable.filter]
+        .map((item) => item + '')
+        .join('//--//');
+
+      return {
+        ...prevState,
+        paginationVariables: {
+          ...prevState.paginationVariables,
+          getThreadsLists: {
+            ...prevState.paginationVariables.getThreadsLists,
             [keyStr]: variable,
           },
         },

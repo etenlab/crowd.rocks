@@ -44,6 +44,7 @@ export enum ErrorType {
   ForumForFolderNotExists = 'ForumForFolderNotExists',
   ForumFolderUpsertFailed = 'ForumFolderUpsertFailed',
   ForumFolderDeleteFailed = 'ForumFolderDeleteFailed',
+  ForumIdNotDefined = 'ForumIdNotDefined',
 
   InvalidEmailOrPassword = 'InvalidEmailOrPassword',
   InvalidInputs = 'InvalidInputs',
@@ -62,6 +63,7 @@ export enum ErrorType {
 
   PositionInvalid = 'PositionInvalid',
   PostCreateFailed = 'PostCreateFailed',
+  PostDeleteFailed = 'PostDeleteFailed',
 
   PrefixInvalid = 'PrefixInvalid',
   PrefixTooLong = 'PrefixTooLong',
@@ -105,7 +107,10 @@ export enum ErrorType {
   MapFilenameAlreadyExists = 'MapFilenameAlreadyExists',
   MapInsertFailed = 'MapInsertFailed',
   MapDeletionError = 'MapDeletionError',
+  MapTranslationError = 'MapTranslationError',
+  MapSavingError = 'MapSavingError',
   MapNotFound = 'MapNotFound',
+  MapParsingError = 'MapParsingError',
   MapVoteNotFound = 'MapVoteNotFound',
   MapZippingError = 'MapZippingError',
   MapWordsAndPhrasesSearchError = 'MapWordsAndPhrasesSearchError',
@@ -157,6 +162,7 @@ export enum TableNameType {
 
   words = 'words',
   phrases = 'phrases',
+  threads = 'threads',
 
   word_to_word_translations = 'word_to_word_translations',
   word_to_phrase_translations = 'word_to_phrase_translations',

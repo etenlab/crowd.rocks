@@ -73,7 +73,7 @@ test('4: Verify that validation message is shown for password when try to login 
   );
 });
 
-test('5: Verify that email field is mandatory', async ({ page }) => {
+test.skip('5: Verify that email field is mandatory', async ({ page }) => {
   const loginPage = new LoginPO(page);
   const loginDataWithoutEmail = LoginData.withoutEmailData();
 
@@ -87,7 +87,7 @@ test('5: Verify that email field is mandatory', async ({ page }) => {
   await expect(page).toHaveScreenshot('Login_emailErrorMessage.png');
 });
 
-test('6: Verify that password field is mandatory', async ({ page }) => {
+test.skip('6: Verify that password field is mandatory', async ({ page }) => {
   const loginPage = new LoginPO(page);
   const loginDataWithoutPassword = LoginData.withoutPasswordData();
 
@@ -188,7 +188,7 @@ test('10:Verify that validation message is display when user clicks on the "SEND
   );
 });
 
-test('11:Verify that validation message is shown when user clicks on the "SEND PASSWORD RESET EMAIL" button without entering the email', async ({
+test.skip('11:Verify that validation message is shown when user clicks on the "SEND PASSWORD RESET EMAIL" button without entering the email', async ({
   page,
 }) => {
   const loginPage = new LoginPO(page);

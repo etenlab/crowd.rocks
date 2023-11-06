@@ -1,16 +1,18 @@
-import { useState, MouseEvent, ReactNode } from 'react';
-import { IconButton, Popover, IconButtonProps } from '@mui/material';
+import { useState, MouseEvent, ReactNode, Fragment } from 'react';
+import { IconButton, Popover, IconButtonProps, Divider } from '@mui/material';
 
 import { MoreHoriz } from '../../icons/MoreHoriz';
 
 export type MoreHorizButtonProps = Omit<IconButtonProps, 'component'> & {
-  component: ReactNode;
+  dropDownList: { key: string; component: ReactNode }[];
   popoverWidth?: string;
+  keepAfterClickItem?: boolean;
 };
 
 export function MoreHorizButton({
-  component,
+  dropDownList,
   popoverWidth,
+  keepAfterClickItem,
   ...props
 }: MoreHorizButtonProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -42,12 +44,16 @@ export function MoreHorizButton({
           },
           border: `1.5px solid ${theme.palette.text.gray_stroke}`,
         })}
+        disabled={dropDownList.length === 0}
         {...props}
       >
         <MoreHoriz sx={{ fontSize: 24 }} />
       </IconButton>
       <Popover
         onClick={(e) => {
+          if (!keepAfterClickItem) {
+            handleClose();
+          }
           e.stopPropagation();
           e.preventDefault();
         }}
@@ -75,7 +81,12 @@ export function MoreHorizButton({
           },
         })}
       >
-        {component}
+        {dropDownList.map((item, index) => (
+          <Fragment key={item.key}>
+            {index !== 0 ? <Divider /> : null}
+            {item.component}
+          </Fragment>
+        ))}
       </Popover>
     </>
   );

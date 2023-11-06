@@ -70,6 +70,17 @@ export class MapsResolver {
   ): Promise<MapUploadOutput> {
     console.log(`mapUpload resolver `, map_file_name);
     const bearer = getBearer(req) || '';
+    const user_id = await this.authenticationService.get_user_id_from_bearer(
+      bearer,
+    );
+    const admin_id = await this.authenticationService.get_admin_id();
+    if (admin_id !== user_id) {
+      return {
+        error: ErrorType.Unauthorized,
+        mapDetailsOutput: null,
+      };
+    }
+
     let fileBody = '';
     const readStream = createReadStream();
     const filePormise = this.fileService.uploadFile(
@@ -87,17 +98,6 @@ export class MapsResolver {
       }
     }
     const uploadedContent = await filePormise;
-
-    const user_id = await this.authenticationService.get_user_id_from_bearer(
-      bearer,
-    );
-    const admin_id = await this.authenticationService.get_admin_id();
-    if (admin_id !== user_id) {
-      return {
-        error: ErrorType.Unauthorized,
-        mapDetailsOutput: null,
-      };
-    }
     if (!uploadedContent?.file?.fileUrl) {
       return {
         error: ErrorType.FileSaveFailed,
@@ -111,25 +111,37 @@ export class MapsResolver {
       };
     }
     try {
-      const savedParsedMap = await this.mapsService.saveAndParseNewMap({
+      const savedMapId = await this.mapsService.saveNewMapInfo({
         content_file_id: String(uploadedContent.file.id),
         mapFileName: map_file_name,
         previewFileId: previewFileId!,
         token: bearer,
       });
-      if (!savedParsedMap.mapDetails?.original_map_id) {
-        Logger.error(
-          `mapsResolver#mapUpload: savedParsedMap.mapDetails?.original_map_id is falsy`,
-        );
-        throw new Error(ErrorType.MapNotFound);
+      if (!savedMapId) {
+        Logger.error(`mapsResolver#mapUpload: savedMapId is null`);
+        return {
+          error: ErrorType.MapSavingError,
+          mapDetailsOutput: null,
+        };
       }
-      await this.mapsService.translateOrigMapsByIds(
-        [savedParsedMap.mapDetails.original_map_id],
-        bearer,
-      );
+      const { str: mapString, details: mapDetails } =
+        await this.mapsService.getMapAsStringById(savedMapId);
+      await this.mapsService.parseOrigMapAndSaveFoundWordsPhrases({
+        mapString,
+        mapDetails,
+        token: bearer,
+      });
+      await this.mapsService.translateMapStringToAllLangsAndSaveTranslated({
+        origMapString: mapString,
+        origMapDetails: mapDetails,
+        token: bearer,
+      });
       return {
         error: ErrorType.NoError,
-        mapDetailsOutput: savedParsedMap,
+        mapDetailsOutput: {
+          error: ErrorType.NoError,
+          mapDetails: mapDetails,
+        },
       };
     } catch (error) {
       return {
@@ -214,7 +226,7 @@ export class MapsResolver {
       };
     }
     try {
-      await this.mapsService.reTranslate(userToken, forLangTag!);
+      await this.mapsService.reTranslate(userToken, forLangTag);
       return {
         error: ErrorType.NoError,
       };
@@ -289,7 +301,7 @@ export class MapsResolver {
   async getMapDetails(
     @Args('input') input: GetMapDetailsInput,
   ): Promise<MapDetailsOutput> {
-    console.log(`getMapDetails resolver `, input);
+    console.log(`getMapDetails resolver `, JSON.stringify(input));
 
     return input.is_original
       ? this.mapsService.getOrigMapWithContentUrl(input.map_id)
@@ -303,7 +315,12 @@ export class MapsResolver {
     @Args('after', { type: () => ID, nullable: true })
     after?: string | null,
   ): Promise<MapWordsAndPhrasesConnection | undefined> {
-    console.log(`getOrigMapWordsAndPhrases resolver `, input, first, after);
+    console.log(
+      `getOrigMapWordsAndPhrases resolver `,
+      JSON.stringify(input),
+      first,
+      after,
+    );
     return this.mapsService.getOrigMapWordsAndPhrases({ input, first, after });
   }
 
@@ -311,7 +328,10 @@ export class MapsResolver {
   async getOrigMapWordsAndPhrasesCount(
     @Args('input') input: GetOrigMapWordsAndPhrasesInput,
   ): Promise<MapWordsAndPhrasesCountOutput | undefined> {
-    console.log(`getOrigMapWordsAndPhrasesCount resolver `, input);
+    console.log(
+      `getOrigMapWordsAndPhrasesCount resolver `,
+      JSON.stringify(input),
+    );
     return this.mapsService.getOrigMapWordsAndPhrasesCount(input);
   }
 
@@ -323,7 +343,7 @@ export class MapsResolver {
   ): Promise<OrigMapWordsAndPhrasesOutput | undefined> {
     console.log(
       `getOrigMapWordsAndPhrasesPaginated resolver `,
-      input,
+      JSON.stringify(input),
       offset,
       limit,
     );
@@ -338,7 +358,10 @@ export class MapsResolver {
   async getMapWordOrPhraseAsOrigByDefinitionId(
     @Args('input') input: GetMapWordOrPhraseByDefinitionIdInput,
   ): Promise<MapWordOrPhraseAsOrigOutput | undefined> {
-    console.log(`getMapWordOrPhraseAsOrigByDefinitionId resolver `, input);
+    console.log(
+      `getMapWordOrPhraseAsOrigByDefinitionId resolver `,
+      JSON.stringify(input),
+    );
     return this.mapsService.getMapWordOrPhraseUnionByDefinitionId(input);
   }
 
@@ -351,7 +374,7 @@ export class MapsResolver {
     @Args('input') input: MapVoteUpsertInput,
     @Context() req: any,
   ): Promise<MapVoteOutput> {
-    console.log('mapVoteUpsert resolver: ', input);
+    console.log('mapVoteUpsert resolver: ', JSON.stringify(input));
 
     return this.mapVotesService.upsert(input, getBearer(req)! || '', null);
   }
@@ -389,7 +412,7 @@ export class MapsResolver {
     @Args('input', { type: () => StartZipMapDownloadInput })
     input: StartZipMapDownloadInput,
   ): Promise<StartZipMapOutput> {
-    console.log(`startMapZipDownload`, input);
+    console.log(`startMapZipDownload`, JSON.stringify(input));
     return this.mapsService.startZipMap(input);
   }
 

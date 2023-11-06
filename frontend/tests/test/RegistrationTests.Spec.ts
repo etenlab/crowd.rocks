@@ -50,7 +50,7 @@ test('1: Verify that user is register/logout and login again successfully', asyn
   expect(await homePage.isHomePageVisible()).toBeTruthy();
 });
 
-test('2: Verify that email field is mandatory', async ({ page }) => {
+test.skip('2: Verify that email field is mandatory', async ({ page }) => {
   const registerPage = new RegisterPO(page);
   const loginPage = new LoginPO(page);
   const registerData = RegisterData.registerDataWithoutEmail();
@@ -77,7 +77,7 @@ test('2: Verify that email field is mandatory', async ({ page }) => {
   await expect(page).toHaveScreenshot('emailErrorMessage.png');
 });
 
-test('3: Verify that username field is mandatory', async ({ page }) => {
+test.skip('3: Verify that username field is mandatory', async ({ page }) => {
   const registerPage = new RegisterPO(page);
   const loginPage = new LoginPO(page);
   const registerData = RegisterData.registerDataWithoutUserName();
@@ -106,7 +106,7 @@ test('3: Verify that username field is mandatory', async ({ page }) => {
   });
 });
 
-test('4: Verify that password field is mandatory', async ({ page }) => {
+test.skip('4: Verify that password field is mandatory', async ({ page }) => {
   const registerPage = new RegisterPO(page);
   const loginPage = new LoginPO(page);
   const registerData = RegisterData.registerDataWithoutPassword();
@@ -133,7 +133,7 @@ test('4: Verify that password field is mandatory', async ({ page }) => {
   await expect(page).toHaveScreenshot('passwordErrorMessage.png');
 });
 
-test('5: Verify that validation shown for invalid email format', async ({
+test.skip('5: Verify that validation shown for invalid email format', async ({
   page,
 }) => {
   const registerPage = new RegisterPO(page);

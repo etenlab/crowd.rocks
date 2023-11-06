@@ -1,124 +1,153 @@
-import { useEffect, useMemo, useCallback } from 'react';
-import { RouteComponentProps } from 'react-router';
+import { useEffect, useMemo, useState, useCallback } from 'react';
+import { IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react';
+import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
 import {
-  IonContent,
-  IonHeader,
-  IonTitle,
-  IonToolbar,
-  useIonRouter,
-} from '@ionic/react';
-import { useIonToast } from '@ionic/react';
+  Stack,
+  Typography,
+  Button,
+  Box,
+  CircularProgress,
+} from '@mui/material';
+import { useDebounce } from 'use-debounce';
 
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
-import { Card } from '../../common/Card';
+import { AddCircle } from '../../common/icons/AddCircle';
+import { SearchInput } from '../../common/forms/SearchInput';
 
-import { useGetForumsLazyQuery } from '../../../generated/graphql';
+import { useGetForumsListLazyQuery } from '../../../generated/graphql';
 
 import { ErrorType } from '../../../generated/graphql';
 
-import { CardListContainer, CardContainer } from '../../common/styled';
-
 import { useTr } from '../../../hooks/useTr';
-import { AddListHeader } from '../../common/ListHeader';
-import { NewForumForm } from '../forms/NewForumForm';
-import { useForumUpdateMutation } from '../../../hooks/useForumUpsertMutation';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-interface ForumListPageProps
-  extends RouteComponentProps<{
-    nation_id: string;
-    language_id: string;
-  }> {}
+import { ForumModal } from '../modals/ForumModal';
+import { ForumItem } from './ForumItem';
 
-export function ForumListPage({ match }: ForumListPageProps) {
-  const router = useIonRouter();
+// import { PAGE_SIZE } from '../../../const/commonConst';
+const PAGE_SIZE = 4;
+
+export function ForumListPage() {
   const { tr } = useTr();
 
-  const {
-    actions: { createModal },
-  } = useAppContext();
-
+  const [filter, setFilter] = useState<string>('');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [present] = useIonToast();
+  const [bouncedFilter] = useDebounce(filter, 500);
+
+  const {
+    actions: { createModal, addPaginationVariableForGetForumsList },
+  } = useAppContext();
 
   const { openModal, closeModal } = createModal();
 
-  const [getForums, { data: forumsData, error }] = useGetForumsLazyQuery();
-
-  const [upsertForum] = useForumUpdateMutation();
+  const [getForumsList, { data: forumsData, error, loading, fetchMore }] =
+    useGetForumsListLazyQuery();
 
   useEffect(() => {
-    getForums();
-  }, [getForums]);
-
-  const handleGoToForumDetail = useCallback(
-    (forumId: string, forum_name: string) => {
-      router.push(
-        `/${match.params.nation_id}/${match.params.language_id}/1/forums/${forumId}/${forum_name}`,
-      );
-    },
-    [match.params.language_id, match.params.nation_id, router],
-  );
-
-  const handleEdit = useCallback(
-    (forum_id: string, newValue: string) => {
-      console.log(`'handle edit' ${newValue}`);
-      upsertForum({ variables: { id: forum_id, name: newValue } });
-    },
-    [upsertForum],
-  );
+    getForumsList({
+      variables: {
+        filter: bouncedFilter,
+        first: PAGE_SIZE,
+        after: null,
+      },
+    });
+    addPaginationVariableForGetForumsList({
+      filter: bouncedFilter,
+    });
+  }, [bouncedFilter, getForumsList, addPaginationVariableForGetForumsList]);
 
   const cardListComs = useMemo(() => {
     if (error) {
       return null;
     }
 
-    if (!forumsData || forumsData.forums.error !== ErrorType.NoError) {
+    if (!forumsData || forumsData.getForumsList.error !== ErrorType.NoError) {
       return null;
     }
 
-    return forumsData.forums.forums.map((forum) => (
-      <CardContainer key={forum.forum_id}>
-        <Card
-          key={forum.forum_id}
-          content={forum.name}
-          //TODO: description=....
-          onClick={() => handleGoToForumDetail(forum.forum_id, forum.name)}
-          onContentEdit={(newValue) => handleEdit(forum.forum_id, newValue)}
-        />
-      </CardContainer>
+    return forumsData.getForumsList.edges.map((edge) => (
+      <ForumItem
+        key={edge.node.forum_id}
+        id={edge.node.forum_id}
+        name={edge.node.name}
+        description={edge.node.description || ''}
+        created_by={edge.node.created_by}
+        totalTopics={100}
+        totalThreads={47}
+        totalPosts={500}
+      />
     ));
-  }, [error, forumsData, handleEdit, handleGoToForumDetail]);
+  }, [error, forumsData]);
 
   const handleOpenModal = () => {
-    openModal(
-      <>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('Add New Forum')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          <NewForumForm onCreated={closeModal} onCancel={closeModal} />
-        </IonContent>
-      </>,
-      'full',
-    );
+    openModal(<ForumModal onClose={closeModal} />);
   };
+
+  const handleInfinite = useCallback(
+    async (ev: IonInfiniteScrollCustomEvent<void>) => {
+      if (forumsData?.getForumsList.pageInfo.hasNextPage) {
+        await fetchMore({
+          variables: {
+            first: PAGE_SIZE,
+            after: forumsData.getForumsList.pageInfo.endCursor,
+            filter: bouncedFilter.trim(),
+          },
+        });
+      }
+
+      setTimeout(() => ev.target.complete(), 500);
+    },
+    [fetchMore, bouncedFilter, forumsData],
+  );
 
   return (
     <PageLayout>
       <Caption>{tr('Community')}</Caption>
 
-      <AddListHeader
-        title={tr('Forums')}
-        onClick={() => {
-          handleOpenModal();
-        }}
-      />
+      <Stack gap="13px">
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Typography variant="h3" color="dark">
+            {`${forumsData?.getForumsList.pageInfo.totalEdges || 0} ${tr(
+              'Forums',
+            )}`}
+          </Typography>
 
-      <CardListContainer>{cardListComs}</CardListContainer>
+          <Button
+            variant="contained"
+            color="orange"
+            sx={{ padding: '7px', minWidth: 0 }}
+            onClick={handleOpenModal}
+          >
+            <AddCircle sx={{ fontSize: '18px' }} />
+          </Button>
+        </Stack>
+        <SearchInput
+          value={filter}
+          onChange={setFilter}
+          onClickSearchButton={() => {}}
+          placeholder={tr('Search by...')}
+        />
+      </Stack>
+
+      <Stack gap="16px">
+        <Box style={{ textAlign: 'center' }}>
+          {loading && <CircularProgress />}
+        </Box>
+
+        {cardListComs}
+
+        <IonInfiniteScroll onIonInfinite={handleInfinite}>
+          <IonInfiniteScrollContent
+            loadingText={`${tr('Loading')}...`}
+            loadingSpinner="bubbles"
+          />
+        </IonInfiniteScroll>
+      </Stack>
     </PageLayout>
   );
 }

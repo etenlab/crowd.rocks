@@ -1,84 +1,111 @@
 import { ApolloCache } from '@apollo/client';
 
 import {
+  ForumFolderEdge,
   ForumFolder,
-  GetForumFoldersDocument,
-  GetForumFoldersQuery,
+  GetForumFoldersListDocument,
+  GetForumFoldersListQuery,
 } from '../generated/graphql';
+import { GetForumFoldersListVariable } from '../reducers/non-persistent.reducer';
+
 export function updateCacheWithUpdateForumFolder(
   cache: ApolloCache<unknown>,
   updatedForumFolder: ForumFolder,
-  forum_id: string,
+  variablesList: GetForumFoldersListVariable[],
 ) {
-  cache.updateQuery<GetForumFoldersQuery>(
-    {
-      query: GetForumFoldersDocument,
-      variables: {
-        forum_id: forum_id,
+  for (const variables of variablesList) {
+    cache.updateQuery<GetForumFoldersListQuery>(
+      {
+        query: GetForumFoldersListDocument,
+        variables,
       },
-    },
-    (data) => {
-      if (data) {
-        const updatedFolders = data.forumFolders.folders.map((folder) => {
-          if (folder.folder_id != updatedForumFolder.folder_id) return folder;
+      (data) => {
+        if (data) {
           return {
-            ...updatedForumFolder,
-          };
-        });
+            ...data,
+            getForumFoldersList: {
+              ...data.getForumFoldersList,
+              edges: [
+                ...data.getForumFoldersList.edges.map((edge) => {
+                  if (
+                    edge.node.forum_folder_id !==
+                    updatedForumFolder.forum_folder_id
+                  ) {
+                    return edge;
+                  }
 
-        return {
-          ...data,
-          forumFolders: {
-            ...data.forumFolders,
-            folders: [...updatedFolders],
-          },
-        };
-      } else {
-        return data;
-      }
-    },
-  );
+                  return {
+                    ...edge,
+                    cursor: updatedForumFolder.name,
+                    node: updatedForumFolder,
+                  };
+                }),
+              ],
+            },
+          };
+        } else {
+          return data;
+        }
+      },
+    );
+  }
 }
 
 export function updateCacheWithCreateForumFolder(
   cache: ApolloCache<unknown>,
   newForumFolder: ForumFolder,
-  forum_id: string,
+  variablesList: GetForumFoldersListVariable[],
 ) {
-  cache.updateQuery<GetForumFoldersQuery>(
-    {
-      query: GetForumFoldersDocument,
-      variables: {
-        forum_id: forum_id,
+  for (const variables of variablesList) {
+    cache.updateQuery<GetForumFoldersListQuery>(
+      {
+        query: GetForumFoldersListDocument,
+        variables,
       },
-    },
-    (data) => {
-      if (data) {
-        const alreadyExists = data.forumFolders.folders.filter(
-          (folder) => folder?.folder_id === newForumFolder.folder_id,
-        );
+      (data) => {
+        if (data) {
+          const alreadyExists = data.getForumFoldersList.edges.filter(
+            (edge) =>
+              edge.node.forum_folder_id === newForumFolder.forum_folder_id,
+          );
 
-        if (alreadyExists.length > 0) {
+          if (alreadyExists.length > 0) {
+            return data;
+          }
+
+          const edges: ForumFolderEdge[] = [
+            ...data.getForumFoldersList.edges,
+            {
+              __typename: 'ForumFolderEdge',
+              cursor: newForumFolder.name,
+              node: newForumFolder,
+            } as ForumFolderEdge,
+          ].sort((a, b) => {
+            if (a.cursor.toLowerCase() < b.cursor.toLowerCase()) {
+              return -1;
+            } else if (a.cursor.toLowerCase() > b.cursor.toLowerCase()) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+
+          return {
+            ...data,
+            getForumFoldersList: {
+              ...data.getForumFoldersList,
+              edges: [...edges],
+              pageInfo: {
+                ...data.getForumFoldersList.pageInfo,
+                totalEdges:
+                  (data.getForumFoldersList.pageInfo.totalEdges || 0) + 1,
+              },
+            },
+          };
+        } else {
           return data;
         }
-
-        return {
-          ...data,
-          forumFolders: {
-            ...data.forumFolders,
-            folders: [
-              ...data.forumFolders.folders,
-              {
-                ...newForumFolder,
-                __typename: 'ForumFolder',
-                created_at: new Date().toISOString(),
-              },
-            ],
-          },
-        };
-      } else {
-        return data;
-      }
-    },
-  );
+      },
+    );
+  }
 }

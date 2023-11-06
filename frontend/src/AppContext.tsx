@@ -6,7 +6,12 @@ import { reducer, loadPersistedStore } from './reducers/index';
 import { type StateType as GlobalStateType } from './reducers/global.reducer';
 import { type StateType as ComponentsStateType } from './reducers/components.reducer';
 import { type StateType as NonPersistentStateType } from './reducers/non-persistent.reducer';
-import { GetAllSiteTextDefinitionsVariable } from './reducers/non-persistent.reducer';
+import {
+  GetAllSiteTextDefinitionsVariable,
+  GetForumsListVariable,
+  GetForumFoldersListVariable,
+  GetThreadsListVariable,
+} from './reducers/non-persistent.reducer';
 
 import { useGlobal } from './hooks/useGlobal';
 import { useGlobalComponents } from './hooks/useGlobalComponents';
@@ -57,6 +62,15 @@ export interface ContextType {
     addPaginationVariableForGetAllSiteTextDefinitions(
       variable: GetAllSiteTextDefinitionsVariable,
     ): void;
+    addPaginationVariableForGetForumsList(
+      variable: GetForumsListVariable,
+    ): void;
+    addPaginationVariableForGetForumFoldersList(
+      variable: GetForumFoldersListVariable,
+    ): void;
+    addPaginationVariableForGetTheadsList(
+      variable: GetThreadsListVariable,
+    ): void;
   };
 }
 
@@ -102,8 +116,12 @@ export function AppContextProvider({ children }: AppProviderProps) {
     dispatch,
   });
   const { createModal, removeModal } = useGlobalComponents({ dispatch });
-  const { addPaginationVariableForGetAllSiteTextDefinitions } =
-    useNonPersistent({ dispatch });
+  const {
+    addPaginationVariableForGetAllSiteTextDefinitions,
+    addPaginationVariableForGetForumsList,
+    addPaginationVariableForGetForumFoldersList,
+    addPaginationVariableForGetTheadsList,
+  } = useNonPersistent({ dispatch });
 
   useEffect(() => {
     getAllRecommendedSiteTextTranslationListByLanguage({
@@ -347,6 +365,9 @@ export function AppContextProvider({ children }: AppProviderProps) {
       setTempTranslation,
       clearTempTranslation,
       addPaginationVariableForGetAllSiteTextDefinitions,
+      addPaginationVariableForGetForumsList,
+      addPaginationVariableForGetForumFoldersList,
+      addPaginationVariableForGetTheadsList,
     },
   };
 

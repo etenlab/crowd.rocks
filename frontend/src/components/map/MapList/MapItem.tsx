@@ -1,6 +1,6 @@
 import { useRef, MouseEventHandler } from 'react';
 import { useHistory } from 'react-router';
-import { Typography, IconButton, Button, Divider, Stack } from '@mui/material';
+import { Typography, IconButton, Button, Stack } from '@mui/material';
 
 import {
   MapDetailsInfo,
@@ -85,7 +85,7 @@ export function MapItem({
     }
   };
 
-  const handleDownloadSvg: MouseEventHandler<HTMLButtonElement> = (e) => {
+  const handleDownloadSvg: MouseEventHandler<HTMLButtonElement> = () => {
     downloadFlagRef.current = mapInfo.is_original ? 'original' : 'translated';
     getMapDetails({
       variables: {
@@ -95,16 +95,10 @@ export function MapItem({
           : mapInfo.translated_map_id!,
       },
     });
-
-    e.preventDefault();
-    e.stopPropagation();
   };
 
-  const handleDeleteMap: MouseEventHandler<HTMLButtonElement> = (e) => {
+  const handleDeleteMap: MouseEventHandler<HTMLButtonElement> = () => {
     openModal(<MapDeleteModal mapInfo={mapInfo} onClose={closeModal} />);
-
-    e.preventDefault();
-    e.stopPropagation();
   };
 
   if (
@@ -145,6 +139,37 @@ export function MapItem({
         : ' ? %');
   const tagColor = mapInfo.is_original ? 'orange' : 'green';
 
+  const dropDownList = [
+    {
+      key: 'download_button',
+      component: (
+        <Button
+          variant="text"
+          startIcon={<DownloadCircle sx={{ fontSize: '24px' }} />}
+          color="dark"
+          sx={{ padding: 0, justifyContent: 'flex-start' }}
+          onClick={handleDownloadSvg}
+        >
+          {tr('Download')}
+        </Button>
+      ),
+    },
+    {
+      key: 'delete_button',
+      component: adminMode ? (
+        <Button
+          variant="text"
+          startIcon={<DeleteCircle sx={{ fontSize: '24px' }} color="red" />}
+          color="red"
+          onClick={handleDeleteMap}
+          sx={{ padding: 0, justifyContent: 'flex-start' }}
+        >
+          {tr('Delete')}
+        </Button>
+      ) : null,
+    },
+  ].filter((item) => item.component !== null);
+
   return (
     <Stack gap="14px" sx={{ width: '162px', cursor: 'pointer' }}>
       <PreviewContainer
@@ -167,35 +192,7 @@ export function MapItem({
 
         {viewMode === 'normal' ? (
           <MoreHorizButton
-            component={
-              <>
-                <Button
-                  variant="text"
-                  startIcon={<DownloadCircle sx={{ fontSize: '24px' }} />}
-                  color="dark"
-                  sx={{ padding: 0, justifyContent: 'flex-start' }}
-                  onClick={handleDownloadSvg}
-                >
-                  {tr('Download')}
-                </Button>
-                {adminMode ? (
-                  <>
-                    <Divider />
-                    <Button
-                      variant="text"
-                      startIcon={
-                        <DeleteCircle sx={{ fontSize: '24px' }} color="red" />
-                      }
-                      color="red"
-                      onClick={handleDeleteMap}
-                      sx={{ padding: 0, justifyContent: 'flex-start' }}
-                    >
-                      {tr('Delete')}
-                    </Button>
-                  </>
-                ) : null}
-              </>
-            }
+            dropDownList={dropDownList}
             color="gray"
             sx={(theme) => ({
               position: 'absolute',

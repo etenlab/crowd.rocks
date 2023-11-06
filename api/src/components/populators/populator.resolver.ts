@@ -34,6 +34,7 @@ export class PopulatorResolver {
     to_languages: LanguageInput[],
     @Context() req: any,
   ): Promise<GenericOutput> {
+    console.log('populating map translations:');
     const token = getBearer(req);
     if (!token) {
       return {
@@ -47,6 +48,7 @@ export class PopulatorResolver {
     }
 
     for (let i = 0; i < to_languages.length; i++) {
+      console.log(`add translations to ${to_languages[i]}...`);
       this.aiTranslationService.translateWordsAndPhrasesByFaker(
         { language_code: 'en', geo_code: null, dialect_code: null },
         to_languages[i],
@@ -54,6 +56,7 @@ export class PopulatorResolver {
         null,
       );
     }
+    console.log('... done');
 
     return {
       error: ErrorType.NoError,
