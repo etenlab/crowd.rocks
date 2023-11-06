@@ -1015,7 +1015,6 @@ export class MapsService {
   }
 
   async reTranslate(token: string, forLangTag?: string | null): Promise<void> {
-    const dbPoolClient = await this.pg.pool.connect();
     try {
       const originalMaps = await this.mapsRepository.getOrigMaps();
       if (!(originalMaps.mapList?.length > 0)) return;
@@ -1048,8 +1047,6 @@ export class MapsService {
       }
     } catch (error) {
       Logger.error(`mapsService#reTranslate error: `, error);
-    } finally {
-      dbPoolClient.release;
     }
   }
 
