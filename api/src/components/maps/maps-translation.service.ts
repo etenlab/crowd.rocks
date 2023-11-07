@@ -31,6 +31,58 @@ export class MapsTranslationService {
     private wordToWordTranslationsService: WordToWordTranslationsService,
   ) {}
 
+  async markTrMapsByTranslationId({
+    translation_id,
+    from_definition_type_is_word,
+    to_definition_type_is_word,
+    token,
+  }: {
+    translation_id: string;
+    from_definition_type_is_word: boolean;
+    to_definition_type_is_word: boolean;
+    token: string;
+  }) {
+    // todo
+    console.log('markTrMapsByTranslationId');
+  }
+
+  async markTrMapsByDefinitionsIds({
+    from_definition_id,
+    from_definition_type_is_word,
+    to_definition_id,
+    to_definition_type_is_word,
+    token,
+  }: {
+    from_definition_id: string;
+    from_definition_type_is_word: boolean;
+    to_definition_id: string;
+    to_definition_type_is_word: boolean;
+    token: string;
+  }) {
+    // todo
+    console.log('markTrMapsByDefinitionsIds');
+  }
+
+  async markTrMapsByFromDefinitionIdAndLang({
+    from_definition_id,
+    from_definition_type_is_word,
+    token,
+    toLang: { language_code, dialect_code, geo_code },
+  }: {
+    from_definition_id;
+    from_definition_type_is_word;
+    token: string;
+    toLang: LanguageInput;
+  }) {
+    // todo
+    console.log('markTrMapsByFromDefinitionIdAndLang');
+  }
+
+  async retranslateMarkedMaps() {
+    // todo
+    console.log('retranslateMarkedMaps');
+  }
+
   async mapReTranslate(
     token: string,
     forLangTag?: string | null,
@@ -70,6 +122,7 @@ export class MapsTranslationService {
     }
   }
 
+  //---
   async translateMapsWithTranslationId({
     translation_id,
     from_definition_type_is_word,
@@ -146,6 +199,7 @@ export class MapsTranslationService {
     }
   }
 
+  //--------
   async translateMapsWithDefinitionId({
     from_definition_id,
     from_definition_type_is_word,
@@ -482,7 +536,7 @@ export class MapsTranslationService {
   }
 
   /**
-   * Mutetes INode sturcture - replaces subnodes' values using provided valuesToReplace
+   * Mutates INode sturcture - replaces subnodes' values using provided valuesToReplace
    * @param iNodeStructure INode structure to replace values inside it.
    * @param valuesToReplace
    */

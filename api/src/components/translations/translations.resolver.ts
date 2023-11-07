@@ -428,7 +428,7 @@ export class TranslationsResolver {
     );
 
     if (res.error === ErrorType.NoError) {
-      this.mapsTranslationService.translateMapsWithTranslationId({
+      this.mapsTranslationService.markTrMapsByTranslationId({
         translation_id: String(translation_id),
         from_definition_type_is_word,
         to_definition_type_is_word,
@@ -462,9 +462,11 @@ export class TranslationsResolver {
     );
 
     if (res.error === ErrorType.NoError) {
-      this.mapsTranslationService.translateMapsWithDefinitionId({
+      this.mapsTranslationService.markTrMapsByDefinitionsIds({
         from_definition_id,
         from_definition_type_is_word,
+        to_definition_id,
+        to_definition_type_is_word,
         token: getBearer(req) || '',
       });
     }
@@ -492,7 +494,7 @@ export class TranslationsResolver {
       );
 
     if (res.error === ErrorType.NoError) {
-      this.mapsTranslationService.translateMapsWithDefinitionId({
+      this.mapsTranslationService.markTrMapsByFromDefinitionIdAndLang({
         from_definition_id,
         from_definition_type_is_word,
         token: getBearer(req) || '',
