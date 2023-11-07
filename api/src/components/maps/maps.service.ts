@@ -620,37 +620,6 @@ export class MapsService {
     }
   }
 
-  checkForLanguageCodePresence(
-    origMapWordsOrPhrases: Array<
-      MapWordWithTranslations | MapPhraseWithTranslations
-    >,
-  ): boolean {
-    try {
-      origMapWordsOrPhrases.forEach((wordOrPhrase) => {
-        if (!wordOrPhrase.language_code) {
-          console.log(
-            `Word or phrase ${JSON.stringify(
-              wordOrPhrase,
-            )} doesn't have language tag `,
-          );
-          return false;
-        }
-        wordOrPhrase!.translations!.forEach((tr) => {
-          if (!tr.language_code) {
-            console.log(
-              `Translation ${JSON.stringify(tr)} doesn't have language tag `,
-            );
-            return false;
-          }
-        });
-      });
-      return true;
-    } catch (e) {
-      Logger.error(e);
-      return false; //not sure about this...
-    }
-  }
-
   async translateMapsWithTranslationId({
     translation_id,
     from_definition_type_is_word,
