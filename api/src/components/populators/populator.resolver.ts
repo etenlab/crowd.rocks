@@ -1,4 +1,3 @@
-import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
 import {
   Args,
@@ -7,29 +6,22 @@ import {
   Resolver,
   Subscription,
 } from '@nestjs/graphql';
-import { ErrorType, GenericOutput } from 'src/common/types';
+import { ErrorType, GenericOutput, SubscriptionStatus } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
 import { AuthorizationService } from '../authorization/authorization.service';
-import { FileService } from '../file/file.service';
-import { MapsResolver } from '../maps/maps.resolver';
 import { DataGenInput, DataGenProgress, Populator } from './types';
-import { AiTranslationsService } from '../translator-bots/ai-translations.service';
-import { PostgresService } from 'src/core/postgres.service';
 import { PopulatorService } from './populator.service';
 import { SubscriptionToken } from 'src/common/subscription-token';
 import { PubSub } from 'graphql-subscriptions';
 import { PUB_SUB } from 'src/pubSub.module';
+import { MapsService } from '../maps/maps.service';
 
 @Injectable()
 @Resolver(Populator)
 export class PopulatorResolver {
   constructor(
-    private httpService: HttpService,
-    private mapRes: MapsResolver,
-    private fileService: FileService,
     private authService: AuthorizationService,
-    private aiTranslationService: AiTranslationsService,
-    private pg: PostgresService,
+    private mapsService: MapsService,
     private generator: PopulatorService,
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
@@ -40,6 +32,15 @@ export class PopulatorResolver {
     input: DataGenInput,
     @Context() req: any,
   ): Promise<GenericOutput> {
+    this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
+      [SubscriptionToken.DataGenerationReport]: {
+        output: ``,
+        mapUploadStatus: SubscriptionStatus.NotStarted,
+        mapTranslationsStatus: SubscriptionStatus.NotStarted,
+        mapReTranslationsStatus: SubscriptionStatus.NotStarted,
+        overallStatus: SubscriptionStatus.NotStarted,
+      } as DataGenProgress,
+    });
     const token = getBearer(req);
     if (!token) {
       return {
@@ -52,15 +53,53 @@ export class PopulatorResolver {
       };
     }
     const { error: mapGenError } = await this.generator.populateMaps(
-      input.mapAmount,
       token,
       req,
+      input.mapAmount,
     );
 
     if (mapGenError !== ErrorType.NoError) {
       return { error: mapGenError };
     }
-    await this.generator.populateMapTranslations(input.mapsToLanguages, token);
+    if (input.mapsToLanguages) {
+      const { error: mapTransError } =
+        await this.generator.populateMapTranslations(
+          input.mapsToLanguages,
+          token,
+        );
+
+      if (mapTransError !== ErrorType.NoError) {
+        return { error: mapTransError };
+      }
+
+      const forLangTags = input.mapsToLanguages.map((l) => l.language_code);
+      for (let i = 0; i < forLangTags!.length; i++) {
+        this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
+          [SubscriptionToken.DataGenerationReport]: {
+            output: `${i} / ${forLangTags.length}`,
+            mapUploadStatus: SubscriptionStatus.Completed,
+            mapTranslationsStatus: SubscriptionStatus.Completed,
+            mapReTranslationsStatus: SubscriptionStatus.Progressing,
+          } as DataGenProgress,
+        });
+        await this.mapsService.reTranslate(token, forLangTags[i]!);
+      }
+
+      this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
+        [SubscriptionToken.DataGenerationReport]: {
+          output: `${forLangTags.length} / ${forLangTags.length}`,
+          mapUploadStatus: SubscriptionStatus.Completed,
+          mapTranslationsStatus: SubscriptionStatus.Completed,
+          mapReTranslationsStatus: SubscriptionStatus.Completed,
+        } as DataGenProgress,
+      });
+    }
+
+    this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
+      [SubscriptionToken.DataGenerationReport]: {
+        overallStatus: SubscriptionStatus.Completed,
+      } as DataGenProgress,
+    });
 
     return {
       error: ErrorType.NoError,
@@ -70,8 +109,8 @@ export class PopulatorResolver {
   @Subscription(() => DataGenProgress, {
     name: SubscriptionToken.DataGenerationReport,
   })
-  async subscribeToDataGenerator() {
-    console.log('subscribeToDataGenerationReport');
+  async subscribeToDataGen() {
+    console.log('subscribeToDataGen');
     return this.pubSub.asyncIterator(SubscriptionToken.DataGenerationReport);
   }
 }

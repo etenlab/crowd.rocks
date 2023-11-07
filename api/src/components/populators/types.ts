@@ -9,13 +9,16 @@ export class Populator {
 
 @InputType()
 export class DataGenInput {
-  @Field(() => Int) mapAmount: number;
-  @Field(() => [LanguageInput]) mapsToLanguages: LanguageInput[];
+  @Field(() => Int, { nullable: true }) mapAmount?: number;
+  @Field(() => [LanguageInput], { nullable: true })
+  mapsToLanguages?: LanguageInput[];
 }
 
 @ObjectType()
 export class DataGenProgress {
-  @Field(() => String) mapUpload: string;
+  @Field(() => String) output: string;
   @Field(() => SubscriptionStatus) mapUploadStatus: SubscriptionStatus;
   @Field(() => SubscriptionStatus) mapTranslationsStatus: SubscriptionStatus;
+  @Field(() => SubscriptionStatus) mapReTranslationsStatus: SubscriptionStatus;
+  @Field(() => SubscriptionStatus) overallStatus: SubscriptionStatus;
 }

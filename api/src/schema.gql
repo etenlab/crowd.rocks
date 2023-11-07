@@ -59,14 +59,16 @@ input CreateQuestionOnWordRangeUpsertInput {
 }
 
 input DataGenInput {
-  mapAmount: Int!
-  mapsToLanguages: [LanguageInput!]!
+  mapAmount: Int
+  mapsToLanguages: [LanguageInput!]
 }
 
 type DataGenProgress {
+  mapReTranslationsStatus: SubscriptionStatus!
   mapTranslationsStatus: SubscriptionStatus!
-  mapUpload: String!
   mapUploadStatus: SubscriptionStatus!
+  output: String!
+  overallStatus: SubscriptionStatus!
 }
 
 """

@@ -34,7 +34,7 @@ export class PopulatorService {
   ): Promise<GenericOutput> {
     this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
       [SubscriptionToken.DataGenerationReport]: {
-        mapUpload: `Completed`,
+        output: `Completed`,
         mapUploadStatus: SubscriptionStatus.Completed,
         mapTranslationsStatus: SubscriptionStatus.Progressing,
       } as DataGenProgress,
@@ -50,7 +50,7 @@ export class PopulatorService {
     }
     this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
       [SubscriptionToken.DataGenerationReport]: {
-        mapUpload: `Completed`,
+        output: `Completed`,
         mapUploadStatus: SubscriptionStatus.Completed,
         mapTranslationsStatus: SubscriptionStatus.Completed,
       } as DataGenProgress,
@@ -62,10 +62,15 @@ export class PopulatorService {
   }
 
   async populateMaps(
-    mapAmount: number,
     token: string,
     req: any,
+    mapAmount?: number | null,
   ): Promise<GenericOutput> {
+    this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
+      [SubscriptionToken.DataGenerationReport]: {
+        overallStatus: SubscriptionStatus.Progressing,
+      } as DataGenProgress,
+    });
     const octokit = new Octokit({
       request: {
         fetch: fetch,
@@ -82,9 +87,11 @@ export class PopulatorService {
     if (!Array.isArray(data)) {
       this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
         [SubscriptionToken.DataGenerationReport]: {
-          mapUpload: `0 / 0`,
+          output: `0 / 0`,
           mapUploadStatus: SubscriptionStatus.Error,
           mapTranslationsStatus: SubscriptionStatus.NotStarted,
+          mapReTranslationsStatus: SubscriptionStatus.NotStarted,
+          overallStatus: SubscriptionStatus.Error,
         } as DataGenProgress,
       });
       return { error: ErrorType.UnknownError };
@@ -98,9 +105,10 @@ export class PopulatorService {
 
     this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
       [SubscriptionToken.DataGenerationReport]: {
-        mapUpload: `0 / ${total}...`,
+        output: `0 / ${total}...`,
         mapUploadStatus: SubscriptionStatus.Progressing,
         mapTranslationsStatus: SubscriptionStatus.NotStarted,
+        mapReTranslationsStatus: SubscriptionStatus.NotStarted,
       } as DataGenProgress,
     });
 
@@ -111,9 +119,10 @@ export class PopulatorService {
         );
         this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
           [SubscriptionToken.DataGenerationReport]: {
-            mapUpload: `${total} / ${total}`,
+            output: `${total} / ${total}`,
             mapUploadStatus: SubscriptionStatus.Completed,
             mapTranslationsStatus: SubscriptionStatus.NotStarted,
+            mapReTranslationsStatus: SubscriptionStatus.NotStarted,
           } as DataGenProgress,
         });
         break;
@@ -188,9 +197,10 @@ export class PopulatorService {
       );
       this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
         [SubscriptionToken.DataGenerationReport]: {
-          mapUpload: `${i + 1} / ${total}...`,
+          output: `${i + 1} / ${total}...`,
           mapUploadStatus: SubscriptionStatus.Progressing,
           mapTranslationsStatus: SubscriptionStatus.NotStarted,
+          mapReTranslationsStatus: SubscriptionStatus.NotStarted,
         } as DataGenProgress,
       });
       console.log('upload finished. errors:');
@@ -200,9 +210,10 @@ export class PopulatorService {
 
     this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
       [SubscriptionToken.DataGenerationReport]: {
-        mapUpload: `${total} / ${total}`,
+        output: `${total} / ${total}`,
         mapUploadStatus: SubscriptionStatus.Completed,
         mapTranslationsStatus: SubscriptionStatus.NotStarted,
+        mapReTranslationsStatus: SubscriptionStatus.NotStarted,
       } as DataGenProgress,
     });
 
