@@ -45,7 +45,7 @@ import {
   getLangConnectionsObjectMapAndTexts,
   validateTranslateByBotInput,
 } from './utility';
-import { langInfo2String, subTags2LangInfo } from '../../../../utils';
+import { langInfo2String, subTags2LangInfo } from '../../../../utils/src';
 import { FakerTranslateService } from './faker-translate.service';
 
 interface ItranslateAllWordsAndPhrasesByBot {
