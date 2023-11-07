@@ -1,29 +1,25 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthenticationService } from '../../components/authentication/authentication.service';
-const ADMIN_DEFAULT_EMAIL = 'admin@crowd.rocks'; // todo move to .env
 
 @Injectable()
 export class IsAdminGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    private readonly authenticationService: AuthenticationService,
-  ) {}
+  constructor(private readonly authenticationService: AuthenticationService) {}
 
-  canActivate(context: ExecutionContext): boolean {
-    const adminAdditionalEmails = this.reflector.get<string[]>(
-      'adminAdditionalEmails',
-      context.getHandler(),
-    );
-    const adminEmails = [ADMIN_DEFAULT_EMAIL, ...adminAdditionalEmails];
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    try {
+      const ctx = GqlExecutionContext.create(context);
+      const request = ctx.getContext().req;
+      const token = request.token;
 
-    console.log(
-      `########is-admin-guard for ${JSON.stringify(adminEmails)}########`,
-    );
-
-    const request = context.switchToHttp().getRequest();
-    const token = request.token;
-
-    return this.usersService.hasRole(user, roles);
+      return await this.authenticationService.isAdmin(token);
+    } catch {
+      throw new UnauthorizedException();
+    }
   }
 }
