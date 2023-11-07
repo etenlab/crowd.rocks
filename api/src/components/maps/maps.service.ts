@@ -988,42 +988,6 @@ export class MapsService {
     }
   }
 
-  async reTranslate(token: string, forLangTag?: string | null): Promise<void> {
-    try {
-      const originalMaps = await this.mapsRepository.getOrigMaps();
-      if (!(originalMaps.mapList?.length > 0)) return;
-      const origMapIds = originalMaps.mapList.map(
-        (m) => m.mapDetails!.original_map_id,
-      );
-      for (const origMapId of origMapIds) {
-        const { str: origMapString, details: origMapDetails } =
-          await this.getMapAsStringById(origMapId);
-        if (forLangTag) {
-          const langInfo = tag2langInfo(forLangTag);
-          const toLang: LanguageInput = {
-            language_code: langInfo.lang.tag,
-            dialect_code: langInfo.dialect?.tag || null,
-            geo_code: langInfo.region?.tag || null,
-          };
-          await this.translateMapStringToLangAndSaveTranslated({
-            origMapDetails,
-            origMapString,
-            token,
-            toLang,
-          });
-        } else {
-          await this.translateMapStringToAllLangsAndSaveTranslated({
-            origMapDetails,
-            origMapString,
-            token,
-          });
-        }
-      }
-    } catch (error) {
-      Logger.error(`mapsService#reTranslate error: `, error);
-    }
-  }
-
   /**
    * Mutetes INode sturcture - replaces subnodes' values using provided valuesToReplace
    * @param iNodeStructure INode structure to replace values inside it.

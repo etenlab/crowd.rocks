@@ -43,12 +43,14 @@ import { MapVotesService } from './map-votes.service';
 import { PUB_SUB } from '../../pubSub.module';
 import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionToken } from '../../common/subscription-token';
+import { ReTranslationService } from './maps-retranslation.service';
 
 @Injectable()
 @Resolver()
 export class MapsResolver {
   constructor(
     private mapsService: MapsService,
+    private reTranslationService: ReTranslationService,
     private mapVotesService: MapVotesService,
     private authenticationService: AuthenticationService,
     private fileService: FileService,
@@ -225,7 +227,7 @@ export class MapsResolver {
       };
     }
     try {
-      await this.mapsService.reTranslate(userToken, forLangTag);
+      await this.reTranslationService.mapReTranslate(userToken, forLangTag);
       return {
         error: ErrorType.NoError,
       };
@@ -255,7 +257,10 @@ export class MapsResolver {
     }
     try {
       for (let i = 0; i < forLangTags!.length; i++) {
-        await this.mapsService.reTranslate(userToken, forLangTags[i]!);
+        await this.reTranslationService.mapReTranslate(
+          userToken,
+          forLangTags[i]!,
+        );
       }
       return {
         error: ErrorType.NoError,
