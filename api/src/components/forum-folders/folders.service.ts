@@ -8,6 +8,7 @@ import {
   ForumFolderUpsertProcedureOutputRow,
   getForumFolderObjById,
   getForumFolders,
+  GetForumFolder,
   GetForumFolderObjectById,
   getForumFoldersTotalSize,
   GetForumFoldersTotalSize,
@@ -61,7 +62,7 @@ export class ForumFoldersService {
     after: string | null;
   }): Promise<ForumFolderListConnection> {
     try {
-      const res = await this.pg.pool.query<GetForumFolderObjectById>(
+      const res = await this.pg.pool.query<GetForumFolder>(
         ...getForumFolders({
           forum_id: input.forum_id,
           filter: input.filter,

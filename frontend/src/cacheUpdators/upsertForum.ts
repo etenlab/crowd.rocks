@@ -3,6 +3,8 @@ import { ApolloCache } from '@apollo/client';
 import {
   Forum,
   ForumEdge,
+  ForumNode,
+  ForumNodeFragmentFragmentDoc,
   GetForumsListDocument,
   GetForumsListQuery,
 } from '../generated/graphql';
@@ -34,7 +36,11 @@ export function updateCacheWithUpdateForum(
                   return {
                     ...edge,
                     cursor: updatedForum.name,
-                    node: updatedForum,
+                    node: {
+                      ...edge.node,
+                      name: updatedForum.name,
+                      description: updatedForum.description,
+                    },
                   };
                 }),
               ],
@@ -46,6 +52,44 @@ export function updateCacheWithUpdateForum(
       },
     );
   }
+}
+
+export function updateForumsListCache(
+  cache: ApolloCache<unknown>,
+  forum_id: string,
+  gap: {
+    total_posts: number;
+    total_threads: number;
+    total_topics: number;
+  },
+) {
+  const data = cache.readFragment<ForumNode>({
+    id: cache.identify({
+      __typename: 'ForumNode',
+      forum_id: forum_id,
+    }),
+    fragment: ForumNodeFragmentFragmentDoc,
+    fragmentName: 'ForumNodeFragment',
+  });
+
+  if (!data) {
+    return;
+  }
+
+  cache.writeFragment<ForumNode>({
+    id: cache.identify({
+      __typename: 'ForumNode',
+      forum_id: forum_id,
+    }),
+    fragment: ForumNodeFragmentFragmentDoc,
+    fragmentName: 'ForumNodeFragment',
+    data: {
+      ...data,
+      total_posts: data.total_posts + gap.total_posts,
+      total_threads: data.total_threads + gap.total_threads,
+      total_topics: data.total_topics + gap.total_topics,
+    },
+  });
 }
 
 export function updateCacheWithCreateForum(
@@ -74,7 +118,13 @@ export function updateCacheWithCreateForum(
             {
               __typename: 'ForumEdge',
               cursor: newForum.name,
-              node: newForum,
+              node: {
+                ...newForum,
+                __typename: 'ForumNode',
+                total_posts: 0,
+                total_threads: 0,
+                total_topics: 0,
+              },
             } as ForumEdge,
           ].sort((a, b) => {
             if (a.cursor.toLowerCase() < b.cursor.toLowerCase()) {
