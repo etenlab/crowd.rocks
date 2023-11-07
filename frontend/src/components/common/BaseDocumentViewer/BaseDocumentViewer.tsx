@@ -1,7 +1,8 @@
 import { useMemo, ReactNode, memo, MouseEvent } from 'react';
 import { Virtuoso } from 'react-virtuoso';
+import { Stack } from '@mui/material';
 
-import { Word, Dot, Container } from './styled';
+import { Word, Dot } from './styled';
 
 export type ViewMode = 'edit' | 'view';
 
@@ -122,10 +123,19 @@ export const BaseDocumentViewer = memo(function BaseDocumentViewerPure({
   return (
     <Virtuoso
       style={{
-        height: 'calc(100vh - 170px)',
+        height: 'calc(100vh - 160px)',
       }}
       data={wordComs}
-      itemContent={(_index, com) => <Container>{com}</Container>}
+      itemContent={(_index, com) => (
+        <Stack
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="center"
+          sx={(theme) => ({ flexWrap: 'wrap', color: theme.palette.text.gray })}
+        >
+          {com}
+        </Stack>
+      )}
     />
   );
 });
