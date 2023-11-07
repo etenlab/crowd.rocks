@@ -24,6 +24,16 @@ export function getForumFolderObjById(id: number): [string, [number]] {
   ];
 }
 
+export type GetForumFolder = {
+  forum_folder_id: string;
+  forum_id: string;
+  name: string;
+  description: string | null;
+  created_by: string;
+  total_threads: number;
+  total_posts: number;
+};
+
 export function getForumFolders({
   forum_id,
   filter,
@@ -51,16 +61,31 @@ export function getForumFolders({
 
   return [
     `
-      select 
-        forum_folder_id,
-        forum_id,
-        name,
-        description,
-        created_by
+      select
+        forum_folders.forum_folder_id,
+        forum_folders.forum_id,
+        forum_folders.name,
+        forum_folders.description,
+        coalesce(count(threads_v2.thread_id), 0) as total_threads,
+        coalesce(sum(threads_v2.post_count), 0) as total_posts,
+        forum_folders.created_by
       from forum_folders
+      left join (
+        select 
+          threads.thread_id,
+          threads.forum_folder_id,
+          coalesce(count(posts.post_id), 0) as post_count
+        from threads
+        left join posts
+        on posts.parent_table = 'threads'
+          and posts.parent_id = threads.thread_id
+        group by threads.thread_id
+      ) as threads_v2
+      on threads_v2.forum_folder_id = forum_folders.forum_folder_id
       where forum_folders.forum_id = $1 
         and lower(forum_folders.name) like $2
         ${cursorStr}
+      group by forum_folders.forum_folder_id
       order by lower(forum_folders.name)
       ${limitStr}
     `,

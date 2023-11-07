@@ -11,6 +11,7 @@ import {
   GetForumObjectById,
   getForumsTotalSize,
   GetForumsTotalSize,
+  GetForums,
 } from './sql-string';
 import {
   ForumOutput,
@@ -54,7 +55,7 @@ export class ForumsService {
     after: string | null;
   }): Promise<ForumListConnection> {
     try {
-      const res = await this.pg.pool.query<GetForumObjectById>(
+      const res = await this.pg.pool.query<GetForums>(
         ...getForums({
           filter: input.filter,
           first: input.first ? input.first * 2 : null,

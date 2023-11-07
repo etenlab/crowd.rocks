@@ -137,6 +137,12 @@ export const typePolicies: TypePolicies = {
   ForumFolder: {
     keyFields: ['forum_folder_id'],
   },
+  ForumNode: {
+    keyFields: ['forum_id'],
+  },
+  ForumFolderNode: {
+    keyFields: ['forum_folder_id'],
+  },
   Thread: {
     keyFields: ['thread_id'],
   },

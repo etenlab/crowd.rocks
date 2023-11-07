@@ -327,25 +327,35 @@ export function AIControllerPage() {
         )} ${langInfo2String(target)} ...`,
       }),
     });
-
-    const { data } = await translateWordsAndPhrasesByGoogle({
-      variables: {
-        from_language_code: source.lang.tag,
-        from_dialect_code: source.dialect?.tag,
-        from_geo_code: source.region?.tag,
-        to_language_code: target.lang.tag,
-        to_dialect_code: target.dialect?.tag,
-        to_geo_code: target.region?.tag,
-      },
-    });
-
-    dismiss();
-
-    if (data && data.translateWordsAndPhrasesByGoogle.result) {
-      setResult(data.translateWordsAndPhrasesByGoogle.result);
-      await mapsReTranslate({
-        variables: { forLangTag: langInfo2tag(target) },
+    try {
+      const { data } = await translateWordsAndPhrasesByGoogle({
+        variables: {
+          from_language_code: source.lang.tag,
+          from_dialect_code: source.dialect?.tag,
+          from_geo_code: source.region?.tag,
+          to_language_code: target.lang.tag,
+          to_dialect_code: target.dialect?.tag,
+          to_geo_code: target.region?.tag,
+        },
       });
+
+      dismiss();
+
+      if (data && data.translateWordsAndPhrasesByGoogle.result) {
+        setResult(data.translateWordsAndPhrasesByGoogle.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
     }
   };
 
@@ -385,20 +395,31 @@ export function AIControllerPage() {
       }),
     });
 
-    const { data } = await translateMissingWordsAndPhrasesByGoogle({
-      variables: {
-        from_language_code: source.lang.tag,
-        to_language_code: target.lang.tag,
-      },
-    });
-
-    dismiss();
-
-    if (data && data.translateMissingWordsAndPhrasesByGoogle.result) {
-      setResult(data.translateMissingWordsAndPhrasesByGoogle.result);
-      await mapsReTranslate({
-        variables: { forLangTag: langInfo2tag(target) },
+    try {
+      const { data } = await translateMissingWordsAndPhrasesByGoogle({
+        variables: {
+          from_language_code: source.lang.tag,
+          to_language_code: target.lang.tag,
+        },
       });
+
+      dismiss();
+
+      if (data && data.translateMissingWordsAndPhrasesByGoogle.result) {
+        setResult(data.translateMissingWordsAndPhrasesByGoogle.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
     }
   };
 
@@ -415,15 +436,25 @@ export function AIControllerPage() {
 
     setBatchTranslating(true);
     batchTranslatingRef.current = true;
-
-    translateAllWordsAndPhrasesByGoogle({
-      variables: {
-        from_language_code: source.lang.tag,
-        from_dialect_code: source.dialect?.tag,
-        from_geo_code: source.region?.tag,
-      },
-    });
-  }, [presentToast, source, tr, translateAllWordsAndPhrasesByGoogle]);
+    try {
+      translateAllWordsAndPhrasesByGoogle({
+        variables: {
+          from_language_code: source.lang.tag,
+          from_dialect_code: source.dialect?.tag,
+          from_geo_code: source.region?.tag,
+        },
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
+    }
+  }, [dismiss, presentToast, source, tr, translateAllWordsAndPhrasesByGoogle]);
 
   // ChatGPT3.5
   const handleTranslateChatGpt3 = async () => {
@@ -461,25 +492,35 @@ export function AIControllerPage() {
         )} ${langInfo2String(target)} ...`,
       }),
     });
-
-    const { data } = await translateWordsAndPhrasesByChatGpt35({
-      variables: {
-        from_language_code: source.lang.tag,
-        from_dialect_code: source.dialect?.tag,
-        from_geo_code: source.region?.tag,
-        to_language_code: target.lang.tag,
-        to_dialect_code: target.dialect?.tag,
-        to_geo_code: target.region?.tag,
-      },
-    });
-
-    dismiss();
-
-    if (data && data.translateWordsAndPhrasesByChatGPT35.result) {
-      setResult(data.translateWordsAndPhrasesByChatGPT35.result);
-      await mapsReTranslate({
-        variables: { forLangTag: langInfo2tag(target) },
+    try {
+      const { data } = await translateWordsAndPhrasesByChatGpt35({
+        variables: {
+          from_language_code: source.lang.tag,
+          from_dialect_code: source.dialect?.tag,
+          from_geo_code: source.region?.tag,
+          to_language_code: target.lang.tag,
+          to_dialect_code: target.dialect?.tag,
+          to_geo_code: target.region?.tag,
+        },
       });
+
+      dismiss();
+
+      if (data && data.translateWordsAndPhrasesByChatGPT35.result) {
+        setResult(data.translateWordsAndPhrasesByChatGPT35.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
     }
   };
 
@@ -518,22 +559,32 @@ export function AIControllerPage() {
         )} ${langInfo2String(target)} ...`,
       }),
     });
-
-    const { data } = await translateMissingWordsAndPhrasesByGpt({
-      variables: {
-        from_language_code: source.lang.tag,
-        to_language_code: target.lang.tag,
-        version: 'gpt-3.5-turbo',
-      },
-    });
-
-    dismiss();
-
-    if (data && data.translateMissingWordsAndPhrasesByChatGpt.result) {
-      setResult(data.translateMissingWordsAndPhrasesByChatGpt.result);
-      await mapsReTranslate({
-        variables: { forLangTag: langInfo2tag(target) },
+    try {
+      const { data } = await translateMissingWordsAndPhrasesByGpt({
+        variables: {
+          from_language_code: source.lang.tag,
+          to_language_code: target.lang.tag,
+          version: 'gpt-3.5-turbo',
+        },
       });
+
+      dismiss();
+
+      if (data && data.translateMissingWordsAndPhrasesByChatGpt.result) {
+        setResult(data.translateMissingWordsAndPhrasesByChatGpt.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
     }
   };
 
@@ -573,25 +624,35 @@ export function AIControllerPage() {
         )} ${langInfo2String(target)} ...`,
       }),
     });
-
-    const { data } = await translateWordsAndPhrasesByChatGpt4({
-      variables: {
-        from_language_code: source.lang.tag,
-        from_dialect_code: source.dialect?.tag,
-        from_geo_code: source.region?.tag,
-        to_language_code: target.lang.tag,
-        to_dialect_code: target.dialect?.tag,
-        to_geo_code: target.region?.tag,
-      },
-    });
-
-    dismiss();
-
-    if (data && data.translateWordsAndPhrasesByChatGPT4.result) {
-      setResult(data.translateWordsAndPhrasesByChatGPT4.result);
-      await mapsReTranslate({
-        variables: { forLangTag: langInfo2tag(target) },
+    try {
+      const { data } = await translateWordsAndPhrasesByChatGpt4({
+        variables: {
+          from_language_code: source.lang.tag,
+          from_dialect_code: source.dialect?.tag,
+          from_geo_code: source.region?.tag,
+          to_language_code: target.lang.tag,
+          to_dialect_code: target.dialect?.tag,
+          to_geo_code: target.region?.tag,
+        },
       });
+
+      dismiss();
+
+      if (data && data.translateWordsAndPhrasesByChatGPT4.result) {
+        setResult(data.translateWordsAndPhrasesByChatGPT4.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
     }
   };
 
@@ -630,22 +691,32 @@ export function AIControllerPage() {
         )} ${langInfo2String(target)} ...`,
       }),
     });
-
-    const { data } = await translateMissingWordsAndPhrasesByGpt({
-      variables: {
-        from_language_code: source.lang.tag,
-        to_language_code: target.lang.tag,
-        version: 'gpt-4',
-      },
-    });
-
-    dismiss();
-
-    if (data && data.translateMissingWordsAndPhrasesByChatGpt.result) {
-      setResult(data.translateMissingWordsAndPhrasesByChatGpt.result);
-      await mapsReTranslate({
-        variables: { forLangTag: langInfo2tag(target) },
+    try {
+      const { data } = await translateMissingWordsAndPhrasesByGpt({
+        variables: {
+          from_language_code: source.lang.tag,
+          to_language_code: target.lang.tag,
+          version: 'gpt-4',
+        },
       });
+
+      dismiss();
+
+      if (data && data.translateMissingWordsAndPhrasesByChatGpt.result) {
+        setResult(data.translateMissingWordsAndPhrasesByChatGpt.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
     }
   };
 
@@ -685,25 +756,35 @@ export function AIControllerPage() {
         )} ${langInfo2String(target)} ...`,
       }),
     });
-
-    const { data } = await translateWordsAndPhrasesByLilt({
-      variables: {
-        from_language_code: source.lang.tag,
-        from_dialect_code: source.dialect?.tag,
-        from_geo_code: source.region?.tag,
-        to_language_code: target.lang.tag,
-        to_dialect_code: target.dialect?.tag,
-        to_geo_code: target.region?.tag,
-      },
-    });
-
-    dismiss();
-
-    if (data && data.translateWordsAndPhrasesByLilt.result) {
-      setResult(data.translateWordsAndPhrasesByLilt.result);
-      await mapsReTranslate({
-        variables: { forLangTag: langInfo2tag(target) },
+    try {
+      const { data } = await translateWordsAndPhrasesByLilt({
+        variables: {
+          from_language_code: source.lang.tag,
+          from_dialect_code: source.dialect?.tag,
+          from_geo_code: source.region?.tag,
+          to_language_code: target.lang.tag,
+          to_dialect_code: target.dialect?.tag,
+          to_geo_code: target.region?.tag,
+        },
       });
+
+      dismiss();
+
+      if (data && data.translateWordsAndPhrasesByLilt.result) {
+        setResult(data.translateWordsAndPhrasesByLilt.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
     }
   };
 
@@ -720,15 +801,25 @@ export function AIControllerPage() {
 
     setBatchTranslating(true);
     batchTranslatingRef.current = true;
-
-    translateAllWordsAndPhrasesByLilt({
-      variables: {
-        from_language_code: source.lang.tag,
-        from_dialect_code: source.dialect?.tag,
-        from_geo_code: source.region?.tag,
-      },
-    });
-  }, [presentToast, source, tr, translateAllWordsAndPhrasesByLilt]);
+    try {
+      translateAllWordsAndPhrasesByLilt({
+        variables: {
+          from_language_code: source.lang.tag,
+          from_dialect_code: source.dialect?.tag,
+          from_geo_code: source.region?.tag,
+        },
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
+    }
+  }, [dismiss, presentToast, source, tr, translateAllWordsAndPhrasesByLilt]);
 
   // SMARTCAT
   const handleTranslateSC = async () => {
@@ -766,25 +857,35 @@ export function AIControllerPage() {
         )} ${langInfo2String(target)} ...`,
       }),
     });
-
-    const { data } = await translateWordsAndPhrasesBySmartcat({
-      variables: {
-        from_language_code: source.lang.tag,
-        from_dialect_code: source.dialect?.tag,
-        from_geo_code: source.region?.tag,
-        to_language_code: target.lang.tag,
-        to_dialect_code: target.dialect?.tag,
-        to_geo_code: target.region?.tag,
-      },
-    });
-
-    dismiss();
-
-    if (data && data.translateWordsAndPhrasesBySmartcat.result) {
-      setResult(data.translateWordsAndPhrasesBySmartcat.result);
-      await mapsReTranslate({
-        variables: { forLangTag: langInfo2tag(target) },
+    try {
+      const { data } = await translateWordsAndPhrasesBySmartcat({
+        variables: {
+          from_language_code: source.lang.tag,
+          from_dialect_code: source.dialect?.tag,
+          from_geo_code: source.region?.tag,
+          to_language_code: target.lang.tag,
+          to_dialect_code: target.dialect?.tag,
+          to_geo_code: target.region?.tag,
+        },
       });
+
+      dismiss();
+
+      if (data && data.translateWordsAndPhrasesBySmartcat.result) {
+        setResult(data.translateWordsAndPhrasesBySmartcat.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
     }
   };
 
@@ -801,15 +902,31 @@ export function AIControllerPage() {
 
     setBatchTranslating(true);
     batchTranslatingRef.current = true;
-
-    translateAllWordsAndPhrasesBySmartcat({
-      variables: {
-        from_language_code: source.lang.tag,
-        from_dialect_code: source.dialect?.tag,
-        from_geo_code: source.region?.tag,
-      },
-    });
-  }, [presentToast, source, tr, translateAllWordsAndPhrasesBySmartcat]);
+    try {
+      translateAllWordsAndPhrasesBySmartcat({
+        variables: {
+          from_language_code: source.lang.tag,
+          from_dialect_code: source.dialect?.tag,
+          from_geo_code: source.region?.tag,
+        },
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
+    }
+  }, [
+    dismiss,
+    presentToast,
+    source,
+    tr,
+    translateAllWordsAndPhrasesBySmartcat,
+  ]);
 
   const handleTranslateMissingSC = async () => {
     if (!source) {
@@ -846,21 +963,31 @@ export function AIControllerPage() {
         )} ${langInfo2String(target)} ...`,
       }),
     });
-
-    const { data } = await translateMissingWordsAndPhrasesBySC({
-      variables: {
-        from_language_code: source.lang.tag,
-        to_language_code: target.lang.tag,
-      },
-    });
-
-    dismiss();
-
-    if (data && data.translateMissingWordsAndPhrasesBySmartcat.result) {
-      setResult(data.translateMissingWordsAndPhrasesBySmartcat.result);
-      await mapsReTranslate({
-        variables: { forLangTag: langInfo2tag(target) },
+    try {
+      const { data } = await translateMissingWordsAndPhrasesBySC({
+        variables: {
+          from_language_code: source.lang.tag,
+          to_language_code: target.lang.tag,
+        },
       });
+
+      dismiss();
+
+      if (data && data.translateMissingWordsAndPhrasesBySmartcat.result) {
+        setResult(data.translateMissingWordsAndPhrasesBySmartcat.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
     }
   };
 
@@ -900,25 +1027,35 @@ export function AIControllerPage() {
         )} ${langInfo2String(target)} ...`,
       }),
     });
-
-    const { data } = await translateWordsAndPhrasesByDeepL({
-      variables: {
-        from_language_code: source.lang.tag,
-        from_dialect_code: source.dialect?.tag,
-        from_geo_code: source.region?.tag,
-        to_language_code: target.lang.tag,
-        to_dialect_code: target.dialect?.tag,
-        to_geo_code: target.region?.tag,
-      },
-    });
-
-    dismiss();
-
-    if (data && data.translateWordsAndPhrasesByDeepL.result) {
-      setResult(data.translateWordsAndPhrasesByDeepL.result);
-      await mapsReTranslate({
-        variables: { forLangTag: langInfo2tag(target) },
+    try {
+      const { data } = await translateWordsAndPhrasesByDeepL({
+        variables: {
+          from_language_code: source.lang.tag,
+          from_dialect_code: source.dialect?.tag,
+          from_geo_code: source.region?.tag,
+          to_language_code: target.lang.tag,
+          to_dialect_code: target.dialect?.tag,
+          to_geo_code: target.region?.tag,
+        },
       });
+
+      dismiss();
+
+      if (data && data.translateWordsAndPhrasesByDeepL.result) {
+        setResult(data.translateWordsAndPhrasesByDeepL.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
     }
   };
 
@@ -980,21 +1117,31 @@ export function AIControllerPage() {
         )} ${langInfo2String(target)} ...`,
       }),
     });
-
-    const { data } = await translateMissingWordsAndPhrasesByDeepL({
-      variables: {
-        from_language_code: source.lang.tag,
-        to_language_code: target.lang.tag,
-      },
-    });
-
-    dismiss();
-
-    if (data && data.translateMissingWordsAndPhrasesByDeepL.result) {
-      setResult(data.translateMissingWordsAndPhrasesByDeepL.result);
-      await mapsReTranslate({
-        variables: { forLangTag: langInfo2tag(target) },
+    try {
+      const { data } = await translateMissingWordsAndPhrasesByDeepL({
+        variables: {
+          from_language_code: source.lang.tag,
+          to_language_code: target.lang.tag,
+        },
       });
+
+      dismiss();
+
+      if (data && data.translateMissingWordsAndPhrasesByDeepL.result) {
+        setResult(data.translateMissingWordsAndPhrasesByDeepL.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
     }
   };
 
