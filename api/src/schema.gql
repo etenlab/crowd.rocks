@@ -674,11 +674,6 @@ input NotifyUsersInput {
   user_ids: [ID!]!
 }
 
-type OrigMapWordsAndPhrasesOutput {
-  error: ErrorType!
-  mapWordsOrPhrases: [MapWordOrPhrase!]
-}
-
 type PageInfo {
   endCursor: ID
   hasNextPage: Boolean!
@@ -1030,7 +1025,6 @@ type Query {
   getMapWordOrPhraseAsOrigByDefinitionId(input: GetMapWordOrPhraseByDefinitionIdInput!): MapWordOrPhraseAsOrigOutput!
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapWordsAndPhrasesCount(input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesCountOutput!
-  getOrigMapWordsAndPhrasesPaginated(input: GetOrigMapWordsAndPhrasesInput!, limit: Int, offset: Int): OrigMapWordsAndPhrasesOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
   getPericopiesByDocumentId(document_id: ID!): PericopiesOutput!

@@ -12,7 +12,6 @@ import {
   MapWordOrPhraseAsOrigOutput,
   GetMapWordOrPhraseByDefinitionIdInput,
   MapWordsAndPhrasesCountOutput,
-  OrigMapWordsAndPhrasesOutput,
   StartZipMapOutput,
   ZipMapResult,
   StartZipMapDownloadInput,
@@ -572,31 +571,6 @@ export class MapsService {
       return {
         count: null,
         error: ErrorType.PaginationError,
-      };
-    } finally {
-      dbPoolClient.release();
-    }
-  }
-
-  async getOrigMapWordsAndPhrasesPaginated(
-    params: GetOrigMapWordsAndPhrasesInput,
-    offset?: number | null,
-    limit?: number | null,
-  ): Promise<OrigMapWordsAndPhrasesOutput> {
-    const dbPoolClient = await this.pg.pool.connect();
-    try {
-      const res = this.mapsRepository.getOrigMapWordsAndPhrasesPaginated(
-        dbPoolClient,
-        params,
-        offset,
-        limit,
-      );
-      return res;
-    } catch (e) {
-      Logger.error(`mapsService#getOrigMapWordsAndPhrases: ${e}`);
-      return {
-        error: ErrorType.PaginationError,
-        mapWordsOrPhrases: null,
       };
     } finally {
       dbPoolClient.release();
