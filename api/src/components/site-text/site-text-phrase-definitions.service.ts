@@ -7,6 +7,7 @@ import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 
 import { PhraseDefinitionsService } from 'src/components/definitions/phrase-definitions.service';
+import { AuthenticationService } from 'src/components/authentication/authentication.service';
 
 import {
   SiteTextPhraseDefinitionOutput,
@@ -36,6 +37,7 @@ export class SiteTextPhraseDefinitionsService {
   constructor(
     private pg: PostgresService,
     private phraseDefinitionService: PhraseDefinitionsService,
+    private authenticationService: AuthenticationService,
   ) {}
 
   async read(
@@ -193,6 +195,18 @@ export class SiteTextPhraseDefinitionsService {
     pgClient: PoolClient | null,
   ): Promise<SiteTextPhraseDefinitionOutput> {
     try {
+      const user_id = await this.authenticationService.get_user_id_from_bearer(
+        token,
+      );
+      const admin_id = await this.authenticationService.get_admin_id();
+
+      if (admin_id !== user_id) {
+        return {
+          error: ErrorType.Unauthorized,
+          site_text_phrase_definition: null,
+        };
+      }
+
       const res = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
