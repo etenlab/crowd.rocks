@@ -12,6 +12,7 @@ import { SubscriptionToken } from 'src/common/subscription-token';
 import { BotType, GenericOutput } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
 import { PUB_SUB } from 'src/pubSub.module';
+import { IsAuthAdmin } from '../../core/decorators/is-auth-admin.decorator';
 import { LanguageInput } from '../common/types';
 import { AiTranslationsService } from './ai-translations.service';
 import {
@@ -50,6 +51,7 @@ export class BotsResolver {
     return this.aiTranslations.getTranslationLanguageInfo(input, null);
   }
 
+  @IsAuthAdmin()
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateWordsAndPhrasesByGoogle(
     @Args('from_language', { type: () => LanguageInput })
@@ -72,6 +74,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateWordsAndPhrasesByChatGPT35(
     @Args('from_language', { type: () => LanguageInput })
@@ -88,6 +91,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateWordsAndPhrasesByChatGPT4(
     @Args('from_language', { type: () => LanguageInput })
@@ -104,6 +108,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateWordsAndPhrasesByLilt(
     @Args('from_language', { type: () => LanguageInput })
@@ -126,6 +131,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateWordsAndPhrasesBySmartcat(
     @Args('from_language', { type: () => LanguageInput })
@@ -148,6 +154,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateWordsAndPhrasesByDeepL(
     @Args('from_language', { type: () => LanguageInput })
@@ -170,6 +177,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateMissingWordsAndPhrasesByGoogle(
     @Args('from_language', { type: () => LanguageInput })
@@ -194,6 +202,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateMissingWordsAndPhrasesByDeepL(
     @Args('from_language', { type: () => LanguageInput })
@@ -218,6 +227,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => GenericOutput)
   async translateAllWordsAndPhrasesByDeepL(
     @Args('from_language', { type: () => LanguageInput })
@@ -238,6 +248,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateMissingWordsAndPhrasesByChatGpt(
     @Args('from_language', { type: () => LanguageInput })
@@ -266,6 +277,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => GenericOutput)
   async translateAllWordsAndPhrasesByGoogle(
     @Args('from_language', { type: () => LanguageInput })
@@ -286,6 +298,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => GenericOutput)
   async translateAllWordsAndPhrasesByLilt(
     @Args('from_language', { type: () => LanguageInput })
@@ -306,6 +319,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => GenericOutput)
   async translateAllWordsAndPhrasesBySmartcat(
     @Args('from_language', { type: () => LanguageInput })
@@ -326,6 +340,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateMissingWordsAndPhrasesBySmartcat(
     @Args('from_language', { type: () => LanguageInput })
@@ -350,6 +365,7 @@ export class BotsResolver {
     );
   }
 
+  @IsAuthAdmin()
   @Mutation(() => GenericOutput)
   async stopBotTranslation(): Promise<GenericOutput> {
     console.log('stopBotTranslation');
