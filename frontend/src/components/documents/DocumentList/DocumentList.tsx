@@ -1,7 +1,11 @@
 import { useMemo } from 'react';
-import { IonList, useIonToast } from '@ionic/react';
+import // IonInfiniteScroll,
+// IonInfiniteScrollContent,
+'@ionic/react';
+// import { IonInfiniteScrollCustomEvent } from '@ionic/core/components';
+import { Stack, Box, CircularProgress } from '@mui/material';
 
-import { useTr } from '../../../hooks/useTr';
+// import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 import { useGetAllDocumentsQuery } from '../../../generated/graphql';
@@ -13,8 +17,7 @@ type DocumentListProps = {
 };
 
 export function DocumentList({ onClickItem }: DocumentListProps) {
-  const { tr } = useTr();
-  const [presentToast] = useIonToast();
+  // const { tr } = useTr();
   const {
     states: {
       global: {
@@ -35,16 +38,24 @@ export function DocumentList({ onClickItem }: DocumentListProps) {
     },
   });
 
-  const documentItems = useMemo(() => {
-    if (error) {
-      presentToast({
-        message: tr('Failed at fetching document list!'),
-        duration: 1500,
-        position: 'top',
-        color: 'danger',
-      });
-    }
+  // const handleInfinite = useCallback(
+  //   async (ev: IonInfiniteScrollCustomEvent<void>) => {
+  //     if (foldersData?.getForumFoldersList.pageInfo.hasNextPage) {
+  //       await fetchMore({
+  //         variables: {
+  //           first: PAGE_SIZE,
+  //           after: foldersData.getForumFoldersList.pageInfo.endCursor,
+  //           filter: bouncedFilter.trim(),
+  //         },
+  //       });
+  //     }
 
+  //     setTimeout(() => ev.target.complete(), 500);
+  //   },
+  //   [fetchMore, bouncedFilter, foldersData],
+  // );
+
+  const documentItems = useMemo(() => {
     if (error || !data || !data.getAllDocuments.documents) {
       return [];
     }
@@ -58,11 +69,22 @@ export function DocumentList({ onClickItem }: DocumentListProps) {
           onClickItem={onClickItem}
         />
       ));
-  }, [data, error, onClickItem, presentToast, tr]);
+  }, [data, error, onClickItem]);
 
-  if (documentItems.length === 0 && !loading) {
-    return <div>{`${tr('No documents yet')}...`} </div>;
-  }
+  return (
+    <Stack gap="12px">
+      <Box style={{ textAlign: 'center' }}>
+        {loading && <CircularProgress />}
+      </Box>
 
-  return <IonList lines="inset">{documentItems}</IonList>;
+      {documentItems}
+
+      {/* <IonInfiniteScroll onIonInfinite={handleInfinite}>
+        <IonInfiniteScrollContent
+          loadingText={`${tr('Loading')}...`}
+          loadingSpinner="bubbles"
+        />
+      </IonInfiniteScroll> */}
+    </Stack>
+  );
 }
