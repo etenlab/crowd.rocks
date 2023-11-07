@@ -5,8 +5,6 @@ import { getBearer } from 'src/common/utility';
 
 import { LanguageInput } from 'src/components/common/types';
 
-import { MapsService } from 'src/components/maps/maps.service';
-
 import { WordToWordTranslationsService } from './word-to-word-translations.service';
 import { WordToPhraseTranslationsService } from './word-to-phrase-translations.service';
 import { PhraseToWordTranslationsService } from './phrase-to-word-translations.service';
@@ -35,6 +33,7 @@ import {
   TranslationWithVoteOutput,
 } from './types';
 import { ErrorType } from '../../common/types';
+import { MapsTranslationService } from '../maps/maps-translation.service';
 
 @Injectable()
 @Resolver()
@@ -45,7 +44,7 @@ export class TranslationsResolver {
     private wordToPhraseTranslationService: WordToPhraseTranslationsService,
     private phraseToWordTranslationService: PhraseToWordTranslationsService,
     private phraseToPhraseTranslationService: PhraseToPhraseTranslationsService,
-    private mapsService: MapsService,
+    private mapsTranslationService: MapsTranslationService,
   ) {}
 
   @Query(() => WordToWordTranslationOutput)
@@ -429,7 +428,7 @@ export class TranslationsResolver {
     );
 
     if (res.error === ErrorType.NoError) {
-      this.mapsService.translateMapsWithTranslationId({
+      this.mapsTranslationService.translateMapsWithTranslationId({
         translation_id: String(translation_id),
         from_definition_type_is_word,
         to_definition_type_is_word,
@@ -463,7 +462,7 @@ export class TranslationsResolver {
     );
 
     if (res.error === ErrorType.NoError) {
-      this.mapsService.translateMapsWithDefinitionId({
+      this.mapsTranslationService.translateMapsWithDefinitionId({
         from_definition_id,
         from_definition_type_is_word,
         token: getBearer(req) || '',
@@ -493,7 +492,7 @@ export class TranslationsResolver {
       );
 
     if (res.error === ErrorType.NoError) {
-      this.mapsService.translateMapsWithDefinitionId({
+      this.mapsTranslationService.translateMapsWithDefinitionId({
         from_definition_id,
         from_definition_type_is_word,
         token: getBearer(req) || '',

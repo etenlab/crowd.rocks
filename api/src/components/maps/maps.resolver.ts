@@ -43,14 +43,14 @@ import { MapVotesService } from './map-votes.service';
 import { PUB_SUB } from '../../pubSub.module';
 import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionToken } from '../../common/subscription-token';
-import { ReTranslationService } from './maps-retranslation.service';
+import { MapsTranslationService } from './maps-translation.service';
 
 @Injectable()
 @Resolver()
 export class MapsResolver {
   constructor(
     private mapsService: MapsService,
-    private reTranslationService: ReTranslationService,
+    private mapsTranslationService: MapsTranslationService,
     private mapVotesService: MapVotesService,
     private authenticationService: AuthenticationService,
     private fileService: FileService,
@@ -132,11 +132,13 @@ export class MapsResolver {
         mapDetails,
         token: bearer,
       });
-      await this.mapsService.translateMapStringToAllLangsAndSaveTranslated({
-        origMapString: mapString,
-        origMapDetails: mapDetails,
-        token: bearer,
-      });
+      await this.mapsTranslationService.translateMapStringToAllLangsAndSaveTranslated(
+        {
+          origMapString: mapString,
+          origMapDetails: mapDetails,
+          token: bearer,
+        },
+      );
       return {
         error: ErrorType.NoError,
         mapDetailsOutput: {
@@ -198,7 +200,7 @@ export class MapsResolver {
       };
     }
     try {
-      await this.mapsService.translationsReset(userToken);
+      await this.mapsTranslationService.translationsReset(userToken);
       return {
         error: ErrorType.NoError,
       };
@@ -227,7 +229,7 @@ export class MapsResolver {
       };
     }
     try {
-      await this.reTranslationService.mapReTranslate(userToken, forLangTag);
+      await this.mapsTranslationService.mapReTranslate(userToken, forLangTag);
       return {
         error: ErrorType.NoError,
       };
@@ -257,7 +259,7 @@ export class MapsResolver {
     }
     try {
       for (let i = 0; i < forLangTags!.length; i++) {
-        await this.reTranslationService.mapReTranslate(
+        await this.mapsTranslationService.mapReTranslate(
           userToken,
           forLangTags[i]!,
         );
