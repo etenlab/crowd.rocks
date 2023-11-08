@@ -511,6 +511,9 @@ export class DatabaseVersionControlService {
   }
 
   async loadVersion10(): Promise<void> {
+    //schema
+    await this.runSqlFile('./src/core/sql/schema/v10.schema.sql');
+
     // set version
     await this.setVersionNumber(10);
   }

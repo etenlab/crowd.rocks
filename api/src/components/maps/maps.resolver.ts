@@ -44,6 +44,7 @@ import { PUB_SUB } from '../../pubSub.module';
 import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionToken } from '../../common/subscription-token';
 import { MapsTranslationService } from './maps-translation.service';
+import { IsAuthAdmin } from '../../decorators/is-auth-admin.decorator';
 
 @Injectable()
 @Resolver()
@@ -229,7 +230,10 @@ export class MapsResolver {
       };
     }
     try {
-      await this.mapsTranslationService.mapReTranslate(userToken, forLangTag);
+      await this.mapsTranslationService.mapReTranslateAllNow(
+        userToken,
+        forLangTag,
+      );
       return {
         error: ErrorType.NoError,
       };
@@ -259,7 +263,7 @@ export class MapsResolver {
     }
     try {
       for (let i = 0; i < forLangTags!.length; i++) {
-        await this.mapsTranslationService.mapReTranslate(
+        await this.mapsTranslationService.mapReTranslateAllNow(
           userToken,
           forLangTags[i]!,
         );
@@ -401,6 +405,42 @@ export class MapsResolver {
   ): Promise<StartZipMapOutput> {
     console.log(`startMapZipDownload`, JSON.stringify(input));
     return this.mapsService.startZipMap(input);
+  }
+
+  @IsAuthAdmin()
+  @Mutation(() => GenericOutput)
+  async forceMarkAndRetranslateOriginalMapsIds(
+    @Args('originalMapsIds', { type: () => [String] })
+    originalMapsIds: Array<string>,
+    @Context()
+    req: any,
+  ): Promise<GenericOutput> {
+    console.log(
+      `triggerMapRetranslationForOriginalIds`,
+      JSON.stringify(originalMapsIds),
+    );
+    const token = req.req.token as string;
+    const trMapsIds: string[] = [];
+    for (const originalMapId of originalMapsIds) {
+      const trMapsInfo = await this.mapsService.getTranslatedMaps({
+        originalMapId: Number(originalMapId),
+      });
+      trMapsIds.push(
+        ...(trMapsInfo.mapList
+          .map((m) => m.mapDetails?.translated_map_id)
+          .filter((m) => !!m) as string[]),
+      );
+    }
+
+    await this.mapsTranslationService.unmarkTrMaps(trMapsIds);
+
+    await this.mapsTranslationService.markTrMapsByOriginalMapsIds(
+      originalMapsIds,
+    );
+    await this.mapsTranslationService.retranslateMarkedMaps(token);
+    return {
+      error: ErrorType.NoError,
+    };
   }
 
   @Subscription(() => ZipMapResult, {

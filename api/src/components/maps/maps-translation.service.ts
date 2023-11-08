@@ -31,59 +31,227 @@ export class MapsTranslationService {
     private wordToWordTranslationsService: WordToWordTranslationsService,
   ) {}
 
+  /**
+   * @returns ids of marked translated maps
+   */
   async markTrMapsByTranslationId({
     translation_id,
     from_definition_type_is_word,
     to_definition_type_is_word,
-    token,
   }: {
     translation_id: string;
     from_definition_type_is_word: boolean;
     to_definition_type_is_word: boolean;
-    token: string;
-  }) {
-    // todo
+  }): Promise<string[]> {
     console.log('markTrMapsByTranslationId');
+    try {
+      const originalMapsIds =
+        await this.mapsRepository.getOrigMapsIdsByTranslationData({
+          translation_id,
+          from_definition_type_is_word,
+          to_definition_type_is_word,
+        });
+      const targetLanguage =
+        await this.translationsService.getTranslationLanguage(
+          translation_id,
+          from_definition_type_is_word,
+          to_definition_type_is_word,
+        );
+      if (!targetLanguage) {
+        Logger.error(
+          `MapsTranslationsService#markTrMapsByTranslationId: targetLanguage not found`,
+        );
+        return [];
+      }
+      const res = await this.mapsRepository.markTrMapsByOrigIdToRetranslate({
+        originalMapsIds,
+        targetLanguage,
+      });
+      return res;
+    } catch (error) {
+      Logger.error(
+        `MapsTranslationsService#markTrMapsByTranslationId: ` +
+          JSON.stringify(error),
+      );
+      return [];
+    }
   }
 
+  async unmarkTrMaps(trMapIds: string[]): Promise<string[]> {
+    return this.mapsRepository.unmarkTrMaps(trMapIds);
+  }
+
+  /**
+   * @returns ids of marked translated maps
+   */
   async markTrMapsByDefinitionsIds({
     from_definition_id,
     from_definition_type_is_word,
     to_definition_id,
     to_definition_type_is_word,
-    token,
   }: {
     from_definition_id: string;
     from_definition_type_is_word: boolean;
     to_definition_id: string;
     to_definition_type_is_word: boolean;
-    token: string;
-  }) {
-    // todo
+  }): Promise<string[]> {
     console.log('markTrMapsByDefinitionsIds');
+    try {
+      const translation_id =
+        await this.translationsService.getTranslationIdByFromToDefinitionsIds({
+          from_definition_id,
+          from_definition_type_is_word,
+          to_definition_id,
+          to_definition_type_is_word,
+        });
+      if (!translation_id) return [];
+      return this.markTrMapsByTranslationId({
+        translation_id,
+        from_definition_type_is_word,
+        to_definition_type_is_word,
+      });
+    } catch (error) {
+      Logger.error(
+        `MapsTranslationsService#markTrMapsByDefinitionsIds: ` +
+          JSON.stringify(error),
+      );
+      return [];
+    }
   }
 
+  /**
+   * @returns ids of marked translated maps
+   */
   async markTrMapsByFromDefinitionIdAndLang({
     from_definition_id,
     from_definition_type_is_word,
-    token,
-    toLang: { language_code, dialect_code, geo_code },
+    toLang,
   }: {
-    from_definition_id;
-    from_definition_type_is_word;
-    token: string;
+    from_definition_id: string;
+    from_definition_type_is_word: boolean;
     toLang: LanguageInput;
-  }) {
-    // todo
+  }): Promise<string[]> {
     console.log('markTrMapsByFromDefinitionIdAndLang');
+    try {
+      const originalMapsIds = from_definition_type_is_word
+        ? await this.mapsRepository.getOrigMapsIdsByWordDefinition(
+            from_definition_id,
+          )
+        : await this.mapsRepository.getOrigMapsIdsByPhraseDefinition(
+            from_definition_id,
+          );
+
+      const res = await this.mapsRepository.markTrMapsByOrigIdToRetranslate({
+        originalMapsIds,
+        targetLanguage: toLang,
+      });
+      return res;
+    } catch (error) {
+      Logger.error(
+        `MapsTranslationsService#markTrMapsByFromDefinitionIdAndLang: ` +
+          JSON.stringify(error),
+      );
+      return [];
+    }
   }
 
-  async retranslateMarkedMaps() {
-    // todo
-    console.log('retranslateMarkedMaps');
+  /**
+   * @returns ids of marked translated maps
+   */
+  async markTrMapsByOriginalMapsIds(
+    originalMapsIds: string[],
+  ): Promise<string[]> {
+    console.log('markTrMapsByOriginalMapsIds');
+    try {
+      const res = await this.mapsRepository.markTrMapsByOrigIdToRetranslate({
+        originalMapsIds,
+      });
+      return res;
+    } catch (error) {
+      Logger.error(
+        `MapsTranslationsService#markTrMapsByFromDefinitionIdAndLang: ` +
+          JSON.stringify(error),
+      );
+      return [];
+    }
   }
 
-  async mapReTranslate(
+  /**
+   * @returns  Ids of translated maps
+   */
+  async retranslateMarkedMaps(token: string): Promise<string[]> {
+    const trMapsRowsToRetranslate =
+      await this.mapsRepository.getAllMarkedAndNotIsTranslatingTrMapsRows();
+    const origMapsToRetranslate = trMapsRowsToRetranslate.reduce(
+      (foundOrgMaps, trMap) => {
+        const foundIdx = foundOrgMaps.findIndex(
+          (om) => om.origMapId === trMap.original_map_id,
+        );
+        if (foundIdx && foundIdx >= 0) {
+          foundOrgMaps[foundIdx].languages.push({
+            language_code: trMap.language_code,
+            dialect_code: trMap.dialect_code,
+            geo_code: trMap.geo_code,
+          });
+        } else {
+          foundOrgMaps.push({
+            origMapId: trMap.original_map_id,
+            languages: [
+              {
+                language_code: trMap.language_code,
+                dialect_code: trMap.dialect_code,
+                geo_code: trMap.geo_code,
+              },
+            ],
+          });
+        }
+        return foundOrgMaps;
+      },
+      [] as Array<{
+        origMapId: string;
+        languages: Array<LanguageInput>;
+      }>,
+    );
+
+    if (!(origMapsToRetranslate.length > 0)) {
+      return [];
+    }
+
+    const trMapsIds: Set<string> = new Set();
+    trMapsRowsToRetranslate.forEach((t_m) => {
+      trMapsIds.add(t_m.translated_map_id);
+    });
+    await this.mapsRepository.markTrMapsAdIsRetranslatingNow(
+      Array.from(trMapsIds),
+    );
+    Logger.log(
+      `Start retranslating translated maps ${JSON.stringify(
+        Array.from(trMapsIds),
+      )}`,
+    );
+
+    const translatedMapIds: Array<string> = [];
+    for (const om of origMapsToRetranslate) {
+      translatedMapIds.push(
+        ...(await this.translateOrigMapIdToLangs(
+          om.origMapId,
+          om.languages,
+          token,
+        )),
+      );
+    }
+    if (translatedMapIds.length > 0) {
+      const unmarked = await this.unmarkTrMaps(translatedMapIds);
+      Logger.log(
+        `Unmark translated maps ${JSON.stringify(
+          unmarked,
+        )}. (retrnanslation completed.)`,
+      );
+    }
+    return translatedMapIds;
+  }
+
+  async mapReTranslateAllNow(
     token: string,
     forLangTag?: string | null,
   ): Promise<void> {
@@ -122,42 +290,30 @@ export class MapsTranslationService {
     }
   }
 
-  //---
-  async translateMapsWithTranslationId({
-    translation_id,
-    from_definition_type_is_word,
-    to_definition_type_is_word,
-    token,
-  }: {
-    translation_id: string;
-    from_definition_type_is_word: boolean;
-    to_definition_type_is_word: boolean;
-    token: string;
-  }) {
+  async translateOrigMapIdToLangs(
+    origMapId: string,
+    toLangs: LanguageInput[],
+    token: string,
+  ): Promise<Array<string>> {
     try {
-      const origMapIds =
-        await this.mapsRepository.getOrigMapsIdsByTranslationData({
-          translation_id,
-          from_definition_type_is_word,
-          to_definition_type_is_word,
-        });
-
-      const toLang = await this.translationsService.getTranslationLanguage(
-        translation_id,
-        from_definition_type_is_word,
-        to_definition_type_is_word,
+      const { str, details } = await this.mapsService.getMapAsStringById(
+        origMapId,
       );
-
-      if (!toLang) {
-        Logger.error(
-          `mapsService#translateMapsWithTranslationId: toLang is not defined`,
+      const translatedMapsIdsPromises: Array<any> = [];
+      for (const toLang of toLangs) {
+        translatedMapsIdsPromises.push(
+          this.translateMapStringToLangAndSaveTranslated({
+            origMapString: str,
+            origMapDetails: details,
+            token,
+            toLang,
+          }),
         );
-        return [];
       }
-
-      return this.translateOrigMapsByIds(origMapIds, token, toLang);
-    } catch (e) {
-      Logger.error(e);
+      const translatedMapsIds = await Promise.all(translatedMapsIdsPromises);
+      return translatedMapsIds.filter((tmid) => !!tmid) as string[];
+    } catch (error) {
+      Logger.error(error);
       return [];
     }
   }
@@ -195,36 +351,6 @@ export class MapsTranslationService {
       return translatedMapsIds.filter((tmid) => !!tmid) as string[];
     } catch (error) {
       Logger.error(error);
-      return [];
-    }
-  }
-
-  //--------
-  async translateMapsWithDefinitionId({
-    from_definition_id,
-    from_definition_type_is_word,
-    token,
-    toLang,
-  }: {
-    from_definition_id: string;
-    from_definition_type_is_word: boolean;
-    token: string;
-    toLang?: LanguageInput;
-  }): Promise<Array<string>> {
-    try {
-      let origMapIds: string[] = [];
-      if (from_definition_type_is_word) {
-        origMapIds = await this.mapsRepository.getOrigMapsIdsByWordDefinition(
-          from_definition_id,
-        );
-      } else {
-        origMapIds = await this.mapsRepository.getOrigMapsIdsByPhraseDefinition(
-          from_definition_id,
-        );
-      }
-      return this.translateOrigMapsByIds(origMapIds, token, toLang);
-    } catch (e) {
-      Logger.error(e);
       return [];
     }
   }
@@ -311,7 +437,7 @@ export class MapsTranslationService {
       // );
       // Logger.log(`prepare translations array: ${p2 - p1} ms`);
       // Logger.log(`translate map string: ${p3 - p2} ms`);
-      Logger.debug(`translation is done in ${p3 - p1} ms(${p3}-${p1})`);
+      Logger.debug(`translation is done in ${p3 - p1} ms`);
 
       const stream = Readable.from([translatedMap]);
       const translatedContentFile = await this.fileService.uploadFile(
@@ -572,4 +698,78 @@ export class MapsTranslationService {
       .filter((w) => w.length > 0)
       .join(' ');
   }
+
+  // /**
+  //  * @deprecated
+  //  */
+  // async translateMapsWithTranslationId({
+  //   translation_id,
+  //   from_definition_type_is_word,
+  //   to_definition_type_is_word,
+  //   token,
+  // }: {
+  //   translation_id: string;
+  //   from_definition_type_is_word: boolean;
+  //   to_definition_type_is_word: boolean;
+  //   token: string;
+  // }) {
+  //   try {
+  //     const origMapIds =
+  //       await this.mapsRepository.getOrigMapsIdsByTranslationData({
+  //         translation_id,
+  //         from_definition_type_is_word,
+  //         to_definition_type_is_word,
+  //       });
+
+  //     const toLang = await this.translationsService.getTranslationLanguage(
+  //       translation_id,
+  //       from_definition_type_is_word,
+  //       to_definition_type_is_word,
+  //     );
+
+  //     if (!toLang) {
+  //       Logger.error(
+  //         `mapsService#translateMapsWithTranslationId: toLang is not defined`,
+  //       );
+  //       return [];
+  //     }
+
+  //     return this.translateOrigMapsByIds(origMapIds, token, toLang);
+  //   } catch (e) {
+  //     Logger.error(e);
+  //     return [];
+  //   }
+  // }
+
+  // /**
+  //  * @deprecated
+  //  */
+  // async translateMapsWithDefinitionId({
+  //   from_definition_id,
+  //   from_definition_type_is_word,
+  //   token,
+  //   toLang,
+  // }: {
+  //   from_definition_id: string;
+  //   from_definition_type_is_word: boolean;
+  //   token: string;
+  //   toLang?: LanguageInput;
+  // }): Promise<Array<string>> {
+  //   try {
+  //     let origMapIds: string[] = [];
+  //     if (from_definition_type_is_word) {
+  //       origMapIds = await this.mapsRepository.getOrigMapsIdsByWordDefinition(
+  //         from_definition_id,
+  //       );
+  //     } else {
+  //       origMapIds = await this.mapsRepository.getOrigMapsIdsByPhraseDefinition(
+  //         from_definition_id,
+  //       );
+  //     }
+  //     return this.translateOrigMapsByIds(origMapIds, token, toLang);
+  //   } catch (e) {
+  //     Logger.error(e);
+  //     return [];
+  //   }
+  // }
 }

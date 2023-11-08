@@ -239,6 +239,12 @@ mutation ToggleMapVoteStatus(
   }
 }
 
+mutation ForceMarkAndRetranslateOriginalMapsIds($originalMapsIds: [String!]!) {
+  forceMarkAndRetranslateOriginalMapsIds(originalMapsIds: $originalMapsIds) {
+    error
+  }
+}
+
 query GetMapVoteStatus($map_id: ID!, $is_original: Boolean!) {
   getMapVoteStatus(map_id: $map_id, is_original: $is_original) {
     error

@@ -711,4 +711,17 @@ export class MapsService {
     }
     return { str, details: mapDetatilsOutput.mapDetails };
   }
+
+  async getTranslatedMaps({
+    lang,
+    originalMapId,
+  }: {
+    lang?: LanguageInput | undefined;
+    originalMapId?: number | undefined;
+  }): Promise<GetOrigMapsListOutput> {
+    return this.mapsRepository.getTranslatedMaps({
+      lang,
+      originalMapId,
+    });
+  }
 }

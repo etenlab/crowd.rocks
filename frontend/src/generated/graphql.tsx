@@ -636,6 +636,7 @@ export type Mutation = {
   createQuestionOnWordRange: QuestionOnWordRangesOutput;
   documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
+  forceMarkAndRetranslateOriginalMapsIds: GenericOutput;
   forumDelete: ForumDeleteOutput;
   forumFolderDelete: ForumFolderDeleteOutput;
   forumFolderUpsert: ForumFolderOutput;
@@ -738,6 +739,11 @@ export type MutationDocumentUploadArgs = {
 
 export type MutationEmailResponseResolverArgs = {
   input: EmailResponseInput;
+};
+
+
+export type MutationForceMarkAndRetranslateOriginalMapsIdsArgs = {
+  originalMapsIds: Array<Scalars['String']['input']>;
 };
 
 
@@ -3359,6 +3365,13 @@ export type ToggleMapVoteStatusMutationVariables = Exact<{
 
 
 export type ToggleMapVoteStatusMutation = { __typename?: 'Mutation', toggleMapVoteStatus: { __typename?: 'MapVoteStatusOutputRow', error: ErrorType, vote_status?: { __typename?: 'MapVoteStatus', map_id: string, is_original: boolean, downvotes: number, upvotes: number } | null } };
+
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationVariables = Exact<{
+  originalMapsIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type ForceMarkAndRetranslateOriginalMapsIdsMutation = { __typename?: 'Mutation', forceMarkAndRetranslateOriginalMapsIds: { __typename?: 'GenericOutput', error: ErrorType } };
 
 export type GetMapVoteStatusQueryVariables = Exact<{
   map_id: Scalars['ID']['input'];
@@ -6969,6 +6982,39 @@ export function useToggleMapVoteStatusMutation(baseOptions?: Apollo.MutationHook
 export type ToggleMapVoteStatusMutationHookResult = ReturnType<typeof useToggleMapVoteStatusMutation>;
 export type ToggleMapVoteStatusMutationResult = Apollo.MutationResult<ToggleMapVoteStatusMutation>;
 export type ToggleMapVoteStatusMutationOptions = Apollo.BaseMutationOptions<ToggleMapVoteStatusMutation, ToggleMapVoteStatusMutationVariables>;
+export const ForceMarkAndRetranslateOriginalMapsIdsDocument = gql`
+    mutation ForceMarkAndRetranslateOriginalMapsIds($originalMapsIds: [String!]!) {
+  forceMarkAndRetranslateOriginalMapsIds(originalMapsIds: $originalMapsIds) {
+    error
+  }
+}
+    `;
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationFn = Apollo.MutationFunction<ForceMarkAndRetranslateOriginalMapsIdsMutation, ForceMarkAndRetranslateOriginalMapsIdsMutationVariables>;
+
+/**
+ * __useForceMarkAndRetranslateOriginalMapsIdsMutation__
+ *
+ * To run a mutation, you first call `useForceMarkAndRetranslateOriginalMapsIdsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useForceMarkAndRetranslateOriginalMapsIdsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [forceMarkAndRetranslateOriginalMapsIdsMutation, { data, loading, error }] = useForceMarkAndRetranslateOriginalMapsIdsMutation({
+ *   variables: {
+ *      originalMapsIds: // value for 'originalMapsIds'
+ *   },
+ * });
+ */
+export function useForceMarkAndRetranslateOriginalMapsIdsMutation(baseOptions?: Apollo.MutationHookOptions<ForceMarkAndRetranslateOriginalMapsIdsMutation, ForceMarkAndRetranslateOriginalMapsIdsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ForceMarkAndRetranslateOriginalMapsIdsMutation, ForceMarkAndRetranslateOriginalMapsIdsMutationVariables>(ForceMarkAndRetranslateOriginalMapsIdsDocument, options);
+      }
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationHookResult = ReturnType<typeof useForceMarkAndRetranslateOriginalMapsIdsMutation>;
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationResult = Apollo.MutationResult<ForceMarkAndRetranslateOriginalMapsIdsMutation>;
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationOptions = Apollo.BaseMutationOptions<ForceMarkAndRetranslateOriginalMapsIdsMutation, ForceMarkAndRetranslateOriginalMapsIdsMutationVariables>;
 export const GetMapVoteStatusDocument = gql`
     query GetMapVoteStatus($map_id: ID!, $is_original: Boolean!) {
   getMapVoteStatus(map_id: $map_id, is_original: $is_original) {
@@ -9752,6 +9798,7 @@ export const namedOperations = {
     MapsTranslationsReset: 'MapsTranslationsReset',
     MapsReTranslate: 'MapsReTranslate',
     ToggleMapVoteStatus: 'ToggleMapVoteStatus',
+    ForceMarkAndRetranslateOriginalMapsIds: 'ForceMarkAndRetranslateOriginalMapsIds',
     AddNotification: 'AddNotification',
     DeleteNotification: 'DeleteNotification',
     MarkNotificationRead: 'MarkNotificationRead',

@@ -570,6 +570,7 @@ type Mutation {
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
+  forceMarkAndRetranslateOriginalMapsIds(originalMapsIds: [String!]!): GenericOutput!
   forumDelete(forum_id: ID!): ForumDeleteOutput!
   forumFolderDelete(forum_folder_id: ID!): ForumFolderDeleteOutput!
   forumFolderUpsert(input: ForumFolderUpsertInput!): ForumFolderOutput!

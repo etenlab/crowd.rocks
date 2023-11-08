@@ -842,3 +842,6 @@ ALTER TABLE public.original_maps_votes ADD CONSTRAINT original_map_votes_user_id
 ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists words_votes_user_id_fkey;
 ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists translated_map_votes_user_id_fkey;
 ALTER TABLE public.translated_maps_votes ADD CONSTRAINT translated_map_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE;;
+
+alter table translated_maps add column if not exists to_retranslate boolean ;
+alter table translated_maps add column if not exists is_retranslating_now boolean;
