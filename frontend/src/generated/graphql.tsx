@@ -281,7 +281,7 @@ export type ForumDeleteOutput = {
 export type ForumEdge = {
   __typename?: 'ForumEdge';
   cursor: Scalars['ID']['output'];
-  node: Forum;
+  node: ForumNode;
 };
 
 export type ForumFolder = {
@@ -302,7 +302,7 @@ export type ForumFolderDeleteOutput = {
 export type ForumFolderEdge = {
   __typename?: 'ForumFolderEdge';
   cursor: Scalars['ID']['output'];
-  node: ForumFolder;
+  node: ForumFolderNode;
 };
 
 export type ForumFolderListConnection = {
@@ -310,6 +310,17 @@ export type ForumFolderListConnection = {
   edges: Array<ForumFolderEdge>;
   error: ErrorType;
   pageInfo: PageInfo;
+};
+
+export type ForumFolderNode = {
+  __typename?: 'ForumFolderNode';
+  created_by: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  forum_folder_id: Scalars['ID']['output'];
+  forum_id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  total_posts: Scalars['Int']['output'];
+  total_threads: Scalars['Int']['output'];
 };
 
 export type ForumFolderOutput = {
@@ -330,6 +341,17 @@ export type ForumListConnection = {
   edges: Array<ForumEdge>;
   error: ErrorType;
   pageInfo: PageInfo;
+};
+
+export type ForumNode = {
+  __typename?: 'ForumNode';
+  created_by: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  forum_id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  total_posts: Scalars['Int']['output'];
+  total_threads: Scalars['Int']['output'];
+  total_topics: Scalars['Int']['output'];
 };
 
 export type ForumOutput = {
@@ -3114,13 +3136,17 @@ export type ThreadFragmentFragment = { __typename?: 'Thread', thread_id: string,
 
 export type ForumFolderFragmentFragment = { __typename?: 'ForumFolder', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string };
 
+export type ForumFolderNodeFragmentFragment = { __typename?: 'ForumFolderNode', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string, total_posts: number, total_threads: number };
+
 export type ForumFragmentFragment = { __typename?: 'Forum', forum_id: string, name: string, description?: string | null, created_by: string };
+
+export type ForumNodeFragmentFragment = { __typename?: 'ForumNode', forum_id: string, name: string, description?: string | null, created_by: string, total_posts: number, total_threads: number, total_topics: number };
 
 export type ThreadEdgeFragmentFragment = { __typename?: 'ThreadEdge', cursor: string, node: { __typename?: 'Thread', thread_id: string, forum_folder_id: string, name: string, created_by: string } };
 
-export type ForumFolderEdgeFragmentFragment = { __typename?: 'ForumFolderEdge', cursor: string, node: { __typename?: 'ForumFolder', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string } };
+export type ForumFolderEdgeFragmentFragment = { __typename?: 'ForumFolderEdge', cursor: string, node: { __typename?: 'ForumFolderNode', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string, total_posts: number, total_threads: number } };
 
-export type ForumEdgeFragmentFragment = { __typename?: 'ForumEdge', cursor: string, node: { __typename?: 'Forum', forum_id: string, name: string, description?: string | null, created_by: string } };
+export type ForumEdgeFragmentFragment = { __typename?: 'ForumEdge', cursor: string, node: { __typename?: 'ForumNode', forum_id: string, name: string, description?: string | null, created_by: string, total_posts: number, total_threads: number, total_topics: number } };
 
 export type GetThreadByIdQueryVariables = Exact<{
   thread_id: Scalars['ID']['input'];
@@ -3178,7 +3204,7 @@ export type GetForumFoldersListQueryVariables = Exact<{
 }>;
 
 
-export type GetForumFoldersListQuery = { __typename?: 'Query', getForumFoldersList: { __typename?: 'ForumFolderListConnection', error: ErrorType, edges: Array<{ __typename?: 'ForumFolderEdge', cursor: string, node: { __typename?: 'ForumFolder', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+export type GetForumFoldersListQuery = { __typename?: 'Query', getForumFoldersList: { __typename?: 'ForumFolderListConnection', error: ErrorType, edges: Array<{ __typename?: 'ForumFolderEdge', cursor: string, node: { __typename?: 'ForumFolderNode', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string, total_posts: number, total_threads: number } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
 
 export type CreateForumFolderMutationVariables = Exact<{
   name: Scalars['String']['input'];
@@ -3220,7 +3246,7 @@ export type GetForumsListQueryVariables = Exact<{
 }>;
 
 
-export type GetForumsListQuery = { __typename?: 'Query', getForumsList: { __typename?: 'ForumListConnection', error: ErrorType, edges: Array<{ __typename?: 'ForumEdge', cursor: string, node: { __typename?: 'Forum', forum_id: string, name: string, description?: string | null, created_by: string } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+export type GetForumsListQuery = { __typename?: 'Query', getForumsList: { __typename?: 'ForumListConnection', error: ErrorType, edges: Array<{ __typename?: 'ForumEdge', cursor: string, node: { __typename?: 'ForumNode', forum_id: string, name: string, description?: string | null, created_by: string, total_posts: number, total_threads: number, total_topics: number } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
 
 export type CreateForumMutationVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4226,6 +4252,23 @@ export const PhraseDefinitionListEdgeFragmentFragmentDoc = gql`
   }
 }
     ${PhraseDefinitionFragmentFragmentDoc}`;
+export const ForumFolderFragmentFragmentDoc = gql`
+    fragment ForumFolderFragment on ForumFolder {
+  forum_folder_id
+  forum_id
+  name
+  description
+  created_by
+}
+    `;
+export const ForumFragmentFragmentDoc = gql`
+    fragment ForumFragment on Forum {
+  forum_id
+  name
+  description
+  created_by
+}
+    `;
 export const ThreadFragmentFragmentDoc = gql`
     fragment ThreadFragment on Thread {
   thread_id
@@ -4242,39 +4285,44 @@ export const ThreadEdgeFragmentFragmentDoc = gql`
   }
 }
     ${ThreadFragmentFragmentDoc}`;
-export const ForumFolderFragmentFragmentDoc = gql`
-    fragment ForumFolderFragment on ForumFolder {
+export const ForumFolderNodeFragmentFragmentDoc = gql`
+    fragment ForumFolderNodeFragment on ForumFolderNode {
   forum_folder_id
   forum_id
   name
   description
   created_by
+  total_posts
+  total_threads
 }
     `;
 export const ForumFolderEdgeFragmentFragmentDoc = gql`
     fragment ForumFolderEdgeFragment on ForumFolderEdge {
   cursor
   node {
-    ...ForumFolderFragment
+    ...ForumFolderNodeFragment
   }
 }
-    ${ForumFolderFragmentFragmentDoc}`;
-export const ForumFragmentFragmentDoc = gql`
-    fragment ForumFragment on Forum {
+    ${ForumFolderNodeFragmentFragmentDoc}`;
+export const ForumNodeFragmentFragmentDoc = gql`
+    fragment ForumNodeFragment on ForumNode {
   forum_id
   name
   description
   created_by
+  total_posts
+  total_threads
+  total_topics
 }
     `;
 export const ForumEdgeFragmentFragmentDoc = gql`
     fragment ForumEdgeFragment on ForumEdge {
   cursor
   node {
-    ...ForumFragment
+    ...ForumNodeFragment
   }
 }
-    ${ForumFragmentFragmentDoc}`;
+    ${ForumNodeFragmentFragmentDoc}`;
 export const MapDetailsOutputFragmentFragmentDoc = gql`
     fragment MapDetailsOutputFragment on MapDetailsOutput {
   error
@@ -9861,7 +9909,9 @@ export const namedOperations = {
     PhraseDefinitionListEdgeFragment: 'PhraseDefinitionListEdgeFragment',
     ThreadFragment: 'ThreadFragment',
     ForumFolderFragment: 'ForumFolderFragment',
+    ForumFolderNodeFragment: 'ForumFolderNodeFragment',
     ForumFragment: 'ForumFragment',
+    ForumNodeFragment: 'ForumNodeFragment',
     ThreadEdgeFragment: 'ThreadEdgeFragment',
     ForumFolderEdgeFragment: 'ForumFolderEdgeFragment',
     ForumEdgeFragment: 'ForumEdgeFragment',

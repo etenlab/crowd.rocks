@@ -514,6 +514,11 @@ export class DatabaseVersionControlService {
     //schema
     await this.runSqlFile('./src/core/sql/schema/v10.schema.sql');
 
+    // threads
+    await this.runSqlFile(
+      './src/core/sql/threads/post_delete_from_thread_delete_trigger-v10.sql',
+    );
+
     // set version
     await this.setVersionNumber(10);
   }

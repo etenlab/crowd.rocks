@@ -220,6 +220,7 @@ create table posts(
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__parent_table_parent_id__posts on posts (parent_table, parent_id);
 
 create table versions(
   version_id bigserial primary key,

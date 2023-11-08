@@ -94,8 +94,8 @@ export function FolderListPage() {
         name={edge.node.name}
         created_by={edge.node.created_by}
         description={edge.node.description || ''}
-        totalThreads={47}
-        totalPosts={500}
+        totalThreads={edge.node.total_threads}
+        totalPosts={edge.node.total_posts}
       />
     ));
   }, [error, foldersData, forum_id]);

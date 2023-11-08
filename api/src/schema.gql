@@ -251,7 +251,7 @@ type ForumDeleteOutput {
 
 type ForumEdge {
   cursor: ID!
-  node: Forum!
+  node: ForumNode!
 }
 
 type ForumFolder {
@@ -269,13 +269,23 @@ type ForumFolderDeleteOutput {
 
 type ForumFolderEdge {
   cursor: ID!
-  node: ForumFolder!
+  node: ForumFolderNode!
 }
 
 type ForumFolderListConnection {
   edges: [ForumFolderEdge!]!
   error: ErrorType!
   pageInfo: PageInfo!
+}
+
+type ForumFolderNode {
+  created_by: String!
+  description: String
+  forum_folder_id: ID!
+  forum_id: String!
+  name: String!
+  total_posts: Int!
+  total_threads: Int!
 }
 
 type ForumFolderOutput {
@@ -294,6 +304,16 @@ type ForumListConnection {
   edges: [ForumEdge!]!
   error: ErrorType!
   pageInfo: PageInfo!
+}
+
+type ForumNode {
+  created_by: String!
+  description: String
+  forum_id: ID!
+  name: String!
+  total_posts: Int!
+  total_threads: Int!
+  total_topics: Int!
 }
 
 type ForumOutput {
