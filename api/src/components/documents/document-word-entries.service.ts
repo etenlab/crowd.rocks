@@ -103,6 +103,7 @@ export class DocumentWordEntriesService {
       document_id: number;
       wordlike_string_id: number;
       parent_document_word_entry_id: number | null;
+      page: number;
     }[],
     isSequentialUpsert: boolean,
     token: string,
@@ -133,6 +134,7 @@ export class DocumentWordEntriesService {
           parent_document_word_entry_ids: input.map(
             (item) => item.parent_document_word_entry_id,
           ),
+          pages: input.map((item) => item.page),
           isSequentialUpsert,
           token,
         }),

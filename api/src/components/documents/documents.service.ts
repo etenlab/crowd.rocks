@@ -7,21 +7,32 @@ import { FileService } from '../file/file.service';
 import { WordlikeStringsService } from '../words/wordlike-strings.service';
 import { PostgresService } from '../../core/postgres.service';
 import { DocumentWordEntriesService } from './document-word-entries.service';
-import { DocumentsRepository } from './documents.repository';
+import { AuthorizationService } from '../authorization/authorization.service';
 
 import {
-  GetAllDocumentsOutput,
+  DocumentListConnection,
   GetDocumentOutput,
   TextyDocumentInput,
   DocumentUploadOutput,
+  DocumentEdge,
 } from './types';
-import { AuthorizationService } from '../authorization/authorization.service';
+
+import {
+  CreateDocumentProcedureOutputRow,
+  callCreateDocumentProcedure,
+  GetDocumentById,
+  getDocumentById,
+  getAllDocuments,
+  getDocumentsTotalSize,
+  GetDocumentsTotalSize,
+} from './sql-string';
+
+const PAGE_SIZE = 1000;
 
 @Injectable()
 export class DocumentsService {
   constructor(
     private pg: PostgresService,
-    private documentsRepository: DocumentsRepository,
     private fileService: FileService,
     private wordlikeStringService: WordlikeStringsService,
     private documentWordEntryService: DocumentWordEntriesService,
@@ -79,14 +90,14 @@ export class DocumentsService {
 
       await dbPoolClient.query('BEGIN');
 
-      const { document_id, error } =
-        await this.documentsRepository.saveDocumentTrn(
-          document,
-          token,
-          dbPoolClient,
-        );
+      const res = await dbPoolClient.query<CreateDocumentProcedureOutputRow>(
+        ...callCreateDocumentProcedure(document, token),
+      );
 
-      if (error !== ErrorType.NoError || document_id === null) {
+      const document_id = res.rows[0].p_document_id;
+      const error = res.rows[0].p_error_type;
+
+      if (error !== ErrorType.NoError) {
         await dbPoolClient.query('ROLLBACK');
         dbPoolClient.release();
 
@@ -100,6 +111,7 @@ export class DocumentsService {
         document_id: number;
         wordlike_string_id: number;
         parent_document_word_entry_id: number | null;
+        page: number;
       }[] = [];
 
       for (let i = 0; i < wordlike_strings.length; i++) {
@@ -107,6 +119,7 @@ export class DocumentsService {
           document_id: +document_id,
           wordlike_string_id: +wordlike_strings[i]!.wordlike_string_id,
           parent_document_word_entry_id: null,
+          page: Math.ceil((i + 1) / PAGE_SIZE),
         });
       }
 
@@ -143,7 +156,7 @@ export class DocumentsService {
       await dbPoolClient.query('COMMIT');
       dbPoolClient.release();
 
-      return this.getDocument(document_id);
+      return this.getDocument(+document_id);
     } catch (err) {
       Logger.log(err);
       await dbPoolClient.query('ROLLBACK');
@@ -156,22 +169,83 @@ export class DocumentsService {
     };
   }
 
-  async getAllDocuments(lang?: LanguageInput): Promise<GetAllDocumentsOutput> {
+  async getAllDocuments(input: {
+    lang: LanguageInput | null;
+    first: number | null;
+    after: string | null;
+  }): Promise<DocumentListConnection> {
     try {
-      return this.documentsRepository.getAllDocuments(lang);
+      const res = await this.pg.pool.query<GetDocumentById>(
+        ...getAllDocuments({
+          lang: input.lang,
+          first: input.first ? input.first * 2 : null,
+          after: input.after,
+        }),
+      );
+
+      const res1 = await this.pg.pool.query<GetDocumentsTotalSize>(
+        ...getDocumentsTotalSize({ lang: input.lang }),
+      );
+
+      const tempEdges: DocumentEdge[] = res.rows.map((item) => ({
+        cursor: item.file_name,
+        node: item,
+      }));
+
+      const edges =
+        input.first && tempEdges.length > input.first
+          ? tempEdges.slice(0, input.first)
+          : tempEdges;
+
+      return {
+        error: ErrorType.NoError,
+        edges: res.rows.map((row) => ({
+          cursor: row.file_name,
+          node: row,
+        })),
+        pageInfo: {
+          hasNextPage: input.first ? res.rowCount > input.first : false,
+          hasPreviousPage: false,
+          startCursor: edges.length > 0 ? edges[0].cursor : null,
+          endCursor:
+            edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
+          totalEdges: res1.rowCount > 0 ? res1.rows[0].total_records : 0,
+        },
+      };
     } catch (err) {
       Logger.log(err);
     }
 
     return {
       error: ErrorType.UnknownError,
-      documents: [],
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+        totalEdges: 0,
+      },
     };
   }
 
-  async getDocument(document_id: string): Promise<GetDocumentOutput> {
+  async getDocument(document_id: number): Promise<GetDocumentOutput> {
     try {
-      return this.documentsRepository.getDocument(document_id);
+      const res = await this.pg.pool.query<GetDocumentById>(
+        ...getDocumentById(document_id),
+      );
+
+      if (res.rows.length === 0) {
+        return {
+          error: ErrorType.DocumentNotFound,
+          document: null,
+        };
+      }
+
+      return {
+        error: ErrorType.NoError,
+        document: res.rows[0],
+      };
     } catch (err) {
       Logger.log(err);
     }

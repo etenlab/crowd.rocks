@@ -80,6 +80,17 @@ type DefinitionVoteStatusOutputRow {
   vote_status: DefinitionVoteStatus
 }
 
+type DocumentEdge {
+  cursor: ID!
+  node: TextyDocument!
+}
+
+type DocumentListConnection {
+  edges: [DocumentEdge!]!
+  error: ErrorType!
+  pageInfo: PageInfo!
+}
+
 input DocumentUploadInput {
   document: TextyDocumentInput!
 }
@@ -344,15 +355,6 @@ input FromWordAndDefintionlikeStringUpsertInput {
 }
 
 type GenericOutput {
-  error: ErrorType!
-}
-
-input GetAllDocumentsInput {
-  lang: LanguageInput
-}
-
-type GetAllDocumentsOutput {
-  documents: [TextyDocument!]
   error: ErrorType!
 }
 
@@ -1030,7 +1032,7 @@ type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
   forumFolderRead(forum_folder_id: ID!): ForumFolderOutput!
   forumRead(forum_id: ID!): ForumOutput!
-  getAllDocuments(input: GetAllDocumentsInput!): GetAllDocumentsOutput!
+  getAllDocuments(after: ID, first: Int, input: LanguageInput): DocumentListConnection!
   getAllMapsList(after: ID, first: Int, input: GetAllMapsListInput!): MapListConnection!
   getAllRecommendedSiteTextTranslationList: TranslationWithVoteListByLanguageListOutput!
   getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): TranslationWithVoteListByLanguageOutput!
