@@ -1,5 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { CoreModule } from 'src/core/core.module';
+import { AuthenticationModule } from '../authentication/authentication.module';
+import { AuthorizationModule } from '../authorization/authorization.module';
 import { DefinitionsService } from '../definitions/definitions.service';
 import { PhraseDefinitionVotesService } from '../definitions/phrase-definition-votes.service';
 import { PhraseDefinitionsService } from '../definitions/phrase-definitions.service';
@@ -29,6 +31,8 @@ import { SmartcatTranslateService } from './sc-translate.service';
     forwardRef(() => TranslationsModule),
     forwardRef(() => WordsModule),
     forwardRef(() => PhraseModule),
+    forwardRef(() => AuthorizationModule),
+    forwardRef(() => AuthenticationModule),
   ],
   providers: [
     BotsResolver,

@@ -1,4 +1,4 @@
-import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, ID, InputType, ObjectType, Int } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
 import { PageInfo } from '../common/types';
 
@@ -31,9 +31,15 @@ export class ForumFolderDeleteOutput extends GenericOutput {
 }
 
 @ObjectType()
+export class ForumFolderNode extends ForumFolder {
+  @Field(() => Int) total_threads: number;
+  @Field(() => Int) total_posts: number;
+}
+
+@ObjectType()
 export class ForumFolderEdge {
   @Field(() => ID) cursor: string;
-  @Field(() => ForumFolder) node: ForumFolder;
+  @Field(() => ForumFolderNode) node: ForumFolderNode;
 }
 
 @ObjectType()
