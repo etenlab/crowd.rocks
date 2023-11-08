@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver, ID } from '@nestjs/graphql';
+import {
+  Args,
+  Context,
+  Int,
+  Mutation,
+  Query,
+  Resolver,
+  ID,
+} from '@nestjs/graphql';
 
 import { ErrorType } from '../../common/types';
 import { getBearer } from '../../common/utility';
@@ -13,13 +21,13 @@ import {
   DocumentUploadInput,
   DocumentUploadOutput,
   DocumentWordEntriesOutput,
-  GetAllDocumentsInput,
-  GetAllDocumentsOutput,
+  DocumentListConnection,
   GetDocumentInput,
   GetDocumentOutput,
   WordRangesOutput,
   WordRangeUpsertInput,
 } from './types';
+import { LanguageInput } from '../common/types';
 
 @Injectable()
 @Resolver()
@@ -49,11 +57,18 @@ export class DocumentsResolver {
     });
   }
 
-  @Query(() => GetAllDocumentsOutput)
+  @Query(() => DocumentListConnection)
   async getAllDocuments(
-    @Args('input') input: GetAllDocumentsInput,
-  ): Promise<GetAllDocumentsOutput> {
-    const res = await this.documentsSevice.getAllDocuments(input.lang);
+    @Args('input', { type: () => LanguageInput, nullable: true })
+    input: LanguageInput | null,
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<DocumentListConnection> {
+    const res = await this.documentsSevice.getAllDocuments({
+      lang: input,
+      after,
+      first,
+    });
     return res;
   }
 
@@ -61,7 +76,7 @@ export class DocumentsResolver {
   async getDocument(
     @Args('input') input: GetDocumentInput,
   ): Promise<GetDocumentOutput> {
-    const res = await this.documentsSevice.getDocument(input.document_id);
+    const res = await this.documentsSevice.getDocument(+input.document_id);
     return res;
   }
 

@@ -1,6 +1,6 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from '../../common/types';
-import { LanguageInput } from '../common/types';
+import { PageInfo } from '../common/types';
 
 import { WordlikeString } from '../words/types';
 
@@ -11,8 +11,8 @@ export class TextyDocument {
   @Field(() => String) file_name: string;
   @Field(() => String) file_url: string;
   @Field(() => String) language_code: string;
-  @Field(() => String, { nullable: true }) dialect_code?: string;
-  @Field(() => String, { nullable: true }) geo_code?: string;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
 }
 
 @ObjectType()
@@ -35,8 +35,8 @@ export class WordRange {
 export class TextyDocumentInput {
   @Field(() => String) file_id: string;
   @Field(() => String) language_code: string;
-  @Field(() => String, { nullable: true }) dialect_code?: string;
-  @Field(() => String, { nullable: true }) geo_code?: string;
+  @Field(() => String, { nullable: true }) dialect_code: string | null;
+  @Field(() => String, { nullable: true }) geo_code: string | null;
 }
 
 @ObjectType()
@@ -50,15 +50,17 @@ export class DocumentUploadInput {
   @Field(() => TextyDocumentInput) document: TextyDocumentInput;
 }
 
-@InputType()
-export class GetAllDocumentsInput {
-  @Field(() => LanguageInput, { nullable: true }) lang?: LanguageInput;
+@ObjectType()
+export class DocumentEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => TextyDocument) node: TextyDocument;
 }
 
 @ObjectType()
-export class GetAllDocumentsOutput extends GenericOutput {
-  @Field(() => [TextyDocument], { nullable: true })
-  documents: TextyDocument[] | null;
+export class DocumentListConnection extends GenericOutput {
+  @Field(() => [DocumentEdge])
+  edges: DocumentEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
 }
 
 @InputType()
