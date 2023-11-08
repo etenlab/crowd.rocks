@@ -1,4 +1,11 @@
-import { useMemo, ReactNode, memo, MouseEvent } from 'react';
+import {
+  useMemo,
+  ReactNode,
+  memo,
+  MouseEvent,
+  useState,
+  useEffect,
+} from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import { Stack } from '@mui/material';
 
@@ -33,8 +40,6 @@ export type BaseDocumentViewerProps = {
   onClickWord(entryId: string, index: number, e?: unknown): void;
 };
 
-const pageSize = 200;
-
 export const BaseDocumentViewer = memo(function BaseDocumentViewerPure({
   mode,
   range,
@@ -42,7 +47,30 @@ export const BaseDocumentViewer = memo(function BaseDocumentViewerPure({
   onClickWord,
   entries,
 }: BaseDocumentViewerProps) {
-  const wordComs = useMemo(() => {
+  const [rowWidth, setRowWidth] = useState<number>(0);
+
+  useEffect(() => {
+    window.addEventListener(
+      'resize',
+      function () {
+        setRowWidth(Math.min(window.screen.width - 32, 777 - 32));
+      },
+      true,
+    );
+
+    setRowWidth(window.screen.width - 32);
+  }, []);
+
+  const rows = useMemo(() => {
+    const rows: JSX.Element[][] = [];
+    const tempRow: {
+      cols: JSX.Element[];
+      width: number;
+    } = {
+      cols: [],
+      width: 0,
+    };
+
     const dotsMap = new Map<
       string,
       {
@@ -53,87 +81,109 @@ export const BaseDocumentViewer = memo(function BaseDocumentViewerPure({
 
     dots.forEach((dot) => dotsMap.set(dot.entryId, dot));
 
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    if (!context || rowWidth === 0) {
+      return rows;
+    }
+
+    const fontSize = 14;
+    const fontWeight = 400;
+    const fontFamily = 'Poppins';
+    const padding = 6;
+    const letterSpacing = -0.28;
+
+    context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+
     let begin = false;
     let end = false;
 
-    return entries
-      .map((entry, index) => {
-        if (entry.id === range.beginEntry) {
-          begin = true;
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+
+      if (entry.id === range.beginEntry) {
+        begin = true;
+      }
+
+      const dot = dotsMap.get(entry.id) || null;
+      const isDot = dot ? true : false;
+      const dotCom = dot ? dot.component : null;
+
+      let classStr = `${mode} `;
+      classStr +=
+        (begin && !end && range.endEntry) ||
+        entry.id === range.beginEntry ||
+        entry.id === range.endEntry
+          ? 'selected'
+          : '';
+      classStr += ` ${entry.id === range.beginEntry ? 'left-boundary' : ''}`;
+      classStr += ` ${entry.id === range.endEntry ? 'right-boundary' : ''}`;
+
+      const cursor = isDot ? 'pointer' : 'default';
+
+      if (entry.id === range.endEntry) {
+        end = true;
+      }
+
+      const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+        if (mode === 'view' && !isDot) {
+          return;
         }
 
-        const dot = dotsMap.get(entry.id) || null;
-        const isDot = dot ? true : false;
-        const dotCom = dot ? dot.component : null;
+        onClickWord(entry.id, i, e);
+      };
 
-        let classStr = `${mode} `;
-        classStr +=
-          (begin && !end && range.endEntry) ||
-          entry.id === range.beginEntry ||
-          entry.id === range.endEntry
-            ? 'selected'
-            : '';
-        classStr += ` ${
-          entry.id === range.beginEntry || entry.id === range.endEntry
-            ? 'boundary'
-            : ''
-        }`;
+      const wordlikeString = entry.wordlike_string.wordlike_string;
 
-        const cursor = isDot ? 'pointer' : 'default';
-
-        if (entry.id === range.endEntry) {
-          end = true;
-        }
-
-        const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-          if (mode === 'view' && !isDot) {
-            return;
-          }
-
-          onClickWord(entry.id, index, e);
-        };
-
-        return (
-          <Word
-            key={entry.id}
-            className={classStr}
-            onClick={handleClick}
-            style={{ cursor }}
-          >
-            {entry.wordlike_string.wordlike_string}
-            {isDot ? dotCom || <Dot /> : null}
-          </Word>
-        );
-      })
-      .reduce(
-        (sumOfArr: JSX.Element[][], item: JSX.Element) => {
-          const sizeOfLastElement = sumOfArr[sumOfArr.length - 1].length;
-          if (sizeOfLastElement < pageSize) {
-            sumOfArr[sumOfArr.length - 1].push(item);
-          } else {
-            sumOfArr.push([item]);
-          }
-
-          return sumOfArr;
-        },
-        [[]],
+      const wordCom = (
+        <Word
+          key={entry.id}
+          className={classStr}
+          onClick={handleClick}
+          style={{ cursor }}
+        >
+          {wordlikeString}
+          {isDot ? dotCom || <Dot /> : null}
+        </Word>
       );
-  }, [dots, entries, mode, onClickWord, range.beginEntry, range.endEntry]);
+
+      const wordWidth = Math.ceil(
+        context.measureText(wordlikeString).width +
+          letterSpacing * (wordlikeString.length - 1) +
+          padding,
+      );
+
+      if (tempRow.width + wordWidth < rowWidth) {
+        tempRow.cols.push(wordCom);
+        tempRow.width = tempRow.width + wordWidth;
+      } else {
+        rows.push([...tempRow.cols]);
+        tempRow.cols = [wordCom];
+        tempRow.width = wordWidth;
+      }
+    }
+
+    if (tempRow.cols.length) {
+      rows.push(tempRow.cols);
+    }
+
+    return rows;
+  }, [dots, entries, mode, onClickWord, range, rowWidth]);
 
   return (
     <Virtuoso
-      style={{
-        height: 'calc(100vh - 160px)',
-      }}
-      data={wordComs}
-      itemContent={(_index, com) => (
+      style={{ height: 'calc(100vh - 160px)' }}
+      data={rows}
+      itemContent={(_index, row) => (
         <Stack
           direction="row"
           justifyContent="flex-start"
-          alignItems="center"
-          sx={(theme) => ({ flexWrap: 'wrap', color: theme.palette.text.gray })}
+          sx={(theme) => ({
+            color: theme.palette.text.gray,
+          })}
         >
-          {com}
+          {row}
         </Stack>
       )}
     />
