@@ -58,6 +58,19 @@ input CreateQuestionOnWordRangeUpsertInput {
   question_type_is_multiselect: Boolean!
 }
 
+input DataGenInput {
+  mapAmount: Int
+  mapsToLanguages: [LanguageInput!]
+}
+
+type DataGenProgress {
+  mapReTranslationsStatus: SubscriptionStatus!
+  mapTranslationsStatus: SubscriptionStatus!
+  mapUploadStatus: SubscriptionStatus!
+  output: String!
+  overallStatus: SubscriptionStatus!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -595,6 +608,7 @@ type Mutation {
   forumFolderDelete(forum_folder_id: ID!): ForumFolderDeleteOutput!
   forumFolderUpsert(input: ForumFolderUpsertInput!): ForumFolderOutput!
   forumUpsert(input: ForumUpsertInput!): ForumOutput!
+  generateData(input: DataGenInput!): GenericOutput!
   login(input: LoginInput!): LoginOutput!
   logout(input: LogoutInput!): LogoutOutput!
   mapDelete(input: MapDeleteInput!): MapDeleteOutput!
@@ -611,8 +625,6 @@ type Mutation {
   phraseToPhraseTranslationUpsert(input: PhraseToPhraseTranslationUpsertInput!): PhraseToPhraseTranslationOutput!
   phraseUpsert(input: PhraseUpsertInput!): PhraseOutput!
   phraseVoteUpsert(input: PhraseVoteUpsertInput!): PhraseVoteOutput!
-  populateMapTranslations(to_languages: [LanguageInput!]!): GenericOutput!
-  populateMaps(map_amount: Int): GenericOutput!
   postCreateResolver(input: PostCreateInput!): PostCreateOutput!
   register(input: RegisterInput!): RegisterOutput!
   resetEmailRequest(input: ResetEmailRequestInput!): ResetEmailRequestOutput!
@@ -621,6 +633,7 @@ type Mutation {
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
   startZipMapDownload(input: StartZipMapDownloadInput!): StartZipMapOutput!
   stopBotTranslation: GenericOutput!
+  stopDataGeneration: GenericOutput!
   threadDelete(thread_id: ID!): ThreadDeleteOutput!
   threadUpsert(input: ThreadUpsertInput!): ThreadOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
@@ -1305,6 +1318,7 @@ type StartZipMapOutput {
 }
 
 type Subscription {
+  DataGenerationReport: DataGenProgress!
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
   ZipMapReport: ZipMapResult!
 }
@@ -1312,6 +1326,7 @@ type Subscription {
 enum SubscriptionStatus {
   Completed
   Error
+  NotStarted
   Progressing
 }
 

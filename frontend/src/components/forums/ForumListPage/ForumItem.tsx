@@ -1,6 +1,7 @@
+/* eslint-disable prettier/prettier */
 import { useCallback } from 'react';
 import { useHistory, useParams } from 'react-router';
-import { Divider, Stack, Typography, Button } from '@mui/material';
+import { Stack, Typography, Button } from '@mui/material';
 
 import { DeleteCircle } from '../../common/icons/DeleteCircle';
 import { Edit } from '../../common/icons/Edit';
@@ -29,9 +30,9 @@ export function ForumItem({
   name,
   description,
   created_by,
-  totalTopics,
-  totalThreads,
-  totalPosts,
+  // totalTopics,
+  // totalThreads,
+  // totalPosts,
 }: ForumItemProps) {
   const { tr } = useTr();
   const history = useHistory();
@@ -132,14 +133,14 @@ export function ForumItem({
           {description}
         </Typography>
       </Stack>
-      <Divider />
+      {/* <Divider />
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography variant="h4">{`${totalTopics} ${tr('topics')}`}</Typography>
         <Typography variant="h4">{`${totalThreads} ${tr(
           'threads',
         )}`}</Typography>
         <Typography variant="h4">{`${totalPosts} ${tr('posts')}`}</Typography>
-      </Stack>
+      </Stack> */}
     </Stack>
   );
 }

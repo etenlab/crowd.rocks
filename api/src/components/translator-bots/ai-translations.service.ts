@@ -759,12 +759,14 @@ export class AiTranslationsService {
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     try {
-      return this.translateWordsAndPhrasesByBot(
+      const output = this.translateWordsAndPhrasesByBot(
         this.fakerService,
         from_language,
         to_language,
         pgClient,
       );
+
+      return output;
     } catch (e) {
       Logger.error(e);
       return {
