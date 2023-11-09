@@ -1,6 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { CoreModule } from 'src/core/core.module';
+import { AuthenticationModule } from '../authentication/authentication.module';
 import { AuthorizationModule } from '../authorization/authorization.module';
 import { FileModule } from '../file/file.module';
 import { MapsModule } from '../maps/maps.module';
@@ -16,6 +17,7 @@ import { PopulatorService } from './populator.service';
     HttpModule,
     BotsModule,
     CoreModule,
+    AuthenticationModule,
   ],
   providers: [PopulatorResolver, PopulatorService],
 })

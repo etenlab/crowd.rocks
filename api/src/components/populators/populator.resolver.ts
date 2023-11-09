@@ -14,18 +14,20 @@ import { PopulatorService } from './populator.service';
 import { SubscriptionToken } from 'src/common/subscription-token';
 import { PubSub } from 'graphql-subscriptions';
 import { PUB_SUB } from 'src/pubSub.module';
-import { MapsService } from '../maps/maps.service';
-import { Observable } from 'rxjs';
+import { Subscription as OSubscription } from 'rxjs';
+import { IsAuthAdmin } from 'src/core/decorators/is-auth-admin.decorator';
 
 @Injectable()
 @Resolver(Populator)
 export class PopulatorResolver {
+  private sub: OSubscription | null;
   constructor(
     private authService: AuthorizationService,
-    private mapsService: MapsService,
     private generator: PopulatorService,
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
-  ) {}
+  ) {
+    this.sub = null;
+  }
 
   @Mutation(() => GenericOutput)
   async generateData(
@@ -55,13 +57,8 @@ export class PopulatorResolver {
     }
 
     if (input.mapsToLanguages) {
-      this.generator
-        .populateMapTranslations(
-          input.mapsToLanguages,
-          token,
-          req,
-          input.mapAmount,
-        )
+      this.sub = this.generator
+        .populateData(input.mapsToLanguages, token, req, input.mapAmount)
         .subscribe((n) =>
           this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
             [SubscriptionToken.DataGenerationReport]: n,
@@ -80,5 +77,17 @@ export class PopulatorResolver {
   async subscribeToDataGen() {
     console.log('subscribeToDataGen');
     return this.pubSub.asyncIterator(SubscriptionToken.DataGenerationReport);
+  }
+
+  @IsAuthAdmin()
+  @Mutation(() => GenericOutput)
+  async stopDataGeneration(): Promise<GenericOutput> {
+    console.log('stopDataGeneration');
+    if (this.sub) {
+      this.sub.unsubscribe();
+    } else {
+      console.log('no subscription exists. ignoring');
+    }
+    return { error: ErrorType.NoError };
   }
 }

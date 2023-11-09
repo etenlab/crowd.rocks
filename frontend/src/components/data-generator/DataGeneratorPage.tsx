@@ -12,6 +12,7 @@ import { getLangsRegistry } from '../../../../utils';
 
 export function DataGeneratorPage() {
   const [generateData] = useGenerateDataMutation();
+  // const [stopGenerate] = useStopDataGenerationMutation();
   const [mapCount, setMapCount] = useState<number | null>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [toLanguageCount, setToLanguageCount] = useState(0);
@@ -78,6 +79,10 @@ export function DataGeneratorPage() {
     });
   }, [generateData, mapCount, toLanguageCount]);
 
+  // const handleStop = useCallback(async () => {
+  //   await stopGenerate();
+  // }, [stopGenerate]);
+
   return (
     <PageLayout>
       <Typography variant="h2">Load Test Data</Typography>
@@ -130,7 +135,7 @@ export function DataGeneratorPage() {
           Generate Test Data
         </Button>
         {progressComp}
-        {/* <Button>Cancel</Button> */}
+        {/* <Button onClick={handleStop}>Cancel</Button> */}
       </Stack>
     </PageLayout>
   );

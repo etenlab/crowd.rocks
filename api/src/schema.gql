@@ -632,6 +632,7 @@ type Mutation {
   siteTextWordDefinitionUpsert(word_definition_id: ID!): SiteTextWordDefinitionOutput!
   startZipMapDownload(input: StartZipMapDownloadInput!): StartZipMapOutput!
   stopBotTranslation: GenericOutput!
+  stopDataGeneration: GenericOutput!
   threadDelete(thread_id: ID!): ThreadDeleteOutput!
   threadUpsert(input: ThreadUpsertInput!): ThreadOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!

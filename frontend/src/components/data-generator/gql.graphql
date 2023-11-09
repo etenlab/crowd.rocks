@@ -13,3 +13,9 @@ subscription SubscribeToDataGenProgress {
     overallStatus
   }
 }
+
+mutation StopDataGeneration {
+  stopDataGeneration {
+    error
+  }
+}

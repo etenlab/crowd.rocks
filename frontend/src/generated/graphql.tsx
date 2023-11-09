@@ -701,6 +701,7 @@ export type Mutation = {
   siteTextWordDefinitionUpsert: SiteTextWordDefinitionOutput;
   startZipMapDownload: StartZipMapOutput;
   stopBotTranslation: GenericOutput;
+  stopDataGeneration: GenericOutput;
   threadDelete: ThreadDeleteOutput;
   threadUpsert: ThreadOutput;
   toggleFlagWithRef: FlagsOutput;
@@ -2949,6 +2950,11 @@ export type SubscribeToDataGenProgressSubscriptionVariables = Exact<{ [key: stri
 
 export type SubscribeToDataGenProgressSubscription = { __typename?: 'Subscription', DataGenerationReport: { __typename?: 'DataGenProgress', output: string, mapUploadStatus: SubscriptionStatus, mapTranslationsStatus: SubscriptionStatus, mapReTranslationsStatus: SubscriptionStatus, overallStatus: SubscriptionStatus } };
 
+export type StopDataGenerationMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type StopDataGenerationMutation = { __typename?: 'Mutation', stopDataGeneration: { __typename?: 'GenericOutput', error: ErrorType } };
+
 export type WordlikeStringFragmentFragment = { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string };
 
 export type WordFragmentFragment = { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } };
@@ -5137,6 +5143,38 @@ export function useSubscribeToDataGenProgressSubscription(baseOptions?: Apollo.S
       }
 export type SubscribeToDataGenProgressSubscriptionHookResult = ReturnType<typeof useSubscribeToDataGenProgressSubscription>;
 export type SubscribeToDataGenProgressSubscriptionResult = Apollo.SubscriptionResult<SubscribeToDataGenProgressSubscription>;
+export const StopDataGenerationDocument = gql`
+    mutation StopDataGeneration {
+  stopDataGeneration {
+    error
+  }
+}
+    `;
+export type StopDataGenerationMutationFn = Apollo.MutationFunction<StopDataGenerationMutation, StopDataGenerationMutationVariables>;
+
+/**
+ * __useStopDataGenerationMutation__
+ *
+ * To run a mutation, you first call `useStopDataGenerationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useStopDataGenerationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [stopDataGenerationMutation, { data, loading, error }] = useStopDataGenerationMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useStopDataGenerationMutation(baseOptions?: Apollo.MutationHookOptions<StopDataGenerationMutation, StopDataGenerationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<StopDataGenerationMutation, StopDataGenerationMutationVariables>(StopDataGenerationDocument, options);
+      }
+export type StopDataGenerationMutationHookResult = ReturnType<typeof useStopDataGenerationMutation>;
+export type StopDataGenerationMutationResult = Apollo.MutationResult<StopDataGenerationMutation>;
+export type StopDataGenerationMutationOptions = Apollo.BaseMutationOptions<StopDataGenerationMutation, StopDataGenerationMutationVariables>;
 export const WordDefinitionReadDocument = gql`
     query WordDefinitionRead($id: ID!) {
   wordDefinitionRead(id: $id) {
@@ -9815,6 +9853,7 @@ export const namedOperations = {
     ResetEmailRequest: 'ResetEmailRequest',
     PasswordResetFormRequest: 'PasswordResetFormRequest',
     GenerateData: 'GenerateData',
+    StopDataGeneration: 'StopDataGeneration',
     WordDefinitionUpsert: 'WordDefinitionUpsert',
     ToggleWordDefinitionVoteStatus: 'ToggleWordDefinitionVoteStatus',
     ToggleWordVoteStatus: 'ToggleWordVoteStatus',
