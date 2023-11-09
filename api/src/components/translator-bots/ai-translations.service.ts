@@ -47,7 +47,6 @@ import {
 } from './utility';
 import { langInfo2String, subTags2LangInfo } from '../../../../utils';
 import { FakerTranslateService } from './faker-translate.service';
-import { MapsService } from '../maps/maps.service';
 
 interface ItranslateAllWordsAndPhrasesByBot {
   translateWordsAndPhrases: (

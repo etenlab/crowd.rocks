@@ -21,7 +21,7 @@ export function DataGeneratorPage() {
   const [mapUploadStatus, setMapUploadStatus] =
     useState<SubscriptionStatus | null>(null);
   const { data } = useSubscribeToDataGenProgressSubscription();
-  console.log(data);
+  // console.log(data);
 
   useEffect(() => {
     if (data && data.DataGenerationReport) {
@@ -30,7 +30,7 @@ export function DataGeneratorPage() {
     }
     if (data && data.DataGenerationReport.mapUploadStatus) {
       setMapUploadStatus(data.DataGenerationReport.mapUploadStatus);
-      console.log(mapUploadStatus);
+      // console.log(mapUploadStatus);
     }
     return;
   }, [data, data?.DataGenerationReport, mapUploadStatus]);

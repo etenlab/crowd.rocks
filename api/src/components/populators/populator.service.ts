@@ -1,19 +1,14 @@
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Octokit } from '@octokit/rest';
 import { createReadStream, ReadStream } from 'fs';
-import { PubSub } from 'graphql-subscriptions';
 import { join } from 'path';
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
-import { SubscriptionToken } from 'src/common/subscription-token';
-import { ErrorType, GenericOutput, SubscriptionStatus } from 'src/common/types';
+import { ErrorType, SubscriptionStatus } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
-import { PUB_SUB } from 'src/pubSub.module';
-import { AuthorizationService } from '../authorization/authorization.service';
 import { LanguageInput } from '../common/types';
 import { FileService } from '../file/file.service';
 import { MapsResolver } from '../maps/maps.resolver';
-import { MapsService } from '../maps/maps.service';
 import { AiTranslationsService } from '../translator-bots/ai-translations.service';
 import { DataGenProgress } from './types';
 
@@ -23,11 +18,8 @@ export class PopulatorService {
     private httpService: HttpService,
     private mapRes: MapsResolver,
     private fileService: FileService,
-    private authService: AuthorizationService,
     private aiTranslationService: AiTranslationsService,
     private pg: PostgresService,
-    private mapsService: MapsService,
-    @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
   populateData(
@@ -229,24 +221,14 @@ export class PopulatorService {
       // --------------------------------
       // Maps ReTranslate
       // --------------------------------
-      const forLangTags = to_languages.map((l) => l.language_code);
-      for (let i = 0; i < forLangTags!.length; i++) {
-        value.next({
-          output: `${i + 1} / ${forLangTags.length}`,
-          mapUploadStatus: SubscriptionStatus.Completed,
-          mapTranslationsStatus: SubscriptionStatus.Completed,
-          mapReTranslationsStatus: SubscriptionStatus.Progressing,
-          overallStatus: SubscriptionStatus.Progressing,
-        } as DataGenProgress);
-        await this.mapsService.reTranslate(token, forLangTags[i]!);
-      }
       value.next({
-        output: `${forLangTags.length} / ${forLangTags.length}`,
+        output: `Retranslating all Available Langs...`,
         mapUploadStatus: SubscriptionStatus.Completed,
         mapTranslationsStatus: SubscriptionStatus.Completed,
-        mapReTranslationsStatus: SubscriptionStatus.Completed,
+        mapReTranslationsStatus: SubscriptionStatus.Progressing,
         overallStatus: SubscriptionStatus.Progressing,
       } as DataGenProgress);
+      await this.mapRes.mapsReTranslate(req);
 
       value.next({
         output: `Done`,
