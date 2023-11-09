@@ -123,11 +123,11 @@ test('Verify that search bar functionality is working properly', async ({
   //Verify setting page title is displayed
   expect(await appLanguagePage.isAppLanguagePopUpTitleVisible()).toBeTruthy();
 
-  //Seach language and check the searched language is displayed
-  for (const lang of AppLanguageData.allLanguages()) {
-    await appLanguagePage.searchLanguage(lang);
+  //Type language name in the searchbox and verify that the searched language is displayed
+  for (const language of AppLanguageData.allLanguages()) {
+    await appLanguagePage.searchLanguage(language);
     const expectedLanguage = await appLanguagePage.getAllAppLanguagesList();
-    expect(lang).toEqual(expectedLanguage.toLocaleString());
+    expect(language).toEqual(expectedLanguage.toLocaleString());
   }
 });
 
@@ -153,7 +153,7 @@ test('Verify that the default selected language remains selected when user chang
     '#476FFF',
   );
 
-  //select the particular language and click on confirm button
+  //Select the particular language and click on confirm button
   await appLanguagePage.clickOnAppLanguageName(language.Hindi);
   await appLanguagePage.clickOnCancelButton();
 
@@ -161,7 +161,7 @@ test('Verify that the default selected language remains selected when user chang
   await homePage.clickOnExpandMenu();
   await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.AppLanguage);
 
-  //verify that preselected language is displayed
+  //Verify that preselected language is displayed
   expect(await appLanguagePage.isAppLanguageChecked(language.English)).toEqual(
     '#476FFF',
   );
