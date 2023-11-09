@@ -15,7 +15,7 @@ import { SubscriptionToken } from 'src/common/subscription-token';
 import { PubSub } from 'graphql-subscriptions';
 import { PUB_SUB } from 'src/pubSub.module';
 import { Subscription as OSubscription } from 'rxjs';
-import { IsAuthAdmin } from 'src/core/decorators/is-auth-admin.decorator';
+import { IsAuthAdmin } from '../../core/decorators/is-auth-admin.decorator';
 
 @Injectable()
 @Resolver(Populator)
