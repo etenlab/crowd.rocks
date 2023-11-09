@@ -236,7 +236,7 @@ export class PostService {
         `,
         [input.parent_name, input.parent_id],
       );
-      if (res.rowCount > 0) {
+      if (res.rowCount! > 0) {
         return {
           error: ErrorType.NoError,
           total: res.rows[0].count,

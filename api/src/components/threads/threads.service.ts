@@ -87,12 +87,12 @@ export class ThreadsService {
         error: ErrorType.NoError,
         edges,
         pageInfo: {
-          hasNextPage: input.first ? res.rowCount > input.first : false,
+          hasNextPage: input.first ? res.rowCount! > input.first : false,
           hasPreviousPage: false,
           startCursor: edges.length > 0 ? edges[0].cursor : null,
           endCursor:
             edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
-          totalEdges: res1.rowCount > 0 ? res1.rows[0].total_records : 0,
+          totalEdges: res1.rowCount! > 0 ? res1.rows[0].total_records : 0,
         },
       };
     } catch (e) {

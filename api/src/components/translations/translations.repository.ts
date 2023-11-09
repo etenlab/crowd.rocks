@@ -31,7 +31,7 @@ export async function getTranslatedStringsById(
     ),
   );
 
-  for (let i = 0; i < trW2WRes.rowCount; i++) {
+  for (let i = 0; i < trW2WRes.rowCount!; i++) {
     const { string, definition } = trW2WRes.rows[i];
     if (translatedStrs.indexOf({ text: string, type: 'text' }) < 0) {
       translatedStrs.push({ text: string, type: 'text' });
@@ -48,7 +48,7 @@ export async function getTranslatedStringsById(
       translated_by_id,
     ),
   );
-  for (let i = 0; i < trW2PRes.rowCount; i++) {
+  for (let i = 0; i < trW2PRes.rowCount!; i++) {
     const { string, definition } = trW2PRes.rows[i];
     if (translatedStrs.indexOf({ text: string, type: 'text' }) < 0) {
       translatedStrs.push({ text: string, type: 'text' });
@@ -65,7 +65,7 @@ export async function getTranslatedStringsById(
       translated_by_id,
     ),
   );
-  for (let i = 0; i < trP2PRes.rowCount; i++) {
+  for (let i = 0; i < trP2PRes.rowCount!; i++) {
     const { string, definition } = trP2PRes.rows[i];
     if (translatedStrs.indexOf({ text: string, type: 'text' }) < 0) {
       translatedStrs.push({ text: string, type: 'text' });
@@ -82,7 +82,7 @@ export async function getTranslatedStringsById(
       translated_by_id,
     ),
   );
-  for (let i = 0; i < trP2WRes.rowCount; i++) {
+  for (let i = 0; i < trP2WRes.rowCount!; i++) {
     const { string, definition } = trP2WRes.rows[i];
     if (translatedStrs.indexOf({ text: string, type: 'text' }) < 0) {
       translatedStrs.push({ text: string, type: 'text' });
@@ -119,7 +119,7 @@ export async function getTranslationsNotByUser(
     ),
   );
 
-  for (let i = 0; i < w2wRes.rowCount; i++) {
+  for (let i = 0; i < w2wRes.rowCount!; i++) {
     const { translation_id, created_by, from_def, from_text, to_def, to_text } =
       w2wRes.rows[i];
 
@@ -141,7 +141,7 @@ export async function getTranslationsNotByUser(
       notById,
     ),
   );
-  for (let i = 0; i < w2pRes.rowCount; i++) {
+  for (let i = 0; i < w2pRes.rowCount!; i++) {
     const { translation_id, created_by, from_def, from_text, to_def, to_text } =
       w2pRes.rows[i];
 
@@ -163,7 +163,7 @@ export async function getTranslationsNotByUser(
       notById,
     ),
   );
-  for (let i = 0; i < p2pRes.rowCount; i++) {
+  for (let i = 0; i < p2pRes.rowCount!; i++) {
     const { translation_id, created_by, from_def, from_text, to_def, to_text } =
       p2pRes.rows[i];
 
@@ -185,7 +185,7 @@ export async function getTranslationsNotByUser(
       notById,
     ),
   );
-  for (let i = 0; i < p2wRes.rowCount; i++) {
+  for (let i = 0; i < p2wRes.rowCount!; i++) {
     const { translation_id, created_by, from_def, from_text, to_def, to_text } =
       p2wRes.rows[i];
 

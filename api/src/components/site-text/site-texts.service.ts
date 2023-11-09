@@ -403,7 +403,7 @@ export class SiteTextsService {
         geo_code: string | null;
       }[] = [];
 
-      for (let i = 0; i < res.rowCount; i++) {
+      for (let i = 0; i < res.rowCount!; i++) {
         siteTextLanguageList.push({
           language_code: res.rows[i].language_code,
           dialect_code: res.rows[i].dialect_code,
@@ -454,7 +454,7 @@ export class SiteTextsService {
         }`;
       };
 
-      for (let i = 0; i < res.rowCount; i++) {
+      for (let i = 0; i < res.rowCount!; i++) {
         const language = {
           language_code: res.rows[i].language_code,
           dialect_code: res.rows[i].dialect_code,
@@ -519,7 +519,7 @@ export class SiteTextsService {
         ...getAllSiteTextPhraseDefinition({ first: null, after: null }),
       );
 
-      const total_count = res2.rowCount + res3.rowCount;
+      const total_count = res2.rowCount! + res3.rowCount!;
 
       const result: SiteTextLanguageWithTranslationInfo[] = [];
 

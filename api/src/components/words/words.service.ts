@@ -432,7 +432,7 @@ export class WordsService {
 
       const wordIds: number[] = [];
 
-      for (let i = 0; i < res.rowCount; i++) {
+      for (let i = 0; i < res.rowCount!; i++) {
         const { word_id } = res.rows[i];
 
         if (after === null && offset === null) {
