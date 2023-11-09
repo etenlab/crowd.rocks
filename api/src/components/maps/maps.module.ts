@@ -12,18 +12,27 @@ import { PhraseModule } from '../phrases/phrases.module';
 import { FileModule } from '../file/file.module';
 import { MapVotesService } from './map-votes.service';
 import { UserModule } from '../user/user.module';
+import { MapsTranslationService } from './maps-translation.service';
+import { AuthorizationModule } from '../authorization/authorization.module';
 @Module({
   imports: [
     forwardRef(() => CoreModule),
     forwardRef(() => FileModule),
     forwardRef(() => AuthenticationModule),
+    forwardRef(() => AuthorizationModule),
     forwardRef(() => WordsModule),
     forwardRef(() => PhraseModule),
     forwardRef(() => DefinitionsModule),
     forwardRef(() => TranslationsModule),
     forwardRef(() => UserModule),
   ],
-  providers: [MapsService, MapVotesService, MapsResolver, MapsRepository],
-  exports: [MapsService, MapsResolver],
+  providers: [
+    MapsService,
+    MapsTranslationService,
+    MapVotesService,
+    MapsResolver,
+    MapsRepository,
+  ],
+  exports: [MapsService, MapsResolver, MapsTranslationService],
 })
 export class MapsModule {}

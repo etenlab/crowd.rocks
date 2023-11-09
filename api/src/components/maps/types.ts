@@ -154,11 +154,6 @@ export class MapWordsAndPhrasesCountOutput extends GenericOutput {
   @Field(() => Number, { nullable: true })
   count: number | null;
 }
-@ObjectType()
-export class OrigMapWordsAndPhrasesOutput extends GenericOutput {
-  @Field(() => [MapWordOrPhrase], { nullable: true })
-  mapWordsOrPhrases: MapWordOrPhrase[] | null;
-}
 
 @InputType()
 export class GetMapWordOrPhraseByDefinitionIdInput {
@@ -217,7 +212,6 @@ export type OriginalMapPhraseInput = {
   phrase_id: string;
   original_map_id: string;
 };
-
 
 ////////////////////////////////////////////////////
 ////////////////////Voting//////////////////////////

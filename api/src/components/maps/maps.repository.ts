@@ -13,7 +13,6 @@ import {
   MapWordsAndPhrasesEdge,
   MapWordOrPhrase,
   MapWordsAndPhrasesCountOutput,
-  OrigMapWordsAndPhrasesOutput,
 } from './types';
 import { putLangCodesToFileName } from '../../common/utility';
 import { GroupedFilterSymbols } from '../../../../utils/dist';
@@ -1103,105 +1102,6 @@ export class MapsRepository {
     };
   }
 
-  async getOrigMapWordsAndPhrasesPaginated(
-    dbPoolClient: PoolClient,
-    input: GetOrigMapWordsAndPhrasesInput,
-    offset,
-    limit,
-  ): Promise<OrigMapWordsAndPhrasesOutput> {
-    const filterParams: string[] = [];
-    let languagesFiltersRestrictionClause = '';
-    if (input.lang.language_code) {
-      filterParams.push(input.lang.language_code);
-      languagesFiltersRestrictionClause += ` and o_language_code =  $${filterParams.length} `;
-    }
-    if (input.lang.dialect_code) {
-      filterParams.push(input.lang.dialect_code);
-      languagesFiltersRestrictionClause += ` and o_dialect_code =  $${filterParams.length} `;
-    }
-    if (input.lang.geo_code) {
-      filterParams.push(input.lang.geo_code);
-      languagesFiltersRestrictionClause += ` and o_geo_code =  $${filterParams.length} `;
-    }
-    if (input.filter && input.filter.length > 0) {
-      filterParams.push(input.filter);
-      languagesFiltersRestrictionClause += ` and LOWER(o_like_string) like concat('%', LOWER($${filterParams.length}),'%')`;
-    }
-    if (input.original_map_id) {
-      filterParams.push(input.original_map_id);
-      languagesFiltersRestrictionClause += ` and original_map_id = $${filterParams.length} `;
-    }
-
-    if (offset) {
-      filterParams.push(offset);
-      languagesFiltersRestrictionClause += ` offset $${filterParams.length} `;
-    }
-    if (limit) {
-      filterParams.push(limit);
-      languagesFiltersRestrictionClause += ` limit $${filterParams.length}`;
-    }
-
-    const sqlStr = `
-      select distinct 
-        cursor,
-        type,
-        o_id,
-        o_like_string,
-        o_definition,
-        o_definition_id,
-        o_language_code,
-        o_dialect_code,
-        o_geo_code,
-        o_created_at,
-        o_created_by
-      from v_map_words_and_phrases
-      where true
-      ${languagesFiltersRestrictionClause}
-      
-    `;
-
-    const resQ = await dbPoolClient.query(sqlStr, filterParams);
-
-    if (!(resQ.rows.length > 0)) {
-      return {
-        error: ErrorType.PaginationError,
-        mapWordsOrPhrases: null,
-      };
-    }
-
-    const mapWordsOrPhrases: MapWordOrPhrase[] = await Promise.all(
-      resQ.rows.map(async (r) => {
-        const createdBy = (
-          await this.userService.read({
-            user_id: r.o_created_by,
-          })
-        ).user;
-        return {
-          id: r.cursor,
-          type: r.type,
-          o_id: r.o_id,
-          o_like_string: r.o_like_string,
-          o_definition: r.o_definition,
-          o_definition_id: r.o_definition_id,
-          o_language_code: r.o_language_code,
-          o_dialect_code: r.o_dialect_code,
-          o_geo_code: r.o_geo_code,
-          o_created_at: r.o_created_at,
-          o_created_by_user: {
-            user_id: createdBy!.user_id,
-            avatar: createdBy!.avatar,
-            avatar_url: createdBy!.avatar_url,
-            is_bot: createdBy!.is_bot,
-          },
-        };
-      }),
-    );
-    return {
-      error: ErrorType.NoError,
-      mapWordsOrPhrases,
-    };
-  }
-
   async getOrigMapsIdsByWordDefinition(
     wordDefinitionId: string,
   ): Promise<string[]> {
@@ -1296,6 +1196,98 @@ export class MapsRepository {
     `;
     const resQ = await this.pg.pool.query(sqlStr, params);
     return resQ.rows.map((row) => row.original_map_id);
+  }
+
+  async markTrMapsByOrigIdToRetranslate({
+    originalMapsIds,
+    targetLanguage: tl,
+  }: {
+    originalMapsIds: string[];
+    targetLanguage?: LanguageInput | null;
+  }): Promise<string[]> {
+    if (!(originalMapsIds?.length > 0)) return [];
+    const params: Array<any> = [];
+
+    params.push(originalMapsIds.map((id) => Number(id)));
+    const mapsSearchClause = `and t_maps.original_map_id = any ($${params.length})`;
+
+    let languageRestrictionClause = '';
+    if (tl?.language_code) {
+      params.push(tl.language_code);
+      languageRestrictionClause = ` and t_maps.language_code =  $${params.length} `;
+    }
+    if (tl?.dialect_code) {
+      params.push(tl?.dialect_code);
+      languageRestrictionClause += ` and t_maps.dialect_code =  $${params.length} `;
+    }
+    if (tl?.geo_code) {
+      params.push(tl?.geo_code);
+      languageRestrictionClause += ` and t_maps.geo_code =  $${params.length} `;
+    }
+
+    const sqlStr = `
+      update translated_maps t_maps
+      set to_retranslate = true  
+      where true
+        ${mapsSearchClause}
+        ${languageRestrictionClause}
+      returning
+      t_maps.translated_map_id;
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, params);
+    return resQ.rows.map((row) => row.translated_map_id);
+  }
+
+  async getAllMarkedAndNotIsTranslatingTrMapsRows(): Promise<
+    Array<{
+      original_map_id: string;
+      translated_map_id: string;
+      language_code: string;
+      dialect_code: string;
+      geo_code: string;
+    }>
+  > {
+    const sqlStr = `
+      select tm.original_map_id , tm.translated_map_id,  tm.language_code , tm.dialect_code , tm.geo_code  
+        from translated_maps tm 
+        where tm.to_retranslate = true
+        and tm.is_retranslating_now is NOT true;
+    `;
+    const resQ = await this.pg.pool.query(sqlStr);
+    if (!(resQ.rows.length > 0)) return [];
+    return resQ.rows.map((r) => ({
+      original_map_id: r.original_map_id,
+      translated_map_id: r.translated_map_id,
+      language_code: r.language_code,
+      dialect_code: r.dialect_code,
+      geo_code: r.geo_code,
+    }));
+  }
+
+  async unmarkTrMaps(trMapIds: string[]): Promise<string[]> {
+    const sqlStr = `
+      update translated_maps t_maps
+      set to_retranslate = false, is_retranslating_now = false
+      where
+        t_maps.translated_map_id = any ($1)
+      returning
+      t_maps.translated_map_id;
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, [trMapIds]);
+    return resQ.rows.map((row) => row.translated_map_id);
+  }
+
+  async markTrMapsAdIsRetranslatingNow(trMapIds: string[]): Promise<string[]> {
+    const sqlStr = `
+      update translated_maps t_maps
+      set is_retranslating_now = true
+      where
+        t_maps.translated_map_id = any ($1)
+      returning
+      t_maps.translated_map_id;
+    `;
+    const resQ = await this.pg.pool.query(sqlStr, [trMapIds]);
+    return resQ.rows.map((row) => row.translated_map_id);
   }
 
   async upsertTranslatedMapWord(
