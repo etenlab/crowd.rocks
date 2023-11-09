@@ -53,7 +53,7 @@ import * as temp from 'temp';
 import * as path from 'path';
 import { createReadStream } from 'fs';
 import * as AdmZip from 'adm-zip';
-import { subTags2Tag, tag2langInfo } from '../../../../utils/src';
+import { subTags2Tag, tag2langInfo } from '../../../../utils';
 
 const POSSIBLE_TEXTY_INODE_NAMES = ['text']; // Considered as final node of text if doesn't have other children texty nodes.
 const TEXTY_INODE_NAMES = ['tspan']; // Final nodes of text. All children nodes' values will be gathered and concatenated into one value
