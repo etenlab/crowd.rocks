@@ -559,7 +559,7 @@ export class PhrasesService {
 
       const phraseIds: number[] = [];
 
-      for (let i = 0; i < res.rowCount; i++) {
+      for (let i = 0; i < res.rowCount!; i++) {
         const { phrase_id } = res.rows[i];
 
         if (after === null && offset === null) {
