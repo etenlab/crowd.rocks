@@ -311,6 +311,29 @@ export class AiTranslationsService {
     }
   }
 
+  async translateMissingWordsAndPhrasesByLilt(
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    try {
+      return this.translateMissingWordsAndPhrasesByBot(
+        this.lTrService.translate,
+        this.lTrService.getTranslatorToken,
+        from_language,
+        to_language,
+        pgClient,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
+  }
+
   // helper function, whatever calls this needs to wrap in try/catch
   async translateMissingWordsAndPhrasesByBot<T extends ITranslator>(
     translateF: (...args: any[]) => Promise<string[]>,
