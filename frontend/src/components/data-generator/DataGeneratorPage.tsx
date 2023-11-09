@@ -1,12 +1,13 @@
 import { Button, Stack, TextField, Typography } from '@mui/material';
 import { PageLayout } from '../common/PageLayout';
 import {
+  DataGenProgress,
   LanguageInput,
   SubscriptionStatus,
   useGenerateDataMutation,
   useSubscribeToDataGenProgressSubscription,
 } from '../../generated/graphql';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getLangsRegistry } from '../../../../utils';
 
 export function DataGeneratorPage() {
@@ -15,7 +16,53 @@ export function DataGeneratorPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [toLanguageCount, setToLanguageCount] = useState(0);
 
+  const [progress, setProgress] = useState<DataGenProgress | null>(null);
+  const [mapUploadStatus, setMapUploadStatus] =
+    useState<SubscriptionStatus | null>(null);
   const { data } = useSubscribeToDataGenProgressSubscription();
+  console.log(data);
+
+  useEffect(() => {
+    if (data && data.DataGenerationReport) {
+      const report = data.DataGenerationReport;
+      setProgress(report);
+    }
+    if (data && data.DataGenerationReport.mapUploadStatus) {
+      setMapUploadStatus(data.DataGenerationReport.mapUploadStatus);
+      console.log(mapUploadStatus);
+    }
+    return;
+  }, [data, data?.DataGenerationReport, mapUploadStatus]);
+
+  const progressComp = progress ? (
+    <>
+      <Typography>Status</Typography>
+      <Stack direction="row">
+        <Typography variant="body1">Output: </Typography>
+        <Typography variant="body1">{progress.output}</Typography>
+      </Stack>
+      <Stack direction="row">
+        <Typography variant="body1">Map Generation: </Typography>
+        <Typography variant="body1">{mapUploadStatus}</Typography>
+      </Stack>
+      <Stack direction="row">
+        <Typography variant="body1">Map Translations: </Typography>
+        <Typography variant="body1">
+          {progress.mapTranslationsStatus}
+        </Typography>
+      </Stack>
+      <Stack direction="row">
+        <Typography variant="body1">ReTranslate Maps: </Typography>
+        <Typography variant="body1">
+          {progress.mapReTranslationsStatus}
+        </Typography>
+      </Stack>
+      <Stack direction="row">
+        <Typography variant="body1">Overall: </Typography>
+        <Typography variant="body1">{progress.overallStatus}</Typography>
+      </Stack>
+    </>
+  ) : null;
 
   const handleGenerateData = useCallback(async () => {
     let toLanguages: [LanguageInput] | null = null;
@@ -76,32 +123,13 @@ export function DataGeneratorPage() {
         <Button
           onClick={handleGenerateData}
           disabled={
-            data?.DataGenerationReport.overallStatus ===
-            SubscriptionStatus.Progressing
+            progress?.overallStatus === SubscriptionStatus.Progressing &&
+            progress.overallStatus !== undefined
           }
         >
           Generate Test Data
         </Button>
-        <Typography>Status</Typography>
-        <Stack direction="row">
-          <Typography variant="body1">Map Generation: </Typography>
-          <Typography variant="body1">
-            {data?.DataGenerationReport.mapUploadStatus}
-          </Typography>
-        </Stack>
-        <Stack direction="row">
-          <Typography variant="body1">Map Translations: </Typography>
-          <Typography variant="body1">
-            {data?.DataGenerationReport.mapTranslationsStatus}
-          </Typography>
-        </Stack>
-        <Stack direction="row">
-          <Typography variant="body1">ReTranslate Maps: </Typography>
-          <Typography variant="body1">
-            {data?.DataGenerationReport.mapReTranslationsStatus}
-          </Typography>
-        </Stack>
-
+        {progressComp}
         {/* <Button>Cancel</Button> */}
       </Stack>
     </PageLayout>

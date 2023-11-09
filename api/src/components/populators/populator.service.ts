@@ -4,7 +4,7 @@ import { Octokit } from '@octokit/rest';
 import { createReadStream, ReadStream } from 'fs';
 import { PubSub } from 'graphql-subscriptions';
 import { join } from 'path';
-import { lastValueFrom } from 'rxjs';
+import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import { SubscriptionToken } from 'src/common/subscription-token';
 import { ErrorType, GenericOutput, SubscriptionStatus } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
@@ -31,34 +31,46 @@ export class PopulatorService {
   async populateMapTranslations(
     to_languages: LanguageInput[],
     token: string,
-  ): Promise<GenericOutput> {
-    this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
-      [SubscriptionToken.DataGenerationReport]: {
-        output: `Completed`,
-        mapUploadStatus: SubscriptionStatus.Completed,
-        mapTranslationsStatus: SubscriptionStatus.Progressing,
-      } as DataGenProgress,
-    });
-    for (let i = 0; i < to_languages.length; i++) {
-      console.log(`add translations to ${to_languages[i]}...`);
-      this.aiTranslationService.translateWordsAndPhrasesByFaker(
-        { language_code: 'en', geo_code: null, dialect_code: null },
-        to_languages[i],
-        token,
-        null,
-      );
-    }
-    this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
-      [SubscriptionToken.DataGenerationReport]: {
+    req: any,
+    mapAmount?: number | null,
+  ) {
+    const value = new BehaviorSubject({
+      output: `Some output`,
+      mapUploadStatus: SubscriptionStatus.Completed,
+      mapTranslationsStatus: SubscriptionStatus.Progressing,
+      mapReTranslationsStatus: SubscriptionStatus.NotStarted,
+      overallStatus: SubscriptionStatus.Progressing,
+    } as DataGenProgress);
+    const observable = value.asObservable();
+
+    const observer = async () => {
+      for (let i = 0; i < to_languages.length; i++) {
+        console.log(`add translations to ${to_languages[i]}...`);
+        value.next({
+          output: `generating translations for ${to_languages[i].language_code}...`,
+          mapUploadStatus: SubscriptionStatus.Completed,
+          mapTranslationsStatus: SubscriptionStatus.Progressing,
+          mapReTranslationsStatus: SubscriptionStatus.NotStarted,
+          overallStatus: SubscriptionStatus.Progressing,
+        } as DataGenProgress);
+        await this.aiTranslationService.translateWordsAndPhrasesByFaker(
+          { language_code: 'en', geo_code: null, dialect_code: null },
+          to_languages[i],
+          token,
+          null,
+        );
+      }
+      value.next({
         output: `Completed`,
         mapUploadStatus: SubscriptionStatus.Completed,
         mapTranslationsStatus: SubscriptionStatus.Completed,
-      } as DataGenProgress,
-    });
-    console.log('... done');
-    return {
-      error: ErrorType.NoError,
+        mapReTranslationsStatus: SubscriptionStatus.NotStarted,
+        overallStatus: SubscriptionStatus.Progressing,
+      } as DataGenProgress);
     };
+
+    observer();
+    return observable;
   }
 
   async populateMaps(
@@ -68,6 +80,10 @@ export class PopulatorService {
   ): Promise<GenericOutput> {
     this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
       [SubscriptionToken.DataGenerationReport]: {
+        output: ``,
+        mapUploadStatus: SubscriptionStatus.Progressing,
+        mapTranslationsStatus: SubscriptionStatus.NotStarted,
+        mapReTranslationsStatus: SubscriptionStatus.NotStarted,
         overallStatus: SubscriptionStatus.Progressing,
       } as DataGenProgress,
     });
@@ -109,6 +125,7 @@ export class PopulatorService {
         mapUploadStatus: SubscriptionStatus.Progressing,
         mapTranslationsStatus: SubscriptionStatus.NotStarted,
         mapReTranslationsStatus: SubscriptionStatus.NotStarted,
+        overallStatus: SubscriptionStatus.Progressing,
       } as DataGenProgress,
     });
 
@@ -123,6 +140,7 @@ export class PopulatorService {
             mapUploadStatus: SubscriptionStatus.Completed,
             mapTranslationsStatus: SubscriptionStatus.NotStarted,
             mapReTranslationsStatus: SubscriptionStatus.NotStarted,
+            overallStatus: SubscriptionStatus.Progressing,
           } as DataGenProgress,
         });
         break;
@@ -201,6 +219,7 @@ export class PopulatorService {
           mapUploadStatus: SubscriptionStatus.Progressing,
           mapTranslationsStatus: SubscriptionStatus.NotStarted,
           mapReTranslationsStatus: SubscriptionStatus.NotStarted,
+          overallStatus: SubscriptionStatus.Progressing,
         } as DataGenProgress,
       });
       console.log('upload finished. errors:');
@@ -214,6 +233,7 @@ export class PopulatorService {
         mapUploadStatus: SubscriptionStatus.Completed,
         mapTranslationsStatus: SubscriptionStatus.NotStarted,
         mapReTranslationsStatus: SubscriptionStatus.NotStarted,
+        overallStatus: SubscriptionStatus.Progressing,
       } as DataGenProgress,
     });
 

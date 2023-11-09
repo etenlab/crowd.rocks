@@ -47,6 +47,7 @@ import {
 } from './utility';
 import { langInfo2String, subTags2LangInfo } from '../../../../utils';
 import { FakerTranslateService } from './faker-translate.service';
+import { MapsService } from '../maps/maps.service';
 
 interface ItranslateAllWordsAndPhrasesByBot {
   translateWordsAndPhrases: (
@@ -759,12 +760,14 @@ export class AiTranslationsService {
     pgClient: PoolClient | null,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
     try {
-      return this.translateWordsAndPhrasesByBot(
+      const output = this.translateWordsAndPhrasesByBot(
         this.fakerService,
         from_language,
         to_language,
         pgClient,
       );
+
+      return output;
     } catch (e) {
       Logger.error(e);
       return {
