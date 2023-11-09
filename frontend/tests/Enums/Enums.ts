@@ -16,4 +16,5 @@ export enum leftMenu {
   AppLanguage = 'App Language',
   Login = 'Login',
   Register = 'Register',
+  Logout = 'Logout',
 }
