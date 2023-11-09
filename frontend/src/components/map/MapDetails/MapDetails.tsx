@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState, MouseEventHandler } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  MouseEventHandler,
+  useCallback,
+} from 'react';
 import { useLocation, useParams, useHistory } from 'react-router';
 import { useIonToast } from '@ionic/react';
 import {
@@ -22,6 +28,7 @@ import { DownloadCircle } from '../../common/icons/DownloadCircle';
 import {
   ErrorType,
   TableNameType,
+  useForceMarkAndRetranslateOriginalMapsIdsMutation,
   useGetMapDetailsQuery,
   useGetMapVoteStatusQuery,
 } from '../../../generated/graphql';
@@ -32,6 +39,7 @@ import { useTr } from '../../../hooks/useTr';
 import { useToggleMapVoteStatusMutation } from '../../../hooks/useToggleMapVoteStatusMutation';
 
 import { MAPS_FLAGS, authorizedForAnyFlag } from '../../flags/flagGroups';
+import { globals } from '../../../services/globals';
 
 export function MapDetails() {
   const { tr } = useTr();
@@ -61,6 +69,9 @@ export function MapDetails() {
   });
 
   const [toggleMapVoteStatus] = useToggleMapVoteStatusMutation();
+
+  const [forceMarkAndRetranslateOriginalMapsIdsMutation] =
+    useForceMarkAndRetranslateOriginalMapsIdsMutation();
 
   const currMapContent = currentMapWithContent?.data?.getMapDetails;
 
@@ -137,6 +148,17 @@ export function MapDetails() {
       history.push(`/${nation_id}/${language_id}/1/maps/translation/all`);
     }
   };
+
+  const handleRetrnanslateClick = useCallback(
+    (originalMapId: string) => {
+      forceMarkAndRetranslateOriginalMapsIdsMutation({
+        variables: {
+          originalMapsIds: [originalMapId],
+        },
+      });
+    },
+    [forceMarkAndRetranslateOriginalMapsIdsMutation],
+  );
 
   const tagLabel = currMapContent?.mapDetails?.is_original
     ? tr('Original')
@@ -247,6 +269,25 @@ export function MapDetails() {
             });
           }}
         />
+
+        {globals.is_admin_user() && isOriginal && (
+          <Button
+            variant="outlined"
+            onClick={() => handleRetrnanslateClick(id)}
+            sx={{
+              padding: `5px`,
+              minWidth: '34px',
+              maxWidth: '160px',
+              borderRadius: '6px',
+              fontSize: '13px',
+              gap: '4px',
+              // ...flexObj,
+            }}
+            color="blue"
+          >
+            {tr('Force Retranslation')}
+          </Button>
+        )}
 
         <DiscussionIconButton
           parent_table={

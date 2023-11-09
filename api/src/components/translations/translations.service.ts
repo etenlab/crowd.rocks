@@ -32,7 +32,11 @@ import { PoolClient } from 'pg';
 import { PhraseDefinition, WordDefinition } from '../definitions/types';
 import { PostgresService } from '../../core/postgres.service';
 import { setTranslationsVotes } from './translations.repository';
-import { getTranslationLangSqlStr } from './sql-string';
+import {
+  getTranslationIdByFromToDefinitionsIdsSqlStr,
+  GetTranslationIdByFromToDefinitionsIdsSqlStrOutput,
+  getTranslationLangSqlStr,
+} from './sql-string';
 import { from } from 'rxjs';
 
 export function makeStr(
@@ -1226,5 +1230,35 @@ export class TranslationsService {
       error: ErrorType.UnknownError,
       translation_vote_status: null,
     };
+  }
+
+  async getTranslationIdByFromToDefinitionsIds({
+    from_definition_id,
+    from_definition_type_is_word,
+    to_definition_id,
+    to_definition_type_is_word,
+  }: {
+    from_definition_id: string;
+    from_definition_type_is_word: boolean;
+    to_definition_id: string;
+    to_definition_type_is_word: boolean;
+  }): Promise<string | null> {
+    const resQ =
+      await this.pg.pool.query<GetTranslationIdByFromToDefinitionsIdsSqlStrOutput>(
+        ...getTranslationIdByFromToDefinitionsIdsSqlStr(
+          Number(from_definition_id),
+          from_definition_type_is_word,
+          Number(to_definition_id),
+          to_definition_type_is_word,
+        ),
+      );
+
+    if (!resQ.rows[0].translation_id || resQ.rows.length > 1) {
+      Logger.error(
+        `translationsService#getTranslationIdByFromToDefinitionsIds: translation id not found or several results are found`,
+      );
+      return null;
+    }
+    return resQ.rows[0].translation_id;
   }
 }

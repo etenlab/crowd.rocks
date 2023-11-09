@@ -590,6 +590,7 @@ type Mutation {
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
+  forceMarkAndRetranslateOriginalMapsIds(originalMapsIds: [String!]!): GenericOutput!
   forumDelete(forum_id: ID!): ForumDeleteOutput!
   forumFolderDelete(forum_folder_id: ID!): ForumFolderDeleteOutput!
   forumFolderUpsert(input: ForumFolderUpsertInput!): ForumFolderOutput!
@@ -692,11 +693,6 @@ type NotificationListOutput {
 input NotifyUsersInput {
   text: String!
   user_ids: [ID!]!
-}
-
-type OrigMapWordsAndPhrasesOutput {
-  error: ErrorType!
-  mapWordsOrPhrases: [MapWordOrPhrase!]
 }
 
 type PageInfo {
@@ -1050,7 +1046,6 @@ type Query {
   getMapWordOrPhraseAsOrigByDefinitionId(input: GetMapWordOrPhraseByDefinitionIdInput!): MapWordOrPhraseAsOrigOutput!
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapWordsAndPhrasesCount(input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesCountOutput!
-  getOrigMapWordsAndPhrasesPaginated(input: GetOrigMapWordsAndPhrasesInput!, limit: Int, offset: Int): OrigMapWordsAndPhrasesOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
   getPericopiesByDocumentId(document_id: ID!): PericopiesOutput!

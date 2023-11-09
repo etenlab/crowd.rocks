@@ -12,7 +12,7 @@ import { SubscriptionToken } from 'src/common/subscription-token';
 import { BotType, GenericOutput } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
 import { PUB_SUB } from 'src/pubSub.module';
-import { IsAuthAdmin } from '../../core/decorators/is-auth-admin.decorator';
+import { IsAuthAdmin } from '../../decorators/is-auth-admin.decorator';
 import { LanguageInput } from '../common/types';
 import { AiTranslationsService } from './ai-translations.service';
 import {

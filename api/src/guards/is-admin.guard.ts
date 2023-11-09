@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { AuthenticationService } from '../../components/authentication/authentication.service';
+import { AuthenticationService } from '../components/authentication/authentication.service';
 
 @Injectable()
 export class IsAdminGuard implements CanActivate {

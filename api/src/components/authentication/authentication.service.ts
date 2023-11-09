@@ -63,4 +63,22 @@ export class AuthenticationService {
     const admin_id = await this.get_admin_id();
     return user_id === admin_id;
   }
+
+  async getAdminToken(): Promise<string> {
+    const adminId = await this.get_admin_id();
+    const resQ = await this.pg.pool.query(
+      `
+      select t.token as token
+      from tokens t 
+      where t.user_id =  $1
+    `,
+      [adminId],
+    );
+    if (!(resQ.rows.length > 0)) {
+      Logger.error(
+        `AuthenticationService#getAdminToken: admin token not found`,
+      );
+    }
+    return resQ.rows.at(-1).token;
+  }
 }

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Request } from 'express';
-import { AuthorizationService } from '../../components/authorization/authorization.service';
+import { AuthorizationService } from '../components/authorization/authorization.service';
 @Injectable()
 export class BearerTokenAuthGuard implements CanActivate {
   constructor(private readonly authorizationService: AuthorizationService) {} // inject here services if needed
