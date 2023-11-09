@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-// import { convert } from 'html-to-text';
+import { Injectable, Logger } from '@nestjs/common';
 import { hash } from 'argon2';
 import { delay } from 'rxjs';
 import { createToken } from 'src/common/utility';
@@ -7,8 +6,13 @@ import { LanguageInput } from 'src/components/common/types';
 import { ConfigService } from 'src/core/config.service';
 import { PostgresService } from 'src/core/postgres.service';
 import { ErrorType } from '../../common/types';
-import { ITranslator, LanguageListForBotTranslateOutput } from './types';
-// import { substituteN, unSubstituteN } from '../../common/utility';
+import {
+  ITranslator,
+  LanguageForBotTranslate,
+  LanguageListForBotTranslateOutput,
+} from './types';
+import fetch, { Headers } from 'node-fetch';
+import { getLangsRegistry } from '../../../../utils';
 
 const LIMIT_REQUESTS = 4000; // per LIMIT_TIME
 const LIMIT_TIME = 60 * 1000; // per minute
@@ -17,6 +21,15 @@ const LIMIT_LENGTH = 5000; // characters of a source string per request
 const JOINER = '.<br/>'; // joins words or phrases before sending to lilt api
 
 const LILT_BOT_EMAIL = 'liltbot@crowd.rocks';
+
+type TResLangs = {
+  source_to_target: {
+    [key: string]: { [key: string]: boolean };
+  };
+  code_to_name: {
+    [key: string]: string;
+  };
+};
 
 @Injectable()
 export class LiltTranslateService implements ITranslator {
@@ -101,20 +114,57 @@ export class LiltTranslateService implements ITranslator {
   };
 
   async getLanguages(): Promise<LanguageListForBotTranslateOutput> {
-    //todo
-    return {
-      languages: [
-        {
-          code: 'uk',
-          name: 'Ukrainian (mocked)',
-        },
-        {
-          code: 'pl',
-          name: 'Polish (mocked)',
-        },
-      ],
-      error: ErrorType.NoError,
-    };
+    try {
+      const ourLangTags = (await getLangsRegistry()).langs.map((l) => l.tag);
+      const url = `https://lilt.com/2/languages?key=${this.config.LILT_KEY}`;
+      const res = await fetch(url, {
+        method: 'GET',
+      });
+      const liltLangsRes = await res.json();
+      const targetLangsObj = (liltLangsRes as TResLangs).source_to_target['en'];
+      const targetLangsNames = (liltLangsRes as TResLangs).code_to_name;
+      const languages: LanguageForBotTranslate[] = [];
+      const filteredOut: Array<LanguageForBotTranslate & { reason: string }> =
+        [];
+
+      for (const [langCode, isTrue] of Object.entries(targetLangsObj)) {
+        if (!isTrue) {
+          filteredOut.push({
+            code: langCode,
+            name: targetLangsNames[langCode],
+            reason: 'Lilt translate status is false',
+          });
+          continue;
+        }
+
+        if (ourLangTags.includes(langCode)) {
+          languages.push({
+            code: langCode,
+            name: targetLangsNames[langCode],
+          });
+        } else {
+          filteredOut.push({
+            code: langCode,
+            name: targetLangsNames[langCode],
+            reason: 'Not Found in RFC 5646 language codes',
+          });
+        }
+      }
+
+      Logger.log(
+        `filtered out lilt's languages: ${JSON.stringify(filteredOut)}`,
+      );
+
+      return {
+        languages,
+        error: ErrorType.NoError,
+      };
+    } catch (error) {
+      return {
+        languages: null,
+        error: ErrorType.BotTranslationLanguagesListError,
+      };
+    }
   }
 
   getTranslatorToken = async (): Promise<{ id: string; token: string }> => {
