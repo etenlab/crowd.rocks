@@ -53,60 +53,21 @@ export class PopulatorResolver {
         error: ErrorType.Unauthorized,
       };
     }
-    const { error: mapGenError } = await this.generator.populateMaps(
-      token,
-      req,
-      input.mapAmount,
-    );
 
-    if (mapGenError !== ErrorType.NoError) {
-      return { error: mapGenError };
-    }
     if (input.mapsToLanguages) {
-      this.generator.populateMapTranslations(
-        input.mapsToLanguages,
-        token,
-        req,
-        input.mapAmount,
-      );
-
-      const forLangTags = input.mapsToLanguages.map((l) => l.language_code);
-      for (let i = 0; i < forLangTags!.length; i++) {
-        this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
-          [SubscriptionToken.DataGenerationReport]: {
-            output: `${i + 1} / ${forLangTags.length}`,
-            mapUploadStatus: SubscriptionStatus.Completed,
-            mapTranslationsStatus: SubscriptionStatus.Completed,
-            mapReTranslationsStatus: SubscriptionStatus.Progressing,
-            overallStatus: SubscriptionStatus.Progressing,
-          } as DataGenProgress,
-        });
-        await this.mapsService.reTranslate(token, forLangTags[i]!);
-      }
-
-      // Add any new data generations here...
-      // ...
-
-      this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
-        [SubscriptionToken.DataGenerationReport]: {
-          output: `${forLangTags.length} / ${forLangTags.length}`,
-          mapUploadStatus: SubscriptionStatus.Completed,
-          mapTranslationsStatus: SubscriptionStatus.Completed,
-          mapReTranslationsStatus: SubscriptionStatus.Completed,
-          overallStatus: SubscriptionStatus.Progressing,
-        } as DataGenProgress,
-      });
+      this.generator
+        .populateMapTranslations(
+          input.mapsToLanguages,
+          token,
+          req,
+          input.mapAmount,
+        )
+        .subscribe((n) =>
+          this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
+            [SubscriptionToken.DataGenerationReport]: n,
+          }),
+        );
     }
-
-    this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
-      [SubscriptionToken.DataGenerationReport]: {
-        output: `Done`,
-        mapUploadStatus: SubscriptionStatus.Completed,
-        mapTranslationsStatus: SubscriptionStatus.Completed,
-        mapReTranslationsStatus: SubscriptionStatus.Completed,
-        overallStatus: SubscriptionStatus.Completed,
-      } as DataGenProgress,
-    });
 
     return {
       error: ErrorType.NoError,
