@@ -6,12 +6,19 @@ import { pgClientOrPool } from 'src/common/utility';
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 
-import { DocumentWordEntriesOutput } from './types';
+import {
+  DocumentWordEntry,
+  DocumentWordEntriesOutput,
+  DocumentWordEntriesEdge,
+  DocumentWordEntriesListConnection,
+} from './types';
 
 import {
   GetDocumentWordEntryRow,
   getDocumentWordEntryByIds,
   getDocumentWordEntryByDocumentId,
+  GetDocumentWordEntriesTotalPageSize,
+  getDocumentWordEntriesTotalPageSize,
   DocumentWordEntryUpsertsProcedureOutputRow,
   callDocumentWordEntryUpsertsProcedure,
 } from './sql-string';
@@ -27,20 +34,15 @@ export class DocumentWordEntriesService {
     private authService: AuthorizationService,
   ) {}
 
-  async reads(
-    ids: number[],
+  private async convertQueryResultToDocumentWordEntries(
+    rows: GetDocumentWordEntryRow[],
     pgClient: PoolClient | null,
   ): Promise<DocumentWordEntriesOutput> {
     try {
-      const res = await pgClientOrPool({
-        client: pgClient,
-        pool: this.pg.pool,
-      }).query<GetDocumentWordEntryRow>(...getDocumentWordEntryByIds(ids));
-
       const documentWordEntriesMap = new Map<string, GetDocumentWordEntryRow>();
       const wordlikeStringIds: number[] = [];
 
-      res.rows.forEach((row) => {
+      rows.forEach((row) => {
         documentWordEntriesMap.set(row.document_word_entry_id, row);
 
         wordlikeStringIds.push(+row.wordlike_string_id);
@@ -69,8 +71,10 @@ export class DocumentWordEntriesService {
 
       return {
         error: ErrorType.NoError,
-        document_word_entries: ids.map((id) => {
-          const documentWordEntry = documentWordEntriesMap.get(id + '')!;
+        document_word_entries: rows.map((row) => {
+          const documentWordEntry = documentWordEntriesMap.get(
+            row.document_id,
+          )!;
           const wordlike_string = wordlikeStringsMap.get(
             documentWordEntry.wordlike_string_id,
           );
@@ -85,9 +89,31 @@ export class DocumentWordEntriesService {
             wordlike_string,
             parent_document_word_entry_id:
               documentWordEntry.parent_document_word_entry_id,
+            page: documentWordEntry.page,
           };
         }),
       };
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      document_word_entries: [],
+    };
+  }
+
+  async reads(
+    ids: number[],
+    pgClient: PoolClient | null,
+  ): Promise<DocumentWordEntriesOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetDocumentWordEntryRow>(...getDocumentWordEntryByIds(ids));
+
+      return this.convertQueryResultToDocumentWordEntries(res.rows, pgClient);
     } catch (e) {
       console.error(e);
     }
@@ -166,44 +192,105 @@ export class DocumentWordEntriesService {
 
   async getDocumentWordEntriesByDocumentId(
     document_id: number,
+    first: number | null,
+    after: string | null,
     pgClient: PoolClient | null,
-  ): Promise<DocumentWordEntriesOutput> {
+  ): Promise<DocumentWordEntriesListConnection> {
     try {
       const res = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
       }).query<GetDocumentWordEntryRow>(
-        ...getDocumentWordEntryByDocumentId(document_id),
+        ...getDocumentWordEntryByDocumentId(
+          document_id,
+          first ? first + 1 : null,
+          after ? +after : 0,
+        ),
       );
 
-      const documentWordEntryIds = res.rows.map(
-        (row) => +row.document_word_entry_id,
-      );
+      const pageMap = new Map<number, DocumentWordEntry[]>();
 
-      const { error, document_word_entries } = await this.reads(
-        documentWordEntryIds,
-        pgClient,
-      );
+      const { error, document_word_entries } =
+        await this.convertQueryResultToDocumentWordEntries(res.rows, pgClient);
 
       if (error !== ErrorType.NoError) {
         return {
           error,
-          document_word_entries: [],
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+            totalEdges: 0,
+          },
         };
       }
 
       for (let i = 0; i < document_word_entries.length; i++) {
-        if (document_word_entries[i] === null) {
+        const documentWordEntry = document_word_entries[i];
+        if (documentWordEntry === null) {
           return {
             error: ErrorType.DocumentEntryReadError,
-            document_word_entries: [],
+            edges: [],
+            pageInfo: {
+              hasNextPage: false,
+              hasPreviousPage: false,
+              startCursor: null,
+              endCursor: null,
+              totalEdges: 0,
+            },
           };
+        }
+
+        const entries = pageMap.get(documentWordEntry.page);
+
+        if (entries) {
+          entries.push(documentWordEntry);
+        } else {
+          pageMap.set(documentWordEntry.page, [documentWordEntry]);
         }
       }
 
+      const res1 = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetDocumentWordEntriesTotalPageSize>(
+        ...getDocumentWordEntriesTotalPageSize(document_id),
+      );
+
+      const tempEdges: DocumentWordEntriesEdge[] = [];
+
+      const endPage = first ? first + 1 : res1.rows[0].total_pages + 1;
+      const startPage = after ? +after + 1 : 1;
+
+      for (let i = 0; i < endPage; i++) {
+        const entries = pageMap.get(startPage + i);
+
+        if (entries) {
+          tempEdges.push({
+            cursor: startPage + i + '',
+            node: entries,
+          });
+        }
+      }
+
+      const edges =
+        first && tempEdges.length > first
+          ? tempEdges.slice(0, first)
+          : tempEdges;
+
       return {
         error: ErrorType.NoError,
-        document_word_entries,
+        edges,
+        pageInfo: {
+          hasNextPage: first ? tempEdges.length > first : false,
+          hasPreviousPage: false,
+          startCursor: edges.length > 0 ? edges[0].cursor : null,
+          endCursor:
+            edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
+          totalEdges: res1.rowCount > 0 ? res1.rows[0].total_pages : 0,
+        },
       };
     } catch (e) {
       console.error(e);
@@ -211,7 +298,14 @@ export class DocumentWordEntriesService {
 
     return {
       error: ErrorType.UnknownError,
-      document_word_entries: [],
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+        totalEdges: 0,
+      },
     };
   }
 }
