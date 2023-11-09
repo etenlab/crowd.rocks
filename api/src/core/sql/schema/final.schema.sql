@@ -710,6 +710,8 @@ create table translated_maps(
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
   content text not null,
+  to_retranslate boolean,
+  is_retranslating_now boolean,
   unique nulls not distinct (original_map_id, language_code, dialect_code, geo_code)
 );
 create index idx__original_map_id__translated_maps on translated_maps (original_map_id);
@@ -843,6 +845,3 @@ ALTER TABLE public.original_maps_votes ADD CONSTRAINT original_map_votes_user_id
 ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists words_votes_user_id_fkey;
 ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists translated_map_votes_user_id_fkey;
 ALTER TABLE public.translated_maps_votes ADD CONSTRAINT translated_map_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE;;
-
-alter table translated_maps add column if not exists to_retranslate boolean ;
-alter table translated_maps add column if not exists is_retranslating_now boolean;
