@@ -1,4 +1,4 @@
-import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, InputType, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from '../../common/types';
 import { PageInfo } from '../common/types';
 
@@ -22,6 +22,7 @@ export class DocumentWordEntry {
   @Field(() => WordlikeString) wordlike_string: WordlikeString;
   @Field(() => String, { nullable: true })
   parent_document_word_entry_id: string | null;
+  @Field(() => Int) page: number;
 }
 
 @ObjectType()
@@ -78,6 +79,19 @@ export class GetDocumentOutput extends GenericOutput {
 export class DocumentWordEntriesOutput extends GenericOutput {
   @Field(() => [DocumentWordEntry], { nullable: 'items' })
   document_word_entries: (DocumentWordEntry | null)[];
+}
+
+@ObjectType()
+export class DocumentWordEntriesEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => [DocumentWordEntry]) node: DocumentWordEntry[];
+}
+
+@ObjectType()
+export class DocumentWordEntriesListConnection extends GenericOutput {
+  @Field(() => [DocumentWordEntriesEdge])
+  edges: DocumentWordEntriesEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
 }
 
 @ObjectType()

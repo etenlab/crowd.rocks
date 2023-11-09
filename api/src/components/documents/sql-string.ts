@@ -164,6 +164,7 @@ export type GetDocumentWordEntryRow = {
   document_id: string;
   wordlike_string_id: string;
   parent_document_word_entry_id: string;
+  page: number;
 };
 
 export function getDocumentWordEntryByIds(ids: number[]): [string, [number[]]] {
@@ -174,6 +175,7 @@ export function getDocumentWordEntryByIds(ids: number[]): [string, [number[]]] {
         document_id,
         wordlike_string_id,
         parent_document_word_entry_id
+        page
       from document_word_entries
       where document_word_entry_id = any($1)
     `,
@@ -181,20 +183,58 @@ export function getDocumentWordEntryByIds(ids: number[]): [string, [number[]]] {
   ];
 }
 
-export function getDocumentWordEntryByDocumentId(
-  id: number,
+export type GetDocumentWordEntriesTotalPageSize = {
+  total_pages: number;
+};
+
+export function getDocumentWordEntriesTotalPageSize(
+  document_id: number,
 ): [string, [number]] {
+  return [
+    `
+      select 
+        count(distinct page) as total_pages
+      from document_word_entries
+      where document_id = $1;
+    `,
+    [document_id],
+  ];
+}
+
+export function getDocumentWordEntryByDocumentId(
+  document_id: number,
+  first: number | null,
+  page: number,
+): [string, unknown[]] {
+  const returnArr: unknown[] = [];
+  let limitStr = '';
+  let cursorStr = '';
+
+  if (page) {
+    returnArr.push(page);
+    cursorStr = `and page > $${returnArr.length}`;
+  }
+
+  if (first) {
+    returnArr.push(page + first + 1);
+    limitStr = `and page < $${returnArr.length}`;
+  }
+
   return [
     `
       select 
         document_word_entry_id,
         document_id,
         wordlike_string_id,
-        parent_document_word_entry_id
+        parent_document_word_entry_id,
+        page
       from document_word_entries
       where document_id = $1
+        ${cursorStr}
+        ${limitStr}
+      order by page;
     `,
-    [id],
+    [document_id, page],
   ];
 }
 

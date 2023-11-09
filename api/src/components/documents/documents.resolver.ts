@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   Args,
   Context,
@@ -20,7 +20,7 @@ import { WordRangesService } from './word-ranges.service';
 import {
   DocumentUploadInput,
   DocumentUploadOutput,
-  DocumentWordEntriesOutput,
+  DocumentWordEntriesListConnection,
   DocumentListConnection,
   GetDocumentInput,
   GetDocumentOutput,
@@ -44,6 +44,8 @@ export class DocumentsResolver {
     @Args('input') input: DocumentUploadInput,
     @Context() req: any,
   ): Promise<DocumentUploadOutput> {
+    Logger.log('documentUpload', JSON.stringify(input, null, 2));
+
     if (!this.authenticationService.isAdmin(getBearer(req) || '')) {
       return {
         error: ErrorType.Unauthorized,
@@ -64,6 +66,19 @@ export class DocumentsResolver {
     @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
   ): Promise<DocumentListConnection> {
+    Logger.log(
+      'getAllDocuments',
+      JSON.stringify(
+        {
+          lang: input,
+          after,
+          first,
+        },
+        null,
+        2,
+      ),
+    );
+
     const res = await this.documentsSevice.getAllDocuments({
       lang: input,
       after,
@@ -76,16 +91,26 @@ export class DocumentsResolver {
   async getDocument(
     @Args('input') input: GetDocumentInput,
   ): Promise<GetDocumentOutput> {
-    const res = await this.documentsSevice.getDocument(+input.document_id);
-    return res;
+    Logger.log('getDocument', JSON.stringify(input, null, 2));
+
+    return this.documentsSevice.getDocument(+input.document_id);
   }
 
-  @Query(() => DocumentWordEntriesOutput)
+  @Query(() => DocumentWordEntriesListConnection)
   async getDocumentWordEntriesByDocumentId(
     @Args('document_id', { type: () => ID }) document_id: string,
-  ): Promise<DocumentWordEntriesOutput> {
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<DocumentWordEntriesListConnection> {
+    Logger.log(
+      'getDocument',
+      JSON.stringify({ document_id, first, after }, null, 2),
+    );
+
     return this.documentWordEntriesService.getDocumentWordEntriesByDocumentId(
       +document_id,
+      first,
+      after,
       null,
     );
   }
@@ -94,7 +119,7 @@ export class DocumentsResolver {
   async readWordRanges(
     @Args('ids', { type: () => [ID] }) ids: string[],
   ): Promise<WordRangesOutput> {
-    console.log('readWordRanges, ids:', ids);
+    Logger.log('readWordRanges, ids:', ids);
 
     return this.wordRangesService.reads(
       ids.map((id) => +id),
@@ -106,7 +131,7 @@ export class DocumentsResolver {
   async getWordRangesByBeginIds(
     @Args('ids', { type: () => [ID] }) ids: string[],
   ): Promise<WordRangesOutput> {
-    console.log('getWordRangesByBeginIds, ids:', ids);
+    Logger.log('getWordRangesByBeginIds, ids:', ids);
 
     return this.wordRangesService.getByBeginWordIds(
       ids.map((id) => +id),
@@ -118,7 +143,7 @@ export class DocumentsResolver {
   async getWordRangesByDocumentId(
     @Args('id', { type: () => ID }) id: string,
   ): Promise<WordRangesOutput> {
-    console.log('getWordRangesByDocumentId, id:', id);
+    Logger.log('getWordRangesByDocumentId, id:', id);
 
     return this.wordRangesService.getByDocumentId(+id, null);
   }
@@ -129,7 +154,7 @@ export class DocumentsResolver {
     input: WordRangeUpsertInput[],
     @Context() req: any,
   ): Promise<WordRangesOutput> {
-    console.log('upsertWordRanges: ', JSON.stringify(input, null, 2));
+    Logger.log('upsertWordRanges: ', JSON.stringify(input, null, 2));
 
     return this.wordRangesService.upserts(input, getBearer(req) || '', null);
   }
