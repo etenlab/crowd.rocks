@@ -141,11 +141,11 @@ export class DocumentsResolver {
 
   @Query(() => WordRangesOutput)
   async getWordRangesByDocumentId(
-    @Args('id', { type: () => ID }) id: string,
+    @Args('document_id', { type: () => ID }) document_id: string,
   ): Promise<WordRangesOutput> {
-    Logger.log('getWordRangesByDocumentId, id:', id);
+    Logger.log('getWordRangesByDocumentId, id:', document_id);
 
-    return this.wordRangesService.getByDocumentId(+id, null);
+    return this.wordRangesService.getByDocumentId(+document_id, null);
   }
 
   @Mutation(() => WordRangesOutput)

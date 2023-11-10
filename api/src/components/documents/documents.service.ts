@@ -188,7 +188,10 @@ export class DocumentsService {
       );
 
       const tempEdges: DocumentEdge[] = res.rows.map((item) => ({
-        cursor: item.file_name,
+        cursor: JSON.stringify({
+          file_name: item.file_name,
+          document_id: item.document_id,
+        }),
         node: item,
       }));
 
@@ -199,10 +202,7 @@ export class DocumentsService {
 
       return {
         error: ErrorType.NoError,
-        edges: res.rows.map((row) => ({
-          cursor: row.file_name,
-          node: row,
-        })),
+        edges: edges,
         pageInfo: {
           hasNextPage: input.first ? res.rowCount > input.first : false,
           hasPreviousPage: false,

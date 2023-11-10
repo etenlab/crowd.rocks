@@ -70,8 +70,13 @@ export function getAllDocuments({
   }
 
   if (after) {
-    params.push(after);
-    cursorStr = ` and lower(f.file_name) > $${params.length}`;
+    const file_name = JSON.parse(after).file_name;
+    const document_id = JSON.parse(after).document_id;
+
+    params.push(file_name);
+    cursorStr = ` and lower(f.file_name) >= $${params.length}`;
+    params.push(document_id);
+    cursorStr += ` and d.document_id > $${params.length}`;
   }
 
   if (first) {
@@ -97,7 +102,7 @@ export function getAllDocuments({
       ${languageClause}
       ${filterStr}
       ${cursorStr}
-      order by lower(f.file_name)
+      order by lower(f.file_name), document_id
       ${limitStr}
     `,
     [...params],
@@ -140,13 +145,7 @@ export function getDocumentsTotalSize({
   return [
     `
       select
-        d.document_id,
-        d.language_code,
-        d.dialect_code,
-        d.geo_code,
-        d.file_id,
-        f.file_name,
-        f.file_url
+        count(*) as total_records
       from
         documents d
       left join files f on
@@ -164,7 +163,7 @@ export type GetDocumentWordEntryRow = {
   document_id: string;
   wordlike_string_id: string;
   parent_document_word_entry_id: string;
-  page: number;
+  page: string;
 };
 
 export function getDocumentWordEntryByIds(ids: number[]): [string, [number[]]] {
@@ -206,7 +205,7 @@ export function getDocumentWordEntryByDocumentId(
   first: number | null,
   page: number,
 ): [string, unknown[]] {
-  const returnArr: unknown[] = [];
+  const returnArr: unknown[] = [document_id];
   let limitStr = '';
   let cursorStr = '';
 
@@ -234,7 +233,7 @@ export function getDocumentWordEntryByDocumentId(
         ${limitStr}
       order by page;
     `,
-    [document_id, page],
+    [...returnArr],
   ];
 }
 

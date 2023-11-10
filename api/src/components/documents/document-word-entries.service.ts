@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
 import { pgClientOrPool } from 'src/common/utility';
@@ -39,12 +39,9 @@ export class DocumentWordEntriesService {
     pgClient: PoolClient | null,
   ): Promise<DocumentWordEntriesOutput> {
     try {
-      const documentWordEntriesMap = new Map<string, GetDocumentWordEntryRow>();
       const wordlikeStringIds: number[] = [];
 
       rows.forEach((row) => {
-        documentWordEntriesMap.set(row.document_word_entry_id, row);
-
         wordlikeStringIds.push(+row.wordlike_string_id);
       });
 
@@ -72,11 +69,8 @@ export class DocumentWordEntriesService {
       return {
         error: ErrorType.NoError,
         document_word_entries: rows.map((row) => {
-          const documentWordEntry = documentWordEntriesMap.get(
-            row.document_id,
-          )!;
           const wordlike_string = wordlikeStringsMap.get(
-            documentWordEntry.wordlike_string_id,
+            row.wordlike_string_id,
           );
 
           if (!wordlike_string) {
@@ -84,17 +78,16 @@ export class DocumentWordEntriesService {
           }
 
           return {
-            document_word_entry_id: documentWordEntry.document_word_entry_id,
-            document_id: documentWordEntry.document_id,
+            document_word_entry_id: row.document_word_entry_id,
+            document_id: row.document_id,
             wordlike_string,
-            parent_document_word_entry_id:
-              documentWordEntry.parent_document_word_entry_id,
-            page: documentWordEntry.page,
+            parent_document_word_entry_id: row.parent_document_word_entry_id,
+            page: +row.page,
           };
         }),
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -115,7 +108,7 @@ export class DocumentWordEntriesService {
 
       return this.convertQueryResultToDocumentWordEntries(res.rows, pgClient);
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -181,7 +174,7 @@ export class DocumentWordEntriesService {
         pgClient,
       );
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
@@ -293,7 +286,7 @@ export class DocumentWordEntriesService {
         },
       };
     } catch (e) {
-      console.error(e);
+      Logger.error(e);
     }
 
     return {
