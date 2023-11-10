@@ -92,6 +92,8 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: test-report
+          path: |
+              ${{ github.workspace }}/frontend/test-results/
+              ${{ github.workspace }}/frontend/playwright-report/
           retention-days: 30

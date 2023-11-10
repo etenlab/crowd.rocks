@@ -16,6 +16,7 @@ class MenuPage extends BasePage {
 
   async clickOnLeftMenufeatureButton(featureName: string) {
     await this.page.locator(leftMenuFeatureButton(featureName)).first().click();
+    await this.page.waitForTimeout(1000);
   }
 
   async clickOnCrowdRocks() {
