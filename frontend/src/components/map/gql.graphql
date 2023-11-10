@@ -125,24 +125,6 @@ query GetOrigMapWordsAndPhrasesCount(
   }
 }
 
-query GetOrigMapWordsAndPhrasesPaginated(
-  $original_map_id: String
-  $lang: LanguageInput!
-  $filter: String
-  $offset: Int
-  $limit: Int
-) {
-  getOrigMapWordsAndPhrasesPaginated(
-    input: { lang: $lang, filter: $filter, original_map_id: $original_map_id }
-    offset: $offset
-    limit: $limit
-  ) {
-    mapWordsOrPhrases {
-      ...MapWordOrPhraseFragment
-    }
-  }
-}
-
 query GetMapWordOrPhraseAsOrigByDefinitionId(
   $definition_id: ID!
   $is_word_definition: Boolean!
@@ -254,6 +236,12 @@ mutation ToggleMapVoteStatus(
     vote_status {
       ...MapVoteStatusFragment
     }
+  }
+}
+
+mutation ForceMarkAndRetranslateOriginalMapsIds($originalMapsIds: [String!]!) {
+  forceMarkAndRetranslateOriginalMapsIds(originalMapsIds: $originalMapsIds) {
+    error
   }
 }
 

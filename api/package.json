@@ -39,6 +39,7 @@
     "@nestjs/core": "^10.0.5",
     "@nestjs/graphql": "^12.0.7",
     "@nestjs/platform-express": "^10.0.5",
+    "@nestjs/schedule": "^4.0.0",
     "@nestjs/serve-static": "^4.0.0",
     "@octokit/rest": "^20.0.2",
     "@types/argon2": "^0.15.0",
