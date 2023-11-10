@@ -38,7 +38,7 @@ export function FolderModal({
   const handleSave = useCallback(async () => {
     if (folderName.trim() === '') {
       present({
-        message: tr('Folder name cannot be empty string!'),
+        message: tr('Topic name cannot be empty string!'),
         duration: 1500,
         position: 'top',
         color: 'danger',
@@ -98,7 +98,7 @@ export function FolderModal({
 
       <Stack gap="16px">
         <Input
-          placeholder={tr('Forum Name')}
+          placeholder={tr('Topic Name')}
           value={folderName}
           onChange={setFolderName}
         />

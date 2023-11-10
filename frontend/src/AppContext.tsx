@@ -11,6 +11,7 @@ import {
   GetForumsListVariable,
   GetForumFoldersListVariable,
   GetThreadsListVariable,
+  GetAllDocumentsVariable,
 } from './reducers/non-persistent.reducer';
 
 import { useGlobal } from './hooks/useGlobal';
@@ -71,6 +72,9 @@ export interface ContextType {
     addPaginationVariableForGetTheadsList(
       variable: GetThreadsListVariable,
     ): void;
+    addPaginationVariableForGetAllDocuments(
+      variable: GetAllDocumentsVariable,
+    ): void;
   };
 }
 
@@ -121,6 +125,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
     addPaginationVariableForGetForumsList,
     addPaginationVariableForGetForumFoldersList,
     addPaginationVariableForGetTheadsList,
+    addPaginationVariableForGetAllDocuments,
   } = useNonPersistent({ dispatch });
 
   useEffect(() => {
@@ -368,6 +373,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
       addPaginationVariableForGetForumsList,
       addPaginationVariableForGetForumFoldersList,
       addPaginationVariableForGetTheadsList,
+      addPaginationVariableForGetAllDocuments,
     },
   };
 

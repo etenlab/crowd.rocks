@@ -519,6 +519,14 @@ export class DatabaseVersionControlService {
       './src/core/sql/threads/post_delete_from_thread_delete_trigger-v10.sql',
     );
 
+    // documents
+    await this.runSqlFile(
+      './src/core/sql/document/document_word_entry_upsert-v10.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/document/batch_document_word_entry_upsert-v10.sql',
+    );
+
     // set version
     await this.setVersionNumber(10);
   }

@@ -53,8 +53,13 @@ export function PericopeDocumentListPage() {
       <RowStack>
         <ListCaption>{tr('Document List')}</ListCaption>
       </RowStack>
-
-      <DocumentList onClickItem={handleGoToDocumentViewer} />
+      {sourceLang ? (
+        <DocumentList
+          onClickItem={handleGoToDocumentViewer}
+          filter=""
+          language={sourceLang}
+        />
+      ) : null}
     </PageLayout>
   );
 }

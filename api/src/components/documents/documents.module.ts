@@ -6,7 +6,6 @@ import { FileModule } from '../file/file.module';
 import { WordsModule } from '../words/words.module';
 
 import { DocumentsResolver } from './documents.resolver';
-import { DocumentsRepository } from './documents.repository';
 import { DocumentsService } from './documents.service';
 import { DocumentWordEntriesService } from './document-word-entries.service';
 import { WordRangesService } from './word-ranges.service';
@@ -22,7 +21,6 @@ import { AuthorizationService } from '../authorization/authorization.service';
     FileModule,
   ],
   providers: [
-    DocumentsRepository,
     DocumentsService,
     DocumentWordEntriesService,
     WordRangesService,
