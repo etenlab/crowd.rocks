@@ -1,7 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router';
 import { Stack, Typography, Button } from '@mui/material';
-// import { useDebounce } from 'use-debounce';
+import { useDebounce } from 'use-debounce';
 
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
@@ -11,12 +11,16 @@ import { SearchInput } from '../../common/forms/SearchInput';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { useGetAllDocumentsLazyQuery } from '../../../generated/graphql';
 
 import { DocumentList } from '../DocumentList/DocumentList';
 import { DocumentUploadModal } from './DocumentUploadModal';
 
+import { PAGE_SIZE } from '../../../const/commonConst';
+
 export function DocumentsPage() {
   const { tr } = useTr();
+  const history = useHistory();
   const { nation_id, language_id, cluster_id } = useParams<{
     nation_id: string;
     language_id: string;
@@ -32,12 +36,29 @@ export function DocumentsPage() {
     actions: { setSourceLanguage, createModal },
   } = useAppContext();
 
+  const [getAllDocuments, { data }] = useGetAllDocumentsLazyQuery();
+
   const [filter, setFilter] = useState<string>('');
-  // const [bouncedFilter] = useDebounce(filter, 500);
+  const [bouncedFilter] = useDebounce(filter, 500);
 
   const { openModal, closeModal } = createModal();
 
-  const history = useHistory();
+  useEffect(() => {
+    if (sourceLang) {
+      getAllDocuments({
+        variables: {
+          input: {
+            filter: bouncedFilter.trim(),
+            language_code: sourceLang?.lang.tag,
+            dialect_code: sourceLang?.dialect?.tag || null,
+            geo_code: sourceLang?.region?.tag || null,
+          },
+          first: PAGE_SIZE,
+          after: null,
+        },
+      });
+    }
+  }, [getAllDocuments, sourceLang, bouncedFilter]);
 
   const handleGoToDocumentViewer = useCallback(
     (documentId: string) => {
@@ -73,7 +94,9 @@ export function DocumentsPage() {
             alignItems="center"
           >
             <Typography variant="h3" color="dark">
-              {`${3} ${tr('documents found')}`}
+              {`${data?.getAllDocuments.pageInfo.totalEdges || 0} ${tr(
+                'documents found',
+              )}`}
             </Typography>
 
             <Button
@@ -94,8 +117,13 @@ export function DocumentsPage() {
           />
         </Stack>
       </Stack>
-
-      <DocumentList onClickItem={handleGoToDocumentViewer} />
+      {sourceLang ? (
+        <DocumentList
+          onClickItem={handleGoToDocumentViewer}
+          filter={bouncedFilter}
+          language={sourceLang}
+        />
+      ) : null}
     </PageLayout>
   );
 }
