@@ -16,8 +16,6 @@ import { TranslationsModule } from './components/translations/translations.modul
 import { DefinitionsModule } from './components/definitions/definitions.module';
 import { PhraseModule } from './components/phrases/phrases.module';
 import { SiteTextsModule } from './components/site-text/site-texts.module';
-import { HttpLoggerMiddleware } from './core/middleware/http-logger.middleware';
-import { MiddlewareModule } from './core/middleware/middleware.module';
 import { ForumsModule } from './components/forums/forums.module';
 import { ForumFoldersModule } from './components/forum-folders/folders.module';
 import { ThreadModule } from './components/threads/threads.module';
@@ -29,6 +27,10 @@ import { QuestionAndAnswersModule } from './components/question-answer/question-
 import { PericopiesModule } from './components/pericopies/pericopies.module';
 import { BotsModule } from './components/translator-bots/bots.module';
 import { PopulatorModule } from './components/populators/populator.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ScheduledTasksModule } from './scheduled-tasks/scheduledTasks.module';
+import { MiddlewareModule } from './middleware/middleware.module';
+import { HttpLoggerMiddleware } from './middleware/http-logger.middleware';
 
 @Module({
   imports: [
@@ -66,6 +68,8 @@ import { PopulatorModule } from './components/populators/populator.module';
     PericopiesModule,
     BotsModule,
     PopulatorModule,
+    ScheduleModule.forRoot(),
+    ScheduledTasksModule,
   ],
   controllers: [],
   providers: [],

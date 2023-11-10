@@ -49,6 +49,7 @@ import {
   useTranslateMissingWordsAndPhrasesByChatGptMutation,
   useTranslateMissingWordsAndPhrasesByDeepLMutation,
   useTranslateMissingWordsAndPhrasesBySmartcatMutation,
+  useTranslateMissingWordsAndPhrasesByLiltMutation,
 } from '../../../generated/graphql';
 
 import { langInfo2String, langInfo2tag } from '../../../../../utils';
@@ -135,6 +136,9 @@ export function AIControllerPage() {
 
   const [translateAllWordsAndPhrasesByLilt] =
     useTranslateAllWordsAndPhrasesByLiltMutation();
+
+  const [translateMissingWordsAndPhrasesByLilt] =
+    useTranslateMissingWordsAndPhrasesByLiltMutation();
 
   //smartcat
   const [translateWordsAndPhrasesBySmartcat] =
@@ -821,6 +825,69 @@ export function AIControllerPage() {
     }
   }, [dismiss, presentToast, source, tr, translateAllWordsAndPhrasesByLilt]);
 
+  const handleTranslateMissingL = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      handleTranslateToAllLangsL();
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    presentLoading({
+      message: messageHTML({
+        total: 1,
+        completed: 0,
+        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
+          'into',
+        )} ${langInfo2String(target)} ...`,
+      }),
+    });
+    try {
+      const { data } = await translateMissingWordsAndPhrasesByLilt({
+        variables: {
+          from_language_code: source.lang.tag,
+          to_language_code: target.lang.tag,
+        },
+      });
+
+      dismiss();
+
+      if (data && data.translateMissingWordsAndPhrasesByLilt.result) {
+        setResult(data.translateMissingWordsAndPhrasesByLilt.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      dismiss();
+    }
+  };
+
   // SMARTCAT
   const handleTranslateSC = async () => {
     if (!source) {
@@ -1244,7 +1311,7 @@ export function AIControllerPage() {
     },
     {
       handleTranslateFunc: handleTranslateL,
-      handleTranslateMissingFunc: null,
+      handleTranslateMissingFunc: handleTranslateMissingL,
       botTitle: 'Lilt',
       languageLabel: !selectTarget
         ? languageData?.getLanguageTranslationInfo.liltTranslateTotalLangCount +
@@ -1253,7 +1320,6 @@ export function AIControllerPage() {
           languagesLData!.languagesForBotTranslate.languages?.filter(
             (scl) => scl.code === langInfo2tag(target || undefined),
           ).length + ' languages',
-      disabledActions: true,
     },
   ];
 

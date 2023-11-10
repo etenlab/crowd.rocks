@@ -81,6 +81,20 @@ export type CreateQuestionOnWordRangeUpsertInput = {
   question_type_is_multiselect: Scalars['Boolean']['input'];
 };
 
+export type DataGenInput = {
+  mapAmount?: InputMaybe<Scalars['Int']['input']>;
+  mapsToLanguages?: InputMaybe<Array<LanguageInput>>;
+};
+
+export type DataGenProgress = {
+  __typename?: 'DataGenProgress';
+  mapReTranslationsStatus: SubscriptionStatus;
+  mapTranslationsStatus: SubscriptionStatus;
+  mapUploadStatus: SubscriptionStatus;
+  output: Scalars['String']['output'];
+  overallStatus: SubscriptionStatus;
+};
+
 export type DefinitionUpdateaInput = {
   definition_id: Scalars['ID']['input'];
   definition_type_is_word: Scalars['Boolean']['input'];
@@ -669,10 +683,12 @@ export type Mutation = {
   createQuestionOnWordRange: QuestionOnWordRangesOutput;
   documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
+  forceMarkAndRetranslateOriginalMapsIds: GenericOutput;
   forumDelete: ForumDeleteOutput;
   forumFolderDelete: ForumFolderDeleteOutput;
   forumFolderUpsert: ForumFolderOutput;
   forumUpsert: ForumOutput;
+  generateData: GenericOutput;
   login: LoginOutput;
   logout: LogoutOutput;
   mapDelete: MapDeleteOutput;
@@ -689,8 +705,6 @@ export type Mutation = {
   phraseToPhraseTranslationUpsert: PhraseToPhraseTranslationOutput;
   phraseUpsert: PhraseOutput;
   phraseVoteUpsert: PhraseVoteOutput;
-  populateMapTranslations: GenericOutput;
-  populateMaps: GenericOutput;
   postCreateResolver: PostCreateOutput;
   register: RegisterOutput;
   resetEmailRequest: ResetEmailRequestOutput;
@@ -699,6 +713,7 @@ export type Mutation = {
   siteTextWordDefinitionUpsert: SiteTextWordDefinitionOutput;
   startZipMapDownload: StartZipMapOutput;
   stopBotTranslation: GenericOutput;
+  stopDataGeneration: GenericOutput;
   threadDelete: ThreadDeleteOutput;
   threadUpsert: ThreadOutput;
   toggleFlagWithRef: FlagsOutput;
@@ -719,6 +734,7 @@ export type Mutation = {
   translateMissingWordsAndPhrasesByChatGpt: TranslateAllWordsAndPhrasesByBotOutput;
   translateMissingWordsAndPhrasesByDeepL: TranslateAllWordsAndPhrasesByBotOutput;
   translateMissingWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByBotOutput;
+  translateMissingWordsAndPhrasesByLilt: TranslateAllWordsAndPhrasesByBotOutput;
   translateMissingWordsAndPhrasesBySmartcat: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByChatGPT4: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByChatGPT35: TranslateAllWordsAndPhrasesByBotOutput;
@@ -774,6 +790,11 @@ export type MutationEmailResponseResolverArgs = {
 };
 
 
+export type MutationForceMarkAndRetranslateOriginalMapsIdsArgs = {
+  originalMapsIds: Array<Scalars['String']['input']>;
+};
+
+
 export type MutationForumDeleteArgs = {
   forum_id: Scalars['ID']['input'];
 };
@@ -791,6 +812,11 @@ export type MutationForumFolderUpsertArgs = {
 
 export type MutationForumUpsertArgs = {
   input: ForumUpsertInput;
+};
+
+
+export type MutationGenerateDataArgs = {
+  input: DataGenInput;
 };
 
 
@@ -869,16 +895,6 @@ export type MutationPhraseUpsertArgs = {
 
 export type MutationPhraseVoteUpsertArgs = {
   input: PhraseVoteUpsertInput;
-};
-
-
-export type MutationPopulateMapTranslationsArgs = {
-  to_languages: Array<LanguageInput>;
-};
-
-
-export type MutationPopulateMapsArgs = {
-  map_amount?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1031,6 +1047,12 @@ export type MutationTranslateMissingWordsAndPhrasesByDeepLArgs = {
 
 
 export type MutationTranslateMissingWordsAndPhrasesByGoogleArgs = {
+  from_language: LanguageInput;
+  to_language: LanguageInput;
+};
+
+
+export type MutationTranslateMissingWordsAndPhrasesByLiltArgs = {
   from_language: LanguageInput;
   to_language: LanguageInput;
 };
@@ -1214,12 +1236,6 @@ export type NotificationListOutput = {
 export type NotifyUsersInput = {
   text: Scalars['String']['input'];
   user_ids: Array<Scalars['ID']['input']>;
-};
-
-export type OrigMapWordsAndPhrasesOutput = {
-  __typename?: 'OrigMapWordsAndPhrasesOutput';
-  error: ErrorType;
-  mapWordsOrPhrases?: Maybe<Array<MapWordOrPhrase>>;
 };
 
 export type PageInfo = {
@@ -1616,7 +1632,6 @@ export type Query = {
   getMapWordOrPhraseAsOrigByDefinitionId: MapWordOrPhraseAsOrigOutput;
   getOrigMapWordsAndPhrases: MapWordsAndPhrasesConnection;
   getOrigMapWordsAndPhrasesCount: MapWordsAndPhrasesCountOutput;
-  getOrigMapWordsAndPhrasesPaginated: OrigMapWordsAndPhrasesOutput;
   getOrigMapsList: GetOrigMapsListOutput;
   getPericopeVoteStatus: PericopeVoteStatusOutput;
   getPericopiesByDocumentId: PericopiesOutput;
@@ -1803,13 +1818,6 @@ export type QueryGetOrigMapWordsAndPhrasesArgs = {
 
 export type QueryGetOrigMapWordsAndPhrasesCountArgs = {
   input: GetOrigMapWordsAndPhrasesInput;
-};
-
-
-export type QueryGetOrigMapWordsAndPhrasesPaginatedArgs = {
-  input: GetOrigMapWordsAndPhrasesInput;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2346,6 +2354,7 @@ export type StartZipMapOutput = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  DataGenerationReport: DataGenProgress;
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult;
   ZipMapReport: ZipMapResult;
 };
@@ -2353,6 +2362,7 @@ export type Subscription = {
 export enum SubscriptionStatus {
   Completed = 'Completed',
   Error = 'Error',
+  NotStarted = 'NotStarted',
   Progressing = 'Progressing'
 }
 
@@ -2941,26 +2951,23 @@ export type PasswordResetFormRequestMutationVariables = Exact<{
 
 export type PasswordResetFormRequestMutation = { __typename?: 'Mutation', passwordResetFormResolver: { __typename?: 'LoginOutput', error: ErrorType, session?: { __typename?: 'Session', user_id: string, token: string, avatar: string, avatar_url?: string | null } | null } };
 
-export type GenerateMapsMutationVariables = Exact<{
-  map_amount?: InputMaybe<Scalars['Int']['input']>;
+export type GenerateDataMutationVariables = Exact<{
+  mapAmount?: InputMaybe<Scalars['Int']['input']>;
+  mapsToLanguages?: InputMaybe<Array<LanguageInput> | LanguageInput>;
 }>;
 
 
-export type GenerateMapsMutation = { __typename?: 'Mutation', populateMaps: { __typename?: 'GenericOutput', error: ErrorType } };
+export type GenerateDataMutation = { __typename?: 'Mutation', generateData: { __typename?: 'GenericOutput', error: ErrorType } };
 
-export type GenerateMapTranslationsMutationVariables = Exact<{
-  to_languages: Array<LanguageInput> | LanguageInput;
-}>;
+export type SubscribeToDataGenProgressSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GenerateMapTranslationsMutation = { __typename?: 'Mutation', populateMapTranslations: { __typename?: 'GenericOutput', error: ErrorType } };
+export type SubscribeToDataGenProgressSubscription = { __typename?: 'Subscription', DataGenerationReport: { __typename?: 'DataGenProgress', output: string, mapUploadStatus: SubscriptionStatus, mapTranslationsStatus: SubscriptionStatus, mapReTranslationsStatus: SubscriptionStatus, overallStatus: SubscriptionStatus } };
 
-export type MapsReTranslateToLangsMutationVariables = Exact<{
-  forLangTags: Array<Scalars['String']['input']> | Scalars['String']['input'];
-}>;
+export type StopDataGenerationMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MapsReTranslateToLangsMutation = { __typename?: 'Mutation', mapsReTranslateToLangs: { __typename?: 'GenericOutput', error: ErrorType } };
+export type StopDataGenerationMutation = { __typename?: 'Mutation', stopDataGeneration: { __typename?: 'GenericOutput', error: ErrorType } };
 
 export type WordlikeStringFragmentFragment = { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string };
 
@@ -3338,17 +3345,6 @@ export type GetOrigMapWordsAndPhrasesCountQueryVariables = Exact<{
 
 export type GetOrigMapWordsAndPhrasesCountQuery = { __typename?: 'Query', getOrigMapWordsAndPhrasesCount: { __typename?: 'MapWordsAndPhrasesCountOutput', count?: number | null } };
 
-export type GetOrigMapWordsAndPhrasesPaginatedQueryVariables = Exact<{
-  original_map_id?: InputMaybe<Scalars['String']['input']>;
-  lang: LanguageInput;
-  filter?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type GetOrigMapWordsAndPhrasesPaginatedQuery = { __typename?: 'Query', getOrigMapWordsAndPhrasesPaginated: { __typename?: 'OrigMapWordsAndPhrasesOutput', mapWordsOrPhrases?: Array<{ __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null, o_created_at: any, o_created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }> | null } };
-
 export type GetMapWordOrPhraseAsOrigByDefinitionIdQueryVariables = Exact<{
   definition_id: Scalars['ID']['input'];
   is_word_definition: Scalars['Boolean']['input'];
@@ -3433,6 +3429,13 @@ export type ToggleMapVoteStatusMutationVariables = Exact<{
 
 
 export type ToggleMapVoteStatusMutation = { __typename?: 'Mutation', toggleMapVoteStatus: { __typename?: 'MapVoteStatusOutputRow', error: ErrorType, vote_status?: { __typename?: 'MapVoteStatus', map_id: string, is_original: boolean, downvotes: number, upvotes: number } | null } };
+
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationVariables = Exact<{
+  originalMapsIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type ForceMarkAndRetranslateOriginalMapsIdsMutation = { __typename?: 'Mutation', forceMarkAndRetranslateOriginalMapsIds: { __typename?: 'GenericOutput', error: ErrorType } };
 
 export type GetMapVoteStatusQueryVariables = Exact<{
   map_id: Scalars['ID']['input'];
@@ -3892,6 +3895,14 @@ export type TranslateMissingWordsAndPhrasesByDeepLMutationVariables = Exact<{
 
 
 export type TranslateMissingWordsAndPhrasesByDeepLMutation = { __typename?: 'Mutation', translateMissingWordsAndPhrasesByDeepL: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
+
+export type TranslateMissingWordsAndPhrasesByLiltMutationVariables = Exact<{
+  from_language_code: Scalars['String']['input'];
+  to_language_code: Scalars['String']['input'];
+}>;
+
+
+export type TranslateMissingWordsAndPhrasesByLiltMutation = { __typename?: 'Mutation', translateMissingWordsAndPhrasesByLilt: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
 
 export type TranslateMissingWordsAndPhrasesBySmartcatMutationVariables = Exact<{
   from_language_code: Scalars['String']['input'];
@@ -5108,105 +5119,105 @@ export function usePasswordResetFormRequestMutation(baseOptions?: Apollo.Mutatio
 export type PasswordResetFormRequestMutationHookResult = ReturnType<typeof usePasswordResetFormRequestMutation>;
 export type PasswordResetFormRequestMutationResult = Apollo.MutationResult<PasswordResetFormRequestMutation>;
 export type PasswordResetFormRequestMutationOptions = Apollo.BaseMutationOptions<PasswordResetFormRequestMutation, PasswordResetFormRequestMutationVariables>;
-export const GenerateMapsDocument = gql`
-    mutation GenerateMaps($map_amount: Int) {
-  populateMaps(map_amount: $map_amount) {
+export const GenerateDataDocument = gql`
+    mutation GenerateData($mapAmount: Int, $mapsToLanguages: [LanguageInput!]) {
+  generateData(input: {mapAmount: $mapAmount, mapsToLanguages: $mapsToLanguages}) {
     error
   }
 }
     `;
-export type GenerateMapsMutationFn = Apollo.MutationFunction<GenerateMapsMutation, GenerateMapsMutationVariables>;
+export type GenerateDataMutationFn = Apollo.MutationFunction<GenerateDataMutation, GenerateDataMutationVariables>;
 
 /**
- * __useGenerateMapsMutation__
+ * __useGenerateDataMutation__
  *
- * To run a mutation, you first call `useGenerateMapsMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useGenerateMapsMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useGenerateDataMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGenerateDataMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [generateMapsMutation, { data, loading, error }] = useGenerateMapsMutation({
+ * const [generateDataMutation, { data, loading, error }] = useGenerateDataMutation({
  *   variables: {
- *      map_amount: // value for 'map_amount'
+ *      mapAmount: // value for 'mapAmount'
+ *      mapsToLanguages: // value for 'mapsToLanguages'
  *   },
  * });
  */
-export function useGenerateMapsMutation(baseOptions?: Apollo.MutationHookOptions<GenerateMapsMutation, GenerateMapsMutationVariables>) {
+export function useGenerateDataMutation(baseOptions?: Apollo.MutationHookOptions<GenerateDataMutation, GenerateDataMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<GenerateMapsMutation, GenerateMapsMutationVariables>(GenerateMapsDocument, options);
+        return Apollo.useMutation<GenerateDataMutation, GenerateDataMutationVariables>(GenerateDataDocument, options);
       }
-export type GenerateMapsMutationHookResult = ReturnType<typeof useGenerateMapsMutation>;
-export type GenerateMapsMutationResult = Apollo.MutationResult<GenerateMapsMutation>;
-export type GenerateMapsMutationOptions = Apollo.BaseMutationOptions<GenerateMapsMutation, GenerateMapsMutationVariables>;
-export const GenerateMapTranslationsDocument = gql`
-    mutation GenerateMapTranslations($to_languages: [LanguageInput!]!) {
-  populateMapTranslations(to_languages: $to_languages) {
+export type GenerateDataMutationHookResult = ReturnType<typeof useGenerateDataMutation>;
+export type GenerateDataMutationResult = Apollo.MutationResult<GenerateDataMutation>;
+export type GenerateDataMutationOptions = Apollo.BaseMutationOptions<GenerateDataMutation, GenerateDataMutationVariables>;
+export const SubscribeToDataGenProgressDocument = gql`
+    subscription SubscribeToDataGenProgress {
+  DataGenerationReport {
+    output
+    mapUploadStatus
+    mapTranslationsStatus
+    mapReTranslationsStatus
+    overallStatus
+  }
+}
+    `;
+
+/**
+ * __useSubscribeToDataGenProgressSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToDataGenProgressSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToDataGenProgressSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToDataGenProgressSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToDataGenProgressSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToDataGenProgressSubscription, SubscribeToDataGenProgressSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToDataGenProgressSubscription, SubscribeToDataGenProgressSubscriptionVariables>(SubscribeToDataGenProgressDocument, options);
+      }
+export type SubscribeToDataGenProgressSubscriptionHookResult = ReturnType<typeof useSubscribeToDataGenProgressSubscription>;
+export type SubscribeToDataGenProgressSubscriptionResult = Apollo.SubscriptionResult<SubscribeToDataGenProgressSubscription>;
+export const StopDataGenerationDocument = gql`
+    mutation StopDataGeneration {
+  stopDataGeneration {
     error
   }
 }
     `;
-export type GenerateMapTranslationsMutationFn = Apollo.MutationFunction<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>;
+export type StopDataGenerationMutationFn = Apollo.MutationFunction<StopDataGenerationMutation, StopDataGenerationMutationVariables>;
 
 /**
- * __useGenerateMapTranslationsMutation__
+ * __useStopDataGenerationMutation__
  *
- * To run a mutation, you first call `useGenerateMapTranslationsMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useGenerateMapTranslationsMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useStopDataGenerationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useStopDataGenerationMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [generateMapTranslationsMutation, { data, loading, error }] = useGenerateMapTranslationsMutation({
+ * const [stopDataGenerationMutation, { data, loading, error }] = useStopDataGenerationMutation({
  *   variables: {
- *      to_languages: // value for 'to_languages'
  *   },
  * });
  */
-export function useGenerateMapTranslationsMutation(baseOptions?: Apollo.MutationHookOptions<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>) {
+export function useStopDataGenerationMutation(baseOptions?: Apollo.MutationHookOptions<StopDataGenerationMutation, StopDataGenerationMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>(GenerateMapTranslationsDocument, options);
+        return Apollo.useMutation<StopDataGenerationMutation, StopDataGenerationMutationVariables>(StopDataGenerationDocument, options);
       }
-export type GenerateMapTranslationsMutationHookResult = ReturnType<typeof useGenerateMapTranslationsMutation>;
-export type GenerateMapTranslationsMutationResult = Apollo.MutationResult<GenerateMapTranslationsMutation>;
-export type GenerateMapTranslationsMutationOptions = Apollo.BaseMutationOptions<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>;
-export const MapsReTranslateToLangsDocument = gql`
-    mutation MapsReTranslateToLangs($forLangTags: [String!]!) {
-  mapsReTranslateToLangs(forLangTags: $forLangTags) {
-    error
-  }
-}
-    `;
-export type MapsReTranslateToLangsMutationFn = Apollo.MutationFunction<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>;
-
-/**
- * __useMapsReTranslateToLangsMutation__
- *
- * To run a mutation, you first call `useMapsReTranslateToLangsMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useMapsReTranslateToLangsMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [mapsReTranslateToLangsMutation, { data, loading, error }] = useMapsReTranslateToLangsMutation({
- *   variables: {
- *      forLangTags: // value for 'forLangTags'
- *   },
- * });
- */
-export function useMapsReTranslateToLangsMutation(baseOptions?: Apollo.MutationHookOptions<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>(MapsReTranslateToLangsDocument, options);
-      }
-export type MapsReTranslateToLangsMutationHookResult = ReturnType<typeof useMapsReTranslateToLangsMutation>;
-export type MapsReTranslateToLangsMutationResult = Apollo.MutationResult<MapsReTranslateToLangsMutation>;
-export type MapsReTranslateToLangsMutationOptions = Apollo.BaseMutationOptions<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>;
+export type StopDataGenerationMutationHookResult = ReturnType<typeof useStopDataGenerationMutation>;
+export type StopDataGenerationMutationResult = Apollo.MutationResult<StopDataGenerationMutation>;
+export type StopDataGenerationMutationOptions = Apollo.BaseMutationOptions<StopDataGenerationMutation, StopDataGenerationMutationVariables>;
 export const WordDefinitionReadDocument = gql`
     query WordDefinitionRead($id: ID!) {
   wordDefinitionRead(id: $id) {
@@ -6696,51 +6707,6 @@ export function useGetOrigMapWordsAndPhrasesCountLazyQuery(baseOptions?: Apollo.
 export type GetOrigMapWordsAndPhrasesCountQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesCountQuery>;
 export type GetOrigMapWordsAndPhrasesCountLazyQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesCountLazyQuery>;
 export type GetOrigMapWordsAndPhrasesCountQueryResult = Apollo.QueryResult<GetOrigMapWordsAndPhrasesCountQuery, GetOrigMapWordsAndPhrasesCountQueryVariables>;
-export const GetOrigMapWordsAndPhrasesPaginatedDocument = gql`
-    query GetOrigMapWordsAndPhrasesPaginated($original_map_id: String, $lang: LanguageInput!, $filter: String, $offset: Int, $limit: Int) {
-  getOrigMapWordsAndPhrasesPaginated(
-    input: {lang: $lang, filter: $filter, original_map_id: $original_map_id}
-    offset: $offset
-    limit: $limit
-  ) {
-    mapWordsOrPhrases {
-      ...MapWordOrPhraseFragment
-    }
-  }
-}
-    ${MapWordOrPhraseFragmentFragmentDoc}`;
-
-/**
- * __useGetOrigMapWordsAndPhrasesPaginatedQuery__
- *
- * To run a query within a React component, call `useGetOrigMapWordsAndPhrasesPaginatedQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetOrigMapWordsAndPhrasesPaginatedQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetOrigMapWordsAndPhrasesPaginatedQuery({
- *   variables: {
- *      original_map_id: // value for 'original_map_id'
- *      lang: // value for 'lang'
- *      filter: // value for 'filter'
- *      offset: // value for 'offset'
- *      limit: // value for 'limit'
- *   },
- * });
- */
-export function useGetOrigMapWordsAndPhrasesPaginatedQuery(baseOptions: Apollo.QueryHookOptions<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>(GetOrigMapWordsAndPhrasesPaginatedDocument, options);
-      }
-export function useGetOrigMapWordsAndPhrasesPaginatedLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>(GetOrigMapWordsAndPhrasesPaginatedDocument, options);
-        }
-export type GetOrigMapWordsAndPhrasesPaginatedQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesPaginatedQuery>;
-export type GetOrigMapWordsAndPhrasesPaginatedLazyQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesPaginatedLazyQuery>;
-export type GetOrigMapWordsAndPhrasesPaginatedQueryResult = Apollo.QueryResult<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>;
 export const GetMapWordOrPhraseAsOrigByDefinitionIdDocument = gql`
     query GetMapWordOrPhraseAsOrigByDefinitionId($definition_id: ID!, $is_word_definition: Boolean!) {
   getMapWordOrPhraseAsOrigByDefinitionId(
@@ -7145,6 +7111,39 @@ export function useToggleMapVoteStatusMutation(baseOptions?: Apollo.MutationHook
 export type ToggleMapVoteStatusMutationHookResult = ReturnType<typeof useToggleMapVoteStatusMutation>;
 export type ToggleMapVoteStatusMutationResult = Apollo.MutationResult<ToggleMapVoteStatusMutation>;
 export type ToggleMapVoteStatusMutationOptions = Apollo.BaseMutationOptions<ToggleMapVoteStatusMutation, ToggleMapVoteStatusMutationVariables>;
+export const ForceMarkAndRetranslateOriginalMapsIdsDocument = gql`
+    mutation ForceMarkAndRetranslateOriginalMapsIds($originalMapsIds: [String!]!) {
+  forceMarkAndRetranslateOriginalMapsIds(originalMapsIds: $originalMapsIds) {
+    error
+  }
+}
+    `;
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationFn = Apollo.MutationFunction<ForceMarkAndRetranslateOriginalMapsIdsMutation, ForceMarkAndRetranslateOriginalMapsIdsMutationVariables>;
+
+/**
+ * __useForceMarkAndRetranslateOriginalMapsIdsMutation__
+ *
+ * To run a mutation, you first call `useForceMarkAndRetranslateOriginalMapsIdsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useForceMarkAndRetranslateOriginalMapsIdsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [forceMarkAndRetranslateOriginalMapsIdsMutation, { data, loading, error }] = useForceMarkAndRetranslateOriginalMapsIdsMutation({
+ *   variables: {
+ *      originalMapsIds: // value for 'originalMapsIds'
+ *   },
+ * });
+ */
+export function useForceMarkAndRetranslateOriginalMapsIdsMutation(baseOptions?: Apollo.MutationHookOptions<ForceMarkAndRetranslateOriginalMapsIdsMutation, ForceMarkAndRetranslateOriginalMapsIdsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ForceMarkAndRetranslateOriginalMapsIdsMutation, ForceMarkAndRetranslateOriginalMapsIdsMutationVariables>(ForceMarkAndRetranslateOriginalMapsIdsDocument, options);
+      }
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationHookResult = ReturnType<typeof useForceMarkAndRetranslateOriginalMapsIdsMutation>;
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationResult = Apollo.MutationResult<ForceMarkAndRetranslateOriginalMapsIdsMutation>;
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationOptions = Apollo.BaseMutationOptions<ForceMarkAndRetranslateOriginalMapsIdsMutation, ForceMarkAndRetranslateOriginalMapsIdsMutationVariables>;
 export const GetMapVoteStatusDocument = gql`
     query GetMapVoteStatus($map_id: ID!, $is_original: Boolean!) {
   getMapVoteStatus(map_id: $map_id, is_original: $is_original) {
@@ -9043,6 +9042,50 @@ export function useTranslateMissingWordsAndPhrasesByDeepLMutation(baseOptions?: 
 export type TranslateMissingWordsAndPhrasesByDeepLMutationHookResult = ReturnType<typeof useTranslateMissingWordsAndPhrasesByDeepLMutation>;
 export type TranslateMissingWordsAndPhrasesByDeepLMutationResult = Apollo.MutationResult<TranslateMissingWordsAndPhrasesByDeepLMutation>;
 export type TranslateMissingWordsAndPhrasesByDeepLMutationOptions = Apollo.BaseMutationOptions<TranslateMissingWordsAndPhrasesByDeepLMutation, TranslateMissingWordsAndPhrasesByDeepLMutationVariables>;
+export const TranslateMissingWordsAndPhrasesByLiltDocument = gql`
+    mutation TranslateMissingWordsAndPhrasesByLilt($from_language_code: String!, $to_language_code: String!) {
+  translateMissingWordsAndPhrasesByLilt(
+    from_language: {language_code: $from_language_code}
+    to_language: {language_code: $to_language_code}
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+    `;
+export type TranslateMissingWordsAndPhrasesByLiltMutationFn = Apollo.MutationFunction<TranslateMissingWordsAndPhrasesByLiltMutation, TranslateMissingWordsAndPhrasesByLiltMutationVariables>;
+
+/**
+ * __useTranslateMissingWordsAndPhrasesByLiltMutation__
+ *
+ * To run a mutation, you first call `useTranslateMissingWordsAndPhrasesByLiltMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTranslateMissingWordsAndPhrasesByLiltMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [translateMissingWordsAndPhrasesByLiltMutation, { data, loading, error }] = useTranslateMissingWordsAndPhrasesByLiltMutation({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      to_language_code: // value for 'to_language_code'
+ *   },
+ * });
+ */
+export function useTranslateMissingWordsAndPhrasesByLiltMutation(baseOptions?: Apollo.MutationHookOptions<TranslateMissingWordsAndPhrasesByLiltMutation, TranslateMissingWordsAndPhrasesByLiltMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TranslateMissingWordsAndPhrasesByLiltMutation, TranslateMissingWordsAndPhrasesByLiltMutationVariables>(TranslateMissingWordsAndPhrasesByLiltDocument, options);
+      }
+export type TranslateMissingWordsAndPhrasesByLiltMutationHookResult = ReturnType<typeof useTranslateMissingWordsAndPhrasesByLiltMutation>;
+export type TranslateMissingWordsAndPhrasesByLiltMutationResult = Apollo.MutationResult<TranslateMissingWordsAndPhrasesByLiltMutation>;
+export type TranslateMissingWordsAndPhrasesByLiltMutationOptions = Apollo.BaseMutationOptions<TranslateMissingWordsAndPhrasesByLiltMutation, TranslateMissingWordsAndPhrasesByLiltMutationVariables>;
 export const TranslateMissingWordsAndPhrasesBySmartcatDocument = gql`
     mutation TranslateMissingWordsAndPhrasesBySmartcat($from_language_code: String!, $to_language_code: String!) {
   translateMissingWordsAndPhrasesBySmartcat(
@@ -9862,7 +9905,6 @@ export const namedOperations = {
     GetForumsList: 'GetForumsList',
     GetOrigMapWordsAndPhrases: 'GetOrigMapWordsAndPhrases',
     GetOrigMapWordsAndPhrasesCount: 'GetOrigMapWordsAndPhrasesCount',
-    GetOrigMapWordsAndPhrasesPaginated: 'GetOrigMapWordsAndPhrasesPaginated',
     GetMapWordOrPhraseAsOrigByDefinitionId: 'GetMapWordOrPhraseAsOrigByDefinitionId',
     GetAllMapsList: 'GetAllMapsList',
     GetMapDetails: 'GetMapDetails',
@@ -9902,9 +9944,8 @@ export const namedOperations = {
     Logout: 'Logout',
     ResetEmailRequest: 'ResetEmailRequest',
     PasswordResetFormRequest: 'PasswordResetFormRequest',
-    GenerateMaps: 'GenerateMaps',
-    GenerateMapTranslations: 'GenerateMapTranslations',
-    MapsReTranslateToLangs: 'MapsReTranslateToLangs',
+    GenerateData: 'GenerateData',
+    StopDataGeneration: 'StopDataGeneration',
     WordDefinitionUpsert: 'WordDefinitionUpsert',
     ToggleWordDefinitionVoteStatus: 'ToggleWordDefinitionVoteStatus',
     ToggleWordVoteStatus: 'ToggleWordVoteStatus',
@@ -9929,6 +9970,7 @@ export const namedOperations = {
     MapsTranslationsReset: 'MapsTranslationsReset',
     MapsReTranslate: 'MapsReTranslate',
     ToggleMapVoteStatus: 'ToggleMapVoteStatus',
+    ForceMarkAndRetranslateOriginalMapsIds: 'ForceMarkAndRetranslateOriginalMapsIds',
     AddNotification: 'AddNotification',
     DeleteNotification: 'DeleteNotification',
     MarkNotificationRead: 'MarkNotificationRead',
@@ -9949,6 +9991,7 @@ export const namedOperations = {
     TranslateMissingWordsAndPhrasesByChatGPT: 'TranslateMissingWordsAndPhrasesByChatGPT',
     TranslateMissingWordsAndPhrasesByGoogle: 'TranslateMissingWordsAndPhrasesByGoogle',
     TranslateMissingWordsAndPhrasesByDeepL: 'TranslateMissingWordsAndPhrasesByDeepL',
+    TranslateMissingWordsAndPhrasesByLilt: 'TranslateMissingWordsAndPhrasesByLilt',
     TranslateMissingWordsAndPhrasesBySmartcat: 'TranslateMissingWordsAndPhrasesBySmartcat',
     TranslateWordsAndPhrasesByLilt: 'TranslateWordsAndPhrasesByLilt',
     TranslateWordsAndPhrasesBySmartcat: 'TranslateWordsAndPhrasesBySmartcat',
@@ -9966,6 +10009,7 @@ export const namedOperations = {
     AvatarUpdate: 'AvatarUpdate'
   },
   Subscription: {
+    SubscribeToDataGenProgress: 'SubscribeToDataGenProgress',
     SubscribeToZipMap: 'SubscribeToZipMap',
     SubscribeToTranslationReport: 'SubscribeToTranslationReport'
   },

@@ -1,16 +1,21 @@
-mutation GenerateMaps($map_amount: Int) {
-  populateMaps(map_amount: $map_amount) {
+mutation GenerateData($mapAmount: Int, $mapsToLanguages: [LanguageInput!]) {
+  generateData(input: {mapAmount: $mapAmount, mapsToLanguages: $mapsToLanguages}) {
     error
   }
 }
-mutation GenerateMapTranslations($to_languages: [LanguageInput!]!){
-    populateMapTranslations(to_languages: $to_languages){
-      error
-    }
+
+subscription SubscribeToDataGenProgress {
+  DataGenerationReport {
+    output
+    mapUploadStatus
+    mapTranslationsStatus
+    mapReTranslationsStatus
+    overallStatus
+  }
 }
 
-mutation MapsReTranslateToLangs($forLangTags: [String!]!) {
-  mapsReTranslateToLangs(forLangTags: $forLangTags) {
+mutation StopDataGeneration {
+  stopDataGeneration {
     error
   }
 }

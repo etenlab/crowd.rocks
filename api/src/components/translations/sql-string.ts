@@ -1338,3 +1338,55 @@ export function getTranslationLangSqlStr(
     [translation_id],
   ];
 }
+
+export type GetTranslationIdByFromToDefinitionsIdsSqlStrOutput = {
+  translation_id: string;
+};
+
+export function getTranslationIdByFromToDefinitionsIdsSqlStr(
+  from_definition_id: number,
+  from_definition_type_is_word: boolean,
+  to_definition_id: number,
+  to_definition_type_is_word: boolean,
+): [string, [number, number]] {
+  if (from_definition_type_is_word && to_definition_type_is_word) {
+    return [
+      `
+        select word_to_word_translation_id as translation_id
+        from word_to_word_translations wxwx
+        where wxwx.from_word_definition_id= $1
+        and wxwx.to_word_definition_id= $2
+        `,
+      [from_definition_id, to_definition_id],
+    ];
+  } else if (from_definition_type_is_word && !to_definition_type_is_word) {
+    return [
+      `
+        select word_to_phrase_translation_id as translation_id
+        from word_to_phrase_translations wxwx
+        where wxwx.from_word_definition_id= $1
+        and wxwx.to_phrase_definition_id= $2
+      `,
+      [from_definition_id, to_definition_id],
+    ];
+  } else if (!from_definition_type_is_word && to_definition_type_is_word) {
+    return [
+      `
+        select phrase_to_word_translation_id as translation_id
+        from phrase_to_word_translations wxwx
+        where wxwx.from_phrase_definition_id= $1
+        and wxwx.to_word_definition_id= $2
+      `,
+      [from_definition_id, to_definition_id],
+    ];
+  }
+  return [
+    `
+        select phrase_to_phrase_translation_id as translation_id
+        from phrase_to_phrase_translations wxwx
+        where wxwx.from_phrase_definition_id= $1
+        and wxwx.to_phrase_definition_id= $2
+      `,
+    [from_definition_id, to_definition_id],
+  ];
+}

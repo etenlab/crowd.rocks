@@ -12,7 +12,7 @@ import { SubscriptionToken } from 'src/common/subscription-token';
 import { BotType, GenericOutput } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
 import { PUB_SUB } from 'src/pubSub.module';
-import { IsAuthAdmin } from '../../core/decorators/is-auth-admin.decorator';
+import { IsAuthAdmin } from '../../decorators/is-auth-admin.decorator';
 import { LanguageInput } from '../common/types';
 import { AiTranslationsService } from './ai-translations.service';
 import {
@@ -127,6 +127,31 @@ export class BotsResolver {
     return this.aiTranslations.translateWordsAndPhrasesByLilt(
       from_language,
       to_language,
+      null,
+    );
+  }
+
+  @IsAuthAdmin()
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
+  async translateMissingWordsAndPhrasesByLilt(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    console.log(
+      'translateMissingWordsAndPhrasesByLilt',
+      JSON.stringify({
+        from_language,
+        to_language,
+      }),
+    );
+
+    return this.aiTranslations.translateMissingWordsAndPhrasesByLilt(
+      from_language,
+      to_language,
+      getBearer(req) || '',
       null,
     );
   }

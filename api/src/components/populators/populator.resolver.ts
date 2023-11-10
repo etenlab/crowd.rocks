@@ -1,40 +1,49 @@
-import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
-import { Args, Context, Int, Mutation, Resolver } from '@nestjs/graphql';
-import { ErrorType, GenericOutput } from 'src/common/types';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  Args,
+  Context,
+  Mutation,
+  Resolver,
+  Subscription,
+} from '@nestjs/graphql';
+import { ErrorType, GenericOutput, SubscriptionStatus } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
-import { createReadStream, ReadStream } from 'fs';
 import { AuthorizationService } from '../authorization/authorization.service';
-import { FileService } from '../file/file.service';
-import { MapsResolver } from '../maps/maps.resolver';
-import { Populator } from './types';
-import { join } from 'path';
-import { Octokit } from '@octokit/rest';
-import { lastValueFrom } from 'rxjs';
-import { AiTranslationsService } from '../translator-bots/ai-translations.service';
-import { LanguageInput } from '../common/types';
-import fetch from 'node-fetch';
-import { PostgresService } from 'src/core/postgres.service';
+import { DataGenInput, DataGenProgress, Populator } from './types';
+import { PopulatorService } from './populator.service';
+import { SubscriptionToken } from 'src/common/subscription-token';
+import { PubSub } from 'graphql-subscriptions';
+import { PUB_SUB } from 'src/pubSub.module';
+import { Subscription as OSubscription } from 'rxjs';
+import { IsAuthAdmin } from '../../decorators/is-auth-admin.decorator';
 
 @Injectable()
 @Resolver(Populator)
 export class PopulatorResolver {
+  private sub: OSubscription | null;
   constructor(
-    private httpService: HttpService,
-    private mapRes: MapsResolver,
-    private fileService: FileService,
     private authService: AuthorizationService,
-    private aiTranslationService: AiTranslationsService,
-    private pg: PostgresService,
-  ) {}
+    private generator: PopulatorService,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
+  ) {
+    this.sub = null;
+  }
 
   @Mutation(() => GenericOutput)
-  async populateMapTranslations(
-    @Args('to_languages', { type: () => [LanguageInput] })
-    to_languages: LanguageInput[],
+  async generateData(
+    @Args('input', { type: () => DataGenInput })
+    input: DataGenInput,
     @Context() req: any,
   ): Promise<GenericOutput> {
-    console.log('populating map translations:');
+    this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
+      [SubscriptionToken.DataGenerationReport]: {
+        output: ``,
+        mapUploadStatus: SubscriptionStatus.NotStarted,
+        mapTranslationsStatus: SubscriptionStatus.NotStarted,
+        mapReTranslationsStatus: SubscriptionStatus.NotStarted,
+        overallStatus: SubscriptionStatus.NotStarted,
+      } as DataGenProgress,
+    });
     const token = getBearer(req);
     if (!token) {
       return {
@@ -47,138 +56,38 @@ export class PopulatorResolver {
       };
     }
 
-    for (let i = 0; i < to_languages.length; i++) {
-      console.log(`add translations to ${to_languages[i]}...`);
-      this.aiTranslationService.translateWordsAndPhrasesByFaker(
-        { language_code: 'en', geo_code: null, dialect_code: null },
-        to_languages[i],
-        token,
-        null,
-      );
+    if (input.mapsToLanguages) {
+      this.sub = this.generator
+        .populateData(input.mapsToLanguages, token, req, input.mapAmount)
+        .subscribe((n) =>
+          this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
+            [SubscriptionToken.DataGenerationReport]: n,
+          }),
+        );
     }
-    console.log('... done');
 
     return {
       error: ErrorType.NoError,
     };
   }
 
+  @Subscription(() => DataGenProgress, {
+    name: SubscriptionToken.DataGenerationReport,
+  })
+  async subscribeToDataGen() {
+    console.log('subscribeToDataGen');
+    return this.pubSub.asyncIterator(SubscriptionToken.DataGenerationReport);
+  }
+
+  @IsAuthAdmin()
   @Mutation(() => GenericOutput)
-  async populateMaps(
-    @Context() req: any,
-    @Args('map_amount', { type: () => Int, nullable: true }) mapAmount?: number,
-  ): Promise<GenericOutput> {
-    const token = getBearer(req);
-    if (!token) {
-      return {
-        error: ErrorType.Unauthorized,
-      };
+  async stopDataGeneration(): Promise<GenericOutput> {
+    console.log('stopDataGeneration');
+    if (this.sub) {
+      this.sub.unsubscribe();
+    } else {
+      console.log('no subscription exists. ignoring');
     }
-    if (!this.authService.is_authorized(token)) {
-      return {
-        error: ErrorType.Unauthorized,
-      };
-    }
-    const octokit = new Octokit({
-      request: {
-        fetch: fetch,
-      },
-    });
-
-    const { data } = await octokit.rest.repos.getContent({
-      owner: 'etenlab',
-      repo: 'datasets',
-      path: 'maps/finished',
-    });
-
-    console.log(typeof data);
-    if (!Array.isArray(data)) {
-      return { error: ErrorType.UnknownError };
-    }
-    let thumbFileID: null | number = null;
-    if (!mapAmount) {
-      mapAmount = data.length;
-    }
-    for (let i = 0; i < mapAmount; i++) {
-      if (i === data.length) {
-        console.log(
-          'reached limit of maps in dataset. continuing with execution...',
-        );
-        break;
-      }
-      if (!data[i].download_url) {
-        console.log('no download url. skipping...');
-        continue;
-      }
-      if (data[i].download_url === null) {
-        console.log('no download url. skipping...');
-        continue;
-      }
-
-      console.log(`checking if ${data[i].name} exists...`);
-      const res1 = await this.pg.pool.query(
-        `
-        select
-          original_map_id
-        from
-          original_maps
-        where
-          map_file_name = $1;
-        `,
-        [data[i].name],
-      );
-      if (res1.rowCount === 1) {
-        console.log(`${data[i].name} already exists. Skipping...`);
-        mapAmount++;
-        continue;
-      }
-
-      console.log(`${data[i].name} does NOT exist yet`);
-      console.log('processing thumb file');
-      const thumb_file = createReadStream(
-        join(process.cwd(), 'test-thumb.png'),
-      );
-      if (thumbFileID === null) {
-        const resp = await this.fileService.uploadFile(
-          thumb_file,
-          'testmaps-thumb',
-          'image/png',
-          token,
-          undefined,
-        );
-        console.log('thumb Saved. error:');
-        console.log(resp?.error);
-        if (resp && resp.file && resp.error === ErrorType.NoError) {
-          thumbFileID = resp?.file?.id;
-        }
-      }
-
-      console.log('getting maps link info');
-
-      const { data: dataStream } = await lastValueFrom(
-        this.httpService.get<ReadStream>(data[i].download_url!, {
-          responseType: 'stream',
-        }),
-      );
-
-      const upload = await this.mapRes.mapUpload(
-        {
-          createReadStream: () => dataStream,
-          filename: data[i].name,
-          fieldName: 'fieldName',
-          mimetype: 'mimetype',
-          encoding: 'encoding',
-        },
-        thumbFileID + '',
-        'image/svg+xml',
-        req,
-        data[i].size,
-      );
-      console.log('upload finished. errors:');
-      console.log(upload.error);
-      console.log(upload.error == ErrorType.MapFilenameAlreadyExists);
-    }
-
     return { error: ErrorType.NoError };
   }
 }
