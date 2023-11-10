@@ -5,6 +5,7 @@ import {
   addPaginationVariableForGetForumsList as addPaginationVariableForGetForumsListAction,
   addPaginationVariableForGetForumFoldersList as addPaginationVariableForGetForumFoldersListAction,
   addPaginationVariableForGetTheadsList as addPaginationVariableForGetTheadsListAction,
+  addPaginationVariableForGetAllDocuments as addPaginationVariableForGetAllDocumentsAction,
 } from '../reducers/non-persistent.action';
 
 import { type ActionType } from '../reducers/index';
@@ -13,6 +14,7 @@ import {
   GetForumsListVariable,
   GetForumFoldersListVariable,
   GetThreadsListVariable,
+  GetAllDocumentsVariable,
 } from '../reducers/non-persistent.reducer';
 
 interface UseNonPersistentProps {
@@ -60,10 +62,20 @@ export function useNonPersistent({ dispatch }: UseNonPersistentProps) {
     [],
   );
 
+  const addPaginationVariableForGetAllDocuments = useCallback(
+    (variable: GetAllDocumentsVariable) => {
+      dispatchRef.current.dispatch(
+        addPaginationVariableForGetAllDocumentsAction(variable),
+      );
+    },
+    [],
+  );
+
   return {
     addPaginationVariableForGetAllSiteTextDefinitions,
     addPaginationVariableForGetForumsList,
     addPaginationVariableForGetForumFoldersList,
     addPaginationVariableForGetTheadsList,
+    addPaginationVariableForGetAllDocuments,
   };
 }

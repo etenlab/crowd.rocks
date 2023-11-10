@@ -27,6 +27,15 @@ export type GetThreadsListVariable = {
   forum_folder_id: string;
 };
 
+export type GetAllDocumentsVariable = {
+  input: {
+    filter: string | null;
+    language_code: string;
+    dialect_code: string | null;
+    geo_code: string | null;
+  };
+};
+
 export interface StateType {
   paginationVariables: {
     getAllSiteTextDefinitions: Record<
@@ -36,6 +45,7 @@ export interface StateType {
     getForumsLists: Record<string, GetForumsListVariable>;
     getForumFoldersLists: Record<string, GetForumFoldersListVariable>;
     getThreadsLists: Record<string, GetThreadsListVariable>;
+    getAllDocuments: Record<string, GetAllDocumentsVariable>;
   };
 }
 
@@ -45,6 +55,7 @@ export const initialState: StateType = {
     getForumsLists: {},
     getForumFoldersLists: {},
     getThreadsLists: {},
+    getAllDocuments: {},
   },
 };
 
@@ -134,6 +145,29 @@ export function reducer(
           ...prevState.paginationVariables,
           getThreadsLists: {
             ...prevState.paginationVariables.getThreadsLists,
+            [keyStr]: variable,
+          },
+        },
+      };
+    }
+    case actions.ADD_PAGINATION_VARIABLE_FOR_GET_ALL_DOCUMENTS: {
+      const variable = payload as GetAllDocumentsVariable;
+
+      const keyStr = [
+        variable.input.filter,
+        variable.input.language_code,
+        variable.input.dialect_code || '',
+        variable.input.geo_code || '',
+      ]
+        .map((item) => item + '')
+        .join('//--//');
+
+      return {
+        ...prevState,
+        paginationVariables: {
+          ...prevState.paginationVariables,
+          getAllDocuments: {
+            ...prevState.paginationVariables.getAllDocuments,
             [keyStr]: variable,
           },
         },
