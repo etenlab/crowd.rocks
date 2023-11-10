@@ -5,8 +5,11 @@ import {
   GetThreadsListDocument,
   GetThreadsListQuery,
   ThreadEdge,
+  ThreadFragmentFragmentDoc,
 } from '../generated/graphql';
 import { GetThreadsListVariable } from '../reducers/non-persistent.reducer';
+
+import { updateForumFoldersListCache } from './upsertForumFolder';
 
 export function updateCacheWithUpdateThread(
   cache: ApolloCache<unknown>,
@@ -46,6 +49,32 @@ export function updateCacheWithUpdateThread(
       },
     );
   }
+}
+
+export function updateThreadsListCache(
+  cache: ApolloCache<unknown>,
+  thread_id: string,
+  gap: {
+    total_posts: number;
+  },
+) {
+  const data = cache.readFragment<Thread>({
+    id: cache.identify({
+      __typename: 'Thread',
+      thread_id: thread_id,
+    }),
+    fragment: ThreadFragmentFragmentDoc,
+    fragmentName: 'ThreadFragment',
+  });
+
+  if (!data) {
+    return;
+  }
+
+  updateForumFoldersListCache(cache, data.forum_folder_id, {
+    total_posts: gap.total_posts,
+    total_threads: 0,
+  });
 }
 
 export function updateCacheWithCreateThread(
@@ -103,4 +132,9 @@ export function updateCacheWithCreateThread(
       },
     );
   }
+
+  updateForumFoldersListCache(cache, newThread.forum_folder_id, {
+    total_posts: 0,
+    total_threads: 1,
+  });
 }

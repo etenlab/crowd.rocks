@@ -28,7 +28,8 @@ export function useTr() {
       if (
         originalMap[siteText.trim()] === undefined &&
         newSiteTextsRef.current[siteText.trim()] === undefined &&
-        globals.get_user_id() !== null
+        globals.get_user_id() !== null &&
+        globals.is_admin_user()
       ) {
         newSiteTextsRef.current[siteText.trim()] = siteText.trim();
         siteTextUpsert({

@@ -81,6 +81,20 @@ export type CreateQuestionOnWordRangeUpsertInput = {
   question_type_is_multiselect: Scalars['Boolean']['input'];
 };
 
+export type DataGenInput = {
+  mapAmount?: InputMaybe<Scalars['Int']['input']>;
+  mapsToLanguages?: InputMaybe<Array<LanguageInput>>;
+};
+
+export type DataGenProgress = {
+  __typename?: 'DataGenProgress';
+  mapReTranslationsStatus: SubscriptionStatus;
+  mapTranslationsStatus: SubscriptionStatus;
+  mapUploadStatus: SubscriptionStatus;
+  output: Scalars['String']['output'];
+  overallStatus: SubscriptionStatus;
+};
+
 export type DefinitionUpdateaInput = {
   definition_id: Scalars['ID']['input'];
   definition_type_is_word: Scalars['Boolean']['input'];
@@ -100,6 +114,19 @@ export type DefinitionVoteStatusOutputRow = {
   vote_status?: Maybe<DefinitionVoteStatus>;
 };
 
+export type DocumentEdge = {
+  __typename?: 'DocumentEdge';
+  cursor: Scalars['ID']['output'];
+  node: TextyDocument;
+};
+
+export type DocumentListConnection = {
+  __typename?: 'DocumentListConnection';
+  edges: Array<DocumentEdge>;
+  error: ErrorType;
+  pageInfo: PageInfo;
+};
+
 export type DocumentUploadInput = {
   document: TextyDocumentInput;
 };
@@ -110,16 +137,24 @@ export type DocumentUploadOutput = {
   error: ErrorType;
 };
 
-export type DocumentWordEntriesOutput = {
-  __typename?: 'DocumentWordEntriesOutput';
-  document_word_entries: Array<Maybe<DocumentWordEntry>>;
+export type DocumentWordEntriesEdge = {
+  __typename?: 'DocumentWordEntriesEdge';
+  cursor: Scalars['ID']['output'];
+  node: Array<DocumentWordEntry>;
+};
+
+export type DocumentWordEntriesListConnection = {
+  __typename?: 'DocumentWordEntriesListConnection';
+  edges: Array<DocumentWordEntriesEdge>;
   error: ErrorType;
+  pageInfo: PageInfo;
 };
 
 export type DocumentWordEntry = {
   __typename?: 'DocumentWordEntry';
   document_id: Scalars['String']['output'];
   document_word_entry_id: Scalars['ID']['output'];
+  page: Scalars['Int']['output'];
   parent_document_word_entry_id?: Maybe<Scalars['String']['output']>;
   wordlike_string: WordlikeString;
 };
@@ -281,7 +316,7 @@ export type ForumDeleteOutput = {
 export type ForumEdge = {
   __typename?: 'ForumEdge';
   cursor: Scalars['ID']['output'];
-  node: Forum;
+  node: ForumNode;
 };
 
 export type ForumFolder = {
@@ -302,7 +337,7 @@ export type ForumFolderDeleteOutput = {
 export type ForumFolderEdge = {
   __typename?: 'ForumFolderEdge';
   cursor: Scalars['ID']['output'];
-  node: ForumFolder;
+  node: ForumFolderNode;
 };
 
 export type ForumFolderListConnection = {
@@ -310,6 +345,17 @@ export type ForumFolderListConnection = {
   edges: Array<ForumFolderEdge>;
   error: ErrorType;
   pageInfo: PageInfo;
+};
+
+export type ForumFolderNode = {
+  __typename?: 'ForumFolderNode';
+  created_by: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  forum_folder_id: Scalars['ID']['output'];
+  forum_id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  total_posts: Scalars['Int']['output'];
+  total_threads: Scalars['Int']['output'];
 };
 
 export type ForumFolderOutput = {
@@ -330,6 +376,17 @@ export type ForumListConnection = {
   edges: Array<ForumEdge>;
   error: ErrorType;
   pageInfo: PageInfo;
+};
+
+export type ForumNode = {
+  __typename?: 'ForumNode';
+  created_by: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  forum_id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  total_posts: Scalars['Int']['output'];
+  total_threads: Scalars['Int']['output'];
+  total_topics: Scalars['Int']['output'];
 };
 
 export type ForumOutput = {
@@ -362,16 +419,6 @@ export type FromWordAndDefintionlikeStringUpsertInput = {
 
 export type GenericOutput = {
   __typename?: 'GenericOutput';
-  error: ErrorType;
-};
-
-export type GetAllDocumentsInput = {
-  lang?: InputMaybe<LanguageInput>;
-};
-
-export type GetAllDocumentsOutput = {
-  __typename?: 'GetAllDocumentsOutput';
-  documents?: Maybe<Array<TextyDocument>>;
   error: ErrorType;
 };
 
@@ -636,10 +683,12 @@ export type Mutation = {
   createQuestionOnWordRange: QuestionOnWordRangesOutput;
   documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
+  forceMarkAndRetranslateOriginalMapsIds: GenericOutput;
   forumDelete: ForumDeleteOutput;
   forumFolderDelete: ForumFolderDeleteOutput;
   forumFolderUpsert: ForumFolderOutput;
   forumUpsert: ForumOutput;
+  generateData: GenericOutput;
   login: LoginOutput;
   logout: LogoutOutput;
   mapDelete: MapDeleteOutput;
@@ -656,8 +705,6 @@ export type Mutation = {
   phraseToPhraseTranslationUpsert: PhraseToPhraseTranslationOutput;
   phraseUpsert: PhraseOutput;
   phraseVoteUpsert: PhraseVoteOutput;
-  populateMapTranslations: GenericOutput;
-  populateMaps: GenericOutput;
   postCreateResolver: PostCreateOutput;
   register: RegisterOutput;
   resetEmailRequest: ResetEmailRequestOutput;
@@ -666,6 +713,7 @@ export type Mutation = {
   siteTextWordDefinitionUpsert: SiteTextWordDefinitionOutput;
   startZipMapDownload: StartZipMapOutput;
   stopBotTranslation: GenericOutput;
+  stopDataGeneration: GenericOutput;
   threadDelete: ThreadDeleteOutput;
   threadUpsert: ThreadOutput;
   toggleFlagWithRef: FlagsOutput;
@@ -686,6 +734,7 @@ export type Mutation = {
   translateMissingWordsAndPhrasesByChatGpt: TranslateAllWordsAndPhrasesByBotOutput;
   translateMissingWordsAndPhrasesByDeepL: TranslateAllWordsAndPhrasesByBotOutput;
   translateMissingWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByBotOutput;
+  translateMissingWordsAndPhrasesByLilt: TranslateAllWordsAndPhrasesByBotOutput;
   translateMissingWordsAndPhrasesBySmartcat: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByChatGPT4: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByChatGPT35: TranslateAllWordsAndPhrasesByBotOutput;
@@ -741,6 +790,11 @@ export type MutationEmailResponseResolverArgs = {
 };
 
 
+export type MutationForceMarkAndRetranslateOriginalMapsIdsArgs = {
+  originalMapsIds: Array<Scalars['String']['input']>;
+};
+
+
 export type MutationForumDeleteArgs = {
   forum_id: Scalars['ID']['input'];
 };
@@ -758,6 +812,11 @@ export type MutationForumFolderUpsertArgs = {
 
 export type MutationForumUpsertArgs = {
   input: ForumUpsertInput;
+};
+
+
+export type MutationGenerateDataArgs = {
+  input: DataGenInput;
 };
 
 
@@ -836,16 +895,6 @@ export type MutationPhraseUpsertArgs = {
 
 export type MutationPhraseVoteUpsertArgs = {
   input: PhraseVoteUpsertInput;
-};
-
-
-export type MutationPopulateMapTranslationsArgs = {
-  to_languages: Array<LanguageInput>;
-};
-
-
-export type MutationPopulateMapsArgs = {
-  map_amount?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -998,6 +1047,12 @@ export type MutationTranslateMissingWordsAndPhrasesByDeepLArgs = {
 
 
 export type MutationTranslateMissingWordsAndPhrasesByGoogleArgs = {
+  from_language: LanguageInput;
+  to_language: LanguageInput;
+};
+
+
+export type MutationTranslateMissingWordsAndPhrasesByLiltArgs = {
   from_language: LanguageInput;
   to_language: LanguageInput;
 };
@@ -1181,12 +1236,6 @@ export type NotificationListOutput = {
 export type NotifyUsersInput = {
   text: Scalars['String']['input'];
   user_ids: Array<Scalars['ID']['input']>;
-};
-
-export type OrigMapWordsAndPhrasesOutput = {
-  __typename?: 'OrigMapWordsAndPhrasesOutput';
-  error: ErrorType;
-  mapWordsOrPhrases?: Maybe<Array<MapWordOrPhrase>>;
 };
 
 export type PageInfo = {
@@ -1563,7 +1612,7 @@ export type Query = {
   fileUploadUrlRequest: FileUploadUrlResponse;
   forumFolderRead: ForumFolderOutput;
   forumRead: ForumOutput;
-  getAllDocuments: GetAllDocumentsOutput;
+  getAllDocuments: DocumentListConnection;
   getAllMapsList: MapListConnection;
   getAllRecommendedSiteTextTranslationList: TranslationWithVoteListByLanguageListOutput;
   getAllRecommendedSiteTextTranslationListByLanguage: TranslationWithVoteListByLanguageOutput;
@@ -1573,7 +1622,7 @@ export type Query = {
   getAllTranslationFromSiteTextDefinitionID: TranslationWithVoteListOutput;
   getAnswersByQuestionIds: AnswersOutput;
   getDocument: GetDocumentOutput;
-  getDocumentWordEntriesByDocumentId: DocumentWordEntriesOutput;
+  getDocumentWordEntriesByDocumentId: DocumentWordEntriesListConnection;
   getFlagsFromRef: FlagsOutput;
   getForumFoldersList: ForumFolderListConnection;
   getForumsList: ForumListConnection;
@@ -1583,7 +1632,6 @@ export type Query = {
   getMapWordOrPhraseAsOrigByDefinitionId: MapWordOrPhraseAsOrigOutput;
   getOrigMapWordsAndPhrases: MapWordsAndPhrasesConnection;
   getOrigMapWordsAndPhrasesCount: MapWordsAndPhrasesCountOutput;
-  getOrigMapWordsAndPhrasesPaginated: OrigMapWordsAndPhrasesOutput;
   getOrigMapsList: GetOrigMapsListOutput;
   getPericopeVoteStatus: PericopeVoteStatusOutput;
   getPericopiesByDocumentId: PericopiesOutput;
@@ -1666,7 +1714,9 @@ export type QueryForumReadArgs = {
 
 
 export type QueryGetAllDocumentsArgs = {
-  input: GetAllDocumentsInput;
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  input?: InputMaybe<LanguageInput>;
 };
 
 
@@ -1711,7 +1761,9 @@ export type QueryGetDocumentArgs = {
 
 
 export type QueryGetDocumentWordEntriesByDocumentIdArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
   document_id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1766,13 +1818,6 @@ export type QueryGetOrigMapWordsAndPhrasesArgs = {
 
 export type QueryGetOrigMapWordsAndPhrasesCountArgs = {
   input: GetOrigMapWordsAndPhrasesInput;
-};
-
-
-export type QueryGetOrigMapWordsAndPhrasesPaginatedArgs = {
-  input: GetOrigMapWordsAndPhrasesInput;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1934,7 +1979,7 @@ export type QueryGetWordRangesByBeginIdsArgs = {
 
 
 export type QueryGetWordRangesByDocumentIdArgs = {
-  id: Scalars['ID']['input'];
+  document_id: Scalars['ID']['input'];
 };
 
 
@@ -2309,6 +2354,7 @@ export type StartZipMapOutput = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  DataGenerationReport: DataGenProgress;
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult;
   ZipMapReport: ZipMapResult;
 };
@@ -2316,6 +2362,7 @@ export type Subscription = {
 export enum SubscriptionStatus {
   Completed = 'Completed',
   Error = 'Error',
+  NotStarted = 'NotStarted',
   Progressing = 'Progressing'
 }
 
@@ -2904,26 +2951,23 @@ export type PasswordResetFormRequestMutationVariables = Exact<{
 
 export type PasswordResetFormRequestMutation = { __typename?: 'Mutation', passwordResetFormResolver: { __typename?: 'LoginOutput', error: ErrorType, session?: { __typename?: 'Session', user_id: string, token: string, avatar: string, avatar_url?: string | null } | null } };
 
-export type GenerateMapsMutationVariables = Exact<{
-  map_amount?: InputMaybe<Scalars['Int']['input']>;
+export type GenerateDataMutationVariables = Exact<{
+  mapAmount?: InputMaybe<Scalars['Int']['input']>;
+  mapsToLanguages?: InputMaybe<Array<LanguageInput> | LanguageInput>;
 }>;
 
 
-export type GenerateMapsMutation = { __typename?: 'Mutation', populateMaps: { __typename?: 'GenericOutput', error: ErrorType } };
+export type GenerateDataMutation = { __typename?: 'Mutation', generateData: { __typename?: 'GenericOutput', error: ErrorType } };
 
-export type GenerateMapTranslationsMutationVariables = Exact<{
-  to_languages: Array<LanguageInput> | LanguageInput;
-}>;
+export type SubscribeToDataGenProgressSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GenerateMapTranslationsMutation = { __typename?: 'Mutation', populateMapTranslations: { __typename?: 'GenericOutput', error: ErrorType } };
+export type SubscribeToDataGenProgressSubscription = { __typename?: 'Subscription', DataGenerationReport: { __typename?: 'DataGenProgress', output: string, mapUploadStatus: SubscriptionStatus, mapTranslationsStatus: SubscriptionStatus, mapReTranslationsStatus: SubscriptionStatus, overallStatus: SubscriptionStatus } };
 
-export type MapsReTranslateToLangsMutationVariables = Exact<{
-  forLangTags: Array<Scalars['String']['input']> | Scalars['String']['input'];
-}>;
+export type StopDataGenerationMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MapsReTranslateToLangsMutation = { __typename?: 'Mutation', mapsReTranslateToLangs: { __typename?: 'GenericOutput', error: ErrorType } };
+export type StopDataGenerationMutation = { __typename?: 'Mutation', stopDataGeneration: { __typename?: 'GenericOutput', error: ErrorType } };
 
 export type WordlikeStringFragmentFragment = { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string };
 
@@ -3014,9 +3058,13 @@ export type WordUpsertMutation = { __typename?: 'Mutation', wordUpsert: { __type
 
 export type TextyDocumentFragmentFragment = { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
-export type DocumentWordEntryFragmentFragment = { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } };
+export type DocumentWordEntryFragmentFragment = { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } };
 
-export type WordRangeFragmentFragment = { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } };
+export type WordRangeFragmentFragment = { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } };
+
+export type DocumentEdgeFragmentFragment = { __typename?: 'DocumentEdge', cursor: string, node: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } };
+
+export type DocumentWordEntriesEdgeFragmentFragment = { __typename?: 'DocumentWordEntriesEdge', cursor: string, node: Array<{ __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }> };
 
 export type DocumentUploadMutationVariables = Exact<{
   document: TextyDocumentInput;
@@ -3026,32 +3074,36 @@ export type DocumentUploadMutationVariables = Exact<{
 export type DocumentUploadMutation = { __typename?: 'Mutation', documentUpload: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
 
 export type GetAllDocumentsQueryVariables = Exact<{
-  languageInput?: InputMaybe<LanguageInput>;
+  input?: InputMaybe<LanguageInput>;
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetAllDocumentsQuery = { __typename?: 'Query', getAllDocuments: { __typename?: 'GetAllDocumentsOutput', documents?: Array<{ __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null }> | null } };
+export type GetAllDocumentsQuery = { __typename?: 'Query', getAllDocuments: { __typename?: 'DocumentListConnection', error: ErrorType, edges: Array<{ __typename?: 'DocumentEdge', cursor: string, node: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
 
 export type GetDocumentQueryVariables = Exact<{
   document_id: Scalars['String']['input'];
 }>;
 
 
-export type GetDocumentQuery = { __typename?: 'Query', getDocument: { __typename?: 'GetDocumentOutput', document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
+export type GetDocumentQuery = { __typename?: 'Query', getDocument: { __typename?: 'GetDocumentOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
 
 export type GetDocumentWordEntriesByDocumentIdQueryVariables = Exact<{
+  document_id: Scalars['ID']['input'];
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetDocumentWordEntriesByDocumentIdQuery = { __typename?: 'Query', getDocumentWordEntriesByDocumentId: { __typename?: 'DocumentWordEntriesListConnection', error: ErrorType, edges: Array<{ __typename?: 'DocumentWordEntriesEdge', cursor: string, node: Array<{ __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }> }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+
+export type GetWordRangesByDocumentIdQueryVariables = Exact<{
   document_id: Scalars['ID']['input'];
 }>;
 
 
-export type GetDocumentWordEntriesByDocumentIdQuery = { __typename?: 'Query', getDocumentWordEntriesByDocumentId: { __typename?: 'DocumentWordEntriesOutput', error: ErrorType, document_word_entries: Array<{ __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } | null> } };
-
-export type GetWordRangesByDocumentIdQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type GetWordRangesByDocumentIdQuery = { __typename?: 'Query', getWordRangesByDocumentId: { __typename?: 'WordRangesOutput', error: ErrorType, word_ranges: Array<{ __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
+export type GetWordRangesByDocumentIdQuery = { __typename?: 'Query', getWordRangesByDocumentId: { __typename?: 'WordRangesOutput', error: ErrorType, word_ranges: Array<{ __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
 
 export type UpsertWordRangeMutationVariables = Exact<{
   begin_document_word_entry_id: Scalars['String']['input'];
@@ -3059,7 +3111,7 @@ export type UpsertWordRangeMutationVariables = Exact<{
 }>;
 
 
-export type UpsertWordRangeMutation = { __typename?: 'Mutation', upsertWordRanges: { __typename?: 'WordRangesOutput', error: ErrorType, word_ranges: Array<{ __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
+export type UpsertWordRangeMutation = { __typename?: 'Mutation', upsertWordRanges: { __typename?: 'WordRangesOutput', error: ErrorType, word_ranges: Array<{ __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
 
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -3122,13 +3174,17 @@ export type ThreadFragmentFragment = { __typename?: 'Thread', thread_id: string,
 
 export type ForumFolderFragmentFragment = { __typename?: 'ForumFolder', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string };
 
+export type ForumFolderNodeFragmentFragment = { __typename?: 'ForumFolderNode', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string, total_posts: number, total_threads: number };
+
 export type ForumFragmentFragment = { __typename?: 'Forum', forum_id: string, name: string, description?: string | null, created_by: string };
+
+export type ForumNodeFragmentFragment = { __typename?: 'ForumNode', forum_id: string, name: string, description?: string | null, created_by: string, total_posts: number, total_threads: number, total_topics: number };
 
 export type ThreadEdgeFragmentFragment = { __typename?: 'ThreadEdge', cursor: string, node: { __typename?: 'Thread', thread_id: string, forum_folder_id: string, name: string, created_by: string } };
 
-export type ForumFolderEdgeFragmentFragment = { __typename?: 'ForumFolderEdge', cursor: string, node: { __typename?: 'ForumFolder', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string } };
+export type ForumFolderEdgeFragmentFragment = { __typename?: 'ForumFolderEdge', cursor: string, node: { __typename?: 'ForumFolderNode', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string, total_posts: number, total_threads: number } };
 
-export type ForumEdgeFragmentFragment = { __typename?: 'ForumEdge', cursor: string, node: { __typename?: 'Forum', forum_id: string, name: string, description?: string | null, created_by: string } };
+export type ForumEdgeFragmentFragment = { __typename?: 'ForumEdge', cursor: string, node: { __typename?: 'ForumNode', forum_id: string, name: string, description?: string | null, created_by: string, total_posts: number, total_threads: number, total_topics: number } };
 
 export type GetThreadByIdQueryVariables = Exact<{
   thread_id: Scalars['ID']['input'];
@@ -3186,7 +3242,7 @@ export type GetForumFoldersListQueryVariables = Exact<{
 }>;
 
 
-export type GetForumFoldersListQuery = { __typename?: 'Query', getForumFoldersList: { __typename?: 'ForumFolderListConnection', error: ErrorType, edges: Array<{ __typename?: 'ForumFolderEdge', cursor: string, node: { __typename?: 'ForumFolder', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+export type GetForumFoldersListQuery = { __typename?: 'Query', getForumFoldersList: { __typename?: 'ForumFolderListConnection', error: ErrorType, edges: Array<{ __typename?: 'ForumFolderEdge', cursor: string, node: { __typename?: 'ForumFolderNode', forum_folder_id: string, forum_id: string, name: string, description?: string | null, created_by: string, total_posts: number, total_threads: number } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
 
 export type CreateForumFolderMutationVariables = Exact<{
   name: Scalars['String']['input'];
@@ -3228,7 +3284,7 @@ export type GetForumsListQueryVariables = Exact<{
 }>;
 
 
-export type GetForumsListQuery = { __typename?: 'Query', getForumsList: { __typename?: 'ForumListConnection', error: ErrorType, edges: Array<{ __typename?: 'ForumEdge', cursor: string, node: { __typename?: 'Forum', forum_id: string, name: string, description?: string | null, created_by: string } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+export type GetForumsListQuery = { __typename?: 'Query', getForumsList: { __typename?: 'ForumListConnection', error: ErrorType, edges: Array<{ __typename?: 'ForumEdge', cursor: string, node: { __typename?: 'ForumNode', forum_id: string, name: string, description?: string | null, created_by: string, total_posts: number, total_threads: number, total_topics: number } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
 
 export type CreateForumMutationVariables = Exact<{
   name: Scalars['String']['input'];
@@ -3288,17 +3344,6 @@ export type GetOrigMapWordsAndPhrasesCountQueryVariables = Exact<{
 
 
 export type GetOrigMapWordsAndPhrasesCountQuery = { __typename?: 'Query', getOrigMapWordsAndPhrasesCount: { __typename?: 'MapWordsAndPhrasesCountOutput', count?: number | null } };
-
-export type GetOrigMapWordsAndPhrasesPaginatedQueryVariables = Exact<{
-  original_map_id?: InputMaybe<Scalars['String']['input']>;
-  lang: LanguageInput;
-  filter?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type GetOrigMapWordsAndPhrasesPaginatedQuery = { __typename?: 'Query', getOrigMapWordsAndPhrasesPaginated: { __typename?: 'OrigMapWordsAndPhrasesOutput', mapWordsOrPhrases?: Array<{ __typename?: 'MapWordOrPhrase', id: string, type: string, o_id: string, o_like_string: string, o_definition: string, o_definition_id: string, o_language_code: string, o_dialect_code?: string | null, o_geo_code?: string | null, o_created_at: any, o_created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }> | null } };
 
 export type GetMapWordOrPhraseAsOrigByDefinitionIdQueryVariables = Exact<{
   definition_id: Scalars['ID']['input'];
@@ -3384,6 +3429,13 @@ export type ToggleMapVoteStatusMutationVariables = Exact<{
 
 
 export type ToggleMapVoteStatusMutation = { __typename?: 'Mutation', toggleMapVoteStatus: { __typename?: 'MapVoteStatusOutputRow', error: ErrorType, vote_status?: { __typename?: 'MapVoteStatus', map_id: string, is_original: boolean, downvotes: number, upvotes: number } | null } };
+
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationVariables = Exact<{
+  originalMapsIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type ForceMarkAndRetranslateOriginalMapsIdsMutation = { __typename?: 'Mutation', forceMarkAndRetranslateOriginalMapsIds: { __typename?: 'GenericOutput', error: ErrorType } };
 
 export type GetMapVoteStatusQueryVariables = Exact<{
   map_id: Scalars['ID']['input'];
@@ -3558,14 +3610,14 @@ export type QuestionFragmentFragment = { __typename?: 'Question', question_id: s
 
 export type AnswerFragmentFragment = { __typename?: 'Answer', answer_id: string, question_id: string, answer?: string | null, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }> };
 
-export type QuestionOnWordRangeFragmentFragment = { __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } };
+export type QuestionOnWordRangeFragmentFragment = { __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } };
 
 export type GetQuestionOnWordRangesByDocumentIdQueryVariables = Exact<{
   document_id: Scalars['ID']['input'];
 }>;
 
 
-export type GetQuestionOnWordRangesByDocumentIdQuery = { __typename?: 'Query', getQuestionOnWordRangesByDocumentId: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
+export type GetQuestionOnWordRangesByDocumentIdQuery = { __typename?: 'Query', getQuestionOnWordRangesByDocumentId: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
 
 export type GetAnswersByQuestionIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3583,7 +3635,7 @@ export type CreateQuestionOnWordRangeMutationVariables = Exact<{
 }>;
 
 
-export type CreateQuestionOnWordRangeMutation = { __typename?: 'Mutation', createQuestionOnWordRange: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
+export type CreateQuestionOnWordRangeMutation = { __typename?: 'Mutation', createQuestionOnWordRange: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_by: string, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
 
 export type UpsertAnswerMutationVariables = Exact<{
   answer: Scalars['String']['input'];
@@ -3843,6 +3895,14 @@ export type TranslateMissingWordsAndPhrasesByDeepLMutationVariables = Exact<{
 
 
 export type TranslateMissingWordsAndPhrasesByDeepLMutation = { __typename?: 'Mutation', translateMissingWordsAndPhrasesByDeepL: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
+
+export type TranslateMissingWordsAndPhrasesByLiltMutationVariables = Exact<{
+  from_language_code: Scalars['String']['input'];
+  to_language_code: Scalars['String']['input'];
+}>;
+
+
+export type TranslateMissingWordsAndPhrasesByLiltMutation = { __typename?: 'Mutation', translateMissingWordsAndPhrasesByLilt: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
 
 export type TranslateMissingWordsAndPhrasesBySmartcatMutationVariables = Exact<{
   from_language_code: Scalars['String']['input'];
@@ -4147,17 +4207,6 @@ export const PageInfoFragmentFragmentDoc = gql`
   totalEdges
 }
     `;
-export const TextyDocumentFragmentFragmentDoc = gql`
-    fragment TextyDocumentFragment on TextyDocument {
-  document_id
-  file_id
-  file_name
-  file_url
-  language_code
-  dialect_code
-  geo_code
-}
-    `;
 export const WordlikeStringFragmentFragmentDoc = gql`
     fragment WordlikeStringFragment on WordlikeString {
   wordlike_string_id
@@ -4172,6 +4221,7 @@ export const DocumentWordEntryFragmentFragmentDoc = gql`
     ...WordlikeStringFragment
   }
   parent_document_word_entry_id
+  page
 }
     ${WordlikeStringFragmentFragmentDoc}`;
 export const WordRangeFragmentFragmentDoc = gql`
@@ -4181,6 +4231,33 @@ export const WordRangeFragmentFragmentDoc = gql`
     ...DocumentWordEntryFragment
   }
   end {
+    ...DocumentWordEntryFragment
+  }
+}
+    ${DocumentWordEntryFragmentFragmentDoc}`;
+export const TextyDocumentFragmentFragmentDoc = gql`
+    fragment TextyDocumentFragment on TextyDocument {
+  document_id
+  file_id
+  file_name
+  file_url
+  language_code
+  dialect_code
+  geo_code
+}
+    `;
+export const DocumentEdgeFragmentFragmentDoc = gql`
+    fragment DocumentEdgeFragment on DocumentEdge {
+  cursor
+  node {
+    ...TextyDocumentFragment
+  }
+}
+    ${TextyDocumentFragmentFragmentDoc}`;
+export const DocumentWordEntriesEdgeFragmentFragmentDoc = gql`
+    fragment DocumentWordEntriesEdgeFragment on DocumentWordEntriesEdge {
+  cursor
+  node {
     ...DocumentWordEntryFragment
   }
 }
@@ -4238,6 +4315,23 @@ export const PhraseDefinitionListEdgeFragmentFragmentDoc = gql`
   }
 }
     ${PhraseDefinitionFragmentFragmentDoc}`;
+export const ForumFolderFragmentFragmentDoc = gql`
+    fragment ForumFolderFragment on ForumFolder {
+  forum_folder_id
+  forum_id
+  name
+  description
+  created_by
+}
+    `;
+export const ForumFragmentFragmentDoc = gql`
+    fragment ForumFragment on Forum {
+  forum_id
+  name
+  description
+  created_by
+}
+    `;
 export const ThreadFragmentFragmentDoc = gql`
     fragment ThreadFragment on Thread {
   thread_id
@@ -4254,39 +4348,44 @@ export const ThreadEdgeFragmentFragmentDoc = gql`
   }
 }
     ${ThreadFragmentFragmentDoc}`;
-export const ForumFolderFragmentFragmentDoc = gql`
-    fragment ForumFolderFragment on ForumFolder {
+export const ForumFolderNodeFragmentFragmentDoc = gql`
+    fragment ForumFolderNodeFragment on ForumFolderNode {
   forum_folder_id
   forum_id
   name
   description
   created_by
+  total_posts
+  total_threads
 }
     `;
 export const ForumFolderEdgeFragmentFragmentDoc = gql`
     fragment ForumFolderEdgeFragment on ForumFolderEdge {
   cursor
   node {
-    ...ForumFolderFragment
+    ...ForumFolderNodeFragment
   }
 }
-    ${ForumFolderFragmentFragmentDoc}`;
-export const ForumFragmentFragmentDoc = gql`
-    fragment ForumFragment on Forum {
+    ${ForumFolderNodeFragmentFragmentDoc}`;
+export const ForumNodeFragmentFragmentDoc = gql`
+    fragment ForumNodeFragment on ForumNode {
   forum_id
   name
   description
   created_by
+  total_posts
+  total_threads
+  total_topics
 }
     `;
 export const ForumEdgeFragmentFragmentDoc = gql`
     fragment ForumEdgeFragment on ForumEdge {
   cursor
   node {
-    ...ForumFragment
+    ...ForumNodeFragment
   }
 }
-    ${ForumFragmentFragmentDoc}`;
+    ${ForumNodeFragmentFragmentDoc}`;
 export const MapDetailsOutputFragmentFragmentDoc = gql`
     fragment MapDetailsOutputFragment on MapDetailsOutput {
   error
@@ -5020,105 +5119,105 @@ export function usePasswordResetFormRequestMutation(baseOptions?: Apollo.Mutatio
 export type PasswordResetFormRequestMutationHookResult = ReturnType<typeof usePasswordResetFormRequestMutation>;
 export type PasswordResetFormRequestMutationResult = Apollo.MutationResult<PasswordResetFormRequestMutation>;
 export type PasswordResetFormRequestMutationOptions = Apollo.BaseMutationOptions<PasswordResetFormRequestMutation, PasswordResetFormRequestMutationVariables>;
-export const GenerateMapsDocument = gql`
-    mutation GenerateMaps($map_amount: Int) {
-  populateMaps(map_amount: $map_amount) {
+export const GenerateDataDocument = gql`
+    mutation GenerateData($mapAmount: Int, $mapsToLanguages: [LanguageInput!]) {
+  generateData(input: {mapAmount: $mapAmount, mapsToLanguages: $mapsToLanguages}) {
     error
   }
 }
     `;
-export type GenerateMapsMutationFn = Apollo.MutationFunction<GenerateMapsMutation, GenerateMapsMutationVariables>;
+export type GenerateDataMutationFn = Apollo.MutationFunction<GenerateDataMutation, GenerateDataMutationVariables>;
 
 /**
- * __useGenerateMapsMutation__
+ * __useGenerateDataMutation__
  *
- * To run a mutation, you first call `useGenerateMapsMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useGenerateMapsMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useGenerateDataMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGenerateDataMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [generateMapsMutation, { data, loading, error }] = useGenerateMapsMutation({
+ * const [generateDataMutation, { data, loading, error }] = useGenerateDataMutation({
  *   variables: {
- *      map_amount: // value for 'map_amount'
+ *      mapAmount: // value for 'mapAmount'
+ *      mapsToLanguages: // value for 'mapsToLanguages'
  *   },
  * });
  */
-export function useGenerateMapsMutation(baseOptions?: Apollo.MutationHookOptions<GenerateMapsMutation, GenerateMapsMutationVariables>) {
+export function useGenerateDataMutation(baseOptions?: Apollo.MutationHookOptions<GenerateDataMutation, GenerateDataMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<GenerateMapsMutation, GenerateMapsMutationVariables>(GenerateMapsDocument, options);
+        return Apollo.useMutation<GenerateDataMutation, GenerateDataMutationVariables>(GenerateDataDocument, options);
       }
-export type GenerateMapsMutationHookResult = ReturnType<typeof useGenerateMapsMutation>;
-export type GenerateMapsMutationResult = Apollo.MutationResult<GenerateMapsMutation>;
-export type GenerateMapsMutationOptions = Apollo.BaseMutationOptions<GenerateMapsMutation, GenerateMapsMutationVariables>;
-export const GenerateMapTranslationsDocument = gql`
-    mutation GenerateMapTranslations($to_languages: [LanguageInput!]!) {
-  populateMapTranslations(to_languages: $to_languages) {
+export type GenerateDataMutationHookResult = ReturnType<typeof useGenerateDataMutation>;
+export type GenerateDataMutationResult = Apollo.MutationResult<GenerateDataMutation>;
+export type GenerateDataMutationOptions = Apollo.BaseMutationOptions<GenerateDataMutation, GenerateDataMutationVariables>;
+export const SubscribeToDataGenProgressDocument = gql`
+    subscription SubscribeToDataGenProgress {
+  DataGenerationReport {
+    output
+    mapUploadStatus
+    mapTranslationsStatus
+    mapReTranslationsStatus
+    overallStatus
+  }
+}
+    `;
+
+/**
+ * __useSubscribeToDataGenProgressSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToDataGenProgressSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToDataGenProgressSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToDataGenProgressSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToDataGenProgressSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToDataGenProgressSubscription, SubscribeToDataGenProgressSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToDataGenProgressSubscription, SubscribeToDataGenProgressSubscriptionVariables>(SubscribeToDataGenProgressDocument, options);
+      }
+export type SubscribeToDataGenProgressSubscriptionHookResult = ReturnType<typeof useSubscribeToDataGenProgressSubscription>;
+export type SubscribeToDataGenProgressSubscriptionResult = Apollo.SubscriptionResult<SubscribeToDataGenProgressSubscription>;
+export const StopDataGenerationDocument = gql`
+    mutation StopDataGeneration {
+  stopDataGeneration {
     error
   }
 }
     `;
-export type GenerateMapTranslationsMutationFn = Apollo.MutationFunction<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>;
+export type StopDataGenerationMutationFn = Apollo.MutationFunction<StopDataGenerationMutation, StopDataGenerationMutationVariables>;
 
 /**
- * __useGenerateMapTranslationsMutation__
+ * __useStopDataGenerationMutation__
  *
- * To run a mutation, you first call `useGenerateMapTranslationsMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useGenerateMapTranslationsMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useStopDataGenerationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useStopDataGenerationMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [generateMapTranslationsMutation, { data, loading, error }] = useGenerateMapTranslationsMutation({
+ * const [stopDataGenerationMutation, { data, loading, error }] = useStopDataGenerationMutation({
  *   variables: {
- *      to_languages: // value for 'to_languages'
  *   },
  * });
  */
-export function useGenerateMapTranslationsMutation(baseOptions?: Apollo.MutationHookOptions<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>) {
+export function useStopDataGenerationMutation(baseOptions?: Apollo.MutationHookOptions<StopDataGenerationMutation, StopDataGenerationMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>(GenerateMapTranslationsDocument, options);
+        return Apollo.useMutation<StopDataGenerationMutation, StopDataGenerationMutationVariables>(StopDataGenerationDocument, options);
       }
-export type GenerateMapTranslationsMutationHookResult = ReturnType<typeof useGenerateMapTranslationsMutation>;
-export type GenerateMapTranslationsMutationResult = Apollo.MutationResult<GenerateMapTranslationsMutation>;
-export type GenerateMapTranslationsMutationOptions = Apollo.BaseMutationOptions<GenerateMapTranslationsMutation, GenerateMapTranslationsMutationVariables>;
-export const MapsReTranslateToLangsDocument = gql`
-    mutation MapsReTranslateToLangs($forLangTags: [String!]!) {
-  mapsReTranslateToLangs(forLangTags: $forLangTags) {
-    error
-  }
-}
-    `;
-export type MapsReTranslateToLangsMutationFn = Apollo.MutationFunction<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>;
-
-/**
- * __useMapsReTranslateToLangsMutation__
- *
- * To run a mutation, you first call `useMapsReTranslateToLangsMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useMapsReTranslateToLangsMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [mapsReTranslateToLangsMutation, { data, loading, error }] = useMapsReTranslateToLangsMutation({
- *   variables: {
- *      forLangTags: // value for 'forLangTags'
- *   },
- * });
- */
-export function useMapsReTranslateToLangsMutation(baseOptions?: Apollo.MutationHookOptions<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>(MapsReTranslateToLangsDocument, options);
-      }
-export type MapsReTranslateToLangsMutationHookResult = ReturnType<typeof useMapsReTranslateToLangsMutation>;
-export type MapsReTranslateToLangsMutationResult = Apollo.MutationResult<MapsReTranslateToLangsMutation>;
-export type MapsReTranslateToLangsMutationOptions = Apollo.BaseMutationOptions<MapsReTranslateToLangsMutation, MapsReTranslateToLangsMutationVariables>;
+export type StopDataGenerationMutationHookResult = ReturnType<typeof useStopDataGenerationMutation>;
+export type StopDataGenerationMutationResult = Apollo.MutationResult<StopDataGenerationMutation>;
+export type StopDataGenerationMutationOptions = Apollo.BaseMutationOptions<StopDataGenerationMutation, StopDataGenerationMutationVariables>;
 export const WordDefinitionReadDocument = gql`
     query WordDefinitionRead($id: ID!) {
   wordDefinitionRead(id: $id) {
@@ -5476,14 +5575,19 @@ export type DocumentUploadMutationHookResult = ReturnType<typeof useDocumentUplo
 export type DocumentUploadMutationResult = Apollo.MutationResult<DocumentUploadMutation>;
 export type DocumentUploadMutationOptions = Apollo.BaseMutationOptions<DocumentUploadMutation, DocumentUploadMutationVariables>;
 export const GetAllDocumentsDocument = gql`
-    query GetAllDocuments($languageInput: LanguageInput) {
-  getAllDocuments(input: {lang: $languageInput}) {
-    documents {
-      ...TextyDocumentFragment
+    query GetAllDocuments($input: LanguageInput, $after: ID, $first: Int) {
+  getAllDocuments(input: $input, after: $after, first: $first) {
+    error
+    edges {
+      ...DocumentEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
-    ${TextyDocumentFragmentFragmentDoc}`;
+    ${DocumentEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
 
 /**
  * __useGetAllDocumentsQuery__
@@ -5497,7 +5601,9 @@ export const GetAllDocumentsDocument = gql`
  * @example
  * const { data, loading, error } = useGetAllDocumentsQuery({
  *   variables: {
- *      languageInput: // value for 'languageInput'
+ *      input: // value for 'input'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
  *   },
  * });
  */
@@ -5515,6 +5621,7 @@ export type GetAllDocumentsQueryResult = Apollo.QueryResult<GetAllDocumentsQuery
 export const GetDocumentDocument = gql`
     query GetDocument($document_id: String!) {
   getDocument(input: {document_id: $document_id}) {
+    error
     document {
       ...TextyDocumentFragment
     }
@@ -5550,15 +5657,23 @@ export type GetDocumentQueryHookResult = ReturnType<typeof useGetDocumentQuery>;
 export type GetDocumentLazyQueryHookResult = ReturnType<typeof useGetDocumentLazyQuery>;
 export type GetDocumentQueryResult = Apollo.QueryResult<GetDocumentQuery, GetDocumentQueryVariables>;
 export const GetDocumentWordEntriesByDocumentIdDocument = gql`
-    query GetDocumentWordEntriesByDocumentId($document_id: ID!) {
-  getDocumentWordEntriesByDocumentId(document_id: $document_id) {
+    query GetDocumentWordEntriesByDocumentId($document_id: ID!, $after: ID, $first: Int) {
+  getDocumentWordEntriesByDocumentId(
+    document_id: $document_id
+    after: $after
+    first: $first
+  ) {
     error
-    document_word_entries {
-      ...DocumentWordEntryFragment
+    edges {
+      ...DocumentWordEntriesEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
-    ${DocumentWordEntryFragmentFragmentDoc}`;
+    ${DocumentWordEntriesEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
 
 /**
  * __useGetDocumentWordEntriesByDocumentIdQuery__
@@ -5573,6 +5688,8 @@ export const GetDocumentWordEntriesByDocumentIdDocument = gql`
  * const { data, loading, error } = useGetDocumentWordEntriesByDocumentIdQuery({
  *   variables: {
  *      document_id: // value for 'document_id'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
  *   },
  * });
  */
@@ -5588,8 +5705,8 @@ export type GetDocumentWordEntriesByDocumentIdQueryHookResult = ReturnType<typeo
 export type GetDocumentWordEntriesByDocumentIdLazyQueryHookResult = ReturnType<typeof useGetDocumentWordEntriesByDocumentIdLazyQuery>;
 export type GetDocumentWordEntriesByDocumentIdQueryResult = Apollo.QueryResult<GetDocumentWordEntriesByDocumentIdQuery, GetDocumentWordEntriesByDocumentIdQueryVariables>;
 export const GetWordRangesByDocumentIdDocument = gql`
-    query GetWordRangesByDocumentId($id: ID!) {
-  getWordRangesByDocumentId(id: $id) {
+    query GetWordRangesByDocumentId($document_id: ID!) {
+  getWordRangesByDocumentId(document_id: $document_id) {
     error
     word_ranges {
       ...WordRangeFragment
@@ -5610,7 +5727,7 @@ export const GetWordRangesByDocumentIdDocument = gql`
  * @example
  * const { data, loading, error } = useGetWordRangesByDocumentIdQuery({
  *   variables: {
- *      id: // value for 'id'
+ *      document_id: // value for 'document_id'
  *   },
  * });
  */
@@ -6590,51 +6707,6 @@ export function useGetOrigMapWordsAndPhrasesCountLazyQuery(baseOptions?: Apollo.
 export type GetOrigMapWordsAndPhrasesCountQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesCountQuery>;
 export type GetOrigMapWordsAndPhrasesCountLazyQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesCountLazyQuery>;
 export type GetOrigMapWordsAndPhrasesCountQueryResult = Apollo.QueryResult<GetOrigMapWordsAndPhrasesCountQuery, GetOrigMapWordsAndPhrasesCountQueryVariables>;
-export const GetOrigMapWordsAndPhrasesPaginatedDocument = gql`
-    query GetOrigMapWordsAndPhrasesPaginated($original_map_id: String, $lang: LanguageInput!, $filter: String, $offset: Int, $limit: Int) {
-  getOrigMapWordsAndPhrasesPaginated(
-    input: {lang: $lang, filter: $filter, original_map_id: $original_map_id}
-    offset: $offset
-    limit: $limit
-  ) {
-    mapWordsOrPhrases {
-      ...MapWordOrPhraseFragment
-    }
-  }
-}
-    ${MapWordOrPhraseFragmentFragmentDoc}`;
-
-/**
- * __useGetOrigMapWordsAndPhrasesPaginatedQuery__
- *
- * To run a query within a React component, call `useGetOrigMapWordsAndPhrasesPaginatedQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetOrigMapWordsAndPhrasesPaginatedQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetOrigMapWordsAndPhrasesPaginatedQuery({
- *   variables: {
- *      original_map_id: // value for 'original_map_id'
- *      lang: // value for 'lang'
- *      filter: // value for 'filter'
- *      offset: // value for 'offset'
- *      limit: // value for 'limit'
- *   },
- * });
- */
-export function useGetOrigMapWordsAndPhrasesPaginatedQuery(baseOptions: Apollo.QueryHookOptions<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>(GetOrigMapWordsAndPhrasesPaginatedDocument, options);
-      }
-export function useGetOrigMapWordsAndPhrasesPaginatedLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>(GetOrigMapWordsAndPhrasesPaginatedDocument, options);
-        }
-export type GetOrigMapWordsAndPhrasesPaginatedQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesPaginatedQuery>;
-export type GetOrigMapWordsAndPhrasesPaginatedLazyQueryHookResult = ReturnType<typeof useGetOrigMapWordsAndPhrasesPaginatedLazyQuery>;
-export type GetOrigMapWordsAndPhrasesPaginatedQueryResult = Apollo.QueryResult<GetOrigMapWordsAndPhrasesPaginatedQuery, GetOrigMapWordsAndPhrasesPaginatedQueryVariables>;
 export const GetMapWordOrPhraseAsOrigByDefinitionIdDocument = gql`
     query GetMapWordOrPhraseAsOrigByDefinitionId($definition_id: ID!, $is_word_definition: Boolean!) {
   getMapWordOrPhraseAsOrigByDefinitionId(
@@ -7039,6 +7111,39 @@ export function useToggleMapVoteStatusMutation(baseOptions?: Apollo.MutationHook
 export type ToggleMapVoteStatusMutationHookResult = ReturnType<typeof useToggleMapVoteStatusMutation>;
 export type ToggleMapVoteStatusMutationResult = Apollo.MutationResult<ToggleMapVoteStatusMutation>;
 export type ToggleMapVoteStatusMutationOptions = Apollo.BaseMutationOptions<ToggleMapVoteStatusMutation, ToggleMapVoteStatusMutationVariables>;
+export const ForceMarkAndRetranslateOriginalMapsIdsDocument = gql`
+    mutation ForceMarkAndRetranslateOriginalMapsIds($originalMapsIds: [String!]!) {
+  forceMarkAndRetranslateOriginalMapsIds(originalMapsIds: $originalMapsIds) {
+    error
+  }
+}
+    `;
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationFn = Apollo.MutationFunction<ForceMarkAndRetranslateOriginalMapsIdsMutation, ForceMarkAndRetranslateOriginalMapsIdsMutationVariables>;
+
+/**
+ * __useForceMarkAndRetranslateOriginalMapsIdsMutation__
+ *
+ * To run a mutation, you first call `useForceMarkAndRetranslateOriginalMapsIdsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useForceMarkAndRetranslateOriginalMapsIdsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [forceMarkAndRetranslateOriginalMapsIdsMutation, { data, loading, error }] = useForceMarkAndRetranslateOriginalMapsIdsMutation({
+ *   variables: {
+ *      originalMapsIds: // value for 'originalMapsIds'
+ *   },
+ * });
+ */
+export function useForceMarkAndRetranslateOriginalMapsIdsMutation(baseOptions?: Apollo.MutationHookOptions<ForceMarkAndRetranslateOriginalMapsIdsMutation, ForceMarkAndRetranslateOriginalMapsIdsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ForceMarkAndRetranslateOriginalMapsIdsMutation, ForceMarkAndRetranslateOriginalMapsIdsMutationVariables>(ForceMarkAndRetranslateOriginalMapsIdsDocument, options);
+      }
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationHookResult = ReturnType<typeof useForceMarkAndRetranslateOriginalMapsIdsMutation>;
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationResult = Apollo.MutationResult<ForceMarkAndRetranslateOriginalMapsIdsMutation>;
+export type ForceMarkAndRetranslateOriginalMapsIdsMutationOptions = Apollo.BaseMutationOptions<ForceMarkAndRetranslateOriginalMapsIdsMutation, ForceMarkAndRetranslateOriginalMapsIdsMutationVariables>;
 export const GetMapVoteStatusDocument = gql`
     query GetMapVoteStatus($map_id: ID!, $is_original: Boolean!) {
   getMapVoteStatus(map_id: $map_id, is_original: $is_original) {
@@ -8937,6 +9042,50 @@ export function useTranslateMissingWordsAndPhrasesByDeepLMutation(baseOptions?: 
 export type TranslateMissingWordsAndPhrasesByDeepLMutationHookResult = ReturnType<typeof useTranslateMissingWordsAndPhrasesByDeepLMutation>;
 export type TranslateMissingWordsAndPhrasesByDeepLMutationResult = Apollo.MutationResult<TranslateMissingWordsAndPhrasesByDeepLMutation>;
 export type TranslateMissingWordsAndPhrasesByDeepLMutationOptions = Apollo.BaseMutationOptions<TranslateMissingWordsAndPhrasesByDeepLMutation, TranslateMissingWordsAndPhrasesByDeepLMutationVariables>;
+export const TranslateMissingWordsAndPhrasesByLiltDocument = gql`
+    mutation TranslateMissingWordsAndPhrasesByLilt($from_language_code: String!, $to_language_code: String!) {
+  translateMissingWordsAndPhrasesByLilt(
+    from_language: {language_code: $from_language_code}
+    to_language: {language_code: $to_language_code}
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+    `;
+export type TranslateMissingWordsAndPhrasesByLiltMutationFn = Apollo.MutationFunction<TranslateMissingWordsAndPhrasesByLiltMutation, TranslateMissingWordsAndPhrasesByLiltMutationVariables>;
+
+/**
+ * __useTranslateMissingWordsAndPhrasesByLiltMutation__
+ *
+ * To run a mutation, you first call `useTranslateMissingWordsAndPhrasesByLiltMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTranslateMissingWordsAndPhrasesByLiltMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [translateMissingWordsAndPhrasesByLiltMutation, { data, loading, error }] = useTranslateMissingWordsAndPhrasesByLiltMutation({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      to_language_code: // value for 'to_language_code'
+ *   },
+ * });
+ */
+export function useTranslateMissingWordsAndPhrasesByLiltMutation(baseOptions?: Apollo.MutationHookOptions<TranslateMissingWordsAndPhrasesByLiltMutation, TranslateMissingWordsAndPhrasesByLiltMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TranslateMissingWordsAndPhrasesByLiltMutation, TranslateMissingWordsAndPhrasesByLiltMutationVariables>(TranslateMissingWordsAndPhrasesByLiltDocument, options);
+      }
+export type TranslateMissingWordsAndPhrasesByLiltMutationHookResult = ReturnType<typeof useTranslateMissingWordsAndPhrasesByLiltMutation>;
+export type TranslateMissingWordsAndPhrasesByLiltMutationResult = Apollo.MutationResult<TranslateMissingWordsAndPhrasesByLiltMutation>;
+export type TranslateMissingWordsAndPhrasesByLiltMutationOptions = Apollo.BaseMutationOptions<TranslateMissingWordsAndPhrasesByLiltMutation, TranslateMissingWordsAndPhrasesByLiltMutationVariables>;
 export const TranslateMissingWordsAndPhrasesBySmartcatDocument = gql`
     mutation TranslateMissingWordsAndPhrasesBySmartcat($from_language_code: String!, $to_language_code: String!) {
   translateMissingWordsAndPhrasesBySmartcat(
@@ -9756,7 +9905,6 @@ export const namedOperations = {
     GetForumsList: 'GetForumsList',
     GetOrigMapWordsAndPhrases: 'GetOrigMapWordsAndPhrases',
     GetOrigMapWordsAndPhrasesCount: 'GetOrigMapWordsAndPhrasesCount',
-    GetOrigMapWordsAndPhrasesPaginated: 'GetOrigMapWordsAndPhrasesPaginated',
     GetMapWordOrPhraseAsOrigByDefinitionId: 'GetMapWordOrPhraseAsOrigByDefinitionId',
     GetAllMapsList: 'GetAllMapsList',
     GetMapDetails: 'GetMapDetails',
@@ -9796,9 +9944,8 @@ export const namedOperations = {
     Logout: 'Logout',
     ResetEmailRequest: 'ResetEmailRequest',
     PasswordResetFormRequest: 'PasswordResetFormRequest',
-    GenerateMaps: 'GenerateMaps',
-    GenerateMapTranslations: 'GenerateMapTranslations',
-    MapsReTranslateToLangs: 'MapsReTranslateToLangs',
+    GenerateData: 'GenerateData',
+    StopDataGeneration: 'StopDataGeneration',
     WordDefinitionUpsert: 'WordDefinitionUpsert',
     ToggleWordDefinitionVoteStatus: 'ToggleWordDefinitionVoteStatus',
     ToggleWordVoteStatus: 'ToggleWordVoteStatus',
@@ -9823,6 +9970,7 @@ export const namedOperations = {
     MapsTranslationsReset: 'MapsTranslationsReset',
     MapsReTranslate: 'MapsReTranslate',
     ToggleMapVoteStatus: 'ToggleMapVoteStatus',
+    ForceMarkAndRetranslateOriginalMapsIds: 'ForceMarkAndRetranslateOriginalMapsIds',
     AddNotification: 'AddNotification',
     DeleteNotification: 'DeleteNotification',
     MarkNotificationRead: 'MarkNotificationRead',
@@ -9843,6 +9991,7 @@ export const namedOperations = {
     TranslateMissingWordsAndPhrasesByChatGPT: 'TranslateMissingWordsAndPhrasesByChatGPT',
     TranslateMissingWordsAndPhrasesByGoogle: 'TranslateMissingWordsAndPhrasesByGoogle',
     TranslateMissingWordsAndPhrasesByDeepL: 'TranslateMissingWordsAndPhrasesByDeepL',
+    TranslateMissingWordsAndPhrasesByLilt: 'TranslateMissingWordsAndPhrasesByLilt',
     TranslateMissingWordsAndPhrasesBySmartcat: 'TranslateMissingWordsAndPhrasesBySmartcat',
     TranslateWordsAndPhrasesByLilt: 'TranslateWordsAndPhrasesByLilt',
     TranslateWordsAndPhrasesBySmartcat: 'TranslateWordsAndPhrasesBySmartcat',
@@ -9860,6 +10009,7 @@ export const namedOperations = {
     AvatarUpdate: 'AvatarUpdate'
   },
   Subscription: {
+    SubscribeToDataGenProgress: 'SubscribeToDataGenProgress',
     SubscribeToZipMap: 'SubscribeToZipMap',
     SubscribeToTranslationReport: 'SubscribeToTranslationReport'
   },
@@ -9880,12 +10030,16 @@ export const namedOperations = {
     TextyDocumentFragment: 'TextyDocumentFragment',
     DocumentWordEntryFragment: 'DocumentWordEntryFragment',
     WordRangeFragment: 'WordRangeFragment',
+    DocumentEdgeFragment: 'DocumentEdgeFragment',
+    DocumentWordEntriesEdgeFragment: 'DocumentWordEntriesEdgeFragment',
     FlagFragment: 'FlagFragment',
     WordDefinitionListEdgeFragment: 'WordDefinitionListEdgeFragment',
     PhraseDefinitionListEdgeFragment: 'PhraseDefinitionListEdgeFragment',
     ThreadFragment: 'ThreadFragment',
     ForumFolderFragment: 'ForumFolderFragment',
+    ForumFolderNodeFragment: 'ForumFolderNodeFragment',
     ForumFragment: 'ForumFragment',
+    ForumNodeFragment: 'ForumNodeFragment',
     ThreadEdgeFragment: 'ThreadEdgeFragment',
     ForumFolderEdgeFragment: 'ForumFolderEdgeFragment',
     ForumEdgeFragment: 'ForumEdgeFragment',

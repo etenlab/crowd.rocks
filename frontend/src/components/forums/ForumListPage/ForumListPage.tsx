@@ -25,14 +25,12 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { ForumModal } from '../modals/ForumModal';
 import { ForumItem } from './ForumItem';
 
-// import { PAGE_SIZE } from '../../../const/commonConst';
-const PAGE_SIZE = 4;
+import { PAGE_SIZE } from '../../../const/commonConst';
 
 export function ForumListPage() {
   const { tr } = useTr();
 
   const [filter, setFilter] = useState<string>('');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [bouncedFilter] = useDebounce(filter, 500);
 
   const {
@@ -73,9 +71,9 @@ export function ForumListPage() {
         name={edge.node.name}
         description={edge.node.description || ''}
         created_by={edge.node.created_by}
-        totalTopics={100}
-        totalThreads={47}
-        totalPosts={500}
+        totalTopics={edge.node.total_topics}
+        totalThreads={edge.node.total_threads}
+        totalPosts={edge.node.total_posts}
       />
     ));
   }, [error, forumsData]);

@@ -1,5 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver, ID } from '@nestjs/graphql';
+import { Injectable, Logger } from '@nestjs/common';
+import {
+  Args,
+  Context,
+  Int,
+  Mutation,
+  Query,
+  Resolver,
+  ID,
+} from '@nestjs/graphql';
 
 import { ErrorType } from '../../common/types';
 import { getBearer } from '../../common/utility';
@@ -12,14 +20,14 @@ import { WordRangesService } from './word-ranges.service';
 import {
   DocumentUploadInput,
   DocumentUploadOutput,
-  DocumentWordEntriesOutput,
-  GetAllDocumentsInput,
-  GetAllDocumentsOutput,
+  DocumentWordEntriesListConnection,
+  DocumentListConnection,
   GetDocumentInput,
   GetDocumentOutput,
   WordRangesOutput,
   WordRangeUpsertInput,
 } from './types';
+import { LanguageInput } from '../common/types';
 
 @Injectable()
 @Resolver()
@@ -36,6 +44,8 @@ export class DocumentsResolver {
     @Args('input') input: DocumentUploadInput,
     @Context() req: any,
   ): Promise<DocumentUploadOutput> {
+    Logger.log('documentUpload', JSON.stringify(input, null, 2));
+
     if (!this.authenticationService.isAdmin(getBearer(req) || '')) {
       return {
         error: ErrorType.Unauthorized,
@@ -49,11 +59,31 @@ export class DocumentsResolver {
     });
   }
 
-  @Query(() => GetAllDocumentsOutput)
+  @Query(() => DocumentListConnection)
   async getAllDocuments(
-    @Args('input') input: GetAllDocumentsInput,
-  ): Promise<GetAllDocumentsOutput> {
-    const res = await this.documentsSevice.getAllDocuments(input.lang);
+    @Args('input', { type: () => LanguageInput, nullable: true })
+    input: LanguageInput | null,
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<DocumentListConnection> {
+    Logger.log(
+      'getAllDocuments',
+      JSON.stringify(
+        {
+          lang: input,
+          after,
+          first,
+        },
+        null,
+        2,
+      ),
+    );
+
+    const res = await this.documentsSevice.getAllDocuments({
+      lang: input,
+      after,
+      first,
+    });
     return res;
   }
 
@@ -61,16 +91,26 @@ export class DocumentsResolver {
   async getDocument(
     @Args('input') input: GetDocumentInput,
   ): Promise<GetDocumentOutput> {
-    const res = await this.documentsSevice.getDocument(input.document_id);
-    return res;
+    Logger.log('getDocument', JSON.stringify(input, null, 2));
+
+    return this.documentsSevice.getDocument(+input.document_id);
   }
 
-  @Query(() => DocumentWordEntriesOutput)
+  @Query(() => DocumentWordEntriesListConnection)
   async getDocumentWordEntriesByDocumentId(
     @Args('document_id', { type: () => ID }) document_id: string,
-  ): Promise<DocumentWordEntriesOutput> {
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<DocumentWordEntriesListConnection> {
+    Logger.log(
+      'getDocument',
+      JSON.stringify({ document_id, first, after }, null, 2),
+    );
+
     return this.documentWordEntriesService.getDocumentWordEntriesByDocumentId(
       +document_id,
+      first,
+      after,
       null,
     );
   }
@@ -79,7 +119,7 @@ export class DocumentsResolver {
   async readWordRanges(
     @Args('ids', { type: () => [ID] }) ids: string[],
   ): Promise<WordRangesOutput> {
-    console.log('readWordRanges, ids:', ids);
+    Logger.log('readWordRanges, ids:', ids);
 
     return this.wordRangesService.reads(
       ids.map((id) => +id),
@@ -91,7 +131,7 @@ export class DocumentsResolver {
   async getWordRangesByBeginIds(
     @Args('ids', { type: () => [ID] }) ids: string[],
   ): Promise<WordRangesOutput> {
-    console.log('getWordRangesByBeginIds, ids:', ids);
+    Logger.log('getWordRangesByBeginIds, ids:', ids);
 
     return this.wordRangesService.getByBeginWordIds(
       ids.map((id) => +id),
@@ -101,11 +141,11 @@ export class DocumentsResolver {
 
   @Query(() => WordRangesOutput)
   async getWordRangesByDocumentId(
-    @Args('id', { type: () => ID }) id: string,
+    @Args('document_id', { type: () => ID }) document_id: string,
   ): Promise<WordRangesOutput> {
-    console.log('getWordRangesByDocumentId, id:', id);
+    Logger.log('getWordRangesByDocumentId, id:', document_id);
 
-    return this.wordRangesService.getByDocumentId(+id, null);
+    return this.wordRangesService.getByDocumentId(+document_id, null);
   }
 
   @Mutation(() => WordRangesOutput)
@@ -114,7 +154,7 @@ export class DocumentsResolver {
     input: WordRangeUpsertInput[],
     @Context() req: any,
   ): Promise<WordRangesOutput> {
-    console.log('upsertWordRanges: ', JSON.stringify(input, null, 2));
+    Logger.log('upsertWordRanges: ', JSON.stringify(input, null, 2));
 
     return this.wordRangesService.upserts(input, getBearer(req) || '', null);
   }

@@ -3,6 +3,7 @@ import {
   GetForumsListVariable,
   GetForumFoldersListVariable,
   GetThreadsListVariable,
+  GetAllDocumentsVariable,
 } from './non-persistent.reducer';
 
 export const actions = {
@@ -14,6 +15,8 @@ export const actions = {
     'ADD_PAGINATION_VARIABLE_FOR_GET_FORUM_FOLDERS_LIST',
   ADD_PAGINATION_VARIABLE_FOR_GET_THREADS_LIST:
     'ADD_PAGINATION_VARIABLE_FOR_GET_THREADS_LIST',
+  ADD_PAGINATION_VARIABLE_FOR_GET_ALL_DOCUMENTS:
+    'ADD_PAGINATION_VARIABLE_FOR_GET_ALL_DOCUMENTS',
 };
 
 export function addPaginationVariableForGetAllSiteTextDefinitions(
@@ -48,6 +51,15 @@ export function addPaginationVariableForGetTheadsList(
 ) {
   return {
     type: actions.ADD_PAGINATION_VARIABLE_FOR_GET_THREADS_LIST,
+    payload: variable,
+  };
+}
+
+export function addPaginationVariableForGetAllDocuments(
+  variable: GetAllDocumentsVariable,
+) {
+  return {
+    type: actions.ADD_PAGINATION_VARIABLE_FOR_GET_ALL_DOCUMENTS,
     payload: variable,
   };
 }

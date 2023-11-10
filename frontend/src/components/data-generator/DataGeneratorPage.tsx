@@ -1,93 +1,87 @@
 import { Button, Stack, TextField, Typography } from '@mui/material';
 import { PageLayout } from '../common/PageLayout';
 import {
+  DataGenProgress,
   LanguageInput,
-  useGenerateMapTranslationsMutation,
-  useGenerateMapsMutation,
-  useMapsReTranslateToLangsMutation,
+  SubscriptionStatus,
+  useGenerateDataMutation,
+  useSubscribeToDataGenProgressSubscription,
 } from '../../generated/graphql';
 import { useCallback, useEffect, useState } from 'react';
 import { getLangsRegistry } from '../../../../utils';
 
 export function DataGeneratorPage() {
-  const [generateMaps, { loading: mapLoading, data: mapData }] =
-    useGenerateMapsMutation();
-  const [
-    generateMapTranslations,
-    { loading: translationLoading, data: translationData },
-  ] = useGenerateMapTranslationsMutation();
-  const [
-    reTranslateMaps,
-    { loading: retranslateLoading, data: retranslateData },
-  ] = useMapsReTranslateToLangsMutation();
-  const [mapCount, setMapCount] = useState<number | null>(null);
-  const [mapUpdateStatus, setMapUpdateStatus] = useState('Not started yet');
-  const [mapTranslationStatus, setMapTranslationStatus] =
-    useState('Not started yet');
-
-  const [mapReTranslationStatus, setMapReTranslationStatus] =
-    useState('Not started yet');
+  const [generateData] = useGenerateDataMutation();
+  // const [stopGenerate] = useStopDataGenerationMutation();
+  const [mapCount, setMapCount] = useState<number | null>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [toLanguageCount, setToLanguageCount] = useState(0);
-  useEffect(() => {
-    setMapUpdateStatus('Map Generation not Called yet');
-    if (mapLoading) {
-      setMapUpdateStatus('Maps Generating...');
-    }
-    if (mapData) {
-      setMapUpdateStatus(`Done! Error: ${mapData.populateMaps.error}`);
-    }
-    if (translationLoading) {
-      setMapTranslationStatus('Generating....');
-    }
-    if (translationData) {
-      setMapTranslationStatus(
-        `Done! Error: ${translationData.populateMapTranslations.error}`,
-      );
-    }
-    if (retranslateLoading) {
-      setMapReTranslationStatus('Generating....');
-    }
-    if (retranslateData) {
-      setMapReTranslationStatus(
-        `Done! Error: ${retranslateData.mapsReTranslateToLangs.error}`,
-      );
-    }
 
+  const [progress, setProgress] = useState<DataGenProgress | null>(null);
+  const [mapUploadStatus, setMapUploadStatus] =
+    useState<SubscriptionStatus | null>(null);
+  const { data } = useSubscribeToDataGenProgressSubscription();
+  // console.log(data);
+
+  useEffect(() => {
+    if (data && data.DataGenerationReport) {
+      const report = data.DataGenerationReport;
+      setProgress(report);
+    }
+    if (data && data.DataGenerationReport.mapUploadStatus) {
+      setMapUploadStatus(data.DataGenerationReport.mapUploadStatus);
+      // console.log(mapUploadStatus);
+    }
     return;
-  }, [
-    mapLoading,
-    mapData,
-    translationLoading,
-    translationData,
-    retranslateLoading,
-    retranslateData,
-  ]);
+  }, [data, data?.DataGenerationReport, mapUploadStatus]);
+
+  const progressComp = progress ? (
+    <>
+      <Typography>Status</Typography>
+      <Stack direction="row">
+        <Typography variant="body1">Output: </Typography>
+        <Typography variant="body1">{progress.output}</Typography>
+      </Stack>
+      <Stack direction="row">
+        <Typography variant="body1">Map Generation: </Typography>
+        <Typography variant="body1">{mapUploadStatus}</Typography>
+      </Stack>
+      <Stack direction="row">
+        <Typography variant="body1">Map Translations: </Typography>
+        <Typography variant="body1">
+          {progress.mapTranslationsStatus}
+        </Typography>
+      </Stack>
+      <Stack direction="row">
+        <Typography variant="body1">ReTranslate Maps: </Typography>
+        <Typography variant="body1">
+          {progress.mapReTranslationsStatus}
+        </Typography>
+      </Stack>
+      <Stack direction="row">
+        <Typography variant="body1">Overall: </Typography>
+        <Typography variant="body1">{progress.overallStatus}</Typography>
+      </Stack>
+    </>
+  ) : null;
 
   const handleGenerateData = useCallback(async () => {
-    await generateMaps({ variables: { map_amount: mapCount } });
+    let toLanguages: [LanguageInput] | null = null;
     if (toLanguageCount > 0) {
       const { langs } = await getLangsRegistry();
-      const toLanguages: [LanguageInput] = [{ language_code: langs[0].tag }];
+      toLanguages = [{ language_code: langs[0].tag }];
       for (let i = 1; i < toLanguageCount; i++) {
         toLanguages.push({ language_code: langs[i].tag });
       }
-
-      await generateMapTranslations({
-        variables: { to_languages: toLanguages },
-      });
-
-      await reTranslateMaps({
-        variables: { forLangTags: toLanguages.map((l) => l.language_code) },
-      });
     }
-  }, [
-    generateMapTranslations,
-    generateMaps,
-    mapCount,
-    reTranslateMaps,
-    toLanguageCount,
-  ]);
+    await generateData({
+      variables: { mapAmount: mapCount, mapsToLanguages: toLanguages },
+    });
+  }, [generateData, mapCount, toLanguageCount]);
+
+  // const handleStop = useCallback(async () => {
+  //   await stopGenerate();
+  // }, [stopGenerate]);
 
   return (
     <PageLayout>
@@ -131,22 +125,17 @@ export function DataGeneratorPage() {
         <Stack direction="row" justifyContent="space-evenly">
           <Typography variant="body1">Mock Phrases</Typography>
         </Stack> */}
-        <Button onClick={handleGenerateData}>Generate Test Data</Button>
-        <Typography>Status</Typography>
-        <Stack direction="row">
-          <Typography variant="body1">Map Generation: </Typography>
-          <Typography variant="body1">{mapUpdateStatus}</Typography>
-        </Stack>
-        <Stack direction="row">
-          <Typography variant="body1">Map Translations: </Typography>
-          <Typography variant="body1">{mapTranslationStatus}</Typography>
-        </Stack>
-        <Stack direction="row">
-          <Typography variant="body1">ReTranslate Maps: </Typography>
-          <Typography variant="body1">{mapReTranslationStatus}</Typography>
-        </Stack>
-
-        {/* <Button>Cancel</Button> */}
+        <Button
+          onClick={handleGenerateData}
+          disabled={
+            progress?.overallStatus === SubscriptionStatus.Progressing &&
+            progress.overallStatus !== undefined
+          }
+        >
+          Generate Test Data
+        </Button>
+        {progressComp}
+        {/* <Button onClick={handleStop}>Cancel</Button> */}
       </Stack>
     </PageLayout>
   );

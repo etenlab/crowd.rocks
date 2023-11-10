@@ -220,6 +220,7 @@ create table posts(
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__parent_table_parent_id__posts on posts (parent_table, parent_id);
 
 create table versions(
   version_id bigserial primary key,
@@ -538,10 +539,16 @@ create table document_word_entries(
   document_word_entry_id bigserial primary key,
   document_id bigint not null references documents(document_id),
   wordlike_string_id bigint not null references wordlike_strings(wordlike_string_id),
+  page bigint not null,
   parent_document_word_entry_id bigint references document_word_entries(document_word_entry_id),
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__document_id__document_word_entries on document_word_entries (document_id);
+create index idx__wordlike_string_id__document_word_entries on document_word_entries (wordlike_string_id);
+create index idx__parent_document_word_entry_id__document_word_entries on document_word_entries (parent_document_word_entry_id);
+create index idx__page__document_word_entries on document_word_entries (page);
+
 
 create table word_ranges (
   word_range_id bigserial primary key,
@@ -709,6 +716,8 @@ create table translated_maps(
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id),
   content text not null,
+  to_retranslate boolean,
+  is_retranslating_now boolean,
   unique nulls not distinct (original_map_id, language_code, dialect_code, geo_code)
 );
 create index idx__original_map_id__translated_maps on translated_maps (original_map_id);
@@ -826,19 +835,30 @@ CREATE INDEX mv_phrases_languages_language_code_idx ON mv_phrases_languages USIN
 CREATE INDEX mv_phrases_languages_t_phrase_id_idx ON mv_phrases_languages USING btree (t_phrase_id);
 CREATE INDEX mv_phrases_languages_t_word_id_idx ON mv_phrases_languages USING btree (t_word_id);
 
----
-ALTER TABLE public.original_maps_votes DROP CONSTRAINT if exists words_votes_map_id_fkey;
-ALTER TABLE public.original_maps_votes DROP CONSTRAINT if exists original_map_votes_id_fkey;
+-- public.original_maps_votes definition
+CREATE TABLE public.original_maps_votes (
+	maps_vote_id bigserial NOT NULL,
+	user_id int8 NOT NULL,
+	map_id int8 NOT NULL,
+	vote bool NULL,
+	last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT original_maps_votes_pkey PRIMARY KEY (maps_vote_id),
+	CONSTRAINT original_maps_votes_user_id_word_id_key UNIQUE (user_id, map_id)
+);
+CREATE INDEX idx__map_id__original_maps_votes ON public.original_maps_votes USING btree (map_id);
 ALTER TABLE public.original_maps_votes ADD CONSTRAINT original_map_votes_id_fkey FOREIGN KEY (map_id) REFERENCES public.original_maps(original_map_id) ON DELETE CASCADE;
+ALTER TABLE public.original_maps_votes ADD CONSTRAINT original_map_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
-ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists words_votes_map_id_fkey;
-ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists translated_map_votes_fkey;
+-- public.translated_maps_votes definition
+CREATE TABLE public.translated_maps_votes (
+	maps_vote_id bigserial NOT NULL,
+	user_id int8 NOT NULL,
+	map_id int8 NOT NULL,
+	vote bool NULL,
+	last_updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT translated_maps_votes_pkey PRIMARY KEY (maps_vote_id),
+	CONSTRAINT translated_maps_votes_user_id_word_id_key UNIQUE (user_id, map_id)
+);
+CREATE INDEX idx__map_id__translated_maps_votes ON public.translated_maps_votes USING btree (map_id);
 ALTER TABLE public.translated_maps_votes ADD CONSTRAINT translated_map_votes_fkey FOREIGN KEY (map_id) REFERENCES public.translated_maps(translated_map_id) ON DELETE CASCADE;
----
-ALTER TABLE public.original_maps_votes DROP CONSTRAINT if exists words_votes_user_id_fkey;
-ALTER TABLE public.original_maps_votes DROP CONSTRAINT if exists original_map_votes_user_id_fkey;
-ALTER TABLE public.original_maps_votes ADD CONSTRAINT original_map_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE;
-
-ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists words_votes_user_id_fkey;
-ALTER TABLE public.translated_maps_votes DROP CONSTRAINT if exists translated_map_votes_user_id_fkey;
-ALTER TABLE public.translated_maps_votes ADD CONSTRAINT translated_map_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE;;
+ALTER TABLE public.translated_maps_votes ADD CONSTRAINT translated_map_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;

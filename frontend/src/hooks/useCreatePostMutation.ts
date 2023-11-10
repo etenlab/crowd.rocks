@@ -1,10 +1,15 @@
 import { useIonToast } from '@ionic/react';
-import { usePostCreateMutation as useGeneratedPostCreateMutation } from '../generated/graphql';
+import {
+  TableNameType,
+  usePostCreateMutation as useGeneratedPostCreateMutation,
+} from '../generated/graphql';
 
 import { ErrorType } from '../generated/graphql';
 
 import { useTr } from './useTr';
+
 import { updateCacheWithCreatePost } from '../cacheUpdators/createPost';
+import { updateThreadsListCache } from '../cacheUpdators/upsertThread';
 import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
 export function usePostCreateMutation({
@@ -17,6 +22,7 @@ export function usePostCreateMutation({
   const { tr } = useTr();
   const [present] = useIonToast();
   const redirectOnUnauth = useUnauthorizedRedirect();
+
   return useGeneratedPostCreateMutation({
     update(cache, { data, errors }) {
       if (
@@ -28,6 +34,12 @@ export function usePostCreateMutation({
         const newPost = data.postCreateResolver.post;
 
         updateCacheWithCreatePost(cache, { newPost, parent_name, parent_id });
+
+        if (parent_name === TableNameType.Threads) {
+          updateThreadsListCache(cache, parent_id, {
+            total_posts: 1,
+          });
+        }
 
         present({
           message: tr('Success at creating new post!'),

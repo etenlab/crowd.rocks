@@ -5,6 +5,7 @@ import { pgClientOrPool } from 'src/common/utility';
 
 import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
+import { AuthenticationService } from 'src/components/authentication/authentication.service';
 
 import { WordDefinitionsService } from 'src/components/definitions/word-definitions.service';
 
@@ -36,6 +37,7 @@ export class SiteTextWordDefinitionsService {
   constructor(
     private pg: PostgresService,
     private wordDefinitionService: WordDefinitionsService,
+    private authenticationService: AuthenticationService,
   ) {}
 
   async read(
@@ -194,6 +196,18 @@ export class SiteTextWordDefinitionsService {
     pgClient: PoolClient | null,
   ): Promise<SiteTextWordDefinitionOutput> {
     try {
+      const user_id = await this.authenticationService.get_user_id_from_bearer(
+        token,
+      );
+      const admin_id = await this.authenticationService.get_admin_id();
+
+      if (admin_id !== user_id) {
+        return {
+          error: ErrorType.Unauthorized,
+          site_text_word_definition: null,
+        };
+      }
+
       const res = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,

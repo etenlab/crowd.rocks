@@ -15,6 +15,7 @@ export const typePolicies: TypePolicies = {
       getForumsList: relayStylePagination(['filter']),
       getForumFoldersList: relayStylePagination(['forum_id', 'filter']),
       getThreadsList: relayStylePagination(['forum_folder_id', 'filter']),
+      getAllDocuments: relayStylePagination(['input']),
     },
   },
   WordWithDefinitions: {
@@ -107,6 +108,18 @@ export const typePolicies: TypePolicies = {
   TextyDocument: {
     keyFields: ['document_id'],
   },
+  DocumentWordEntry: {
+    keyFields: ['document_word_entry_id'],
+  },
+  WordRange: {
+    keyFields: ['word_range_id'],
+  },
+  DocumentEdge: {
+    keyFields: ['cursor'],
+  },
+  DocumentWordEntriesEdge: {
+    keyFields: ['cursor'],
+  },
   MapFileOutputEdge: {
     keyFields: ['cursor'],
   },
@@ -135,6 +148,12 @@ export const typePolicies: TypePolicies = {
     keyFields: ['forum_id'],
   },
   ForumFolder: {
+    keyFields: ['forum_folder_id'],
+  },
+  ForumNode: {
+    keyFields: ['forum_id'],
+  },
+  ForumFolderNode: {
     keyFields: ['forum_folder_id'],
   },
   Thread: {

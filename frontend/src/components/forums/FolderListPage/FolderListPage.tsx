@@ -39,7 +39,6 @@ export function FolderListPage() {
   }>();
 
   const [filter, setFilter] = useState<string>('');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [bouncedFilter] = useDebounce(filter, 500);
 
   const {
@@ -94,8 +93,8 @@ export function FolderListPage() {
         name={edge.node.name}
         created_by={edge.node.created_by}
         description={edge.node.description || ''}
-        totalThreads={47}
-        totalPosts={500}
+        totalThreads={edge.node.total_threads}
+        totalPosts={edge.node.total_posts}
       />
     ));
   }, [error, foldersData, forum_id]);

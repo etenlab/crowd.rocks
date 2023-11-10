@@ -59,6 +59,9 @@ export class DatabaseVersionControlService {
         case 8:
           console.log('Updating database to version 9');
           await this.loadVersion9();
+        case 9:
+          console.log('Updating database to version 10');
+          await this.loadVersion10();
 
         default:
           console.error('Database version is current');
@@ -505,6 +508,27 @@ export class DatabaseVersionControlService {
 
     // set version
     await this.setVersionNumber(9);
+  }
+
+  async loadVersion10(): Promise<void> {
+    //schema
+    await this.runSqlFile('./src/core/sql/schema/v10.schema.sql');
+
+    // threads
+    await this.runSqlFile(
+      './src/core/sql/threads/post_delete_from_thread_delete_trigger-v10.sql',
+    );
+
+    // documents
+    await this.runSqlFile(
+      './src/core/sql/document/document_word_entry_upsert-v10.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/document/batch_document_word_entry_upsert-v10.sql',
+    );
+
+    // set version
+    await this.setVersionNumber(10);
   }
 
   async registerUser(

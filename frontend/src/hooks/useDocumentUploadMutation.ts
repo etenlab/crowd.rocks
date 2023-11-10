@@ -9,12 +9,13 @@ import { updateCacheWithUploadDocument } from '../cacheUpdators/uploadDocument';
 import { useTr } from './useTr';
 import { useAppContext } from './useAppContext';
 import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
+import { langInfo2String, subTags2LangInfo } from '../../../utils';
 
 export function useDocumentUploadMutation() {
   const {
     states: {
-      global: {
-        langauges: { sourceLang },
+      nonPersistent: {
+        paginationVariables: { getAllDocuments },
       },
     },
   } = useAppContext();
@@ -32,7 +33,30 @@ export function useDocumentUploadMutation() {
       ) {
         const newDocument = data.documentUpload.document;
 
-        updateCacheWithUploadDocument(cache, newDocument, sourceLang);
+        const variablesList = Object.values(getAllDocuments).filter((item) => {
+          if (
+            langInfo2String(
+              subTags2LangInfo({
+                lang: item.input.language_code,
+                dialect: item.input.dialect_code || undefined,
+                region: item.input.geo_code || undefined,
+              }),
+            ) ===
+            langInfo2String(
+              subTags2LangInfo({
+                lang: newDocument.language_code,
+                dialect: newDocument.dialect_code || undefined,
+                region: newDocument.geo_code || undefined,
+              }),
+            )
+          ) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+
+        updateCacheWithUploadDocument(cache, newDocument, variablesList);
 
         present({
           message: tr('Success at uploading new document!'),
