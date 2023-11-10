@@ -5,7 +5,7 @@ import LoginPO from '../pages/LoginPage';
 import HomePO from '../pages/HomePage';
 import MenuPO from '../pages/MenuPage';
 import LoginDTO from '../data-objects/LoginDto';
-import { leftMenu } from '../Enums/Enums';
+import { leftMenu } from '../enums/Enums';
 
 test('1: Verify that user is register/logout and login again successfully', async ({
   page,

@@ -3,7 +3,7 @@ import MenuPage from '../pages/MenuPage';
 import HomePage from '../pages/HomePage';
 import SettingsPage from '../pages/SettingsPage';
 import SettingsData from '../data-factory/SettingsData';
-import { settings, leftMenu } from '../Enums/Enums';
+import { settings, leftMenu } from '../enums/Enums';
 
 test('Verify that user is navigated to settings page after clicking on the setting button from the left nav menu', async ({
   page,

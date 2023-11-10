@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import MenuPage from '../pages/MenuPage';
 import HomePage from '../pages/HomePage';
-import { language, leftMenu } from '../Enums/Enums';
+import { language, leftMenu } from '../enums/Enums';
 import AppLanguagePage from '../pages/AppLanguagePage';
 import AppLanguageData from '../data-factory/AppLanguageData';
 
