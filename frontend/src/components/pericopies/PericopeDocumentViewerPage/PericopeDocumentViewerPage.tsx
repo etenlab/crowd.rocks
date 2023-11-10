@@ -9,7 +9,7 @@ import { Caption } from '../../common/Caption/Caption';
 import { useGetDocumentQuery } from '../../../generated/graphql';
 
 import { PericopeDocumentViewer } from '../PericopeDocumentViewer/PericopeDocumentViewer';
-import { ViewMode } from '../../common/BaseDocumentViewer';
+import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
 
 interface PericopeDocumentViewerPageProps
   extends RouteComponentProps<{
