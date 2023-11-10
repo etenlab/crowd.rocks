@@ -16,7 +16,7 @@ import { getLangsRegistry, languageInput2tag } from '../../../../utils';
 
 const LIMIT_REQUESTS = 4000; // per LIMIT_TIME
 const LIMIT_TIME = 60 * 1000; // per minute
-const WAIT_TIMEOUT = 60 * 1000; // miliseconds; if limit_requests reached, need to wait 60 seconds before the next request
+const WAIT_TIMEOUT = 60 * 1000 + 100; // miliseconds; if limit_requests reached, need to wait 60 seconds before the next request
 const LIMIT_LENGTH = 5000; // characters of a source string per request
 const JOINER = '<br/>'; // joins words or phrases before sending to lilt api
 
@@ -85,25 +85,22 @@ export class LiltTranslateService implements ITranslator {
     this.availableRequests = LIMIT_REQUESTS;
   }
 
-  private async liltTranslateApiCall(
-    origStr,
-    memoryId: string,
-  ): Promise<string | null> {
+  private async liltTranslateApiCall(origStr, memoryId: string): Promise<any> {
     const strEncoded = encodeURIComponent(origStr);
-    const url = `${LILT_API_URL}/translate?key=${this.config.LILT_KEY}&memory_id=${memoryId}&source="${strEncoded}"`;
+    const url = `${LILT_API_URL}/translate?key=${this.config.LILT_KEY}&memory_id=${memoryId}&source=${strEncoded}`;
     const res = await fetch(url, {
       method: 'GET',
     });
-    const liltCrerateMemoryRes = (await res.json()) as TlilitTranslateResponce;
-    if (!liltCrerateMemoryRes?.translation[0][0].target) {
-      Logger.error(
-        `liltTranslateService#liltCreateMemoryIdApiCall: ${JSON.stringify(
-          liltCrerateMemoryRes,
-        )}`,
-      );
-      return null;
-    }
-    return liltCrerateMemoryRes.translation[0][0].target;
+    const translatedObj = (await res.json()) as TlilitTranslateResponce;
+    // if (!translatedObj?.translation[0][0].target) {
+    //   Logger.error(
+    //     `liltTranslateService#liltCreateMemoryIdApiCall: ${JSON.stringify(
+    //       translatedObj,
+    //     )}`,
+    //   );
+    //   return null;
+    // }
+    return translatedObj;
   }
 
   private liltMemoryName(
@@ -188,32 +185,29 @@ export class LiltTranslateService implements ITranslator {
     return undefined;
   }
 
-  private planLiltTranslationApiCalls = async (
-    chunks: Array<string>,
-    memoryId: string,
-  ): Promise<Array<string>> => {
-    if (!(chunks?.length > 0)) return [];
+  // private planLiltTranslationApiCalls = async (
+  //   chunks: Array<string>,
+  //   memoryId: string,
+  // ): Promise<Array<string>> => {
+  //   if (!(chunks?.length > 0)) return [];
 
-    if (
-      Date.now() - this.firstOperateTime < 60 * LIMIT_TIME &&
-      this.availableRequests < 1
-    ) {
-      await delay(WAIT_TIMEOUT);
-      this.availableRequests = LIMIT_REQUESTS;
-    }
+  //   if (
+  //     Date.now() - this.firstOperateTime < 60 * LIMIT_TIME &&
+  //     this.availableRequests < 1
+  //   ) {
+  //     await delay(WAIT_TIMEOUT);
+  //     this.availableRequests = LIMIT_REQUESTS;
+  //   }
+  //   const trnanslationsPromises: Array<any> = [];
+  //   for (const chunk of chunks) {
+  //     trnanslationsPromises.push(this.liltTranslateApiCall(chunk, memoryId));
+  //   }
+  //   const translatedChunks = await Promise.all(trnanslationsPromises);
 
-    const translation = await this.liltTranslateApiCall(
-      chunks.join(JOINER),
-      memoryId,
-    );
-    if (!translation)
-      throw new Error(`Lilt translation API returned nullish value`);
-    const translatedChunks = translation.split(JOINER);
-
-    this.lastOperateTime = Date.now();
-    this.availableRequests--;
-    return translatedChunks;
-  };
+  //   this.lastOperateTime = Date.now();
+  //   this.availableRequests = this.availableRequests - chunks.length;
+  //   return translatedChunks;
+  // };
 
   public translate = async (
     texts: string[],
@@ -223,15 +217,13 @@ export class LiltTranslateService implements ITranslator {
     try {
       texts.forEach((text) => {
         if (text.length >= LIMIT_LENGTH - JOINER.length) {
-          throw new Error(
+          Logger.error(
             `Input text too long, more than ${LIMIT_LENGTH - JOINER.length}`,
           );
+          return [];
         }
       });
 
-      let chunks: string[] = [];
-      const translatedTexts: string[] = [];
-      let availableCharacters = LIMIT_LENGTH;
       const memoryId = await this.getLiltMemoryId(fromLang, toLang);
       if (!memoryId) {
         Logger.error(
@@ -240,21 +232,25 @@ export class LiltTranslateService implements ITranslator {
         return [];
       }
 
+      const translationPromises: Array<any> = [];
+      this.firstOperateTime = Date.now();
       for (const text of texts) {
-        if (availableCharacters < text.length + JOINER.length) {
-          translatedTexts.push(
-            ...(await this.planLiltTranslationApiCalls(chunks, memoryId)),
+        if (
+          Date.now() - this.firstOperateTime < LIMIT_TIME &&
+          this.availableRequests < 1
+        ) {
+          Logger.debug(
+            `Lilt request limit reached. Waiting timeout ${WAIT_TIMEOUT} ms.`,
           );
-          chunks = [];
-          availableCharacters = LIMIT_LENGTH;
+          await delay(WAIT_TIMEOUT);
+          this.availableRequests = LIMIT_REQUESTS;
+          this.firstOperateTime = Date.now();
         }
-        chunks.push(text);
-        availableCharacters = availableCharacters - text.length - JOINER.length;
+        translationPromises.push(this.liltTranslateApiCall(text, memoryId));
+        this.availableRequests--;
       }
-      // last one
-      translatedTexts.push(
-        ...(await this.planLiltTranslationApiCalls(chunks, memoryId)),
-      );
+      const translatedObjects = await Promise.all(translationPromises);
+      const translatedTexts = translatedObjects.map((to) => to[0]);
 
       return translatedTexts;
     } catch (err) {
