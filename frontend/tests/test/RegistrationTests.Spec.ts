@@ -5,6 +5,7 @@ import LoginPO from '../pages/LoginPage';
 import HomePO from '../pages/HomePage';
 import MenuPO from '../pages/MenuPage';
 import LoginDTO from '../data-objects/LoginDto';
+import { leftMenu } from '../Enums/Enums';
 
 test('1: Verify that user is register/logout and login again successfully', async ({
   page,
@@ -12,7 +13,7 @@ test('1: Verify that user is register/logout and login again successfully', asyn
   const registerPage = new RegisterPO(page);
   const loginPage = new LoginPO(page);
   const homePage = new HomePO(page);
-  const leftMenu = new MenuPO(page);
+  const leftMenuPage = new MenuPO(page);
   const registerData = RegisterData.validRegisterData();
 
   //Navigate to the URL
@@ -33,11 +34,11 @@ test('1: Verify that user is register/logout and login again successfully', asyn
 
   //logout from the app
   await homePage.clickOnExpandMenu();
-  await leftMenu.clickOnLogout();
+  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Logout);
 
   //Login to the app with registered data
   await homePage.clickOnExpandMenu();
-  await leftMenu.clickOnLoginButton();
+  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Login);
 
   const loginData = LoginDTO;
   loginData.email = registerData.email;
