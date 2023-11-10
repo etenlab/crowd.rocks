@@ -133,6 +133,31 @@ export class BotsResolver {
 
   @IsAuthAdmin()
   @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
+  async translateMissingWordsAndPhrasesByLilt(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    console.log(
+      'translateMissingWordsAndPhrasesByLilt',
+      JSON.stringify({
+        from_language,
+        to_language,
+      }),
+    );
+
+    return this.aiTranslations.translateMissingWordsAndPhrasesByLilt(
+      from_language,
+      to_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @IsAuthAdmin()
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
   async translateWordsAndPhrasesBySmartcat(
     @Args('from_language', { type: () => LanguageInput })
     from_language: LanguageInput,
