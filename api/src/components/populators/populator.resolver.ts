@@ -41,6 +41,7 @@ export class PopulatorResolver {
         mapUploadStatus: SubscriptionStatus.NotStarted,
         mapTranslationsStatus: SubscriptionStatus.NotStarted,
         mapReTranslationsStatus: SubscriptionStatus.NotStarted,
+        userCreateStatus: SubscriptionStatus.NotStarted,
         overallStatus: SubscriptionStatus.NotStarted,
       } as DataGenProgress,
     });

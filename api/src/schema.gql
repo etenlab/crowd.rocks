@@ -61,6 +61,7 @@ input CreateQuestionOnWordRangeUpsertInput {
 input DataGenInput {
   mapAmount: Int
   mapsToLanguages: [LanguageInput!]
+  userAmount: Int
 }
 
 type DataGenProgress {
@@ -69,6 +70,7 @@ type DataGenProgress {
   mapUploadStatus: SubscriptionStatus!
   output: String!
   overallStatus: SubscriptionStatus!
+  userCreateStatus: SubscriptionStatus!
 }
 
 """

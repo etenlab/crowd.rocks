@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { Octokit } from '@octokit/rest';
+import { randomInt } from 'crypto';
 import { createReadStream, ReadStream } from 'fs';
 import { join } from 'path';
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
@@ -10,6 +11,7 @@ import { LanguageInput } from '../common/types';
 import { FileService } from '../file/file.service';
 import { MapsResolver } from '../maps/maps.resolver';
 import { AiTranslationsService } from '../translator-bots/ai-translations.service';
+import { callBatchRegisterBotProcedure } from './sql-string';
 import { DataGenProgress } from './types';
 
 @Injectable()
@@ -27,6 +29,7 @@ export class PopulatorService {
     token: string,
     req: any,
     mapAmount?: number | null,
+    userAmount?: number | null,
   ) {
     const value = new BehaviorSubject({
       output: `Some output`,
@@ -34,6 +37,7 @@ export class PopulatorService {
       mapTranslationsStatus: SubscriptionStatus.Progressing,
       mapReTranslationsStatus: SubscriptionStatus.NotStarted,
       overallStatus: SubscriptionStatus.Progressing,
+      userCreateStatus: SubscriptionStatus.NotStarted,
     } as DataGenProgress);
     const observable = value.asObservable();
 
@@ -47,6 +51,7 @@ export class PopulatorService {
         mapTranslationsStatus: SubscriptionStatus.NotStarted,
         mapReTranslationsStatus: SubscriptionStatus.NotStarted,
         overallStatus: SubscriptionStatus.Progressing,
+        userCreateStatus: SubscriptionStatus.NotStarted,
       } as DataGenProgress);
       const octokit = new Octokit({
         request: {
@@ -68,6 +73,7 @@ export class PopulatorService {
           mapTranslationsStatus: SubscriptionStatus.NotStarted,
           mapReTranslationsStatus: SubscriptionStatus.NotStarted,
           overallStatus: SubscriptionStatus.Error,
+          userCreateStatus: SubscriptionStatus.NotStarted,
         } as DataGenProgress);
         value.complete();
         return;
@@ -87,6 +93,7 @@ export class PopulatorService {
         mapTranslationsStatus: SubscriptionStatus.NotStarted,
         mapReTranslationsStatus: SubscriptionStatus.NotStarted,
         overallStatus: SubscriptionStatus.Progressing,
+        userCreateStatus: SubscriptionStatus.NotStarted,
       } as DataGenProgress);
 
       for (let i = 0; i < mapAmount; i++) {
@@ -100,6 +107,7 @@ export class PopulatorService {
             mapTranslationsStatus: SubscriptionStatus.NotStarted,
             mapReTranslationsStatus: SubscriptionStatus.NotStarted,
             overallStatus: SubscriptionStatus.Progressing,
+            userCreateStatus: SubscriptionStatus.NotStarted,
           } as DataGenProgress);
           break;
         }
@@ -177,6 +185,7 @@ export class PopulatorService {
           mapTranslationsStatus: SubscriptionStatus.NotStarted,
           mapReTranslationsStatus: SubscriptionStatus.NotStarted,
           overallStatus: SubscriptionStatus.Progressing,
+          userCreateStatus: SubscriptionStatus.NotStarted,
         } as DataGenProgress);
         totalUploaded++;
         console.log('upload finished. errors:');
@@ -202,6 +211,7 @@ export class PopulatorService {
           mapTranslationsStatus: SubscriptionStatus.Progressing,
           mapReTranslationsStatus: SubscriptionStatus.NotStarted,
           overallStatus: SubscriptionStatus.Progressing,
+          userCreateStatus: SubscriptionStatus.NotStarted,
         } as DataGenProgress);
         await this.aiTranslationService.translateWordsAndPhrasesByFaker(
           { language_code: 'en', geo_code: null, dialect_code: null },
@@ -216,19 +226,53 @@ export class PopulatorService {
         mapTranslationsStatus: SubscriptionStatus.Completed,
         mapReTranslationsStatus: SubscriptionStatus.NotStarted,
         overallStatus: SubscriptionStatus.Progressing,
+        userCreateStatus: SubscriptionStatus.NotStarted,
       } as DataGenProgress);
 
       // --------------------------------
       // Maps ReTranslate
       // --------------------------------
       value.next({
-        output: `Retranslating all Available Langs...`,
+        output: `Retranslating Maps to all Available Langs...`,
         mapUploadStatus: SubscriptionStatus.Completed,
         mapTranslationsStatus: SubscriptionStatus.Completed,
         mapReTranslationsStatus: SubscriptionStatus.Progressing,
         overallStatus: SubscriptionStatus.Progressing,
+        userCreateStatus: SubscriptionStatus.NotStarted,
       } as DataGenProgress);
       await this.mapRes.mapsReTranslate(req);
+
+      // --------------------------------
+      // Generate users and Vote
+      // --------------------------------
+      value.next({
+        output: `Generating users...`,
+        mapUploadStatus: SubscriptionStatus.Completed,
+        mapTranslationsStatus: SubscriptionStatus.Completed,
+        mapReTranslationsStatus: SubscriptionStatus.Progressing,
+        overallStatus: SubscriptionStatus.Progressing,
+        userCreateStatus: SubscriptionStatus.Progressing,
+      } as DataGenProgress);
+      // make passwords
+      if (userAmount) {
+        const passwords: Array<string> = [];
+        const usernames: Array<string> = [];
+        const emails: Array<string> = [];
+        for (let i = 0; i < userAmount; i++) {
+          passwords.push('asdfasdf');
+          const username = 'fakeuser' + randomInt(userAmount * 100);
+          usernames.push(username);
+          emails.push(username + '@crowd.rocks');
+        }
+        await this.pg.pool.query(
+          ...callBatchRegisterBotProcedure({
+            token,
+            emails,
+            usernames,
+            passwords,
+          }),
+        );
+      }
 
       value.next({
         output: `Done`,
@@ -236,6 +280,7 @@ export class PopulatorService {
         mapTranslationsStatus: SubscriptionStatus.Completed,
         mapReTranslationsStatus: SubscriptionStatus.Completed,
         overallStatus: SubscriptionStatus.Completed,
+        userCreateStatus: SubscriptionStatus.Completed,
       } as DataGenProgress);
     };
 

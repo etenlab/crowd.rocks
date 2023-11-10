@@ -12,6 +12,7 @@ export class DataGenInput {
   @Field(() => Int, { nullable: true }) mapAmount?: number;
   @Field(() => [LanguageInput], { nullable: true })
   mapsToLanguages?: LanguageInput[];
+  @Field(() => Int, { nullable: true }) userAmount?: number;
 }
 
 @ObjectType()
@@ -20,5 +21,6 @@ export class DataGenProgress {
   @Field(() => SubscriptionStatus) mapUploadStatus: SubscriptionStatus;
   @Field(() => SubscriptionStatus) mapTranslationsStatus: SubscriptionStatus;
   @Field(() => SubscriptionStatus) mapReTranslationsStatus: SubscriptionStatus;
+  @Field(() => SubscriptionStatus) userCreateStatus: SubscriptionStatus;
   @Field(() => SubscriptionStatus) overallStatus: SubscriptionStatus;
 }

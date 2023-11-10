@@ -519,6 +519,37 @@ export class DatabaseVersionControlService {
       './src/core/sql/threads/post_delete_from_thread_delete_trigger-v10.sql',
     );
 
+    // batch bot register
+    await this.runSqlFile(
+      './src/core/sql/authentication/batch-register-bot.sql',
+    );
+
+    // vote
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/batch_translation_vote_set-v10.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/translation_vote_set-v10.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/batch_translation_vote_set-v10.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/translation_vote_set-v10.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/batch_translation_vote_set-v10.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/translation_vote_set-v10.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/batch_translation_vote_set-v10.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/translation_vote_set-v10.sql',
+    );
+
     // set version
     await this.setVersionNumber(10);
   }
