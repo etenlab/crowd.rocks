@@ -1,32 +1,32 @@
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router';
-import {
-  IonContent,
-  IonHeader,
-  IonTitle,
-  IonToolbar,
-  useIonToast,
-  useIonLoading,
-} from '@ionic/react';
+import { Stack, Typography, Button } from '@mui/material';
+import { useDebounce } from 'use-debounce';
 
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
-import { ListCaption } from '../../common/styled';
-import { RowStack } from '../../common/Layout/styled';
+import { AddCircle } from '../../common/icons/AddCircle';
+import { SearchInput } from '../../common/forms/SearchInput';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
-
-import { useDocumentUploadMutation } from '../../../hooks/useDocumentUploadMutation';
+import { useGetAllDocumentsLazyQuery } from '../../../generated/graphql';
 
 import { DocumentList } from '../DocumentList/DocumentList';
-import { NewDocumentForm } from './NewDocumentForm';
-import { DocumentsTools } from './DocumentsTools';
-import { useUploadFileMutation } from '../../../hooks/useUploadFileMutation';
+import { DocumentUploadModal } from './DocumentUploadModal';
+
+import { PAGE_SIZE } from '../../../const/commonConst';
 
 export function DocumentsPage() {
   const { tr } = useTr();
+  const history = useHistory();
+  const { nation_id, language_id, cluster_id } = useParams<{
+    nation_id: string;
+    language_id: string;
+    cluster_id: string;
+  }>();
+
   const {
     states: {
       global: {
@@ -35,87 +35,30 @@ export function DocumentsPage() {
     },
     actions: { setSourceLanguage, createModal },
   } = useAppContext();
-  const { nation_id, language_id, cluster_id } = useParams<{
-    nation_id: string;
-    language_id: string;
-    cluster_id: string;
-  }>();
+
+  const [getAllDocuments, { data }] = useGetAllDocumentsLazyQuery();
+
+  const [filter, setFilter] = useState<string>('');
+  const [bouncedFilter] = useDebounce(filter, 500);
+
   const { openModal, closeModal } = createModal();
 
-  const [uploadFile] = useUploadFileMutation();
-  const [documentUpload] = useDocumentUploadMutation();
-
-  const [toast] = useIonToast();
-  const [loader, dismissLoader] = useIonLoading();
-  const history = useHistory();
-
-  const handleAddDocument = useCallback(
-    async (file: File | undefined) => {
-      if (!sourceLang?.lang) {
-        toast({
-          message: tr('Please select language first.'),
-          duration: 1500,
-          position: 'top',
-          color: 'danger',
-        });
-        return;
-      }
-      if (!file) {
-        toast({
-          message: tr('Please choose file first.'),
-          duration: 1500,
-          position: 'top',
-          color: 'danger',
-        });
-        return;
-      }
-
-      loader({
-        message: `${tr('Uploading')} ${file.name}...`,
-      });
-
-      const uploadResult = await uploadFile({
+  useEffect(() => {
+    if (sourceLang) {
+      getAllDocuments({
         variables: {
-          file: file,
-          file_size: file.size,
-          file_type: file.type,
-        },
-      });
-
-      if (!uploadResult.data?.uploadFile.file?.id) {
-        dismissLoader();
-        console.log(`S3 upload error `, uploadResult.data?.uploadFile.error);
-        return;
-      }
-
-      await documentUpload({
-        variables: {
-          document: {
-            file_id: String(uploadResult.data.uploadFile.file.id),
-            language_code: sourceLang.lang.tag,
-            dialect_code: sourceLang?.dialect?.tag,
-            geo_code: sourceLang?.region?.tag,
+          input: {
+            filter: bouncedFilter.trim(),
+            language_code: sourceLang?.lang.tag,
+            dialect_code: sourceLang?.dialect?.tag || null,
+            geo_code: sourceLang?.region?.tag || null,
           },
+          first: PAGE_SIZE,
+          after: null,
         },
       });
-
-      dismissLoader();
-
-      closeModal();
-    },
-    [
-      sourceLang?.lang,
-      sourceLang?.dialect?.tag,
-      sourceLang?.region?.tag,
-      loader,
-      tr,
-      uploadFile,
-      documentUpload,
-      dismissLoader,
-      closeModal,
-      toast,
-    ],
-  );
+    }
+  }, [getAllDocuments, sourceLang, bouncedFilter]);
 
   const handleGoToDocumentViewer = useCallback(
     (documentId: string) => {
@@ -127,40 +70,60 @@ export function DocumentsPage() {
   );
 
   const handleOpenModal = () => {
-    openModal(
-      <>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>{tr('New Document')}</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          <NewDocumentForm onSave={handleAddDocument} onCancel={closeModal} />
-        </IonContent>
-      </>,
-      'full',
-    );
+    openModal(<DocumentUploadModal onClose={closeModal} />);
   };
 
   return (
     <PageLayout>
       <Caption>{tr('Documents')}</Caption>
 
-      <LangSelector
-        title={tr('Select language')}
-        selected={sourceLang}
-        onChange={(_sourceLangTag, sourceLangInfo) => {
-          setSourceLanguage(sourceLangInfo);
-        }}
-        onClearClick={() => setSourceLanguage(null)}
-      />
+      <Stack gap="32px">
+        <LangSelector
+          title={tr('Select your language')}
+          selected={sourceLang}
+          onChange={(_sourceLangTag, sourceLangInfo) => {
+            setSourceLanguage(sourceLangInfo);
+          }}
+          onClearClick={() => setSourceLanguage(null)}
+        />
 
-      <RowStack>
-        <ListCaption>{tr('Document List')}</ListCaption>
-        <DocumentsTools onAddClick={() => handleOpenModal()} />
-      </RowStack>
+        <Stack gap="8px">
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h3" color="dark">
+              {`${data?.getAllDocuments.pageInfo.totalEdges || 0} ${tr(
+                'documents found',
+              )}`}
+            </Typography>
 
-      <DocumentList onClickItem={handleGoToDocumentViewer} />
+            <Button
+              variant="contained"
+              color="orange"
+              sx={{ padding: '7px', minWidth: 0 }}
+              onClick={handleOpenModal}
+            >
+              <AddCircle sx={{ fontSize: '18px' }} />
+            </Button>
+          </Stack>
+
+          <SearchInput
+            value={filter}
+            onChange={setFilter}
+            onClickSearchButton={() => {}}
+            placeholder={tr('Search by document...')}
+          />
+        </Stack>
+      </Stack>
+      {sourceLang ? (
+        <DocumentList
+          onClickItem={handleGoToDocumentViewer}
+          filter={bouncedFilter}
+          language={sourceLang}
+        />
+      ) : null}
     </PageLayout>
   );
 }

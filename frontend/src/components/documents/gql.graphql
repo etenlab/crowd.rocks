@@ -15,6 +15,7 @@ fragment DocumentWordEntryFragment on DocumentWordEntry {
     ...WordlikeStringFragment
   }
   parent_document_word_entry_id
+  page
 }
 
 fragment WordRangeFragment on WordRange {
@@ -23,6 +24,20 @@ fragment WordRangeFragment on WordRange {
     ...DocumentWordEntryFragment
   }
   end {
+    ...DocumentWordEntryFragment
+  }
+}
+
+fragment DocumentEdgeFragment on DocumentEdge {
+  cursor
+  node {
+    ...TextyDocumentFragment
+  }
+}
+
+fragment DocumentWordEntriesEdgeFragment on DocumentWordEntriesEdge {
+  cursor
+  node {
     ...DocumentWordEntryFragment
   }
 }
@@ -36,33 +51,49 @@ mutation DocumentUpload($document: TextyDocumentInput!) {
   }
 }
 
-query GetAllDocuments($languageInput: LanguageInput) {
-  getAllDocuments(input: { lang: $languageInput }) {
-    documents {
-      ...TextyDocumentFragment
+query GetAllDocuments($input: LanguageInput, $after: ID, $first: Int) {
+  getAllDocuments(input: $input, after: $after, first: $first) {
+    error
+    edges {
+      ...DocumentEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
 
 query GetDocument($document_id: String!) {
   getDocument(input: { document_id: $document_id }) {
+    error
     document {
       ...TextyDocumentFragment
     }
   }
 }
 
-query GetDocumentWordEntriesByDocumentId($document_id: ID!) {
-  getDocumentWordEntriesByDocumentId(document_id: $document_id) {
+query GetDocumentWordEntriesByDocumentId(
+  $document_id: ID!
+  $after: ID
+  $first: Int
+) {
+  getDocumentWordEntriesByDocumentId(
+    document_id: $document_id
+    after: $after
+    first: $first
+  ) {
     error
-    document_word_entries {
-      ...DocumentWordEntryFragment
+    edges {
+      ...DocumentWordEntriesEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
     }
   }
 }
 
-query GetWordRangesByDocumentId($id: ID!) {
-  getWordRangesByDocumentId(id: $id) {
+query GetWordRangesByDocumentId($document_id: ID!) {
+  getWordRangesByDocumentId(document_id: $document_id) {
     error
     word_ranges {
       ...WordRangeFragment

@@ -539,10 +539,16 @@ create table document_word_entries(
   document_word_entry_id bigserial primary key,
   document_id bigint not null references documents(document_id),
   wordlike_string_id bigint not null references wordlike_strings(wordlike_string_id),
+  page bigint not null,
   parent_document_word_entry_id bigint references document_word_entries(document_word_entry_id),
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__document_id__document_word_entries on document_word_entries (document_id);
+create index idx__wordlike_string_id__document_word_entries on document_word_entries (wordlike_string_id);
+create index idx__parent_document_word_entry_id__document_word_entries on document_word_entries (parent_document_word_entry_id);
+create index idx__page__document_word_entries on document_word_entries (page);
+
 
 create table word_ranges (
   word_range_id bigserial primary key,

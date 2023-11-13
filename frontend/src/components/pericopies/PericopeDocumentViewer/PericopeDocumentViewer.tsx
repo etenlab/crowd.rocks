@@ -6,7 +6,8 @@ import {
   // useIonLoading,
 } from '@ionic/react';
 
-import { ViewMode, Dot } from '../../common/BaseDocumentViewer';
+import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
+import { Dot } from '../../documents/DocumentViewer/styled';
 import { DocumentViewer } from '../../documents/DocumentViewer';
 import { PericopeReaction } from './PericopeReaction';
 
