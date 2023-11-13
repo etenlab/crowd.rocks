@@ -19,21 +19,21 @@ export const Word = styled('div')({
     background: '#EFF1F8',
   },
   '&.left-boundary': {
-    borderRadius: '5px 0 0 5px',
+    borderRadius: '5px',
   },
   '&.right-boundary': {
     borderRadius: '0 5px 5px 0',
   },
 });
 
-export const Dot = styled('div')({
+export const Dot = styled('div')(({ theme }) => ({
   position: 'absolute',
-  top: '-3px',
+  top: '0px',
   left: '50%',
   transform: 'translateX(-50%)',
-  backgroundColor: '#1f77df',
-  width: '7px',
-  height: '7px',
+  backgroundColor: theme.palette.background.blue,
+  width: '5px',
+  height: '5px',
   borderRadius: '50%',
   cursor: 'pointer',
-});
+}));
