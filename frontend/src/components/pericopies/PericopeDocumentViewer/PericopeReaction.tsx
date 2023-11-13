@@ -1,56 +1,96 @@
-import { IonButton } from '@ionic/react';
-import { chatbubbleEllipsesSharp } from 'ionicons/icons';
-import { useTr } from '../../../hooks/useTr';
-import { RowStack } from '../../common/Layout/styled';
+import { useMemo } from 'react';
+import { Stack } from '@mui/material';
 
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
+import { DiscussionIconButton } from '../../Discussion/DiscussionButton/DiscussionIconButton';
 
-import { StChatIcon } from '../../common/styled';
+import {
+  useGetPericopeVoteStatusQuery,
+  TableNameType,
+  ErrorType,
+} from '../../../generated/graphql';
+import { useTogglePericopeVoteStatusMutation } from '../../../hooks/useTogglePericopeVoteStatusMutation';
 
-type PericopeReaction = {
-  mode: 'view' | 'edit';
-  vote?: {
-    upVotes: number;
-    downVotes: number;
-    onVoteUpClick: () => void;
-    onVoteDownClick: () => void;
-  };
-  onClickAddPericope(): void;
-  onClickDiscussion?: () => void;
+type PericopeReactionProps = {
+  pericopeId: string;
+  onClose(): void;
 };
 
 export function PericopeReaction({
-  mode,
-  vote,
-  onClickAddPericope,
-  onClickDiscussion,
-}: PericopeReaction) {
-  const { tr } = useTr();
+  pericopeId,
+  onClose,
+}: PericopeReactionProps) {
+  const { data: voteStatusData, error: voteStatusError } =
+    useGetPericopeVoteStatusQuery({
+      variables: {
+        pericope_id: pericopeId,
+      },
+    });
+  const [togglePericopeVoteStatus] = useTogglePericopeVoteStatusMutation();
 
-  if (mode === 'edit') {
-    return (
-      <IonButton fill="clear" onClick={onClickAddPericope}>
-        {tr('Add Pericope')}
-      </IonButton>
-    );
-  } else {
-    const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
+  const vote = useMemo(() => {
+    if (
+      voteStatusError ||
+      !voteStatusData ||
+      voteStatusData.getPericopeVoteStatus.error !== ErrorType.NoError ||
+      !voteStatusData.getPericopeVoteStatus.vote_status
+    ) {
+      return null;
+    }
 
-    const discussionCom = onClickDiscussion ? (
-      <StChatIcon
-        icon={chatbubbleEllipsesSharp}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClickDiscussion();
-        }}
+    const voteStatus = voteStatusData.getPericopeVoteStatus.vote_status;
+
+    if (pericopeId !== voteStatus.pericope_id) {
+      return null;
+    }
+
+    const handleUpClick = () => {
+      togglePericopeVoteStatus({
+        variables: {
+          pericope_id: voteStatus.pericope_id,
+          vote: true,
+        },
+      });
+    };
+
+    const handleDownClick = () => {
+      togglePericopeVoteStatus({
+        variables: {
+          pericope_id: voteStatus.pericope_id,
+          vote: false,
+        },
+      });
+    };
+
+    return {
+      upVotes: voteStatus.upvotes,
+      downVotes: voteStatus.downvotes,
+      onVoteUpClick: handleUpClick,
+      onVoteDownClick: handleDownClick,
+    };
+  }, [pericopeId, voteStatusError, voteStatusData, togglePericopeVoteStatus]);
+
+  const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
+
+  return (
+    <Stack
+      direction="row"
+      gap="16px"
+      alignItems="center"
+      sx={(theme) => ({
+        padding: '10px',
+        border: `1px solid ${theme.palette.text.gray_stroke}`,
+        borderRadius: '6px',
+        backgroundColor: theme.palette.background.white,
+      })}
+    >
+      {voteButtonCom}
+      <DiscussionIconButton
+        parent_id={pericopeId}
+        parent_table={TableNameType.Pericopies}
+        flex="1"
+        onClick={onClose}
       />
-    ) : null;
-
-    return (
-      <RowStack>
-        {voteButtonCom}
-        {discussionCom}
-      </RowStack>
-    );
-  }
+    </Stack>
+  );
 }
