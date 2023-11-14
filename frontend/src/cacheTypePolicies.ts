@@ -141,6 +141,9 @@ export const typePolicies: TypePolicies = {
   Pericope: {
     keyFields: ['pericope_id'],
   },
+  PericopeWithVote: {
+    keyFields: ['pericope_id'],
+  },
   PericopeVoteStatus: {
     keyFields: ['pericope_id'],
   },

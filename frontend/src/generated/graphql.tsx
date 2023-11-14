@@ -1288,6 +1288,12 @@ export type PericopeWithVote = {
   upvotes: Scalars['Int']['output'];
 };
 
+export type PericopeWithVotesOutput = {
+  __typename?: 'PericopeWithVotesOutput';
+  error: ErrorType;
+  pericope_with_votes: Array<PericopeWithVote>;
+};
+
 export type PericopiesOutput = {
   __typename?: 'PericopiesOutput';
   error: ErrorType;
@@ -1634,7 +1640,7 @@ export type Query = {
   getOrigMapWordsAndPhrasesCount: MapWordsAndPhrasesCountOutput;
   getOrigMapsList: GetOrigMapsListOutput;
   getPericopeVoteStatus: PericopeVoteStatusOutput;
-  getPericopiesByDocumentId: PericopiesOutput;
+  getPericopiesByDocumentId: PericopeWithVotesOutput;
   getPhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   getPhraseDefinitionsByFlag: PhraseDefinitionListConnection;
   getPhraseDefinitionsByLanguage: PhraseDefinitionWithVoteListOutput;
@@ -1833,6 +1839,7 @@ export type QueryGetPericopeVoteStatusArgs = {
 
 export type QueryGetPericopiesByDocumentIdArgs = {
   document_id: Scalars['ID']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1980,6 +1987,7 @@ export type QueryGetWordRangesByBeginIdsArgs = {
 
 export type QueryGetWordRangesByDocumentIdArgs = {
   document_id: Scalars['ID']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3476,12 +3484,15 @@ export type PericopeFragmentFragment = { __typename?: 'Pericope', pericope_id: s
 
 export type PericopeVoteStatusFragmentFragment = { __typename?: 'PericopeVoteStatus', pericope_id: string, upvotes: number, downvotes: number };
 
+export type PericopeWithVoteFragmentFragment = { __typename?: 'PericopeWithVote', pericope_id: string, start_word: string, downvotes: number, upvotes: number };
+
 export type GetPericopiesByDocumentIdQueryVariables = Exact<{
   document_id: Scalars['ID']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetPericopiesByDocumentIdQuery = { __typename?: 'Query', getPericopiesByDocumentId: { __typename?: 'PericopiesOutput', error: ErrorType, pericopies: Array<{ __typename?: 'Pericope', pericope_id: string, start_word: string } | null> } };
+export type GetPericopiesByDocumentIdQuery = { __typename?: 'Query', getPericopiesByDocumentId: { __typename?: 'PericopeWithVotesOutput', error: ErrorType, pericope_with_votes: Array<{ __typename?: 'PericopeWithVote', pericope_id: string, start_word: string, downvotes: number, upvotes: number }> } };
 
 export type GetPericopeVoteStatusQueryVariables = Exact<{
   pericope_id: Scalars['ID']['input'];
@@ -4492,6 +4503,14 @@ export const PericopeVoteStatusFragmentFragmentDoc = gql`
   pericope_id
   upvotes
   downvotes
+}
+    `;
+export const PericopeWithVoteFragmentFragmentDoc = gql`
+    fragment PericopeWithVoteFragment on PericopeWithVote {
+  pericope_id
+  start_word
+  downvotes
+  upvotes
 }
     `;
 export const PhraseDefinitionWithVoteFragmentFragmentDoc = gql`
@@ -7330,15 +7349,15 @@ export type MarkNotificationReadMutationHookResult = ReturnType<typeof useMarkNo
 export type MarkNotificationReadMutationResult = Apollo.MutationResult<MarkNotificationReadMutation>;
 export type MarkNotificationReadMutationOptions = Apollo.BaseMutationOptions<MarkNotificationReadMutation, MarkNotificationReadMutationVariables>;
 export const GetPericopiesByDocumentIdDocument = gql`
-    query GetPericopiesByDocumentId($document_id: ID!) {
-  getPericopiesByDocumentId(document_id: $document_id) {
+    query GetPericopiesByDocumentId($document_id: ID!, $page: Int) {
+  getPericopiesByDocumentId(document_id: $document_id, page: $page) {
     error
-    pericopies {
-      ...PericopeFragment
+    pericope_with_votes {
+      ...PericopeWithVoteFragment
     }
   }
 }
-    ${PericopeFragmentFragmentDoc}`;
+    ${PericopeWithVoteFragmentFragmentDoc}`;
 
 /**
  * __useGetPericopiesByDocumentIdQuery__
@@ -7353,6 +7372,7 @@ export const GetPericopiesByDocumentIdDocument = gql`
  * const { data, loading, error } = useGetPericopiesByDocumentIdQuery({
  *   variables: {
  *      document_id: // value for 'document_id'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10052,6 +10072,7 @@ export const namedOperations = {
     MapVoteStatusFragment: 'MapVoteStatusFragment',
     PericopeFragment: 'PericopeFragment',
     PericopeVoteStatusFragment: 'PericopeVoteStatusFragment',
+    PericopeWithVoteFragment: 'PericopeWithVoteFragment',
     PhraseFragment: 'PhraseFragment',
     PhraseDefinitionFragment: 'PhraseDefinitionFragment',
     PhraseWithDefinitionsFragment: 'PhraseWithDefinitionsFragment',

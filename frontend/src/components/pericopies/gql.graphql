@@ -9,11 +9,28 @@ fragment PericopeVoteStatusFragment on PericopeVoteStatus {
   downvotes
 }
 
-query GetPericopiesByDocumentId($document_id: ID!) {
-  getPericopiesByDocumentId(document_id: $document_id) {
+fragment PericopeWithVoteFragment on PericopeWithVote {
+  pericope_id
+  start_word
+  downvotes
+  upvotes
+}
+
+fragment PericopeWithVotesEdgeFragment on PericopeWithVotesEdge {
+  cursor
+  node {
+    ...PericopeWithVoteFragment
+  }
+}
+
+query GetPericopiesByDocumentId($document_id: ID!, $page: Int) {
+  getPericopiesByDocumentId(document_id: $document_id, page: $page) {
     error
-    pericopies {
-      ...PericopeFragment
+    edges {
+      ...PericopeWithVotesEdgeFragment
+    }
+    pageInfo: {
+      ...PageInfoFragment
     }
   }
 }
