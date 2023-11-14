@@ -158,6 +158,8 @@ enum ErrorType {
   CandidateNotFound
   CandidateNotFoundInBallot
   DocumentEntryReadError
+  DocumentFileIdNotProvided
+  DocumentFileReadError
   DocumentIdNotProvided
   DocumentNotFound
   DocumentWordEntryAlreadyExists
@@ -172,7 +174,9 @@ enum ErrorType {
   EmailUnavailable
   FileDeleteFailed
   FileNotExists
+  FileRecordNotFound
   FileSaveFailed
+  FileUpdateFailed
   FileWithFilenameAlreadyExists
   FolderForThreadNotExists
   FolderIdNotDefined

@@ -1275,12 +1275,16 @@ export class AiTranslationsService {
     const fileInfo = await this.fileService.findOne(
       Number(document.document.file_id),
     );
-    if (!fileInfo) {
+    if (!fileInfo?.file?.fileName) {
       Logger.error(
-        `aiTranslationsService#botTranslateDocument: document.file_id not specified`,
+        `aiTranslationsService#botTranslateDocument: fileInfo?.file?.fileName not specified`,
       );
       return { error: ErrorType.DocumentFileReadError };
     }
+
+    const fileString = await this.fileService.getFileContentAsString(
+      document.document.file_id,
+    );
     const sourceLang: LanguageInput = {
       language_code: document.document?.language_code,
       dialect_code: document.document?.dialect_code,
@@ -1289,11 +1293,11 @@ export class AiTranslationsService {
     switch (input.botType) {
       case BotType.Lilt:
         return this.lTrService.translateFile(
-          file, /// todo chose suitabe format
+          fileString, /// todo chose suitabe format
+          fileInfo?.file?.fileName,
           sourceLang,
           input.targetLang,
         );
-        break;
       default:
         return {
           error: ErrorType.BotTranslationBotNotFound,

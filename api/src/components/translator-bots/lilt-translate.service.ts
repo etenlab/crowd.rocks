@@ -13,6 +13,8 @@ import {
 } from './types';
 import fetch, { Headers } from 'node-fetch';
 import { getLangsRegistry, languageInput2tag } from '../../../../utils';
+import { ReadStream } from 'fs';
+import { Readable } from 'stream';
 
 const LIMIT_REQUESTS = 4000; // per LIMIT_TIME
 const LIMIT_TIME = 60 * 1000; // per minute
@@ -71,6 +73,18 @@ type TlilitTranslateResponce = {
       },
     ]
   >;
+};
+
+type TLiltSourceFile = {
+  id: number;
+  name: string;
+  file_hash: string;
+  detected_lang: string;
+  detected_lang_confidence: number;
+  category: string;
+  labels: string[];
+  created_at: string;
+  updated_at: string;
 };
 
 @Injectable()
@@ -179,16 +193,57 @@ export class LiltTranslateService implements ITranslator {
 
   // specific to Lilt methods:
 
+  private async sendFileToLilt(fileString: string, fileName: string) {
+    const url = `${LILT_API_URL}/files?key=${this.config.LILT_KEY}&name=${fileName}&labels=crowdrocks_bot`;
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/octet-stream');
+    headers.append('Accept', 'application/json');
+    const body = Readable.from(fileString);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    });
+
+    const sourceFile: TLiltSourceFile = await res.json();
+    if (sourceFile.id) {
+      Logger.log(`file is uploaded to Lilt, id: ${sourceFile.id}`);
+    } else {
+      Logger.error(
+        `Error with file upload to Lilt: ${JSON.stringify(sourceFile)}`,
+      );
+    }
+  }
+
+  private async startFileTranslation() {
+    // todo
+  }
+
+  private async checkFileTranslationStatus() {
+    // todo
+  }
+
+  private async getTranslatedFile() {
+    // todo
+  }
+
+  private async deleteFileFromLilt() {
+    // todo
+  }
+
   public translateFile = async (
-    file: File,
+    fileString: string,
+    fileName: string,
     fromLang: LanguageInput,
     toLang: LanguageInput,
   ): Promise<GenericOutput> => {
-    // const memory = this.getLiltMemoryId(fromLang, toLang);
+    const memory = await this.getLiltMemoryId(fromLang, toLang);
+    const res1 = await this.sendFileToLilt(fileString, fileName);
     // todo
     Logger.debug(
       `liltTranslateService#translateDocument mock:`,
-      file.name,
+      fileName,
       fromLang,
       toLang,
     );

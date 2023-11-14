@@ -9,7 +9,11 @@ import {
 import { useTr } from '../../../hooks/useTr';
 import { Check } from '../../common/icons/Check';
 
-import { TextyDocument } from '../../../generated/graphql';
+import {
+  ErrorType,
+  TextyDocument,
+  useBotTranslateDocumentMutation,
+} from '../../../generated/graphql';
 
 import { useAppContext } from '../../../hooks/useAppContext';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
@@ -37,7 +41,7 @@ export function DocumentBotTranslateModal({
   const [
     documentBotTranslate,
     { loading: translating, data: translatingData },
-  ] = botTranslateDocument();
+  ] = useBotTranslateDocumentMutation();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const possibleBots: Array<{ name: string; translateFn: () => any }> = [
@@ -94,7 +98,7 @@ export function DocumentBotTranslateModal({
 
   if (
     translatingData &&
-    translatingData?.documentLiltTranslate?.error === ErrorType.NoError
+    translatingData?.botTranslateDocument.error === ErrorType.NoError
   ) {
     title = tr('Great news!');
     content = tr('The document translated successfully!');
@@ -114,7 +118,7 @@ export function DocumentBotTranslateModal({
 
   if (
     translatingData &&
-    translatingData.documentLiltTranslate.error !== ErrorType.NoError
+    translatingData.botTranslateDocument.error !== ErrorType.NoError
   ) {
     title = tr('Something went wrong');
     content = tr(

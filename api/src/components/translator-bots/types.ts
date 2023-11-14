@@ -25,7 +25,8 @@ export interface ITranslator {
   }>;
   getLanguages(): Promise<LanguageListForBotTranslateOutput>;
   translateFile?: (
-    file: File,
+    fileString: string,
+    fileName: string,
     fromLang: LanguageInput,
     toLang: LanguageInput,
   ) => Promise<GenericOutput>;
