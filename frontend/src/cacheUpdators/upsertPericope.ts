@@ -21,13 +21,15 @@ export function updateCacheWithUpsertPericope(
     (data) => {
       if (data) {
         const alreadyExists =
-          data.getPericopiesByDocumentId.pericopies?.filter((pericope) => {
-            if (pericope) {
-              return pericope.pericope_id === newPericope.pericope_id;
-            }
+          data.getPericopiesByDocumentId.pericope_with_votes?.filter(
+            (pericope) => {
+              if (pericope) {
+                return pericope.pericope_id === newPericope.pericope_id;
+              }
 
-            return false;
-          }) || [];
+              return false;
+            },
+          ) || [];
 
         if (alreadyExists.length > 0) {
           return data;
@@ -37,9 +39,15 @@ export function updateCacheWithUpsertPericope(
           ...data,
           getPericopiesByDocumentId: {
             ...data.getPericopiesByDocumentId,
-            pericopies: [
-              ...(data.getPericopiesByDocumentId.pericopies || []),
-              newPericope,
+            pericope_with_votes: [
+              ...data.getPericopiesByDocumentId.pericope_with_votes,
+              {
+                __typename: 'PericopeWithVote',
+                pericope_id: newPericope.pericope_id,
+                start_word: newPericope.start_word,
+                upvotes: 0,
+                downvotes: 0,
+              },
             ],
           },
         };

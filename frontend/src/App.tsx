@@ -108,6 +108,9 @@ export const apollo_client = new ApolloClient({
   link: authLink.concat(splitLink),
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(window as any).cacheApollo = apollo_client;
+
 const App: React.FC = () => {
   return (
     <IonApp>
