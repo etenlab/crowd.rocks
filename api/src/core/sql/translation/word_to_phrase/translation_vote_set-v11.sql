@@ -4,7 +4,7 @@ create or replace procedure word_to_phrase_translation_vote_set(
   in p_vote boolean,
   inout p_word_to_phrase_translations_vote_id bigint,
   inout p_error_type varchar(32),
-  in p_user_id default -1
+  in p_user_id bigint default -1
 )
 language plpgsql
 as $$
@@ -21,7 +21,7 @@ begin
   where token = p_token;
 
   if p_user_id != -1 then
-    v_user_id = p_user_id
+    v_user_id = p_user_id;
   end if;
 
   if v_user_id is null then

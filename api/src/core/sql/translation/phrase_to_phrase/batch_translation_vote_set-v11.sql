@@ -5,7 +5,7 @@ create or replace procedure batch_phrase_to_phrase_translation_vote_set(
   inout p_translation_vote_ids bigint[],
   inout p_error_types varchar(32)[],
   inout p_error_type varchar(32),
-  in p_user_id default -1
+  in p_user_id bigint default -1
 )
 language plpgsql
 as $$
@@ -34,7 +34,7 @@ begin
       p_vote,
       v_temp_phrase_to_phrase_translation_vote_id,
       v_temp_error_type,
-      p_user_id,
+      p_user_id
     );
 
     p_translation_vote_ids := array_append(
