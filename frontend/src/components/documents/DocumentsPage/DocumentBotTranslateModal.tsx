@@ -35,25 +35,15 @@ export function DocumentBotTranslateModal({
   } = useAppContext();
 
   const [
-    documentLiltTranslate,
+    documentBotTranslate,
     { loading: translating, data: translatingData },
-  ] = [
-    () => {
-      console.log('start lilt translate');
-    },
-    {
-      loading: false,
-      data: undefined,
-      // data: { documentLiltTranslate: { error: ErrorType.NoError } },
-    },
-  ];
-  //useDocumentLiltTranslateMutation();
+  ] = botTranslateDocument();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const possibleBots: Array<{ name: string; translateFn: () => any }> = [
     {
       name: 'Lilt',
-      translateFn: documentLiltTranslate,
+      translateFn: documentBotTranslate,
     },
   ];
 
@@ -103,9 +93,8 @@ export function DocumentBotTranslateModal({
   }
 
   if (
-    translatingData
-    // &&
-    // translatingData?.documentLiltTranslate?.error === ErrorType.NoError
+    translatingData &&
+    translatingData?.documentLiltTranslate?.error === ErrorType.NoError
   ) {
     title = tr('Great news!');
     content = tr('The document translated successfully!');
@@ -124,9 +113,8 @@ export function DocumentBotTranslateModal({
   }
 
   if (
-    translatingData
-    // &&
-    // translatingData!.documentLiltTranslate!.error !== ErrorType.NoError
+    translatingData &&
+    translatingData.documentLiltTranslate.error !== ErrorType.NoError
   ) {
     title = tr('Something went wrong');
     content = tr(

@@ -9,6 +9,12 @@ Accept: application/json
 }
 
 ###
+GET https://lilt.com/2/memories?key=374e6ccebcac920a894dd33374db253c
+Content-Type: application/json
+Accept: application/json
+
+
+###
 DELETE https://lilt.com/2/memories?key=374e6ccebcac920a894dd33374db253c&id=108877
 
 "{\"name\":\"liltbot@crowd.rocks-en-uk\",\"srclang\":\"en\",\"trglang\":\"uk\"}"

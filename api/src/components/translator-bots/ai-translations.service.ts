@@ -9,6 +9,7 @@ import { LanguageInput } from 'src/components/common/types';
 import { PhrasesService } from 'src/components/phrases/phrases.service';
 import { WordsService } from 'src/components/words/words.service';
 import { PostgresService } from 'src/core/postgres.service';
+import { FileService } from 'src/components/file/file.service';
 import { PUB_SUB } from 'src/pubSub.module';
 import { PhraseToPhraseTranslationsService } from '../translations/phrase-to-phrase-translations.service';
 import { PhraseToWordTranslationsService } from '../translations/phrase-to-word-translations.service';
@@ -29,6 +30,7 @@ import { TranslationsService } from '../translations/translations.service';
 import { ToDefinitionInput } from '../translations/types';
 import { ChatGPTService } from './chatgpt.service';
 import {
+  BotTranslateDocumentInput,
   ChatGPTVersion,
   IGPTTranslator,
   ITranslator,
@@ -47,6 +49,7 @@ import {
 } from './utility';
 import { langInfo2String, subTags2LangInfo } from '../../../../utils';
 import { FakerTranslateService } from './faker-translate.service';
+import { DocumentsService } from '../documents/documents.service';
 
 interface ItranslateAllWordsAndPhrasesByBot {
   translateWordsAndPhrases: (
@@ -66,6 +69,8 @@ export class AiTranslationsService {
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private wordsService: WordsService,
     private phrasesService: PhrasesService,
+    private documentsService: DocumentsService,
+    private fileService: FileService,
     private gTrService: GoogleTranslateService,
     private lTrService: LiltTranslateService,
     private scTrService: SmartcatTranslateService,
@@ -1251,4 +1256,48 @@ export class AiTranslationsService {
       result: null,
     };
   };
+
+  async botTranslateDocument(
+    input: BotTranslateDocumentInput,
+  ): Promise<GenericOutput> {
+    const document = await this.documentsService.getDocument(
+      Number(input.documentId),
+    );
+    if (
+      !document.document?.file_id ||
+      isNaN(Number(document.document?.file_id))
+    ) {
+      Logger.error(
+        `aiTranslationsService#botTranslateDocument: document.file_id not specified`,
+      );
+      return { error: ErrorType.DocumentFileIdNotProvided };
+    }
+    const fileInfo = await this.fileService.findOne(
+      Number(document.document.file_id),
+    );
+    if (!fileInfo) {
+      Logger.error(
+        `aiTranslationsService#botTranslateDocument: document.file_id not specified`,
+      );
+      return { error: ErrorType.DocumentFileReadError };
+    }
+    const sourceLang: LanguageInput = {
+      language_code: document.document?.language_code,
+      dialect_code: document.document?.dialect_code,
+      geo_code: document.document?.geo_code,
+    };
+    switch (input.botType) {
+      case BotType.Lilt:
+        return this.lTrService.translateFile(
+          file, /// todo chose suitabe format
+          sourceLang,
+          input.targetLang,
+        );
+        break;
+      default:
+        return {
+          error: ErrorType.BotTranslationBotNotFound,
+        };
+    }
+  }
 }

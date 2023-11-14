@@ -5,7 +5,7 @@ import { createToken } from 'src/common/utility';
 import { LanguageInput } from 'src/components/common/types';
 import { ConfigService } from 'src/core/config.service';
 import { PostgresService } from 'src/core/postgres.service';
-import { ErrorType } from '../../common/types';
+import { ErrorType, GenericOutput } from '../../common/types';
 import {
   ITranslator,
   LanguageForBotTranslate,
@@ -92,14 +92,6 @@ export class LiltTranslateService implements ITranslator {
       method: 'GET',
     });
     const translatedObj = (await res.json()) as TlilitTranslateResponce;
-    // if (!translatedObj?.translation[0][0].target) {
-    //   Logger.error(
-    //     `liltTranslateService#liltCreateMemoryIdApiCall: ${JSON.stringify(
-    //       translatedObj,
-    //     )}`,
-    //   );
-    //   return null;
-    // }
     return translatedObj;
   }
 
@@ -185,29 +177,27 @@ export class LiltTranslateService implements ITranslator {
     return undefined;
   }
 
-  // private planLiltTranslationApiCalls = async (
-  //   chunks: Array<string>,
-  //   memoryId: string,
-  // ): Promise<Array<string>> => {
-  //   if (!(chunks?.length > 0)) return [];
+  // specific to Lilt methods:
 
-  //   if (
-  //     Date.now() - this.firstOperateTime < 60 * LIMIT_TIME &&
-  //     this.availableRequests < 1
-  //   ) {
-  //     await delay(WAIT_TIMEOUT);
-  //     this.availableRequests = LIMIT_REQUESTS;
-  //   }
-  //   const trnanslationsPromises: Array<any> = [];
-  //   for (const chunk of chunks) {
-  //     trnanslationsPromises.push(this.liltTranslateApiCall(chunk, memoryId));
-  //   }
-  //   const translatedChunks = await Promise.all(trnanslationsPromises);
+  public translateFile = async (
+    file: File,
+    fromLang: LanguageInput,
+    toLang: LanguageInput,
+  ): Promise<GenericOutput> => {
+    // const memory = this.getLiltMemoryId(fromLang, toLang);
+    // todo
+    Logger.debug(
+      `liltTranslateService#translateDocument mock:`,
+      file.name,
+      fromLang,
+      toLang,
+    );
+    return {
+      error: ErrorType.NoError,
+    };
+  };
 
-  //   this.lastOperateTime = Date.now();
-  //   this.availableRequests = this.availableRequests - chunks.length;
-  //   return translatedChunks;
-  // };
+  // mandatory ITranslator intefrace methods:
 
   public translate = async (
     texts: string[],

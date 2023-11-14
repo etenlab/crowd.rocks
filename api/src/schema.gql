@@ -41,6 +41,12 @@ type AvatarUpdateOutput {
   user: User
 }
 
+input BotTranslateDocumentInput {
+  botType: BotType!
+  documentId: String!
+  targetLang: LanguageInput!
+}
+
 enum BotType {
   DeepL
   GPT4
@@ -609,6 +615,7 @@ type MarkNotificationReadOutput {
 type Mutation {
   addNotification(input: AddNotificationInput!): AddNotificationOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
+  botTranslateDocument(input: BotTranslateDocumentInput!): GenericOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!

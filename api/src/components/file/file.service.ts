@@ -64,7 +64,7 @@ export class FileService {
     fileType: string,
     token: string,
     fileSize?: number,
-  ): Promise<IFileOutput | undefined> {
+  ): Promise<IFileOutput> {
     Logger.log(`Uploading file ` + fileName);
     try {
       const fileKey = `${nanoid()}-${fileName}`;
@@ -164,6 +164,7 @@ export class FileService {
       });
     } catch (err) {
       Logger.log('File upload failed', err);
+      return { error: ErrorType.FileUpdateFailed, file: null };
     }
   }
 
@@ -174,7 +175,7 @@ export class FileService {
     fileType: string,
     fileSize: number,
     token: string,
-  ): Promise<IFileOutput | undefined> {
+  ): Promise<IFileOutput> {
     try {
       const oldFileEntity = await this.fileRepository.find({
         where: { file_id: id },
@@ -245,7 +246,8 @@ export class FileService {
       });
       return await this.fileRepository.save(updatedFileEntity);
     } catch (err) {
-      console.log('File update failed', err);
+      Logger.error('File update failed', err);
+      return { error: ErrorType.FileUpdateFailed, file: null };
     }
   }
 

@@ -24,6 +24,11 @@ export interface ITranslator {
     token: string;
   }>;
   getLanguages(): Promise<LanguageListForBotTranslateOutput>;
+  translateFile?: (
+    file: File,
+    fromLang: LanguageInput,
+    toLang: LanguageInput,
+  ) => Promise<GenericOutput>;
 }
 
 export interface IGPTTranslator extends ITranslator {
@@ -100,4 +105,11 @@ export class TranslateAllWordsAndPhrasesByBotOutput extends GenericOutput {
 @InputType()
 export class ChatGPTVersionInput {
   @Field(() => String) version: ChatGPTVersion;
+}
+
+@InputType()
+export class BotTranslateDocumentInput {
+  @Field(() => BotType) botType: BotType;
+  @Field(() => String) documentId: string;
+  @Field(() => LanguageInput) targetLang: LanguageInput;
 }
