@@ -1,76 +1,36 @@
-import { useMemo } from 'react';
 import { Stack } from '@mui/material';
 
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton/DiscussionIconButton';
 
-import {
-  useGetPericopeVoteStatusQuery,
-  TableNameType,
-  ErrorType,
-} from '../../../generated/graphql';
+import { TableNameType, PericopeWithVote } from '../../../generated/graphql';
 import { useTogglePericopeVoteStatusMutation } from '../../../hooks/useTogglePericopeVoteStatusMutation';
 
 type PericopeReactionProps = {
-  pericopeId: string;
+  pericope: PericopeWithVote;
   onClose(): void;
 };
 
-export function PericopeReaction({
-  pericopeId,
-  onClose,
-}: PericopeReactionProps) {
-  const { data: voteStatusData, error: voteStatusError } =
-    useGetPericopeVoteStatusQuery({
-      variables: {
-        pericope_id: pericopeId,
-      },
-    });
+export function PericopeReaction({ pericope, onClose }: PericopeReactionProps) {
   const [togglePericopeVoteStatus] = useTogglePericopeVoteStatusMutation();
 
-  const vote = useMemo(() => {
-    if (
-      voteStatusError ||
-      !voteStatusData ||
-      voteStatusData.getPericopeVoteStatus.error !== ErrorType.NoError ||
-      !voteStatusData.getPericopeVoteStatus.vote_status
-    ) {
-      return null;
-    }
+  const handleUpClick = () => {
+    togglePericopeVoteStatus({
+      variables: {
+        pericope_id: pericope.pericope_id,
+        vote: true,
+      },
+    });
+  };
 
-    const voteStatus = voteStatusData.getPericopeVoteStatus.vote_status;
-
-    if (pericopeId !== voteStatus.pericope_id) {
-      return null;
-    }
-
-    const handleUpClick = () => {
-      togglePericopeVoteStatus({
-        variables: {
-          pericope_id: voteStatus.pericope_id,
-          vote: true,
-        },
-      });
-    };
-
-    const handleDownClick = () => {
-      togglePericopeVoteStatus({
-        variables: {
-          pericope_id: voteStatus.pericope_id,
-          vote: false,
-        },
-      });
-    };
-
-    return {
-      upVotes: voteStatus.upvotes,
-      downVotes: voteStatus.downvotes,
-      onVoteUpClick: handleUpClick,
-      onVoteDownClick: handleDownClick,
-    };
-  }, [pericopeId, voteStatusError, voteStatusData, togglePericopeVoteStatus]);
-
-  const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
+  const handleDownClick = () => {
+    togglePericopeVoteStatus({
+      variables: {
+        pericope_id: pericope.pericope_id,
+        vote: false,
+      },
+    });
+  };
 
   return (
     <Stack
@@ -84,9 +44,14 @@ export function PericopeReaction({
         backgroundColor: theme.palette.background.white,
       })}
     >
-      {voteButtonCom}
+      <VoteButtonsHorizontal
+        upVotes={pericope.upvotes}
+        downVotes={pericope.downvotes}
+        onVoteDownClick={handleDownClick}
+        onVoteUpClick={handleUpClick}
+      />
       <DiscussionIconButton
-        parent_id={pericopeId}
+        parent_id={pericope.pericope_id}
         parent_table={TableNameType.Pericopies}
         flex="1"
         onClick={onClose}
