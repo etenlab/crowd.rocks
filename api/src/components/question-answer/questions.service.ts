@@ -299,7 +299,11 @@ export class QuestionsService {
   ): Promise<QuestionOnWordRangesOutput> {
     try {
       const { error: wordRangeError, word_ranges } =
-        await this.wordRangesService.getByDocumentId(document_id, pgClient);
+        await this.wordRangesService.getByDocumentId(
+          document_id,
+          null,
+          pgClient,
+        );
 
       if (wordRangeError !== ErrorType.NoError) {
         return {

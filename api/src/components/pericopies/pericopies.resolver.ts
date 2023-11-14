@@ -16,7 +16,7 @@ import { PericopiesService } from './pericopies.service';
 import {
   PericopiesOutput,
   PericopeVoteStatusOutput,
-  PericopeWithVotesOutput,
+  PericopeWithVotesListConnection,
 } from './types';
 
 @Injectable()
@@ -39,16 +39,21 @@ export class PericopiesResolver {
     );
   }
 
-  @Query(() => PericopeWithVotesOutput)
+  @Query(() => PericopeWithVotesListConnection)
   async getPericopiesByDocumentId(
     @Args('document_id', { type: () => ID }) document_id: string,
-    @Args('page', { type: () => Int, nullable: true }) page: number | null,
-  ): Promise<PericopeWithVotesOutput> {
-    Logger.log('getPericopiesByDocumentId', { document_id, page });
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<PericopeWithVotesListConnection> {
+    Logger.log(
+      'getPericopiesByDocumentId',
+      JSON.stringify({ document_id, first, after }, null, 2),
+    );
 
     return this.pericopiesService.getPericopiesByDocumentId(
       +document_id,
-      page,
+      first,
+      after,
       null,
     );
   }
