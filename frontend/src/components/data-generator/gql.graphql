@@ -1,5 +1,5 @@
-mutation GenerateData($mapAmount: Int, $mapsToLanguages: [LanguageInput!]) {
-  generateData(input: {mapAmount: $mapAmount, mapsToLanguages: $mapsToLanguages}) {
+mutation GenerateData($mapAmount: Int, $mapsToLanguages: [LanguageInput!], $userAmount: Int, $wordAmount: Int, $phraseAmount: Int) {
+  generateData(input: {mapAmount: $mapAmount, mapsToLanguages: $mapsToLanguages, userAmount: $userAmount, wordAmount: $wordAmount, phraseAmount: $phraseAmount}) {
     error
   }
 }
@@ -7,9 +7,6 @@ mutation GenerateData($mapAmount: Int, $mapsToLanguages: [LanguageInput!]) {
 subscription SubscribeToDataGenProgress {
   DataGenerationReport {
     output
-    mapUploadStatus
-    mapTranslationsStatus
-    mapReTranslationsStatus
     overallStatus
   }
 }

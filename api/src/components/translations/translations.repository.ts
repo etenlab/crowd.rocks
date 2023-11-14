@@ -215,7 +215,9 @@ export async function setTranslationsVotes(
     if (fromTypeIsWord) {
       if (toTypeIsWord) {
         // call word to word procedure
-        //console.log('w2w');
+        console.log('-------------');
+        console.log('calling w2w');
+        console.log(translationIds);
         // console.log(
         //   ...callWordToWordTranslationVoteSetProcedure({
         //     translationIds,
@@ -232,7 +234,9 @@ export async function setTranslationsVotes(
         );
       } else {
         // call word to phrase reset procedure
-        //console.log('w2p');
+        console.log('-------------');
+        console.log('calling w2p');
+        console.log(translationIds);
         // console.log(
         //   ...callWordToPhraseTranslationVoteSetProcedure({
         //     translationIds,
@@ -251,7 +255,9 @@ export async function setTranslationsVotes(
     } else {
       if (toTypeIsWord) {
         // phrase to word reset procedure
-        //console.log('p2w');
+        console.log('-------------');
+        console.log('calling p2w');
+        console.log(translationIds);
         // console.log(
         //   ...callPhraseToWordTranslationVoteSetProcedure({
         //     translationIds,
@@ -268,7 +274,9 @@ export async function setTranslationsVotes(
         );
       } else {
         // phrase to phrase reset
-        // console.log('p2p');
+        console.log('-------------');
+        console.log('calling p2p');
+        console.log(translationIds);
         // console.log(
         //   ...callPhraseToPhraseTranslationVoteSetProcedure({
         //     translationIds,

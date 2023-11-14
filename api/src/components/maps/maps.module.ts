@@ -33,6 +33,6 @@ import { AuthorizationModule } from '../authorization/authorization.module';
     MapsResolver,
     MapsRepository,
   ],
-  exports: [MapsService, MapsResolver, MapsTranslationService],
+  exports: [MapsService, MapsResolver, MapsTranslationService, MapVotesService],
 })
 export class MapsModule {}
