@@ -16,6 +16,7 @@ import { PubSub } from 'graphql-subscriptions';
 import { PUB_SUB } from 'src/pubSub.module';
 import { Subscription as OSubscription } from 'rxjs';
 import { IsAuthAdmin } from '../../decorators/is-auth-admin.decorator';
+import { SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 @Resolver(Populator)
@@ -24,17 +25,22 @@ export class PopulatorResolver {
   constructor(
     private authService: AuthorizationService,
     private generator: PopulatorService,
+    private schedulerRegistry: SchedulerRegistry,
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {
     this.sub = null;
   }
 
   @Mutation(() => GenericOutput)
+  @IsAuthAdmin()
   async generateData(
     @Args('input', { type: () => DataGenInput })
     input: DataGenInput,
     @Context() req: any,
   ): Promise<GenericOutput> {
+    // don't want map retranslation to run twice at once.
+    const retransJob = this.schedulerRegistry.getCronJob('retranslation');
+    retransJob.stop();
     this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
       [SubscriptionToken.DataGenerationReport]: {
         output: ``,
@@ -57,15 +63,22 @@ export class PopulatorResolver {
       };
     }
 
-    if (input.mapsToLanguages) {
-      this.sub = this.generator
-        .populateData(input.mapsToLanguages, token, req, input.mapAmount)
-        .subscribe((n) =>
-          this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
-            [SubscriptionToken.DataGenerationReport]: n,
-          }),
-        );
-    }
+    this.sub = this.generator
+      .populateData(
+        token,
+        req,
+        input.mapsToLanguages,
+        input.mapAmount,
+        input.userAmount,
+        input.wordAmount,
+        input.phraseAmount,
+      )
+      .subscribe((n) =>
+        this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
+          [SubscriptionToken.DataGenerationReport]: n,
+        }),
+      );
+    retransJob.start();
 
     return {
       error: ErrorType.NoError,

@@ -1,19 +1,19 @@
 export function callBatchRegisterBotProcedure({
-  token,
+  tokens,
   emails,
   usernames,
   passwords,
 }: {
-  token: string;
+  tokens: string[];
   emails: string[];
   usernames: string[];
   passwords: string[];
-}): [string, [string, string[], string[], string[]]] {
+}): [string, [string[], string[], string[], string[]]] {
   return [
     `
-        call batch_register_bot($1, $2, $3, $4, null, null, null);
+        call batch_register_bot($1, $2, $3, $4, null, null, '');
       `,
-    [token, emails, usernames, passwords],
+    [tokens, emails, usernames, passwords],
   ];
 }
 
@@ -22,16 +22,18 @@ export function callTranslationVoteSetProcedureByTableName({
   translationIds,
   token,
   vote,
+  userId,
 }: {
   baseTableName: string;
   translationIds: number[];
   token: string;
   vote: boolean | null;
-}): [string, [number[], string, boolean | null]] {
+  userId: number;
+}): [string, [number[], string, boolean | null, number]] {
   return [
     `
-        call batch_${baseTableName}_vote_set($1::bigint[], $2, $3, null, null, '');
+        call batch_${baseTableName}_vote_set($1::bigint[], $2, $3, null, null, '', $4);
       `,
-    [translationIds, token, vote],
+    [translationIds, token, vote, userId],
   ];
 }
