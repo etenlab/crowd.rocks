@@ -312,7 +312,18 @@ export function getWordRangeByBeginWordIds(
   ];
 }
 
-export function getWordRangeByDocumentId(id: number): [string, [number]] {
+export function getWordRangeByDocumentId(
+  document_id: number,
+  page: number | null,
+): [string, number[]] {
+  const params: number[] = [document_id];
+  let pageConstraints = ``;
+
+  if (page) {
+    params.push(page);
+    pageConstraints = `and document_word_entries.page = $2`;
+  }
+
   return [
     `
       select distinct 
@@ -324,11 +335,12 @@ export function getWordRangeByDocumentId(id: number): [string, [number]] {
         select
           document_word_entry_id
         from document_word_entries
-        where document_id = $1
+        where document_word_entries.document_id = $1
+          ${pageConstraints}
       ) dwes
       on word_ranges.begin_word = dwes.document_word_entry_id;
     `,
-    [id],
+    [...params],
   ];
 }
 
