@@ -10,9 +10,11 @@ import {
 import { Virtuoso } from 'react-virtuoso';
 import { Stack } from '@mui/material';
 import { Word, Dot } from './styled';
-import { SkeletonPage } from './SkeletonPage';
+import { SkeletonRow } from './SkeletonRow';
 
 import { useGetDocumentWordEntriesByDocumentIdLazyQuery } from '../../../generated/graphql';
+
+import { useAppContext } from '../../../hooks/useAppContext';
 
 export type TempPage = {
   id: string;
@@ -48,6 +50,7 @@ export type DocumentViewerProps = {
   onClickWord(entryId: string, index: number, e?: unknown): void;
   documentId: string;
   onChangeRange(sentence: string): void;
+  onLoadPage?(page: number): void;
 };
 
 export const DocumentViewer = memo(function DocumentViewerPure({
@@ -57,7 +60,13 @@ export const DocumentViewer = memo(function DocumentViewerPure({
   dots,
   onClickWord,
   onChangeRange,
+  onLoadPage,
 }: DocumentViewerProps) {
+  const {
+    states: {
+      components: { ionContentScrollElement },
+    },
+  } = useAppContext();
   const [getDocumentWordEntriesByDocumentId] =
     useGetDocumentWordEntriesByDocumentIdLazyQuery();
 
@@ -67,19 +76,16 @@ export const DocumentViewer = memo(function DocumentViewerPure({
   const [rowWidth, setRowWidth] = useState<number>(0);
   const [requiredPage, setRequiredPage] = useState<TempPage | null>(null);
 
-  useEffect(() => {
-    window.addEventListener(
-      'resize',
-      function () {
-        setRowWidth(Math.min(window.screen.width - 32, 777 - 32));
-      },
-      true,
-    );
+  const calcRowWidth = useCallback(() => {
+    const bodyWidth = document.body.offsetWidth;
 
-    setTimeout(() => {
-      setRowWidth(window.screen.width - 50);
-    }, 2000);
+    setRowWidth(Math.min(bodyWidth - 32, 777 - 32));
   }, []);
+
+  useEffect(() => {
+    window.addEventListener('resize', calcRowWidth);
+    calcRowWidth();
+  }, [calcRowWidth]);
 
   useEffect(() => {
     (async () => {
@@ -254,14 +260,17 @@ export const DocumentViewer = memo(function DocumentViewerPure({
       return;
     }
 
-    const timer = setTimeout(() => fetchMore(requiredPage), 1000);
+    const timer = setTimeout(() => {
+      fetchMore(requiredPage);
+      onLoadPage && onLoadPage(requiredPage.after + 1);
+    }, 1000);
 
     return () => {
       if (timer) {
         clearTimeout(timer);
       }
     };
-  }, [fetchMore, requiredPage]);
+  }, [fetchMore, requiredPage, onLoadPage]);
 
   const handleLoading = useCallback((tempPage: TempPage) => {
     setRequiredPage(tempPage);
@@ -307,15 +316,13 @@ export const DocumentViewer = memo(function DocumentViewerPure({
 
     for (const data of entriesData) {
       if (!Array.isArray(data)) {
-        const skeletonCom = (
-          <SkeletonPage
-            tempPage={data}
-            onLoading={handleLoading}
-            height={1400}
-          />
-        );
+        for (let i = 0; i < 60; i++) {
+          const skeletonCom = (
+            <SkeletonRow tempPage={data} onLoading={handleLoading} />
+          );
 
-        rows.push(skeletonCom);
+          rows.push(skeletonCom);
+        }
         continue;
       }
 
@@ -427,7 +434,7 @@ export const DocumentViewer = memo(function DocumentViewerPure({
 
   return (
     <Virtuoso
-      style={{ height: 'calc(100vh - 160px)' }}
+      customScrollParent={ionContentScrollElement || undefined}
       data={rows}
       itemContent={(_index, row) => row}
     />
