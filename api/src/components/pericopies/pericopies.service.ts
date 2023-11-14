@@ -8,7 +8,11 @@ import { ErrorType } from 'src/common/types';
 import { PostgresService } from 'src/core/postgres.service';
 import { PericopeVotesService } from './pericope-votes.service';
 
-import { PericopiesOutput } from './types';
+import {
+  PericopiesOutput,
+  PericopeWithVotesOutput,
+  PericopeWithVote,
+} from './types';
 import {
   PericopeUpsertsProcedureOutput,
   callPericopeUpsertsProcedure,
@@ -116,19 +120,44 @@ export class PericopiesService {
 
   async getPericopiesByDocumentId(
     document_id: number,
+    page: number | null,
     pgClient,
-  ): Promise<PericopiesOutput> {
+  ): Promise<PericopeWithVotesOutput> {
     try {
       const res = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
       }).query<GetPericopiesObjectRow>(
-        ...getPericopiesObjByDocumentId(document_id),
+        ...getPericopiesObjByDocumentId(document_id, page),
       );
+
+      const pericopeIds = res.rows.map((row) => +row.pericope_id);
+
+      const { error, vote_status_list } =
+        await this.pericopeVoteService.getVoteStatusFromIds(
+          pericopeIds,
+          pgClient,
+        );
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error,
+          pericope_with_votes: [],
+        };
+      }
+
+      const pericope_with_votes: PericopeWithVote[] = [];
+
+      for (let i = 0; i < res.rows.length; i++) {
+        pericope_with_votes.push({
+          ...vote_status_list[i],
+          start_word: res.rows[i].start_word,
+        });
+      }
 
       return {
         error: ErrorType.NoError,
-        pericopies: res.rows,
+        pericope_with_votes,
       };
     } catch (e) {
       Logger.error(e);
@@ -136,7 +165,7 @@ export class PericopiesService {
 
     return {
       error: ErrorType.UnknownError,
-      pericopies: [],
+      pericope_with_votes: [],
     };
   }
 }

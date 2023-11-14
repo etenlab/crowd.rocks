@@ -1,11 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
+import {
+  Args,
+  Query,
+  Resolver,
+  Mutation,
+  Context,
+  ID,
+  Int,
+} from '@nestjs/graphql';
 import { getBearer } from 'src/common/utility';
 
 import { PericopeVotesService } from './pericope-votes.service';
 import { PericopiesService } from './pericopies.service';
 
-import { PericopiesOutput, PericopeVoteStatusOutput } from './types';
+import {
+  PericopiesOutput,
+  PericopeVoteStatusOutput,
+  PericopeWithVotesOutput,
+} from './types';
 
 @Injectable()
 @Resolver()
@@ -27,13 +39,18 @@ export class PericopiesResolver {
     );
   }
 
-  @Query(() => PericopiesOutput)
+  @Query(() => PericopeWithVotesOutput)
   async getPericopiesByDocumentId(
     @Args('document_id', { type: () => ID }) document_id: string,
-  ): Promise<PericopiesOutput> {
-    Logger.log('getPericopiesByDocumentId, document_id:', document_id);
+    @Args('page', { type: () => Int, nullable: true }) page: number | null,
+  ): Promise<PericopeWithVotesOutput> {
+    Logger.log('getPericopiesByDocumentId', { document_id, page });
 
-    return this.pericopiesService.getPericopiesByDocumentId(+document_id, null);
+    return this.pericopiesService.getPericopiesByDocumentId(
+      +document_id,
+      page,
+      null,
+    );
   }
 
   @Mutation(() => PericopiesOutput)

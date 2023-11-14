@@ -55,6 +55,6 @@ export class PericopeVoteStatusOutput extends GenericOutput {
 
 @ObjectType()
 export class PericopeWithVotesOutput extends GenericOutput {
-  @Field(() => [PericopeWithVote], { nullable: 'items' })
-  pericope_with_votes: (PericopeWithVote | null)[];
+  @Field(() => [PericopeWithVote])
+  pericope_with_votes: PericopeWithVote[];
 }
