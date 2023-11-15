@@ -52,6 +52,8 @@ export function Modal({ component, onClose, container }: ModalProps) {
             borderRadius: '20px',
             width: matches ? '600px' : 'calc(100vw - 30px)',
             maxWidth: '757px',
+            maxHeight: '80%',
+            overflow: 'scroll',
           }}
         >
           {component}
