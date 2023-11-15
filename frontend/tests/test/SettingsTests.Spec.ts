@@ -3,12 +3,13 @@ import MenuPage from '../pages/MenuPage';
 import HomePage from '../pages/HomePage';
 import SettingsPage from '../pages/SettingsPage';
 import SettingsData from '../data-factory/SettingsData';
+import { settings, leftMenu } from '../enums/Enums';
 
 test('Verify that user is navigated to settings page after clicking on the setting button from the left nav menu', async ({
   page,
 }) => {
   const homePage = new HomePage(page);
-  const leftMenu = new MenuPage(page);
+  const leftMenuPage = new MenuPage(page);
   const settingsPage = new SettingsPage(page);
 
   //Navigate to the URL
@@ -16,7 +17,7 @@ test('Verify that user is navigated to settings page after clicking on the setti
 
   //Expand the menu and click on settings
   await homePage.clickOnExpandMenu();
-  await leftMenu.clickOnSettingButton();
+  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Settings);
 
   //verify setting page title is displayed
   expect(await settingsPage.isSettingPageTitleVisible()).toBeTruthy();
@@ -26,7 +27,7 @@ test.skip('Verify that all the settings options are available on the setting pag
   page,
 }) => {
   const homePage = new HomePage(page);
-  const leftMenu = new MenuPage(page);
+  const leftMenuPage = new MenuPage(page);
   const settingsPage = new SettingsPage(page);
   const settingsDataList = SettingsData.allSettingsList();
 
@@ -35,8 +36,99 @@ test.skip('Verify that all the settings options are available on the setting pag
 
   //Expand the menu and click on settings
   await homePage.clickOnExpandMenu();
-  await leftMenu.clickOnSettingButton();
+  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Settings);
 
-  const lists = await settingsPage.getTheSettingPageList();
-  await expect(lists).toEqual(expect.arrayContaining(settingsDataList));
+  //Get the settings page lists and verify the settings name is displayed
+  const lists = await settingsPage.getAllSettingFeaturesList();
+  expect(lists).toEqual(expect.arrayContaining(settingsDataList));
+});
+
+test('Verify that all the Beta tools are displayed when user enable beta tools toggle button', async ({
+  page,
+}) => {
+  const homePage = new HomePage(page);
+  const leftMenuPage = new MenuPage(page);
+  const settingsPage = new SettingsPage(page);
+  const getSettingsList = SettingsData.allSettingsList();
+
+  //Navigate to the URL
+  await page.goto('/US/en/1/home');
+
+  //Expand the menu and click on settings
+  await homePage.clickOnExpandMenu();
+  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Settings);
+
+  //Get the settings page list and verify the beta tools is displayed
+  const lists = await settingsPage.getAllSettingFeaturesList();
+  expect(lists).toContain(getSettingsList[0]);
+
+  //Click on beta tools toggle button
+  await settingsPage.clickOnToggleButton(settings.BetaTools, true);
+
+  //Go to the home page and verify the language text is displayed
+  await leftMenuPage.clickOnCrowdRocks();
+  expect(await homePage.isLanguageTextVisible()).toBeTruthy();
+
+  //Expand the menu and click on settings
+  await homePage.clickOnExpandMenu();
+  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Settings);
+
+  //Click on beta toggle button
+  await settingsPage.clickOnToggleButton(settings.BetaTools, false);
+
+  //Go to the home page and verify the language text is hide
+  await leftMenuPage.clickOnCrowdRocks();
+  expect(await homePage.isLanguageTextVisible(false));
+});
+
+test('Verify that dark UI is display when user enable dark mode toggle button', async ({
+  page,
+}) => {
+  const homePage = new HomePage(page);
+  const leftMenuPage = new MenuPage(page);
+  const settingsPage = new SettingsPage(page);
+  const getSettingsList = SettingsData.allSettingsList();
+
+  //Navigate to the URL
+  await page.goto('/US/en/1/home');
+
+  //Expand the menu and click on settings
+  await homePage.clickOnExpandMenu();
+  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Settings);
+
+  //Get the settings page list and verify the beta tools is displayed
+  const lists = await settingsPage.getAllSettingFeaturesList();
+  expect(lists).toContain(getSettingsList[1]);
+
+  //click on dark mode toggle button
+  await settingsPage.clickOnToggleButton(settings.DarkMode, true);
+
+  //verify that dark mode enabled
+  expect(await settingsPage.isDarkModeEnabled()).toBeTruthy();
+});
+
+test('Verify that light UI is display when user disable dark mode toggle button', async ({
+  page,
+}) => {
+  const homePage = new HomePage(page);
+  const leftMenuPage = new MenuPage(page);
+  const settingsPage = new SettingsPage(page);
+  const getSettingsList = SettingsData.allSettingsList();
+
+  //Navigate to the URL
+  await page.goto('/US/en/1/home');
+
+  //Expand the menu and click on settings
+  await homePage.clickOnExpandMenu();
+  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Settings);
+
+  //Get the settings page list and verify the beta tools is displayed
+  const lists = await settingsPage.getAllSettingFeaturesList();
+  expect(lists).toContain(getSettingsList[1]);
+
+  //click on dark mode toggle button
+  await settingsPage.clickOnToggleButton(settings.DarkMode, false);
+
+  //verify that dark mode enabled
+  expect(await settingsPage.isLightModeEnabled()).toBeTruthy();
 });

@@ -36,6 +36,7 @@ class LoginPage extends BasePage {
   }
 
   async clickOnSendResetPasswordEmailButton() {
+    await this.page.locator(sendPasswordResetEmail).last().waitFor();
     return await this.page.locator(sendPasswordResetEmail).last().click();
   }
 
