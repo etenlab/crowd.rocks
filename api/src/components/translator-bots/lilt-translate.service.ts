@@ -207,7 +207,7 @@ export class LiltTranslateService implements ITranslator {
       (memory) => memory.name === this.liltMemoryName(fromLang, toLang),
     );
     if (foundMemory?.id) {
-      Logger.log(`Lilt memory found: ${foundMemory.id}`);
+      Logger.log(`Lilt memory found, id: ${foundMemory.id}`);
       return foundMemory;
     }
 
@@ -337,7 +337,7 @@ export class LiltTranslateService implements ITranslator {
       headers,
     });
     if (res.status === HttpStatus.NO_CONTENT) {
-      Logger.log(`translated file is downloaded from Lilt`);
+      Logger.log(`translated file deleted from Lilt`);
       return true;
     } else {
       Logger.error(
@@ -370,63 +370,84 @@ export class LiltTranslateService implements ITranslator {
       }
     }
     Logger.error(
-      `Lilt translation failed, used ${attempts} attempts. last status ${liltTrStatus}`,
+      `Lilt translation failed, used ${attempts} attempts. last status ${JSON.stringify(
+        liltTrStatus,
+      )}`,
     );
   }
 
-  public translateFile = async (
+  public translateFileString = async (
     fileString: string,
     fileName: string,
     fromLang: LanguageInput,
     toLang: LanguageInput,
-  ): Promise<GenericOutput> => {
+  ): Promise<GenericOutput & { translatedFileString?: string }> => {
     const memory = await this.getLiltMemoryId(fromLang, toLang);
+    if (!memory) {
+      Logger.error(`LiltTranslateService#translateFile: !memory`);
+      return {
+        error: ErrorType.BotTranslationError,
+      };
+    }
     const sourceFile = await this.sendFileToLilt(fileString, fileName);
-    if (!memory || !sourceFile) {
+    if (!sourceFile) {
+      Logger.error(`LiltTranslateService#translateFile: !sourceFile`);
+      return {
+        error: ErrorType.BotTranslationError,
+      };
+    }
+    try {
+      const translation = await this.startFileTranslation(
+        sourceFile?.id,
+        memory?.id,
+      );
+      if (!translation) {
+        Logger.error(`LiltTranslateService#translateFile: !translation`);
+        return {
+          error: ErrorType.BotTranslationError,
+        };
+      }
+      const result = await this.waitForTranslation(
+        translation.id,
+        FILE_TRANSLATION_CHECK_INTERVALS,
+      );
+      if (result != liltTranslationStatus.READY_FOR_DOWNLOAD) {
+        Logger.error(`LiltTranslateService#translateFile: result is ${result}`);
+        return {
+          error: ErrorType.BotTranslationError,
+        };
+      }
+      const translatedFile = await this.getTranslatedFile(translation.id);
+      if (!translatedFile) {
+        Logger.error(`LiltTranslateService#translateFile: !translatedFile`);
+        return {
+          error: ErrorType.BotTranslationError,
+        };
+      }
+      const deleteFile = await this.deleteFileFromLilt(sourceFile.id);
+      if (!deleteFile) {
+        Logger.error(`LiltTranslateService#translateFile: !deleteFile`);
+      }
+
+      return {
+        error: ErrorType.NoError,
+        translatedFileString: translatedFile,
+      };
+    } catch (error) {
       Logger.error(
-        `LiltTranslateService#translateFile: !memory || !sourceFile`,
+        `LiltTranslateService#translateFile: unknown error: ${JSON.stringify(
+          error,
+        )}`,
       );
       return {
         error: ErrorType.BotTranslationError,
       };
+    } finally {
+      Logger.log(
+        `LiltTranslateService#translateFile: Finally check file cleanup`,
+      );
+      await this.deleteFileFromLilt(sourceFile.id);
     }
-    const translation = await this.startFileTranslation(
-      sourceFile?.id,
-      memory?.id,
-    );
-    if (!translation) {
-      Logger.error(`LiltTranslateService#translateFile: !translation`);
-      return {
-        error: ErrorType.BotTranslationError,
-      };
-    }
-    const result = await this.waitForTranslation(
-      translation.id,
-      FILE_TRANSLATION_CHECK_INTERVALS,
-    );
-    if (result != liltTranslationStatus.READY_FOR_DOWNLOAD) {
-      Logger.error(`LiltTranslateService#translateFile: result is ${result}`);
-      return {
-        error: ErrorType.BotTranslationError,
-      };
-    }
-    const translatedFile = await this.getTranslatedFile(translation.id);
-    if (!translatedFile) {
-      Logger.error(`LiltTranslateService#translateFile: !translatedFile`);
-      return {
-        error: ErrorType.BotTranslationError,
-      };
-    }
-    const deleteFile = await this.deleteFileFromLilt(sourceFile.id);
-    if (!deleteFile) {
-      Logger.error(`LiltTranslateService#translateFile: !deleteFile`);
-    }
-
-    console.log(translatedFile);
-
-    return {
-      error: ErrorType.NoError,
-    };
   };
 
   // mandatory ITranslator intefrace methods:

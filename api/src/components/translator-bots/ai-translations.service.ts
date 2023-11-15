@@ -4,7 +4,7 @@ import { PoolClient } from 'pg';
 import { Subject } from 'rxjs';
 import { SubscriptionToken } from 'src/common/subscription-token';
 import { BotType, ErrorType, GenericOutput } from 'src/common/types';
-import { pgClientOrPool } from 'src/common/utility';
+import { pgClientOrPool, putLangCodesToFileName } from 'src/common/utility';
 import { LanguageInput } from 'src/components/common/types';
 import { PhrasesService } from 'src/components/phrases/phrases.service';
 import { WordsService } from 'src/components/words/words.service';
@@ -50,6 +50,9 @@ import {
 import { langInfo2String, subTags2LangInfo } from '../../../../utils';
 import { FakerTranslateService } from './faker-translate.service';
 import { DocumentsService } from '../documents/documents.service';
+import { Readable } from 'stream';
+import { IFileOutput } from '../file/types';
+import { DocumentUploadOutput } from '../documents/types';
 
 interface ItranslateAllWordsAndPhrasesByBot {
   translateWordsAndPhrases: (
@@ -1259,7 +1262,7 @@ export class AiTranslationsService {
 
   async botTranslateDocument(
     input: BotTranslateDocumentInput,
-  ): Promise<GenericOutput> {
+  ): Promise<DocumentUploadOutput> {
     const document = await this.documentsService.getDocument(
       Number(input.documentId),
     );
@@ -1290,18 +1293,51 @@ export class AiTranslationsService {
       dialect_code: document.document?.dialect_code,
       geo_code: document.document?.geo_code,
     };
+    let translatedAndSavedFile: IFileOutput;
+    const { token } = await this.lTrService.getTranslatorToken();
     switch (input.botType) {
       case BotType.Lilt:
-        return this.lTrService.translateFile(
-          fileString, /// todo chose suitabe format
+        const fileTrResult = await this.lTrService.translateFileString(
+          fileString,
           fileInfo?.file?.fileName,
           sourceLang,
           input.targetLang,
         );
+        if (!fileTrResult || fileTrResult.error !== ErrorType.NoError)
+          return { error: ErrorType.BotTranslationError };
+        const stream = Readable.from([fileTrResult.translatedFileString]);
+        translatedAndSavedFile = await this.fileService.uploadFile(
+          stream,
+          putLangCodesToFileName(fileInfo.file.fileName, input.targetLang),
+          fileInfo.file.fileType,
+          token,
+        );
+        break;
       default:
         return {
           error: ErrorType.BotTranslationBotNotFound,
         };
     }
+
+    if (!translatedAndSavedFile.file?.id) {
+      Logger.error(
+        `aiTranslationsService#botTranslateDocument: !translatedAndSavedFile.file?.id, translatedAndSavedFile: ${JSON.stringify(
+          translatedAndSavedFile,
+        )}`,
+      );
+      return { error: ErrorType.BotTranslationError };
+    }
+
+    const translatedDocument = await this.documentsService.saveDocument({
+      document: {
+        file_id: String(translatedAndSavedFile.file.id),
+        language_code: input.targetLang.language_code,
+        dialect_code: input.targetLang.dialect_code,
+        geo_code: input.targetLang.geo_code,
+      },
+      token,
+    });
+
+    return translatedDocument;
   }
 }

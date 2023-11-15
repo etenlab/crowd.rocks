@@ -119,7 +119,7 @@ export class FileService {
         where: {
           file_name: fileName,
           file_type: fileType,
-          file_size: fileSize,
+          file_size: fileSize || totalCalcSize,
           file_hash: hashValue!,
         },
       });
