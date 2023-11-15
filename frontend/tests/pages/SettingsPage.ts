@@ -1,8 +1,7 @@
 import BasePage from './BasePage';
 
 const settingsPageTitle = '//h2[text()="Settings"]';
-const settingFeaturesList =
-  "//li[@class ='MuiListItem-root MuiListItem-gutters css-1nxmd3h-MuiListItem-root']//h4";
+const settingFeaturesList = '//h4[text()]';
 const lightModeUI = `//html[contains(@class,'light')]`;
 const darkModeUI = `//html[contains(@class,'dark')]`;
 const toggleButton = (featureName: string) =>

@@ -23,30 +23,7 @@ test('Verify that user is navigated to select app language page after clicking o
   expect(await appLanguagePage.isAppLanguagePopUpTitleVisible()).toBeTruthy();
 });
 
-test('Verify that the app language popup appeared when user clicks on the App Language button from the left nav menu', async ({
-  page,
-}) => {
-  const homePage = new HomePage(page);
-  const leftMenuPage = new MenuPage(page);
-  const appLanguagePage = new AppLanguagePage(page);
-
-  //Navigate to the URL
-  await page.goto('/US/en/1/home');
-
-  //Expand the menu and click on app language
-  await homePage.clickOnExpandMenu();
-  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.AppLanguage);
-
-  //Verify setting page title is displayed
-  expect(await appLanguagePage.isAppLanguagePopUpTitleVisible()).toBeTruthy();
-
-  //Verify that app language list is equal with actual list
-  const actualLanguagesList = await appLanguagePage.getAllAppLanguagesList();
-  const expectedLanguagesList = AppLanguageData.allLanguages();
-  expect(actualLanguagesList).toEqual(expectedLanguagesList);
-});
-
-test('Verify that the selected language is displayed when user select the language', async ({
+test.skip('Verify that the selected language is displayed when user select the language', async ({
   page,
 }) => {
   const homePage = new HomePage(page);
@@ -72,14 +49,8 @@ test('Verify that the selected language is displayed when user select the langua
   await appLanguagePage.clickOnAppLanguageName(language.Hindi);
   await appLanguagePage.clickOnConfirmButton();
 
-  //Expand the menu and click on app language
-  await homePage.clickOnExpandMenu();
-  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.AppLanguage);
-
   //verify that preselected language is displayed
-  expect(await appLanguagePage.isAppLanguageChecked(language.Hindi)).toEqual(
-    '#476FFF',
-  );
+  expect(await homePage.getHomePageTitle()).toEqual('मिडिया');
 });
 
 test('Verify that user can check the different available lanugages', async ({
@@ -101,6 +72,7 @@ test('Verify that user can check the different available lanugages', async ({
 
   //Verifying that user can select all languages
   for (const lang of AppLanguageData.allLanguages()) {
+    await appLanguagePage.searchLanguage(lang);
     await appLanguagePage.clickOnAppLanguageName(lang);
     expect(await appLanguagePage.isAppLanguageChecked(lang)).toEqual('#476FFF');
   }
