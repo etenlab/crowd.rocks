@@ -67,16 +67,17 @@ export function getPericopiesObjByDocumentId(
     returnArr.push(page + first + 1);
     limitStr = `and document_word_entries.page < $${returnArr.length}`;
   }
+
   return [
     `
       select
         pericope_id,
-        start_word
+        start_word,
         dwes.page
       from pericopies
       join (
         select 
-          document_word_entries.document_word_entry_id
+          document_word_entries.document_word_entry_id,
           document_word_entries.page
         from document_word_entries
         where document_word_entries.document_id = $1

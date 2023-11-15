@@ -138,7 +138,7 @@ export class PericopiesService {
         ...getPericopiesObjByDocumentId(
           document_id,
           first ? first + 1 : null,
-          after ? +after : 0,
+          after ? +JSON.parse(after).page : 0,
         ),
       );
 
@@ -193,14 +193,14 @@ export class PericopiesService {
       const tempEdges: PericopeWithVotesEdge[] = [];
 
       const endPage = first ? first + 1 : res1.rows[0].total_pages + 1;
-      const startPage = after ? +after + 1 : 1;
+      const startPage = after ? +JSON.parse(after).page + 1 : 1;
 
       for (let i = 0; i < endPage; i++) {
         const entries = pageMap.get(startPage + i);
 
         if (entries) {
           tempEdges.push({
-            cursor: startPage + i + '',
+            cursor: JSON.stringify({ document_id, page: startPage + i }),
             node: entries,
           });
         }
