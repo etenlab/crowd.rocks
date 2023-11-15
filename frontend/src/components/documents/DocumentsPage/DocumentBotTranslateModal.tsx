@@ -10,6 +10,7 @@ import { useTr } from '../../../hooks/useTr';
 import { Check } from '../../common/icons/Check';
 
 import {
+  BotType,
   ErrorType,
   TextyDocument,
   useBotTranslateDocumentMutation,
@@ -18,6 +19,8 @@ import {
 import { useAppContext } from '../../../hooks/useAppContext';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { NavArrowRight } from '../../common/icons/NavArrowRight';
+import { useMemo } from 'react';
+import { langInfo2langInput } from '../../../../../utils';
 
 type DocumentBotTranslateModalProps = {
   onClose(): void;
@@ -44,12 +47,23 @@ export function DocumentBotTranslateModal({
   ] = useBotTranslateDocumentMutation();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const possibleBots: Array<{ name: string; translateFn: () => any }> = [
-    {
-      name: 'Lilt',
-      translateFn: documentBotTranslate,
-    },
-  ];
+  const possibleBots: Array<{ name: string; translateFn: () => any }> = useMemo(
+    () => [
+      {
+        name: 'Lilt',
+        translateFn: () =>
+          targetLang &&
+          documentBotTranslate({
+            variables: {
+              botType: BotType.Lilt,
+              documentId: document.document_id,
+              targetLang: langInfo2langInput(targetLang),
+            },
+          }),
+      },
+    ],
+    [document.document_id, documentBotTranslate, targetLang],
+  );
 
   let title = tr('Translate using bot');
   let content = tr('Click the button below to start translation.');

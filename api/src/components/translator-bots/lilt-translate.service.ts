@@ -1,6 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { hash } from 'argon2';
-import { delay } from 'rxjs';
 import { createToken } from 'src/common/utility';
 import { LanguageInput } from 'src/components/common/types';
 import { ConfigService } from 'src/core/config.service';
@@ -12,18 +11,30 @@ import {
   LanguageListForBotTranslateOutput,
 } from './types';
 import fetch, { Headers } from 'node-fetch';
-import { getLangsRegistry, languageInput2tag } from '../../../../utils';
-import { ReadStream } from 'fs';
+import {
+  getLangsRegistry,
+  languageInput2tag,
+  sortSiteTextFn,
+} from '../../../../utils';
 import { Readable } from 'stream';
+import { delay } from './utility';
 
 const LIMIT_REQUESTS = 4000; // per LIMIT_TIME
 const LIMIT_TIME = 60 * 1000; // per minute
 const WAIT_TIMEOUT = 60 * 1000 + 100; // miliseconds; if limit_requests reached, need to wait 60 seconds before the next request
 const LIMIT_LENGTH = 5000; // characters of a source string per request
 const JOINER = '<br/>'; // joins words or phrases before sending to lilt api
+const FILE_TRANSLATION_CHECK_INTERVALS = [1000, 2000, 5000, 7000, 10000];
 
 const LILT_BOT_EMAIL = 'liltbot@crowd.rocks';
 const LILT_API_URL = 'https://lilt.com/2';
+
+export enum liltTranslationStatus {
+  IN_PROGRESS = 'InProgress',
+  COMPLETED = 'Completed',
+  FAILED = 'Failed',
+  READY_FOR_DOWNLOAD = 'ReadyForDownload',
+}
 
 type TResLangs = {
   source_to_target: {
@@ -87,6 +98,18 @@ type TLiltSourceFile = {
   updated_at: string;
 };
 
+type TLiltTranslationOfFile = {
+  id: number;
+  fileId: number;
+  status: string;
+  createdAt: string;
+};
+
+type TLiltDeleteFileRes = {
+  id: number;
+  deleted: boolean;
+};
+
 @Injectable()
 export class LiltTranslateService implements ITranslator {
   private firstOperateTime: number;
@@ -99,7 +122,7 @@ export class LiltTranslateService implements ITranslator {
     this.availableRequests = LIMIT_REQUESTS;
   }
 
-  private async liltTranslateApiCall(origStr, memoryId: string): Promise<any> {
+  private async liltTranslateApiCall(origStr, memoryId: number): Promise<any> {
     const strEncoded = encodeURIComponent(origStr);
     const url = `${LILT_API_URL}/translate?key=${this.config.LILT_KEY}&memory_id=${memoryId}&source=${strEncoded}`;
     const res = await fetch(url, {
@@ -178,22 +201,36 @@ export class LiltTranslateService implements ITranslator {
   private async getLiltMemoryId(
     fromLang: LanguageInput,
     toLang: LanguageInput,
-  ): Promise<string | undefined> {
+  ): Promise<TLiltMemoryObject | undefined> {
     const existingMemories = await this.liltGetMemoriesApiCall();
     const foundMemory = existingMemories.find(
       (memory) => memory.name === this.liltMemoryName(fromLang, toLang),
     );
-    if (foundMemory?.id) return String(foundMemory.id);
+    if (foundMemory?.id) {
+      Logger.log(`Lilt memory found: ${foundMemory.id}`);
+      return foundMemory;
+    }
 
     const newMemory = await this.liltCreateMemoryIdApiCall(fromLang, toLang);
-    if (newMemory?.id) return String(newMemory.id);
+    if (newMemory?.id) {
+      Logger.log(`Lilt memory created: ${newMemory.id}`);
+      return newMemory;
+    }
 
+    Logger.log(
+      `Error with find or create Lilt memory: ${JSON.stringify(
+        foundMemory,
+      )},${JSON.stringify(newMemory)}`,
+    );
     return undefined;
   }
 
   // specific to Lilt methods:
 
-  private async sendFileToLilt(fileString: string, fileName: string) {
+  private async sendFileToLilt(
+    fileString: string,
+    fileName: string,
+  ): Promise<TLiltSourceFile | undefined> {
     const url = `${LILT_API_URL}/files?key=${this.config.LILT_KEY}&name=${fileName}&labels=crowdrocks_bot`;
     const headers = new Headers();
     headers.append('Content-Type', 'application/octet-stream');
@@ -209,6 +246,7 @@ export class LiltTranslateService implements ITranslator {
     const sourceFile: TLiltSourceFile = await res.json();
     if (sourceFile.id) {
       Logger.log(`file is uploaded to Lilt, id: ${sourceFile.id}`);
+      return sourceFile;
     } else {
       Logger.error(
         `Error with file upload to Lilt: ${JSON.stringify(sourceFile)}`,
@@ -216,20 +254,124 @@ export class LiltTranslateService implements ITranslator {
     }
   }
 
-  private async startFileTranslation() {
-    // todo
+  private async startFileTranslation(
+    fileId: number,
+    memoryId: number,
+  ): Promise<TLiltTranslationOfFile | undefined> {
+    const url = `${LILT_API_URL}/translate/file?key=${this.config.LILT_KEY}&fileId=${fileId}&memoryId=${memoryId}`;
+    const headers = new Headers();
+    headers.append('Accept', 'application/json');
+    const res = await fetch(url, {
+      method: 'POST',
+      headers,
+    });
+
+    const fileTranslation: TLiltTranslationOfFile[] = await res.json();
+    if (fileTranslation[0].id) {
+      Logger.log(
+        `file translation with Lilt has started. ${JSON.stringify(
+          fileTranslation,
+        )}`,
+      );
+      return fileTranslation[0];
+    } else {
+      Logger.error(
+        `Error translation with Lilt: ${JSON.stringify(fileTranslation)}`,
+      );
+    }
   }
 
-  private async checkFileTranslationStatus() {
-    // todo
+  private async checkFileTranslationStatus(
+    translationId: number,
+  ): Promise<TLiltTranslationOfFile | undefined> {
+    const url = `${LILT_API_URL}/translate/file?key=${this.config.LILT_KEY}&translationIds=${translationId}`;
+    const headers = new Headers();
+    headers.append('Accept', 'application/json');
+    const res = await fetch(url, {
+      method: 'GET',
+      headers,
+    });
+
+    const fileTranslation: TLiltTranslationOfFile[] = await res.json();
+    if (fileTranslation[0].id) {
+      Logger.log(
+        `file translation status checked: ${JSON.stringify(fileTranslation)}`,
+      );
+      return fileTranslation[0];
+    } else {
+      Logger.error(
+        `Error translation check failed: ${JSON.stringify(fileTranslation)}`,
+      );
+    }
   }
 
-  private async getTranslatedFile() {
-    // todo
+  private async getTranslatedFile(
+    translationId: number,
+  ): Promise<string | undefined> {
+    const url = `${LILT_API_URL}/translate/files?key=${this.config.LILT_KEY}&id=${translationId}`;
+    const headers = new Headers();
+    headers.append('Accept', 'application/octet-stream');
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers,
+    });
+    const sourceFile = await res.text();
+
+    if (sourceFile) {
+      Logger.log(`translated file is downloaded from Lilt`);
+      return sourceFile;
+    } else {
+      Logger.error(
+        `Error with file upload to Lilt: ${JSON.stringify(sourceFile)}`,
+      );
+    }
   }
 
-  private async deleteFileFromLilt() {
-    // todo
+  private async deleteFileFromLilt(fileId: number): Promise<true | undefined> {
+    const url = `${LILT_API_URL}/files?key=${this.config.LILT_KEY}&id=${fileId}`;
+    const headers = new Headers();
+    headers.append('Accept', 'application/json');
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers,
+    });
+    if (res.status === HttpStatus.NO_CONTENT) {
+      Logger.log(`translated file is downloaded from Lilt`);
+      return true;
+    } else {
+      Logger.error(
+        `Error with file upload to Lilt: ${JSON.stringify(res.json())}`,
+      );
+    }
+  }
+
+  private async waitForTranslation(
+    translationId: number,
+    intervals: Array<number>,
+  ): Promise<liltTranslationStatus | undefined> {
+    let attempts = 0;
+    let liltTrStatus: TLiltTranslationOfFile | undefined;
+    for (const interval of intervals) {
+      await delay(interval);
+      attempts++;
+      liltTrStatus = await this.checkFileTranslationStatus(translationId);
+      if (
+        liltTrStatus?.status &&
+        [
+          liltTranslationStatus.FAILED as string,
+          liltTranslationStatus.READY_FOR_DOWNLOAD as string,
+        ].includes(liltTrStatus.status)
+      ) {
+        Logger.log(
+          `Lilt translation completed in ${attempts} attempts, status ${liltTrStatus.status}`,
+        );
+        return liltTrStatus.status as liltTranslationStatus;
+      }
+    }
+    Logger.error(
+      `Lilt translation failed, used ${attempts} attempts. last status ${liltTrStatus}`,
+    );
   }
 
   public translateFile = async (
@@ -239,14 +381,49 @@ export class LiltTranslateService implements ITranslator {
     toLang: LanguageInput,
   ): Promise<GenericOutput> => {
     const memory = await this.getLiltMemoryId(fromLang, toLang);
-    const res1 = await this.sendFileToLilt(fileString, fileName);
-    // todo
-    Logger.debug(
-      `liltTranslateService#translateDocument mock:`,
-      fileName,
-      fromLang,
-      toLang,
+    const sourceFile = await this.sendFileToLilt(fileString, fileName);
+    if (!memory || !sourceFile) {
+      Logger.error(
+        `LiltTranslateService#translateFile: !memory || !sourceFile`,
+      );
+      return {
+        error: ErrorType.BotTranslationError,
+      };
+    }
+    const translation = await this.startFileTranslation(
+      sourceFile?.id,
+      memory?.id,
     );
+    if (!translation) {
+      Logger.error(`LiltTranslateService#translateFile: !translation`);
+      return {
+        error: ErrorType.BotTranslationError,
+      };
+    }
+    const result = await this.waitForTranslation(
+      translation.id,
+      FILE_TRANSLATION_CHECK_INTERVALS,
+    );
+    if (result != liltTranslationStatus.READY_FOR_DOWNLOAD) {
+      Logger.error(`LiltTranslateService#translateFile: result is ${result}`);
+      return {
+        error: ErrorType.BotTranslationError,
+      };
+    }
+    const translatedFile = await this.getTranslatedFile(translation.id);
+    if (!translatedFile) {
+      Logger.error(`LiltTranslateService#translateFile: !translatedFile`);
+      return {
+        error: ErrorType.BotTranslationError,
+      };
+    }
+    const deleteFile = await this.deleteFileFromLilt(sourceFile.id);
+    if (!deleteFile) {
+      Logger.error(`LiltTranslateService#translateFile: !deleteFile`);
+    }
+
+    console.log(translatedFile);
+
     return {
       error: ErrorType.NoError,
     };
@@ -291,7 +468,7 @@ export class LiltTranslateService implements ITranslator {
           this.availableRequests = LIMIT_REQUESTS;
           this.firstOperateTime = Date.now();
         }
-        translationPromises.push(this.liltTranslateApiCall(text, memoryId));
+        translationPromises.push(this.liltTranslateApiCall(text, memoryId.id));
         this.availableRequests--;
       }
       const translatedObjects = await Promise.all(translationPromises);

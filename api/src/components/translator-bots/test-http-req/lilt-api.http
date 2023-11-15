@@ -1,3 +1,4 @@
+### MEMORIES
 POST https://lilt.com/2/memories?key=374e6ccebcac920a894dd33374db253c
 Content-Type: application/json
 Accept: application/json
@@ -18,3 +19,18 @@ Accept: application/json
 DELETE https://lilt.com/2/memories?key=374e6ccebcac920a894dd33374db253c&id=108877
 
 "{\"name\":\"liltbot@crowd.rocks-en-uk\",\"srclang\":\"en\",\"trglang\":\"uk\"}"
+
+
+### FILES
+GET https://lilt.com/2/files?key=374e6ccebcac920a894dd33374db253c
+Content-Type: application/json
+Accept: application/json
+
+###
+DELETE  https://lilt.com/2/files?key=374e6ccebcac920a894dd33374db253c&id=4684023
+Content-Type: application/json
+Accept: application/json
+
+
+### TRANSLATIONS
+GET https://lilt.com/2/translate/files?key=374e6ccebcac920a894dd33374db253c&id=2587089
