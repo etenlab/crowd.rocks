@@ -12,6 +12,7 @@ import {
   LanguageListForBotTranslateOutput,
 } from './types';
 import { ErrorType } from '../../common/types';
+import { randomInt } from 'crypto';
 
 @Injectable()
 export class FakerTranslateService implements ITranslator {
@@ -25,7 +26,10 @@ export class FakerTranslateService implements ITranslator {
     to: LanguageInput,
   ): Promise<string[]> => {
     try {
-      const translations = ['TEST-translation-word', 'TEST Translation Phrase'];
+      const translations = [
+        'TEST-translation-word' + randomInt(10000),
+        'TEST Translation Phrase' + randomInt(10000),
+      ];
       const translationTexts: string[] = [];
       for (let i = 0; i < texts.length; i++) {
         translationTexts.push(translations[i % 2]);

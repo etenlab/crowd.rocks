@@ -16,10 +16,11 @@ export function DataGeneratorPage() {
   const [mapCount, setMapCount] = useState<number | null>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [toLanguageCount, setToLanguageCount] = useState(0);
+  const [mockUserCount, setMockUserCount] = useState(0);
+  const [wordsCount, setWordsCount] = useState(0);
+  const [phrasesCount, setPhrasesCount] = useState(0);
 
   const [progress, setProgress] = useState<DataGenProgress | null>(null);
-  const [mapUploadStatus, setMapUploadStatus] =
-    useState<SubscriptionStatus | null>(null);
   const { data } = useSubscribeToDataGenProgressSubscription();
   // console.log(data);
 
@@ -28,39 +29,19 @@ export function DataGeneratorPage() {
       const report = data.DataGenerationReport;
       setProgress(report);
     }
-    if (data && data.DataGenerationReport.mapUploadStatus) {
-      setMapUploadStatus(data.DataGenerationReport.mapUploadStatus);
-      // console.log(mapUploadStatus);
-    }
     return;
-  }, [data, data?.DataGenerationReport, mapUploadStatus]);
+  }, [data, data?.DataGenerationReport]);
 
   const progressComp = progress ? (
     <>
-      <Typography>Status</Typography>
+      <Typography>Progress</Typography>
       <Stack direction="row">
         <Typography variant="body1">Output: </Typography>
-        <Typography variant="body1">{progress.output}</Typography>
+        <Typography variant="body1"> {progress.output}</Typography>
       </Stack>
       <Stack direction="row">
-        <Typography variant="body1">Map Generation: </Typography>
-        <Typography variant="body1">{mapUploadStatus}</Typography>
-      </Stack>
-      <Stack direction="row">
-        <Typography variant="body1">Map Translations: </Typography>
-        <Typography variant="body1">
-          {progress.mapTranslationsStatus}
-        </Typography>
-      </Stack>
-      <Stack direction="row">
-        <Typography variant="body1">ReTranslate Maps: </Typography>
-        <Typography variant="body1">
-          {progress.mapReTranslationsStatus}
-        </Typography>
-      </Stack>
-      <Stack direction="row">
-        <Typography variant="body1">Overall: </Typography>
-        <Typography variant="body1">{progress.overallStatus}</Typography>
+        <Typography variant="body1">Status: </Typography>
+        <Typography variant="body1"> {progress.overallStatus}</Typography>
       </Stack>
     </>
   ) : null;
@@ -75,9 +56,22 @@ export function DataGeneratorPage() {
       }
     }
     await generateData({
-      variables: { mapAmount: mapCount, mapsToLanguages: toLanguages },
+      variables: {
+        mapAmount: mapCount,
+        mapsToLanguages: toLanguages,
+        userAmount: mockUserCount,
+        phraseAmount: phrasesCount,
+        wordAmount: wordsCount,
+      },
     });
-  }, [generateData, mapCount, toLanguageCount]);
+  }, [
+    generateData,
+    mapCount,
+    mockUserCount,
+    phrasesCount,
+    toLanguageCount,
+    wordsCount,
+  ]);
 
   // const handleStop = useCallback(async () => {
   //   await stopGenerate();
@@ -87,7 +81,7 @@ export function DataGeneratorPage() {
     <PageLayout>
       <Typography variant="h2">Load Test Data</Typography>
       <Stack spacing={2}>
-        <Stack direction="row" justifyContent="space-evenly">
+        <Stack direction="row" justifyContent="space-between">
           <Typography variant="body1">
             Mock map originals. Leave blank for all maps in dataset repo
           </Typography>
@@ -100,7 +94,7 @@ export function DataGeneratorPage() {
             onChange={(e) => setMapCount(+e.target.value)}
           />
         </Stack>
-        <Stack direction="row" justifyContent="space-evenly">
+        <Stack direction="row" justifyContent="space-between">
           <Typography variant="body1">
             # Languages to translate map word/phrases
           </Typography>
@@ -111,6 +105,47 @@ export function DataGeneratorPage() {
             variant="outlined"
             size="small"
             onChange={(e) => setToLanguageCount(+e.target.value)}
+          />
+        </Stack>
+        <Stack direction="row" justifyContent="space-between">
+          <Stack direction="column">
+            <Typography variant="body1"># Mock Users</Typography>
+            <Typography variant="caption" maxWidth="400px">
+              Each generated user will provide one translation to words and
+              phrases for each language in language amount and will provide vote
+              for maps/mapwords/mapphrases, words, phrases, and translations (if
+              they exist)
+            </Typography>
+          </Stack>
+          <TextField
+            id="mock-user-amount"
+            label="Mock User Amount"
+            type="number"
+            variant="outlined"
+            size="small"
+            onChange={(e) => setMockUserCount(+e.target.value)}
+          />
+        </Stack>
+        <Stack direction="row" justifyContent="space-between">
+          <Typography variant="body1"># Words</Typography>
+          <TextField
+            id="mock-words"
+            label="Mock Word Amount"
+            type="number"
+            variant="outlined"
+            size="small"
+            onChange={(e) => setWordsCount(+e.target.value)}
+          />
+        </Stack>
+        <Stack direction="row" justifyContent="space-between">
+          <Typography variant="body1"># Phrases</Typography>
+          <TextField
+            id="mock-phrase-amount"
+            label="Mock Phrase Amount"
+            type="number"
+            variant="outlined"
+            size="small"
+            onChange={(e) => setPhrasesCount(+e.target.value)}
           />
         </Stack>
         {/* <Stack direction="row" justifyContent="space-evenly">

@@ -84,13 +84,13 @@ export type CreateQuestionOnWordRangeUpsertInput = {
 export type DataGenInput = {
   mapAmount?: InputMaybe<Scalars['Int']['input']>;
   mapsToLanguages?: InputMaybe<Array<LanguageInput>>;
+  phraseAmount?: InputMaybe<Scalars['Int']['input']>;
+  userAmount?: InputMaybe<Scalars['Int']['input']>;
+  wordAmount?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type DataGenProgress = {
   __typename?: 'DataGenProgress';
-  mapReTranslationsStatus: SubscriptionStatus;
-  mapTranslationsStatus: SubscriptionStatus;
-  mapUploadStatus: SubscriptionStatus;
   output: Scalars['String']['output'];
   overallStatus: SubscriptionStatus;
 };
@@ -2970,6 +2970,9 @@ export type PasswordResetFormRequestMutation = { __typename?: 'Mutation', passwo
 export type GenerateDataMutationVariables = Exact<{
   mapAmount?: InputMaybe<Scalars['Int']['input']>;
   mapsToLanguages?: InputMaybe<Array<LanguageInput> | LanguageInput>;
+  userAmount?: InputMaybe<Scalars['Int']['input']>;
+  wordAmount?: InputMaybe<Scalars['Int']['input']>;
+  phraseAmount?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -2978,7 +2981,7 @@ export type GenerateDataMutation = { __typename?: 'Mutation', generateData: { __
 export type SubscribeToDataGenProgressSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SubscribeToDataGenProgressSubscription = { __typename?: 'Subscription', DataGenerationReport: { __typename?: 'DataGenProgress', output: string, mapUploadStatus: SubscriptionStatus, mapTranslationsStatus: SubscriptionStatus, mapReTranslationsStatus: SubscriptionStatus, overallStatus: SubscriptionStatus } };
+export type SubscribeToDataGenProgressSubscription = { __typename?: 'Subscription', DataGenerationReport: { __typename?: 'DataGenProgress', output: string, overallStatus: SubscriptionStatus } };
 
 export type StopDataGenerationMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -5158,8 +5161,10 @@ export type PasswordResetFormRequestMutationHookResult = ReturnType<typeof usePa
 export type PasswordResetFormRequestMutationResult = Apollo.MutationResult<PasswordResetFormRequestMutation>;
 export type PasswordResetFormRequestMutationOptions = Apollo.BaseMutationOptions<PasswordResetFormRequestMutation, PasswordResetFormRequestMutationVariables>;
 export const GenerateDataDocument = gql`
-    mutation GenerateData($mapAmount: Int, $mapsToLanguages: [LanguageInput!]) {
-  generateData(input: {mapAmount: $mapAmount, mapsToLanguages: $mapsToLanguages}) {
+    mutation GenerateData($mapAmount: Int, $mapsToLanguages: [LanguageInput!], $userAmount: Int, $wordAmount: Int, $phraseAmount: Int) {
+  generateData(
+    input: {mapAmount: $mapAmount, mapsToLanguages: $mapsToLanguages, userAmount: $userAmount, wordAmount: $wordAmount, phraseAmount: $phraseAmount}
+  ) {
     error
   }
 }
@@ -5181,6 +5186,9 @@ export type GenerateDataMutationFn = Apollo.MutationFunction<GenerateDataMutatio
  *   variables: {
  *      mapAmount: // value for 'mapAmount'
  *      mapsToLanguages: // value for 'mapsToLanguages'
+ *      userAmount: // value for 'userAmount'
+ *      wordAmount: // value for 'wordAmount'
+ *      phraseAmount: // value for 'phraseAmount'
  *   },
  * });
  */
@@ -5195,9 +5203,6 @@ export const SubscribeToDataGenProgressDocument = gql`
     subscription SubscribeToDataGenProgress {
   DataGenerationReport {
     output
-    mapUploadStatus
-    mapTranslationsStatus
-    mapReTranslationsStatus
     overallStatus
   }
 }
