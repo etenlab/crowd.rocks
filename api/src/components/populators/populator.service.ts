@@ -84,7 +84,6 @@ export class PopulatorService {
           path: 'maps/finished',
         });
 
-        console.log(typeof data);
         if (!Array.isArray(data)) {
           value.error({
             output: `Uploading Maps: ERROR`,
@@ -110,9 +109,9 @@ export class PopulatorService {
 
         for (let i = 0; i < mapAmount; i++) {
           if (i === data.length) {
-            console.log(
-              'reached limit of maps in dataset. continuing with execution...',
-            );
+            // console.log(
+            //   'reached limit of maps in dataset. continuing with execution...',
+            // );
             value.next({
               output: `${total} / ${total}`,
               overallStatus: SubscriptionStatus.Progressing,
@@ -120,15 +119,15 @@ export class PopulatorService {
             break;
           }
           if (!data[i].download_url) {
-            console.log('no download url. skipping...');
+            // console.log('no download url. skipping...');
             continue;
           }
           if (data[i].download_url === null) {
-            console.log('no download url. skipping...');
+            // console.log('no download url. skipping...');
             continue;
           }
 
-          console.log(`checking if ${data[i].name} exists...`);
+          // console.log(`checking if ${data[i].name} exists...`);
           const res1 = await this.pg.pool.query(
             `
               select
@@ -141,13 +140,13 @@ export class PopulatorService {
             [data[i].name],
           );
           if (res1.rowCount === 1) {
-            console.log(`${data[i].name} already exists. Skipping...`);
+            // console.log(`${data[i].name} already exists. Skipping...`);
             mapAmount++;
             continue;
           }
 
-          console.log(`${data[i].name} does NOT exist yet`);
-          console.log('processing thumb file');
+          // console.log(`${data[i].name} does NOT exist yet`);
+          // console.log('processing thumb file');
           const thumb_file = createReadStream(
             join(process.cwd(), 'test-thumb.png'),
           );
@@ -159,14 +158,15 @@ export class PopulatorService {
               token,
               undefined,
             );
-            console.log('thumb Saved. error:');
-            console.log(resp?.error);
+            if (resp && resp.error !== ErrorType.NoError) {
+              console.error('error uploading thumbnail');
+              console.error(resp.error);
+            }
+
             if (resp && resp.file && resp.error === ErrorType.NoError) {
               thumbFileID = resp?.file?.id;
             }
           }
-
-          console.log('getting maps link info');
 
           const { data: dataStream } = await lastValueFrom(
             this.httpService.get<ReadStream>(data[i].download_url!, {
@@ -192,8 +192,10 @@ export class PopulatorService {
             overallStatus: SubscriptionStatus.Progressing,
           } as DataGenProgress);
           totalUploaded++;
-          console.log('upload finished. errors:');
-          console.log(upload.error);
+          if (upload.error !== ErrorType.NoError) {
+            console.error('error uploading map');
+            console.error(upload.error);
+          }
         }
         value.next({
           output: `Maps Uploaded: ${total} / ${total}`,
@@ -210,7 +212,6 @@ export class PopulatorService {
           overallStatus: SubscriptionStatus.Progressing,
         } as DataGenProgress);
         for (let i = 0; i < to_languages.length; i++) {
-          console.log(`add translations to ${to_languages[i]}...`);
           await this.aiTranslationService.translateWordsAndPhrasesByFaker(
             { language_code: 'en', geo_code: null, dialect_code: null },
             to_languages[i],
@@ -230,7 +231,6 @@ export class PopulatorService {
         await this.fakerService.getTranslatorToken();
 
       if (wordAmount && wordAmount > 0) {
-        console.log('generating words');
         value.next({
           output: `Generating words...`,
           overallStatus: SubscriptionStatus.Progressing,
@@ -246,16 +246,14 @@ export class PopulatorService {
           });
         }
 
-        this.definitionsService.batchUpsertFromWordAndDefinitionlikeString(
+        await this.definitionsService.batchUpsertFromWordAndDefinitionlikeString(
           inputs,
           fakerToken,
           null,
         );
-        console.log('done');
       }
 
       if (phraseAmount && phraseAmount > 0) {
-        console.log('generating phrases');
         value.next({
           output: `Generating Phrases...`,
           overallStatus: SubscriptionStatus.Progressing,
@@ -272,12 +270,11 @@ export class PopulatorService {
           });
         }
 
-        this.definitionsService.batchUpsertFromPhraseAndDefinitionlikeString(
+        await this.definitionsService.batchUpsertFromPhraseAndDefinitionlikeString(
           inputs,
           fakerToken,
           null,
         );
-        console.log('done');
       }
 
       // --------------------------------
@@ -302,14 +299,6 @@ export class PopulatorService {
           emails.push(username + '@crowd.rocks');
         }
 
-        // console.log(
-        //   ...callBatchRegisterBotProcedure({
-        //     tokens,
-        //     emails,
-        //     usernames,
-        //     passwords,
-        //   }),
-        // );
         const userRes = await this.pg.pool.query(
           ...callBatchRegisterBotProcedure({
             tokens,
@@ -357,7 +346,10 @@ export class PopulatorService {
                   to_languages[g],
                   null,
                 );
-              console.log(res.error);
+              if (res.error !== ErrorType.NoError) {
+                console.error('error translating words and phrases');
+                console.error(res.error);
+              }
             }
           }
         }
@@ -382,24 +374,12 @@ export class PopulatorService {
           output: `Users voting...`,
           overallStatus: SubscriptionStatus.Progressing,
         } as DataGenProgress);
-        console.log('userIds:');
-        console.log(userIds);
         translationTableNames.forEach(async (table) => {
-          console.log(table);
           const tableIdRes = await this.pg.pool.query(
             `select ${table}_id as id from ${table}s`,
           );
           const tableIds: Array<number> = tableIdRes.rows.map((r) => r.id);
           for (let i = 0; i < userIds.length; i++) {
-            console.log(
-              ...callTranslationVoteSetProcedureByTableName({
-                baseTableName: table,
-                translationIds: tableIds,
-                token,
-                vote: randomInt(2) % 2 === 0 ? true : false,
-                userId: userIds[i],
-              }),
-            );
             await this.pg.pool.query(
               ...callTranslationVoteSetProcedureByTableName({
                 baseTableName: table,
