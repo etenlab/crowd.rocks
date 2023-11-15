@@ -1,5 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
+import { PageInfo } from '../common/types';
 
 @ObjectType()
 export class Pericope {
@@ -54,7 +55,14 @@ export class PericopeVoteStatusOutput extends GenericOutput {
 }
 
 @ObjectType()
-export class PericopeWithVotesOutput extends GenericOutput {
-  @Field(() => [PericopeWithVote], { nullable: 'items' })
-  pericope_with_votes: (PericopeWithVote | null)[];
+export class PericopeWithVotesEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => [PericopeWithVote]) node: PericopeWithVote[];
+}
+
+@ObjectType()
+export class PericopeWithVotesListConnection extends GenericOutput {
+  @Field(() => [PericopeWithVotesEdge])
+  edges: PericopeWithVotesEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
 }

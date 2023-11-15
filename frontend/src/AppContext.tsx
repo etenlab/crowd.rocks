@@ -55,6 +55,7 @@ export interface ContextType {
       closeModal(): void;
     };
     removeModal(id: string): void;
+    setIonContentScrollElement(scrollElement: HTMLElement | null): void;
     setTempTranslation(
       key: string,
       value: { translation: string; description: string },
@@ -119,7 +120,8 @@ export function AppContextProvider({ children }: AppProviderProps) {
   } = useGlobal({
     dispatch,
   });
-  const { createModal, removeModal } = useGlobalComponents({ dispatch });
+  const { createModal, removeModal, setIonContentScrollElement } =
+    useGlobalComponents({ dispatch });
   const {
     addPaginationVariableForGetAllSiteTextDefinitions,
     addPaginationVariableForGetForumsList,
@@ -374,6 +376,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
       addPaginationVariableForGetForumFoldersList,
       addPaginationVariableForGetTheadsList,
       addPaginationVariableForGetAllDocuments,
+      setIonContentScrollElement,
     },
   };
 

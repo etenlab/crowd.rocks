@@ -8,6 +8,10 @@ const VoteButton = styled(Button)({
   borderRadius: '6px',
   fontSize: '13px',
   letterSpacing: '-0.26px',
+  minWidth: '52px',
+  '& .MuiButton-startIcon': {
+    marginRight: '4px',
+  },
 });
 
 export type VoteButtonsHerizontalProps = {

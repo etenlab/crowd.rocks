@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import {
   addModal,
   removeModal as removeModalAction,
+  setIonContentScrollElement as setIonContentScrollElementAction,
 } from '../reducers/components.actions';
 
 import { type ActionType } from '../reducers/index';
@@ -37,8 +38,18 @@ export function useGlobalComponents({ dispatch }: UseGlobalComponentsProps) {
     dispatchRef.current.dispatch(removeModalAction(id));
   }, []);
 
+  const setIonContentScrollElement = useCallback(
+    (scrollElement: HTMLElement | null) => {
+      dispatchRef.current.dispatch(
+        setIonContentScrollElementAction(scrollElement),
+      );
+    },
+    [],
+  );
+
   return {
     createModal,
     removeModal,
+    setIonContentScrollElement,
   };
 }

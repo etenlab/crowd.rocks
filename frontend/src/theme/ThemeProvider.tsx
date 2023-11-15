@@ -163,6 +163,7 @@ declare module '@mui/material/styles' {
     gray_text: string;
     gray_stroke: string;
     gray_bg: string;
+    orange_light: string;
   }
 
   interface Palette extends CustomPalette {}
@@ -191,6 +192,7 @@ declare module '@mui/material/styles' {
     gray_text: string;
     gray_stroke: string;
     gray_bg: string;
+    orange_light: string;
   }
 }
 

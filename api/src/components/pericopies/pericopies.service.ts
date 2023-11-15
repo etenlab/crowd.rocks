@@ -5,18 +5,28 @@ import { pgClientOrPool } from 'src/common/utility';
 
 import { ErrorType } from 'src/common/types';
 
+import { AuthorizationService } from '../authorization/authorization.service';
 import { PostgresService } from 'src/core/postgres.service';
 import { PericopeVotesService } from './pericope-votes.service';
 
-import { PericopiesOutput } from './types';
+import {
+  PericopiesOutput,
+  PericopeWithVotesListConnection,
+  PericopeWithVote,
+  PericopeWithVotesEdge,
+} from './types';
 import {
   PericopeUpsertsProcedureOutput,
   callPericopeUpsertsProcedure,
   GetPericopiesObjectRow,
   getPericopiesObjByIds,
+  GetPericopiesObjByDocumentId,
   getPericopiesObjByDocumentId,
 } from './sql-string';
-import { AuthorizationService } from '../authorization/authorization.service';
+import {
+  GetDocumentWordEntriesTotalPageSize,
+  getDocumentWordEntriesTotalPageSize,
+} from '../documents/sql-string';
 
 @Injectable()
 export class PericopiesService {
@@ -116,19 +126,102 @@ export class PericopiesService {
 
   async getPericopiesByDocumentId(
     document_id: number,
+    first: number | null,
+    after: string | null,
     pgClient,
-  ): Promise<PericopiesOutput> {
+  ): Promise<PericopeWithVotesListConnection> {
     try {
       const res = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
-      }).query<GetPericopiesObjectRow>(
-        ...getPericopiesObjByDocumentId(document_id),
+      }).query<GetPericopiesObjByDocumentId>(
+        ...getPericopiesObjByDocumentId(
+          document_id,
+          first ? first + 1 : null,
+          after ? +JSON.parse(after).page : 0,
+        ),
       );
+
+      const pageMap = new Map<number, PericopeWithVote[]>();
+
+      const pericopeIds = res.rows.map((row) => +row.pericope_id);
+
+      const { error, vote_status_list } =
+        await this.pericopeVoteService.getVoteStatusFromIds(
+          pericopeIds,
+          pgClient,
+        );
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error,
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+            totalEdges: 0,
+          },
+        };
+      }
+
+      for (let i = 0; i < res.rows.length; i++) {
+        const pericopeWithVote = {
+          pericope_id: vote_status_list[i].pericope_id,
+          start_word: res.rows[i].start_word,
+          upvotes: vote_status_list[i].upvotes,
+          downvotes: vote_status_list[i].downvotes,
+        };
+
+        const entries = pageMap.get(+res.rows[i].page);
+
+        if (entries) {
+          entries.push(pericopeWithVote);
+        } else {
+          pageMap.set(+res.rows[i].page, [pericopeWithVote]);
+        }
+      }
+
+      const res1 = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetDocumentWordEntriesTotalPageSize>(
+        ...getDocumentWordEntriesTotalPageSize(document_id),
+      );
+
+      const tempEdges: PericopeWithVotesEdge[] = [];
+
+      const endPage = first ? first + 1 : res1.rows[0].total_pages + 1;
+      const startPage = after ? +JSON.parse(after).page + 1 : 1;
+
+      for (let i = 0; i < endPage; i++) {
+        const entries = pageMap.get(startPage + i);
+
+        if (entries) {
+          tempEdges.push({
+            cursor: JSON.stringify({ document_id, page: startPage + i }),
+            node: entries,
+          });
+        }
+      }
+
+      const edges =
+        first && tempEdges.length > first
+          ? tempEdges.slice(0, first)
+          : tempEdges;
 
       return {
         error: ErrorType.NoError,
-        pericopies: res.rows,
+        edges,
+        pageInfo: {
+          hasNextPage: first ? tempEdges.length > first : false,
+          hasPreviousPage: false,
+          startCursor: edges.length > 0 ? edges[0].cursor : null,
+          endCursor:
+            edges.length > 0 ? edges[edges.length - 1].cursor || null : null,
+          totalEdges: res1.rowCount > 0 ? res1.rows[0].total_pages : 0,
+        },
       };
     } catch (e) {
       Logger.error(e);
@@ -136,7 +229,14 @@ export class PericopiesService {
 
     return {
       error: ErrorType.UnknownError,
-      pericopies: [],
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+        totalEdges: 0,
+      },
     };
   }
 }
