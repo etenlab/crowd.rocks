@@ -1,11 +1,9 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { SchedulerRegistry } from '@nestjs/schedule';
 import { Octokit } from '@octokit/rest';
 import { hash } from 'argon2';
 import { randomInt } from 'crypto';
 import { createReadStream, ReadStream } from 'fs';
-import { random } from 'nanoid';
 import { join } from 'path';
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import { ErrorType, SubscriptionStatus } from 'src/common/types';
@@ -33,6 +31,7 @@ import {
   callTranslationVoteSetProcedureByTableName,
 } from './sql-string';
 import { DataGenProgress } from './types';
+import fetch from 'node-fetch';
 
 @Injectable()
 export class PopulatorService {
