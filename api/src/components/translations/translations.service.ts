@@ -37,63 +37,12 @@ import {
   GetTranslationIdByFromToDefinitionsIdsSqlStrOutput,
   getTranslationLangSqlStr,
 } from './sql-string';
-import { from } from 'rxjs';
 
 export function makeStr(
   word_definition_id: number,
   is_word_definition: boolean,
 ) {
   return `${word_definition_id}-${is_word_definition ? 'true' : 'false'}`;
-}
-function isWtoW(
-  translation:
-    | WordToWordTranslation
-    | WordToPhraseTranslation
-    | PhraseToPhraseTranslation
-    | PhraseToWordTranslation,
-): translation is WordToWordTranslation {
-  return (
-    (translation as WordToWordTranslation).word_to_word_translation_id !==
-    undefined
-  );
-}
-
-function isWtoP(
-  translation:
-    | WordToWordTranslation
-    | WordToPhraseTranslation
-    | PhraseToPhraseTranslation
-    | PhraseToWordTranslation,
-): translation is WordToPhraseTranslation {
-  return (
-    (translation as WordToPhraseTranslation).word_to_phrase_translation_id !==
-    undefined
-  );
-}
-
-function isPtoP(
-  translation:
-    | WordToWordTranslation
-    | WordToPhraseTranslation
-    | PhraseToPhraseTranslation
-    | PhraseToWordTranslation,
-): translation is PhraseToPhraseTranslation {
-  return (
-    (translation as PhraseToPhraseTranslation)
-      .phrase_to_phrase_translation_id !== undefined
-  );
-}
-function isPtoW(
-  translation:
-    | WordToWordTranslation
-    | WordToPhraseTranslation
-    | PhraseToPhraseTranslation
-    | PhraseToWordTranslation,
-): translation is PhraseToWordTranslation {
-  return (
-    (translation as PhraseToWordTranslation).phrase_to_word_translation_id !==
-    undefined
-  );
 }
 
 const makeKey = (
@@ -884,7 +833,6 @@ export class TranslationsService {
     }[],
     token: string,
     pgClient: PoolClient | null,
-    withAddVote = false,
   ): Promise<TranslationsOutput> {
     if (input.length === 0) {
       return {
