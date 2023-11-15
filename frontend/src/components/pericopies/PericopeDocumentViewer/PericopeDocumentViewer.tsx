@@ -5,6 +5,7 @@ import {
   ReactNode,
   MouseEvent,
   useEffect,
+  useRef,
 } from 'react';
 import { Popover } from '@mui/material';
 
@@ -14,10 +15,11 @@ import { DocumentViewer } from '../../documents/DocumentViewer';
 import { PericopeReaction } from './PericopeReaction';
 import { PericopeAddButton } from './PericopeAddButton';
 
+import { TempPage } from '../../documents/DocumentViewer/DocumentViewer';
+
 import {
-  useGetPericopiesByDocumentIdLazyQuery,
+  useGetPericopiesByDocumentIdQuery,
   PericopeWithVote,
-  ErrorType,
 } from '../../../generated/graphql';
 
 type PericopeDocumentViewerProps = {
@@ -29,14 +31,20 @@ export function PericopeDocumentViewer({
   documentId,
   mode,
 }: PericopeDocumentViewerProps) {
-  const [getPericopiesByDocumentId, { data, error }] =
-    useGetPericopiesByDocumentIdLazyQuery();
+  const { data, fetchMore } = useGetPericopiesByDocumentIdQuery({
+    variables: {
+      document_id: documentId,
+      first: 1,
+      after: null,
+    },
+  });
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedWordEntryId, setSelectedWordEntryId] = useState<string | null>(
     null,
   );
-  const [requiredPage, setRequiredPage] = useState<number | null>(null);
+  const [requiredPage, setRequiredPage] = useState<TempPage | null>(null);
+  const pericopesMapRef = useRef(new Map<string, PericopeWithVote>());
 
   useEffect(() => {
     if (!requiredPage) {
@@ -44,10 +52,11 @@ export function PericopeDocumentViewer({
     }
 
     const timer = setTimeout(() => {
-      getPericopiesByDocumentId({
+      fetchMore({
         variables: {
           document_id: documentId,
-          page: requiredPage,
+          first: requiredPage.first,
+          after: requiredPage.after + '',
         },
       });
     }, 1000);
@@ -57,20 +66,18 @@ export function PericopeDocumentViewer({
         clearTimeout(timer);
       }
     };
-  }, [documentId, getPericopiesByDocumentId, requiredPage]);
+  }, [requiredPage, fetchMore, documentId]);
 
-  const { dots, pericopiesMap } = useMemo(() => {
-    const pericopiesMap = new Map<string, PericopeWithVote>();
-    console.log(data);
-    if (
-      error ||
-      !data ||
-      data.getPericopiesByDocumentId.error !== ErrorType.NoError
-    ) {
-      return {
-        dots: [],
-        pericopiesMap,
-      };
+  const dots = useMemo(() => {
+    if (data) {
+      data.getPericopiesByDocumentId.edges.forEach((edge) => {
+        edge.node.forEach((pericopeWithVote) => {
+          pericopesMapRef.current.set(
+            pericopeWithVote.start_word,
+            pericopeWithVote,
+          );
+        });
+      });
     }
 
     const dots: {
@@ -78,39 +85,32 @@ export function PericopeDocumentViewer({
       component?: ReactNode;
     }[] = [];
 
-    data.getPericopiesByDocumentId.pericope_with_votes.forEach(
-      (pericopeWithVote) => {
-        if (!pericopeWithVote) {
-          return;
-        }
+    for (const pericopeWithVote of pericopesMapRef.current.values()) {
+      let dotColor = 'blue';
 
-        let dotColor = 'blue';
+      if (pericopeWithVote.upvotes > pericopeWithVote.downvotes) {
+        dotColor = 'green';
+      } else if (pericopeWithVote.upvotes < pericopeWithVote.downvotes) {
+        dotColor = 'red';
+      }
 
-        if (pericopeWithVote.upvotes > pericopeWithVote.downvotes) {
-          dotColor = 'green';
-        } else if (pericopeWithVote.upvotes < pericopeWithVote.downvotes) {
-          dotColor = 'red';
-        }
+      dots.push({
+        entryId: pericopeWithVote.start_word,
+        component: (
+          <Dot
+            sx={{
+              backgroundColor: (theme) =>
+                theme.palette.background[
+                  dotColor as keyof typeof theme.palette.background
+                ],
+            }}
+          />
+        ),
+      });
+    }
 
-        dots.push({
-          entryId: pericopeWithVote.start_word,
-          component: (
-            <Dot
-              sx={{
-                backgroundColor: (theme) =>
-                  theme.palette.background[
-                    dotColor as keyof typeof theme.palette.background
-                  ],
-              }}
-            />
-          ),
-        });
-        pericopiesMap.set(pericopeWithVote.start_word, pericopeWithVote);
-      },
-    );
-
-    return { dots, pericopiesMap };
-  }, [data, error]);
+    return dots;
+  }, [data]);
 
   const handleWordClick = useCallback(
     (entryId: string, _index: number, event: MouseEvent<HTMLElement>) => {
@@ -120,7 +120,7 @@ export function PericopeDocumentViewer({
     [],
   );
 
-  const handleLoadPage = (page: number) => {
+  const handleLoadPage = (page: TempPage) => {
     setRequiredPage(page);
   };
 
@@ -140,7 +140,7 @@ export function PericopeDocumentViewer({
   const open = Boolean(anchorEl);
 
   const selectedPericope = selectedWordEntryId
-    ? pericopiesMap.get(selectedWordEntryId) || null
+    ? pericopesMapRef.current.get(selectedWordEntryId) || null
     : null;
 
   return (
@@ -180,7 +180,6 @@ export function PericopeDocumentViewer({
         {mode === 'edit' && selectedWordEntryId ? (
           <PericopeAddButton
             wordEntryId={selectedWordEntryId}
-            documentId={documentId}
             onClose={handleClose}
           />
         ) : null}
