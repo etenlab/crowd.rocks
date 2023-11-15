@@ -67,37 +67,37 @@ export class PopulatorService {
       // --------------------------------
       // populate maps...
       // --------------------------------
-      if (mapAmount && mapAmount != 0) {
+      const octokit = new Octokit({
+        request: {
+          fetch: fetch,
+        },
+      });
+      const { data } = await octokit.rest.repos.getContent({
+        owner: 'etenlab',
+        repo: 'datasets',
+        path: 'maps/finished',
+      });
+      if (!Array.isArray(data)) {
+        value.error({
+          output: `Uploading Maps: ERROR`,
+          overallStatus: SubscriptionStatus.Error,
+        } as DataGenProgress);
+        value.complete();
+        return;
+      }
+
+      if (!mapAmount) {
+        mapAmount = data.length;
+      }
+
+      if (mapAmount > 0) {
         value.next({
           output: `Uploading Maps: 0 / 0`,
           overallStatus: SubscriptionStatus.Progressing,
         } as DataGenProgress);
-        const octokit = new Octokit({
-          request: {
-            fetch: fetch,
-          },
-        });
 
-        const { data } = await octokit.rest.repos.getContent({
-          owner: 'etenlab',
-          repo: 'datasets',
-          path: 'maps/finished',
-        });
-
-        if (!Array.isArray(data)) {
-          value.error({
-            output: `Uploading Maps: ERROR`,
-            overallStatus: SubscriptionStatus.Error,
-          } as DataGenProgress);
-          value.complete();
-          return;
-        }
         let thumbFileID: null | number = null;
         let total = 0;
-
-        if (!mapAmount) {
-          mapAmount = data.length;
-        }
 
         total = mapAmount;
         let totalUploaded = 0;
