@@ -9442,19 +9442,19 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PericopeWithVotesOutput",
+        "name": "PericopeWithVotesEdge",
         "description": null,
         "fields": [
           {
-            "name": "error",
+            "name": "cursor",
             "description": null,
             "args": [],
             "type": {
               "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "ENUM",
-                "name": "ErrorType",
+                "kind": "SCALAR",
+                "name": "ID",
                 "ofType": null
               }
             },
@@ -9462,7 +9462,7 @@
             "deprecationReason": null
           },
           {
-            "name": "pericope_with_votes",
+            "name": "node",
             "description": null,
             "args": [],
             "type": {
@@ -9480,6 +9480,73 @@
                     "ofType": null
                   }
                 }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PericopeWithVotesListConnection",
+        "description": null,
+        "fields": [
+          {
+            "name": "edges",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PericopeWithVotesEdge",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "error",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "ErrorType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pageInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -13428,6 +13495,18 @@
             "description": null,
             "args": [
               {
+                "name": "after",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
                 "name": "document_id",
                 "description": null,
                 "type": {
@@ -13444,7 +13523,7 @@
                 "deprecationReason": null
               },
               {
-                "name": "page",
+                "name": "first",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -13461,7 +13540,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PericopeWithVotesOutput",
+                "name": "PericopeWithVotesListConnection",
                 "ofType": null
               }
             },

@@ -23,13 +23,17 @@ fragment PericopeWithVotesEdgeFragment on PericopeWithVotesEdge {
   }
 }
 
-query GetPericopiesByDocumentId($document_id: ID!, $page: Int) {
-  getPericopiesByDocumentId(document_id: $document_id, page: $page) {
+query GetPericopiesByDocumentId($document_id: ID!, $first: Int, $after: ID) {
+  getPericopiesByDocumentId(
+    document_id: $document_id
+    first: $first
+    after: $after
+  ) {
     error
     edges {
       ...PericopeWithVotesEdgeFragment
     }
-    pageInfo: {
+    pageInfo {
       ...PageInfoFragment
     }
   }
