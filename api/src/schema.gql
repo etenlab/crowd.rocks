@@ -61,12 +61,12 @@ input CreateQuestionOnWordRangeUpsertInput {
 input DataGenInput {
   mapAmount: Int
   mapsToLanguages: [LanguageInput!]
+  phraseAmount: Int
+  userAmount: Int
+  wordAmount: Int
 }
 
 type DataGenProgress {
-  mapReTranslationsStatus: SubscriptionStatus!
-  mapTranslationsStatus: SubscriptionStatus!
-  mapUploadStatus: SubscriptionStatus!
   output: String!
   overallStatus: SubscriptionStatus!
 }
@@ -93,6 +93,17 @@ type DefinitionVoteStatusOutputRow {
   vote_status: DefinitionVoteStatus
 }
 
+type DocumentEdge {
+  cursor: ID!
+  node: TextyDocument!
+}
+
+type DocumentListConnection {
+  edges: [DocumentEdge!]!
+  error: ErrorType!
+  pageInfo: PageInfo!
+}
+
 input DocumentUploadInput {
   document: TextyDocumentInput!
 }
@@ -102,14 +113,21 @@ type DocumentUploadOutput {
   error: ErrorType!
 }
 
-type DocumentWordEntriesOutput {
-  document_word_entries: [DocumentWordEntry]!
+type DocumentWordEntriesEdge {
+  cursor: ID!
+  node: [DocumentWordEntry!]!
+}
+
+type DocumentWordEntriesListConnection {
+  edges: [DocumentWordEntriesEdge!]!
   error: ErrorType!
+  pageInfo: PageInfo!
 }
 
 type DocumentWordEntry {
   document_id: String!
   document_word_entry_id: ID!
+  page: Int!
   parent_document_word_entry_id: String
   wordlike_string: WordlikeString!
 }
@@ -357,15 +375,6 @@ input FromWordAndDefintionlikeStringUpsertInput {
 }
 
 type GenericOutput {
-  error: ErrorType!
-}
-
-input GetAllDocumentsInput {
-  lang: LanguageInput
-}
-
-type GetAllDocumentsOutput {
-  documents: [TextyDocument!]
   error: ErrorType!
 }
 
@@ -654,6 +663,7 @@ type Mutation {
   translateMissingWordsAndPhrasesByChatGpt(from_language: LanguageInput!, to_language: LanguageInput!, version: String!): TranslateAllWordsAndPhrasesByBotOutput!
   translateMissingWordsAndPhrasesByDeepL(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateMissingWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateMissingWordsAndPhrasesByLilt(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateMissingWordsAndPhrasesBySmartcat(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByChatGPT4(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByChatGPT35(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
@@ -1039,7 +1049,7 @@ type Query {
   fileUploadUrlRequest(input: FileUploadUrlRequest!): FileUploadUrlResponse!
   forumFolderRead(forum_folder_id: ID!): ForumFolderOutput!
   forumRead(forum_id: ID!): ForumOutput!
-  getAllDocuments(input: GetAllDocumentsInput!): GetAllDocumentsOutput!
+  getAllDocuments(after: ID, first: Int, input: LanguageInput): DocumentListConnection!
   getAllMapsList(after: ID, first: Int, input: GetAllMapsListInput!): MapListConnection!
   getAllRecommendedSiteTextTranslationList: TranslationWithVoteListByLanguageListOutput!
   getAllRecommendedSiteTextTranslationListByLanguage(dialect_code: String, geo_code: String, language_code: String!): TranslationWithVoteListByLanguageOutput!
@@ -1049,7 +1059,7 @@ type Query {
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): TranslationWithVoteListOutput!
   getAnswersByQuestionIds(ids: [ID!]!): AnswersOutput!
   getDocument(input: GetDocumentInput!): GetDocumentOutput!
-  getDocumentWordEntriesByDocumentId(document_id: ID!): DocumentWordEntriesOutput!
+  getDocumentWordEntriesByDocumentId(after: ID, document_id: ID!, first: Int): DocumentWordEntriesListConnection!
   getFlagsFromRef(parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   getForumFoldersList(after: ID, filter: String, first: Int, forum_id: ID!): ForumFolderListConnection!
   getForumsList(after: ID, filter: String, first: Int): ForumListConnection!
@@ -1086,7 +1096,7 @@ type Query {
   getWordDefinitionsByLanguage(input: LanguageInput!): WordDefinitionWithVoteListOutput!
   getWordDefinitionsByWordId(word_id: ID!): WordDefinitionWithVoteListOutput!
   getWordRangesByBeginIds(ids: [ID!]!): WordRangesOutput!
-  getWordRangesByDocumentId(id: ID!): WordRangesOutput!
+  getWordRangesByDocumentId(document_id: ID!): WordRangesOutput!
   getWordToPhraseTrVoteStatus(word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   getWordToPhraseTranslationsByFromWordDefinitionId(from_word_definition_id: ID!, langInfo: LanguageInput!): WordToPhraseTranslationWithVoteListOutput!
   getWordToWordTrVoteStatus(word_to_word_translation_id: ID!): WordTrVoteStatusOutputRow!

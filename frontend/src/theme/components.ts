@@ -16,5 +16,12 @@ export const components: ThemeOptions = {
         },
       },
     },
+    MuiDivider: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderColor: theme.palette.background.gray_stroke,
+        }),
+      },
+    },
   },
 };

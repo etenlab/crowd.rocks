@@ -384,6 +384,25 @@ mutation TranslateMissingWordsAndPhrasesByDeepL(
   }
 }
 
+mutation TranslateMissingWordsAndPhrasesByLilt(
+  $from_language_code: String!
+  $to_language_code: String!
+) {
+  translateMissingWordsAndPhrasesByLilt(
+    from_language: { language_code: $from_language_code }
+    to_language: { language_code: $to_language_code }
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+
 mutation TranslateMissingWordsAndPhrasesBySmartcat(
   $from_language_code: String!
   $to_language_code: String!

@@ -39,7 +39,6 @@ export function FolderListPage() {
   }>();
 
   const [filter, setFilter] = useState<string>('');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [bouncedFilter] = useDebounce(filter, 500);
 
   const {

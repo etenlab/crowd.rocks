@@ -9,7 +9,7 @@ export class MapReTranslationSchedule {
     private readonly mapsTranslationService: MapsTranslationService,
     private readonly authenticationService: AuthenticationService,
   ) {}
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_5_MINUTES, { name: 'retranslation' })
   async handleCron() {
     Logger.log(`MapReTranslationSchedule: checking maps for retranslation.`);
     const token = await this.authenticationService.getAdminToken();

@@ -56,6 +56,6 @@ import { SmartcatTranslateService } from './sc-translate.service';
     ChatGPTService,
     FakerTranslateService,
   ],
-  exports: [AiTranslationsService],
+  exports: [AiTranslationsService, FakerTranslateService],
 })
 export class BotsModule {}
