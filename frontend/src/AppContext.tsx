@@ -5,7 +5,10 @@ import { reducer, loadPersistedStore } from './reducers/index';
 
 import { type StateType as GlobalStateType } from './reducers/global.reducer';
 import { type StateType as ComponentsStateType } from './reducers/components.reducer';
-import { type StateType as NonPersistentStateType } from './reducers/non-persistent.reducer';
+import {
+  NewQuestionFormPageData,
+  type StateType as NonPersistentStateType,
+} from './reducers/non-persistent.reducer';
 import {
   GetAllSiteTextDefinitionsVariable,
   GetForumsListVariable,
@@ -76,6 +79,7 @@ export interface ContextType {
     addPaginationVariableForGetAllDocuments(
       variable: GetAllDocumentsVariable,
     ): void;
+    setNewQuestionFormPageData(pageData: NewQuestionFormPageData): void;
   };
 }
 
@@ -128,6 +132,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
     addPaginationVariableForGetForumFoldersList,
     addPaginationVariableForGetTheadsList,
     addPaginationVariableForGetAllDocuments,
+    setNewQuestionFormPageData,
   } = useNonPersistent({ dispatch });
 
   useEffect(() => {
@@ -377,6 +382,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
       addPaginationVariableForGetTheadsList,
       addPaginationVariableForGetAllDocuments,
       setIonContentScrollElement,
+      setNewQuestionFormPageData,
     },
   };
 
