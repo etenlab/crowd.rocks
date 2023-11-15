@@ -6,17 +6,15 @@ import { AddCircle } from '../../common/icons/AddCircle';
 
 type PericopeAddButtonProps = {
   wordEntryId: string;
-  documentId: string;
   onClose(): void;
 };
 
 export function PericopeAddButton({
   wordEntryId,
-  documentId,
   onClose,
 }: PericopeAddButtonProps) {
   const { tr } = useTr();
-  const [upsertPericope] = useUpsertPericopeMutation(documentId);
+  const [upsertPericope] = useUpsertPericopeMutation();
 
   const handleAddPericope = () => {
     upsertPericope({

@@ -19,7 +19,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 export type TempPage = {
   id: string;
   first: number;
-  after: number;
+  after: string | null;
 };
 
 export type ViewMode = 'edit' | 'view';
@@ -50,7 +50,7 @@ export type DocumentViewerProps = {
   onClickWord(entryId: string, index: number, e?: unknown): void;
   documentId: string;
   onChangeRange(sentence: string): void;
-  onLoadPage?(page: number): void;
+  onLoadPage?(tempPage: TempPage): void;
 };
 
 export const DocumentViewer = memo(function DocumentViewerPure({
@@ -106,7 +106,7 @@ export const DocumentViewer = memo(function DocumentViewerPure({
       for (let i = 0; i < totalPages; i++) {
         pageEntriesData.push({
           id: `page_${i + 1}`,
-          after: i,
+          after: JSON.stringify({ document_id: +documentId, page: i }),
           first: 1,
         });
       }
@@ -121,7 +121,7 @@ export const DocumentViewer = memo(function DocumentViewerPure({
         variables: {
           document_id: documentId,
           first: page.first,
-          after: page.after + '',
+          after: page.after,
         },
       });
 
@@ -181,7 +181,7 @@ export const DocumentViewer = memo(function DocumentViewerPure({
       }
 
       if (sortedEntries.length !== 1) {
-        alert('Error at fetching');
+        return;
       }
 
       setEntriesData((data) => {
@@ -262,7 +262,7 @@ export const DocumentViewer = memo(function DocumentViewerPure({
 
     const timer = setTimeout(() => {
       fetchMore(requiredPage);
-      onLoadPage && onLoadPage(requiredPage.after + 1);
+      onLoadPage && onLoadPage(requiredPage);
     }, 1000);
 
     return () => {

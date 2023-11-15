@@ -9,7 +9,7 @@ import { updateCacheWithUpsertPericope } from '../cacheUpdators/upsertPericope';
 import { useTr } from './useTr';
 import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 
-export function useUpsertPericopeMutation(documentId: string) {
+export function useUpsertPericopeMutation() {
   const { tr } = useTr();
   const [present] = useIonToast();
   const redirectOnUnauth = useUnauthorizedRedirect();
@@ -24,7 +24,7 @@ export function useUpsertPericopeMutation(documentId: string) {
       ) {
         const newPericope = data.upsertPericopies.pericopies[0]!;
 
-        updateCacheWithUpsertPericope(cache, newPericope, documentId);
+        updateCacheWithUpsertPericope(cache, newPericope);
 
         present({
           message: tr('Success at creating new Pericope!'),
