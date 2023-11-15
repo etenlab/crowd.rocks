@@ -199,12 +199,6 @@ export class PopulatorService {
           output: `Maps Uploaded: ${total} / ${total}`,
           overallStatus: SubscriptionStatus.Progressing,
         } as DataGenProgress);
-
-        value.next({
-          output: `Retranslating Maps...`,
-          overallStatus: SubscriptionStatus.Progressing,
-        } as DataGenProgress);
-        await this.mapRes.mapsReTranslate(req);
       }
 
       // --------------------------------
@@ -367,6 +361,15 @@ export class PopulatorService {
             }
           }
         }
+
+        // ------------------------------------
+        // ReTranslate Maps
+        // ------------------------------------
+        value.next({
+          output: `Retranslating Maps...`,
+          overallStatus: SubscriptionStatus.Progressing,
+        } as DataGenProgress);
+        await this.mapRes.mapsReTranslate(req);
 
         const translationTableNames = [
           'word_to_word_translation',

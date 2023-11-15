@@ -729,6 +729,14 @@ export class TranslationsService {
           : null,
       );
 
+      const w2wIds: number[] = [];
+      word_to_word_translations.forEach((w2wTr) => {
+        if (w2wTr) {
+          w2wIds.push(+w2wTr.word_to_word_translation_id);
+        }
+      });
+      await setTranslationsVotes(true, true, w2wIds, token, true, this.pg.pool);
+
       const { error: w2pError, word_to_phrase_translations } =
         await this.wordToPhraseTrService.upserts(w2pInput, token, pgClient);
 
@@ -751,6 +759,20 @@ export class TranslationsService {
               w2pTr,
             )
           : null,
+      );
+      const w2pIds: number[] = [];
+      word_to_phrase_translations.forEach((w2pTr) => {
+        if (w2pTr) {
+          w2pIds.push(+w2pTr.word_to_phrase_translation_id);
+        }
+      });
+      await setTranslationsVotes(
+        true, //from type is word
+        false, //to type is word
+        w2pIds,
+        token,
+        true, //vote
+        this.pg.pool,
       );
 
       const { error: p2wError, phrase_to_word_translations } =
@@ -776,6 +798,20 @@ export class TranslationsService {
             )
           : null,
       );
+      const p2wIds: number[] = [];
+      phrase_to_word_translations.forEach((p2wTr) => {
+        if (p2wTr) {
+          p2wIds.push(+p2wTr.phrase_to_word_translation_id);
+        }
+      });
+      await setTranslationsVotes(
+        false, //from type is word
+        true, //to type is word
+        p2wIds,
+        token,
+        true, //vote
+        this.pg.pool,
+      );
 
       const { error: p2pError, phrase_to_phrase_translations } =
         await this.phraseToPhraseTrService.upserts(p2pInput, token, pgClient);
@@ -799,6 +835,21 @@ export class TranslationsService {
               p2pTr,
             )
           : null,
+      );
+
+      const p2pIds: number[] = [];
+      phrase_to_phrase_translations.forEach((p2pTr) => {
+        if (p2pTr) {
+          p2pIds.push(+p2pTr.phrase_to_phrase_translation_id);
+        }
+      });
+      await setTranslationsVotes(
+        false, //from type is word
+        false, //to type is word
+        p2pIds,
+        token,
+        true, //vote
+        this.pg.pool,
       );
 
       return {
@@ -833,6 +884,7 @@ export class TranslationsService {
     }[],
     token: string,
     pgClient: PoolClient | null,
+    withAddVote = false,
   ): Promise<TranslationsOutput> {
     if (input.length === 0) {
       return {
@@ -1003,50 +1055,6 @@ export class TranslationsService {
             upsertInput[i].to_definition_type_is_word,
           ),
           translations[i],
-        );
-        if (!upsertInput[i].valid) {
-          continue;
-        }
-
-        let translationId: string;
-        let from_is_word: boolean;
-        let to_is_word: boolean;
-        if (isWtoW(translations[i]!)) {
-          translationId = (translations[i]! as WordToWordTranslation)
-            .word_to_word_translation_id!;
-          from_is_word = true;
-          to_is_word = true;
-          // console.log('w2w');
-        } else if (isWtoP(translations[i]!)) {
-          translationId = (translations[i]! as WordToPhraseTranslation)
-            .word_to_phrase_translation_id!;
-          from_is_word = true;
-          to_is_word = false;
-          // console.log('w2p');
-        } else if (isPtoP(translations[i]!)) {
-          translationId = (translations[i]! as PhraseToPhraseTranslation)
-            .phrase_to_phrase_translation_id!;
-          from_is_word = false;
-          to_is_word = false;
-          // console.log('p2p');
-        } else if (isPtoW(translations[i]!)) {
-          translationId = (translations[i]! as PhraseToWordTranslation)
-            .phrase_to_word_translation_id!;
-          from_is_word = false;
-          to_is_word = true;
-          // console.log('p2w');
-        } else {
-          continue;
-        }
-        // console.log(`upvote: ${translationId}`);
-
-        await setTranslationsVotes(
-          from_is_word,
-          to_is_word,
-          [+translationId],
-          token,
-          true,
-          this.pg.pool,
         );
       }
 
