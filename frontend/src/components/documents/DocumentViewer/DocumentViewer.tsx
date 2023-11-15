@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import { Stack } from '@mui/material';
-import { Word, Dot } from './styled';
+import { Dot, Word } from './styled';
 import { SkeletonRow } from './SkeletonRow';
 
 import { useGetDocumentWordEntriesByDocumentIdLazyQuery } from '../../../generated/graphql';
@@ -47,7 +47,11 @@ export type DocumentViewerProps = {
     entryId: string;
     component?: ReactNode;
   }[];
-  onClickWord(entryId: string, index: number, e?: unknown): void;
+  onClickWord(
+    entryId: string,
+    order: number,
+    e: MouseEvent<HTMLDivElement>,
+  ): void;
   documentId: string;
   onChangeRange(sentence: string): void;
   onLoadPage?(tempPage: TempPage): void;
@@ -279,7 +283,10 @@ export const DocumentViewer = memo(function DocumentViewerPure({
   const rows = useMemo(() => {
     const rows: JSX.Element[] = [];
     const tempRow: {
-      cols: JSX.Element[];
+      cols: {
+        wordEntry: WordEntry;
+        order: number;
+      }[];
       width: number;
     } = {
       cols: [],
@@ -313,6 +320,55 @@ export const DocumentViewer = memo(function DocumentViewerPure({
 
     let begin = false;
     let end = false;
+    let wordCounter = 0;
+
+    const getWordProps = (entry: WordEntry, order: number, padding: string) => {
+      if (entry.id === range.beginEntry) {
+        begin = true;
+      }
+
+      const dot = dotsMap.get(entry.id) || null;
+      const isDot = dot ? true : false;
+      const dotCom = dot ? dot.component : null;
+
+      let classStr = `${mode} `;
+      classStr +=
+        (begin && !end && range.endEntry) ||
+        entry.id === range.beginEntry ||
+        entry.id === range.endEntry
+          ? 'selected'
+          : '';
+      classStr += ` ${entry.id === range.beginEntry ? 'left-boundary' : ''}`;
+      classStr += ` ${entry.id === range.endEntry ? 'right-boundary' : ''}`;
+
+      const cursor = isDot ? 'pointer' : 'default';
+
+      if (entry.id === range.endEntry) {
+        end = true;
+      }
+
+      const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+        if (mode === 'view' && !isDot) {
+          return;
+        }
+
+        onClickWord(entry.id, order, e);
+      };
+
+      const wordlikeString = entry.wordlike_string.wordlike_string;
+
+      return {
+        sx: {
+          cursor,
+          padding,
+        },
+        classStr,
+        handleClick,
+        wordlikeString,
+        dotCom,
+        isDot,
+      };
+    };
 
     for (const data of entriesData) {
       if (!Array.isArray(data)) {
@@ -331,51 +387,7 @@ export const DocumentViewer = memo(function DocumentViewerPure({
       for (let i = 0; i < entries.length; i++) {
         const entry = entries[i];
 
-        if (entry.id === range.beginEntry) {
-          begin = true;
-        }
-
-        const dot = dotsMap.get(entry.id) || null;
-        const isDot = dot ? true : false;
-        const dotCom = dot ? dot.component : null;
-
-        let classStr = `${mode} `;
-        classStr +=
-          (begin && !end && range.endEntry) ||
-          entry.id === range.beginEntry ||
-          entry.id === range.endEntry
-            ? 'selected'
-            : '';
-        classStr += ` ${entry.id === range.beginEntry ? 'left-boundary' : ''}`;
-        classStr += ` ${entry.id === range.endEntry ? 'right-boundary' : ''}`;
-
-        const cursor = isDot ? 'pointer' : 'default';
-
-        if (entry.id === range.endEntry) {
-          end = true;
-        }
-
-        const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-          if (mode === 'view' && !isDot) {
-            return;
-          }
-
-          onClickWord(entry.id, i, e);
-        };
-
         const wordlikeString = entry.wordlike_string.wordlike_string;
-
-        const wordCom = (
-          <Word
-            key={entry.id}
-            className={classStr}
-            onClick={handleClick}
-            style={{ cursor }}
-          >
-            {wordlikeString}
-            {isDot ? dotCom || <Dot /> : null}
-          </Word>
-        );
 
         const wordWidth = Math.ceil(
           context.measureText(wordlikeString).width +
@@ -384,7 +396,10 @@ export const DocumentViewer = memo(function DocumentViewerPure({
         );
 
         if (tempRow.width + wordWidth < rowWidth) {
-          tempRow.cols.push(wordCom);
+          tempRow.cols.push({
+            wordEntry: entry,
+            order: wordCounter,
+          });
           tempRow.width = tempRow.width + wordWidth;
         } else {
           const rowCom = (
@@ -395,13 +410,43 @@ export const DocumentViewer = memo(function DocumentViewerPure({
                 color: theme.palette.text.gray,
               })}
             >
-              {tempRow.cols}
+              {tempRow.cols.map((col) => {
+                const {
+                  sx,
+                  classStr,
+                  handleClick,
+                  wordlikeString,
+                  dotCom,
+                  isDot,
+                } = getWordProps(
+                  col.wordEntry,
+                  col.order,
+                  `0 ${
+                    3 + (rowWidth - tempRow.width) / tempRow.cols.length / 2
+                  }px`,
+                );
+
+                return (
+                  <Word
+                    key={col.wordEntry.id}
+                    sx={sx}
+                    className={classStr}
+                    onClick={handleClick}
+                  >
+                    {wordlikeString}
+                    {isDot ? dotCom || <Dot /> : null}
+                  </Word>
+                );
+              })}
             </Stack>
           );
+
           rows.push(rowCom);
-          tempRow.cols = [wordCom];
+          tempRow.cols = [{ wordEntry: entry, order: wordCounter }];
           tempRow.width = wordWidth;
         }
+
+        wordCounter++;
       }
     }
 
@@ -414,7 +459,22 @@ export const DocumentViewer = memo(function DocumentViewerPure({
             color: theme.palette.text.gray,
           })}
         >
-          {tempRow.cols}
+          {tempRow.cols.map((col) => {
+            const { sx, classStr, handleClick, wordlikeString, dotCom, isDot } =
+              getWordProps(col.wordEntry, col.order, '0 3px');
+
+            return (
+              <Word
+                key={col.wordEntry.id}
+                sx={sx}
+                className={classStr}
+                onClick={handleClick}
+              >
+                {wordlikeString}
+                {isDot ? dotCom || <Dot /> : null}
+              </Word>
+            );
+          })}
         </Stack>
       );
       rows.push(rowCom);
@@ -433,10 +493,15 @@ export const DocumentViewer = memo(function DocumentViewerPure({
   ]);
 
   return (
-    <Virtuoso
-      customScrollParent={ionContentScrollElement || undefined}
-      data={rows}
-      itemContent={(_index, row) => row}
-    />
+    <>
+      <Virtuoso
+        customScrollParent={ionContentScrollElement || undefined}
+        data={rows}
+        itemContent={(_index, row) => row}
+      />
+      <div style={{ opacity: 0 }}>
+        <span style={{ fontFamily: 'Poppins' }} />
+      </div>
+    </>
   );
 });
