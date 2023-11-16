@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useParams } from 'react-router';
 import {
   Stack,
@@ -22,8 +22,12 @@ import { DownloadCircle } from '../../common/icons/DownloadCircle';
 import { useGetDocumentQuery } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
 
-import { QADocumentViewer } from '../QADocumentViewer/QADocumentViewer';
+import {
+  QADocumentViewer,
+  RangeItem,
+} from '../QADocumentViewer/QADocumentViewer';
 import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
+import { QuestionForm } from './QuestionForm';
 
 export function QADocumentViewerPage() {
   const { tr } = useTr();
@@ -36,6 +40,10 @@ export function QADocumentViewerPage() {
   });
 
   const [mode, setMode] = useState<ViewMode>('view');
+  const [questionFormData, setQuestionFormData] = useState<{
+    sentence: string;
+    range: { begin: RangeItem; end: RangeItem };
+  } | null>(null);
 
   const document = documentData ? documentData.getDocument.document : null;
 
@@ -62,16 +70,19 @@ export function QADocumentViewerPage() {
     },
   ].filter((item) => item.component !== null);
 
-  if (!document) {
-    return (
-      <PageLayout>
-        <Caption>{tr('Details')}</Caption>
-        <Box style={{ textAlign: 'center' }}>
-          <CircularProgress />
-        </Box>
-      </PageLayout>
-    );
-  }
+  const handleCloseQuestionForm = useCallback(() => {
+    setQuestionFormData(null);
+  }, []);
+
+  const handleNewQuestionFormData = useCallback(
+    (data: {
+      sentence: string;
+      range: { begin: RangeItem; end: RangeItem };
+    }) => {
+      setQuestionFormData(data);
+    },
+    [],
+  );
 
   const handleToggleMode = () => {
     setMode((mode) => {
@@ -82,41 +93,77 @@ export function QADocumentViewerPage() {
       }
     });
   };
-  return (
-    <PageLayout>
-      <Caption>{tr('Details')}</Caption>
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Tag
-          label={langInfo2String(
-            subTags2LangInfo({
-              lang: document.language_code,
-              dialect: document.dialect_code || undefined,
-              region: document.geo_code || undefined,
-            }),
-          )}
-          color="blue"
-        />
-        <Button
-          onClick={handleToggleMode}
-          variant="text"
-          sx={{ display: 'flex', alignItem: 'center', gap: '6px' }}
+  if (!document) {
+    return (
+      <PageLayout>
+        <Caption>{tr('Details')}</Caption>
+        <Box style={{ textAlign: 'center' }}>
+          <CircularProgress />
+        </Box>
+      </PageLayout>
+    );
+  } else {
+    return (
+      <PageLayout>
+        <Stack
+          gap="20px"
+          style={{ display: questionFormData ? 'none' : 'inherit' }}
         >
-          <Typography variant="h5" color="text.gray">
-            {tr('Edit mode')}
+          <Caption>{tr('Details')}</Caption>
+
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Tag
+              label={langInfo2String(
+                subTags2LangInfo({
+                  lang: document.language_code,
+                  dialect: document.dialect_code || undefined,
+                  region: document.geo_code || undefined,
+                }),
+              )}
+              color="blue"
+            />
+            <Button
+              onClick={handleToggleMode}
+              variant="text"
+              sx={{ display: 'flex', alignItem: 'center', gap: '6px' }}
+            >
+              <Typography variant="h5" color="text.gray">
+                {tr('Edit mode')}
+              </Typography>
+              <Switch checked={mode === 'edit'} />
+            </Button>
+            <MoreHorizButton dropDownList={dropDownList} />
+          </Stack>
+
+          <Divider />
+
+          <Typography variant="h4" sx={{ fontWeight: 500 }}>
+            {document.file_name}
           </Typography>
-          <Switch checked={mode === 'edit'} />
-        </Button>
-        <MoreHorizButton dropDownList={dropDownList} />
-      </Stack>
 
-      <Divider />
+          <QADocumentViewer
+            documentId={document_id}
+            mode={mode}
+            onNewQuestionFormData={handleNewQuestionFormData}
+          />
+        </Stack>
 
-      <Typography variant="h4" sx={{ fontWeight: 500 }}>
-        {document.file_name}
-      </Typography>
-
-      <QADocumentViewer documentId={document_id} mode={mode} />
-    </PageLayout>
-  );
+        {questionFormData ? (
+          <QuestionForm
+            sentence={questionFormData.sentence}
+            range={{
+              begin: questionFormData.range.begin,
+              end: questionFormData.range.end,
+            }}
+            onClose={handleCloseQuestionForm}
+          />
+        ) : null}
+      </PageLayout>
+    );
+  }
 }

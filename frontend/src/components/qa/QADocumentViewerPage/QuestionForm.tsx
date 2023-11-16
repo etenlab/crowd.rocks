@@ -1,18 +1,17 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { useParams, useHistory } from 'react-router';
+import { useState, useRef } from 'react';
 import { useIonToast } from '@ionic/react';
 import { Divider, Stack, Typography, Button } from '@mui/material';
 
 import { AddCircle } from '../../common/icons/AddCircle';
 
-import { PageLayout } from '../../common/PageLayout';
 import { Input } from '../../common/forms/Input';
 import { Select, OptionItem } from '../../common/forms/Select';
 
 import { useTr } from '../../../hooks/useTr';
 
 import { useCreateQuestionOnWordRangeMutation } from '../../../hooks/useCreateQuestionOnWordRangeMutation';
-import { useAppContext } from '../../../hooks/useAppContext';
+
+import { RangeItem } from '../QADocumentViewer/QADocumentViewer';
 
 export enum QuestionValue {
   TEXT,
@@ -22,24 +21,19 @@ export enum QuestionValue {
   CHOOSEONE,
 }
 
-export function QuestionFormPage() {
-  const history = useHistory();
-  const { nation_id, language_id, cluster_id, document_id } = useParams<{
-    nation_id: string;
-    language_id: string;
-    cluster_id: string;
-    document_id: string;
-  }>();
+export type QuestionFormProps = {
+  sentence: string;
+  range: {
+    begin: RangeItem;
+    end: RangeItem;
+  };
+  onClose(): void;
+};
+
+export function QuestionForm({ sentence, range, onClose }: QuestionFormProps) {
   const [presentToast] = useIonToast();
 
   const { tr } = useTr();
-  const {
-    states: {
-      nonPersistent: {
-        pageData: { newQuestionForm },
-      },
-    },
-  } = useAppContext();
 
   const [questionItems, setQuestionItems] = useState<
     { key: string; value: string }[]
@@ -51,7 +45,7 @@ export function QuestionFormPage() {
 
   const [questionType, setQuestionType] = useState<OptionItem | null>(null);
   const [question, setQuestion] = useState<string>('');
-  const questionItemKeyRef = useRef(1);
+  const questionItemKeyRef = useRef<number>(1);
 
   const [createQuestionOnWordRange] = useCreateQuestionOnWordRangeMutation();
 
@@ -78,39 +72,22 @@ export function QuestionFormPage() {
     },
   ];
 
-  const goToDocumentsDetailPage = useCallback(() => {
-    history.push(
-      `/${nation_id}/${language_id}/${cluster_id}/qa/documents/${document_id}`,
-    );
-  }, [cluster_id, document_id, history, language_id, nation_id]);
-
-  useEffect(() => {
-    if (!newQuestionForm) {
-      goToDocumentsDetailPage();
-    }
-  }, [goToDocumentsDetailPage, newQuestionForm]);
-
   const saveQuestion = (
     question: string,
     items: string[],
     isMultiselect: boolean,
   ) => {
-    if (!newQuestionForm) {
-      goToDocumentsDetailPage();
-      return;
-    }
-
     createQuestionOnWordRange({
       variables: {
-        begin_document_word_entry_id: newQuestionForm.range.begin.entryId,
-        end_document_word_entry_id: newQuestionForm.range.end.entryId,
+        begin_document_word_entry_id: range.begin.entryId,
+        end_document_word_entry_id: range.end.entryId,
         question: question,
         question_items: items,
         question_type_is_multiselect: isMultiselect,
       },
     });
 
-    goToDocumentsDetailPage();
+    onClose();
   };
 
   const checkQuestionItemsValidation = () => {
@@ -223,64 +200,68 @@ export function QuestionFormPage() {
   const handleChangeQuestionItem = (key: string, value: string) => {
     setQuestionItems((_items) => {
       return [
-        ..._items.filter((item) => item.key !== key),
-        {
-          key,
-          value,
-        },
+        ..._items.map((item) => {
+          if (item.key !== key) {
+            return item;
+          }
+          return {
+            key,
+            value,
+          };
+        }),
       ];
     });
   };
 
   const addMoreQuestionItemCom =
-    questionType && questionType.value === '' ? (
+    (questionType && questionType.value === QuestionValue.CHOOSEONE) ||
+    (questionType && questionType.value === QuestionValue.MULTISELECT) ? (
       <Button
         variant="text"
         startIcon={<AddCircle sx={{ fontSize: 20 }} />}
         color="orange"
         onClick={handleAddQuestionItem}
+        sx={{ justifyContent: 'flex-start', padding: 0 }}
       >
         {tr('Add More')}
       </Button>
     ) : null;
 
   return (
-    <PageLayout>
-      <Stack gap="32px">
-        <Typography variant="h2">{tr('New Question')}</Typography>
+    <Stack gap="32px">
+      <Typography variant="h2">{tr('New Question')}</Typography>
 
-        <Stack gap="24px">
-          <Stack gap="20px">
-            <Typography variant="h4">
-              {`"${newQuestionForm ? newQuestionForm.sentence : ''}"`}
+      <Stack gap="24px">
+        <Stack gap="20px">
+          <Typography variant="h4">{sentence}</Typography>
+
+          <Divider />
+
+          <Stack gap="10px">
+            <Typography variant="overline" color="text.gray">
+              {tr('Your Question')}
             </Typography>
-
-            <Divider />
-
-            <Stack gap="10px">
-              <Typography variant="overline" color="text.gray">
-                {tr('Your Question')}
-              </Typography>
-              <Input
-                placeholder={tr('Ask a question')}
-                value={question}
-                onChange={setQuestion}
-                multiline
-                rows={4}
-              />
-            </Stack>
-          </Stack>
-
-          <Stack gap="20px">
-            <Select
-              label={tr('Question Type')}
-              placeholder={tr('Select question type')}
-              options={questionTypeOptions}
-              value={questionType}
-              onChange={setQuestionType}
-              onClear={() => {}}
+            <Input
+              placeholder={tr('Ask a question')}
+              value={question}
+              onChange={setQuestion}
+              multiline
+              rows={4}
             />
+          </Stack>
+        </Stack>
 
+        <Stack gap="20px">
+          <Select
+            label={tr('Question Type')}
+            placeholder={tr('Select question type')}
+            options={questionTypeOptions}
+            value={questionType}
+            onChange={setQuestionType}
+            onClear={() => {}}
+          />
+
+          {questionItems.length > 0 ? (
             <Stack gap="16px">
               {questionItems.map((item) => (
                 <Input
@@ -307,31 +288,27 @@ export function QuestionFormPage() {
                 </Typography>
               ) : null}
             </Stack>
+          ) : null}
 
-            {addMoreQuestionItemCom}
-          </Stack>
-        </Stack>
-
-        <Stack gap="16px">
-          <Button
-            variant="contained"
-            color="blue"
-            startIcon={<AddCircle sx={{ fontSize: 24 }} />}
-            fullWidth
-            onClick={handleSaveQuestion}
-          >
-            {tr('Save')}
-          </Button>
-
-          <Button
-            variant="contained"
-            color="gray_stroke"
-            onClick={goToDocumentsDetailPage}
-          >
-            {tr('Cancel')}
-          </Button>
+          {addMoreQuestionItemCom}
         </Stack>
       </Stack>
-    </PageLayout>
+
+      <Stack gap="16px">
+        <Button
+          variant="contained"
+          color="blue"
+          startIcon={<AddCircle sx={{ fontSize: 24 }} />}
+          fullWidth
+          onClick={handleSaveQuestion}
+        >
+          {tr('Save')}
+        </Button>
+
+        <Button variant="contained" color="gray_stroke" onClick={onClose}>
+          {tr('Cancel')}
+        </Button>
+      </Stack>
+    </Stack>
   );
 }

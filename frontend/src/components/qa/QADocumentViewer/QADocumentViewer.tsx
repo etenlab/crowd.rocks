@@ -1,5 +1,11 @@
-import { useMemo, useState, useCallback, ReactNode, MouseEvent } from 'react';
-import { useParams, useHistory } from 'react-router';
+import {
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+  ReactNode,
+  MouseEvent,
+} from 'react';
 import { useIonToast } from '@ionic/react';
 import { Popover } from '@mui/material';
 
@@ -30,20 +36,20 @@ export type RangeItem = {
 type QADocumentViewerProps = {
   documentId: string;
   mode: ViewMode;
+  onNewQuestionFormData(data: {
+    sentence: string;
+    range: { begin: RangeItem; end: RangeItem };
+  }): void;
 };
 
-export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
-  const history = useHistory();
-  const { nation_id, language_id, cluster_id, document_id } = useParams<{
-    nation_id: string;
-    language_id: string;
-    cluster_id: string;
-    document_id: string;
-  }>();
-
+export function QADocumentViewer({
+  documentId,
+  mode,
+  onNewQuestionFormData,
+}: QADocumentViewerProps) {
   const { tr } = useTr();
   const {
-    actions: { createModal, setNewQuestionFormPageData },
+    actions: { createModal },
   } = useAppContext();
   const [presetToast] = useIonToast();
 
@@ -62,7 +68,7 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
   //   useState<QuestionOnWordRange | null>(null);
   const [sentence, setSentence] = useState<string>('');
 
-  const { openModal, closeModal } = createModal();
+  const askQuestionButtonModalRef = useRef(createModal());
 
   const { dots, questionsMap } = useMemo(() => {
     const questionsMap = new Map<string, QuestionOnWordRange[]>();
@@ -198,15 +204,15 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
 
   const handleSelectDot = useCallback(
     (entryId: string) => {
-      openModal(
+      askQuestionButtonModalRef.current.openModal(
         <PieceOfTextModal
           questions={questionsMap.get(entryId) || []}
           onSelectQuestion={handleSelectQuestion}
-          onClose={closeModal}
+          onClose={askQuestionButtonModalRef.current.closeModal}
         />,
       );
     },
-    [closeModal, handleSelectQuestion, openModal, questionsMap],
+    [handleSelectQuestion, questionsMap],
   );
 
   const handleWordClick = useCallback(
@@ -224,9 +230,9 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
     setSentence(_sentence);
   }, []);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setRange({});
-  };
+  }, []);
 
   // const handleSaveAnswer = async (answer: string, itemIds: string[]) => {
   //   if (!selectedQuestion) {
@@ -277,28 +283,17 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
 
   const handleAddQuestionButton = useCallback(() => {
     if (range.begin && range.end) {
-      setNewQuestionFormPageData({
+      onNewQuestionFormData({
+        sentence,
         range: {
           begin: range.begin,
           end: range.end,
         },
-        sentence,
       });
-      history.push(
-        `/${nation_id}/${language_id}/${cluster_id}/qa/new-question?document_id=${document_id}`,
-      );
     }
-  }, [
-    cluster_id,
-    document_id,
-    history,
-    language_id,
-    nation_id,
-    range.begin,
-    range.end,
-    sentence,
-    setNewQuestionFormPageData,
-  ]);
+
+    handleCancel();
+  }, [range, sentence, handleCancel, onNewQuestionFormData]);
 
   const popoverCom =
     range.begin && range.end && mode === 'edit' && range.begin.element ? (
