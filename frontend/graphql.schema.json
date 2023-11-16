@@ -1409,6 +1409,18 @@
             "deprecationReason": null
           },
           {
+            "name": "DocumentFileIdNotProvided",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "DocumentFileReadError",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "DocumentIdNotProvided",
             "description": null,
             "isDeprecated": false,
@@ -1493,7 +1505,19 @@
             "deprecationReason": null
           },
           {
+            "name": "FileRecordNotFound",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "FileSaveFailed",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "FileUpdateFailed",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -3981,6 +4005,26 @@
                 "ofType": {
                   "kind": "OBJECT",
                   "name": "LanguageForBotTranslate",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sourceToTarget",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "SourceTargetLangs",
                   "ofType": null
                 }
               }
@@ -17622,6 +17666,57 @@
               "kind": "OBJECT",
               "name": "SiteTextWordDefinition",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SourceTargetLangs",
+        "description": null,
+        "fields": [
+          {
+            "name": "sourceLangCode",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetLangCodes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null

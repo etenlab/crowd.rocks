@@ -15,7 +15,6 @@ import { PUB_SUB } from 'src/pubSub.module';
 import { IsAuthAdmin } from '../../decorators/is-auth-admin.decorator';
 import { LanguageInput } from '../common/types';
 import { AiTranslationsService } from './ai-translations.service';
-import { LiltTranslateService } from './lilt-translate.service';
 import {
   LanguageListForBotTranslateOutput,
   TranslatedLanguageInfoOutput,

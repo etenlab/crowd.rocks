@@ -52,9 +52,17 @@ export class LanguageForBotTranslate {
 }
 
 @ObjectType()
+export class SourceTargetLangs {
+  @Field(() => String) sourceLangCode: string;
+  @Field(() => [String]) targetLangCodes: string[];
+}
+
+@ObjectType()
 export class LanguageListForBotTranslateOutput extends GenericOutput {
   @Field(() => [LanguageForBotTranslate], { nullable: true })
   languages: LanguageForBotTranslate[] | null;
+  @Field(() => [SourceTargetLangs], { nullable: true })
+  sourceToTarget?: SourceTargetLangs[] | null;
 }
 
 @InputType()

@@ -9,6 +9,7 @@ import {
   ITranslator,
   LanguageForBotTranslate,
   LanguageListForBotTranslateOutput,
+  SourceTargetLangs,
 } from './types';
 import fetch, { Headers } from 'node-fetch';
 import {
@@ -103,11 +104,6 @@ type TLiltTranslationOfFile = {
   fileId: number;
   status: string;
   createdAt: string;
-};
-
-type TLiltDeleteFileRes = {
-  id: number;
-  deleted: boolean;
 };
 
 @Injectable()
@@ -323,7 +319,7 @@ export class LiltTranslateService implements ITranslator {
       return sourceFile;
     } else {
       Logger.error(
-        `Error with file upload to Lilt: ${JSON.stringify(sourceFile)}`,
+        `Error with getTranslatedFile Lilt: ${JSON.stringify(sourceFile)}`,
       );
     }
   }
@@ -341,7 +337,7 @@ export class LiltTranslateService implements ITranslator {
       return true;
     } else {
       Logger.error(
-        `Error with file upload to Lilt: ${JSON.stringify(res.json())}`,
+        `Error with deleteFileFromLilt: ${JSON.stringify(res.json())}`,
       );
     }
   }
@@ -424,10 +420,6 @@ export class LiltTranslateService implements ITranslator {
           error: ErrorType.BotTranslationError,
         };
       }
-      const deleteFile = await this.deleteFileFromLilt(sourceFile.id);
-      if (!deleteFile) {
-        Logger.error(`LiltTranslateService#translateFile: !deleteFile`);
-      }
 
       return {
         error: ErrorType.NoError,
@@ -443,10 +435,11 @@ export class LiltTranslateService implements ITranslator {
         error: ErrorType.BotTranslationError,
       };
     } finally {
-      Logger.log(
-        `LiltTranslateService#translateFile: Finally check file cleanup`,
-      );
-      await this.deleteFileFromLilt(sourceFile.id);
+      Logger.log(`LiltTranslateService#translateFile: Finally file cleanup`);
+      const deleteFile = await this.deleteFileFromLilt(sourceFile.id);
+      if (!deleteFile) {
+        Logger.error(`LiltTranslateService#translateFile: !deleteFile`);
+      }
     }
   };
 
@@ -509,7 +502,7 @@ export class LiltTranslateService implements ITranslator {
       const res = await fetch(url, {
         method: 'GET',
       });
-      const liltLangsRes = await res.json();
+      const liltLangsRes: TResLangs = await res.json();
       const targetLangsObj = (liltLangsRes as TResLangs).source_to_target['en'];
       const targetLangsNames = (liltLangsRes as TResLangs).code_to_name;
       const languages: LanguageForBotTranslate[] = [];
@@ -539,13 +532,29 @@ export class LiltTranslateService implements ITranslator {
           });
         }
       }
-
+      const sourceToTarget: SourceTargetLangs[] = [];
+      for (const [sLang, tLangs] of Object.entries(
+        liltLangsRes.source_to_target,
+      )) {
+        if (!ourLangTags.includes(sLang)) continue;
+        const tLangsArray = Object.entries(tLangs).reduce(
+          (resArr, [tLangCode, isTrue]) => {
+            isTrue && ourLangTags.includes(tLangCode) && resArr.push(tLangCode);
+            return resArr;
+          },
+          [] as Array<string>,
+        );
+        sourceToTarget.push({
+          sourceLangCode: sLang,
+          targetLangCodes: tLangsArray,
+        });
+      }
       Logger.log(
         `filtered out lilt's languages: ${JSON.stringify(filteredOut)}`,
       );
-
       return {
         languages,
+        sourceToTarget,
         error: ErrorType.NoError,
       };
     } catch (error) {

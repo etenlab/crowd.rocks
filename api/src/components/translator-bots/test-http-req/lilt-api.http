@@ -1,22 +1,24 @@
 ### MEMORIES
+
+
+GET https://lilt.com/2/memories?key=374e6ccebcac920a894dd33374db253c
+Content-Type: application/json
+Accept: application/json
+
+### 
 POST https://lilt.com/2/memories?key=374e6ccebcac920a894dd33374db253c
 Content-Type: application/json
 Accept: application/json
 
 {
-  "name": "liltbot@crowd.rocks-en-uk",
-  "srclang": "en",
-  "trglang": "uk"
+  "name": "liltbot@crowd.rocks-pl-ru",
+  "srclang": "pl",
+  "trglang": "ru"
 }
 
 ###
-GET https://lilt.com/2/memories?key=374e6ccebcac920a894dd33374db253c
-Content-Type: application/json
-Accept: application/json
 
-
-###
-DELETE https://lilt.com/2/memories?key=374e6ccebcac920a894dd33374db253c&id=108877
+DELETE https://lilt.com/2/memories?key=374e6ccebcac920a894dd33374db253c&id=109167
 
 "{\"name\":\"liltbot@crowd.rocks-en-uk\",\"srclang\":\"en\",\"trglang\":\"uk\"}"
 
@@ -27,10 +29,11 @@ Content-Type: application/json
 Accept: application/json
 
 ###
-DELETE  https://lilt.com/2/files?key=374e6ccebcac920a894dd33374db253c&id=4684375
+DELETE  https://lilt.com/2/files?key=374e6ccebcac920a894dd33374db253c&id=4685042
 Content-Type: application/json
 Accept: application/json
 
 
 ### TRANSLATIONS
 GET https://lilt.com/2/translate/files?key=374e6ccebcac920a894dd33374db253c&id=2587089
+

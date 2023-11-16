@@ -4,6 +4,10 @@ import {
   Divider,
   Button,
   LinearProgress,
+  Select,
+  InputLabel,
+  MenuItem,
+  SelectChangeEvent,
 } from '@mui/material';
 
 import { useTr } from '../../../hooks/useTr';
@@ -14,13 +18,14 @@ import {
   ErrorType,
   TextyDocument,
   useBotTranslateDocumentMutation,
+  useSourceToTargetLanguagesForBotLazyQuery,
 } from '../../../generated/graphql';
 
 import { useAppContext } from '../../../hooks/useAppContext';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
-import { NavArrowRight } from '../../common/icons/NavArrowRight';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { langInfo2langInput } from '../../../../../utils';
+import { NavArrowRight } from '../../common/icons/NavArrowRight';
 
 type DocumentBotTranslateModalProps = {
   onClose(): void;
@@ -35,7 +40,7 @@ export function DocumentBotTranslateModal({
   const {
     states: {
       global: {
-        langauges: { targetLang },
+        langauges: { sourceLang, targetLang },
       },
     },
     actions: { setTargetLanguage },
@@ -45,6 +50,36 @@ export function DocumentBotTranslateModal({
     documentBotTranslate,
     { loading: translating, data: translatingData },
   ] = useBotTranslateDocumentMutation();
+  const [selectetdBot, setSelectedBot] = useState<BotType>();
+
+  const [enabledTags, setEnabledTags] = useState<string[]>();
+
+  const [sourceToTargetLanguagesForBot] =
+    useSourceToTargetLanguagesForBotLazyQuery();
+
+  const handleBotTypeChange = useCallback(
+    async (event: SelectChangeEvent) => {
+      const sttLangsQ = await sourceToTargetLanguagesForBot({
+        variables: {
+          botType: event.target.value as BotType,
+        },
+      });
+      if (!sttLangsQ.data?.languagesForBotTranslate.sourceToTarget) return;
+      setSelectedBot(event.target.value as BotType);
+
+      console.log(sourceLang);
+
+      const targetLangCodes =
+        sttLangsQ.data.languagesForBotTranslate.sourceToTarget.find(
+          (sttl) => sttl.sourceLangCode === sourceLang?.lang.tag,
+        )?.targetLangCodes;
+
+      console.log(sourceLang);
+
+      setEnabledTags(targetLangCodes);
+    },
+    [sourceLang, sourceToTargetLanguagesForBot],
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const possibleBots: Array<{ name: string; translateFn: () => any }> = useMemo(
@@ -69,28 +104,44 @@ export function DocumentBotTranslateModal({
   let content = tr('Click the button below to start translation.');
   let bottomCom = (
     <Stack gap="16px">
-      <LangSelector
-        title={tr('Select target language')}
-        selected={targetLang}
-        onChange={(_sourceLangTag, sourceLangInfo) => {
-          setTargetLanguage(sourceLangInfo);
-        }}
-        onClearClick={() => setTargetLanguage(null)}
-      />
-      {possibleBots.map((pbot) => (
+      <InputLabel id="tr-bot-select-label">Select translate bot</InputLabel>
+      <Select
+        labelId="tr-bot-select-label"
+        id="tr-bot-select"
+        value={selectetdBot}
+        onChange={handleBotTypeChange}
+      >
+        {possibleBots.map((pbot) => (
+          <MenuItem key={pbot.name} value={pbot.name}>
+            {pbot.name}
+          </MenuItem>
+        ))}
+      </Select>
+      {selectetdBot && (
+        <LangSelector
+          title={tr('Select target language')}
+          selected={targetLang}
+          onChange={(_sourceLangTag, sourceLangInfo) => {
+            setTargetLanguage(sourceLangInfo);
+          }}
+          enabledTags={enabledTags}
+          onClearClick={() => setTargetLanguage(null)}
+        />
+      )}
+      {selectetdBot && targetLang && (
         <Button
-          key={pbot.name}
           variant="contained"
           color="blue"
           startIcon={<NavArrowRight sx={{ fontSize: 24 }} />}
           fullWidth
           onClick={() => {
-            pbot.translateFn();
+            const bot = possibleBots.find((pb) => pb.name === selectetdBot);
+            bot && bot.translateFn();
           }}
         >
-          {pbot.name}
+          {tr('Start translation')}
         </Button>
-      ))}
+      )}
       <Button variant="contained" color="gray_stroke" onClick={onClose}>
         {tr('Cancel')}
       </Button>

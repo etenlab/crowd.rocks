@@ -466,6 +466,7 @@ input LanguageInput {
 type LanguageListForBotTranslateOutput {
   error: ErrorType!
   languages: [LanguageForBotTranslate!]
+  sourceToTarget: [SourceTargetLangs!]
 }
 
 type LanguageOutput {
@@ -1328,6 +1329,11 @@ type SiteTextWordDefinitionEdge {
 type SiteTextWordDefinitionOutput {
   error: ErrorType!
   site_text_word_definition: SiteTextWordDefinition
+}
+
+type SourceTargetLangs {
+  sourceLangCode: String!
+  targetLangCodes: [String!]!
 }
 
 input StartZipMapDownloadInput {
