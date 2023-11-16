@@ -564,7 +564,9 @@ var getLangsRegistry = /*#__PURE__*/function () {
         case 0:
           return _context.abrupt("return", new Promise(function (resolve) {
             var allTags = Tags.search(/.*/);
-            var langs = [].concat(X_LANG_TAGS);
+            var langs = enabledTags ? [].concat(X_LANG_TAGS).filter(function (xt) {
+              return enabledTags.includes(xt.tag);
+            }) : [].concat(X_LANG_TAGS);
             var dialects = [{
               tag: null,
               descriptions: [NOT_DEFINED_PLACEHOLDER]

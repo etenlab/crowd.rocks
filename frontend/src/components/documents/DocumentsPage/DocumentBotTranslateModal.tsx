@@ -149,8 +149,8 @@ export function DocumentBotTranslateModal({
   );
 
   if (translating) {
-    title = tr('Uploading document');
-    content = tr('Started document uploading... ');
+    title = tr('Translating document');
+    content = tr('Started document translating ... ');
     bottomCom = (
       <Stack gap="16px">
         <LinearProgress color="orange" />

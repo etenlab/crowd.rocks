@@ -160,7 +160,9 @@ export const getLangsRegistry = async (
 ): Promise<LangsRegistry> => {
   return new Promise((resolve) => {
     const allTags = Tags.search(/.*/);
-    const langs: Array<TLang> = [...X_LANG_TAGS];
+    const langs: Array<TLang> = enabledTags
+      ? [...X_LANG_TAGS].filter((xt) => enabledTags.includes(xt.tag))
+      : [...X_LANG_TAGS];
     const dialects: Array<TDialect> = [
       { tag: null, descriptions: [NOT_DEFINED_PLACEHOLDER] },
     ];
