@@ -1,6 +1,5 @@
 import { actions } from './non-persistent.action';
 import { type ActionType } from '.';
-import { RangeItem } from '../components/qa/QADocumentViewer/QADocumentViewer';
 
 export type GetAllSiteTextDefinitionsVariable = {
   filter: string;
@@ -37,14 +36,6 @@ export type GetAllDocumentsVariable = {
   };
 };
 
-export type NewQuestionFormPageData = {
-  sentence: string;
-  range: {
-    begin: RangeItem;
-    end: RangeItem;
-  };
-} | null;
-
 export interface StateType {
   paginationVariables: {
     getAllSiteTextDefinitions: Record<
@@ -56,9 +47,6 @@ export interface StateType {
     getThreadsLists: Record<string, GetThreadsListVariable>;
     getAllDocuments: Record<string, GetAllDocumentsVariable>;
   };
-  pageData: {
-    newQuestionForm: NewQuestionFormPageData;
-  };
 }
 
 export const initialState: StateType = {
@@ -68,9 +56,6 @@ export const initialState: StateType = {
     getForumFoldersLists: {},
     getThreadsLists: {},
     getAllDocuments: {},
-  },
-  pageData: {
-    newQuestionForm: null,
   },
 };
 
@@ -185,21 +170,6 @@ export function reducer(
             ...prevState.paginationVariables.getAllDocuments,
             [keyStr]: variable,
           },
-        },
-      };
-    }
-    case actions.SET_NEW_QUESTION_FORM_PAGE_DATA: {
-      return {
-        ...prevState,
-        pageData: {
-          ...prevState.pageData,
-          newQuestionForm: action.payload as {
-            sentence: string;
-            range: {
-              begin: RangeItem;
-              end: RangeItem;
-            };
-          } | null,
         },
       };
     }

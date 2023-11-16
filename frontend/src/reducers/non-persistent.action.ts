@@ -4,7 +4,6 @@ import {
   GetForumFoldersListVariable,
   GetThreadsListVariable,
   GetAllDocumentsVariable,
-  NewQuestionFormPageData,
 } from './non-persistent.reducer';
 
 export const actions = {
@@ -18,7 +17,6 @@ export const actions = {
     'ADD_PAGINATION_VARIABLE_FOR_GET_THREADS_LIST',
   ADD_PAGINATION_VARIABLE_FOR_GET_ALL_DOCUMENTS:
     'ADD_PAGINATION_VARIABLE_FOR_GET_ALL_DOCUMENTS',
-  SET_NEW_QUESTION_FORM_PAGE_DATA: 'SET_NEW_QUESTION_FORM_PAGE_DATA',
 };
 
 export function addPaginationVariableForGetAllSiteTextDefinitions(
@@ -63,12 +61,5 @@ export function addPaginationVariableForGetAllDocuments(
   return {
     type: actions.ADD_PAGINATION_VARIABLE_FOR_GET_ALL_DOCUMENTS,
     payload: variable,
-  };
-}
-
-export function setNewQuestionFormPageData(pageData: NewQuestionFormPageData) {
-  return {
-    type: actions.ADD_PAGINATION_VARIABLE_FOR_GET_ALL_DOCUMENTS,
-    payload: pageData,
   };
 }

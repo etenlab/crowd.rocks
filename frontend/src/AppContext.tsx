@@ -4,11 +4,11 @@ import { useIonToast } from '@ionic/react';
 import { reducer, loadPersistedStore } from './reducers/index';
 
 import { type StateType as GlobalStateType } from './reducers/global.reducer';
-import { type StateType as ComponentsStateType } from './reducers/components.reducer';
 import {
-  NewQuestionFormPageData,
-  type StateType as NonPersistentStateType,
-} from './reducers/non-persistent.reducer';
+  type StateType as ComponentsStateType,
+  type ModalMode,
+} from './reducers/components.reducer';
+import { type StateType as NonPersistentStateType } from './reducers/non-persistent.reducer';
 import {
   GetAllSiteTextDefinitionsVariable,
   GetForumsListVariable,
@@ -54,7 +54,7 @@ export interface ContextType {
     setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
     setUpdatedTrDefinitionIds: (definitionIds: Array<string>) => void;
     createModal(): {
-      openModal(component: ReactNode, mode?: 'standard' | 'full'): void;
+      openModal(component: ReactNode, mode?: ModalMode): void;
       closeModal(): void;
     };
     removeModal(id: string): void;
@@ -79,7 +79,6 @@ export interface ContextType {
     addPaginationVariableForGetAllDocuments(
       variable: GetAllDocumentsVariable,
     ): void;
-    setNewQuestionFormPageData(pageData: NewQuestionFormPageData): void;
   };
 }
 
@@ -132,7 +131,6 @@ export function AppContextProvider({ children }: AppProviderProps) {
     addPaginationVariableForGetForumFoldersList,
     addPaginationVariableForGetTheadsList,
     addPaginationVariableForGetAllDocuments,
-    setNewQuestionFormPageData,
   } = useNonPersistent({ dispatch });
 
   useEffect(() => {
@@ -382,7 +380,6 @@ export function AppContextProvider({ children }: AppProviderProps) {
       addPaginationVariableForGetTheadsList,
       addPaginationVariableForGetAllDocuments,
       setIonContentScrollElement,
-      setNewQuestionFormPageData,
     },
   };
 

@@ -6,7 +6,6 @@ import {
   addPaginationVariableForGetForumFoldersList as addPaginationVariableForGetForumFoldersListAction,
   addPaginationVariableForGetTheadsList as addPaginationVariableForGetTheadsListAction,
   addPaginationVariableForGetAllDocuments as addPaginationVariableForGetAllDocumentsAction,
-  setNewQuestionFormPageData as setNewQuestionFormPageDataAction,
 } from '../reducers/non-persistent.action';
 
 import { type ActionType } from '../reducers/index';
@@ -16,7 +15,6 @@ import {
   GetForumFoldersListVariable,
   GetThreadsListVariable,
   GetAllDocumentsVariable,
-  NewQuestionFormPageData,
 } from '../reducers/non-persistent.reducer';
 
 interface UseNonPersistentProps {
@@ -73,19 +71,11 @@ export function useNonPersistent({ dispatch }: UseNonPersistentProps) {
     [],
   );
 
-  const setNewQuestionFormPageData = useCallback(
-    (pageData: NewQuestionFormPageData) => {
-      dispatchRef.current.dispatch(setNewQuestionFormPageDataAction(pageData));
-    },
-    [],
-  );
-
   return {
     addPaginationVariableForGetAllSiteTextDefinitions,
     addPaginationVariableForGetForumsList,
     addPaginationVariableForGetForumFoldersList,
     addPaginationVariableForGetTheadsList,
     addPaginationVariableForGetAllDocuments,
-    setNewQuestionFormPageData,
   };
 }
