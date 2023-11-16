@@ -1,56 +1,61 @@
-import { IonButton } from '@ionic/react';
-import { chatbubbleEllipsesSharp } from 'ionicons/icons';
-import { useTr } from '../../../hooks/useTr';
-import { RowStack } from '../../common/Layout/styled';
+import { Stack } from '@mui/material';
 
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
+import { DiscussionIconButton } from '../../Discussion/DiscussionButton/DiscussionIconButton';
 
-import { StChatIcon } from '../../common/styled';
+import { TableNameType, PericopeWithVote } from '../../../generated/graphql';
+import { useTogglePericopeVoteStatusMutation } from '../../../hooks/useTogglePericopeVoteStatusMutation';
 
-type PericopeReaction = {
-  mode: 'view' | 'edit';
-  vote?: {
-    upVotes: number;
-    downVotes: number;
-    onVoteUpClick: () => void;
-    onVoteDownClick: () => void;
-  };
-  onClickAddPericope(): void;
-  onClickDiscussion?: () => void;
+type PericopeReactionProps = {
+  pericope: PericopeWithVote;
+  onClose(): void;
 };
 
-export function PericopeReaction({
-  mode,
-  vote,
-  onClickAddPericope,
-  onClickDiscussion,
-}: PericopeReaction) {
-  const { tr } = useTr();
+export function PericopeReaction({ pericope, onClose }: PericopeReactionProps) {
+  const [togglePericopeVoteStatus] = useTogglePericopeVoteStatusMutation();
 
-  if (mode === 'edit') {
-    return (
-      <IonButton fill="clear" onClick={onClickAddPericope}>
-        {tr('Add Pericope')}
-      </IonButton>
-    );
-  } else {
-    const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
+  const handleUpClick = () => {
+    togglePericopeVoteStatus({
+      variables: {
+        pericope_id: pericope.pericope_id,
+        vote: true,
+      },
+    });
+  };
 
-    const discussionCom = onClickDiscussion ? (
-      <StChatIcon
-        icon={chatbubbleEllipsesSharp}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClickDiscussion();
-        }}
+  const handleDownClick = () => {
+    togglePericopeVoteStatus({
+      variables: {
+        pericope_id: pericope.pericope_id,
+        vote: false,
+      },
+    });
+  };
+
+  return (
+    <Stack
+      direction="row"
+      gap="16px"
+      alignItems="center"
+      sx={(theme) => ({
+        padding: '10px',
+        border: `1px solid ${theme.palette.text.gray_stroke}`,
+        borderRadius: '6px',
+        backgroundColor: theme.palette.background.white,
+      })}
+    >
+      <VoteButtonsHorizontal
+        upVotes={pericope.upvotes}
+        downVotes={pericope.downvotes}
+        onVoteDownClick={handleDownClick}
+        onVoteUpClick={handleUpClick}
       />
-    ) : null;
-
-    return (
-      <RowStack>
-        {voteButtonCom}
-        {discussionCom}
-      </RowStack>
-    );
-  }
+      <DiscussionIconButton
+        parent_id={pericope.pericope_id}
+        parent_table={TableNameType.Pericopies}
+        flex="1"
+        onClick={onClose}
+      />
+    </Stack>
+  );
 }

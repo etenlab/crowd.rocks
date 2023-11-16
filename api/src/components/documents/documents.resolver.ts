@@ -103,7 +103,7 @@ export class DocumentsResolver {
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
   ): Promise<DocumentWordEntriesListConnection> {
     Logger.log(
-      'getDocument',
+      'getDocumentWordEntriesByDocumentId',
       JSON.stringify({ document_id, first, after }, null, 2),
     );
 
@@ -142,10 +142,11 @@ export class DocumentsResolver {
   @Query(() => WordRangesOutput)
   async getWordRangesByDocumentId(
     @Args('document_id', { type: () => ID }) document_id: string,
+    @Args('page', { type: () => Int, nullable: true }) page: number | null,
   ): Promise<WordRangesOutput> {
-    Logger.log('getWordRangesByDocumentId, id:', document_id);
+    Logger.log('getWordRangesByDocumentId:', { document_id, page });
 
-    return this.wordRangesService.getByDocumentId(+document_id, null);
+    return this.wordRangesService.getByDocumentId(+document_id, page, null);
   }
 
   @Mutation(() => WordRangesOutput)

@@ -1,25 +1,26 @@
-import { useMemo, useState, useCallback, useRef, ReactNode } from 'react';
-import { useHistory, useParams } from 'react-router';
 import {
-  IonPopover,
-  // useIonToast,
-  // useIonLoading,
-} from '@ionic/react';
+  useMemo,
+  useState,
+  useCallback,
+  ReactNode,
+  MouseEvent,
+  useEffect,
+  useRef,
+} from 'react';
+import { Popover } from '@mui/material';
 
 import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
 import { Dot } from '../../documents/DocumentViewer/styled';
 import { DocumentViewer } from '../../documents/DocumentViewer';
 import { PericopeReaction } from './PericopeReaction';
+import { PericopeAddButton } from './PericopeAddButton';
+
+import { TempPage } from '../../documents/DocumentViewer/DocumentViewer';
 
 import {
   useGetPericopiesByDocumentIdQuery,
-  useGetPericopeVoteStatusLazyQuery,
-  Pericope,
-  ErrorType,
-  TableNameType,
+  PericopeWithVote,
 } from '../../../generated/graphql';
-import { useTogglePericopeVoteStatusMutation } from '../../../hooks/useTogglePericopeVoteStatusMutation';
-import { useUpsertPericopeMutation } from '../../../hooks/useUpsertPericopeMutation';
 
 type PericopeDocumentViewerProps = {
   documentId: string;
@@ -30,44 +31,53 @@ export function PericopeDocumentViewer({
   documentId,
   mode,
 }: PericopeDocumentViewerProps) {
-  const history = useHistory();
-  const { nation_id, language_id, cluster_id } = useParams<{
-    nation_id: string;
-    language_id: string;
-    cluster_id: string;
-  }>();
-
-  const { data, error } = useGetPericopiesByDocumentIdQuery({
+  const { data, fetchMore } = useGetPericopiesByDocumentIdQuery({
     variables: {
       document_id: documentId,
+      first: 1,
+      after: null,
     },
   });
-  const [
-    getPericopeVoteStatus,
-    { data: voteStatusData, error: voteStatusError },
-  ] = useGetPericopeVoteStatusLazyQuery();
-  const [togglePericopeVoteStatus] = useTogglePericopeVoteStatusMutation();
-  const [upsertPericope] = useUpsertPericopeMutation(documentId);
 
-  const popoverRef = useRef<HTMLIonPopoverElement>(null);
-
-  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedWordEntryId, setSelectedWordEntryId] = useState<string | null>(
     null,
   );
+  const [requiredPage, setRequiredPage] = useState<TempPage | null>(null);
+  const pericopesMapRef = useRef(new Map<string, PericopeWithVote>());
 
-  const { dots, pericopiesMap } = useMemo(() => {
-    const pericopiesMap = new Map<string, Pericope>();
+  useEffect(() => {
+    if (!requiredPage) {
+      return;
+    }
 
-    if (
-      error ||
-      !data ||
-      data.getPericopiesByDocumentId.error !== ErrorType.NoError
-    ) {
-      return {
-        dots: [],
-        pericopiesMap,
-      };
+    const timer = setTimeout(() => {
+      fetchMore({
+        variables: {
+          document_id: documentId,
+          first: requiredPage.first,
+          after: requiredPage.after + '',
+        },
+      });
+    }, 1000);
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [requiredPage, fetchMore, documentId]);
+
+  const dots = useMemo(() => {
+    if (data) {
+      data.getPericopiesByDocumentId.edges.forEach((edge) => {
+        edge.node.forEach((pericopeWithVote) => {
+          pericopesMapRef.current.set(
+            pericopeWithVote.start_word,
+            pericopeWithVote,
+          );
+        });
+      });
     }
 
     const dots: {
@@ -75,130 +85,43 @@ export function PericopeDocumentViewer({
       component?: ReactNode;
     }[] = [];
 
-    data.getPericopiesByDocumentId.pericopies.forEach((pericope) => {
-      if (!pericope) {
-        return;
+    for (const pericopeWithVote of pericopesMapRef.current.values()) {
+      let dotColor = 'blue';
+
+      if (pericopeWithVote.upvotes > pericopeWithVote.downvotes) {
+        dotColor = 'green';
+      } else if (pericopeWithVote.upvotes < pericopeWithVote.downvotes) {
+        dotColor = 'red';
       }
 
       dots.push({
-        entryId: pericope.start_word,
-        component: <Dot />,
+        entryId: pericopeWithVote.start_word,
+        component: (
+          <Dot
+            sx={{
+              backgroundColor: (theme) =>
+                theme.palette.background[
+                  dotColor as keyof typeof theme.palette.background
+                ],
+            }}
+          />
+        ),
       });
-      pericopiesMap.set(pericope.start_word, pericope);
-    });
+    }
 
-    return { dots, pericopiesMap };
-  }, [data, error]);
+    return dots;
+  }, [data]);
 
   const handleWordClick = useCallback(
-    (entryId: string, _index: number, e?: unknown) => {
-      const pericope = pericopiesMap.get(entryId);
-
-      if (mode === 'edit' && pericope) {
-        return;
-      }
-
+    (entryId: string, _index: number, event: MouseEvent<HTMLElement>) => {
       setSelectedWordEntryId(entryId);
-
-      if (mode === 'view') {
-        if (pericope) {
-          getPericopeVoteStatus({
-            variables: {
-              pericope_id: pericope.pericope_id,
-            },
-          });
-        }
-      }
-
-      popoverRef.current!.event = e;
-      setPopoverOpen(true);
+      setAnchorEl(event.currentTarget);
     },
-    [getPericopeVoteStatus, mode, pericopiesMap],
+    [],
   );
 
-  const vote = useMemo(() => {
-    if (!selectedWordEntryId) {
-      return null;
-    }
-
-    const pericope = pericopiesMap.get(selectedWordEntryId) || null;
-
-    if (
-      voteStatusError ||
-      !voteStatusData ||
-      voteStatusData.getPericopeVoteStatus.error !== ErrorType.NoError ||
-      !voteStatusData.getPericopeVoteStatus.vote_status ||
-      !pericope
-    ) {
-      return null;
-    }
-
-    const voteStatus = voteStatusData.getPericopeVoteStatus.vote_status;
-
-    if (pericope.pericope_id !== voteStatus.pericope_id) {
-      return null;
-    }
-
-    const handleUpClick = () => {
-      togglePericopeVoteStatus({
-        variables: {
-          pericope_id: voteStatus.pericope_id,
-          vote: true,
-        },
-      });
-    };
-
-    const handleDownClick = () => {
-      togglePericopeVoteStatus({
-        variables: {
-          pericope_id: voteStatus.pericope_id,
-          vote: false,
-        },
-      });
-    };
-
-    return {
-      upVotes: voteStatus.upvotes,
-      downVotes: voteStatus.downvotes,
-      onVoteUpClick: handleUpClick,
-      onVoteDownClick: handleDownClick,
-    };
-  }, [
-    selectedWordEntryId,
-    pericopiesMap,
-    voteStatusError,
-    voteStatusData,
-    togglePericopeVoteStatus,
-  ]);
-
-  const handleAddPericope = () => {
-    if (!selectedWordEntryId) {
-      return;
-    }
-
-    if (mode === 'edit') {
-      upsertPericope({
-        variables: {
-          startWord: selectedWordEntryId,
-        },
-      });
-    }
-  };
-
-  const handleClickDiscussion = () => {
-    if (!selectedWordEntryId) {
-      return;
-    }
-
-    const pericope = pericopiesMap.get(selectedWordEntryId) || null;
-
-    if (!pericope) {
-      return;
-    }
-
-    history.push(
-      `/${nation_id}/${language_id}/${cluster_id}/discussion/${TableNameType.Pericopies}/${pericope.pericope_id}`,
-    );
+  const handleLoadPage = (page: TempPage) => {
+    setRequiredPage(page);
   };
 
   const documentRange = useMemo(
@@ -209,6 +132,17 @@ export function PericopeDocumentViewer({
     [selectedWordEntryId],
   );
 
+  const handleClose = () => {
+    setAnchorEl(null);
+    setSelectedWordEntryId(null);
+  };
+
+  const open = Boolean(anchorEl);
+
+  const selectedPericope = selectedWordEntryId
+    ? pericopesMapRef.current.get(selectedWordEntryId) || null
+    : null;
+
   return (
     <>
       <DocumentViewer
@@ -218,21 +152,38 @@ export function PericopeDocumentViewer({
         dots={dots}
         onChangeRange={() => {}}
         onClickWord={handleWordClick}
+        onLoadPage={handleLoadPage}
       />
 
-      <IonPopover
-        ref={popoverRef}
-        isOpen={popoverOpen}
-        onDidDismiss={() => setPopoverOpen(false)}
-        style={{ '--width': '150px' }}
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        sx={{
+          '& .MuiPopover-paper': {
+            marginTop: '2px',
+            borderRadius: '6px',
+          },
+        }}
       >
-        <PericopeReaction
-          mode={mode}
-          vote={vote || undefined}
-          onClickAddPericope={handleAddPericope}
-          onClickDiscussion={handleClickDiscussion}
-        />
-      </IonPopover>
+        {mode === 'view' && selectedPericope ? (
+          <PericopeReaction pericope={selectedPericope} onClose={handleClose} />
+        ) : null}
+        {mode === 'edit' && selectedWordEntryId ? (
+          <PericopeAddButton
+            wordEntryId={selectedWordEntryId}
+            onClose={handleClose}
+          />
+        ) : null}
+      </Popover>
     </>
   );
 }

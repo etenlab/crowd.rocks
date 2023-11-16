@@ -141,13 +141,14 @@ export class WordRangesService {
 
   async getByDocumentId(
     document_id: number,
+    page: number | null,
     pgClient: PoolClient | null,
   ): Promise<WordRangesOutput> {
     try {
       const res = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
-      }).query<GetWordRangeRow>(...getWordRangeByDocumentId(document_id));
+      }).query<GetWordRangeRow>(...getWordRangeByDocumentId(document_id, page));
 
       return this.convertQueryResultToWordRange(res.rows, pgClient);
     } catch (e) {

@@ -215,16 +215,6 @@ export async function setTranslationsVotes(
     if (fromTypeIsWord) {
       if (toTypeIsWord) {
         // call word to word procedure
-        console.log('-------------');
-        console.log('calling w2w');
-        console.log(translationIds);
-        // console.log(
-        //   ...callWordToWordTranslationVoteSetProcedure({
-        //     translationIds,
-        //     token,
-        //     vote,
-        //   }),
-        // );
         await pgClient.query(
           ...callWordToWordTranslationVoteSetProcedure({
             translationIds,
@@ -233,17 +223,7 @@ export async function setTranslationsVotes(
           }),
         );
       } else {
-        // call word to phrase reset procedure
-        console.log('-------------');
-        console.log('calling w2p');
-        console.log(translationIds);
-        // console.log(
-        //   ...callWordToPhraseTranslationVoteSetProcedure({
-        //     translationIds,
-        //     token,
-        //     vote,
-        //   }),
-        // );
+        // call word to phrase set procedure
         await pgClient.query(
           ...callWordToPhraseTranslationVoteSetProcedure({
             translationIds,
@@ -254,17 +234,6 @@ export async function setTranslationsVotes(
       }
     } else {
       if (toTypeIsWord) {
-        // phrase to word reset procedure
-        console.log('-------------');
-        console.log('calling p2w');
-        console.log(translationIds);
-        // console.log(
-        //   ...callPhraseToWordTranslationVoteSetProcedure({
-        //     translationIds,
-        //     token,
-        //     vote,
-        //   }),
-        // );
         await pgClient.query(
           ...callPhraseToWordTranslationVoteSetProcedure({
             translationIds,
@@ -273,17 +242,6 @@ export async function setTranslationsVotes(
           }),
         );
       } else {
-        // phrase to phrase reset
-        console.log('-------------');
-        console.log('calling p2p');
-        console.log(translationIds);
-        // console.log(
-        //   ...callPhraseToPhraseTranslationVoteSetProcedure({
-        //     translationIds,
-        //     token,
-        //     vote,
-        //   }),
-        // );
         await pgClient.query(
           ...callPhraseToPhraseTranslationVoteSetProcedure({
             translationIds,
