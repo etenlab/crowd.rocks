@@ -163,7 +163,7 @@ export class FileService {
         token,
       });
     } catch (err) {
-      Logger.log('File upload failed', err);
+      Logger.log(`File upload failed. #file_name[${fileName}]`, err);
       return { error: ErrorType.FileUpdateFailed, file: null };
     }
   }
