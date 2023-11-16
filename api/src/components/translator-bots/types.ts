@@ -24,6 +24,12 @@ export interface ITranslator {
     token: string;
   }>;
   getLanguages(): Promise<LanguageListForBotTranslateOutput>;
+  translateFileString?: (
+    fileString: string,
+    fileName: string,
+    fromLang: LanguageInput,
+    toLang: LanguageInput,
+  ) => Promise<GenericOutput>;
 }
 
 export interface IGPTTranslator extends ITranslator {
@@ -46,9 +52,17 @@ export class LanguageForBotTranslate {
 }
 
 @ObjectType()
+export class SourceTargetLangs {
+  @Field(() => String) sourceLangCode: string;
+  @Field(() => [String]) targetLangCodes: string[];
+}
+
+@ObjectType()
 export class LanguageListForBotTranslateOutput extends GenericOutput {
   @Field(() => [LanguageForBotTranslate], { nullable: true })
   languages: LanguageForBotTranslate[] | null;
+  @Field(() => [SourceTargetLangs], { nullable: true })
+  sourceToTarget?: SourceTargetLangs[] | null;
 }
 
 @InputType()
@@ -100,4 +114,11 @@ export class TranslateAllWordsAndPhrasesByBotOutput extends GenericOutput {
 @InputType()
 export class ChatGPTVersionInput {
   @Field(() => String) version: ChatGPTVersion;
+}
+
+@InputType()
+export class BotTranslateDocumentInput {
+  @Field(() => BotType) botType: BotType;
+  @Field(() => String) documentId: string;
+  @Field(() => LanguageInput) targetLang: LanguageInput;
 }

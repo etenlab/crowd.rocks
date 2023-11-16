@@ -64,6 +64,12 @@ export type AvatarUpdateOutput = {
   user?: Maybe<User>;
 };
 
+export type BotTranslateDocumentInput = {
+  botType: BotType;
+  documentId: Scalars['String']['input'];
+  targetLang: LanguageInput;
+};
+
 export enum BotType {
   DeepL = 'DeepL',
   Gpt4 = 'GPT4',
@@ -180,6 +186,8 @@ export enum ErrorType {
   CandidateNotFound = 'CandidateNotFound',
   CandidateNotFoundInBallot = 'CandidateNotFoundInBallot',
   DocumentEntryReadError = 'DocumentEntryReadError',
+  DocumentFileIdNotProvided = 'DocumentFileIdNotProvided',
+  DocumentFileReadError = 'DocumentFileReadError',
   DocumentIdNotProvided = 'DocumentIdNotProvided',
   DocumentNotFound = 'DocumentNotFound',
   DocumentWordEntryAlreadyExists = 'DocumentWordEntryAlreadyExists',
@@ -194,7 +202,9 @@ export enum ErrorType {
   EmailUnavailable = 'EmailUnavailable',
   FileDeleteFailed = 'FileDeleteFailed',
   FileNotExists = 'FileNotExists',
+  FileRecordNotFound = 'FileRecordNotFound',
   FileSaveFailed = 'FileSaveFailed',
+  FileUpdateFailed = 'FileUpdateFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
   FolderForThreadNotExists = 'FolderForThreadNotExists',
   FolderIdNotDefined = 'FolderIdNotDefined',
@@ -507,6 +517,7 @@ export type LanguageListForBotTranslateOutput = {
   __typename?: 'LanguageListForBotTranslateOutput';
   error: ErrorType;
   languages?: Maybe<Array<LanguageForBotTranslate>>;
+  sourceToTarget?: Maybe<Array<SourceTargetLangs>>;
 };
 
 export type LanguageOutput = {
@@ -680,6 +691,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   addNotification: AddNotificationOutput;
   avatarUpdateResolver: AvatarUpdateOutput;
+  botTranslateDocument: GenericOutput;
   createQuestionOnWordRange: QuestionOnWordRangesOutput;
   documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
@@ -772,6 +784,11 @@ export type MutationAddNotificationArgs = {
 
 export type MutationAvatarUpdateResolverArgs = {
   input: AvatarUpdateInput;
+};
+
+
+export type MutationBotTranslateDocumentArgs = {
+  input: BotTranslateDocumentInput;
 };
 
 
@@ -2359,6 +2376,12 @@ export type SiteTextWordDefinitionOutput = {
   site_text_word_definition?: Maybe<SiteTextWordDefinition>;
 };
 
+export type SourceTargetLangs = {
+  __typename?: 'SourceTargetLangs';
+  sourceLangCode: Scalars['String']['output'];
+  targetLangCodes: Array<Scalars['String']['output']>;
+};
+
 export type StartZipMapDownloadInput = {
   language: LanguageInput;
 };
@@ -3132,6 +3155,15 @@ export type UpsertWordRangeMutationVariables = Exact<{
 
 export type UpsertWordRangeMutation = { __typename?: 'Mutation', upsertWordRanges: { __typename?: 'WordRangesOutput', error: ErrorType, word_ranges: Array<{ __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
 
+export type BotTranslateDocumentMutationVariables = Exact<{
+  botType: BotType;
+  documentId: Scalars['String']['input'];
+  targetLang: LanguageInput;
+}>;
+
+
+export type BotTranslateDocumentMutation = { __typename?: 'Mutation', botTranslateDocument: { __typename?: 'GenericOutput', error: ErrorType } };
+
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
 }>;
@@ -3855,6 +3887,13 @@ export type LanguagesForBotTranslateQueryVariables = Exact<{
 
 
 export type LanguagesForBotTranslateQuery = { __typename?: 'Query', languagesForBotTranslate: { __typename?: 'LanguageListForBotTranslateOutput', error: ErrorType, languages?: Array<{ __typename?: 'LanguageForBotTranslate', code: string, name: string }> | null } };
+
+export type SourceToTargetLanguagesForBotQueryVariables = Exact<{
+  botType: BotType;
+}>;
+
+
+export type SourceToTargetLanguagesForBotQuery = { __typename?: 'Query', languagesForBotTranslate: { __typename?: 'LanguageListForBotTranslateOutput', error: ErrorType, sourceToTarget?: Array<{ __typename?: 'SourceTargetLangs', sourceLangCode: string, targetLangCodes: Array<string> }> | null } };
 
 export type TranslateWordsAndPhrasesByGoogleMutationVariables = Exact<{
   from_language_code: Scalars['String']['input'];
@@ -5824,6 +5863,43 @@ export function useUpsertWordRangeMutation(baseOptions?: Apollo.MutationHookOpti
 export type UpsertWordRangeMutationHookResult = ReturnType<typeof useUpsertWordRangeMutation>;
 export type UpsertWordRangeMutationResult = Apollo.MutationResult<UpsertWordRangeMutation>;
 export type UpsertWordRangeMutationOptions = Apollo.BaseMutationOptions<UpsertWordRangeMutation, UpsertWordRangeMutationVariables>;
+export const BotTranslateDocumentDocument = gql`
+    mutation BotTranslateDocument($botType: BotType!, $documentId: String!, $targetLang: LanguageInput!) {
+  botTranslateDocument(
+    input: {botType: $botType, documentId: $documentId, targetLang: $targetLang}
+  ) {
+    error
+  }
+}
+    `;
+export type BotTranslateDocumentMutationFn = Apollo.MutationFunction<BotTranslateDocumentMutation, BotTranslateDocumentMutationVariables>;
+
+/**
+ * __useBotTranslateDocumentMutation__
+ *
+ * To run a mutation, you first call `useBotTranslateDocumentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useBotTranslateDocumentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [botTranslateDocumentMutation, { data, loading, error }] = useBotTranslateDocumentMutation({
+ *   variables: {
+ *      botType: // value for 'botType'
+ *      documentId: // value for 'documentId'
+ *      targetLang: // value for 'targetLang'
+ *   },
+ * });
+ */
+export function useBotTranslateDocumentMutation(baseOptions?: Apollo.MutationHookOptions<BotTranslateDocumentMutation, BotTranslateDocumentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<BotTranslateDocumentMutation, BotTranslateDocumentMutationVariables>(BotTranslateDocumentDocument, options);
+      }
+export type BotTranslateDocumentMutationHookResult = ReturnType<typeof useBotTranslateDocumentMutation>;
+export type BotTranslateDocumentMutationResult = Apollo.MutationResult<BotTranslateDocumentMutation>;
+export type BotTranslateDocumentMutationOptions = Apollo.BaseMutationOptions<BotTranslateDocumentMutation, BotTranslateDocumentMutationVariables>;
 export const EmailResponseDocument = gql`
     mutation EmailResponse($token: String!) {
   emailResponseResolver(input: {token: $token}) {
@@ -8813,6 +8889,45 @@ export function useLanguagesForBotTranslateLazyQuery(baseOptions?: Apollo.LazyQu
 export type LanguagesForBotTranslateQueryHookResult = ReturnType<typeof useLanguagesForBotTranslateQuery>;
 export type LanguagesForBotTranslateLazyQueryHookResult = ReturnType<typeof useLanguagesForBotTranslateLazyQuery>;
 export type LanguagesForBotTranslateQueryResult = Apollo.QueryResult<LanguagesForBotTranslateQuery, LanguagesForBotTranslateQueryVariables>;
+export const SourceToTargetLanguagesForBotDocument = gql`
+    query SourceToTargetLanguagesForBot($botType: BotType!) {
+  languagesForBotTranslate(botType: $botType) {
+    error
+    sourceToTarget {
+      sourceLangCode
+      targetLangCodes
+    }
+  }
+}
+    `;
+
+/**
+ * __useSourceToTargetLanguagesForBotQuery__
+ *
+ * To run a query within a React component, call `useSourceToTargetLanguagesForBotQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSourceToTargetLanguagesForBotQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSourceToTargetLanguagesForBotQuery({
+ *   variables: {
+ *      botType: // value for 'botType'
+ *   },
+ * });
+ */
+export function useSourceToTargetLanguagesForBotQuery(baseOptions: Apollo.QueryHookOptions<SourceToTargetLanguagesForBotQuery, SourceToTargetLanguagesForBotQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SourceToTargetLanguagesForBotQuery, SourceToTargetLanguagesForBotQueryVariables>(SourceToTargetLanguagesForBotDocument, options);
+      }
+export function useSourceToTargetLanguagesForBotLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SourceToTargetLanguagesForBotQuery, SourceToTargetLanguagesForBotQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SourceToTargetLanguagesForBotQuery, SourceToTargetLanguagesForBotQueryVariables>(SourceToTargetLanguagesForBotDocument, options);
+        }
+export type SourceToTargetLanguagesForBotQueryHookResult = ReturnType<typeof useSourceToTargetLanguagesForBotQuery>;
+export type SourceToTargetLanguagesForBotLazyQueryHookResult = ReturnType<typeof useSourceToTargetLanguagesForBotLazyQuery>;
+export type SourceToTargetLanguagesForBotQueryResult = Apollo.QueryResult<SourceToTargetLanguagesForBotQuery, SourceToTargetLanguagesForBotQueryVariables>;
 export const TranslateWordsAndPhrasesByGoogleDocument = gql`
     mutation TranslateWordsAndPhrasesByGoogle($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String, $to_language_code: String!, $to_dialect_code: String, $to_geo_code: String) {
   translateWordsAndPhrasesByGoogle(
@@ -9987,6 +10102,7 @@ export const namedOperations = {
     GetRecommendedTranslationFromDefinitionID: 'GetRecommendedTranslationFromDefinitionID',
     GetRecommendedTranslationFromDefinitionIDs: 'GetRecommendedTranslationFromDefinitionIDs',
     LanguagesForBotTranslate: 'LanguagesForBotTranslate',
+    SourceToTargetLanguagesForBot: 'SourceToTargetLanguagesForBot',
     UserRead: 'UserRead',
     GetFileUploadUrl: 'GetFileUploadUrl'
   },
@@ -10005,6 +10121,7 @@ export const namedOperations = {
     WordUpsert: 'WordUpsert',
     DocumentUpload: 'DocumentUpload',
     UpsertWordRange: 'UpsertWordRange',
+    BotTranslateDocument: 'BotTranslateDocument',
     EmailResponse: 'EmailResponse',
     UploadFile: 'UploadFile',
     ToggleFlagWithRef: 'ToggleFlagWithRef',

@@ -22,13 +22,14 @@ import {
   TranslateAllWordsAndPhrasesByBotOutput,
   TranslateAllWordsAndPhrasesByBotResult,
   ChatGPTVersion,
+  BotTranslateDocumentInput,
 } from './types';
 
 @Injectable()
 @Resolver()
 export class BotsResolver {
   constructor(
-    private aiTranslations: AiTranslationsService,
+    private aiTranslationsService: AiTranslationsService,
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
@@ -37,7 +38,7 @@ export class BotsResolver {
     @Args('botType', { type: () => BotType }) botType,
   ): Promise<LanguageListForBotTranslateOutput> {
     console.log('languagesForBotTranslate resolver');
-    return this.aiTranslations.languagesForBotTranslate(botType);
+    return this.aiTranslationsService.languagesForBotTranslate(botType);
   }
 
   @Query(() => TranslatedLanguageInfoOutput)
@@ -48,7 +49,7 @@ export class BotsResolver {
     console.log(
       `getLanguageTranslationInfo resolver fromLang: ${input.fromLanguageCode} toLang: ${input.toLanguageCode}`,
     );
-    return this.aiTranslations.getTranslationLanguageInfo(input, null);
+    return this.aiTranslationsService.getTranslationLanguageInfo(input, null);
   }
 
   @IsAuthAdmin()
@@ -67,7 +68,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateWordsAndPhrasesByGoogle(
+    return this.aiTranslationsService.translateWordsAndPhrasesByGoogle(
       from_language,
       to_language,
       null,
@@ -83,7 +84,7 @@ export class BotsResolver {
     to_language: LanguageInput,
     @Context() req: any,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
-    return this.aiTranslations.translateWordsAndPhrasesByChatGPT35(
+    return this.aiTranslationsService.translateWordsAndPhrasesByChatGPT35(
       from_language,
       to_language,
       getBearer(req) || '',
@@ -100,7 +101,7 @@ export class BotsResolver {
     to_language: LanguageInput,
     @Context() req: any,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
-    return this.aiTranslations.translateWordsAndPhrasesByChatGPT4(
+    return this.aiTranslationsService.translateWordsAndPhrasesByChatGPT4(
       from_language,
       to_language,
       getBearer(req) || '',
@@ -124,7 +125,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateWordsAndPhrasesByLilt(
+    return this.aiTranslationsService.translateWordsAndPhrasesByLilt(
       from_language,
       to_language,
       null,
@@ -148,7 +149,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateMissingWordsAndPhrasesByLilt(
+    return this.aiTranslationsService.translateMissingWordsAndPhrasesByLilt(
       from_language,
       to_language,
       getBearer(req) || '',
@@ -172,7 +173,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateWordsAndPhrasesBySmartcat(
+    return this.aiTranslationsService.translateWordsAndPhrasesBySmartcat(
       from_language,
       to_language,
       null,
@@ -195,7 +196,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateWordsAndPhrasesByDeepL(
+    return this.aiTranslationsService.translateWordsAndPhrasesByDeepL(
       from_language,
       to_language,
       null,
@@ -219,7 +220,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateMissingWordsAndPhrasesByGoogle(
+    return this.aiTranslationsService.translateMissingWordsAndPhrasesByGoogle(
       from_language,
       to_language,
       getBearer(req) || '',
@@ -244,7 +245,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateMissingWordsAndPhrasesByDeepL(
+    return this.aiTranslationsService.translateMissingWordsAndPhrasesByDeepL(
       from_language,
       to_language,
       getBearer(req) || '',
@@ -266,7 +267,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateAllWordsAndPhrasesByDeepL(
+    return this.aiTranslationsService.translateAllWordsAndPhrasesByDeepL(
       from_language,
       getBearer(req) || '',
       null,
@@ -293,7 +294,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateMissingWordsAndPhrasesByGpt35(
+    return this.aiTranslationsService.translateMissingWordsAndPhrasesByGpt35(
       from_language,
       to_language,
       getBearer(req) || '',
@@ -316,7 +317,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateWordsAndPhrasesToAllLangsByGoogle(
+    return this.aiTranslationsService.translateWordsAndPhrasesToAllLangsByGoogle(
       from_language,
       getBearer(req) || '',
       null,
@@ -337,7 +338,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateWordsAndPhrasesToAllLangsByLilt(
+    return this.aiTranslationsService.translateWordsAndPhrasesToAllLangsByLilt(
       from_language,
       getBearer(req) || '',
       null,
@@ -358,7 +359,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateWordsAndPhrasesToAllLangsBySmartcat(
+    return this.aiTranslationsService.translateWordsAndPhrasesToAllLangsBySmartcat(
       from_language,
       getBearer(req) || '',
       null,
@@ -382,7 +383,7 @@ export class BotsResolver {
       }),
     );
 
-    return this.aiTranslations.translateMissingWordsAndPhrasesBySmartcat(
+    return this.aiTranslationsService.translateMissingWordsAndPhrasesBySmartcat(
       from_language,
       to_language,
       getBearer(req) || '',
@@ -394,7 +395,7 @@ export class BotsResolver {
   @Mutation(() => GenericOutput)
   async stopBotTranslation(): Promise<GenericOutput> {
     console.log('stopBotTranslation');
-    return this.aiTranslations.stopBotTranslation();
+    return this.aiTranslationsService.stopBotTranslation();
   }
 
   @Subscription(() => TranslateAllWordsAndPhrasesByBotResult, {
@@ -403,5 +404,14 @@ export class BotsResolver {
   async subscribeToTranslationReport() {
     console.log('subscribeToTranslationReport');
     return this.pubSub.asyncIterator(SubscriptionToken.TranslationReport);
+  }
+
+  @IsAuthAdmin()
+  @Mutation(() => GenericOutput)
+  async botTranslateDocument(
+    @Args('input', { type: () => BotTranslateDocumentInput })
+    input: BotTranslateDocumentInput,
+  ): Promise<GenericOutput> {
+    return this.aiTranslationsService.botTranslateDocument(input);
   }
 }

@@ -41,6 +41,12 @@ type AvatarUpdateOutput {
   user: User
 }
 
+input BotTranslateDocumentInput {
+  botType: BotType!
+  documentId: String!
+  targetLang: LanguageInput!
+}
+
 enum BotType {
   DeepL
   GPT4
@@ -152,6 +158,8 @@ enum ErrorType {
   CandidateNotFound
   CandidateNotFoundInBallot
   DocumentEntryReadError
+  DocumentFileIdNotProvided
+  DocumentFileReadError
   DocumentIdNotProvided
   DocumentNotFound
   DocumentWordEntryAlreadyExists
@@ -166,7 +174,9 @@ enum ErrorType {
   EmailUnavailable
   FileDeleteFailed
   FileNotExists
+  FileRecordNotFound
   FileSaveFailed
+  FileUpdateFailed
   FileWithFilenameAlreadyExists
   FolderForThreadNotExists
   FolderIdNotDefined
@@ -456,6 +466,7 @@ input LanguageInput {
 type LanguageListForBotTranslateOutput {
   error: ErrorType!
   languages: [LanguageForBotTranslate!]
+  sourceToTarget: [SourceTargetLangs!]
 }
 
 type LanguageOutput {
@@ -609,6 +620,7 @@ type MarkNotificationReadOutput {
 type Mutation {
   addNotification(input: AddNotificationInput!): AddNotificationOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
+  botTranslateDocument(input: BotTranslateDocumentInput!): GenericOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
@@ -1328,6 +1340,11 @@ type SiteTextWordDefinitionEdge {
 type SiteTextWordDefinitionOutput {
   error: ErrorType!
   site_text_word_definition: SiteTextWordDefinition
+}
+
+type SourceTargetLangs {
+  sourceLangCode: String!
+  targetLangCodes: [String!]!
 }
 
 input StartZipMapDownloadInput {

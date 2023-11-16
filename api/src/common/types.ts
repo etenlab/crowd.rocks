@@ -36,7 +36,9 @@ export enum ErrorType {
   ForumDeleteFailed = 'ForumDeleteFailed',
 
   FileNotExists = 'FileNotExists',
+  FileRecordNotFound = 'FileRecordNotFound',
   FileSaveFailed = 'FileSaveFailed',
+  FileUpdateFailed = 'FileUpdateFailed',
   FileDeleteFailed = 'FileDeleteFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
   FolderIdNotDefined = 'FolderIdNotDefined',
@@ -115,9 +117,6 @@ export enum ErrorType {
   MapZippingError = 'MapZippingError',
   MapWordsAndPhrasesSearchError = 'MapWordsAndPhrasesSearchError',
 
-  DocumentIdNotProvided = 'DocumentIdNotProvided',
-  DocumentNotFound = 'DocumentNotFound',
-
   PostNotFound = 'PostNotFound',
 
   Unauthorized = 'Unauthorized',
@@ -125,6 +124,10 @@ export enum ErrorType {
   ProvidedIdIsMalformed = 'ProvidedIdIsMalformed',
   PaginationError = 'PaginationError',
 
+  DocumentIdNotProvided = 'DocumentIdNotProvided',
+  DocumentFileIdNotProvided = 'DocumentFileIdNotProvided',
+  DocumentFileReadError = 'DocumentFileReadError',
+  DocumentNotFound = 'DocumentNotFound',
   DocumentEntryReadError = 'DocumentEntryReadError',
   DocumentWordEntryInsertFailed = 'DocumentWordEntryInsertFailed',
   DocumentWordEntryAlreadyExists = 'DocumentWordEntryAlreadyExists',
