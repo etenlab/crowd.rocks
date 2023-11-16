@@ -209,47 +209,49 @@ export async function setTranslationsVotes(
   vote: boolean | null,
   pgClient: PoolClient | Pool,
 ) {
-  // console.log(`fromTypeIsWord: ${fromTypeIsWord}`);
-  // console.log(`toTypeIsWord: ${toTypeIsWord}`);
-  if (translationIds && translationIds.length > 0) {
-    if (fromTypeIsWord) {
-      if (toTypeIsWord) {
-        // call word to word procedure
-        await pgClient.query(
-          ...callWordToWordTranslationVoteSetProcedure({
-            translationIds,
-            token,
-            vote,
-          }),
-        );
+  try {
+    if (translationIds && translationIds.length > 0) {
+      if (fromTypeIsWord) {
+        if (toTypeIsWord) {
+          // call word to word procedure
+          await pgClient.query(
+            ...callWordToWordTranslationVoteSetProcedure({
+              translationIds,
+              token,
+              vote,
+            }),
+          );
+        } else {
+          // call word to phrase set procedure
+          await pgClient.query(
+            ...callWordToPhraseTranslationVoteSetProcedure({
+              translationIds,
+              token,
+              vote,
+            }),
+          );
+        }
       } else {
-        // call word to phrase set procedure
-        await pgClient.query(
-          ...callWordToPhraseTranslationVoteSetProcedure({
-            translationIds,
-            token,
-            vote,
-          }),
-        );
-      }
-    } else {
-      if (toTypeIsWord) {
-        await pgClient.query(
-          ...callPhraseToWordTranslationVoteSetProcedure({
-            translationIds,
-            token,
-            vote,
-          }),
-        );
-      } else {
-        await pgClient.query(
-          ...callPhraseToPhraseTranslationVoteSetProcedure({
-            translationIds,
-            token,
-            vote,
-          }),
-        );
+        if (toTypeIsWord) {
+          await pgClient.query(
+            ...callPhraseToWordTranslationVoteSetProcedure({
+              translationIds,
+              token,
+              vote,
+            }),
+          );
+        } else {
+          await pgClient.query(
+            ...callPhraseToPhraseTranslationVoteSetProcedure({
+              translationIds,
+              token,
+              vote,
+            }),
+          );
+        }
       }
     }
+  } catch (e) {
+    console.error(e);
   }
 }

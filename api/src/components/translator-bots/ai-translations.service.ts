@@ -1128,6 +1128,18 @@ export class AiTranslationsService {
         to_definition_input: ToDefinitionInput;
       }[] = [];
 
+      const { token, id: botUserId } = await translator.getTranslatorToken();
+
+      const translationsByOthers = await getTranslationsNotByUser(
+        botUserId,
+        await pgClientOrPool({
+          client: pgClient,
+          pool: this.pg.pool,
+        }),
+        to_language.language_code,
+        from_language.language_code,
+      );
+
       if (wordsConnection.error === ErrorType.NoError) {
         for (const edge of wordsConnection.edges) {
           const { node } = edge;
@@ -1143,6 +1155,7 @@ export class AiTranslationsService {
           if (translatedWord === undefined) {
             continue;
           }
+
           const is_type_word =
             translatedWord
               .trim()
@@ -1157,20 +1170,69 @@ export class AiTranslationsService {
 
             const translatedDefinition = translationTexts[obj.id];
 
-            upsertInputs.push({
-              from_definition_id: +definition.word_definition_id,
-              from_definition_type_is_word: true,
-              to_definition_input: {
-                word_or_phrase: translatedWord,
-                is_type_word,
-                definition: translatedDefinition,
-                language_code: to_language.language_code,
-                dialect_code: to_language.dialect_code,
-                geo_code: to_language.geo_code,
-              },
+            const otherSameTranslations = translationsByOthers.filter((t) => {
+              return (
+                t.fromDef == definition.definition &&
+                t.fromText == obj.text &&
+                t.toDef == translatedDefinition && //not sure whether to have translation of defs match...
+                t.toText == translatedWord
+              );
             });
+            // process the translation if not submitted
+            if (
+              otherSameTranslations === undefined ||
+              otherSameTranslations.length == 0
+            ) {
+              upsertInputs.push({
+                from_definition_id: +definition.word_definition_id,
+                from_definition_type_is_word: true,
+                to_definition_input: {
+                  word_or_phrase: translatedWord,
+                  is_type_word,
+                  definition: translatedDefinition,
+                  language_code: to_language.language_code,
+                  dialect_code: to_language.dialect_code,
+                  geo_code: to_language.geo_code,
+                },
+              });
 
-            translatedWordCount++;
+              translatedWordCount++;
+            } else {
+              await setTranslationsVotes(
+                true,
+                is_type_word,
+                [+otherSameTranslations[0].translationId],
+                token,
+                true,
+                await pgClientOrPool({
+                  client: pgClient,
+                  pool: this.pg.pool,
+                }),
+              );
+            }
+
+            // reset votes any/all old/other translations (any translation that is different from current translation)
+            const otherTranslationIds = translationsByOthers
+              .filter(
+                (t) =>
+                  t.fromDef == definition.definition &&
+                  t.fromText == obj.text &&
+                  (t.toDef !== translatedDefinition ||
+                    t.toText !== translatedWord),
+              )
+              .map((t) => +t.translationId);
+
+            await setTranslationsVotes(
+              true,
+              is_type_word,
+              otherTranslationIds,
+              token,
+              null,
+              await pgClientOrPool({
+                client: pgClient,
+                pool: this.pg.pool,
+              }),
+            );
           }
         }
       }
@@ -1204,25 +1266,72 @@ export class AiTranslationsService {
 
             const translatedDefinition = translationTexts[obj.id];
 
-            upsertInputs.push({
-              from_definition_id: +definition.phrase_definition_id,
-              from_definition_type_is_word: false,
-              to_definition_input: {
-                word_or_phrase: translatedPhrase,
-                is_type_word,
-                definition: translatedDefinition,
-                language_code: to_language.language_code,
-                dialect_code: to_language.dialect_code,
-                geo_code: to_language.geo_code,
-              },
+            const otherSameTranslations = translationsByOthers.filter((t) => {
+              return (
+                t.fromDef == definition.definition &&
+                t.fromText == obj.text &&
+                t.toDef == translatedDefinition && //not sure whether to have translation of defs match...
+                t.toText == translatedPhrase
+              );
             });
+            // process the translation if not submitted
+            if (
+              otherSameTranslations === undefined ||
+              otherSameTranslations.length == 0
+            ) {
+              upsertInputs.push({
+                from_definition_id: +definition.phrase_definition_id,
+                from_definition_type_is_word: false,
+                to_definition_input: {
+                  word_or_phrase: translatedPhrase,
+                  is_type_word,
+                  definition: translatedDefinition,
+                  language_code: to_language.language_code,
+                  dialect_code: to_language.dialect_code,
+                  geo_code: to_language.geo_code,
+                },
+              });
 
-            translatedPhraseCount++;
+              translatedPhraseCount++;
+            } else {
+              await setTranslationsVotes(
+                true,
+                is_type_word,
+                [+otherSameTranslations[0].translationId],
+                token,
+                true,
+                await pgClientOrPool({
+                  client: pgClient,
+                  pool: this.pg.pool,
+                }),
+              );
+            }
+
+            // reset votes any/all old/other translations (any translation that is different from current translation)
+            const otherTranslationIds = translationsByOthers
+              .filter(
+                (t) =>
+                  t.fromDef == definition.definition &&
+                  t.fromText == obj.text &&
+                  (t.toDef !== translatedDefinition ||
+                    t.toText !== translatedPhrase),
+              )
+              .map((t) => +t.translationId);
+
+            await setTranslationsVotes(
+              true,
+              is_type_word,
+              otherTranslationIds,
+              token,
+              null,
+              await pgClientOrPool({
+                client: pgClient,
+                pool: this.pg.pool,
+              }),
+            );
           }
         }
       }
-
-      const { token } = await translator.getTranslatorToken();
 
       const { error } =
         await this.translationService.batchUpsertTranslationFromWordAndDefinitionlikeString(
