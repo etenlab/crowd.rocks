@@ -87,16 +87,18 @@ test('3: Verify that user is naviagted to reset a password page ', async ({
   const homePage = new HomePO(page);
   const leftMenuPage = new MenuPage(page);
   const profilePage = new ProfilePage(page);
-  const validLoginData = LoginData.validLoginData();
+  const registerPage = new RegistrationPage(page);
+  const validRegisterData = RegisterData.validRegisterData();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto('/US/en/1/register');
 
-  //Login with valid credentials
-  await loginPage.loginToApp(validLoginData);
+  //Register the new user
+  await registerPage.fillRegistrationForm(validRegisterData);
+  await registerPage.clickOnRegisterButton();
   expect(await homePage.isHomePageVisible()).toBeTruthy();
 
-  //Navigate to My Profile page
+  //Click on left menu for myprofile and verify the page title
   await homePage.clickOnExpandMenu();
   await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.MyProfile);
 
