@@ -24,7 +24,7 @@ import {
 import { useAppContext } from '../../../hooks/useAppContext';
 import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { useCallback, useMemo, useState } from 'react';
-import { langInfo2langInput } from '../../../../../utils';
+import { LanguageInfo, langInfo2langInput } from '../../../../../utils';
 import { NavArrowRight } from '../../common/icons/NavArrowRight';
 
 type DocumentBotTranslateModalProps = {
@@ -40,17 +40,17 @@ export function DocumentBotTranslateModal({
   const {
     states: {
       global: {
-        langauges: { sourceLang, targetLang },
+        langauges: { sourceLang },
       },
     },
-    actions: { setTargetLanguage },
   } = useAppContext();
 
   const [
     documentBotTranslate,
     { loading: translating, data: translatingData },
   ] = useBotTranslateDocumentMutation();
-  const [selectetdBot, setSelectedBot] = useState<BotType>();
+  const [selectedBot, setSelectedBot] = useState<BotType>();
+  const [targetLang, setTargetLanguage] = useState<LanguageInfo | null>(null);
 
   const [enabledTags, setEnabledTags] = useState<string[]>();
 
@@ -67,14 +67,10 @@ export function DocumentBotTranslateModal({
       if (!sttLangsQ.data?.languagesForBotTranslate.sourceToTarget) return;
       setSelectedBot(event.target.value as BotType);
 
-      console.log(sourceLang);
-
       const targetLangCodes =
         sttLangsQ.data.languagesForBotTranslate.sourceToTarget.find(
           (sttl) => sttl.sourceLangCode === sourceLang?.lang.tag,
         )?.targetLangCodes;
-
-      console.log(sourceLang);
 
       setEnabledTags(targetLangCodes);
     },
@@ -108,7 +104,7 @@ export function DocumentBotTranslateModal({
       <Select
         labelId="tr-bot-select-label"
         id="tr-bot-select"
-        value={selectetdBot}
+        value={selectedBot || ''}
         onChange={handleBotTypeChange}
       >
         {possibleBots.map((pbot) => (
@@ -117,7 +113,7 @@ export function DocumentBotTranslateModal({
           </MenuItem>
         ))}
       </Select>
-      {selectetdBot && (
+      {selectedBot && (
         <LangSelector
           title={tr('Select target language')}
           selected={targetLang}
@@ -128,14 +124,14 @@ export function DocumentBotTranslateModal({
           onClearClick={() => setTargetLanguage(null)}
         />
       )}
-      {selectetdBot && targetLang && (
+      {selectedBot && targetLang && (
         <Button
           variant="contained"
           color="blue"
           startIcon={<NavArrowRight sx={{ fontSize: 24 }} />}
           fullWidth
           onClick={() => {
-            const bot = possibleBots.find((pb) => pb.name === selectetdBot);
+            const bot = possibleBots.find((pb) => pb.name === selectedBot);
             bot && bot.translateFn();
           }}
         >
