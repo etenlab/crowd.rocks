@@ -13,6 +13,7 @@ class HomePage extends BasePage {
   }
 
   async getHomePageTitle() {
+    await this.page.waitForTimeout(1000);
     return await this.page.locator(homePageText).first().textContent();
   }
 

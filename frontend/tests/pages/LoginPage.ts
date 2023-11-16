@@ -50,6 +50,7 @@ class LoginPage extends BasePage {
   }
 
   async isForgotPasswordTitleVisible() {
+    await this.page.locator(forgotPasswordPageTitle).waitFor();
     return await this.page.locator(forgotPasswordPageTitle).isVisible();
   }
 

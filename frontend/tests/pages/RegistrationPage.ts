@@ -11,6 +11,7 @@ class RegistrationPage extends BasePage {
   async fillRegistrationForm(registrationData: RegisterDto) {
     await this.page.locator(emailTextBox).last().waitFor();
     await this.page.locator(emailTextBox).last().fill(registrationData.email);
+    await this.page.locator(userNameTextBox).last().waitFor();
     await this.page
       .locator(userNameTextBox)
       .last()
