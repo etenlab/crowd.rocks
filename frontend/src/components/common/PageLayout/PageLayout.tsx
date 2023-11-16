@@ -41,23 +41,40 @@ export function PageLayout({ children, header }: PageLayoutProps) {
         <div className="page">
           <div className="section">{children}</div>
 
-          {modals.map((modal) =>
-            modal.mode === 'standard' ? (
-              <Modal
-                key={modal.id}
-                component={modal.component}
-                onClose={() => removeModal(modal.id)}
-                container={ref.current}
-              />
-            ) : (
-              <FullModal
-                key={modal.id}
-                component={modal.component}
-                onClose={() => removeModal(modal.id)}
-                container={ref.current}
-              />
-            ),
-          )}
+          {modals.map((modal) => {
+            switch (modal.mode) {
+              case 'standard': {
+                return (
+                  <Modal
+                    key={modal.id}
+                    component={modal.component}
+                    onClose={() => removeModal(modal.id)}
+                    container={ref.current}
+                  />
+                );
+              }
+              case 'full': {
+                return (
+                  <FullModal
+                    key={modal.id}
+                    component={modal.component}
+                    onClose={() => removeModal(modal.id)}
+                    container={ref.current}
+                  />
+                );
+              }
+              default: {
+                return (
+                  <Modal
+                    key={modal.id}
+                    component={modal.component}
+                    onClose={() => removeModal(modal.id)}
+                    container={ref.current}
+                  />
+                );
+              }
+            }
+          })}
         </div>
       </IonContent>
     </IonPage>

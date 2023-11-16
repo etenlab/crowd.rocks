@@ -19,6 +19,7 @@ export const Word = styled('div')({
   '&.selected': {
     background: '#EFF1F8',
     fontWeight: 600,
+    letterSpacing: '-0.5px',
   },
   '&.left-boundary': {
     borderRadius: '5px',
