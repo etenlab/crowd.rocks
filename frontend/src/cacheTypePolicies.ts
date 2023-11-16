@@ -1,5 +1,15 @@
 import { TypePolicies } from '@apollo/client';
 import { relayStylePagination } from '@apollo/client/utilities';
+import { PericopeWithVotesListConnection } from './generated/graphql';
+
+type GetPericopiesByDocumentIdMerge = Omit<
+  PericopeWithVotesListConnection,
+  'edges'
+> & {
+  edges: {
+    __ref: string;
+  }[];
+};
 
 export const typePolicies: TypePolicies = {
   Query: {
@@ -16,6 +26,40 @@ export const typePolicies: TypePolicies = {
       getForumFoldersList: relayStylePagination(['forum_id', 'filter']),
       getThreadsList: relayStylePagination(['forum_folder_id', 'filter']),
       getAllDocuments: relayStylePagination(['input']),
+      getPericopiesByDocumentId: {
+        keyArgs: ['document_id'],
+        merge(
+          existing: GetPericopiesByDocumentIdMerge | undefined,
+          incoming: GetPericopiesByDocumentIdMerge,
+        ) {
+          if (existing) {
+            const edgesMap = new Map<string, { __ref: string }>();
+
+            existing.edges.forEach((edge) => {
+              edgesMap.set(edge.__ref, edge);
+            });
+
+            incoming.edges.forEach((edge) => {
+              edgesMap.set(edge.__ref, edge);
+            });
+
+            const edges: {
+              __ref: string;
+            }[] = [];
+
+            for (const edge of edgesMap.values()) {
+              edges.push(edge);
+            }
+
+            return {
+              ...existing,
+              edges,
+            };
+          } else {
+            return { ...incoming };
+          }
+        },
+      },
     },
   },
   WordWithDefinitions: {
@@ -140,6 +184,12 @@ export const typePolicies: TypePolicies = {
   },
   Pericope: {
     keyFields: ['pericope_id'],
+  },
+  PericopeWithVote: {
+    keyFields: ['pericope_id'],
+  },
+  PericopeWithVotesEdge: {
+    keyFields: ['cursor'],
   },
   PericopeVoteStatus: {
     keyFields: ['pericope_id'],

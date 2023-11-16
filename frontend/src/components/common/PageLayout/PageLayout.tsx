@@ -15,13 +15,17 @@ export function PageLayout({ children, header }: PageLayoutProps) {
     states: {
       components: { modals },
     },
-    actions: { removeModal },
+    actions: { removeModal, setIonContentScrollElement },
   } = useAppContext();
   const ref = useRef<HTMLElement | null>();
+  const contentRef = useRef<HTMLIonContentElement>(null);
 
   useEffect(() => {
     ref.current = document.getElementById('crowd-rock-app');
-  }, []);
+    contentRef.current
+      ?.getScrollElement()
+      .then((value) => setIonContentScrollElement(value));
+  }, [setIonContentScrollElement]);
 
   return (
     <IonPage>
@@ -33,7 +37,7 @@ export function PageLayout({ children, header }: PageLayoutProps) {
         </IonHeader>
       ) : null}
 
-      <IonContent>
+      <IonContent ref={contentRef}>
         <div className="page">
           <div className="section">{children}</div>
 

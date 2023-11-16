@@ -5,10 +5,12 @@ import { type ActionType } from '.';
 
 export interface StateType {
   modals: { id: string; mode: 'standard' | 'full'; component: ReactNode }[];
+  ionContentScrollElement: HTMLElement | null;
 }
 
 export const initialState: StateType = {
   modals: [],
+  ionContentScrollElement: null,
 };
 
 export function reducer(
@@ -44,6 +46,12 @@ export function reducer(
         modals: prevState.modals
           ? [...prevState.modals.filter((modal) => modal.id !== id)]
           : [],
+      };
+    }
+    case actions.SET_ION_CONTENT_SCROLL_ELEMENT: {
+      return {
+        ...prevState,
+        ionContentScrollElement: action.payload as HTMLElement | null,
       };
     }
     default: {

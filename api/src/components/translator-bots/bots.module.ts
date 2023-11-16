@@ -63,6 +63,6 @@ import { SmartcatTranslateService } from './sc-translate.service';
     // PhraseDefinitionVotesService,
     // WordDefinitionVotesService,
   ],
-  exports: [AiTranslationsService],
+  exports: [AiTranslationsService, FakerTranslateService],
 })
 export class BotsModule {}

@@ -43,22 +43,50 @@ export function getPericopiesObjByIds({
   ];
 }
 
-export function getPericopiesObjByDocumentId(id: number): [string, [number]] {
+export type GetPericopiesObjByDocumentId = {
+  pericope_id: string;
+  start_word: string;
+  page: string;
+};
+
+export function getPericopiesObjByDocumentId(
+  document_id: number,
+  first: number | null,
+  page: number,
+): [string, number[]] {
+  const returnArr: number[] = [document_id];
+  let limitStr = '';
+  let cursorStr = '';
+
+  if (page) {
+    returnArr.push(page);
+    cursorStr = `and document_word_entries.page > $${returnArr.length}`;
+  }
+
+  if (first) {
+    returnArr.push(page + first + 1);
+    limitStr = `and document_word_entries.page < $${returnArr.length}`;
+  }
+
   return [
     `
       select
         pericope_id,
-        start_word
+        start_word,
+        dwes.page
       from pericopies
       join (
         select 
-          document_word_entry_id
+          document_word_entries.document_word_entry_id,
+          document_word_entries.page
         from document_word_entries
         where document_word_entries.document_id = $1
+          ${cursorStr}
+          ${limitStr}
       ) as dwes
       on pericopies.start_word = dwes.document_word_entry_id;
     `,
-    [id],
+    [...returnArr],
   ];
 }
 

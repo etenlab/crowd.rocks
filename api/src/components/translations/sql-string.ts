@@ -477,7 +477,7 @@ export function callWordToWordTranslationVoteSetProcedure({
 }): [string, [number[], string, boolean | null]] {
   return [
     `
-      call batch_word_to_word_translation_vote_set($1::bigint[], $2, $3, null, null, '');
+      call batch_word_to_word_translation_vote_set($1::bigint[], $2, $3, null, null, '', -1);
     `,
     [translationIds, token, vote],
   ];
@@ -500,7 +500,7 @@ export function callWordToPhraseTranslationVoteSetProcedure({
 }): [string, [number[], string, boolean | null]] {
   return [
     `
-      call batch_word_to_phrase_translation_vote_set($1::bigint[], $2, $3, null, null, '');
+      call batch_word_to_phrase_translation_vote_set($1::bigint[], $2, $3, null, null, '', -1);
     `,
     [translationIds, token, vote],
   ];
@@ -523,7 +523,7 @@ export function callPhraseToPhraseTranslationVoteSetProcedure({
 }): [string, [number[], string, boolean | null]] {
   return [
     `
-      call batch_phrase_to_phrase_translation_vote_set($1::bigint[], $2, $3, null, null, '');
+      call batch_phrase_to_phrase_translation_vote_set($1::bigint[], $2, $3, null, null, '', -1);
     `,
     [translationIds, token, vote],
   ];
@@ -546,7 +546,7 @@ export function callPhraseToWordTranslationVoteSetProcedure({
 }): [string, [number[], string, boolean | null]] {
   return [
     `
-      call batch_phrase_to_word_translation_vote_set($1::bigint[], $2, $3, null, null, '');
+      call batch_phrase_to_word_translation_vote_set($1::bigint[], $2, $3, null, null, '', -1);
     `,
     [translationIds, token, vote],
   ];

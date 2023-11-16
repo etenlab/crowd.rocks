@@ -67,12 +67,12 @@ input CreateQuestionOnWordRangeUpsertInput {
 input DataGenInput {
   mapAmount: Int
   mapsToLanguages: [LanguageInput!]
+  phraseAmount: Int
+  userAmount: Int
+  wordAmount: Int
 }
 
 type DataGenProgress {
-  mapReTranslationsStatus: SubscriptionStatus!
-  mapTranslationsStatus: SubscriptionStatus!
-  mapUploadStatus: SubscriptionStatus!
   output: String!
   overallStatus: SubscriptionStatus!
 }
@@ -774,6 +774,17 @@ type PericopeWithVote {
   upvotes: Int!
 }
 
+type PericopeWithVotesEdge {
+  cursor: ID!
+  node: [PericopeWithVote!]!
+}
+
+type PericopeWithVotesListConnection {
+  edges: [PericopeWithVotesEdge!]!
+  error: ErrorType!
+  pageInfo: PageInfo!
+}
+
 type PericopiesOutput {
   error: ErrorType!
   pericopies: [Pericope]!
@@ -1083,7 +1094,7 @@ type Query {
   getOrigMapWordsAndPhrasesCount(input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesCountOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
-  getPericopiesByDocumentId(document_id: ID!): PericopiesOutput!
+  getPericopiesByDocumentId(after: ID, document_id: ID!, first: Int): PericopeWithVotesListConnection!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getPhraseDefinitionsByFlag(after: ID, first: Int, flag_name: FlagType!): PhraseDefinitionListConnection!
   getPhraseDefinitionsByLanguage(input: LanguageInput!): PhraseDefinitionWithVoteListOutput!
@@ -1108,7 +1119,7 @@ type Query {
   getWordDefinitionsByLanguage(input: LanguageInput!): WordDefinitionWithVoteListOutput!
   getWordDefinitionsByWordId(word_id: ID!): WordDefinitionWithVoteListOutput!
   getWordRangesByBeginIds(ids: [ID!]!): WordRangesOutput!
-  getWordRangesByDocumentId(document_id: ID!): WordRangesOutput!
+  getWordRangesByDocumentId(document_id: ID!, page: Int): WordRangesOutput!
   getWordToPhraseTrVoteStatus(word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   getWordToPhraseTranslationsByFromWordDefinitionId(from_word_definition_id: ID!, langInfo: LanguageInput!): WordToPhraseTranslationWithVoteListOutput!
   getWordToWordTrVoteStatus(word_to_word_translation_id: ID!): WordTrVoteStatusOutputRow!

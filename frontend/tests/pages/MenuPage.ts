@@ -1,9 +1,8 @@
 import BasePage from './BasePage';
 
 const headerText = '#crowd-rock-app #app-name-text';
-const logoutButton = '#app-logout-button';
-const loginButton = "//h4[text()='Login']";
-const settingsButton = '//h4[text()="Settings"]';
+const leftMenuFeatureButton = (featureName: string) =>
+  `//h4[text()="${featureName}"]`;
 
 class MenuPage extends BasePage {
   async isheaderTextPresent() {
@@ -15,16 +14,13 @@ class MenuPage extends BasePage {
     return headerTextPresnt;
   }
 
-  async clickOnLogout() {
-    await this.page.locator(logoutButton).first().click();
+  async clickOnLeftMenufeatureButton(featureName: string) {
+    await this.page.locator(leftMenuFeatureButton(featureName)).first().click();
+    await this.page.waitForTimeout(1000);
   }
 
-  async clickOnLoginButton() {
-    await this.page.locator(loginButton).first().click();
-  }
-
-  async clickOnSettingButton() {
-    await this.page.locator(settingsButton).first().click();
+  async clickOnCrowdRocks() {
+    await this.page.locator(headerText).first().click();
   }
 }
 
