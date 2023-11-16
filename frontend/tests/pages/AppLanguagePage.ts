@@ -21,6 +21,7 @@ class AppLanguagePage extends BasePage {
   }
 
   async clickOnAppLanguageName(name: string) {
+    await this.searchLanguage(name);
     await this.page.locator(languageName(name)).first().waitFor();
     await this.page.locator(languageName(name)).first().click();
   }
@@ -35,6 +36,7 @@ class AppLanguagePage extends BasePage {
   }
 
   async isAppLanguageChecked(_languageName: string) {
+    await this.searchLanguage(_languageName);
     await this.page.locator(checkedAppLanguage(_languageName)).last().waitFor();
     return await this.page
       .locator(checkedAppLanguage(_languageName))
