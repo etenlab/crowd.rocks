@@ -7,32 +7,9 @@ import { leftMenu } from '../enums/Enums';
 import MenuPage from '../pages/MenuPage';
 import ProfilePage from '../pages/ProfilePage';
 import RegisterData from '../data-factory/RegisterData';
+const updatedUsername = 'UpdatedUsername' + Math.floor(Math.random() * 10);
 
-test('1: Verify that user is navigated to Profile page successfully', async ({
-  page,
-}) => {
-  const loginPage = new LoginPO(page);
-  const homePage = new HomePO(page);
-  const leftMenuPage = new MenuPage(page);
-  const profilePage = new ProfilePage(page);
-  const validLoginData = LoginData.validLoginData();
-
-  //Navigate to the URL
-  await page.goto('/US/en/1/login');
-
-  //Login with valid credentials
-  await loginPage.loginToApp(validLoginData);
-
-  //Verify user is navigated to home page
-  expect(await homePage.isHomePageVisible()).toBeTruthy();
-
-  //Click on left menu for myprofile and verify the page title
-  await homePage.clickOnExpandMenu();
-  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.MyProfile);
-  expect(await profilePage.isPageTitlePresent()).toBeTruthy();
-});
-
-test('2: Verify that user can edit username on my profile page', async ({
+test('1: Verify that user can navigate to profile page and able to edit username on profile page', async ({
   page,
 }) => {
   const registerPage = new RegistrationPage(page);
@@ -62,16 +39,16 @@ test('2: Verify that user can edit username on my profile page', async ({
   );
 
   //Edit the username and click on submit button
-  await profilePage.editUsername('AutomationUser2');
+  await profilePage.editUsername(updatedUsername);
   await profilePage.clickOnSubmitButton();
   await profilePage.clickOnUsernameText();
   await profilePage.clickOnSubmitButton();
 
   //Verify the username is equal to the 'AutomationUser2'
-  expect(await profilePage.getUsernameText()).toEqual('AutomationUser2');
+  expect(await profilePage.getUsernameText()).toEqual(updatedUsername);
 });
 
-test('3: Verify that username is not changed after clicking on the cancel button ', async ({
+test('2: Verify that username is not changed after clicking on the cancel button ', async ({
   page,
 }) => {
   const registerPage = new RegistrationPage(page);
@@ -87,21 +64,12 @@ test('3: Verify that username is not changed after clicking on the cancel button
   await registerPage.fillRegistrationForm(validRegisterData);
   await registerPage.clickOnRegisterButton();
 
-  //Verify user is navigated to home page
-  expect(await homePage.isHomePageVisible()).toBeTruthy();
-
   //Click on left menu for myprofile and verify the page title
   await homePage.clickOnExpandMenu();
   await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.MyProfile);
-  expect(await profilePage.isPageTitlePresent()).toBeTruthy();
-
-  //Verify the username is equal to the register username
-  expect(await profilePage.getUsernameText()).toEqual(
-    validRegisterData.username,
-  );
 
   //Edit the username and click on cancel button
-  await profilePage.editUsername('AutomationUser2');
+  await profilePage.editUsername(updatedUsername);
   await profilePage.clickOnCancelButton();
 
   //Click on username and cancel button and verify the username doesn't updated
@@ -112,7 +80,7 @@ test('3: Verify that username is not changed after clicking on the cancel button
   );
 });
 
-test('4: Verify that user is naviagted to reset a password page ', async ({
+test('3: Verify that user is naviagted to reset a password page ', async ({
   page,
 }) => {
   const loginPage = new LoginPO(page);
@@ -126,14 +94,11 @@ test('4: Verify that user is naviagted to reset a password page ', async ({
 
   //Login with valid credentials
   await loginPage.loginToApp(validLoginData);
-
-  //Verify user is navigated to home page
   expect(await homePage.isHomePageVisible()).toBeTruthy();
 
-  //Click on left menu for myprofile and verify the page title
+  //Navigate to My Profile page
   await homePage.clickOnExpandMenu();
   await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.MyProfile);
-  expect(await profilePage.isPageTitlePresent()).toBeTruthy();
 
   //Click on reset password button and verify the forgot password page title
   await profilePage.clickOnResetPasswordButton();
