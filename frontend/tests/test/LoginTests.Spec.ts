@@ -3,6 +3,7 @@ import LoginPO from '../pages/LoginPage';
 import HomePO from '../pages/HomePage';
 import RegisterPO from '../pages/RegistrationPage';
 import LoginData from '../data-factory/LoginData';
+test.use({ storageState: { cookies: [], origins: [] } });
 
 test.skip('1: Verify that user is logged in with valid data', async ({
   page,
