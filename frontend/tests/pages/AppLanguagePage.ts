@@ -29,6 +29,7 @@ class AppLanguagePage extends BasePage {
   async clickOnConfirmButton() {
     await this.page.locator(confirmButton).waitFor();
     await this.page.locator(confirmButton).click();
+    await this.page.waitForTimeout(3000);
   }
   async clickOnCancelButton() {
     await this.page.locator(cancelButton).waitFor();
