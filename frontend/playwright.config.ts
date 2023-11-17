@@ -15,6 +15,7 @@ const ciEnv = process.env.CI === 'true' ? true : false;
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  globalSetup: './global-setup',
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -34,6 +35,7 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    storageState: './registerAuth.json',
   },
 
   /* Configure projects for major browsers */

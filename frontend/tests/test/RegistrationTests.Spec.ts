@@ -6,6 +6,7 @@ import HomePO from '../pages/HomePage';
 import MenuPO from '../pages/MenuPage';
 import LoginDTO from '../data-objects/LoginDto';
 import { leftMenu } from '../enums/Enums';
+test.use({ storageState: { cookies: [], origins: [] } });
 
 test('1: Verify that user is register/logout and login again successfully', async ({
   page,
@@ -31,6 +32,9 @@ test('1: Verify that user is register/logout and login again successfully', asyn
   //Fill and submit the register form
   await registerPage.fillRegistrationForm(registerData);
   await registerPage.clickOnRegisterButton();
+
+  //Verify user is navigated to home page
+  expect(await homePage.isHomePageVisible()).toBeTruthy();
 
   //logout from the app
   await homePage.clickOnExpandMenu();
