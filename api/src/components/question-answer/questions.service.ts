@@ -18,6 +18,8 @@ import {
   QuestionOnWordRangesOutput,
   QuestionOnWordRange,
   CreateQuestionOnWordRangeUpsertInput,
+  QuestionWithStatisticOutput,
+  QuestionItemWithStatistic,
 } from './types';
 
 import {
@@ -83,6 +85,12 @@ export class QuestionsService {
           return {
             ...row,
             question_items: questionItems,
+            created_by_user: {
+              user_id: row.user_id,
+              avatar: row.avatar,
+              avatar_url: row.avatar_url,
+              is_bot: row.is_bot,
+            },
           };
         }),
       };
@@ -114,6 +122,73 @@ export class QuestionsService {
     return {
       error: ErrorType.UnknownError,
       questions: [],
+    };
+  }
+
+  async getQuestionStatistic(
+    question_id: number,
+    pgClient: PoolClient | null,
+  ): Promise<QuestionWithStatisticOutput> {
+    try {
+      const { error, questions } = await this.reads([question_id], pgClient);
+
+      if (error !== ErrorType.NoError || questions.length !== 1) {
+        return {
+          error,
+          question_with_statistic: null,
+        };
+      }
+
+      const question_item_ids: number[] = questions[0]!.question_items.map(
+        (question_item) => +question_item.question_item_id,
+      );
+
+      const { error: qiError, question_item_with_statistics } =
+        await this.questionItemService.getStatistics(
+          question_item_ids,
+          pgClient,
+        );
+
+      if (qiError !== ErrorType.NoError) {
+        return {
+          error,
+          question_with_statistic: null,
+        };
+      }
+
+      const questionItemMap = new Map<string, QuestionItemWithStatistic>();
+
+      question_item_with_statistics.forEach((item) => {
+        if (item) {
+          questionItemMap.set(item.question_item_id, item);
+        }
+      });
+
+      return {
+        error: ErrorType.NoError,
+        question_with_statistic: {
+          ...questions[0]!,
+          question_items: questions[0]!.question_items.map((item) => {
+            const data = questionItemMap.get(item.question_item_id);
+
+            if (data) {
+              return data;
+            } else {
+              return {
+                ...item,
+                statistic: 0,
+              };
+            }
+          }),
+        },
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      question_with_statistic: null,
     };
   }
 

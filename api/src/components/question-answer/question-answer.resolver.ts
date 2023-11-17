@@ -14,6 +14,7 @@ import {
   AnswersOutput,
   QuestionUpsertInput,
   AnswerUpsertInput,
+  QuestionWithStatisticOutput,
 } from './types';
 import { TableNameType } from 'src/common/types';
 
@@ -59,6 +60,15 @@ export class QuestionAndAnswersResolver {
       ids.map((id) => +id),
       null,
     );
+  }
+
+  @Query(() => QuestionWithStatisticOutput)
+  async getQuestionStatistic(
+    @Args('question_id', { type: () => ID }) question_id: string,
+  ): Promise<QuestionWithStatisticOutput> {
+    Logger.log('getQuestionStatistic, question_id:', question_id);
+
+    return this.questionService.getQuestionStatistic(+question_id, null);
   }
 
   @Query(() => QuestionsOutput)

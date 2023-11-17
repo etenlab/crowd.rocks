@@ -16,7 +16,7 @@ type Answer {
   answer: String
   answer_id: ID!
   created_at: DateTime!
-  created_by: String!
+  created_by_user: User!
   question_id: String!
   question_items: [QuestionItem!]!
 }
@@ -151,6 +151,7 @@ enum ErrorType {
   BotTranslationLanguagesListError
   CandidateNotFound
   CandidateNotFoundInBallot
+  DamagedDocumentWordEntryBlock
   DocumentEntryReadError
   DocumentIdNotProvided
   DocumentNotFound
@@ -1095,6 +1096,7 @@ type Query {
   getPhraseWithVoteById(phrase_id: ID!): PhraseWithVoteOutput!
   getPhrasesByLanguage(after: ID, first: Int, input: LanguageInput!): PhraseWithVoteListConnection!
   getQuestionOnWordRangesByDocumentId(document_id: ID!): QuestionOnWordRangesOutput!
+  getQuestionStatistic(question_id: ID!): QuestionWithStatisticOutput!
   getQuestionsByRefs(parent_ids: [ID!]!, parent_tables: [TableNameType!]!): QuestionsOutput!
   getRecommendedTranslationFromDefinitionID(from_definition_id: ID!, from_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteOutput!
   getRecommendedTranslationFromDefinitionIDs(from_definition_ids: [ID!]!, from_type_is_words: [Boolean!]!, langInfo: LanguageInput!): TranslationWithVoteListOutput!
@@ -1142,7 +1144,7 @@ type Query {
 
 type Question {
   created_at: DateTime!
-  created_by: String!
+  created_by_user: User!
   parent_id: String!
   parent_table: TableNameType!
   question: String!
@@ -1156,6 +1158,12 @@ type QuestionItem {
   question_item_id: ID!
 }
 
+type QuestionItemWithStatistic {
+  item: String!
+  question_item_id: ID!
+  statistic: Int!
+}
+
 type QuestionItemsOutput {
   error: ErrorType!
   question_items: [QuestionItem]!
@@ -1164,7 +1172,7 @@ type QuestionItemsOutput {
 type QuestionOnWordRange {
   begin: DocumentWordEntry!
   created_at: DateTime!
-  created_by: String!
+  created_by_user: User!
   end: DocumentWordEntry!
   parent_id: String!
   parent_table: TableNameType!
@@ -1185,6 +1193,22 @@ input QuestionUpsertInput {
   question: String!
   question_items: [String!]!
   question_type_is_multiselect: Boolean!
+}
+
+type QuestionWithStatistic {
+  created_at: DateTime!
+  created_by_user: User!
+  parent_id: String!
+  parent_table: TableNameType!
+  question: String!
+  question_id: ID!
+  question_items: [QuestionItemWithStatistic!]!
+  question_type_is_multiselect: Boolean!
+}
+
+type QuestionWithStatisticOutput {
+  error: ErrorType!
+  question_with_statistic: QuestionWithStatistic!
 }
 
 type QuestionsOutput {
