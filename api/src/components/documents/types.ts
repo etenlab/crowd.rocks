@@ -100,8 +100,33 @@ export class WordRangesOutput extends GenericOutput {
   word_ranges: (WordRange | null)[];
 }
 
+@ObjectType()
+export class WordRangesEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => [WordRange]) node: WordRange[];
+}
+
+@ObjectType()
+export class WordRangesListConnection extends GenericOutput {
+  @Field(() => [WordRangesEdge])
+  edges: WordRangesEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
+}
+
 @InputType()
-export class WordRangeUpsertInput {
+export class WordRangeInput {
   @Field(() => String) begin_document_word_entry_id: string;
   @Field(() => String) end_document_word_entry_id: string;
+}
+
+@ObjectType()
+export class TextFromRange {
+  @Field(() => String) piece_of_text: string;
+  @Field(() => ID) begin_document_word_entry_id: string;
+  @Field(() => ID) end_document_word_entry_id: string;
+}
+
+@ObjectType()
+export class TextFromRangesOutput extends GenericOutput {
+  @Field(() => [TextFromRange]) list: TextFromRange[];
 }

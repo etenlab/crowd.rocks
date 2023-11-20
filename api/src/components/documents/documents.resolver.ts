@@ -18,6 +18,7 @@ import { DocumentsService } from './documents.service';
 import { WordRangesService } from './word-ranges.service';
 
 import {
+  TextFromRangesOutput,
   DocumentUploadInput,
   DocumentUploadOutput,
   DocumentWordEntriesListConnection,
@@ -25,7 +26,8 @@ import {
   GetDocumentInput,
   GetDocumentOutput,
   WordRangesOutput,
-  WordRangeUpsertInput,
+  WordRangeInput,
+  WordRangesListConnection,
 } from './types';
 import { LanguageInput } from '../common/types';
 
@@ -139,20 +141,38 @@ export class DocumentsResolver {
     );
   }
 
-  @Query(() => WordRangesOutput)
+  @Query(() => WordRangesListConnection)
   async getWordRangesByDocumentId(
     @Args('document_id', { type: () => ID }) document_id: string,
-    @Args('page', { type: () => Int, nullable: true }) page: number | null,
-  ): Promise<WordRangesOutput> {
-    Logger.log('getWordRangesByDocumentId:', { document_id, page });
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<WordRangesListConnection> {
+    Logger.log(
+      'getWordRangesByDocumentId:',
+      JSON.stringify({ document_id, first, after }, null, 2),
+    );
 
-    return this.wordRangesService.getByDocumentId(+document_id, page, null);
+    return this.wordRangesService.getByDocumentId(
+      +document_id,
+      first,
+      after,
+      null,
+    );
+  }
+
+  @Query(() => TextFromRangesOutput)
+  async getDocumentTextFromRanges(
+    @Args('ranges', { type: () => [WordRangeInput] }) ranges: WordRangeInput[],
+  ): Promise<TextFromRangesOutput> {
+    Logger.log('getDocumentTextFromRange:', JSON.stringify(ranges, null, 2));
+
+    return this.wordRangesService.getTextFromRanges(ranges, null);
   }
 
   @Mutation(() => WordRangesOutput)
   async upsertWordRanges(
-    @Args('input', { type: () => [WordRangeUpsertInput] })
-    input: WordRangeUpsertInput[],
+    @Args('input', { type: () => [WordRangeInput] })
+    input: WordRangeInput[],
     @Context() req: any,
   ): Promise<WordRangesOutput> {
     Logger.log('upsertWordRanges: ', JSON.stringify(input, null, 2));
