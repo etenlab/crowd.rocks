@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { chromium, expect, test } from '@playwright/test';
 import HomePO from '../pages/HomePage';
 import { leftMenu } from '../enums/Enums';
 import MenuPage from '../pages/MenuPage';
@@ -10,7 +10,10 @@ const updatedUsername = 'UpdatedUsername' + Math.floor(Math.random() * 10);
 const registerData = RegisterData.validRegisterData();
 test.use({ storageState: { cookies: [], origins: [] } });
 
-test.beforeAll('Register User', async ({ page }) => {
+test.beforeAll(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext();
+  const page = await context.newPage();
   const registerPage = new RegistrationPage(page);
 
   //Navigate to the URL
