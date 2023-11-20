@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import {
   useMemo,
   memo,
@@ -6,6 +7,8 @@ import {
   useState,
   ReactNode,
   MouseEvent,
+  forwardRef,
+  useImperativeHandle,
 } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import { Stack } from '@mui/material';
@@ -40,6 +43,10 @@ export type WordEntry = {
   parent_id?: string;
 };
 
+export type DocumentViewerHandle = {
+  getTextFromRange(start: string, end: string): string;
+};
+
 export type DocumentViewerProps = {
   mode: ViewMode;
   range: Range;
@@ -57,351 +64,403 @@ export type DocumentViewerProps = {
   onLoadPage?(tempPage: TempPage): void;
 };
 
-export const DocumentViewer = memo(function DocumentViewerPure({
-  documentId,
-  mode,
-  range,
-  dots,
-  onClickWord,
-  onChangeRange,
-  onLoadPage,
-}: DocumentViewerProps) {
-  const {
-    states: {
-      components: { ionContentScrollElement },
-    },
-  } = useAppContext();
-  const [getDocumentWordEntriesByDocumentId] =
-    useGetDocumentWordEntriesByDocumentIdLazyQuery();
-
-  const [entriesData, setEntriesData] = useState<(TempPage | WordEntry[])[]>(
-    [],
-  );
-  const [rowWidth, setRowWidth] = useState<number>(0);
-  const [requiredPage, setRequiredPage] = useState<TempPage | null>(null);
-
-  const calcRowWidth = useCallback(() => {
-    const bodyWidth = document.body.offsetWidth;
-
-    setRowWidth(Math.min(bodyWidth - 32, 777 - 32));
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('resize', calcRowWidth);
-    calcRowWidth();
-  }, [calcRowWidth]);
-
-  useEffect(() => {
-    (async () => {
-      const firstPage = await getDocumentWordEntriesByDocumentId({
-        variables: {
-          document_id: documentId,
-          first: 1,
-          after: null,
+export const DocumentViewer = memo(
+  forwardRef<DocumentViewerHandle, DocumentViewerProps>(
+    (
+      { documentId, mode, range, dots, onClickWord, onChangeRange, onLoadPage },
+      ref,
+    ) => {
+      const {
+        states: {
+          components: { ionContentScrollElement },
         },
-      });
+      } = useAppContext();
+      const [getDocumentWordEntriesByDocumentId] =
+        useGetDocumentWordEntriesByDocumentIdLazyQuery();
 
-      const totalPages =
-        firstPage.data?.getDocumentWordEntriesByDocumentId.pageInfo
-          .totalEdges || 0;
+      const [entriesData, setEntriesData] = useState<
+        (TempPage | WordEntry[])[]
+      >([]);
+      const [rowWidth, setRowWidth] = useState<number>(0);
+      const [requiredPage, setRequiredPage] = useState<TempPage | null>(null);
 
-      const pageEntriesData: TempPage[] = [];
+      useImperativeHandle(
+        ref,
+        () => {
+          return {
+            getTextFromRange(start: string, end: string) {
+              const words: string[] = [];
 
-      for (let i = 0; i < totalPages; i++) {
-        pageEntriesData.push({
-          id: `page_${i + 1}`,
-          after: JSON.stringify({ document_id: +documentId, page: i }),
-          first: 1,
-        });
-      }
+              let isStarted = false;
 
-      setEntriesData(pageEntriesData);
-    })();
-  }, [documentId, getDocumentWordEntriesByDocumentId]);
+              for (const data of entriesData) {
+                if (!Array.isArray(data)) {
+                  if (isStarted) {
+                    words.push('...');
+                  }
+                  continue;
+                }
 
-  const fetchMore = useCallback(
-    async (page: TempPage) => {
-      const { data } = await getDocumentWordEntriesByDocumentId({
-        variables: {
-          document_id: documentId,
-          first: page.first,
-          after: page.after,
-        },
-      });
+                for (let i = 0; i < data.length; i++) {
+                  if (data[i].id === start) {
+                    isStarted = true;
+                  }
 
-      if (!data) {
-        return;
-      }
+                  if (isStarted) {
+                    words.push(data[i].wordlike_string.wordlike_string);
+                  }
 
-      const word_entries: WordEntry[] = [];
-      data.getDocumentWordEntriesByDocumentId.edges.forEach((edge) => {
-        edge.node.forEach((item) =>
-          word_entries.push({
-            id: item.document_word_entry_id,
-            wordlike_string: {
-              id: item.wordlike_string.wordlike_string_id,
-              wordlike_string: item.wordlike_string.wordlike_string,
+                  if (data[i].id === end) {
+                    isStarted = false;
+
+                    return words.join(' ');
+                  }
+                }
+              }
+
+              return words.join(' ');
             },
-            parent_id: item.parent_document_word_entry_id || undefined,
-          }),
-        );
-      });
+          };
+        },
+        [entriesData],
+      );
 
-      const entriesMap = new Map<string, WordEntry>();
-      const childrenMap = new Map<string, string>();
-      const rootIds: string[] = [];
+      const calcRowWidth = useCallback(() => {
+        const bodyWidth = document.body.offsetWidth;
 
-      for (const word_entry of word_entries) {
-        entriesMap.set(word_entry.id, word_entry);
+        setRowWidth(Math.min(bodyWidth - 32, 777 - 32));
+      }, []);
 
-        if (word_entry.parent_id) {
-          childrenMap.set(word_entry.parent_id, word_entry.id);
-        } else {
-          rootIds.push(word_entry.id);
-        }
-      }
+      useEffect(() => {
+        window.addEventListener('resize', calcRowWidth);
+        calcRowWidth();
+      }, [calcRowWidth]);
 
-      for (const parentId of childrenMap.keys()) {
-        if (entriesMap.get(parentId)) {
-          continue;
-        }
+      useEffect(() => {
+        (async () => {
+          const firstPage = await getDocumentWordEntriesByDocumentId({
+            variables: {
+              document_id: documentId,
+              first: 1,
+              after: null,
+            },
+          });
 
-        rootIds.push(childrenMap.get(parentId)!);
-      }
+          const totalPages =
+            firstPage.data?.getDocumentWordEntriesByDocumentId.pageInfo
+              .totalEdges || 0;
 
-      const sortedEntries: WordEntry[][] = [];
+          const pageEntriesData: TempPage[] = [];
 
-      for (const root of rootIds) {
-        const tempEntries: WordEntry[] = [];
-
-        let cur: string | undefined = root;
-
-        while (cur) {
-          tempEntries.push(entriesMap.get(cur)!);
-          cur = childrenMap.get(cur);
-        }
-
-        sortedEntries.push(tempEntries);
-      }
-
-      if (sortedEntries.length !== 1) {
-        return;
-      }
-
-      setEntriesData((data) => {
-        const refactoredData: (WordEntry[] | TempPage)[] = [];
-
-        data
-          .map((item) => {
-            if (
-              !Array.isArray(item) &&
-              item.after === page.after &&
-              item.first === page.first
-            ) {
-              return sortedEntries[0];
-            } else {
-              return item;
-            }
-          })
-          .forEach((item) => {
-            if (refactoredData.length === 0) {
-              refactoredData.push(item);
-              return;
-            }
-
-            const lastItem = refactoredData[refactoredData.length - 1];
-
-            if (!Array.isArray(item) || !Array.isArray(lastItem)) {
-              refactoredData.push(item);
-              return;
-            }
-
-            lastItem.push(...item);
-
-            return;
-          }, []);
-
-        return refactoredData;
-      });
-    },
-    [documentId, getDocumentWordEntriesByDocumentId],
-  );
-
-  useEffect(() => {
-    let sentence: string = '';
-    let start = false;
-
-    if (range.beginEntry && range.endEntry && entriesData.length > 0) {
-      for (const data of entriesData) {
-        if (!Array.isArray(data)) {
-          if (start) {
-            sentence = `${sentence} ... `;
-          }
-          continue;
-        }
-
-        for (let i = 0; i < data.length; i++) {
-          if (data[i].id === range.beginEntry) {
-            start = true;
+          for (let i = 0; i < totalPages; i++) {
+            pageEntriesData.push({
+              id: `page_${i + 1}`,
+              after: JSON.stringify({ document_id: +documentId, page: i }),
+              first: 1,
+            });
           }
 
-          if (start) {
-            sentence = `${sentence} ${data[i].wordlike_string.wordlike_string}`;
-          }
+          setEntriesData(pageEntriesData);
+        })();
+      }, [documentId, getDocumentWordEntriesByDocumentId]);
 
-          if (data[i].id === range.endEntry) {
-            start = false;
-            onChangeRange(sentence);
+      const fetchMore = useCallback(
+        async (page: TempPage) => {
+          const { data } = await getDocumentWordEntriesByDocumentId({
+            variables: {
+              document_id: documentId,
+              first: page.first,
+              after: page.after,
+            },
+          });
+
+          if (!data) {
             return;
           }
+
+          const word_entries: WordEntry[] = [];
+          data.getDocumentWordEntriesByDocumentId.edges.forEach((edge) => {
+            edge.node.forEach((item) =>
+              word_entries.push({
+                id: item.document_word_entry_id,
+                wordlike_string: {
+                  id: item.wordlike_string.wordlike_string_id,
+                  wordlike_string: item.wordlike_string.wordlike_string,
+                },
+                parent_id: item.parent_document_word_entry_id || undefined,
+              }),
+            );
+          });
+
+          setEntriesData((data) => {
+            const refactoredData: (WordEntry[] | TempPage)[] = [];
+
+            data
+              .map((item) => {
+                if (
+                  !Array.isArray(item) &&
+                  item.after === page.after &&
+                  item.first === page.first
+                ) {
+                  return word_entries;
+                } else {
+                  return item;
+                }
+              })
+              .forEach((item) => {
+                if (refactoredData.length === 0) {
+                  refactoredData.push(item);
+                  return;
+                }
+
+                const lastItem = refactoredData[refactoredData.length - 1];
+
+                if (!Array.isArray(item) || !Array.isArray(lastItem)) {
+                  refactoredData.push(item);
+                  return;
+                }
+
+                lastItem.push(...item);
+
+                return;
+              }, []);
+
+            return refactoredData;
+          });
+        },
+        [documentId, getDocumentWordEntriesByDocumentId],
+      );
+
+      useEffect(() => {
+        let sentence: string = '';
+        let start = false;
+
+        if (range.beginEntry && range.endEntry && entriesData.length > 0) {
+          for (const data of entriesData) {
+            if (!Array.isArray(data)) {
+              if (start) {
+                sentence = `${sentence} ... `;
+              }
+              continue;
+            }
+
+            for (let i = 0; i < data.length; i++) {
+              if (data[i].id === range.beginEntry) {
+                start = true;
+              }
+
+              if (start) {
+                sentence = `${sentence} ${data[i].wordlike_string.wordlike_string}`;
+              }
+
+              if (data[i].id === range.endEntry) {
+                start = false;
+                onChangeRange(sentence);
+                return;
+              }
+            }
+          }
         }
-      }
-    }
-  }, [entriesData, onChangeRange, range.beginEntry, range.endEntry]);
+      }, [entriesData, onChangeRange, range.beginEntry, range.endEntry]);
 
-  useEffect(() => {
-    if (!requiredPage) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      fetchMore(requiredPage);
-      onLoadPage && onLoadPage(requiredPage);
-    }, 1000);
-
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-  }, [fetchMore, requiredPage, onLoadPage]);
-
-  const handleLoading = useCallback((tempPage: TempPage) => {
-    setRequiredPage(tempPage);
-  }, []);
-
-  const rows = useMemo(() => {
-    const rows: JSX.Element[] = [];
-    const tempRow: {
-      cols: {
-        wordEntry: WordEntry;
-        order: number;
-      }[];
-      width: number;
-    } = {
-      cols: [],
-      width: 0,
-    };
-
-    const dotsMap = new Map<
-      string,
-      {
-        entryId: string;
-        component?: ReactNode;
-      }
-    >();
-
-    dots.forEach((dot) => dotsMap.set(dot.entryId, dot));
-
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-
-    if (!context || rowWidth === 0) {
-      return rows;
-    }
-
-    const fontSize = 14;
-    const fontWeight = 400;
-    const fontFamily = 'Poppins';
-    const padding = 6;
-    const letterSpacing = -0.28;
-
-    context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-
-    let begin = false;
-    let end = false;
-    let wordCounter = 0;
-
-    const getWordProps = (entry: WordEntry, order: number, padding: string) => {
-      if (entry.id === range.beginEntry) {
-        begin = true;
-      }
-
-      const dot = dotsMap.get(entry.id) || null;
-      const isDot = dot ? true : false;
-      const dotCom = dot ? dot.component : null;
-
-      let classStr = `${mode} `;
-      classStr +=
-        (begin && !end && range.endEntry) ||
-        entry.id === range.beginEntry ||
-        entry.id === range.endEntry
-          ? 'selected'
-          : '';
-      classStr += ` ${entry.id === range.beginEntry ? 'left-boundary' : ''}`;
-      classStr += ` ${entry.id === range.endEntry ? 'right-boundary' : ''}`;
-
-      const cursor = isDot ? 'pointer' : 'default';
-
-      if (entry.id === range.endEntry) {
-        end = true;
-      }
-
-      const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-        if (mode === 'view' && !isDot) {
+      useEffect(() => {
+        if (!requiredPage) {
           return;
         }
 
-        onClickWord(entry.id, order, e);
-      };
+        const timer = setTimeout(() => {
+          fetchMore(requiredPage);
+          onLoadPage && onLoadPage(requiredPage);
+        }, 1000);
 
-      const wordlikeString = entry.wordlike_string.wordlike_string;
+        return () => {
+          if (timer) {
+            clearTimeout(timer);
+          }
+        };
+      }, [fetchMore, requiredPage, onLoadPage]);
 
-      return {
-        sx: {
-          cursor,
-          padding,
-        },
-        classStr,
-        handleClick,
-        wordlikeString,
-        dotCom,
-        isDot,
-      };
-    };
+      const handleLoading = useCallback((tempPage: TempPage) => {
+        setRequiredPage(tempPage);
+      }, []);
 
-    for (const data of entriesData) {
-      if (!Array.isArray(data)) {
-        for (let i = 0; i < 60; i++) {
-          const skeletonCom = (
-            <SkeletonRow tempPage={data} onLoading={handleLoading} />
-          );
+      const rows = useMemo(() => {
+        const rows: JSX.Element[] = [];
+        const tempRow: {
+          cols: {
+            wordEntry: WordEntry;
+            order: number;
+          }[];
+          width: number;
+        } = {
+          cols: [],
+          width: 0,
+        };
 
-          rows.push(skeletonCom);
+        const dotsMap = new Map<
+          string,
+          {
+            entryId: string;
+            component?: ReactNode;
+          }
+        >();
+
+        dots.forEach((dot) => dotsMap.set(dot.entryId, dot));
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        if (!context || rowWidth === 0) {
+          return rows;
         }
-        continue;
-      }
 
-      const entries: WordEntry[] = data;
+        const fontSize = 14;
+        const fontWeight = 400;
+        const fontFamily = 'Poppins';
+        const padding = 6;
+        const letterSpacing = -0.28;
 
-      for (let i = 0; i < entries.length; i++) {
-        const entry = entries[i];
+        context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
 
-        const wordlikeString = entry.wordlike_string.wordlike_string;
+        let begin = false;
+        let end = false;
+        let wordCounter = 0;
 
-        const wordWidth = Math.ceil(
-          context.measureText(wordlikeString).width +
-            letterSpacing * (wordlikeString.length - 1) +
-            padding,
-        );
+        const getWordProps = (
+          entry: WordEntry,
+          order: number,
+          padding: string,
+        ) => {
+          if (entry.id === range.beginEntry) {
+            begin = true;
+          }
 
-        if (tempRow.width + wordWidth < rowWidth) {
-          tempRow.cols.push({
-            wordEntry: entry,
-            order: wordCounter,
-          });
-          tempRow.width = tempRow.width + wordWidth;
-        } else {
+          const dot = dotsMap.get(entry.id) || null;
+          const isDot = dot ? true : false;
+          const dotCom = dot ? dot.component : null;
+
+          let classStr = `${mode} `;
+          classStr +=
+            (begin && !end && range.endEntry) ||
+            entry.id === range.beginEntry ||
+            entry.id === range.endEntry
+              ? 'selected'
+              : '';
+          classStr += ` ${
+            entry.id === range.beginEntry ? 'left-boundary' : ''
+          }`;
+          classStr += ` ${entry.id === range.endEntry ? 'right-boundary' : ''}`;
+
+          const cursor = isDot ? 'pointer' : 'default';
+
+          if (entry.id === range.endEntry) {
+            end = true;
+          }
+
+          const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+            if (mode === 'view' && !isDot) {
+              return;
+            }
+
+            onClickWord(entry.id, order, e);
+          };
+
+          const wordlikeString = entry.wordlike_string.wordlike_string;
+
+          return {
+            sx: {
+              cursor,
+              padding,
+            },
+            classStr,
+            handleClick,
+            wordlikeString,
+            dotCom,
+            isDot,
+          };
+        };
+
+        for (const data of entriesData) {
+          if (!Array.isArray(data)) {
+            for (let i = 0; i < 60; i++) {
+              const skeletonCom = (
+                <SkeletonRow tempPage={data} onLoading={handleLoading} />
+              );
+
+              rows.push(skeletonCom);
+            }
+            continue;
+          }
+
+          const entries: WordEntry[] = data;
+
+          for (let i = 0; i < entries.length; i++) {
+            const entry = entries[i];
+
+            const wordlikeString = entry.wordlike_string.wordlike_string;
+
+            const wordWidth = Math.ceil(
+              context.measureText(wordlikeString).width +
+                letterSpacing * (wordlikeString.length - 1) +
+                padding,
+            );
+
+            if (tempRow.width + wordWidth < rowWidth) {
+              tempRow.cols.push({
+                wordEntry: entry,
+                order: wordCounter,
+              });
+              tempRow.width = tempRow.width + wordWidth;
+            } else {
+              const rowCom = (
+                <Stack
+                  direction="row"
+                  justifyContent="flex-start"
+                  sx={(theme) => ({
+                    color: theme.palette.text.gray,
+                  })}
+                >
+                  {tempRow.cols.map((col) => {
+                    const {
+                      sx,
+                      classStr,
+                      handleClick,
+                      wordlikeString,
+                      dotCom,
+                      isDot,
+                    } = getWordProps(
+                      col.wordEntry,
+                      col.order,
+                      `0 ${
+                        3 + (rowWidth - tempRow.width) / tempRow.cols.length / 2
+                      }px`,
+                    );
+
+                    return (
+                      <Word
+                        key={col.wordEntry.id}
+                        sx={sx}
+                        className={classStr}
+                        onClick={handleClick}
+                      >
+                        {wordlikeString}
+                        {isDot ? dotCom || <Dot /> : null}
+                      </Word>
+                    );
+                  })}
+                </Stack>
+              );
+
+              rows.push(rowCom);
+              tempRow.cols = [{ wordEntry: entry, order: wordCounter }];
+              tempRow.width = wordWidth;
+            }
+
+            wordCounter++;
+          }
+        }
+
+        if (tempRow.cols.length) {
           const rowCom = (
             <Stack
               direction="row"
@@ -418,13 +477,7 @@ export const DocumentViewer = memo(function DocumentViewerPure({
                   wordlikeString,
                   dotCom,
                   isDot,
-                } = getWordProps(
-                  col.wordEntry,
-                  col.order,
-                  `0 ${
-                    3 + (rowWidth - tempRow.width) / tempRow.cols.length / 2
-                  }px`,
-                );
+                } = getWordProps(col.wordEntry, col.order, '0 3px');
 
                 return (
                   <Word
@@ -440,68 +493,33 @@ export const DocumentViewer = memo(function DocumentViewerPure({
               })}
             </Stack>
           );
-
           rows.push(rowCom);
-          tempRow.cols = [{ wordEntry: entry, order: wordCounter }];
-          tempRow.width = wordWidth;
         }
 
-        wordCounter++;
-      }
-    }
+        return rows;
+      }, [
+        dots,
+        entriesData,
+        handleLoading,
+        mode,
+        onClickWord,
+        range.beginEntry,
+        range.endEntry,
+        rowWidth,
+      ]);
 
-    if (tempRow.cols.length) {
-      const rowCom = (
-        <Stack
-          direction="row"
-          justifyContent="flex-start"
-          sx={(theme) => ({
-            color: theme.palette.text.gray,
-          })}
-        >
-          {tempRow.cols.map((col) => {
-            const { sx, classStr, handleClick, wordlikeString, dotCom, isDot } =
-              getWordProps(col.wordEntry, col.order, '0 3px');
-
-            return (
-              <Word
-                key={col.wordEntry.id}
-                sx={sx}
-                className={classStr}
-                onClick={handleClick}
-              >
-                {wordlikeString}
-                {isDot ? dotCom || <Dot /> : null}
-              </Word>
-            );
-          })}
-        </Stack>
+      return (
+        <>
+          <Virtuoso
+            customScrollParent={ionContentScrollElement || undefined}
+            data={rows}
+            itemContent={(_index, row) => row}
+          />
+          <div style={{ opacity: 0 }}>
+            <span style={{ fontFamily: 'Poppins' }} />
+          </div>
+        </>
       );
-      rows.push(rowCom);
-    }
-
-    return rows;
-  }, [
-    dots,
-    entriesData,
-    handleLoading,
-    mode,
-    onClickWord,
-    range.beginEntry,
-    range.endEntry,
-    rowWidth,
-  ]);
-
-  return (
-    <>
-      <Virtuoso
-        customScrollParent={ionContentScrollElement || undefined}
-        data={rows}
-        itemContent={(_index, row) => row}
-      />
-      <div style={{ opacity: 0 }}>
-        <span style={{ fontFamily: 'Poppins' }} />
-      </div>
-    </>
-  );
-});
+    },
+  ),
+);
