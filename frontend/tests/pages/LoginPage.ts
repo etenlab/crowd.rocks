@@ -24,6 +24,7 @@ class LoginPage extends BasePage {
     await this.page.locator(emailTextBox).fill(loginData.email || '');
     await this.page.locator(passwordTextBox).fill(loginData.password || '');
     await this.page.locator(loginNowButton).first().click();
+    await this.page.waitForTimeout(3000);
   }
 
   async goToRegisterPage() {
