@@ -1,4 +1,4 @@
-FROM postgres:15.5 
+FROM postgres:15.3 
 
 ENV PG_MAJOR 15
 
