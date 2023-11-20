@@ -200,6 +200,7 @@ export enum ErrorType {
   EmailTooLong = 'EmailTooLong',
   EmailTooShort = 'EmailTooShort',
   EmailUnavailable = 'EmailUnavailable',
+  FileAlreadyExists = 'FileAlreadyExists',
   FileDeleteFailed = 'FileDeleteFailed',
   FileNotExists = 'FileNotExists',
   FileRecordNotFound = 'FileRecordNotFound',
@@ -1134,6 +1135,7 @@ export type MutationUploadFileArgs = {
   file: Scalars['Upload']['input'];
   file_size: Scalars['Int']['input'];
   file_type: Scalars['String']['input'];
+  returnErrorIfExists?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -3175,6 +3177,7 @@ export type UploadFileMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
   file_size: Scalars['Int']['input'];
   file_type: Scalars['String']['input'];
+  returnErrorIfExists?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -5937,8 +5940,13 @@ export type EmailResponseMutationHookResult = ReturnType<typeof useEmailResponse
 export type EmailResponseMutationResult = Apollo.MutationResult<EmailResponseMutation>;
 export type EmailResponseMutationOptions = Apollo.BaseMutationOptions<EmailResponseMutation, EmailResponseMutationVariables>;
 export const UploadFileDocument = gql`
-    mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!) {
-  uploadFile(file: $file, file_size: $file_size, file_type: $file_type) {
+    mutation UploadFile($file: Upload!, $file_size: Int!, $file_type: String!, $returnErrorIfExists: Boolean) {
+  uploadFile(
+    file: $file
+    file_size: $file_size
+    file_type: $file_type
+    returnErrorIfExists: $returnErrorIfExists
+  ) {
     error
     file {
       id
@@ -5964,6 +5972,7 @@ export type UploadFileMutationFn = Apollo.MutationFunction<UploadFileMutation, U
  *      file: // value for 'file'
  *      file_size: // value for 'file_size'
  *      file_type: // value for 'file_type'
+ *      returnErrorIfExists: // value for 'returnErrorIfExists'
  *   },
  * });
  */

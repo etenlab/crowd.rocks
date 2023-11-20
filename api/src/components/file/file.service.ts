@@ -71,9 +71,25 @@ export class FileService {
     fileType: string,
     token: string,
     fileSize?: number,
+    returnErrorIfExists?: boolean | null,
   ): Promise<IFileOutput> {
     Logger.log(`Uploading file ` + fileName);
     try {
+      if (returnErrorIfExists) {
+        const existingFile = await this.fileRepository.find({
+          where: {
+            file_name: fileName,
+            file_type: fileType,
+          },
+        });
+        if (existingFile.file) {
+          return {
+            file: null,
+            error: ErrorType.FileAlreadyExists,
+          };
+        }
+      }
+
       const fileKey = `${nanoid()}-${fileName}`;
 
       const hash = createHash('sha256');
