@@ -78,8 +78,19 @@ export function DocumentUploadModal({ onClose }: DocumentUploadModalProps) {
           file: file,
           file_size: file.size,
           file_type: file.type,
+          returnErrorIfExists: true,
         },
       });
+
+      if (uploadResult.data?.uploadFile.error === ErrorType.FileAlreadyExists) {
+        present({
+          message: tr('File with this name already exists'),
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+        return;
+      }
 
       if (
         uploadResult.data?.uploadFile.error !== ErrorType.NoError ||

@@ -172,6 +172,7 @@ enum ErrorType {
   EmailTooLong
   EmailTooShort
   EmailUnavailable
+  FileAlreadyExists
   FileDeleteFailed
   FileNotExists
   FileRecordNotFound
@@ -685,7 +686,7 @@ type Mutation {
   translateWordsAndPhrasesBySmartcat(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionOutput!
   updateFile(file: Upload, file_size: Int, file_type: String, id: Int!): IFileOutput!
-  uploadFile(file: Upload!, file_size: Int!, file_type: String!): IFileOutput!
+  uploadFile(file: Upload!, file_size: Int!, file_type: String!, returnErrorIfExists: Boolean): IFileOutput!
   upsertAnswers(input: [AnswerUpsertInput!]!): AnswersOutput!
   upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): TranslationOutput!
   upsertPericopies(startWords: [String!]!): PericopiesOutput!
