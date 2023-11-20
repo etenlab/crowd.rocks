@@ -22,6 +22,7 @@ import { ErrorType } from '../../../generated/graphql';
 
 import { useDocumentUploadMutation } from '../../../hooks/useDocumentUploadMutation';
 import { useUploadFileMutation } from '../../../hooks/useUploadFileMutation';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 type DocumentUploadModalProps = {
   onClose(): void;
@@ -35,10 +36,14 @@ export function DocumentUploadModal({ onClose }: DocumentUploadModalProps) {
     nation_id: string;
     language_id: string;
   }>();
-
-  const [documentLanguage, setDocumentLanguage] = useState<LanguageInfo | null>(
-    null,
-  );
+  const {
+    states: {
+      global: {
+        langauges: { sourceLang },
+      },
+    },
+    actions: { setSourceLanguage },
+  } = useAppContext();
 
   const [uploadFile, { loading: uploading }] = useUploadFileMutation();
   const [documentUpload, { loading, data }] = useDocumentUploadMutation();
@@ -47,7 +52,7 @@ export function DocumentUploadModal({ onClose }: DocumentUploadModalProps) {
 
   const handleAddDocument = useCallback(
     async (file: File | undefined) => {
-      if (!documentLanguage) {
+      if (!sourceLang) {
         present({
           message: tr('Please select document language first.'),
           duration: 1500,
@@ -87,9 +92,9 @@ export function DocumentUploadModal({ onClose }: DocumentUploadModalProps) {
         variables: {
           document: {
             file_id: String(uploadResult.data.uploadFile.file.id),
-            language_code: documentLanguage.lang.tag,
-            dialect_code: documentLanguage?.dialect?.tag,
-            geo_code: documentLanguage?.region?.tag,
+            language_code: sourceLang.lang.tag,
+            dialect_code: sourceLang?.dialect?.tag,
+            geo_code: sourceLang?.region?.tag,
           },
         },
       });
@@ -102,14 +107,14 @@ export function DocumentUploadModal({ onClose }: DocumentUploadModalProps) {
       }
     },
     [
-      tr,
+      sourceLang,
+      uploadFile,
+      documentUpload,
       present,
+      tr,
       history,
       nation_id,
-      uploadFile,
       language_id,
-      documentUpload,
-      documentLanguage,
     ],
   );
 
@@ -121,11 +126,11 @@ export function DocumentUploadModal({ onClose }: DocumentUploadModalProps) {
     <Stack gap="16px">
       <LangSelector
         title={tr('Select document language')}
-        selected={documentLanguage}
+        selected={sourceLang}
         onChange={(_sourceLangTag, sourceLangInfo) => {
-          setDocumentLanguage(sourceLangInfo);
+          setSourceLanguage(sourceLangInfo);
         }}
-        onClearClick={() => setDocumentLanguage(null)}
+        onClearClick={() => setSourceLanguage(null)}
       />
 
       <FileUpload
