@@ -5,25 +5,7 @@ import SettingsPage from '../pages/SettingsPage';
 import SettingsData from '../data-factory/SettingsData';
 import { settings, leftMenu } from '../enums/Enums';
 
-test('Verify that user is navigated to settings page after clicking on the setting button from the left nav menu', async ({
-  page,
-}) => {
-  const homePage = new HomePage(page);
-  const leftMenuPage = new MenuPage(page);
-  const settingsPage = new SettingsPage(page);
-
-  //Navigate to the URL
-  await page.goto('/US/en/1/home');
-
-  //Expand the menu and click on settings
-  await homePage.clickOnExpandMenu();
-  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Settings);
-
-  //verify setting page title is displayed
-  expect(await settingsPage.isSettingPageTitleVisible()).toBeTruthy();
-});
-
-test.skip('Verify that all the settings options are available on the setting page', async ({
+test.skip('Verify that user is navigated to settings page & all the settings options are available on the setting page', async ({
   page,
 }) => {
   const homePage = new HomePage(page);
@@ -37,6 +19,9 @@ test.skip('Verify that all the settings options are available on the setting pag
   //Expand the menu and click on settings
   await homePage.clickOnExpandMenu();
   await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Settings);
+
+  //verify setting page title is displayed
+  expect(await settingsPage.isSettingPageTitleVisible()).toBeTruthy();
 
   //Get the settings page lists and verify the settings name is displayed
   const lists = await settingsPage.getAllSettingFeaturesList();
@@ -52,11 +37,7 @@ test('Verify that all the Beta tools are displayed when user enable beta tools t
   const getSettingsList = SettingsData.allSettingsList();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/home');
-
-  //Expand the menu and click on settings
-  await homePage.clickOnExpandMenu();
-  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Settings);
+  await page.goto('/US/en/1/settings');
 
   //Get the settings page list and verify the beta tools is displayed
   const lists = await settingsPage.getAllSettingFeaturesList();
@@ -70,8 +51,7 @@ test('Verify that all the Beta tools are displayed when user enable beta tools t
   expect(await homePage.isLanguageTextVisible()).toBeTruthy();
 
   //Expand the menu and click on settings
-  await homePage.clickOnExpandMenu();
-  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Settings);
+  await page.goto('/US/en/1/settings');
 
   //Click on beta toggle button
   await settingsPage.clickOnToggleButton(settings.BetaTools, false);
@@ -84,17 +64,11 @@ test('Verify that all the Beta tools are displayed when user enable beta tools t
 test('Verify that dark UI is display when user enable dark mode toggle button', async ({
   page,
 }) => {
-  const homePage = new HomePage(page);
-  const leftMenuPage = new MenuPage(page);
   const settingsPage = new SettingsPage(page);
   const getSettingsList = SettingsData.allSettingsList();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/home');
-
-  //Expand the menu and click on settings
-  await homePage.clickOnExpandMenu();
-  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Settings);
+  await page.goto('/US/en/1/settings');
 
   //Get the settings page list and verify the beta tools is displayed
   const lists = await settingsPage.getAllSettingFeaturesList();
@@ -110,17 +84,11 @@ test('Verify that dark UI is display when user enable dark mode toggle button', 
 test('Verify that light UI is display when user disable dark mode toggle button', async ({
   page,
 }) => {
-  const homePage = new HomePage(page);
-  const leftMenuPage = new MenuPage(page);
   const settingsPage = new SettingsPage(page);
   const getSettingsList = SettingsData.allSettingsList();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/home');
-
-  //Expand the menu and click on settings
-  await homePage.clickOnExpandMenu();
-  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Settings);
+  await page.goto('/US/en/1/settings');
 
   //Get the settings page list and verify the beta tools is displayed
   const lists = await settingsPage.getAllSettingFeaturesList();
