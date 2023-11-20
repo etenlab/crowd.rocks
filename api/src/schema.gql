@@ -620,7 +620,7 @@ type MarkNotificationReadOutput {
 type Mutation {
   addNotification(input: AddNotificationInput!): AddNotificationOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
-  botTranslateDocument(input: BotTranslateDocumentInput!): GenericOutput!
+  botTranslateDocument(input: BotTranslateDocumentInput!): DocumentUploadOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!

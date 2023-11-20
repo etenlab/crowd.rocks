@@ -17,7 +17,6 @@ import {
   BotType,
   ErrorType,
   TextyDocument,
-  useBotTranslateDocumentMutation,
   useSourceToTargetLanguagesForBotLazyQuery,
 } from '../../../generated/graphql';
 
@@ -26,6 +25,7 @@ import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { useCallback, useMemo, useState } from 'react';
 import { LanguageInfo, langInfo2langInput } from '../../../../../utils';
 import { NavArrowRight } from '../../common/icons/NavArrowRight';
+import { useBotTranslateDocumentMutation } from '../../../hooks/useBotTranslateDocumentMutation';
 
 type DocumentBotTranslateModalProps = {
   onClose(): void;
