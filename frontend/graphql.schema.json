@@ -5544,7 +5544,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "GenericOutput",
+                "name": "DocumentUploadOutput",
                 "ofType": null
               }
             },

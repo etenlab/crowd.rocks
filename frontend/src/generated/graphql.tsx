@@ -691,7 +691,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   addNotification: AddNotificationOutput;
   avatarUpdateResolver: AvatarUpdateOutput;
-  botTranslateDocument: GenericOutput;
+  botTranslateDocument: DocumentUploadOutput;
   createQuestionOnWordRange: QuestionOnWordRangesOutput;
   documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
@@ -3162,7 +3162,7 @@ export type BotTranslateDocumentMutationVariables = Exact<{
 }>;
 
 
-export type BotTranslateDocumentMutation = { __typename?: 'Mutation', botTranslateDocument: { __typename?: 'GenericOutput', error: ErrorType } };
+export type BotTranslateDocumentMutation = { __typename?: 'Mutation', botTranslateDocument: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
 
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -5868,10 +5868,13 @@ export const BotTranslateDocumentDocument = gql`
   botTranslateDocument(
     input: {botType: $botType, documentId: $documentId, targetLang: $targetLang}
   ) {
+    document {
+      ...TextyDocumentFragment
+    }
     error
   }
 }
-    `;
+    ${TextyDocumentFragmentFragmentDoc}`;
 export type BotTranslateDocumentMutationFn = Apollo.MutationFunction<BotTranslateDocumentMutation, BotTranslateDocumentMutationVariables>;
 
 /**
