@@ -2,6 +2,7 @@ import { Field, ID, Int, InputType, ObjectType } from '@nestjs/graphql';
 import { GenericOutput, TableNameType } from 'src/common/types';
 import { DocumentWordEntry } from 'src/components/documents/types';
 import { User } from '../user/types';
+import { PageInfo } from '../common/types';
 
 @ObjectType()
 export class QuestionItem {
@@ -83,6 +84,19 @@ export class QuestionWithStatisticOutput extends GenericOutput {
 export class QuestionOnWordRangesOutput extends GenericOutput {
   @Field(() => [QuestionOnWordRange], { nullable: 'items' })
   questions: (QuestionOnWordRange | null)[];
+}
+
+@ObjectType()
+export class QuestionOnWordRangesEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => [QuestionOnWordRange]) node: QuestionOnWordRange[];
+}
+
+@ObjectType()
+export class QuestionOnWordRangesListConnection extends GenericOutput {
+  @Field(() => [QuestionOnWordRangesEdge])
+  edges: QuestionOnWordRangesEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
 }
 
 @ObjectType()

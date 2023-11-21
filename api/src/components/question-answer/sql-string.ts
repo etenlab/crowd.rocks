@@ -134,13 +134,13 @@ export function getQuestionsObjByRefs(
         select unnest($1::text[]), unnest($2::int[])
       )
       select 
-        question_id,
-        parent_table,
-        parent_id,
-        question_type_is_multiselect,
-        question,
-        question_items,
-        created_at,
+        questions.question_id,
+        questions.parent_table,
+        questions.parent_id,
+        questions.question_type_is_multiselect,
+        questions.question,
+        questions.question_items,
+        questions.created_at,
         questions.created_by as user_id,
         u.is_bot,
         a.avatar,
@@ -237,11 +237,11 @@ export function getAnswersObjByQuestionIds(
   return [
     `
       select 
-        answer_id,
-        question_id,
-        answer,
-        question_items,
-        created_at,
+        answers.answer_id,
+        answers.question_id,
+        answers.answer,
+        answers.question_items,
+        answers.created_at,
         answers.created_by as user_id,
         u.is_bot,
         a.avatar,
@@ -271,12 +271,12 @@ export function getQuestionItemStatistic(
       select
         qis.question_item_id,
         qis.item,
-        count(
+        sum(
           case when answers.answer_id is null then 0 else 1 end
         ) as statistic
       from question_items as qis
       left join answers
-        on qis.question_item_id = any(answers.question_items).
+        on qis.question_item_id = any(answers.question_items)
       where qis.question_item_id = any($1)
       group by qis.question_item_id;
     `,
