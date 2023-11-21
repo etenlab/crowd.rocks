@@ -141,15 +141,8 @@ export class QuestionsService {
         };
       }
 
-      const question_item_ids: number[] = questions[0]!.question_items.map(
-        (question_item) => +question_item.question_item_id,
-      );
-
       const { error: qiError, question_item_with_statistics } =
-        await this.questionItemService.getStatistics(
-          question_item_ids,
-          pgClient,
-        );
+        await this.questionItemService.getStatistics(question_id, pgClient);
 
       if (qiError !== ErrorType.NoError) {
         return {

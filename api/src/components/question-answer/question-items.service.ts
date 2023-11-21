@@ -11,7 +11,6 @@ import {
   QuestionItemsOutput,
   QuestionItem,
   QuestionItemWithStatisticsOutput,
-  QuestionItemWithStatistic,
 } from './types';
 
 import {
@@ -65,30 +64,24 @@ export class QuestionItemsService {
   }
 
   async getStatistics(
-    ids: number[],
+    question_id: number,
     pgClient: PoolClient | null,
   ): Promise<QuestionItemWithStatisticsOutput> {
     try {
       const res = await pgClientOrPool({
         client: pgClient,
         pool: this.pg.pool,
-      }).query<GetQuestionItemStatistic>(...getQuestionItemStatistic(ids));
-
-      const questionItemsMap = new Map<string, QuestionItemWithStatistic>();
-
-      res.rows.forEach((row) =>
-        questionItemsMap.set(row.question_item_id, {
-          question_item_id: row.question_item_id,
-          item: row.item,
-          statistic: +row.statistic,
-        }),
+      }).query<GetQuestionItemStatistic>(
+        ...getQuestionItemStatistic(question_id),
       );
 
       return {
         error: ErrorType.NoError,
-        question_item_with_statistics: ids.map(
-          (id) => questionItemsMap.get(id + '') || null,
-        ),
+        question_item_with_statistics: res.rows.map((row) => ({
+          question_item_id: row.question_item_id,
+          item: row.item,
+          statistic: +row.statistic,
+        })),
       };
     } catch (e) {
       Logger.error(e);

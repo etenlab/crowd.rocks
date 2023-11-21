@@ -264,8 +264,8 @@ export type GetQuestionItemStatistic = {
 };
 
 export function getQuestionItemStatistic(
-  question_item_ids: number[],
-): [string, [number[]]] {
+  question_id: number,
+): [string, [number]] {
   return [
     `
       select
@@ -275,11 +275,14 @@ export function getQuestionItemStatistic(
           case when answers.answer_id is null then 0 else 1 end
         ) as statistic
       from question_items as qis
+      join questions
+        on qis.question_item_id = any(questions.question_items)
       left join answers
         on qis.question_item_id = any(answers.question_items)
-      where qis.question_item_id = any($1)
+      where questions.question_id = $1
+        and answers.question_id = $1
       group by qis.question_item_id;
     `,
-    [question_item_ids],
+    [question_id],
   ];
 }
