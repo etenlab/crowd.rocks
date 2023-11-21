@@ -3,10 +3,9 @@ import { Stack, Button } from '@mui/material';
 
 import { Checkbox } from '../../common/buttons/Checkbox';
 import { Radio } from '../../common/buttons/Radio';
-import { ThumbsUp } from '../../common/icons/ThumbsUp';
-import { ThumbsDown } from '../../common/icons/ThumbsDown';
-import { CheckCircle } from '../../common/icons/CheckCircle';
 import { Input } from '../../common/forms/Input';
+import { UpvoteButton } from '../../common/buttons/vote/UpvoteButton';
+import { DownvoteButton } from '../../common/buttons/vote/DownvoteButton';
 
 import { useTr } from '../../../hooks/useTr';
 import { useUpsertAnswerMutation } from '../../../hooks/useUpsertAnswerMutation';
@@ -74,7 +73,7 @@ export function AnswerForm({ onClose, question }: AnswerFormProps) {
 
   return (
     <Stack gap="20px">
-      <Typography>{tr('Add answer')}</Typography>
+      <Typography variant="h3">{tr('Add answer')}</Typography>
       <QuestionItemsForm
         question={question}
         text={text}
@@ -83,11 +82,21 @@ export function AnswerForm({ onClose, question }: AnswerFormProps) {
         onChangeText={handleChangeText}
       />
       <Stack direction="row" gap="24px">
-        <Button variant="contained" color="gray">
+        <Button
+          variant="contained"
+          color="gray_stroke"
+          fullWidth
+          onClick={onClose}
+        >
           {tr('Cancel')}
         </Button>
         {showSaveButton ? (
-          <Button variant="contained" color="green" onClick={handleSaveAnswer}>
+          <Button
+            variant="contained"
+            color="green"
+            fullWidth
+            onClick={handleSaveAnswer}
+          >
             {tr('Save')}
           </Button>
         ) : null}
@@ -134,11 +143,17 @@ export function QuestionItemsForm({
           <Button
             variant="text"
             startIcon={
-              <Checkbox checked={items.includes(item.item)} color="blue" />
+              <Checkbox
+                checked={items.includes(item.item)}
+                sx={{ fontSize: 22, padding: 0 }}
+                color={items.includes(item.item) ? 'blue' : 'gray_stroke'}
+              />
             }
             color="gray"
             key={item.question_item_id}
             onClick={() => handleChangeMultiselect(item.item)}
+            sx={{ justifyContent: 'flex-start', padding: 0 }}
+            disableRipple
           >
             {item.item}
           </Button>
@@ -153,6 +168,8 @@ export function QuestionItemsForm({
         placeholder={tr('Please write your answer')}
         value={text}
         onChange={onChangeText}
+        multiline
+        rows={4}
       />
     );
   }
@@ -171,22 +188,16 @@ export function QuestionItemsForm({
           justifyContent="space-between"
           alignItems="center"
         >
-          <Button
-            variant={items[0] === 'agree' ? 'contained' : 'outlined'}
-            startIcon={<ThumbsUp sx={{ fontSize: 22 }} color="green" />}
-            color="gray"
+          <UpvoteButton
+            selected={items[0] === 'agree'}
+            upvotes={tr('Agree')}
             onClick={() => handleChangeChooseOne('agree')}
-          >
-            {tr('Agree')}
-          </Button>
-          <Button
-            variant={items[1] === 'disagree' ? 'contained' : 'outlined'}
-            startIcon={<ThumbsDown sx={{ fontSize: 22 }} color="red" />}
-            color="gray"
-            onClick={() => handleChangeChooseOne('agree')}
-          >
-            {tr('Disagree')}
-          </Button>
+          />
+          <DownvoteButton
+            selected={items[0] === 'disagree'}
+            downvotes={tr('Disagree')}
+            onClick={() => handleChangeChooseOne('disagree')}
+          />
         </Stack>
       );
     } else if (
@@ -199,17 +210,33 @@ export function QuestionItemsForm({
         <Stack gap="16px">
           <Button
             variant="text"
-            startIcon={<CheckCircle sx={{ fontSize: 22 }} color="green" />}
+            startIcon={
+              <Radio
+                sx={{ fontSize: 22, padding: 0 }}
+                color={items[0] === 'true' ? 'green' : 'gray_stroke'}
+                checked={items[0] === 'true'}
+              />
+            }
             onClick={() => handleChangeChooseOne('true')}
             color="gray"
+            sx={{ justifyContent: 'flex-start', padding: 0 }}
+            disableRipple
           >
             {tr('True')}
           </Button>
           <Button
             variant="text"
-            startIcon={<CheckCircle sx={{ fontSize: 22 }} color="red" />}
+            startIcon={
+              <Radio
+                sx={{ fontSize: 22, padding: 0 }}
+                color={items[0] === 'false' ? 'red' : 'gray_stroke'}
+                checked={items[0] === 'false'}
+              />
+            }
             color="gray"
             onClick={() => handleChangeChooseOne('false')}
+            sx={{ justifyContent: 'flex-start', padding: 0 }}
+            disableRipple
           >
             {tr('False')}
           </Button>
@@ -225,13 +252,16 @@ export function QuestionItemsForm({
           variant="text"
           startIcon={
             <Radio
+              sx={{ fontSize: 22, padding: 0 }}
               checked={items.includes(item.item)}
-              color="blue"
-              onClick={() => handleChangeChooseOne(item.item)}
+              color={items.includes(item.item) ? 'blue' : 'gray_stroke'}
             />
           }
+          onClick={() => handleChangeChooseOne(item.item)}
           color="gray"
           key={item.question_item_id}
+          sx={{ justifyContent: 'flex-start', padding: 0 }}
+          disableRipple
         >
           {item.item}
         </Button>

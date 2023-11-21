@@ -4,10 +4,9 @@ import { QuestionWithStatistic } from '../../../generated/graphql';
 
 import { Item } from '../styled';
 import { Checkbox } from '../../common/buttons/Checkbox';
-import { Radio } from '../../common/buttons/Radio';
 import { ThumbsUp } from '../../common/icons/ThumbsUp';
 import { ThumbsDown } from '../../common/icons/ThumbsDown';
-import { CheckCircle } from '../../common/icons/CheckCircle';
+import { FilledCheckCircle } from '../../common/icons/FilledCheckCircle';
 
 export type StatisticsProps = {
   question: QuestionWithStatistic;
@@ -18,10 +17,22 @@ export function Statistics({ question }: StatisticsProps) {
     return (
       <Stack gap="16px">
         {question.question_items.map((item) => (
-          <Item key={item.question_item_id}>
+          <Item
+            key={item.question_item_id}
+            sx={{
+              display: 'flex',
+              flexDireciton: 'row',
+              gap: '10px',
+              alignItem: 'center',
+            }}
+          >
             <Checkbox checked color="blue" />
-            <Typography>{item.item}</Typography>
-            <Typography>{` (${item.statistic})`}</Typography>
+            <Typography variant="h5">{item.item}</Typography>
+            <Typography
+              variant="h5"
+              color="text.gray"
+              sx={{ marginLeft: '-7px' }}
+            >{`(${item.statistic})`}</Typography>
           </Item>
         ))}
       </Stack>
@@ -42,14 +53,26 @@ export function Statistics({ question }: StatisticsProps) {
       return (
         <Stack gap="16px">
           {question.question_items.map((item) => (
-            <Item key={item.question_item_id}>
+            <Item
+              key={item.question_item_id}
+              sx={{
+                display: 'flex',
+                flexDireciton: 'row',
+                gap: '10px',
+                alignItem: 'center',
+              }}
+            >
               {item.item === 'agree' ? (
                 <ThumbsUp sx={{ fontSize: 22 }} color="green" />
               ) : (
                 <ThumbsDown sx={{ fontSize: 22 }} color="red" />
               )}
-              <Typography>{item.item}</Typography>
-              <Typography>{` (${item.statistic})`}</Typography>
+              <Typography variant="h5">{item.item}</Typography>
+              <Typography
+                variant="h5"
+                color="text.gray"
+                sx={{ marginLeft: '-7px' }}
+              >{`(${item.statistic})`}</Typography>
             </Item>
           ))}
         </Stack>
@@ -63,14 +86,26 @@ export function Statistics({ question }: StatisticsProps) {
       return (
         <Stack gap="16px">
           {question.question_items.map((item) => (
-            <Item key={item.question_item_id}>
+            <Item
+              key={item.question_item_id}
+              sx={{
+                display: 'flex',
+                flexDireciton: 'row',
+                gap: '10px',
+                alignItem: 'center',
+              }}
+            >
               {item.item === 'true' ? (
-                <CheckCircle sx={{ fontSize: 22 }} color="green" />
+                <FilledCheckCircle sx={{ fontSize: 22 }} color="green" />
               ) : (
-                <CheckCircle sx={{ fontSize: 22 }} color="red" />
+                <FilledCheckCircle sx={{ fontSize: 22 }} color="red" />
               )}
-              <Typography>{item.item}</Typography>
-              <Typography>{` (${item.statistic})`}</Typography>
+              <Typography variant="h5">{item.item}</Typography>
+              <Typography
+                variant="h5"
+                color="text.gray"
+                sx={{ marginLeft: '-7px' }}
+              >{`(${item.statistic})`}</Typography>
             </Item>
           ))}
         </Stack>
@@ -81,10 +116,22 @@ export function Statistics({ question }: StatisticsProps) {
   return (
     <Stack gap="16px">
       {question.question_items.map((item) => (
-        <Item key={item.question_item_id}>
-          <Radio checked color="blue" />
-          <Typography>{item.item}</Typography>
-          <Typography>{` (${item.statistic})`}</Typography>
+        <Item
+          key={item.question_item_id}
+          sx={{
+            display: 'flex',
+            flexDireciton: 'row',
+            gap: '10px',
+            alignItem: 'center',
+          }}
+        >
+          <FilledCheckCircle sx={{ fontSize: 22 }} color="blue" />
+          <Typography variant="h5">{item.item}</Typography>
+          <Typography
+            variant="h5"
+            color="text.gray"
+            sx={{ marginLeft: '-7px' }}
+          >{`(${item.statistic})`}</Typography>
         </Item>
       ))}
     </Stack>

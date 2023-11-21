@@ -104,14 +104,20 @@ export function AnswersPage() {
 
       {questionWithStatistic ? (
         <Stack gap="10px">
-          <Typography variant="overline">{tr('Question by')}:</Typography>
+          <Typography variant="overline" color="text.gray">
+            {tr('Question by')}:
+          </Typography>
 
           <PostAuthor
             username={questionWithStatistic.created_by_user.avatar}
             date={new Date(questionWithStatistic.created_at)}
             avatar={questionWithStatistic.created_by_user.avatar_url || ''}
           />
-          <Item>{questionWithStatistic.question}</Item>
+          <Item>
+            <Typography variant="h5" sx={{ fontWeight: 500 }}>
+              {questionWithStatistic.question}
+            </Typography>
+          </Item>
         </Stack>
       ) : null}
 
@@ -121,17 +127,39 @@ export function AnswersPage() {
             <Stack direction="row">
               <Button
                 variant="outlined"
-                sx={{}}
+                sx={(theme) => ({
+                  borderRadius: '10px 0 0 10px',
+                  borderRight: currentTab === 'Answers' ? '' : 'none',
+                  backgroundColor:
+                    currentTab === 'Answers'
+                      ? theme.palette.background.blue_10
+                      : '',
+                })}
                 color={currentTab === 'Answers' ? 'blue' : 'gray'}
                 onClick={() => setCurrentTab('Answers')}
+                fullWidth
               >
                 {tr('Answers')}
               </Button>
               <Button
                 variant="outlined"
-                sx={{}}
+                sx={(theme) => ({
+                  borderRadius: '0 10px 10px 0',
+                  borderLeft: currentTab === 'Statistics' ? '' : 'none',
+                  backgroundColor:
+                    currentTab === 'Statistics'
+                      ? theme.palette.background.blue_10
+                      : '',
+                })}
                 color={currentTab === 'Statistics' ? 'blue' : 'gray'}
                 onClick={() => setCurrentTab('Statistics')}
+                fullWidth
+                disabled={
+                  !questionWithStatistic ||
+                  questionWithStatistic.question_items.length === 0
+                    ? true
+                    : false
+                }
               >
                 {tr('Statistics')}
               </Button>
@@ -140,7 +168,7 @@ export function AnswersPage() {
 
           {answerFormCom}
 
-          {questionWithStatistic ? (
+          {!showAnswerForm && questionWithStatistic ? (
             currentTab === 'Answers' ? (
               <AnswerList question={questionWithStatistic} />
             ) : (

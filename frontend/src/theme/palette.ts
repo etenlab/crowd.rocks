@@ -22,7 +22,7 @@ export const colors = {
   },
   blue_10: {
     light: designColors['blue_10'],
-    dark: designColors['blue_10'],
+    dark: designColors['dark'],
   },
   orange: {
     light: designColors['orange'],
@@ -107,7 +107,7 @@ export function getColorPalette(mode: 'light' | 'dark'): ThemeOptions {
       },
       text: {
         blue: colors['blue'][mode],
-        blue_10: colors['blue'][mode],
+        blue_10: colors['blue_10'][mode],
         orange: colors['orange'][mode],
         red: colors['red'][mode],
         white: colors['white'][mode],
@@ -121,7 +121,7 @@ export function getColorPalette(mode: 'light' | 'dark'): ThemeOptions {
       },
       background: {
         blue: colors['blue'][mode],
-        blue_10: colors['blue'][mode],
+        blue_10: colors['blue_10'][mode],
         orange: colors['orange'][mode],
         red: colors['red'][mode],
         white: colors['white'][mode],

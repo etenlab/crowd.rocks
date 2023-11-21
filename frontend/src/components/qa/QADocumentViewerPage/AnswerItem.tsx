@@ -1,15 +1,15 @@
 import { Stack, Typography } from '@mui/material';
 
 import { Checkbox } from '../../common/buttons/Checkbox';
-import { Radio } from '../../common/buttons/Radio';
-import { ThumbsUp } from '../../common/icons/ThumbsUp';
-import { ThumbsDown } from '../../common/icons/ThumbsDown';
-import { CheckCircle } from '../../common/icons/CheckCircle';
+import { UpvoteButton } from '../../common/buttons/vote/UpvoteButton';
+import { DownvoteButton } from '../../common/buttons/vote/DownvoteButton';
 
 import { Item } from '../styled';
 
 import { Answer, QuestionWithStatistic } from '../../../generated/graphql';
 import { PostAuthor } from '../../common/PostAuthor';
+import { useTr } from '../../../hooks/useTr';
+import { FilledCheckCircle } from '../../common/icons/FilledCheckCircle';
 
 type AnswerItemProps = {
   question: QuestionWithStatistic;
@@ -17,27 +17,32 @@ type AnswerItemProps = {
 };
 
 export function AnswerItem({ question, answer }: AnswerItemProps) {
+  const { tr } = useTr();
+
   if (question.question_type_is_multiselect) {
-    <Stack gap="10px">
-      <PostAuthor
-        username={answer.created_by_user.avatar}
-        date={new Date(answer.created_at)}
-        avatar={answer.created_by_user.avatar_url || ''}
-      />
-      <Item sx={{ display: 'flex', direction: 'column', gap: '16px' }}>
-        {answer.question_items.map((item) => (
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="flex-start"
-            key={item.question_item_id}
-          >
-            <Checkbox checked color="blue" />
-            <Typography>{item.item}</Typography>
-          </Stack>
-        ))}
-      </Item>
-    </Stack>;
+    return (
+      <Stack gap="10px">
+        <PostAuthor
+          username={answer.created_by_user.avatar}
+          date={new Date(answer.created_at)}
+          avatar={answer.created_by_user.avatar_url || ''}
+        />
+        <Item sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {answer.question_items.map((item) => (
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="flex-start"
+              gap="10px"
+              key={item.question_item_id}
+            >
+              <Checkbox checked color="blue" />
+              <Typography>{item.item}</Typography>
+            </Stack>
+          ))}
+        </Item>
+      </Stack>
+    );
   }
 
   if (question.question_items.length === 0) {
@@ -69,17 +74,24 @@ export function AnswerItem({ question, answer }: AnswerItemProps) {
             date={new Date(answer.created_at)}
             avatar={answer.created_by_user.avatar_url || ''}
           />
-          <Item sx={{ display: 'flex', direction: 'column', gap: '16px' }}>
-            {answer.question_items.map((item) => (
-              <Item key={item.question_item_id}>
-                {item.item === 'agree' ? (
-                  <ThumbsUp sx={{ fontSize: 22 }} color="green" />
-                ) : (
-                  <ThumbsDown sx={{ fontSize: 22 }} color="red" />
-                )}
-                <Typography>{item.item}</Typography>
-              </Item>
-            ))}
+          <Item sx={{ display: 'flex', gap: '16px' }}>
+            {answer.question_items.map((item) =>
+              item.item === 'agree' ? (
+                <UpvoteButton
+                  key={item.question_item_id}
+                  selected
+                  upvotes={tr('Agree')}
+                  onClick={() => {}}
+                />
+              ) : (
+                <DownvoteButton
+                  key={item.question_item_id}
+                  selected
+                  downvotes={tr('Disagree')}
+                  onClick={() => {}}
+                />
+              ),
+            )}
           </Item>
         </Stack>
       );
@@ -98,14 +110,21 @@ export function AnswerItem({ question, answer }: AnswerItemProps) {
           />
           <Item sx={{ display: 'flex', direction: 'column', gap: '16px' }}>
             {answer.question_items.map((item) => (
-              <Item key={item.question_item_id}>
+              <Stack
+                key={item.question_item_id}
+                direction="row"
+                alignContent="center"
+                gap="10px"
+              >
                 {item.item === 'true' ? (
-                  <CheckCircle sx={{ fontSize: 22 }} color="green" />
+                  <FilledCheckCircle sx={{ fontSize: 22 }} color="green" />
                 ) : (
-                  <CheckCircle sx={{ fontSize: 22 }} color="red" />
+                  <FilledCheckCircle sx={{ fontSize: 22 }} color="red" />
                 )}
-                <Typography>{item.item}</Typography>
-              </Item>
+                <Typography variant="h5" sx={{ fontWeight: 500 }}>
+                  {item.item}
+                </Typography>
+              </Stack>
             ))}
           </Item>
         </Stack>
@@ -120,14 +139,17 @@ export function AnswerItem({ question, answer }: AnswerItemProps) {
         date={new Date(answer.created_at)}
         avatar={answer.created_by_user.avatar_url || ''}
       />
-      <Item sx={{ display: 'flex', direction: 'column', gap: '16px' }}>
+      <Stack gap="16px">
         {answer.question_items.map((item) => (
-          <Item key={item.question_item_id}>
-            <Radio checked color="blue" />
+          <Item
+            key={item.question_item_id}
+            sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            <FilledCheckCircle sx={{ fontSize: 22 }} color="blue" />
             <Typography>{item.item}</Typography>
           </Item>
         ))}
-      </Item>
+      </Stack>
     </Stack>
   );
 }

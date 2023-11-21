@@ -63,6 +63,7 @@ export function QuestionsModal({
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '16px',
+                marginBottom: '16px',
               }}
             >
               <Typography variant="body2">{item.question}</Typography>
