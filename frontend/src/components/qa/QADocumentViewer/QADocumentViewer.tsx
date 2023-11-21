@@ -1,31 +1,36 @@
 import {
   useMemo,
   useState,
+  useEffect,
   useCallback,
   useRef,
   ReactNode,
   MouseEvent,
 } from 'react';
-import { useIonToast } from '@ionic/react';
+import { useHistory, useParams } from 'react-router';
 import { Popover } from '@mui/material';
 
 import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
 import { Dot } from '../../documents/DocumentViewer/styled';
-import { DocumentViewer } from '../../documents/DocumentViewer';
+import {
+  DocumentViewer,
+  DocumentViewerHandle,
+} from '../../documents/DocumentViewer';
 
 import {
-  useGetQuestionOnWordRangesByDocumentIdQuery,
   QuestionOnWordRange,
-  ErrorType,
+  useGetQuestionOnWordRangesByDocumentIdQuery,
 } from '../../../generated/graphql';
 // import { useUpsertAnswerMutation } from '../../../hooks/useUpsertAnswerMutation';
 
-import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 // import { AnswerList } from './AnswerList';
 import { PieceOfTextModal } from './PieceOfTextModal';
 import { QuestionAddButton } from './QuestionAddButton';
+import { QuestionsModal } from './QuestionsModal';
+
+import { TempPage } from '../../documents/DocumentViewer/DocumentViewer';
 
 export type RangeItem = {
   entryId: string;
@@ -47,17 +52,25 @@ export function QADocumentViewer({
   mode,
   onNewQuestionFormData,
 }: QADocumentViewerProps) {
-  const { tr } = useTr();
+  const history = useHistory();
+  const { nation_id, language_id, cluster_id } = useParams<{
+    nation_id: string;
+    language_id: string;
+    cluster_id: string;
+  }>();
+
   const {
     actions: { createModal },
   } = useAppContext();
-  const [presetToast] = useIonToast();
 
-  const { data, error } = useGetQuestionOnWordRangesByDocumentIdQuery({
+  const { data, fetchMore } = useGetQuestionOnWordRangesByDocumentIdQuery({
     variables: {
       document_id: documentId,
+      first: 1,
+      after: null,
     },
   });
+
   // const [upsertAnswer] = useUpsertAnswerMutation();
 
   const [range, setRange] = useState<{
@@ -67,59 +80,66 @@ export function QADocumentViewer({
   // const [selectedQuestion, setSelectedQuestion] =
   //   useState<QuestionOnWordRange | null>(null);
   const [sentence, setSentence] = useState<string>('');
+  const [requiredPage, setRequiredPage] = useState<TempPage | null>(null);
 
-  const askQuestionButtonModalRef = useRef(createModal());
+  const questionsMapRef = useRef(new Map<string, QuestionOnWordRange>());
+  const questionsGroupMapRef = useRef(new Map<string, QuestionOnWordRange[]>());
+  const documentViewerRef = useRef<DocumentViewerHandle>(null);
 
-  const { dots, questionsMap } = useMemo(() => {
-    const questionsMap = new Map<string, QuestionOnWordRange[]>();
+  const { openModal, closeModal } = createModal();
 
-    if (
-      error ||
-      !data ||
-      data.getQuestionOnWordRangesByDocumentId.error !== ErrorType.NoError
-    ) {
-      if (
-        data &&
-        data.getQuestionOnWordRangesByDocumentId.error !== ErrorType.NoError
-      ) {
-        presetToast({
-          message: `${tr('Failed at fetching questions!')} [${
-            data.getQuestionOnWordRangesByDocumentId.error
-          }]`,
-          duration: 1500,
-          position: 'top',
-          color: 'danger',
-        });
-      }
-      return {
-        dots: [],
-        questionsMap,
-      };
+  useEffect(() => {
+    if (!requiredPage) {
+      return;
     }
 
-    data.getQuestionOnWordRangesByDocumentId.questions.forEach((question) => {
-      if (!question) {
-        return;
+    const timer = setTimeout(() => {
+      fetchMore({
+        variables: {
+          document_id: documentId,
+          first: requiredPage.first,
+          after: requiredPage.after + '',
+        },
+      });
+    }, 1000);
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
       }
+    };
+  }, [requiredPage, fetchMore, documentId]);
 
-      const key = question.begin.document_word_entry_id;
+  const dots = useMemo(() => {
+    if (data) {
+      data.getQuestionOnWordRangesByDocumentId.edges.forEach((edge) => {
+        edge.node.forEach((question) => {
+          const exists = questionsMapRef.current.get(question.question_id);
 
-      const arr = questionsMap.get(key);
+          if (!exists) {
+            questionsMapRef.current.set(question.question_id, question);
 
-      if (arr) {
-        arr.push(question);
-      } else {
-        questionsMap.set(key, [question]);
-      }
-    });
+            const key = question.begin.document_word_entry_id;
+
+            const arr = questionsGroupMapRef.current.get(key);
+
+            if (arr) {
+              arr.push(question);
+            } else {
+              questionsGroupMapRef.current.set(key, [question]);
+            }
+          }
+        });
+      });
+    }
 
     const dots: {
       entryId: string;
       component?: ReactNode;
     }[] = [];
 
-    for (const key of questionsMap.keys()) {
-      const arr = questionsMap.get(key) || [];
+    for (const key of questionsGroupMapRef.current.keys()) {
+      const arr = questionsGroupMapRef.current.get(key) || [];
 
       if (arr.length > 0) {
         dots.push({
@@ -133,24 +153,8 @@ export function QADocumentViewer({
       }
     }
 
-    return { dots, questionsMap };
-  }, [data, error, presetToast, tr]);
-
-  const handleSelectQuestion = useCallback((question: QuestionOnWordRange) => {
-    setRange({
-      begin: {
-        entryId: question.begin.document_word_entry_id,
-        order: 0,
-        element: null,
-      },
-      end: {
-        entryId: question.end.document_word_entry_id,
-        order: 0,
-        element: null,
-      },
-    });
-    // setSelectedQuestion(question);
-  }, []);
+    return dots;
+  }, [data]);
 
   const handleSelectRange = useCallback(
     (entryId: string, index: number, e: MouseEvent<HTMLElement>) => {
@@ -202,17 +206,60 @@ export function QADocumentViewer({
     [],
   );
 
-  const handleSelectDot = useCallback(
-    (entryId: string) => {
-      askQuestionButtonModalRef.current.openModal(
-        <PieceOfTextModal
-          questions={questionsMap.get(entryId) || []}
+  const handleSelectQuestion = useCallback(
+    (question: QuestionOnWordRange) => {
+      setRange({
+        begin: {
+          entryId: question.begin.document_word_entry_id,
+          order: 0,
+          element: null,
+        },
+        end: {
+          entryId: question.end.document_word_entry_id,
+          order: 0,
+          element: null,
+        },
+      });
+
+      history.push(
+        `/${nation_id}/${language_id}/${cluster_id}/qa/answers/${question.question_id}`,
+      );
+    },
+    [cluster_id, history, language_id, nation_id],
+  );
+
+  const handleSelectPiece = useCallback(
+    (pieceOfText: string, beginWordEntryId: string, endWordEntryId: string) => {
+      const questions =
+        questionsGroupMapRef.current.get(beginWordEntryId) || [];
+
+      openModal(
+        <QuestionsModal
+          pieceOfText={pieceOfText}
+          questions={questions.filter(
+            (item) => item.end.document_word_entry_id === endWordEntryId,
+          )}
           onSelectQuestion={handleSelectQuestion}
-          onClose={askQuestionButtonModalRef.current.closeModal}
+          onClose={closeModal}
         />,
       );
     },
-    [handleSelectQuestion, questionsMap],
+    [closeModal, handleSelectQuestion, openModal],
+  );
+
+  const handleSelectDot = useCallback(
+    (entryId: string) => {
+      const questions = questionsGroupMapRef.current.get(entryId) || [];
+
+      openModal(
+        <PieceOfTextModal
+          questions={questions}
+          onSelectPiece={handleSelectPiece}
+          onClose={closeModal}
+        />,
+      );
+    },
+    [openModal, handleSelectPiece, closeModal],
   );
 
   const handleWordClick = useCallback(
@@ -281,6 +328,10 @@ export function QADocumentViewer({
   //     modalContentCom
   //   );
 
+  const handleLoadPage = useCallback((page: TempPage) => {
+    setRequiredPage(page);
+  }, []);
+
   const handleAddQuestionButton = useCallback(() => {
     if (range.begin && range.end) {
       onNewQuestionFormData({
@@ -323,12 +374,14 @@ export function QADocumentViewer({
   return (
     <>
       <DocumentViewer
+        ref={documentViewerRef}
         mode={mode}
         documentId={documentId}
         range={documentRange}
         dots={dots}
         onChangeRange={handleChangeRange}
         onClickWord={handleWordClick}
+        onLoadPage={handleLoadPage}
       />
 
       {popoverCom}
