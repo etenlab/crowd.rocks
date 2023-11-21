@@ -121,7 +121,10 @@ export function AnswerItem({ question, answer }: AnswerItemProps) {
                 ) : (
                   <FilledCheckCircle sx={{ fontSize: 22 }} color="red" />
                 )}
-                <Typography variant="h5" sx={{ fontWeight: 500 }}>
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: 500, textTransform: 'capitalize' }}
+                >
                   {item.item}
                 </Typography>
               </Stack>

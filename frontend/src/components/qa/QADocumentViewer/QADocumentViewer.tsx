@@ -21,11 +21,9 @@ import {
   QuestionOnWordRange,
   useGetQuestionOnWordRangesByDocumentIdQuery,
 } from '../../../generated/graphql';
-// import { useUpsertAnswerMutation } from '../../../hooks/useUpsertAnswerMutation';
 
 import { useAppContext } from '../../../hooks/useAppContext';
 
-// import { AnswerList } from './AnswerList';
 import { PieceOfTextModal } from './PieceOfTextModal';
 import { QuestionAddButton } from './QuestionAddButton';
 import { QuestionsModal } from './QuestionsModal';
@@ -41,17 +39,9 @@ export type RangeItem = {
 type QADocumentViewerProps = {
   documentId: string;
   mode: ViewMode;
-  onNewQuestionFormData(data: {
-    sentence: string;
-    range: { begin: RangeItem; end: RangeItem };
-  }): void;
 };
 
-export function QADocumentViewer({
-  documentId,
-  mode,
-  onNewQuestionFormData,
-}: QADocumentViewerProps) {
+export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
   const history = useHistory();
   const { nation_id, language_id, cluster_id } = useParams<{
     nation_id: string;
@@ -71,15 +61,11 @@ export function QADocumentViewer({
     },
   });
 
-  // const [upsertAnswer] = useUpsertAnswerMutation();
-
   const [range, setRange] = useState<{
     begin?: RangeItem;
     end?: RangeItem;
   }>({});
-  // const [selectedQuestion, setSelectedQuestion] =
-  //   useState<QuestionOnWordRange | null>(null);
-  const [sentence, setSentence] = useState<string>('');
+
   const [requiredPage, setRequiredPage] = useState<TempPage | null>(null);
 
   const questionsMapRef = useRef(new Map<string, QuestionOnWordRange>());
@@ -273,40 +259,9 @@ export function QADocumentViewer({
     [handleSelectRange, handleSelectDot, mode],
   );
 
-  const handleChangeRange = useCallback((_sentence: string) => {
-    setSentence(_sentence);
-  }, []);
-
   const handleCancel = useCallback(() => {
     setRange({});
   }, []);
-
-  // const handleSaveAnswer = async (answer: string, itemIds: string[]) => {
-  //   if (!selectedQuestion) {
-  //     presetToast({
-  //       message: `${tr('Not selected question!')}`,
-  //       duration: 1500,
-  //       position: 'top',
-  //       color: 'danger',
-  //     });
-
-  //     return;
-  //   }
-
-  //   const res = await upsertAnswer({
-  //     variables: {
-  //       question_id: selectedQuestion.question_id,
-  //       answer,
-  //       question_item_ids: itemIds,
-  //     },
-  //   });
-
-  //   if (res.data?.upsertAnswers.error !== ErrorType.NoError) {
-  //     return;
-  //   }
-
-  //   handleCancel();
-  // };
 
   const documentRange = useMemo(
     () => ({
@@ -316,35 +271,27 @@ export function QADocumentViewer({
     [range],
   );
 
-  // modalContentCom =
-  //   mode === 'view' && selectedQuestion ? (
-  //     <AnswerList
-  //       onCancel={handleCancel}
-  //       onSave={handleSaveAnswer}
-  //       question={selectedQuestion}
-  //       sentence={sentence}
-  //     />
-  //   ) : (
-  //     modalContentCom
-  //   );
-
   const handleLoadPage = useCallback((page: TempPage) => {
     setRequiredPage(page);
   }, []);
 
   const handleAddQuestionButton = useCallback(() => {
     if (range.begin && range.end) {
-      onNewQuestionFormData({
-        sentence,
-        range: {
-          begin: range.begin,
-          end: range.end,
-        },
-      });
+      history.push(
+        `/${nation_id}/${language_id}/${cluster_id}/qa/new-question/${range.begin.entryId}/${range.end.entryId}`,
+      );
     }
 
     handleCancel();
-  }, [range, sentence, handleCancel, onNewQuestionFormData]);
+  }, [
+    range.begin,
+    range.end,
+    handleCancel,
+    history,
+    nation_id,
+    language_id,
+    cluster_id,
+  ]);
 
   const popoverCom =
     range.begin && range.end && mode === 'edit' && range.begin.element ? (
@@ -379,7 +326,7 @@ export function QADocumentViewer({
         documentId={documentId}
         range={documentRange}
         dots={dots}
-        onChangeRange={handleChangeRange}
+        onChangeRange={() => {}}
         onClickWord={handleWordClick}
         onLoadPage={handleLoadPage}
       />

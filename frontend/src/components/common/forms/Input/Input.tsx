@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Box, InputBase, Divider, IconButton } from '@mui/material';
 
 import { Cancel } from '../../icons/Cancel';
@@ -12,7 +13,7 @@ export type InputProps = {
   error?: boolean;
 };
 
-export function Input({
+export const Input = memo(function Input({
   placeholder,
   value,
   onChange,
@@ -52,6 +53,7 @@ export function Input({
             error ? theme.palette.text.red : theme.palette.text.dark,
         }}
         {...props}
+        fullWidth
         placeholder={placeholder}
       />
       {onClear ? (
@@ -74,4 +76,4 @@ export function Input({
       ) : null}
     </Box>
   );
-}
+});

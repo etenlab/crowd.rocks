@@ -432,7 +432,8 @@ export const DocumentViewer = memo(
                       col.wordEntry,
                       col.order,
                       `0 ${
-                        3 + (rowWidth - tempRow.width) / tempRow.cols.length / 2
+                        2.5 +
+                        (rowWidth - tempRow.width) / tempRow.cols.length / 2
                       }px`,
                     );
 

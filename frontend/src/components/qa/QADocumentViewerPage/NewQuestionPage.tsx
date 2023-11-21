@@ -1,17 +1,19 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { useParams, useHistory } from 'react-router';
 import { useIonToast } from '@ionic/react';
-import { Divider, Stack, Typography, Button } from '@mui/material';
+import { Divider, Stack, Typography, Button, Box, styled } from '@mui/material';
 
 import { AddCircle } from '../../common/icons/AddCircle';
 
+import { Caption } from '../../common/Caption/Caption';
+import { PageLayout } from '../../common/PageLayout';
 import { Input } from '../../common/forms/Input';
 import { Select, OptionItem } from '../../common/forms/Select';
 
 import { useTr } from '../../../hooks/useTr';
 
+import { useGetDocumentTextFromRangesLazyQuery } from '../../../generated/graphql';
 import { useCreateQuestionOnWordRangeMutation } from '../../../hooks/useCreateQuestionOnWordRangeMutation';
-
-import { RangeItem } from '../QADocumentViewer/QADocumentViewer';
 
 export enum QuestionValue {
   TEXT,
@@ -21,16 +23,15 @@ export enum QuestionValue {
   CHOOSEONE,
 }
 
-export type QuestionFormProps = {
-  sentence: string;
-  range: {
-    begin: RangeItem;
-    end: RangeItem;
-  };
-  onClose(): void;
-};
+const Textarea = styled('textarea')({});
 
-export function QuestionForm({ sentence, range, onClose }: QuestionFormProps) {
+export function NewQuestionPage() {
+  const history = useHistory();
+  const { begin_document_word_entry_id, end_document_word_entry_id } =
+    useParams<{
+      begin_document_word_entry_id: string;
+      end_document_word_entry_id: string;
+    }>();
   const [presentToast] = useIonToast();
 
   const { tr } = useTr();
@@ -48,29 +49,51 @@ export function QuestionForm({ sentence, range, onClose }: QuestionFormProps) {
   const questionItemKeyRef = useRef<number>(1);
 
   const [createQuestionOnWordRange] = useCreateQuestionOnWordRangeMutation();
+  const [getDocumentTextFromRange, { data: textFromRangeData }] =
+    useGetDocumentTextFromRangesLazyQuery();
 
-  const questionTypeOptions = [
-    {
-      label: tr('Text'),
-      value: QuestionValue.TEXT,
-    },
-    {
-      label: tr('True / False'),
-      value: QuestionValue.TRUE_OR_FALSE,
-    },
-    {
-      label: tr('Agree / Disagree'),
-      value: QuestionValue.AGREE_OR_DISAGREE,
-    },
-    {
-      label: tr('Multiselect'),
-      value: QuestionValue.MULTISELECT,
-    },
-    {
-      label: tr('Choose One'),
-      value: QuestionValue.CHOOSEONE,
-    },
-  ];
+  const questionTypeOptions = useMemo(
+    () => [
+      {
+        label: tr('Text'),
+        value: QuestionValue.TEXT,
+      },
+      {
+        label: tr('True / False'),
+        value: QuestionValue.TRUE_OR_FALSE,
+      },
+      {
+        label: tr('Agree / Disagree'),
+        value: QuestionValue.AGREE_OR_DISAGREE,
+      },
+      {
+        label: tr('Multiselect'),
+        value: QuestionValue.MULTISELECT,
+      },
+      {
+        label: tr('Choose One'),
+        value: QuestionValue.CHOOSEONE,
+      },
+    ],
+    [tr],
+  );
+
+  useEffect(() => {
+    getDocumentTextFromRange({
+      variables: {
+        ranges: [
+          {
+            begin_document_word_entry_id: begin_document_word_entry_id,
+            end_document_word_entry_id: end_document_word_entry_id,
+          },
+        ],
+      },
+    });
+  }, [
+    begin_document_word_entry_id,
+    end_document_word_entry_id,
+    getDocumentTextFromRange,
+  ]);
 
   const saveQuestion = (
     question: string,
@@ -79,15 +102,15 @@ export function QuestionForm({ sentence, range, onClose }: QuestionFormProps) {
   ) => {
     createQuestionOnWordRange({
       variables: {
-        begin_document_word_entry_id: range.begin.entryId,
-        end_document_word_entry_id: range.end.entryId,
+        begin_document_word_entry_id: begin_document_word_entry_id,
+        end_document_word_entry_id: end_document_word_entry_id,
         question: question,
         question_items: items,
         question_type_is_multiselect: isMultiselect,
       },
     });
 
-    onClose();
+    history.goBack();
   };
 
   const checkQuestionItemsValidation = () => {
@@ -253,71 +276,95 @@ export function QuestionForm({ sentence, range, onClose }: QuestionFormProps) {
       </Button>
     ) : null;
 
+  const pieceOfText =
+    textFromRangeData?.getDocumentTextFromRanges.list[0].piece_of_text || '';
+
   return (
-    <Stack gap="32px">
-      <Typography variant="h2">{tr('New Question')}</Typography>
+    <PageLayout>
+      <Caption>{tr('New Question')}</Caption>
 
-      <Stack gap="24px">
-        <Stack gap="20px">
-          <Typography variant="h4">{sentence}</Typography>
+      <Stack gap="20px">
+        <Typography variant="h4">{pieceOfText}</Typography>
 
-          <Divider />
+        <Divider />
 
-          <Stack gap="10px">
-            <Typography variant="overline" color="text.gray">
-              {tr('Your Question')}
-            </Typography>
-            <Input
-              placeholder={tr('Ask a question')}
+        <Stack gap="10px">
+          <Typography variant="overline" color="text.gray">
+            {tr('Your Question')}
+          </Typography>
+
+          <Box
+            sx={(theme) => ({
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 12px',
+              borderRadius: '10px',
+              border: `1px solid ${theme.palette.text.gray_stroke}`,
+              gap: '12px',
+            })}
+          >
+            <Textarea
+              sx={(theme) => ({
+                border: 'none',
+                width: '100%',
+                overflow: 'auto',
+                outline: 'none',
+                boxShadow: 'none',
+                resize: 'none',
+                color: theme.palette.text.dark,
+                fontSize: '14px',
+                fontWeight: 400,
+                lineHeight: '22px',
+                letterSpacing: '-0.28px',
+              })}
               value={question}
-              onChange={setQuestion}
-              multiline
+              placeholder={tr('Ask a question')}
               rows={4}
+              onChange={(e) => setQuestion(e.target.value)}
             />
+          </Box>
+        </Stack>
+      </Stack>
+
+      <Stack gap="20px">
+        <Select
+          label={tr('Question Type')}
+          placeholder={tr('Select question type')}
+          options={questionTypeOptions}
+          value={questionType}
+          onChange={setQuestionType}
+          onClear={() => {}}
+        />
+
+        {questionItems.length > 0 ? (
+          <Stack gap="16px">
+            {questionItems.map((item) => (
+              <Input
+                key={item.key}
+                placeholder={`${tr('Answer')} ${item.key}`}
+                value={item.value}
+                onChange={(value) => handleChangeQuestionItem(item.key, value)}
+                onClear={() => handleClearQuestionItem(item.key)}
+                error={
+                  (
+                    invalidMessage?.invalidItems.filter(
+                      (key) => key === item.key,
+                    ) || []
+                  ).length > 0
+                }
+              />
+            ))}
+
+            {invalidMessage ? (
+              <Typography variant="overline" color="text.red">
+                {invalidMessage.message}
+              </Typography>
+            ) : null}
           </Stack>
-        </Stack>
+        ) : null}
 
-        <Stack gap="20px">
-          <Select
-            label={tr('Question Type')}
-            placeholder={tr('Select question type')}
-            options={questionTypeOptions}
-            value={questionType}
-            onChange={setQuestionType}
-            onClear={() => {}}
-          />
-
-          {questionItems.length > 0 ? (
-            <Stack gap="16px">
-              {questionItems.map((item) => (
-                <Input
-                  key={item.key}
-                  placeholder={`${tr('Answer')} ${item.key}`}
-                  value={item.value}
-                  onChange={(value) =>
-                    handleChangeQuestionItem(item.key, value)
-                  }
-                  onClear={() => handleClearQuestionItem(item.key)}
-                  error={
-                    (
-                      invalidMessage?.invalidItems.filter(
-                        (key) => key === item.key,
-                      ) || []
-                    ).length > 0
-                  }
-                />
-              ))}
-
-              {invalidMessage ? (
-                <Typography variant="overline" color="text.red">
-                  {invalidMessage.message}
-                </Typography>
-              ) : null}
-            </Stack>
-          ) : null}
-
-          {addMoreQuestionItemCom}
-        </Stack>
+        {addMoreQuestionItemCom}
       </Stack>
 
       <Stack gap="16px">
@@ -331,10 +378,14 @@ export function QuestionForm({ sentence, range, onClose }: QuestionFormProps) {
           {tr('Save')}
         </Button>
 
-        <Button variant="contained" color="gray_stroke" onClick={onClose}>
+        <Button
+          variant="contained"
+          color="gray_stroke"
+          onClick={() => history.goBack()}
+        >
           {tr('Cancel')}
         </Button>
       </Stack>
-    </Stack>
+    </PageLayout>
   );
 }

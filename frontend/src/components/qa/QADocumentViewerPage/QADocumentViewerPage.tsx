@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router';
 import {
   Stack,
@@ -22,12 +22,8 @@ import { DownloadCircle } from '../../common/icons/DownloadCircle';
 import { useGetDocumentQuery } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
 
-import {
-  QADocumentViewer,
-  RangeItem,
-} from '../QADocumentViewer/QADocumentViewer';
+import { QADocumentViewer } from '../QADocumentViewer/QADocumentViewer';
 import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
-import { QuestionForm } from './QuestionForm';
 
 export function QADocumentViewerPage() {
   const { tr } = useTr();
@@ -40,10 +36,6 @@ export function QADocumentViewerPage() {
   });
 
   const [mode, setMode] = useState<ViewMode>('view');
-  const [questionFormData, setQuestionFormData] = useState<{
-    sentence: string;
-    range: { begin: RangeItem; end: RangeItem };
-  } | null>(null);
 
   const document = documentData ? documentData.getDocument.document : null;
 
@@ -70,20 +62,6 @@ export function QADocumentViewerPage() {
     },
   ].filter((item) => item.component !== null);
 
-  const handleCloseQuestionForm = useCallback(() => {
-    setQuestionFormData(null);
-  }, []);
-
-  const handleNewQuestionFormData = useCallback(
-    (data: {
-      sentence: string;
-      range: { begin: RangeItem; end: RangeItem };
-    }) => {
-      setQuestionFormData(data);
-    },
-    [],
-  );
-
   const handleToggleMode = () => {
     setMode((mode) => {
       if (mode === 'view') {
@@ -106,10 +84,7 @@ export function QADocumentViewerPage() {
   } else {
     return (
       <PageLayout>
-        <Stack
-          gap="20px"
-          style={{ display: questionFormData ? 'none' : 'inherit' }}
-        >
+        <Stack gap="20px">
           <Caption>{tr('Details')}</Caption>
 
           <Stack
@@ -146,23 +121,8 @@ export function QADocumentViewerPage() {
             {document.file_name}
           </Typography>
 
-          <QADocumentViewer
-            documentId={document_id}
-            mode={mode}
-            onNewQuestionFormData={handleNewQuestionFormData}
-          />
+          <QADocumentViewer documentId={document_id} mode={mode} />
         </Stack>
-
-        {questionFormData ? (
-          <QuestionForm
-            sentence={questionFormData.sentence}
-            range={{
-              begin: questionFormData.range.begin,
-              end: questionFormData.range.end,
-            }}
-            onClose={handleCloseQuestionForm}
-          />
-        ) : null}
       </PageLayout>
     );
   }
