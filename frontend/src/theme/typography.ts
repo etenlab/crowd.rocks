@@ -37,7 +37,7 @@ export function getTypographyPalette(mode: 'light' | 'dark'): ThemeOptions {
         color: colors['dark'][mode],
       },
       h5: {
-        fontWeight: 500,
+        fontWeight: 600,
         fontSize: '13px',
         lineHeight: '22px',
         letterSpacing: '-0.26px',

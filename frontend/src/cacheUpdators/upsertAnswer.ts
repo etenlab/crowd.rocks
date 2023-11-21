@@ -10,15 +10,12 @@ export function updateCacheWithUpsertAnswer(
   cache: ApolloCache<unknown>,
   newAnswer: Answer,
 ) {
+  console.log(newAnswer);
   cache.updateQuery<GetAnswersByQuestionIdQuery>(
     {
       query: GetAnswersByQuestionIdDocument,
       variables: {
-        question_id: newAnswer.question_id,
-        answer: newAnswer.answer,
-        question_item_ids: newAnswer.question_items.map(
-          (item) => item.question_item_id,
-        ),
+        id: newAnswer.question_id,
       },
     },
     (data) => {
@@ -40,7 +37,7 @@ export function updateCacheWithUpsertAnswer(
           ...data,
           getAnswersByQuestionIds: {
             ...data.getAnswersByQuestionIds,
-            documents: [
+            answers: [
               ...(data.getAnswersByQuestionIds.answers || []),
               newAnswer,
             ],

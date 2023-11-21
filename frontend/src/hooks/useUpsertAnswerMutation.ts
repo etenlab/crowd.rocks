@@ -1,6 +1,9 @@
 import { useIonToast } from '@ionic/react';
 
-import { useUpsertAnswerMutation as useGeneratedUpsertAnswerMutation } from '../generated/graphql';
+import {
+  GetQuestionStatisticDocument,
+  useUpsertAnswerMutation as useGeneratedUpsertAnswerMutation,
+} from '../generated/graphql';
 
 import { ErrorType } from '../generated/graphql';
 
@@ -25,13 +28,6 @@ export function useUpsertAnswerMutation() {
         const newAnswer = data.upsertAnswers.answers[0]!;
 
         updateCacheWithUpsertAnswer(cache, newAnswer);
-
-        present({
-          message: tr('Success at creating new Answer!'),
-          duration: 1500,
-          position: 'top',
-          color: 'success',
-        });
       } else {
         console.log('useUpsertAnswerMutation: ', errors);
         console.log(data?.upsertAnswers.error);
@@ -46,5 +42,6 @@ export function useUpsertAnswerMutation() {
         redirectOnUnauth(data?.upsertAnswers.error);
       }
     },
+    refetchQueries: [GetQuestionStatisticDocument],
   });
 }

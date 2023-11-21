@@ -6,6 +6,7 @@ export const Word = styled('div')({
   padding: '0px 3px',
   fontSize: '14px',
   fontStyle: 'normal',
+  fontFamily: 'Poppins',
   fontWeight: 400,
   lineHeight: '32px',
   letterSpacing: '-0.28px',
@@ -17,6 +18,8 @@ export const Word = styled('div')({
   },
   '&.selected': {
     background: '#EFF1F8',
+    fontWeight: 600,
+    letterSpacing: '-0.5px',
   },
   '&.left-boundary': {
     borderRadius: '5px',
@@ -28,7 +31,7 @@ export const Word = styled('div')({
 
 export const Dot = styled('div')(({ theme }) => ({
   position: 'absolute',
-  top: '0px',
+  top: '3px',
   left: '50%',
   transform: 'translateX(-50%)',
   backgroundColor: theme.palette.background.blue,

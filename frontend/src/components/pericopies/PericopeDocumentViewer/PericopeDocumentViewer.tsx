@@ -120,9 +120,9 @@ export function PericopeDocumentViewer({
     [],
   );
 
-  const handleLoadPage = (page: TempPage) => {
+  const handleLoadPage = useCallback((page: TempPage) => {
     setRequiredPage(page);
-  };
+  }, []);
 
   const documentRange = useMemo(
     () => ({

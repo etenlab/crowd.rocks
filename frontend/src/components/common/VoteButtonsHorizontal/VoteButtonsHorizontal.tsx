@@ -1,18 +1,8 @@
-import { Stack, Button, styled } from '@mui/material';
+import { useState } from 'react';
+import { Stack } from '@mui/material';
 
-import { ThumbsUp } from '../icons/ThumbsUp';
-import { ThumbsDown } from '../icons/ThumbsDown';
-
-const VoteButton = styled(Button)({
-  padding: '5px 10px',
-  borderRadius: '6px',
-  fontSize: '13px',
-  letterSpacing: '-0.26px',
-  minWidth: '52px',
-  '& .MuiButton-startIcon': {
-    marginRight: '4px',
-  },
-});
+import { UpvoteButton } from '../buttons/vote/UpvoteButton';
+import { DownvoteButton } from '../buttons/vote/DownvoteButton';
 
 export type VoteButtonsHerizontalProps = {
   onVoteUpClick: () => void;
@@ -27,34 +17,30 @@ export function VoteButtonsHorizontal({
   upVotes,
   downVotes,
 }: VoteButtonsHerizontalProps) {
+  const [selected, setSelected] = useState<string>('');
+
+  const handleUpvote = () => {
+    setSelected('upvote');
+    onVoteUpClick();
+  };
+
+  const handleDownvote = () => {
+    setSelected('downvote');
+    onVoteDownClick();
+  };
+
   return (
     <Stack direction="row" gap="16px">
-      <VoteButton
-        variant="outlined"
-        color="green"
-        startIcon={<ThumbsUp sx={{ fontSize: 20 }} />}
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-
-          onVoteUpClick();
-        }}
-      >
-        {upVotes}
-      </VoteButton>
-      <VoteButton
-        variant="outlined"
-        color="red"
-        startIcon={<ThumbsDown sx={{ fontSize: 20 }} />}
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-
-          onVoteDownClick();
-        }}
-      >
-        {downVotes}
-      </VoteButton>
+      <UpvoteButton
+        selected={selected === 'upvote'}
+        upvotes={upVotes + ''}
+        onClick={handleUpvote}
+      />
+      <DownvoteButton
+        selected={selected === 'downvote'}
+        downvotes={downVotes + ''}
+        onClick={handleDownvote}
+      />
     </Stack>
   );
 }

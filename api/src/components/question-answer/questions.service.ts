@@ -12,12 +12,16 @@ import { QuestionItemsService } from './question-items.service';
 
 import { WordRange } from 'src/components/documents/types';
 import {
+  Question,
   QuestionItem,
   QuestionsOutput,
   QuestionUpsertInput,
   QuestionOnWordRangesOutput,
   QuestionOnWordRange,
   CreateQuestionOnWordRangeUpsertInput,
+  QuestionWithStatisticOutput,
+  QuestionItemWithStatistic,
+  QuestionOnWordRangesListConnection,
 } from './types';
 
 import {
@@ -83,6 +87,12 @@ export class QuestionsService {
           return {
             ...row,
             question_items: questionItems,
+            created_by_user: {
+              user_id: row.user_id,
+              avatar: row.avatar,
+              avatar_url: row.avatar_url,
+              is_bot: row.is_bot,
+            },
           };
         }),
       };
@@ -114,6 +124,66 @@ export class QuestionsService {
     return {
       error: ErrorType.UnknownError,
       questions: [],
+    };
+  }
+
+  async getQuestionStatistic(
+    question_id: number,
+    pgClient: PoolClient | null,
+  ): Promise<QuestionWithStatisticOutput> {
+    try {
+      const { error, questions } = await this.reads([question_id], pgClient);
+
+      if (error !== ErrorType.NoError || questions.length !== 1) {
+        return {
+          error,
+          question_with_statistic: null,
+        };
+      }
+
+      const { error: qiError, question_item_with_statistics } =
+        await this.questionItemService.getStatistics(question_id, pgClient);
+
+      if (qiError !== ErrorType.NoError) {
+        return {
+          error,
+          question_with_statistic: null,
+        };
+      }
+
+      const questionItemMap = new Map<string, QuestionItemWithStatistic>();
+
+      question_item_with_statistics.forEach((item) => {
+        if (item) {
+          questionItemMap.set(item.question_item_id, item);
+        }
+      });
+
+      return {
+        error: ErrorType.NoError,
+        question_with_statistic: {
+          ...questions[0]!,
+          question_items: questions[0]!.question_items.map((item) => {
+            const data = questionItemMap.get(item.question_item_id);
+
+            if (data) {
+              return data;
+            } else {
+              return {
+                ...item,
+                statistic: 0,
+              };
+            }
+          }),
+        },
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      question_with_statistic: null,
     };
   }
 
@@ -295,35 +365,47 @@ export class QuestionsService {
 
   async getQuestionOnWordRangesByDocumentId(
     document_id: number,
+    first: number | null,
+    after: string | null,
     pgClient,
-  ): Promise<QuestionOnWordRangesOutput> {
+  ): Promise<QuestionOnWordRangesListConnection> {
     try {
-      const { error: wordRangeError, word_ranges } =
-        await this.wordRangesService.getByDocumentId(
-          document_id,
-          null,
-          pgClient,
-        );
+      const {
+        error: wordRangeError,
+        edges,
+        pageInfo,
+      } = await this.wordRangesService.getByDocumentId(
+        document_id,
+        first,
+        after,
+        pgClient,
+      );
 
       if (wordRangeError !== ErrorType.NoError) {
         return {
           error: wordRangeError,
-          questions: [],
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+          },
         };
       }
 
-      const wordRangesMap = new Map<string, WordRange>();
-
       const refs = (
-        word_ranges.map((word_range) => word_range) as WordRange[]
+        edges
+          .reduce<WordRange[]>((acc, edge) => [...acc, ...edge.node], [])
+          .map((word_range) => word_range) as WordRange[]
       ).map((word_range) => {
-        wordRangesMap.set(word_range.word_range_id, word_range);
-
         return {
           parent_table: TableNameType.word_ranges,
           parent_id: +word_range.word_range_id,
         };
       });
+
+      const questionsMap = new Map<string, Question[]>();
 
       const { error: questionError, questions } = await this.getQuestionsByRefs(
         refs,
@@ -333,31 +415,57 @@ export class QuestionsService {
       if (questionError !== ErrorType.NoError) {
         return {
           error: questionError,
-          questions: [],
+          edges: [],
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: null,
+            endCursor: null,
+          },
         };
       }
 
+      questions.forEach((question) => {
+        if (!question) {
+          return;
+        }
+
+        const entries = questionsMap.get(question.parent_id);
+
+        if (entries) {
+          entries.push(question);
+        } else {
+          questionsMap.set(question.parent_id, [question]);
+        }
+      });
+
+      const questionEdges = edges.map((edge) => {
+        const node: QuestionOnWordRange[] = [];
+
+        edge.node.map((item) => {
+          const entries = questionsMap.get(item.word_range_id);
+
+          if (entries) {
+            node.push(
+              ...entries.map((entry) => ({
+                ...entry,
+                begin: item.begin,
+                end: item.end,
+              })),
+            );
+          }
+        });
+
+        return {
+          cursor: edge.cursor,
+          node,
+        };
+      });
+
       return {
         error: ErrorType.NoError,
-        questions: questions
-          .map((question) => {
-            if (!question) {
-              return null;
-            }
-
-            const wordRange = wordRangesMap.get(question.parent_id);
-
-            if (!wordRange) {
-              return null;
-            }
-
-            return {
-              ...question,
-              begin: wordRange.begin,
-              end: wordRange.end,
-            };
-          })
-          .filter((question) => question) as QuestionOnWordRange[],
+        edges: questionEdges,
+        pageInfo,
       };
     } catch (e) {
       Logger.error(e);
@@ -365,7 +473,13 @@ export class QuestionsService {
 
     return {
       error: ErrorType.UnknownError,
-      questions: [],
+      edges: [],
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: null,
+        endCursor: null,
+      },
     };
   }
 }

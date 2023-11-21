@@ -1,9 +1,21 @@
 import { TypePolicies } from '@apollo/client';
 import { relayStylePagination } from '@apollo/client/utilities';
-import { PericopeWithVotesListConnection } from './generated/graphql';
+import {
+  PericopeWithVotesListConnection,
+  QuestionOnWordRangesListConnection,
+} from './generated/graphql';
 
 type GetPericopiesByDocumentIdMerge = Omit<
   PericopeWithVotesListConnection,
+  'edges'
+> & {
+  edges: {
+    __ref: string;
+  }[];
+};
+
+type GetQuestionOnWordRangesByDocumentIdMerge = Omit<
+  QuestionOnWordRangesListConnection,
   'edges'
 > & {
   edges: {
@@ -31,6 +43,40 @@ export const typePolicies: TypePolicies = {
         merge(
           existing: GetPericopiesByDocumentIdMerge | undefined,
           incoming: GetPericopiesByDocumentIdMerge,
+        ) {
+          if (existing) {
+            const edgesMap = new Map<string, { __ref: string }>();
+
+            existing.edges.forEach((edge) => {
+              edgesMap.set(edge.__ref, edge);
+            });
+
+            incoming.edges.forEach((edge) => {
+              edgesMap.set(edge.__ref, edge);
+            });
+
+            const edges: {
+              __ref: string;
+            }[] = [];
+
+            for (const edge of edgesMap.values()) {
+              edges.push(edge);
+            }
+
+            return {
+              ...existing,
+              edges,
+            };
+          } else {
+            return { ...incoming };
+          }
+        },
+      },
+      getQuestionOnWordRangesByDocumentId: {
+        keyArgs: ['document_id'],
+        merge(
+          existing: GetQuestionOnWordRangesByDocumentIdMerge | undefined,
+          incoming: GetQuestionOnWordRangesByDocumentIdMerge,
         ) {
           if (existing) {
             const edgesMap = new Map<string, { __ref: string }>();
@@ -178,6 +224,9 @@ export const typePolicies: TypePolicies = {
   },
   QuestionOnWordRange: {
     keyFields: ['question_id'],
+  },
+  QuestionOnWordRangesEdge: {
+    keyFields: ['cursor'],
   },
   Answer: {
     keyFields: ['answer_id'],

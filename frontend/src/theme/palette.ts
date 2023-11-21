@@ -2,6 +2,7 @@ import { ThemeOptions } from '@mui/material';
 
 export const designColors = {
   blue: '#476FFF',
+  blue_10: '#ECF0FF',
   orange: '#FF5F2D',
   orange_light: '#FFECE5',
   red: '#FF4747',
@@ -18,6 +19,10 @@ export const colors = {
   blue: {
     light: designColors['blue'],
     dark: designColors['blue'],
+  },
+  blue_10: {
+    light: designColors['blue_10'],
+    dark: designColors['dark'],
   },
   orange: {
     light: designColors['orange'],
@@ -102,6 +107,7 @@ export function getColorPalette(mode: 'light' | 'dark'): ThemeOptions {
       },
       text: {
         blue: colors['blue'][mode],
+        blue_10: colors['blue_10'][mode],
         orange: colors['orange'][mode],
         red: colors['red'][mode],
         white: colors['white'][mode],
@@ -115,6 +121,7 @@ export function getColorPalette(mode: 'light' | 'dark'): ThemeOptions {
       },
       background: {
         blue: colors['blue'][mode],
+        blue_10: colors['blue_10'][mode],
         orange: colors['orange'][mode],
         red: colors['red'][mode],
         white: colors['white'][mode],

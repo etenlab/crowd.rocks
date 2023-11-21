@@ -16,7 +16,7 @@ type Answer {
   answer: String
   answer_id: ID!
   created_at: DateTime!
-  created_by: String!
+  created_by_user: User!
   question_id: String!
   question_items: [QuestionItem!]!
 }
@@ -157,6 +157,7 @@ enum ErrorType {
   BotTranslationLanguagesListError
   CandidateNotFound
   CandidateNotFoundInBallot
+  DamagedDocumentWordEntryBlock
   DocumentEntryReadError
   DocumentFileIdNotProvided
   DocumentFileReadError
@@ -697,7 +698,7 @@ type Mutation {
   upsertTranslation(from_definition_id: ID!, from_definition_type_is_word: Boolean!, to_definition_id: ID!, to_definition_type_is_word: Boolean!): TranslationOutput!
   upsertTranslationFromWordAndDefinitionlikeString(from_definition_id: ID!, from_definition_type_is_word: Boolean!, to_definition_input: ToDefinitionInput!): TranslationOutput!
   upsertWordDefinitionFromWordAndDefinitionlikeString(input: FromWordAndDefintionlikeStringUpsertInput!): WordDefinitionOutput!
-  upsertWordRanges(input: [WordRangeUpsertInput!]!): WordRangesOutput!
+  upsertWordRanges(input: [WordRangeInput!]!): WordRangesOutput!
   versionCreateResolver(input: VersionCreateInput!): VersionCreateOutput!
   wordDefinitionUpsert(input: WordDefinitionUpsertInput!): WordDefinitionOutput!
   wordToPhraseTranslationUpsert(input: WordToPhraseTranslationUpsertInput!): WordToPhraseTranslationOutput!
@@ -1083,6 +1084,7 @@ type Query {
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): TranslationWithVoteListOutput!
   getAnswersByQuestionIds(ids: [ID!]!): AnswersOutput!
   getDocument(input: GetDocumentInput!): GetDocumentOutput!
+  getDocumentTextFromRanges(ranges: [WordRangeInput!]!): TextFromRangesOutput!
   getDocumentWordEntriesByDocumentId(after: ID, document_id: ID!, first: Int): DocumentWordEntriesListConnection!
   getFlagsFromRef(parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   getForumFoldersList(after: ID, filter: String, first: Int, forum_id: ID!): ForumFolderListConnection!
@@ -1107,7 +1109,8 @@ type Query {
   getPhraseVoteStatus(phrase_id: ID!): PhraseVoteStatusOutputRow!
   getPhraseWithVoteById(phrase_id: ID!): PhraseWithVoteOutput!
   getPhrasesByLanguage(after: ID, first: Int, input: LanguageInput!): PhraseWithVoteListConnection!
-  getQuestionOnWordRangesByDocumentId(document_id: ID!): QuestionOnWordRangesOutput!
+  getQuestionOnWordRangesByDocumentId(after: ID, document_id: ID!, first: Int): QuestionOnWordRangesListConnection!
+  getQuestionStatistic(question_id: ID!): QuestionWithStatisticOutput!
   getQuestionsByRefs(parent_ids: [ID!]!, parent_tables: [TableNameType!]!): QuestionsOutput!
   getRecommendedTranslationFromDefinitionID(from_definition_id: ID!, from_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteOutput!
   getRecommendedTranslationFromDefinitionIDs(from_definition_ids: [ID!]!, from_type_is_words: [Boolean!]!, langInfo: LanguageInput!): TranslationWithVoteListOutput!
@@ -1120,7 +1123,7 @@ type Query {
   getWordDefinitionsByLanguage(input: LanguageInput!): WordDefinitionWithVoteListOutput!
   getWordDefinitionsByWordId(word_id: ID!): WordDefinitionWithVoteListOutput!
   getWordRangesByBeginIds(ids: [ID!]!): WordRangesOutput!
-  getWordRangesByDocumentId(document_id: ID!, page: Int): WordRangesOutput!
+  getWordRangesByDocumentId(after: ID, document_id: ID!, first: Int): WordRangesListConnection!
   getWordToPhraseTrVoteStatus(word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   getWordToPhraseTranslationsByFromWordDefinitionId(from_word_definition_id: ID!, langInfo: LanguageInput!): WordToPhraseTranslationWithVoteListOutput!
   getWordToWordTrVoteStatus(word_to_word_translation_id: ID!): WordTrVoteStatusOutputRow!
@@ -1155,7 +1158,7 @@ type Query {
 
 type Question {
   created_at: DateTime!
-  created_by: String!
+  created_by_user: User!
   parent_id: String!
   parent_table: TableNameType!
   question: String!
@@ -1169,6 +1172,12 @@ type QuestionItem {
   question_item_id: ID!
 }
 
+type QuestionItemWithStatistic {
+  item: String!
+  question_item_id: ID!
+  statistic: Int!
+}
+
 type QuestionItemsOutput {
   error: ErrorType!
   question_items: [QuestionItem]!
@@ -1177,7 +1186,7 @@ type QuestionItemsOutput {
 type QuestionOnWordRange {
   begin: DocumentWordEntry!
   created_at: DateTime!
-  created_by: String!
+  created_by_user: User!
   end: DocumentWordEntry!
   parent_id: String!
   parent_table: TableNameType!
@@ -1185,6 +1194,17 @@ type QuestionOnWordRange {
   question_id: ID!
   question_items: [QuestionItem!]!
   question_type_is_multiselect: Boolean!
+}
+
+type QuestionOnWordRangesEdge {
+  cursor: ID!
+  node: [QuestionOnWordRange!]!
+}
+
+type QuestionOnWordRangesListConnection {
+  edges: [QuestionOnWordRangesEdge!]!
+  error: ErrorType!
+  pageInfo: PageInfo!
 }
 
 type QuestionOnWordRangesOutput {
@@ -1198,6 +1218,22 @@ input QuestionUpsertInput {
   question: String!
   question_items: [String!]!
   question_type_is_multiselect: Boolean!
+}
+
+type QuestionWithStatistic {
+  created_at: DateTime!
+  created_by_user: User!
+  parent_id: String!
+  parent_table: TableNameType!
+  question: String!
+  question_id: ID!
+  question_items: [QuestionItemWithStatistic!]!
+  question_type_is_multiselect: Boolean!
+}
+
+type QuestionWithStatisticOutput {
+  error: ErrorType!
+  question_with_statistic: QuestionWithStatistic!
 }
 
 type QuestionsOutput {
@@ -1385,6 +1421,17 @@ enum TableNameType {
   word_to_phrase_translations
   word_to_word_translations
   words
+}
+
+type TextFromRange {
+  begin_document_word_entry_id: ID!
+  end_document_word_entry_id: ID!
+  piece_of_text: String!
+}
+
+type TextFromRangesOutput {
+  error: ErrorType!
+  list: [TextFromRange!]!
 }
 
 type TextyDocument {
@@ -1636,9 +1683,20 @@ type WordRange {
   word_range_id: ID!
 }
 
-input WordRangeUpsertInput {
+input WordRangeInput {
   begin_document_word_entry_id: String!
   end_document_word_entry_id: String!
+}
+
+type WordRangesEdge {
+  cursor: ID!
+  node: [WordRange!]!
+}
+
+type WordRangesListConnection {
+  edges: [WordRangesEdge!]!
+  error: ErrorType!
+  pageInfo: PageInfo!
 }
 
 type WordRangesOutput {

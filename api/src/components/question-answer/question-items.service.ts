@@ -7,13 +7,19 @@ import { ErrorType } from 'src/common/types';
 
 import { PostgresService } from 'src/core/postgres.service';
 
-import { QuestionItemsOutput, QuestionItem } from './types';
+import {
+  QuestionItemsOutput,
+  QuestionItem,
+  QuestionItemWithStatisticsOutput,
+} from './types';
 
 import {
   callQuestionItemUpsertsProcedure,
   QuestionItemUpsertsProcedureOutput,
   getQuestionItemsObjByIds,
   GetQuestionItemsObjectByIds,
+  GetQuestionItemStatistic,
+  getQuestionItemStatistic,
 } from './sql-string';
 import { AuthorizationService } from '../authorization/authorization.service';
 
@@ -54,6 +60,36 @@ export class QuestionItemsService {
     return {
       error: ErrorType.UnknownError,
       question_items: [],
+    };
+  }
+
+  async getStatistics(
+    question_id: number,
+    pgClient: PoolClient | null,
+  ): Promise<QuestionItemWithStatisticsOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetQuestionItemStatistic>(
+        ...getQuestionItemStatistic(question_id),
+      );
+
+      return {
+        error: ErrorType.NoError,
+        question_item_with_statistics: res.rows.map((row) => ({
+          question_item_id: row.question_item_id,
+          item: row.item,
+          statistic: +row.statistic,
+        })),
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      question_item_with_statistics: [],
     };
   }
 
