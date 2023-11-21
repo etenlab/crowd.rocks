@@ -24,7 +24,7 @@ export class IFile {
 
 @ObjectType()
 export class IFileOutput {
-  @Field(() => IFile, { nullable: true }) file: IFile | null;
+  @Field(() => IFile, { nullable: true }) file?: IFile | null;
   @Field(() => ErrorType) error: ErrorType;
 }
 export class IFileDeleteOutput {

@@ -4,11 +4,12 @@ import { PoolClient } from 'pg';
 import { Subject } from 'rxjs';
 import { SubscriptionToken } from 'src/common/subscription-token';
 import { BotType, ErrorType, GenericOutput } from 'src/common/types';
-import { pgClientOrPool } from 'src/common/utility';
+import { pgClientOrPool, putLangCodesToFileName } from 'src/common/utility';
 import { LanguageInput } from 'src/components/common/types';
 import { PhrasesService } from 'src/components/phrases/phrases.service';
 import { WordsService } from 'src/components/words/words.service';
 import { PostgresService } from 'src/core/postgres.service';
+import { FileService } from 'src/components/file/file.service';
 import { PUB_SUB } from 'src/pubSub.module';
 import { PhraseToPhraseTranslationsService } from '../translations/phrase-to-phrase-translations.service';
 import { PhraseToWordTranslationsService } from '../translations/phrase-to-word-translations.service';
@@ -29,6 +30,7 @@ import { TranslationsService } from '../translations/translations.service';
 import { ToDefinitionInput } from '../translations/types';
 import { ChatGPTService } from './chatgpt.service';
 import {
+  BotTranslateDocumentInput,
   ChatGPTVersion,
   IGPTTranslator,
   ITranslator,
@@ -47,6 +49,10 @@ import {
 } from './utility';
 import { langInfo2String, subTags2LangInfo } from '../../../../utils';
 import { FakerTranslateService } from './faker-translate.service';
+import { DocumentsService } from '../documents/documents.service';
+import { Readable } from 'stream';
+import { IFileOutput } from '../file/types';
+import { DocumentUploadOutput } from '../documents/types';
 
 interface ItranslateAllWordsAndPhrasesByBot {
   translateWordsAndPhrases: (
@@ -66,6 +72,8 @@ export class AiTranslationsService {
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private wordsService: WordsService,
     private phrasesService: PhrasesService,
+    private documentsService: DocumentsService,
+    private fileService: FileService,
     private gTrService: GoogleTranslateService,
     private lTrService: LiltTranslateService,
     private scTrService: SmartcatTranslateService,
@@ -1128,6 +1136,18 @@ export class AiTranslationsService {
         to_definition_input: ToDefinitionInput;
       }[] = [];
 
+      const { token, id: botUserId } = await translator.getTranslatorToken();
+
+      const translationsByOthers = await getTranslationsNotByUser(
+        botUserId,
+        await pgClientOrPool({
+          client: pgClient,
+          pool: this.pg.pool,
+        }),
+        to_language.language_code,
+        from_language.language_code,
+      );
+
       if (wordsConnection.error === ErrorType.NoError) {
         for (const edge of wordsConnection.edges) {
           const { node } = edge;
@@ -1143,6 +1163,7 @@ export class AiTranslationsService {
           if (translatedWord === undefined) {
             continue;
           }
+
           const is_type_word =
             translatedWord
               .trim()
@@ -1157,20 +1178,69 @@ export class AiTranslationsService {
 
             const translatedDefinition = translationTexts[obj.id];
 
-            upsertInputs.push({
-              from_definition_id: +definition.word_definition_id,
-              from_definition_type_is_word: true,
-              to_definition_input: {
-                word_or_phrase: translatedWord,
-                is_type_word,
-                definition: translatedDefinition,
-                language_code: to_language.language_code,
-                dialect_code: to_language.dialect_code,
-                geo_code: to_language.geo_code,
-              },
+            const otherSameTranslations = translationsByOthers.filter((t) => {
+              return (
+                t.fromDef == definition.definition &&
+                t.fromText == obj.text &&
+                t.toDef == translatedDefinition && //not sure whether to have translation of defs match...
+                t.toText == translatedWord
+              );
             });
+            // process the translation if not submitted
+            if (
+              otherSameTranslations === undefined ||
+              otherSameTranslations.length == 0
+            ) {
+              upsertInputs.push({
+                from_definition_id: +definition.word_definition_id,
+                from_definition_type_is_word: true,
+                to_definition_input: {
+                  word_or_phrase: translatedWord,
+                  is_type_word,
+                  definition: translatedDefinition,
+                  language_code: to_language.language_code,
+                  dialect_code: to_language.dialect_code,
+                  geo_code: to_language.geo_code,
+                },
+              });
 
-            translatedWordCount++;
+              translatedWordCount++;
+            } else {
+              await setTranslationsVotes(
+                true,
+                is_type_word,
+                [+otherSameTranslations[0].translationId],
+                token,
+                true,
+                await pgClientOrPool({
+                  client: pgClient,
+                  pool: this.pg.pool,
+                }),
+              );
+            }
+
+            // reset votes any/all old/other translations (any translation that is different from current translation)
+            const otherTranslationIds = translationsByOthers
+              .filter(
+                (t) =>
+                  t.fromDef == definition.definition &&
+                  t.fromText == obj.text &&
+                  (t.toDef !== translatedDefinition ||
+                    t.toText !== translatedWord),
+              )
+              .map((t) => +t.translationId);
+
+            await setTranslationsVotes(
+              true,
+              is_type_word,
+              otherTranslationIds,
+              token,
+              null,
+              await pgClientOrPool({
+                client: pgClient,
+                pool: this.pg.pool,
+              }),
+            );
           }
         }
       }
@@ -1204,25 +1274,72 @@ export class AiTranslationsService {
 
             const translatedDefinition = translationTexts[obj.id];
 
-            upsertInputs.push({
-              from_definition_id: +definition.phrase_definition_id,
-              from_definition_type_is_word: false,
-              to_definition_input: {
-                word_or_phrase: translatedPhrase,
-                is_type_word,
-                definition: translatedDefinition,
-                language_code: to_language.language_code,
-                dialect_code: to_language.dialect_code,
-                geo_code: to_language.geo_code,
-              },
+            const otherSameTranslations = translationsByOthers.filter((t) => {
+              return (
+                t.fromDef == definition.definition &&
+                t.fromText == obj.text &&
+                t.toDef == translatedDefinition && //not sure whether to have translation of defs match...
+                t.toText == translatedPhrase
+              );
             });
+            // process the translation if not submitted
+            if (
+              otherSameTranslations === undefined ||
+              otherSameTranslations.length == 0
+            ) {
+              upsertInputs.push({
+                from_definition_id: +definition.phrase_definition_id,
+                from_definition_type_is_word: false,
+                to_definition_input: {
+                  word_or_phrase: translatedPhrase,
+                  is_type_word,
+                  definition: translatedDefinition,
+                  language_code: to_language.language_code,
+                  dialect_code: to_language.dialect_code,
+                  geo_code: to_language.geo_code,
+                },
+              });
 
-            translatedPhraseCount++;
+              translatedPhraseCount++;
+            } else {
+              await setTranslationsVotes(
+                true,
+                is_type_word,
+                [+otherSameTranslations[0].translationId],
+                token,
+                true,
+                await pgClientOrPool({
+                  client: pgClient,
+                  pool: this.pg.pool,
+                }),
+              );
+            }
+
+            // reset votes any/all old/other translations (any translation that is different from current translation)
+            const otherTranslationIds = translationsByOthers
+              .filter(
+                (t) =>
+                  t.fromDef == definition.definition &&
+                  t.fromText == obj.text &&
+                  (t.toDef !== translatedDefinition ||
+                    t.toText !== translatedPhrase),
+              )
+              .map((t) => +t.translationId);
+
+            await setTranslationsVotes(
+              true,
+              is_type_word,
+              otherTranslationIds,
+              token,
+              null,
+              await pgClientOrPool({
+                client: pgClient,
+                pool: this.pg.pool,
+              }),
+            );
           }
         }
       }
-
-      const { token } = await translator.getTranslatorToken();
 
       const { error } =
         await this.translationService.batchUpsertTranslationFromWordAndDefinitionlikeString(
@@ -1251,4 +1368,85 @@ export class AiTranslationsService {
       result: null,
     };
   };
+
+  async botTranslateDocument(
+    input: BotTranslateDocumentInput,
+  ): Promise<DocumentUploadOutput> {
+    const document = await this.documentsService.getDocument(
+      Number(input.documentId),
+    );
+    if (
+      !document.document?.file_id ||
+      isNaN(Number(document.document?.file_id))
+    ) {
+      Logger.error(
+        `aiTranslationsService#botTranslateDocument: document.file_id not specified`,
+      );
+      return { error: ErrorType.DocumentFileIdNotProvided };
+    }
+    const fileInfo = await this.fileService.findOne(
+      Number(document.document.file_id),
+    );
+    if (!fileInfo?.file?.fileName) {
+      Logger.error(
+        `aiTranslationsService#botTranslateDocument: fileInfo?.file?.fileName not specified`,
+      );
+      return { error: ErrorType.DocumentFileReadError };
+    }
+
+    const fileString = await this.fileService.getFileContentAsString(
+      document.document.file_id,
+    );
+    const sourceLang: LanguageInput = {
+      language_code: document.document?.language_code,
+      dialect_code: document.document?.dialect_code,
+      geo_code: document.document?.geo_code,
+    };
+    let translatedAndSavedFile: IFileOutput;
+    const { token } = await this.lTrService.getTranslatorToken();
+    switch (input.botType) {
+      case BotType.Lilt:
+        const fileTrResult = await this.lTrService.translateFileString(
+          fileString,
+          fileInfo?.file?.fileName,
+          sourceLang,
+          input.targetLang,
+        );
+        if (!fileTrResult || fileTrResult.error !== ErrorType.NoError)
+          return { error: ErrorType.BotTranslationError };
+        const stream = Readable.from([fileTrResult.translatedFileString]);
+        translatedAndSavedFile = await this.fileService.uploadFile(
+          stream,
+          putLangCodesToFileName(fileInfo.file.fileName, input.targetLang),
+          fileInfo.file.fileType,
+          token,
+        );
+        break;
+      default:
+        return {
+          error: ErrorType.BotTranslationBotNotFound,
+        };
+    }
+
+    if (!translatedAndSavedFile.file?.id) {
+      Logger.error(
+        `aiTranslationsService#botTranslateDocument: !translatedAndSavedFile.file?.id, translatedAndSavedFile: ${JSON.stringify(
+          translatedAndSavedFile,
+        )}`,
+      );
+      return { error: ErrorType.BotTranslationError };
+    }
+
+    const translatedDocument = await this.documentsService.saveDocument({
+      document: {
+        file_id: String(translatedAndSavedFile.file.id),
+        language_code: input.targetLang.language_code,
+        dialect_code: input.targetLang.dialect_code,
+        geo_code: input.targetLang.geo_code,
+      },
+      token,
+    });
+
+    return translatedDocument;
+  }
 }

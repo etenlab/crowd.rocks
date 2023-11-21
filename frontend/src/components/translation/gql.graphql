@@ -220,6 +220,16 @@ query LanguagesForBotTranslate($botType: BotType!) {
   }
 }
 
+query SourceToTargetLanguagesForBot($botType: BotType!) {
+  languagesForBotTranslate(botType: $botType) {
+    error
+    sourceToTarget {
+      sourceLangCode
+      targetLangCodes
+    }
+  }
+}
+
 mutation TranslateWordsAndPhrasesByGoogle(
   $from_language_code: String!
   $from_dialect_code: String

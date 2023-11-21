@@ -12,6 +12,10 @@ import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 import { TextyDocument } from '../../../generated/graphql';
 
 import { useTr } from '../../../hooks/useTr';
+import { languageOutline } from 'ionicons/icons';
+import { IonIcon } from '@ionic/react';
+import { useAppContext } from '../../../hooks/useAppContext';
+import { DocumentBotTranslateModal } from '../DocumentsPage/DocumentBotTranslateModal';
 
 type DocumentItemProps = {
   document: TextyDocument;
@@ -19,7 +23,11 @@ type DocumentItemProps = {
 };
 
 export function DocumentItem({ document, onClickItem }: DocumentItemProps) {
+  const {
+    actions: { createModal },
+  } = useAppContext();
   const { tr } = useTr();
+  const { openModal, closeModal } = createModal();
   const langInfo = subTags2LangInfo({
     lang: document.language_code,
     dialect: document.dialect_code || undefined,
@@ -34,6 +42,12 @@ export function DocumentItem({ document, onClickItem }: DocumentItemProps) {
     downloadFromUrl(document.file_name, document.file_url);
   };
 
+  const handleBotTranslate = () => {
+    openModal(
+      <DocumentBotTranslateModal onClose={closeModal} document={document} />,
+    );
+  };
+
   const dropDownList = [
     {
       key: 'download_button',
@@ -46,6 +60,20 @@ export function DocumentItem({ document, onClickItem }: DocumentItemProps) {
           onClick={handleDownloadFile}
         >
           {tr('Download')}
+        </Button>
+      ),
+    },
+    {
+      key: 'bottranslate_button',
+      component: (
+        <Button
+          variant="text"
+          startIcon={<IonIcon icon={languageOutline}></IonIcon>}
+          color="dark"
+          sx={{ padding: 0, justifyContent: 'flex-start' }}
+          onClick={handleBotTranslate}
+        >
+          {tr('Translate using bot')}
         </Button>
       ),
     },

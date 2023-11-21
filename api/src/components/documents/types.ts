@@ -43,7 +43,7 @@ export class TextyDocumentInput {
 @ObjectType()
 export class DocumentUploadOutput extends GenericOutput {
   @Field(() => TextyDocument, { nullable: true })
-  document: TextyDocument | null;
+  document?: TextyDocument | null;
 }
 
 @InputType()

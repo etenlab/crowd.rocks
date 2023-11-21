@@ -41,6 +41,12 @@ type AvatarUpdateOutput {
   user: User
 }
 
+input BotTranslateDocumentInput {
+  botType: BotType!
+  documentId: String!
+  targetLang: LanguageInput!
+}
+
 enum BotType {
   DeepL
   GPT4
@@ -153,6 +159,8 @@ enum ErrorType {
   CandidateNotFoundInBallot
   DamagedDocumentWordEntryBlock
   DocumentEntryReadError
+  DocumentFileIdNotProvided
+  DocumentFileReadError
   DocumentIdNotProvided
   DocumentNotFound
   DocumentWordEntryAlreadyExists
@@ -165,9 +173,12 @@ enum ErrorType {
   EmailTooLong
   EmailTooShort
   EmailUnavailable
+  FileAlreadyExists
   FileDeleteFailed
   FileNotExists
+  FileRecordNotFound
   FileSaveFailed
+  FileUpdateFailed
   FileWithFilenameAlreadyExists
   FolderForThreadNotExists
   FolderIdNotDefined
@@ -457,6 +468,7 @@ input LanguageInput {
 type LanguageListForBotTranslateOutput {
   error: ErrorType!
   languages: [LanguageForBotTranslate!]
+  sourceToTarget: [SourceTargetLangs!]
 }
 
 type LanguageOutput {
@@ -610,6 +622,7 @@ type MarkNotificationReadOutput {
 type Mutation {
   addNotification(input: AddNotificationInput!): AddNotificationOutput!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
+  botTranslateDocument(input: BotTranslateDocumentInput!): DocumentUploadOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
@@ -674,7 +687,7 @@ type Mutation {
   translateWordsAndPhrasesBySmartcat(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   updateDefinition(input: DefinitionUpdateaInput!): PhraseDefinitionOutput!
   updateFile(file: Upload, file_size: Int, file_type: String, id: Int!): IFileOutput!
-  uploadFile(file: Upload!, file_size: Int!, file_type: String!): IFileOutput!
+  uploadFile(file: Upload!, file_size: Int!, file_type: String!, returnErrorIfExists: Boolean): IFileOutput!
   upsertAnswers(input: [AnswerUpsertInput!]!): AnswersOutput!
   upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): TranslationOutput!
   upsertPericopies(startWords: [String!]!): PericopiesOutput!
@@ -1364,6 +1377,11 @@ type SiteTextWordDefinitionEdge {
 type SiteTextWordDefinitionOutput {
   error: ErrorType!
   site_text_word_definition: SiteTextWordDefinition
+}
+
+type SourceTargetLangs {
+  sourceLangCode: String!
+  targetLangCodes: [String!]!
 }
 
 input StartZipMapDownloadInput {

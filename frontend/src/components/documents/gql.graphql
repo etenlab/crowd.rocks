@@ -153,3 +153,22 @@ mutation UpsertWordRange(
     }
   }
 }
+
+mutation BotTranslateDocument(
+  $botType: BotType!
+  $documentId: String!
+  $targetLang: LanguageInput!
+) {
+  botTranslateDocument(
+    input: {
+      botType: $botType
+      documentId: $documentId
+      targetLang: $targetLang
+    }
+  ) {
+    document {
+      ...TextyDocumentFragment
+    }
+    error
+  }
+}
