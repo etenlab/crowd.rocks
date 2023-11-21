@@ -99,6 +99,17 @@ query GetDocumentWordEntriesByDocumentId(
   }
 }
 
+query GetDocumentTextFromRanges($ranges: [WordRangeInput!]!) {
+  getDocumentTextFromRanges(ranges: $ranges) {
+    error
+    list {
+      begin_document_word_entry_id
+      end_document_word_entry_id
+      piece_of_text
+    }
+  }
+}
+
 query GetWordRangesByDocumentId($document_id: ID!, $after: ID, $first: Int) {
   getWordRangesByDocumentId(
     document_id: $document_id
@@ -111,6 +122,15 @@ query GetWordRangesByDocumentId($document_id: ID!, $after: ID, $first: Int) {
     }
     pageInfo {
       ...PageInfoFragment
+    }
+  }
+}
+
+query ReadWordRange($id: ID!) {
+  readWordRanges(ids: [$id]) {
+    error
+    word_ranges {
+      ...WordRangeFragment
     }
   }
 }
