@@ -6,6 +6,8 @@ import {
   PericopeWithVotesEdgeFragmentFragmentDoc,
   DocumentWordEntryFragmentFragmentDoc,
   DocumentWordEntry,
+  GetPericopiesByDocumentIdQuery,
+  GetPericopiesByDocumentIdDocument,
 } from '../generated/graphql';
 
 export function updateCacheWithUpsertPericope(
@@ -30,45 +32,92 @@ export function updateCacheWithUpsertPericope(
   const documentId = +wordEntryData.document_id;
   const page = +wordEntryData.page;
 
-  cache.updateFragment<PericopeWithVotesEdge>(
-    {
-      id: cache.identify({
-        __typename: 'PericopeWithVotesEdge',
-        cursor: JSON.stringify({ document_id: documentId, page }),
-      }),
-      fragment: PericopeWithVotesEdgeFragmentFragmentDoc,
-      fragmentName: 'PericopeWithVotesEdgeFragment',
+  const pericopiesData = cache.readQuery<GetPericopiesByDocumentIdQuery>({
+    query: GetPericopiesByDocumentIdDocument,
+    variables: {
+      document_id: documentId + '',
     },
-    (data) => {
-      if (data) {
-        return {
-          ...data,
-          node: [
-            ...data.node,
-            {
-              __typename: 'PericopeWithVote',
-              pericope_id: newPericope.pericope_id,
-              start_word: newPericope.start_word,
-              upvotes: 0,
-              downvotes: 0,
-            },
-          ],
-        };
-      } else {
-        return {
+  });
+
+  if (!pericopiesData) {
+    return;
+  }
+
+  const exists = pericopiesData.getPericopiesByDocumentId.edges.filter(
+    (edge) => edge.cursor === JSON.stringify({ document_id: documentId, page }),
+  );
+
+  if (exists.length > 0) {
+    cache.updateFragment<PericopeWithVotesEdge>(
+      {
+        id: cache.identify({
           __typename: 'PericopeWithVotesEdge',
           cursor: JSON.stringify({ document_id: documentId, page }),
-          node: [
-            {
-              __typename: 'PericopeWithVote',
-              pericope_id: newPericope.pericope_id,
-              start_word: newPericope.start_word,
-              upvotes: 0,
-              downvotes: 0,
-            },
-          ],
-        };
-      }
+        }),
+        fragment: PericopeWithVotesEdgeFragmentFragmentDoc,
+        fragmentName: 'PericopeWithVotesEdgeFragment',
+      },
+      (data) => {
+        if (data) {
+          return {
+            ...data,
+            node: [
+              ...data.node,
+              {
+                __typename: 'PericopeWithVote',
+                pericope_id: newPericope.pericope_id,
+                start_word: newPericope.start_word,
+                upvotes: 0,
+                downvotes: 0,
+              },
+            ],
+          };
+        } else {
+          return {
+            __typename: 'PericopeWithVotesEdge',
+            cursor: JSON.stringify({ document_id: documentId, page }),
+            node: [
+              {
+                __typename: 'PericopeWithVote',
+                pericope_id: newPericope.pericope_id,
+                start_word: newPericope.start_word,
+                upvotes: 0,
+                downvotes: 0,
+              },
+            ],
+          };
+        }
+      },
+    );
+
+    return;
+  }
+
+  cache.writeQuery<GetPericopiesByDocumentIdQuery>({
+    query: GetPericopiesByDocumentIdDocument,
+    variables: {
+      document_id: documentId + '',
     },
-  );
+    data: {
+      getPericopiesByDocumentId: {
+        ...pericopiesData.getPericopiesByDocumentId,
+        edges: [
+          ...pericopiesData.getPericopiesByDocumentId.edges,
+          {
+            __typename: 'PericopeWithVotesEdge',
+            cursor: JSON.stringify({ document_id: documentId, page }),
+            node: [
+              {
+                __typename: 'PericopeWithVote',
+                pericope_id: newPericope.pericope_id,
+                start_word: newPericope.start_word,
+                upvotes: 0,
+                downvotes: 0,
+              },
+            ],
+          },
+        ],
+      },
+    },
+  });
 }
