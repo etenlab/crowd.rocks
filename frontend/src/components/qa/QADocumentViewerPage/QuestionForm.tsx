@@ -113,6 +113,32 @@ export function QuestionForm({ sentence, range, onClose }: QuestionFormProps) {
       return false;
     }
 
+    if (questionItems.length === 0) {
+      setInvalidMessage({
+        invalidItems: [],
+        message: tr('Please add question Items'),
+      });
+
+      return false;
+    }
+
+    const invalid: string[] = [];
+
+    questionItems.forEach((item) => {
+      if (item.value.trim() === '') {
+        invalid.push(item.key);
+      }
+    });
+
+    if (invalid.length > 0) {
+      setInvalidMessage({
+        invalidItems: invalid,
+        message: tr('There are empty items'),
+      });
+
+      return false;
+    }
+
     return true;
   };
 

@@ -83,6 +83,7 @@ import { DocumentViewerPage } from './components/documents/DocumentViewerPage/Do
 
 import { QADocumentListPage } from './components/qa/QADocumentListPage';
 import { QADocumentViewerPage } from './components/qa/QADocumentViewerPage';
+import { AnswersPage } from './components/qa/QADocumentViewerPage/AnswersPage';
 
 import { PericopeDocumentListPage } from './components/pericopies/PericopeDocumentListPage';
 import { PericopeDocumentViewerPage } from './components/pericopies/PericopeDocumentViewerPage';
@@ -567,6 +568,11 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/qa/documents/:document_id"
               component={QADocumentViewerPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/qa/answers/:question_id"
+              component={AnswersPage}
             />
             <Route
               exact
