@@ -158,7 +158,7 @@ export class AiTranslationsService {
           ...getTotalWordToPhraseCount(
             input.fromLanguageCode,
             input.toLanguageCode,
-            [google_user_id, lilt_user_id],
+            [google_user_id, lilt_user_id, gpt_3_user_id, gpt_4_user_id],
           ),
         );
         translatedMissingWordCount =
@@ -181,8 +181,12 @@ export class AiTranslationsService {
         error: ErrorType.NoError, // later
         totalPhraseCount,
         totalWordCount,
-        translatedMissingPhraseCount,
-        translatedMissingWordCount,
+        translatedMissingPhraseCount:
+          translatedMissingPhraseCount &&
+          (translatedMissingPhraseCount < 0 ? 0 : translatedMissingPhraseCount),
+        translatedMissingWordCount:
+          translatedMissingWordCount &&
+          (translatedMissingWordCount < 0 ? 0 : translatedMissingWordCount),
         googleTranslateTotalLangCount,
         liltTranslateTotalLangCount,
         smartcatTranslateTotalLangCount,
