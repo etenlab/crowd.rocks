@@ -29,9 +29,10 @@ export const PericopeTrPage: React.FC<PericopeTrPageProps> = ({
     actions: { setSourceLanguage, setTargetLanguage },
   } = useAppContext();
 
-  const handleGoToTranslation = () => {
-    // todo
-    history.push(`/${nation_id}/${language_id}/1/maps/translation/all`);
+  const handleShowPericopiesList = () => {
+    history.push(
+      `/${nation_id}/${language_id}/1/pericope-translations/pericopies-list`,
+    );
   };
 
   return (
@@ -62,7 +63,7 @@ export const PericopeTrPage: React.FC<PericopeTrPageProps> = ({
       <Button
         variant="contained"
         color="blue"
-        onClick={handleGoToTranslation}
+        onClick={handleShowPericopiesList}
         sx={{ marginTop: '30px' }}
       >
         {tr('Show Documents')}
