@@ -9,7 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionToken } from 'src/common/subscription-token';
-import { BotType, GenericOutput } from 'src/common/types';
+import { BotType, ChatGPTVersion, GenericOutput } from 'src/common/types';
 import { getBearer } from 'src/common/utility';
 import { PUB_SUB } from 'src/pubSub.module';
 import { IsAuthAdmin } from '../../decorators/is-auth-admin.decorator';
@@ -22,8 +22,8 @@ import {
   TranslatedLanguageInfoInput,
   TranslateAllWordsAndPhrasesByBotOutput,
   TranslateAllWordsAndPhrasesByBotResult,
-  ChatGPTVersion,
   BotTranslateDocumentInput,
+  GPTTranslateProgress,
 } from './types';
 
 @Injectable()
@@ -86,6 +86,24 @@ export class BotsResolver {
     @Context() req: any,
   ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
     return this.aiTranslationsService.translateWordsAndPhrasesByChatGPT35(
+      from_language,
+      to_language,
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @IsAuthAdmin()
+  @Mutation(() => TranslateAllWordsAndPhrasesByBotOutput)
+  async translateWordsAndPhrasesByChatGPTFAKE(
+    @Args('from_language', { type: () => LanguageInput })
+    from_language: LanguageInput,
+    @Args('to_language', { type: () => LanguageInput })
+    to_language: LanguageInput,
+    @Context() req: any,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> {
+    console.log('translateWordsAndPhrasesByGPTFAKE');
+    return this.aiTranslationsService.translateWordsAndPhrasesByChatGPTFAKE(
       from_language,
       to_language,
       getBearer(req) || '',
@@ -405,6 +423,16 @@ export class BotsResolver {
   async subscribeToTranslationReport() {
     console.log('subscribeToTranslationReport');
     return this.pubSub.asyncIterator(SubscriptionToken.TranslationReport);
+  }
+
+  @Subscription(() => GPTTranslateProgress, {
+    name: SubscriptionToken.ChatGptTranslateProgress,
+  })
+  async subscribeToGptTranslateProgress() {
+    console.log('subscribeToGptTranslateProgress');
+    return this.pubSub.asyncIterator(
+      SubscriptionToken.ChatGptTranslateProgress,
+    );
   }
 
   @IsAuthAdmin()

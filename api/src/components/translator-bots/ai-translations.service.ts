@@ -3,7 +3,12 @@ import { PubSub } from 'graphql-subscriptions';
 import { PoolClient } from 'pg';
 import { Subject } from 'rxjs';
 import { SubscriptionToken } from 'src/common/subscription-token';
-import { BotType, ErrorType, GenericOutput } from 'src/common/types';
+import {
+  BotType,
+  ChatGPTVersion,
+  ErrorType,
+  GenericOutput,
+} from 'src/common/types';
 import { pgClientOrPool, putLangCodesToFileName } from 'src/common/utility';
 import { LanguageInput } from 'src/components/common/types';
 import { PhrasesService } from 'src/components/phrases/phrases.service';
@@ -31,7 +36,6 @@ import { ToDefinitionInput } from '../translations/types';
 import { ChatGPTService } from './chatgpt.service';
 import {
   BotTranslateDocumentInput,
-  ChatGPTVersion,
   IGPTTranslator,
   ITranslator,
   LanguageListForBotTranslateOutput,
@@ -748,7 +752,7 @@ export class AiTranslationsService {
         from_language,
         to_language,
         pgClient,
-        ChatGPTVersion.Three,
+        ChatGPTVersion.Four,
       );
     } catch (e) {
       Logger.error(e);
@@ -772,7 +776,31 @@ export class AiTranslationsService {
         from_language,
         to_language,
         pgClient,
-        ChatGPTVersion.Four,
+        ChatGPTVersion.Three,
+      );
+    } catch (e) {
+      Logger.error(e);
+      return {
+        error: ErrorType.UnknownError,
+        result: null,
+      };
+    }
+  };
+
+  // use arrow function declaration here to provide proper 'this' context!
+  translateWordsAndPhrasesByChatGPTFAKE = async (
+    from_language: LanguageInput,
+    to_language: LanguageInput,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<TranslateAllWordsAndPhrasesByBotOutput> => {
+    try {
+      return this.translateWordsAndPhrasesByBot(
+        this.chatgptService,
+        from_language,
+        to_language,
+        pgClient,
+        ChatGPTVersion.Fake,
       );
     } catch (e) {
       Logger.error(e);

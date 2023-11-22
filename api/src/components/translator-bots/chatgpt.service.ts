@@ -1,15 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import { LanguageInput } from 'src/components/common/types';
 import {
-  ChatGPTVersion,
+  GPTTranslateProgress,
   IGPTTranslator,
   LanguageListForBotTranslateOutput,
 } from './types';
 import { delay, getTranslatorTokenByEmailAndUsername } from './utility';
-import { ErrorType } from '../../common/types';
+import { ChatGPTVersion, ErrorType } from '../../common/types';
 import { PostgresService } from 'src/core/postgres.service';
 import { ConfigService } from 'src/core/config.service';
+import { PUB_SUB } from 'src/pubSub.module';
+import { PubSub } from 'graphql-subscriptions';
+import { SubscriptionToken } from 'src/common/subscription-token';
+import { timeout } from 'rxjs';
+import { randomInt } from 'crypto';
 
 const CHAT_GPT_3_EMAIL = 'chatgpt-3@crowd.rocks';
 const CHAT_GPT_3_USERNAME = 'chatgpt-3.5';
@@ -33,7 +38,11 @@ export class ChatGPTService implements IGPTTranslator {
   private availableTokens: number;
   private openai: OpenAI;
 
-  constructor(pg: PostgresService, private config: ConfigService) {
+  constructor(
+    pg: PostgresService,
+    private config: ConfigService,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
+  ) {
     this.pg = pg;
     this.firstOperateTime = 0;
     this.lastOperateTime = 0;
@@ -87,11 +96,33 @@ export class ChatGPTService implements IGPTTranslator {
       let chunks: string[] = [];
       const translatedTexts: string[] = [];
       let availableCharacters = LIMIT_LENGTH;
+      this.pubSub.publish(SubscriptionToken.ChatGptTranslateProgress, {
+        [SubscriptionToken.ChatGptTranslateProgress]: { progress: 0, version },
+      });
 
+      let counter = 0;
       for (const text of texts) {
         translatedTexts.push(
           ...(await this.processApiCall(chunks, from, to, version)),
         );
+        counter++;
+        // 'debounce'
+        if (counter % 5 === 0 && counter !== texts.length) {
+          this.pubSub.publish(SubscriptionToken.ChatGptTranslateProgress, {
+            [SubscriptionToken.ChatGptTranslateProgress]: {
+              progress: Math.round((counter / texts.length) * 100),
+              version,
+            } as GPTTranslateProgress,
+          });
+        }
+        if (counter === texts.length) {
+          this.pubSub.publish(SubscriptionToken.ChatGptTranslateProgress, {
+            [SubscriptionToken.ChatGptTranslateProgress]: {
+              progress: 100,
+              version,
+            } as GPTTranslateProgress,
+          });
+        }
         // for now, each chunk will be the size of one because
         // chatgpt handles requests differently based on the
         // number of tokens of both the request and the response
@@ -132,21 +163,31 @@ export class ChatGPTService implements IGPTTranslator {
     //console.log(translateCmd);
     //console.log(version);
 
-    const params: OpenAI.Chat.ChatCompletionCreateParams = {
-      messages: [
-        {
-          role: 'user',
-          content: translateCmd,
-        },
-      ],
-      model: version,
-    };
-    const chatCompletion: OpenAI.Chat.ChatCompletion =
-      await this.openai.chat.completions.create(params);
+    if (version != ChatGPTVersion.Fake) {
+      const params: OpenAI.Chat.ChatCompletionCreateParams = {
+        messages: [
+          {
+            role: 'user',
+            content: translateCmd,
+          },
+        ],
+        model: version,
+      };
+      const chatCompletion: OpenAI.Chat.ChatCompletion =
+        await this.openai.chat.completions.create(params);
 
-    //console.log(chatCompletion.choices[0].message.content);
-    this.availableTokens -= chatCompletion.usage?.total_tokens ?? 0;
-    return chatCompletion.choices[0].message.content ?? '';
+      //console.log(chatCompletion.choices[0].message.content);
+      this.availableTokens -= chatCompletion.usage?.total_tokens ?? 0;
+      return chatCompletion.choices[0].message.content ?? '';
+    } else {
+      await new Promise((f) => setTimeout(f, randomInt(200)));
+      const translations = [
+        'TEST-translation-word' + randomInt(10000),
+        'TEST Translation Phrase' + randomInt(10000),
+      ];
+
+      return translations[randomInt(2)];
+    }
   }
 
   getTranslatorToken = (
