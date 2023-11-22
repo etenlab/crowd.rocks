@@ -3,8 +3,10 @@ import { ReactNode } from 'react';
 import { actions } from './components.actions';
 import { type ActionType } from '.';
 
+export type ModalMode = 'standard' | 'full';
+
 export interface StateType {
-  modals: { id: string; mode: 'standard' | 'full'; component: ReactNode }[];
+  modals: { id: string; mode: ModalMode; component: ReactNode }[];
   ionContentScrollElement: HTMLElement | null;
 }
 
@@ -24,7 +26,7 @@ export function reducer(
     case actions.ADD_MODAL: {
       const payload = action.payload as {
         id: string;
-        mode: 'standard' | 'full';
+        mode: ModalMode;
         component: ReactNode;
       };
 

@@ -1,5 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
+import {
+  Args,
+  Query,
+  Resolver,
+  Mutation,
+  Context,
+  ID,
+  Int,
+} from '@nestjs/graphql';
 import { getBearer } from 'src/common/utility';
 
 import { QuestionItemsService } from './question-items.service';
@@ -14,6 +22,8 @@ import {
   AnswersOutput,
   QuestionUpsertInput,
   AnswerUpsertInput,
+  QuestionWithStatisticOutput,
+  QuestionOnWordRangesListConnection,
 } from './types';
 import { TableNameType } from 'src/common/types';
 
@@ -61,6 +71,15 @@ export class QuestionAndAnswersResolver {
     );
   }
 
+  @Query(() => QuestionWithStatisticOutput)
+  async getQuestionStatistic(
+    @Args('question_id', { type: () => ID }) question_id: string,
+  ): Promise<QuestionWithStatisticOutput> {
+    Logger.log('getQuestionStatistic, question_id:', question_id);
+
+    return this.questionService.getQuestionStatistic(+question_id, null);
+  }
+
   @Query(() => QuestionsOutput)
   async getQuestionsByRefs(
     @Args('parent_tables', { type: () => [TableNameType] })
@@ -79,15 +98,22 @@ export class QuestionAndAnswersResolver {
     );
   }
 
-  @Query(() => QuestionOnWordRangesOutput)
+  @Query(() => QuestionOnWordRangesListConnection)
   async getQuestionOnWordRangesByDocumentId(
     @Args('document_id', { type: () => ID })
     document_id: string,
-  ): Promise<QuestionOnWordRangesOutput> {
-    Logger.log('getQuestionOnWordRangesByDocumentId', document_id);
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<QuestionOnWordRangesListConnection> {
+    Logger.log(
+      'getQuestionOnWordRangesByDocumentId',
+      JSON.stringify({ document_id, first, after }, null, 2),
+    );
 
     return this.questionService.getQuestionOnWordRangesByDocumentId(
       +document_id,
+      first,
+      after,
       null,
     );
   }

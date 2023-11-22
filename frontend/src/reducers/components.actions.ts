@@ -1,5 +1,7 @@
 import { ReactNode } from 'react';
 
+import { ModalMode } from './components.reducer';
+
 export const actions = {
   ADD_MODAL: 'ADD_MODAL',
   REMOVE_MODAL: 'REMOVE_MODAL',
@@ -8,7 +10,7 @@ export const actions = {
 
 export function addModal(
   id: string,
-  mode: 'full' | 'standard',
+  mode: ModalMode,
   component: ReactNode | null,
 ) {
   return {

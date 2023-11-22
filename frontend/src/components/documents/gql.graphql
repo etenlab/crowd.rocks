@@ -28,6 +28,13 @@ fragment WordRangeFragment on WordRange {
   }
 }
 
+fragment WordRangesEdgeFragment on WordRangesEdge {
+  cursor
+  node {
+    ...WordRangeFragment
+  }
+}
+
 fragment DocumentEdgeFragment on DocumentEdge {
   cursor
   node {
@@ -92,8 +99,35 @@ query GetDocumentWordEntriesByDocumentId(
   }
 }
 
-query GetWordRangesByDocumentId($document_id: ID!) {
-  getWordRangesByDocumentId(document_id: $document_id) {
+query GetDocumentTextFromRanges($ranges: [WordRangeInput!]!) {
+  getDocumentTextFromRanges(ranges: $ranges) {
+    error
+    list {
+      begin_document_word_entry_id
+      end_document_word_entry_id
+      piece_of_text
+    }
+  }
+}
+
+query GetWordRangesByDocumentId($document_id: ID!, $after: ID, $first: Int) {
+  getWordRangesByDocumentId(
+    document_id: $document_id
+    after: $after
+    first: $first
+  ) {
+    error
+    edges {
+      ...WordRangesEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+
+query ReadWordRange($id: ID!) {
+  readWordRanges(ids: [$id]) {
     error
     word_ranges {
       ...WordRangeFragment

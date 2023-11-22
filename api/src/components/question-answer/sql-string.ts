@@ -90,23 +90,33 @@ export type GetQuestionsObjectRow = {
   question: string;
   question_items: string[];
   created_at: Date;
-  created_by: string;
+  user_id: string;
+  is_bot: boolean;
+  avatar: string;
+  avatar_url: string | null;
 };
 
 export function getQuestionsObjByIds(ids: number[]): [string, [number[]]] {
   return [
     `
       select 
-        question_id,
-        parent_table,
-        parent_id,
-        question_type_is_multiselect,
-        question,
-        question_items,
-        created_at,
-        created_by
+        questions.question_id,
+        questions.parent_table,
+        questions.parent_id,
+        questions.question_type_is_multiselect,
+        questions.question,
+        questions.question_items,
+        questions.created_at,
+        questions.created_by as user_id,
+        u.is_bot,
+        a.avatar,
+        a.url as avatar_url
       from questions
-      where question_id = any($1)
+      join users as u
+        on u.user_id = questions.created_by
+      join avatars as a
+        on u.user_id = a.user_id
+      where questions.question_id = any($1)
     `,
     [ids],
   ];
@@ -124,16 +134,23 @@ export function getQuestionsObjByRefs(
         select unnest($1::text[]), unnest($2::int[])
       )
       select 
-        question_id,
-        parent_table,
-        parent_id,
-        question_type_is_multiselect,
-        question,
-        question_items,
-        created_at,
-        created_by
+        questions.question_id,
+        questions.parent_table,
+        questions.parent_id,
+        questions.question_type_is_multiselect,
+        questions.question,
+        questions.question_items,
+        questions.created_at,
+        questions.created_by as user_id,
+        u.is_bot,
+        a.avatar,
+        a.url as avatar_url
       from questions
-      where (parent_table, parent_id) in (
+      join users as u
+        on u.user_id = questions.created_by
+      join avatars as a
+        on u.user_id = a.user_id
+      where (questions.parent_table, questions.parent_id) in (
         select parent_table, parent_id
         from pairs
       );
@@ -184,21 +201,31 @@ export type GetAnswersObjectRow = {
   answer: string;
   question_items: string[];
   created_at: Date;
-  created_by: string;
+  user_id: string;
+  is_bot: boolean;
+  avatar: string;
+  avatar_url: string | null;
 };
 
 export function getAnswersObjByIds(ids: number[]): [string, [number[]]] {
   return [
     `
       select 
-        answer_id,
-        question_id,
-        answer,
-        question_items,
-        created_at,
-        created_by
+        answers.answer_id,
+        answers.question_id,
+        answers.answer,
+        answers.question_items,
+        answers.created_at,
+        answers.created_by as user_id,
+        u.is_bot,
+        a.avatar,
+        a.url as avatar_url
       from answers
-      where answer_id = any($1)
+      join users as u
+        on u.user_id = answers.created_by
+      join avatars as a
+        on u.user_id = a.user_id
+      where answers.answer_id = any($1)
     `,
     [ids],
   ];
@@ -210,15 +237,52 @@ export function getAnswersObjByQuestionIds(
   return [
     `
       select 
-        answer_id,
-        question_id,
-        answer,
-        question_items,
-        created_at,
-        created_by
+        answers.answer_id,
+        answers.question_id,
+        answers.answer,
+        answers.question_items,
+        answers.created_at,
+        answers.created_by as user_id,
+        u.is_bot,
+        a.avatar,
+        a.url as avatar_url
       from answers
-      where question_id = any($1)
+      join users as u
+        on u.user_id = answers.created_by
+      join avatars as a
+        on u.user_id = a.user_id
+      where answers.question_id = any($1)
     `,
     [ids],
+  ];
+}
+
+export type GetQuestionItemStatistic = {
+  question_item_id: string;
+  item: string;
+  statistic: string;
+};
+
+export function getQuestionItemStatistic(
+  question_id: number,
+): [string, [number]] {
+  return [
+    `
+      select
+        qis.question_item_id,
+        qis.item,
+        sum(
+          case when answers.answer_id is null then 0 else 1 end
+        ) as statistic
+      from question_items as qis
+      join questions
+        on qis.question_item_id = any(questions.question_items)
+      left join answers
+        on qis.question_item_id = any(answers.question_items)
+      where questions.question_id = $1
+        and answers.question_id = $1
+      group by qis.question_item_id;
+    `,
+    [question_id],
   ];
 }
