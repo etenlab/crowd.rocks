@@ -56,6 +56,7 @@ export function PericopeTrDocumentListPage() {
   const handleGoToPericopeTrList = useCallback(
     (documentId: string) => {
       history.push(
+        //todo
         `/${nation_id}/${language_id}/${cluster_id}/qa/documents/${documentId}`,
       );
     },

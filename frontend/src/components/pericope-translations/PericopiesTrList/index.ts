@@ -1,0 +1,1 @@
+export { PericopiesTrList } from './PericopiesTrList';
