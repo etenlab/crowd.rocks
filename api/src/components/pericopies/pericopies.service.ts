@@ -128,7 +128,7 @@ export class PericopiesService {
     document_id: number,
     first: number | null,
     after: string | null,
-    pgClient,
+    pgClient: PoolClient | null,
   ): Promise<PericopeWithVotesListConnection> {
     try {
       const res = await pgClientOrPool({
@@ -238,5 +238,15 @@ export class PericopiesService {
         totalEdges: 0,
       },
     };
+  }
+
+  async getRecomendedPericopiesByDocumentId( documentId: number): Promise<RecomendedPericopeConnection> {
+    //todo
+    stopped here
+  }
+
+  async getPericopiesTexts(pericopiesIds): Promise<{ [key: number]: string }> {
+   //todo
+    stopped here  
   }
 }
