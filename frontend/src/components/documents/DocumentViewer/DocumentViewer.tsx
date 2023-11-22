@@ -88,41 +88,12 @@ export const DocumentViewer = memo(
         ref,
         () => {
           return {
-            getTextFromRange(start: string, end: string) {
-              const words: string[] = [];
-
-              let isStarted = false;
-
-              for (const data of entriesData) {
-                if (!Array.isArray(data)) {
-                  if (isStarted) {
-                    words.push('...');
-                  }
-                  continue;
-                }
-
-                for (let i = 0; i < data.length; i++) {
-                  if (data[i].id === start) {
-                    isStarted = true;
-                  }
-
-                  if (isStarted) {
-                    words.push(data[i].wordlike_string.wordlike_string);
-                  }
-
-                  if (data[i].id === end) {
-                    isStarted = false;
-
-                    return words.join(' ');
-                  }
-                }
-              }
-
-              return words.join(' ');
+            getTextFromRange() {
+              return '';
             },
           };
         },
-        [entriesData],
+        [],
       );
 
       const calcRowWidth = useCallback(() => {
@@ -318,7 +289,6 @@ export const DocumentViewer = memo(
         const fontWeight = 400;
         const fontFamily = 'Poppins';
         const padding = 6;
-        const letterSpacing = -0.28;
 
         context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
 
@@ -399,13 +369,10 @@ export const DocumentViewer = memo(
 
             const wordlikeString = entry.wordlike_string.wordlike_string;
 
-            const wordWidth = Math.ceil(
-              context.measureText(wordlikeString).width +
-                letterSpacing * (wordlikeString.length - 1) +
-                padding,
-            );
+            const wordWidth =
+              context.measureText(wordlikeString).width + padding;
 
-            if (tempRow.width + wordWidth < rowWidth) {
+            if (tempRow.width + wordWidth < rowWidth - 30) {
               tempRow.cols.push({
                 wordEntry: entry,
                 order: wordCounter,
@@ -415,7 +382,7 @@ export const DocumentViewer = memo(
               const rowCom = (
                 <Stack
                   direction="row"
-                  justifyContent="flex-start"
+                  justifyContent="space-between"
                   sx={(theme) => ({
                     color: theme.palette.text.gray,
                   })}
@@ -428,14 +395,7 @@ export const DocumentViewer = memo(
                       wordlikeString,
                       dotCom,
                       isDot,
-                    } = getWordProps(
-                      col.wordEntry,
-                      col.order,
-                      `0 ${
-                        2.5 +
-                        (rowWidth - tempRow.width) / tempRow.cols.length / 2
-                      }px`,
-                    );
+                    } = getWordProps(col.wordEntry, col.order, `0 3px`);
 
                     return (
                       <Word

@@ -9,7 +9,6 @@ export const Word = styled('div')(({ theme }) => ({
   fontFamily: 'Poppins',
   fontWeight: 400,
   lineHeight: '32px',
-  letterSpacing: '-0.28px',
   '&.edit': {
     cursor: 'pointer',
   },
