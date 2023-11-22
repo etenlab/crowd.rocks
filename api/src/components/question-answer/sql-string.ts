@@ -257,6 +257,37 @@ export function getAnswersObjByQuestionIds(
   ];
 }
 
+export function getAnswersObjByUserIdAndQuestionId({
+  question_id,
+  user_id,
+}: {
+  question_id: number;
+  user_id: number;
+}): [string, [number, number]] {
+  return [
+    `
+      select 
+        answers.answer_id,
+        answers.question_id,
+        answers.answer,
+        answers.question_items,
+        answers.created_at,
+        answers.created_by as user_id,
+        u.is_bot,
+        a.avatar,
+        a.url as avatar_url
+      from answers
+      join users as u
+        on u.user_id = answers.created_by
+      join avatars as a
+        on u.user_id = a.user_id
+      where answers.question_id = $1
+        and answers.created_by = $2
+    `,
+    [question_id, user_id],
+  ];
+}
+
 export type GetQuestionItemStatistic = {
   question_item_id: string;
   item: string;
