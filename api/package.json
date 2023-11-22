@@ -59,6 +59,7 @@
     "html-to-text": "^9.0.5",
     "jsonwebtoken": "^9.0.1",
     "language-tags": "^1.0.8",
+    "lorem-ipsum": "^2.0.8",
     "nanoid": "^3.3.0",
     "node-fetch": "2",
     "node-html-parser": "^6.1.10",

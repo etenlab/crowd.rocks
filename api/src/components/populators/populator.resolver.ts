@@ -44,10 +44,6 @@ export class PopulatorResolver {
     this.pubSub.publish(SubscriptionToken.DataGenerationReport, {
       [SubscriptionToken.DataGenerationReport]: {
         output: ``,
-        mapUploadStatus: SubscriptionStatus.NotStarted,
-        mapTranslationsStatus: SubscriptionStatus.NotStarted,
-        mapReTranslationsStatus: SubscriptionStatus.NotStarted,
-        userCreateStatus: SubscriptionStatus.NotStarted,
         overallStatus: SubscriptionStatus.NotStarted,
       } as DataGenProgress,
     });
@@ -70,8 +66,10 @@ export class PopulatorResolver {
         input.mapsToLanguages,
         input.mapAmount,
         input.userAmount,
+        input.postsPerUser,
         input.wordAmount,
         input.phraseAmount,
+        input.docAmount,
       )
       .subscribe((n) =>
         this.pubSub.publish(SubscriptionToken.DataGenerationReport, {

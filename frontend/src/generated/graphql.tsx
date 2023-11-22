@@ -94,9 +94,11 @@ export type CreateQuestionOnWordRangeUpsertInput = {
 };
 
 export type DataGenInput = {
+  docAmount?: InputMaybe<Scalars['Int']['input']>;
   mapAmount?: InputMaybe<Scalars['Int']['input']>;
   mapsToLanguages?: InputMaybe<Array<LanguageInput>>;
   phraseAmount?: InputMaybe<Scalars['Int']['input']>;
+  postsPerUser?: InputMaybe<Scalars['Int']['input']>;
   userAmount?: InputMaybe<Scalars['Int']['input']>;
   wordAmount?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -3098,6 +3100,8 @@ export type GenerateDataMutationVariables = Exact<{
   userAmount?: InputMaybe<Scalars['Int']['input']>;
   wordAmount?: InputMaybe<Scalars['Int']['input']>;
   phraseAmount?: InputMaybe<Scalars['Int']['input']>;
+  docAmount?: InputMaybe<Scalars['Int']['input']>;
+  postsPerUser?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -5402,9 +5406,9 @@ export type PasswordResetFormRequestMutationHookResult = ReturnType<typeof usePa
 export type PasswordResetFormRequestMutationResult = Apollo.MutationResult<PasswordResetFormRequestMutation>;
 export type PasswordResetFormRequestMutationOptions = Apollo.BaseMutationOptions<PasswordResetFormRequestMutation, PasswordResetFormRequestMutationVariables>;
 export const GenerateDataDocument = gql`
-    mutation GenerateData($mapAmount: Int, $mapsToLanguages: [LanguageInput!], $userAmount: Int, $wordAmount: Int, $phraseAmount: Int) {
+    mutation GenerateData($mapAmount: Int, $mapsToLanguages: [LanguageInput!], $userAmount: Int, $wordAmount: Int, $phraseAmount: Int, $docAmount: Int, $postsPerUser: Int) {
   generateData(
-    input: {mapAmount: $mapAmount, mapsToLanguages: $mapsToLanguages, userAmount: $userAmount, wordAmount: $wordAmount, phraseAmount: $phraseAmount}
+    input: {mapAmount: $mapAmount, mapsToLanguages: $mapsToLanguages, userAmount: $userAmount, wordAmount: $wordAmount, phraseAmount: $phraseAmount, docAmount: $docAmount, postsPerUser: $postsPerUser}
   ) {
     error
   }
@@ -5430,6 +5434,8 @@ export type GenerateDataMutationFn = Apollo.MutationFunction<GenerateDataMutatio
  *      userAmount: // value for 'userAmount'
  *      wordAmount: // value for 'wordAmount'
  *      phraseAmount: // value for 'phraseAmount'
+ *      docAmount: // value for 'docAmount'
+ *      postsPerUser: // value for 'postsPerUser'
  *   },
  * });
  */

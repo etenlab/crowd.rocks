@@ -71,9 +71,11 @@ input CreateQuestionOnWordRangeUpsertInput {
 }
 
 input DataGenInput {
+  docAmount: Int
   mapAmount: Int
   mapsToLanguages: [LanguageInput!]
   phraseAmount: Int
+  postsPerUser: Int
   userAmount: Int
   wordAmount: Int
 }

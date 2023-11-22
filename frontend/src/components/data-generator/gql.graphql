@@ -1,5 +1,5 @@
-mutation GenerateData($mapAmount: Int, $mapsToLanguages: [LanguageInput!], $userAmount: Int, $wordAmount: Int, $phraseAmount: Int) {
-  generateData(input: {mapAmount: $mapAmount, mapsToLanguages: $mapsToLanguages, userAmount: $userAmount, wordAmount: $wordAmount, phraseAmount: $phraseAmount}) {
+mutation GenerateData($mapAmount: Int, $mapsToLanguages: [LanguageInput!], $userAmount: Int, $wordAmount: Int, $phraseAmount: Int, $docAmount: Int, $postsPerUser: Int) {
+  generateData(input: {mapAmount: $mapAmount, mapsToLanguages: $mapsToLanguages, userAmount: $userAmount, wordAmount: $wordAmount, phraseAmount: $phraseAmount, docAmount: $docAmount, postsPerUser: $postsPerUser}) {
     error
   }
 }
