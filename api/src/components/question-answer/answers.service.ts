@@ -72,6 +72,12 @@ export class AnswersService {
           return {
             ...row,
             question_items: questionItems,
+            created_by_user: {
+              user_id: row.user_id,
+              avatar: row.avatar,
+              avatar_url: row.avatar_url,
+              is_bot: row.is_bot,
+            },
           };
         }),
       };

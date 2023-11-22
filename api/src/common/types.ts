@@ -36,6 +36,7 @@ export enum ErrorType {
   ForumDeleteFailed = 'ForumDeleteFailed',
 
   FileNotExists = 'FileNotExists',
+  FileAlreadyExists = 'FileAlreadyExists',
   FileRecordNotFound = 'FileRecordNotFound',
   FileSaveFailed = 'FileSaveFailed',
   FileUpdateFailed = 'FileUpdateFailed',
@@ -133,6 +134,7 @@ export enum ErrorType {
   DocumentWordEntryAlreadyExists = 'DocumentWordEntryAlreadyExists',
   DocumentWordEntryNotFound = 'DocumentWordEntryNotFound',
   WordRangeInsertFailed = 'WordRangeInsertFailed',
+  DamagedDocumentWordEntryBlock = 'DamagedDocumentWordEntryBlock',
 
   QuestionItemInsertFailed = 'QuestionItemInsertFailed',
   QuestionInsertFailed = 'QuestionInsertFailed',

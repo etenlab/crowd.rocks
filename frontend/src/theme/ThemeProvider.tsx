@@ -154,6 +154,7 @@ declare module '@mui/material/styles' {
 
   interface CustomTypeText {
     blue: string;
+    blue_10: string;
     orange: string;
     red: string;
     white: string;
@@ -183,6 +184,7 @@ declare module '@mui/material/styles' {
 
   interface TypeBackground {
     blue: string;
+    blue_10: string;
     orange: string;
     red: string;
     white: string;
@@ -206,6 +208,20 @@ declare module '@mui/material/Typography' {
 
 declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {
+    blue: true;
+    orange: true;
+    red: true;
+    white: true;
+    green: true;
+    dark: true;
+    gray_stroke: true;
+    gray: true;
+    gray_bg: true;
+  }
+}
+
+declare module '@mui/material/ButtonGroup' {
+  interface ButtonGroupPropsColorOverrides {
     blue: true;
     orange: true;
     red: true;

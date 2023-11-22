@@ -63,16 +63,13 @@ export function WordCard({
         ) : (
           <div />
         )}
-        <MoreHorizButton
-          sx={{
-            display: authorizedForAnyFlag(flags?.flag_names ?? [])
-              ? undefined
-              : 'none',
-          }}
-          dropDownList={
-            flags ? [{ key: 'flag', component: <FlagV2 {...flags} /> }] : []
-          }
-        />
+        {authorizedForAnyFlag(flags?.flag_names ?? []) ? (
+          <MoreHorizButton
+            dropDownList={
+              flags ? [{ key: 'flag', component: <FlagV2 {...flags} /> }] : []
+            }
+          />
+        ) : null}
       </Stack>
 
       <Stack

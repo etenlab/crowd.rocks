@@ -20,7 +20,15 @@ dotenv.config();
 
 @Injectable()
 export class FileService {
+  s3Client: S3Client;
   constructor(private fileRepository: FileRepository) {}
+
+  private getS3Client(): S3Client {
+    if (!this.s3Client) {
+      this.s3Client = new S3Client(this.makeS3Creds().creds);
+    }
+    return this.s3Client;
+  }
 
   async uploadTemporaryFile(
     readStream: ReadStream | Readable,
@@ -30,7 +38,6 @@ export class FileService {
     try {
       const fileKey = `${nanoid()}-${fileName}`;
       const s3Creds = this.makeS3Creds({ useTemporaryBucket: true });
-      const s3Client = new S3Client(s3Creds);
 
       const uploadParams: PutObjectCommandInput = {
         Bucket: s3Creds.bucketName,
@@ -41,7 +48,7 @@ export class FileService {
       };
 
       const parallelUploads3 = new Upload({
-        client: s3Client,
+        client: this.getS3Client(),
         params: uploadParams,
         queueSize: 40,
         partSize: 1024 * 1024 * 5,
@@ -64,9 +71,25 @@ export class FileService {
     fileType: string,
     token: string,
     fileSize?: number,
+    returnErrorIfExists?: boolean | null,
   ): Promise<IFileOutput> {
     Logger.log(`Uploading file ` + fileName);
     try {
+      if (returnErrorIfExists) {
+        const existingFile = await this.fileRepository.find({
+          where: {
+            file_name: fileName,
+            file_type: fileType,
+          },
+        });
+        if (existingFile.file) {
+          return {
+            file: null,
+            error: ErrorType.FileAlreadyExists,
+          };
+        }
+      }
+
       const fileKey = `${nanoid()}-${fileName}`;
 
       const hash = createHash('sha256');
@@ -89,8 +112,6 @@ export class FileService {
       readStream.pipe(calcHashTr);
       const p1 = performance.now();
 
-      const s3Client = new S3Client(this.makeS3Creds().creds);
-
       const uploadParams: PutObjectCommandInput = {
         Bucket: this.makeS3Creds().bucketName,
         Key: fileKey,
@@ -103,7 +124,7 @@ export class FileService {
       // of any kind.
 
       const parallelUploads3 = new Upload({
-        client: s3Client,
+        client: this.getS3Client(),
         params: uploadParams,
         queueSize: 40,
         partSize: 1024 * 1024 * 5,
@@ -132,7 +153,7 @@ export class FileService {
 
         const deleteCommand = new DeleteObjectCommand(deleteParams);
 
-        await s3Client.send(deleteCommand);
+        await this.getS3Client().send(deleteCommand);
 
         Logger.debug(
           `Deleted old file, key ${deleteParams.Key} . Save+delete took ${
@@ -205,14 +226,6 @@ export class FileService {
       });
       readStream.pipe(calcHashTr);
 
-      const s3Client = new S3Client({
-        region,
-        credentials: {
-          accessKeyId,
-          secretAccessKey,
-        },
-      });
-
       const uploadParams = {
         Bucket: bucketName,
         Key: newFileKey,
@@ -220,7 +233,7 @@ export class FileService {
       };
 
       const parallelUploads3 = new Upload({
-        client: s3Client,
+        client: this.getS3Client(),
         params: uploadParams,
         queueSize: 40,
         partSize: 1024 * 1024 * 5,
@@ -234,7 +247,7 @@ export class FileService {
         Key: oldFileEntity.file!.fileUrl.split('/').at(-1),
       };
       const deleteCommand = new DeleteObjectCommand(deleteParams);
-      await s3Client.send(deleteCommand);
+      await this.getS3Client().send(deleteCommand);
 
       const updatedFileEntity = Object.assign(oldFileEntity, {
         file_name: fileName,
@@ -266,16 +279,12 @@ export class FileService {
       const bucketName = process.env.AWS_S3_BUCKET_NAME;
       const region = process.env.AWS_S3_REGION;
 
-      const s3Client = new S3Client({
-        region,
-      });
-
       const deleteParams = {
         Bucket: bucketName,
         Key: oldFileEntity.file!.fileUrl.split('/').at(-1),
       };
       const deleteCommand = new DeleteObjectCommand(deleteParams);
-      await s3Client.send(deleteCommand);
+      await this.getS3Client().send(deleteCommand);
 
       const deletedId = await this.fileRepository.delete(id);
       Logger.debug(
@@ -324,7 +333,6 @@ export class FileService {
           `flieService#getFileContentAsString: Error: Number(fileId) is NaN`,
         );
       const p1 = performance.now();
-      const s3Client = new S3Client(this.makeS3Creds().creds);
       const fileData = await this.fileRepository.find({
         where: { file_id: Number(fileId) },
       });
@@ -334,7 +342,7 @@ export class FileService {
         Key: fileData?.file?.fileUrl.split('/').at(-1),
       });
 
-      const response = await s3Client.send(command);
+      const response = await this.getS3Client().send(command);
       if (!response.Body)
         throw new Error(
           `flieService#getFileContentAsString: Error: can't get file ${fileData?.file?.fileUrl

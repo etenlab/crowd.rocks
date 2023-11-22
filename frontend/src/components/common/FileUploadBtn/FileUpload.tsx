@@ -22,7 +22,9 @@ export function FileUpload({ accept, onSelect, component }: FileUploadProps) {
         type="file"
         accept={accept}
         onChange={(e) => {
-          e.target?.files && onSelect(e.target.files[0]);
+          if (!e.target?.files) return;
+          onSelect(e.target.files[0]);
+          e.target.value = '';
         }}
       />
       {component}

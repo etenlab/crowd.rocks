@@ -9,7 +9,7 @@ export function BpIcon({ color }: { color: string }) {
         borderRadius: '6px !important',
         width: 22,
         height: 22,
-        boxShadow: `inset 0 0 0 2px ${color}, inset 0 -2px 0 ${color}`,
+        boxShadow: `inset 0 0 0 1px ${color}, inset 0 -1px 0 ${color}`,
         backgroundColor: (theme) => theme.palette.background.white,
       }}
     />

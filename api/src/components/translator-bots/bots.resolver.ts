@@ -14,6 +14,7 @@ import { getBearer } from 'src/common/utility';
 import { PUB_SUB } from 'src/pubSub.module';
 import { IsAuthAdmin } from '../../decorators/is-auth-admin.decorator';
 import { LanguageInput } from '../common/types';
+import { DocumentUploadOutput } from '../documents/types';
 import { AiTranslationsService } from './ai-translations.service';
 import {
   LanguageListForBotTranslateOutput,
@@ -435,11 +436,11 @@ export class BotsResolver {
   }
 
   @IsAuthAdmin()
-  @Mutation(() => GenericOutput)
+  @Mutation(() => DocumentUploadOutput) // same as for uploading new document
   async botTranslateDocument(
     @Args('input', { type: () => BotTranslateDocumentInput })
     input: BotTranslateDocumentInput,
-  ): Promise<GenericOutput> {
+  ): Promise<DocumentUploadOutput> {
     return this.aiTranslationsService.botTranslateDocument(input);
   }
 }

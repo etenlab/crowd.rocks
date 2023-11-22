@@ -1,5 +1,6 @@
 import { ReactNode, useState, useEffect } from 'react';
 import {
+  Box,
   Paper,
   Backdrop,
   Modal as MuiModal,
@@ -48,13 +49,23 @@ export function Modal({ component, onClose, container }: ModalProps) {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            padding: '40px 20px',
+            padding: '0px 20px',
             borderRadius: '20px',
             width: matches ? '600px' : 'calc(100vw - 30px)',
             maxWidth: '757px',
+            maxHeight: '80%',
           }}
         >
-          {component}
+          <Box
+            sx={{
+              width: '100%',
+              height: 'calc(80vh - 40px)',
+              margin: '20px 0',
+              overflowY: 'auto',
+            }}
+          >
+            {component}
+          </Box>
         </Paper>
       </Fade>
     </MuiModal>

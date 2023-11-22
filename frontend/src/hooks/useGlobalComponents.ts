@@ -6,6 +6,7 @@ import {
   removeModal as removeModalAction,
   setIonContentScrollElement as setIonContentScrollElementAction,
 } from '../reducers/components.actions';
+import { ModalMode } from '../reducers/components.reducer';
 
 import { type ActionType } from '../reducers/index';
 
@@ -22,10 +23,7 @@ export function useGlobalComponents({ dispatch }: UseGlobalComponentsProps) {
     const id = nanoid();
 
     return {
-      openModal: (
-        component: ReactNode,
-        mode: 'standard' | 'full' = 'standard',
-      ) => {
+      openModal: (component: ReactNode, mode: ModalMode = 'standard') => {
         dispatchRef.current.dispatch(addModal(id, mode, component));
       },
       closeModal: () => {
