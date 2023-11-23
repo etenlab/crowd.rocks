@@ -17,7 +17,7 @@ export class PericopeTrResolver {
     @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
   ): Promise<PericopiesTextsWithTranslationConnection> {
-    return this.pericopeTrService.getPericopiesTextsWithTranslation(
+    return this.pericopeTrService.getPericopiesTextsWithTranslationConnection(
       input,
       first,
       after,

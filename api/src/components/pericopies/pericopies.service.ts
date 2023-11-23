@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
-import { pgClientOrPool } from 'src/common/utility';
+import { calc_vote_weight, pgClientOrPool } from 'src/common/utility';
 
 import { ErrorType } from 'src/common/types';
 
@@ -246,10 +246,12 @@ export class PericopiesService {
 
   async getRecomendedPericopiesByDocumentId(
     documentId: string,
+    first: number | null,
+    after: string | null,
   ): Promise<PericopeWithVotesSqlR[]> {
     try {
       const resQ = await this.pg.pool.query<PericopeWithVotesSqlR>(
-        ...getPericopiesWithVotesByDocumentIdSql({ documentId }),
+        ...getPericopiesWithVotesByDocumentIdSql({ documentId, after, first }),
       );
       return this.filterRecomendedPericopies(resQ.rows);
     } catch (error) {
@@ -265,7 +267,9 @@ export class PericopiesService {
   filterRecomendedPericopies(
     pericopies: PericopeWithVotesSqlR[],
   ): PericopeWithVotesSqlR[] {
-    return pericopies.filter((p) => p.upvotes * 2 - p.downvotes >= 0);
+    return pericopies.filter(
+      (p) => calc_vote_weight(p.upvotes, p.downvotes) >= 0,
+    );
   }
 
   async getWordsTillNextPericope(

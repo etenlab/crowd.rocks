@@ -29,9 +29,9 @@ export const PericopeTrPage: React.FC<PericopeTrPageProps> = ({
     actions: { setSourceLanguage, setTargetLanguage },
   } = useAppContext();
 
-  const handleShowPericopiesList = () => {
+  const handleShowDocuments = () => {
     history.push(
-      `/${nation_id}/${language_id}/1/pericope-translations/pericopies-list`,
+      `/${nation_id}/${language_id}/1/pericope-translations/documents`,
     );
   };
 
@@ -63,7 +63,7 @@ export const PericopeTrPage: React.FC<PericopeTrPageProps> = ({
       <Button
         variant="contained"
         color="blue"
-        onClick={handleShowPericopiesList}
+        onClick={handleShowDocuments}
         sx={{ marginTop: '30px' }}
       >
         {tr('Show Documents')}

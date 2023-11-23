@@ -1,0 +1,52 @@
+fragment LanguageOutputFragment on LanguageOutput {
+  language_code
+  dialect_code
+  geo_code
+}
+
+fragment PericopeTranslationFragment on PericopeTranslation {
+  pericope_translation_id
+  percope_id
+  translation
+  created_by
+  created_at
+  language {
+    ...LanguageOutputFragment
+  }
+}
+
+fragment PericopeTextWithTranslationFragment on PericopeTextWithTranslation {
+  pericope_id
+  pericope_text
+  translation {
+    ...PericopeTranslationFragment
+  }
+}
+
+fragment PericopiesTextsWithTranslationEdgeFragment on PericopiesTextsWithTranslationEdge {
+  cursor
+  node {
+    ...PericopeTextWithTranslationFragment
+  }
+}
+
+query GetPericopiesTr(
+  $documentId: String!
+  $filter: String
+  $first: Int
+  $after: ID
+  $targetLang: LanguageInput!
+) {
+  getPericopiesTr(
+    input: { documentId: $documentId, targetLang: $targetLang, filter: $filter }
+    first: $first
+    after: $after
+  ) {
+    pageInfo {
+      ...PageInfoFragment
+    }
+    edges {
+      ...PericopiesTextsWithTranslationEdgeFragment
+    }
+  }
+}

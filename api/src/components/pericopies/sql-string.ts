@@ -147,6 +147,7 @@ export function togglePericopeVoteStatus({
 }
 
 export type PericopeWithVotesSqlR = {
+  cursor: string;
   pericope_id: string;
   start_word: string;
   upvotes: number;
@@ -154,9 +155,24 @@ export type PericopeWithVotesSqlR = {
 };
 export function getPericopiesWithVotesByDocumentIdSql({
   documentId,
+  after,
+  first,
 }: {
   documentId: string;
-}): [string, [string]] {
+  after: string | null;
+  first: number | null;
+}): [string, [string, string?, number?]] {
+  const params: [string, string?, number?] = [documentId];
+  let afterClause = '';
+  let firstClause = '';
+  if (after) {
+    params.push(after);
+    afterClause += ` and p.pericope_id >= $${params.length}`;
+  }
+  if (first) {
+    params.push(first);
+    firstClause += ` limit $${params.length}`;
+  }
   return [
     ` 
       with votes as (
@@ -173,13 +189,22 @@ export function getPericopiesWithVotesByDocumentIdSql({
             group BY 
               v.pericope_id 
       )
-      select p.pericope_id, p.start_word, votes.upvotes, votes.downvotes from pericopies p
+      select 
+        p.pericope_id as cursor, 
+        p.pericope_id as pericope_id, 
+        p.start_word, 
+        votes.upvotes, 
+        votes.downvotes 
+      from pericopies p
       left join votes on p.pericope_id = votes.pericope_id
       join document_word_entries dwe on p.start_word = dwe.document_word_entry_id  
       join  documents d ON d.document_id =dwe.document_id
-      where d.document_id = {$1};
+      where d.document_id = $1
+      ${afterClause}
+      order by p.pericope_id
+      ${firstClause}
     `,
-    [documentId],
+    params,
   ];
 }
 
