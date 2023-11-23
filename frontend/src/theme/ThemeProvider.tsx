@@ -155,6 +155,7 @@ declare module '@mui/material/styles' {
   interface CustomTypeText {
     blue: string;
     blue_10: string;
+    blue_20: string;
     orange: string;
     red: string;
     white: string;
@@ -185,6 +186,7 @@ declare module '@mui/material/styles' {
   interface TypeBackground {
     blue: string;
     blue_10: string;
+    blue_20: string;
     orange: string;
     red: string;
     white: string;

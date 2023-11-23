@@ -1672,6 +1672,7 @@ export type Query = {
   getAllSiteTextLanguageList: SiteTextLanguageListOutput;
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput;
   getAllTranslationFromSiteTextDefinitionID: TranslationWithVoteListOutput;
+  getAnswerByUserId: AnswersOutput;
   getAnswersByQuestionIds: AnswersOutput;
   getDocument: GetDocumentOutput;
   getDocumentTextFromRanges: TextFromRangesOutput;
@@ -1801,6 +1802,12 @@ export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
   language_code: Scalars['String']['input'];
   site_text_id: Scalars['ID']['input'];
   site_text_type_is_word: Scalars['Boolean']['input'];
+};
+
+
+export type QueryGetAnswerByUserIdArgs = {
+  question_id: Scalars['ID']['input'];
+  user_id: Scalars['ID']['input'];
 };
 
 
@@ -3811,6 +3818,14 @@ export type GetAnswersByQuestionIdQueryVariables = Exact<{
 
 
 export type GetAnswersByQuestionIdQuery = { __typename?: 'Query', getAnswersByQuestionIds: { __typename?: 'AnswersOutput', error: ErrorType, answers: Array<{ __typename?: 'Answer', answer_id: string, question_id: string, answer?: string | null, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } | null> } };
+
+export type GetAnswerByUserIdQueryVariables = Exact<{
+  question_id: Scalars['ID']['input'];
+  user_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetAnswerByUserIdQuery = { __typename?: 'Query', getAnswerByUserId: { __typename?: 'AnswersOutput', error: ErrorType, answers: Array<{ __typename?: 'Answer', answer_id: string, question_id: string, answer?: string | null, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } | null> } };
 
 export type GetQuestionStatisticQueryVariables = Exact<{
   question_id: Scalars['ID']['input'];
@@ -8390,6 +8405,45 @@ export function useGetAnswersByQuestionIdLazyQuery(baseOptions?: Apollo.LazyQuer
 export type GetAnswersByQuestionIdQueryHookResult = ReturnType<typeof useGetAnswersByQuestionIdQuery>;
 export type GetAnswersByQuestionIdLazyQueryHookResult = ReturnType<typeof useGetAnswersByQuestionIdLazyQuery>;
 export type GetAnswersByQuestionIdQueryResult = Apollo.QueryResult<GetAnswersByQuestionIdQuery, GetAnswersByQuestionIdQueryVariables>;
+export const GetAnswerByUserIdDocument = gql`
+    query GetAnswerByUserId($question_id: ID!, $user_id: ID!) {
+  getAnswerByUserId(question_id: $question_id, user_id: $user_id) {
+    error
+    answers {
+      ...AnswerFragment
+    }
+  }
+}
+    ${AnswerFragmentFragmentDoc}`;
+
+/**
+ * __useGetAnswerByUserIdQuery__
+ *
+ * To run a query within a React component, call `useGetAnswerByUserIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAnswerByUserIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAnswerByUserIdQuery({
+ *   variables: {
+ *      question_id: // value for 'question_id'
+ *      user_id: // value for 'user_id'
+ *   },
+ * });
+ */
+export function useGetAnswerByUserIdQuery(baseOptions: Apollo.QueryHookOptions<GetAnswerByUserIdQuery, GetAnswerByUserIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAnswerByUserIdQuery, GetAnswerByUserIdQueryVariables>(GetAnswerByUserIdDocument, options);
+      }
+export function useGetAnswerByUserIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAnswerByUserIdQuery, GetAnswerByUserIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAnswerByUserIdQuery, GetAnswerByUserIdQueryVariables>(GetAnswerByUserIdDocument, options);
+        }
+export type GetAnswerByUserIdQueryHookResult = ReturnType<typeof useGetAnswerByUserIdQuery>;
+export type GetAnswerByUserIdLazyQueryHookResult = ReturnType<typeof useGetAnswerByUserIdLazyQuery>;
+export type GetAnswerByUserIdQueryResult = Apollo.QueryResult<GetAnswerByUserIdQuery, GetAnswerByUserIdQueryVariables>;
 export const GetQuestionStatisticDocument = gql`
     query getQuestionStatistic($question_id: ID!) {
   getQuestionStatistic(question_id: $question_id) {
@@ -10515,6 +10569,7 @@ export const namedOperations = {
     PostRead: 'PostRead',
     GetQuestionOnWordRangesByDocumentId: 'GetQuestionOnWordRangesByDocumentId',
     GetAnswersByQuestionId: 'GetAnswersByQuestionId',
+    GetAnswerByUserId: 'GetAnswerByUserId',
     getQuestionStatistic: 'getQuestionStatistic',
     GetAllSiteTextDefinitions: 'GetAllSiteTextDefinitions',
     GetAllTranslationFromSiteTextDefinitionID: 'GetAllTranslationFromSiteTextDefinitionID',

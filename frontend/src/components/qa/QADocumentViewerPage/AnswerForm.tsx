@@ -10,20 +10,30 @@ import { DownvoteButton } from '../../common/buttons/vote/DownvoteButton';
 import { useTr } from '../../../hooks/useTr';
 import { useUpsertAnswerMutation } from '../../../hooks/useUpsertAnswerMutation';
 
-import { QuestionWithStatistic } from '../../../generated/graphql';
+import {
+  QuestionItem,
+  QuestionWithStatistic,
+} from '../../../generated/graphql';
 import { Typography } from '@mui/material';
 
 export type AnswerFormProps = {
   question: QuestionWithStatistic;
+  initialItems: QuestionItem[];
   onClose(): void;
 };
 
-export function AnswerForm({ onClose, question }: AnswerFormProps) {
+export function AnswerForm({
+  onClose,
+  question,
+  initialItems,
+}: AnswerFormProps) {
   const { tr } = useTr();
 
   const [upsertAnswer] = useUpsertAnswerMutation();
 
-  const [items, setItems] = useState<string[]>([]);
+  const [items, setItems] = useState<string[]>(
+    initialItems.map((item) => item.item),
+  );
   const [text, setText] = useState<string>('');
   const [showSaveButton, setShowSaveButton] = useState<boolean>(false);
 

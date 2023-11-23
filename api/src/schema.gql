@@ -1094,6 +1094,7 @@ type Query {
   getAllSiteTextLanguageList: SiteTextLanguageListOutput!
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput!
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): TranslationWithVoteListOutput!
+  getAnswerByUserId(question_id: ID!, user_id: ID!): AnswersOutput!
   getAnswersByQuestionIds(ids: [ID!]!): AnswersOutput!
   getDocument(input: GetDocumentInput!): GetDocumentOutput!
   getDocumentTextFromRanges(ranges: [WordRangeInput!]!): TextFromRangesOutput!

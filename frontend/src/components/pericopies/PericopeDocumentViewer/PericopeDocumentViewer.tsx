@@ -25,11 +25,13 @@ import {
 type PericopeDocumentViewerProps = {
   documentId: string;
   mode: ViewMode;
+  customScrollParent?: HTMLElement;
 };
 
 export function PericopeDocumentViewer({
   documentId,
   mode,
+  customScrollParent,
 }: PericopeDocumentViewerProps) {
   const { data, fetchMore } = useGetPericopiesByDocumentIdQuery({
     variables: {
@@ -153,6 +155,7 @@ export function PericopeDocumentViewer({
         onChangeRange={() => {}}
         onClickWord={handleWordClick}
         onLoadPage={handleLoadPage}
+        customScrollParent={customScrollParent}
       />
 
       <Popover

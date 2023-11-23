@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
+import { useIonViewDidEnter, useIonViewDidLeave } from '@ionic/react';
 import {
   Stack,
   Box,
@@ -21,6 +22,7 @@ import { DownloadCircle } from '../../common/icons/DownloadCircle';
 
 import { useGetDocumentQuery } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 import { QADocumentViewer } from '../QADocumentViewer/QADocumentViewer';
 import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
@@ -28,6 +30,13 @@ import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
 export function QADocumentViewerPage() {
   const { tr } = useTr();
   const { document_id } = useParams<{ document_id: string }>();
+  const {
+    states: {
+      components: { ionContentScrollElement },
+    },
+  } = useAppContext();
+
+  const [pageStatus, setPageStatus] = useState<'shown' | 'hidden' | null>(null);
 
   const { data: documentData } = useGetDocumentQuery({
     variables: {
@@ -36,6 +45,14 @@ export function QADocumentViewerPage() {
   });
 
   const [mode, setMode] = useState<ViewMode>('view');
+
+  useIonViewDidEnter(() => {
+    setPageStatus('shown');
+  });
+
+  useIonViewDidLeave(() => {
+    setPageStatus('hidden');
+  });
 
   const document = documentData ? documentData.getDocument.document : null;
 
@@ -121,7 +138,15 @@ export function QADocumentViewerPage() {
             {document.file_name}
           </Typography>
 
-          <QADocumentViewer documentId={document_id} mode={mode} />
+          <QADocumentViewer
+            documentId={document_id}
+            mode={mode}
+            customScrollParent={
+              pageStatus === 'shown' && ionContentScrollElement
+                ? ionContentScrollElement
+                : undefined
+            }
+          />
         </Stack>
       </PageLayout>
     );
