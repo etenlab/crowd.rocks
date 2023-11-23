@@ -7,10 +7,10 @@ import {
   MouseEvent,
 } from 'react';
 import { Stack } from '@mui/material';
+import { Virtuoso } from 'react-virtuoso';
 
 import { Dot, Word } from './styled';
 import { SkeletonRow } from './SkeletonRow';
-import { VirtualList } from '../../common/list/VirtualList/VirtualList';
 
 import { useGetDocumentWordEntriesByDocumentIdLazyQuery } from '../../../generated/graphql';
 
@@ -82,15 +82,12 @@ export function DocumentViewer({
     [],
   );
   const [rowWidth, setRowWidth] = useState<number>(0);
-  const [viewportHeight, setViewportHeight] = useState(0);
   const [requiredPage, setRequiredPage] = useState<TempPage | null>(null);
 
   // const [visibleRange, setVisibleRange] = useState({
   //   startIndex: 0,
   //   endIndex: 0,
   // });
-
-  const rowHeight = 32;
 
   // const handleRangeChange = useCallback(
   //   (startIndex: number, endIndex: number) => {
@@ -102,7 +99,6 @@ export function DocumentViewer({
   const calcRowWidth = useCallback(() => {
     const bodyWidth = document.body.offsetWidth;
 
-    setViewportHeight(window.innerHeight - 79);
     setRowWidth(Math.min(bodyWidth - 32, 777 - 32));
   }, []);
 
@@ -369,7 +365,7 @@ export function DocumentViewer({
 
         const wordWidth = context.measureText(wordlikeString).width + padding;
 
-        if (tempRow.width + wordWidth < rowWidth - 30) {
+        if (tempRow.width + wordWidth < rowWidth - 20) {
           tempRow.cols.push({
             wordEntry: entry,
             order: wordCounter,
@@ -379,7 +375,7 @@ export function DocumentViewer({
           const rowCom = (
             <Stack
               direction="row"
-              justifyContent="space-between"
+              justifyContent="flex-start"
               sx={(theme) => ({
                 color: theme.palette.text.gray,
               })}
@@ -392,7 +388,14 @@ export function DocumentViewer({
                   wordlikeString,
                   dotCom,
                   isDot,
-                } = getWordProps(col.wordEntry, col.order, `0 3px`);
+                } = getWordProps(
+                  col.wordEntry,
+                  col.order,
+                  `0 ${
+                    3 +
+                    (rowWidth - tempRow.width - 25) / tempRow.cols.length / 2
+                  }px`,
+                );
 
                 return (
                   <Word
@@ -462,13 +465,10 @@ export function DocumentViewer({
 
   return (
     <>
-      <VirtualList
-        // onRangeChange={handleRangeChange}
-        customScrollElement={ionContentScrollElement || undefined}
-        totalCount={rows.length}
-        itemContent={(_index) => rows[_index]}
-        viewportHeight={viewportHeight}
-        rowHeight={rowHeight}
+      <Virtuoso
+        customScrollParent={ionContentScrollElement || undefined}
+        data={rows}
+        itemContent={(_index, data) => data}
       />
       <div style={{ opacity: 0 }}>
         <span style={{ fontFamily: 'Poppins' }} />

@@ -1,4 +1,4 @@
-import { Skeleton, Box } from '@mui/material';
+import { Skeleton } from '@mui/material';
 import { useEffect } from 'react';
 
 import { TempPage } from './DocumentViewer';
@@ -13,9 +13,5 @@ export function SkeletonRow({ onLoading, tempPage }: SkeletonRowProps) {
     onLoading(tempPage);
   }, [onLoading, tempPage]);
 
-  return (
-    <Box sx={{ padding: '5px 0' }}>
-      <Skeleton animation="wave" sx={{ lineHeight: '22px' }} />
-    </Box>
-  );
+  return <Skeleton animation="wave" />;
 }
