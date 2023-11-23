@@ -22,6 +22,10 @@ import {
   getPericopiesObjByIds,
   GetPericopiesObjByDocumentId,
   getPericopiesObjByDocumentId,
+  getPericopiesWithVotesByDocumentIdSql,
+  PericopeWithVotesSqlR,
+  DocumentWordSqlR,
+  getWordsTillNextPericopeSql,
 } from './sql-string';
 import {
   GetDocumentWordEntriesTotalPageSize,
@@ -240,13 +244,44 @@ export class PericopiesService {
     };
   }
 
-  async getRecomendedPericopiesByDocumentId( documentId: number): Promise<RecomendedPericopeConnection> {
-    //todo
-    stopped here
+  async getRecomendedPericopiesByDocumentId(
+    documentId: string,
+  ): Promise<PericopeWithVotesSqlR[]> {
+    try {
+      const resQ = await this.pg.pool.query<PericopeWithVotesSqlR>(
+        ...getPericopiesWithVotesByDocumentIdSql({ documentId }),
+      );
+      return this.filterRecomendedPericopies(resQ.rows);
+    } catch (error) {
+      Logger.error(
+        `PericopiesService#getRecomendedPericopiesIdsByDocumentId: ${JSON.stringify(
+          error,
+        )}`,
+      );
+      return [];
+    }
   }
 
-  async getPericopiesTexts(pericopiesIds): Promise<{ [key: number]: string }> {
-   //todo
-    stopped here  
+  filterRecomendedPericopies(
+    pericopies: PericopeWithVotesSqlR[],
+  ): PericopeWithVotesSqlR[] {
+    return pericopies.filter((p) => p.upvotes * 2 - p.downvotes >= 0);
+  }
+
+  async getWordsTillNextPericope(
+    documentId: string,
+    start_word_id: string,
+  ): Promise<DocumentWordSqlR[]> {
+    try {
+      const resQ = await this.pg.pool.query<DocumentWordSqlR>(
+        ...getWordsTillNextPericopeSql({ documentId, start_word_id }),
+      );
+      return resQ.rows;
+    } catch (error) {
+      Logger.error(
+        `PericopiesService#getWordsTillNextPericope: ${JSON.stringify(error)}`,
+      );
+      return [];
+    }
   }
 }

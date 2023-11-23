@@ -5,8 +5,12 @@ import { PostgresService } from '../../core/postgres.service';
 import { PericopiesService } from '../pericopies/pericopies.service';
 import {
   GetPericopiesTrInput,
+  PericopeTranslation,
   PericopiesTextsWithTranslationConnection,
+  PericopiesTextsWithTranslationEdge,
 } from './types';
+
+const WORDS_JOINER = ' ';
 
 const errorishPageInfo = {
   hasNextPage: false,
@@ -28,31 +32,35 @@ export class PericopeTrService {
     after: string | null,
   ): Promise<PericopiesTextsWithTranslationConnection> {
     try {
-      if (isNaN(Number(documentId))) {
-        throw new Error(
-          `documentId isn't a numeric value: ${JSON.stringify(documentId)} `,
-        );
-      }
-
       const pericopies =
         await this.pericopiesService.getRecomendedPericopiesByDocumentId(
-          Number(documentId),
+          documentId,
         );
+      const edges: Array<PericopiesTextsWithTranslationEdge> = [];
+      for (const pericope of pericopies) {
+        const [words, translation] = await Promise.all([
+          this.pericopiesService.getWordsTillNextPericope(
+            documentId,
+            pericope.start_word,
+          ),
+          this.getPericopeTranslation(pericope.pericope_id),
+        ]);
 
-      const pericopiesIds = pericopies.map((p) => p.pericope_id);
+        const edge = {
+          cursor: pericope.pericope_id,
+          node: {
+            pericope_id: pericope.pericope_id,
+            pericope_text: words
+              .map((w) => w.wordlike_string)
+              .join(WORDS_JOINER),
+            translation,
+          },
+        };
+        edges.push(edge);
+      }
 
-      const pericopiesTexts = await this.pericopiesService.getPericopiesTexts(
-        pericopiesIds,
-      );
-
-      const pericopiesTranslations = await this.getPericopiesTranslations(
-        pericopiesIds,
-      );
-      
       // todo: map to edges[] and implement filtering
-      stopped here
 
-      
       return {
         error: ErrorType.NoError,
         edges: [
@@ -92,9 +100,10 @@ export class PericopeTrService {
       };
     }
   }
-  
-  async getPericopiesTranslations(pericopiesIds): Promise<{ [key: number]: string }> {
-   //todo
-    stopped here  
-  }  
+
+  async getPericopeTranslation(
+    pericopeId: string,
+  ): Promise<PericopeTranslation> {
+    //todo
+  }
 }
