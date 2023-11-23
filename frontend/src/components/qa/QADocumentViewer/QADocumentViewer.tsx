@@ -12,10 +12,7 @@ import { Popover } from '@mui/material';
 
 import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
 import { Dot } from '../../documents/DocumentViewer/styled';
-import {
-  DocumentViewer,
-  DocumentViewerHandle,
-} from '../../documents/DocumentViewer';
+import { DocumentViewer } from '../../documents/DocumentViewer';
 
 import {
   QuestionOnWordRange,
@@ -70,7 +67,6 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
 
   const questionsMapRef = useRef(new Map<string, QuestionOnWordRange>());
   const questionsGroupMapRef = useRef(new Map<string, QuestionOnWordRange[]>());
-  const documentViewerRef = useRef<DocumentViewerHandle>(null);
 
   const { openModal, closeModal } = createModal();
 
@@ -321,7 +317,6 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
   return (
     <>
       <DocumentViewer
-        ref={documentViewerRef}
         mode={mode}
         documentId={documentId}
         range={documentRange}
