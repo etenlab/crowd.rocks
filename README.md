@@ -18,14 +18,28 @@ Commands are run from each project folder (`env`, `api`, `frontend`, `infra`).
 #### Start Environment
 `docker-compose --env-file .env up -d`
 
-Note:
-If you don't see SQL statementes being logged, most likely your postgres docker container was started earlier, with older docker-compose.yml without such parameter, so you should rebuild and start container again:
--ensure that your postgres docker container is started using docker-compose.yml that contains service `postgres_1` with parameter `command: ["postgres", "-c", "log_statement=all"]`
--change directory to env (containing docker-compose.yml):  `cd ../env`
--rebuild and start containers: `docker-compose up -d`
+#### (optional) View Database Query Logs
+`docker logs -f env_postgres_1_1`
 
-#### View Database Query Logs
-`docker logs -f env-postgres_1-1`
+Note:
+If you don't see SQL statementes being logged, most likely your postgres docker image  was built earlier. So you should rebuild and start container again:
+-change directory to env (containing docker-compose.yml):  `cd ../env`
+-rebuild `docker-compose build` and start containers: `docker-compose --env-file .env up -d`
+
+#### (optional) Enable plpgsql procedures/functions debugging 
+use postgres tools or pgadmin or any other tool to execute command:
+```sql
+CREATE EXTENSION pldbgapi
+```
+Check current postgers config file:
+```sql
+SHOW config_file;
+```
+it shoud be '/etc/postgresql.conf'. If not - something gone wrong with posgtres image build. Try to rebuild them:
+`docker-compose build`
+
+Now you can use pgadmin to debug plpgsql procedures/functions.
+
 
 ### API
 1. open API folder in new vscode window
