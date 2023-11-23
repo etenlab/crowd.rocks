@@ -36,9 +36,14 @@ export type RangeItem = {
 type QADocumentViewerProps = {
   documentId: string;
   mode: ViewMode;
+  customScrollParent?: HTMLElement;
 };
 
-export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
+export function QADocumentViewer({
+  documentId,
+  mode,
+  customScrollParent,
+}: QADocumentViewerProps) {
   const history = useHistory();
   const { nation_id, language_id, cluster_id } = useParams<{
     nation_id: string;
@@ -324,6 +329,7 @@ export function QADocumentViewer({ documentId, mode }: QADocumentViewerProps) {
         onChangeRange={() => {}}
         onClickWord={handleWordClick}
         onLoadPage={handleLoadPage}
+        customScrollParent={customScrollParent}
       />
 
       {popoverCom}
