@@ -253,6 +253,9 @@ enum ErrorType {
   WordLikeStringInsertFailed
   WordNotFound
   WordRangeInsertFailed
+  WordRangeNotExists
+  WordRangeTagInsertFailed
+  WordRangeTagNotFound
   WordToPhraseTranslationNotFound
   WordToWordTranslationNotFound
   WordVoteNotFound

@@ -134,6 +134,9 @@ export enum ErrorType {
   DocumentWordEntryAlreadyExists = 'DocumentWordEntryAlreadyExists',
   DocumentWordEntryNotFound = 'DocumentWordEntryNotFound',
   WordRangeInsertFailed = 'WordRangeInsertFailed',
+  WordRangeNotExists = 'WordRangeNotExists',
+  WordRangeTagInsertFailed = 'WordRangeTagInsertFailed',
+  WordRangeTagNotFound = 'WordRangeTagNotFound',
   DamagedDocumentWordEntryBlock = 'DamagedDocumentWordEntryBlock',
 
   QuestionItemInsertFailed = 'QuestionItemInsertFailed',
