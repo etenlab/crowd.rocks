@@ -114,10 +114,18 @@ export function PericopiesTrListPage() {
 
   const handleInfinite = useCallback(
     async (ev: IonInfiniteScrollCustomEvent<void>) => {
+      if (!sourceLang || !targetLang) {
+        present({
+          message: tr('Target language is not defined'),
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+        return;
+      }
       if (pericopies?.getPericopiesTr.pageInfo.hasNextPage) {
         const variables = {
-          sourceLang: sourceLang,
-          targetLang: targetLang,
+          targetLang: langInfo2langInput(targetLang),
           filter: debouncedFilter,
           onlyNotTranslatedTo:
             filterOption.value === filterOptionsValues.NOT_TRANSLATED &&
@@ -140,10 +148,12 @@ export function PericopiesTrListPage() {
       setTimeout(() => ev.target.complete(), 500);
     },
     [
-      pericopies?.getPericopiesTr.pageInfo.hasNextPage,
-      pericopies?.getPericopiesTr.pageInfo.endCursor,
       sourceLang,
       targetLang,
+      pericopies?.getPericopiesTr.pageInfo.hasNextPage,
+      pericopies?.getPericopiesTr.pageInfo.endCursor,
+      present,
+      tr,
       debouncedFilter,
       filterOption.value,
       fetchMore,
@@ -193,7 +203,14 @@ export function PericopiesTrListPage() {
                 pericopeTr.node && (
                   <PericopeTrItem
                     key={pericopeTr.cursor}
-                    pericopeTextWithTranslation={pericopeTr.node}
+                    original={{
+                      word: pericopeTr.node.pericope_text,
+                      description: 'asdf',
+                    }}
+                    translation={{
+                      word: pericopeTr.node.translation?.translation || '',
+                      description: 'ZXCc',
+                    }}
                   />
                 ),
             )}
