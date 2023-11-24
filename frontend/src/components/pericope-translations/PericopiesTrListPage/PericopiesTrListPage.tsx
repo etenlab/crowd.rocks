@@ -189,7 +189,12 @@ export function PericopiesTrListPage() {
           {pericopies &&
             pericopies.getPericopiesTr.edges.map(
               (pericopeTr) =>
-                pericopeTr.node && <PericopeTrItem key={pericopeTr.cursor} />,
+                pericopeTr.node && (
+                  <PericopeTrItem
+                    key={pericopeTr.cursor}
+                    pericopeTextWithTranslation={pericopeTr.node}
+                  />
+                ),
             )}
         </Stack>
 

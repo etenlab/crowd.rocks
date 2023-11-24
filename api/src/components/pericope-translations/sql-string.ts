@@ -11,10 +11,13 @@ export function getPericopeTanslationsIdsWithVotesSql({
 }: {
   pericopeId: string;
   targetLang: LanguageInput;
-}): [string, [string]] {
-  const params = [pericopeId];
-  params.push(language_code);
+}): [string, [string, string, string?, string?]] {
+  const params: [string, string, string?, string?] = [
+    pericopeId,
+    language_code,
+  ];
   let langRestrictionClause = ` and pt.language_code = $${params.length}`;
+
   if (dialect_code) {
     params.push(dialect_code);
     langRestrictionClause += ` and pt.dialect_code = $${params.length}`;
@@ -44,7 +47,7 @@ export function getPericopeTanslationsIdsWithVotesSql({
           where pt.pericope_id = $1
           ${langRestrictionClause}
     `,
-    [pericopeId],
+    params,
   ];
 }
 
