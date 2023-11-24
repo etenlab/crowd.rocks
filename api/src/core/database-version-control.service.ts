@@ -566,6 +566,17 @@ export class DatabaseVersionControlService {
       './src/core/sql/translation/word_to_word/translation_vote_set-v11.sql',
     );
 
+    // tagging
+    await this.runSqlFile(
+      './src/core/sql/tagging/word_range_tag_upsert-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/tagging/batch_word_range_tag_upsert-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/tagging/word_range_tag_vote_toggle-v11.sql',
+    );
+
     // set version
     await this.setVersionNumber(11);
   }
