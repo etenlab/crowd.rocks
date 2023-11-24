@@ -13,6 +13,10 @@ class CommunityPage extends BasePage {
   async getValidationMessage() {
     return await this.page.locator(`.toast-message`).textContent();
   }
+  async fillForumDetails(forumName: string, forumDescription: string) {
+    await this.fillForumName(forumName);
+    await this.fillDescription(forumDescription);
+  }
   async fillForumName(forumName: string) {
     await this.page.locator(addNewForumPopupForumName).last().fill(forumName);
   }
@@ -33,14 +37,19 @@ class CommunityPage extends BasePage {
   }
   async clickOnAddNewForumPopupCreateNewButton() {
     await this.page.getByRole('button', { name: 'Create New' }).click();
+    await this.page.waitForTimeout(500);
   }
 
-  async clickOnCancelButton() {
+  async clickOnAddNewForumPopupCancelButton() {
     await this.page.getByRole('button', { name: 'Cancel' }).click();
     await this.page.waitForTimeout(4000);
   }
-
-  async isForumCreatedName(forumName: string) {
+  async isAddNewForumPopupVisible() {
+    return await this.page
+      .getByRole('heading', { name: 'Add new forum' })
+      .isVisible();
+  }
+  async isCreatedForumVisible(forumName: string) {
     return await this.page
       .getByRole('heading', { name: forumName })
       .isVisible();
@@ -50,9 +59,15 @@ class CommunityPage extends BasePage {
     await this.page.getByRole('button', { name: 'Delete' }).click();
   }
 
-  async editForum(forumName: string) {
+  async clickOnEditForumButton(forumName: string) {
     await this.page.locator(`//h3[text()='${forumName}']//..//button`).click();
     await this.page.getByRole('button', { name: 'Edit' }).click();
+  }
+
+  async isEditedForumVisible(editedForumName: string) {
+    return await this.page
+      .getByRole('heading', { name: editedForumName })
+      .isVisible();
   }
 
   async clickOnSaveButton() {
