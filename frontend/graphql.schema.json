@@ -3686,6 +3686,30 @@
             "deprecationReason": null
           },
           {
+            "name": "onlyNotTranslatedTo",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "LanguageInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "onlyTranslatedTo",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "LanguageInput",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "targetLang",
             "description": null,
             "type": {

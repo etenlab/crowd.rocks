@@ -36,9 +36,17 @@ query GetPericopiesTr(
   $first: Int
   $after: ID
   $targetLang: LanguageInput!
+  $onlyNotTranslatedTo: LanguageInput
+  $onlyTranslatedTo: LanguageInput
 ) {
   getPericopiesTr(
-    input: { documentId: $documentId, targetLang: $targetLang, filter: $filter }
+    input: {
+      documentId: $documentId
+      targetLang: $targetLang
+      filter: $filter
+      onlyNotTranslatedTo: $onlyNotTranslatedTo
+      onlyTranslatedTo: $onlyTranslatedTo
+    }
     first: $first
     after: $after
   ) {

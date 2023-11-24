@@ -435,6 +435,8 @@ type GetOrigMapsListOutput {
 input GetPericopiesTrInput {
   documentId: String!
   filter: String
+  onlyNotTranslatedTo: LanguageInput
+  onlyTranslatedTo: LanguageInput
   targetLang: LanguageInput!
 }
 

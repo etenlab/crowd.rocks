@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { languageInput2tag } from '../../../../utils/dist';
 import { ErrorType } from '../../common/types';
 import { calc_vote_weight } from '../../common/utility';
 import { PostgresService } from '../../core/postgres.service';
@@ -34,7 +35,13 @@ export class PericopeTrService {
   ) {}
 
   async getPericopiesTextsWithTranslationConnection(
-    { documentId, targetLang, filter }: GetPericopiesTrInput,
+    {
+      documentId,
+      targetLang,
+      filter,
+      onlyTranslatedTo,
+      onlyNotTranslatedTo,
+    }: GetPericopiesTrInput,
     first: number | null,
     after: string | null,
   ): Promise<PericopiesTextsWithTranslationConnection> {
@@ -70,13 +77,25 @@ export class PericopeTrService {
           ),
         ]);
 
+        const pericope_text = words
+          .map((w) => w.wordlike_string)
+          .join(WORDS_JOINER);
+
+        if (!!onlyTranslatedTo && !translation) continue;
+        if (!!onlyNotTranslatedTo && translation) continue;
+        if (
+          !!filter &&
+          !pericope_text.toUpperCase().includes(filter.toUpperCase()) &&
+          !translation?.translation.toUpperCase().includes(filter.toUpperCase())
+        ) {
+          continue;
+        }
+
         const edge = {
           cursor: pericope.cursor,
           node: {
             pericope_id: pericope.pericope_id,
-            pericope_text: words
-              .map((w) => w.wordlike_string)
-              .join(WORDS_JOINER),
+            pericope_text,
             translation,
           },
         };

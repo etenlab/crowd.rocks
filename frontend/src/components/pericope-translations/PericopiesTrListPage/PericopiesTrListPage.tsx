@@ -87,15 +87,15 @@ export function PericopiesTrListPage() {
           documentId,
           targetLang: langInfo2langInput(targetLang),
           filter: debouncedFilter,
-          // onlyNotTranslatedTo:
-          //   filterOption.value === filterOptionsValues.NOT_TRANSLATED &&
-          //   targetLang
-          //     ? langInfo2langInput(targetLang)
-          //     : null,
-          // onlyTranslatedTo:
-          //   filterOption.value === filterOptionsValues.TRANSLATED && targetLang
-          //     ? langInfo2langInput(targetLang)
-          //     : null,
+          onlyNotTranslatedTo:
+            filterOption.value === filterOptionsValues.NOT_TRANSLATED &&
+            targetLang
+              ? langInfo2langInput(targetLang)
+              : null,
+          onlyTranslatedTo:
+            filterOption.value === filterOptionsValues.TRANSLATED && targetLang
+              ? langInfo2langInput(targetLang)
+              : null,
           first: PAGE_SIZE,
         },
       });
@@ -119,15 +119,15 @@ export function PericopiesTrListPage() {
           sourceLang: sourceLang,
           targetLang: targetLang,
           filter: debouncedFilter,
-          // onlyNotTranslatedTo:
-          //   filterOption.value === filterOptionsValues.NOT_TRANSLATED &&
-          //   targetLang
-          //     ? langInfo2langInput(targetLang)
-          //     : null,
-          // onlyTranslatedTo:
-          //   filterOption.value === filterOptionsValues.TRANSLATED && targetLang
-          //     ? langInfo2langInput(targetLang)
-          //     : null,
+          onlyNotTranslatedTo:
+            filterOption.value === filterOptionsValues.NOT_TRANSLATED &&
+            targetLang
+              ? langInfo2langInput(targetLang)
+              : null,
+          onlyTranslatedTo:
+            filterOption.value === filterOptionsValues.TRANSLATED && targetLang
+              ? langInfo2langInput(targetLang)
+              : null,
           first: PAGE_SIZE,
           after: pericopies?.getPericopiesTr.pageInfo.endCursor,
         };
@@ -145,6 +145,7 @@ export function PericopiesTrListPage() {
       sourceLang,
       targetLang,
       debouncedFilter,
+      filterOption.value,
       fetchMore,
     ],
   );

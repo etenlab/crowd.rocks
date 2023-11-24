@@ -481,6 +481,8 @@ export type GetOrigMapsListOutput = {
 export type GetPericopiesTrInput = {
   documentId: Scalars['String']['input'];
   filter?: InputMaybe<Scalars['String']['input']>;
+  onlyNotTranslatedTo?: InputMaybe<LanguageInput>;
+  onlyTranslatedTo?: InputMaybe<LanguageInput>;
   targetLang: LanguageInput;
 };
 
@@ -3689,6 +3691,8 @@ export type GetPericopiesTrQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['ID']['input']>;
   targetLang: LanguageInput;
+  onlyNotTranslatedTo?: InputMaybe<LanguageInput>;
+  onlyTranslatedTo?: InputMaybe<LanguageInput>;
 }>;
 
 
@@ -7817,9 +7821,9 @@ export type MarkNotificationReadMutationHookResult = ReturnType<typeof useMarkNo
 export type MarkNotificationReadMutationResult = Apollo.MutationResult<MarkNotificationReadMutation>;
 export type MarkNotificationReadMutationOptions = Apollo.BaseMutationOptions<MarkNotificationReadMutation, MarkNotificationReadMutationVariables>;
 export const GetPericopiesTrDocument = gql`
-    query GetPericopiesTr($documentId: String!, $filter: String, $first: Int, $after: ID, $targetLang: LanguageInput!) {
+    query GetPericopiesTr($documentId: String!, $filter: String, $first: Int, $after: ID, $targetLang: LanguageInput!, $onlyNotTranslatedTo: LanguageInput, $onlyTranslatedTo: LanguageInput) {
   getPericopiesTr(
-    input: {documentId: $documentId, targetLang: $targetLang, filter: $filter}
+    input: {documentId: $documentId, targetLang: $targetLang, filter: $filter, onlyNotTranslatedTo: $onlyNotTranslatedTo, onlyTranslatedTo: $onlyTranslatedTo}
     first: $first
     after: $after
   ) {
@@ -7851,6 +7855,8 @@ ${PericopiesTextsWithTranslationEdgeFragmentFragmentDoc}`;
  *      first: // value for 'first'
  *      after: // value for 'after'
  *      targetLang: // value for 'targetLang'
+ *      onlyNotTranslatedTo: // value for 'onlyNotTranslatedTo'
+ *      onlyTranslatedTo: // value for 'onlyTranslatedTo'
  *   },
  * });
  */

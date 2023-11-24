@@ -46,4 +46,8 @@ export class GetPericopiesTrInput {
   @Field(() => String) documentId: string;
   @Field(() => LanguageInput) targetLang: LanguageInput;
   @Field(() => String, { nullable: true }) filter?: string | null;
+  @Field(() => LanguageInput, { nullable: true })
+  onlyTranslatedTo?: LanguageInput | null;
+  @Field(() => LanguageInput, { nullable: true })
+  onlyNotTranslatedTo?: LanguageInput | null;
 }
