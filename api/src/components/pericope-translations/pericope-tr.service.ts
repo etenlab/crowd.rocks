@@ -102,14 +102,12 @@ export class PericopeTrService {
         edges.push(edge);
       }
 
-      // todo: implement filtering
-
       return {
         error: ErrorType.NoError,
         edges,
         pageInfo: {
-          hasNextPage: false, // it is expencive to get information. Looks like better just to make request
-          hasPreviousPage: false, // it is expencive to get information. Looks like better just to make request
+          hasNextPage: true, // todo!!!
+          hasPreviousPage: true, // todo!!!
           endCursor,
           startCursor,
         },
