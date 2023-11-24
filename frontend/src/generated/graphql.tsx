@@ -79,6 +79,12 @@ export enum BotType {
   Smartcat = 'Smartcat'
 }
 
+export enum ChatGptVersion {
+  Fake = 'Fake',
+  Four = 'Four',
+  Three = 'Three'
+}
+
 export type CreateQuestionOnWordRangeUpsertInput = {
   begin_document_word_entry_id: Scalars['ID']['input'];
   end_document_word_entry_id: Scalars['ID']['input'];
@@ -430,6 +436,12 @@ export type FromWordAndDefintionlikeStringUpsertInput = {
   wordlike_string: Scalars['String']['input'];
 };
 
+export type GptTranslateProgress = {
+  __typename?: 'GPTTranslateProgress';
+  progress: Scalars['Int']['output'];
+  version: ChatGptVersion;
+};
+
 export type GenericOutput = {
   __typename?: 'GenericOutput';
   error: ErrorType;
@@ -761,6 +773,7 @@ export type Mutation = {
   translateMissingWordsAndPhrasesBySmartcat: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByChatGPT4: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByChatGPT35: TranslateAllWordsAndPhrasesByBotOutput;
+  translateWordsAndPhrasesByChatGPTFAKE: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByDeepL: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByGoogle: TranslateAllWordsAndPhrasesByBotOutput;
   translateWordsAndPhrasesByLilt: TranslateAllWordsAndPhrasesByBotOutput;
@@ -1099,6 +1112,12 @@ export type MutationTranslateWordsAndPhrasesByChatGpt4Args = {
 
 
 export type MutationTranslateWordsAndPhrasesByChatGpt35Args = {
+  from_language: LanguageInput;
+  to_language: LanguageInput;
+};
+
+
+export type MutationTranslateWordsAndPhrasesByChatGptfakeArgs = {
   from_language: LanguageInput;
   to_language: LanguageInput;
 };
@@ -1698,6 +1717,7 @@ export type Query = {
   getAllSiteTextLanguageList: SiteTextLanguageListOutput;
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput;
   getAllTranslationFromSiteTextDefinitionID: TranslationWithVoteListOutput;
+  getAnswerByUserId: AnswersOutput;
   getAnswersByQuestionIds: AnswersOutput;
   getDocument: GetDocumentOutput;
   getDocumentTextFromRanges: TextFromRangesOutput;
@@ -1828,6 +1848,12 @@ export type QueryGetAllTranslationFromSiteTextDefinitionIdArgs = {
   language_code: Scalars['String']['input'];
   site_text_id: Scalars['ID']['input'];
   site_text_type_is_word: Scalars['Boolean']['input'];
+};
+
+
+export type QueryGetAnswerByUserIdArgs = {
+  question_id: Scalars['ID']['input'];
+  user_id: Scalars['ID']['input'];
 };
 
 
@@ -2502,6 +2528,7 @@ export type StartZipMapOutput = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  ChatGptTranslateProgress: GptTranslateProgress;
   DataGenerationReport: DataGenProgress;
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult;
   ZipMapReport: ZipMapResult;
@@ -3866,6 +3893,14 @@ export type GetAnswersByQuestionIdQueryVariables = Exact<{
 
 export type GetAnswersByQuestionIdQuery = { __typename?: 'Query', getAnswersByQuestionIds: { __typename?: 'AnswersOutput', error: ErrorType, answers: Array<{ __typename?: 'Answer', answer_id: string, question_id: string, answer?: string | null, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } | null> } };
 
+export type GetAnswerByUserIdQueryVariables = Exact<{
+  question_id: Scalars['ID']['input'];
+  user_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetAnswerByUserIdQuery = { __typename?: 'Query', getAnswerByUserId: { __typename?: 'AnswersOutput', error: ErrorType, answers: Array<{ __typename?: 'Answer', answer_id: string, question_id: string, answer?: string | null, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } | null> } };
+
 export type GetQuestionStatisticQueryVariables = Exact<{
   question_id: Scalars['ID']['input'];
 }>;
@@ -4121,6 +4156,18 @@ export type TranslateWordsAndPhrasesByChatGpt4MutationVariables = Exact<{
 
 export type TranslateWordsAndPhrasesByChatGpt4Mutation = { __typename?: 'Mutation', translateWordsAndPhrasesByChatGPT4: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
 
+export type TranslateWordsAndPhrasesByChatGptfakeMutationVariables = Exact<{
+  from_language_code: Scalars['String']['input'];
+  from_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  from_geo_code?: InputMaybe<Scalars['String']['input']>;
+  to_language_code: Scalars['String']['input'];
+  to_dialect_code?: InputMaybe<Scalars['String']['input']>;
+  to_geo_code?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type TranslateWordsAndPhrasesByChatGptfakeMutation = { __typename?: 'Mutation', translateWordsAndPhrasesByChatGPTFAKE: { __typename?: 'TranslateAllWordsAndPhrasesByBotOutput', error: ErrorType, result?: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number } | null } };
+
 export type TranslateMissingWordsAndPhrasesByChatGptMutationVariables = Exact<{
   from_language_code: Scalars['String']['input'];
   from_dialect_code?: InputMaybe<Scalars['String']['input']>;
@@ -4303,6 +4350,11 @@ export type SubscribeToTranslationReportSubscriptionVariables = Exact<{ [key: st
 
 
 export type SubscribeToTranslationReportSubscription = { __typename?: 'Subscription', TranslationReport: { __typename?: 'TranslateAllWordsAndPhrasesByBotResult', requestedCharacters: number, totalPhraseCount: number, totalWordCount: number, translatedPhraseCount: number, translatedWordCount: number, status?: string | null, message?: string | null, errors?: Array<string> | null, total?: number | null, completed?: number | null } };
+
+export type SubscribeToGptProgressSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToGptProgressSubscription = { __typename?: 'Subscription', ChatGptTranslateProgress: { __typename?: 'GPTTranslateProgress', progress: number, version: ChatGptVersion } };
 
 export type UserReadQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -8514,6 +8566,45 @@ export function useGetAnswersByQuestionIdLazyQuery(baseOptions?: Apollo.LazyQuer
 export type GetAnswersByQuestionIdQueryHookResult = ReturnType<typeof useGetAnswersByQuestionIdQuery>;
 export type GetAnswersByQuestionIdLazyQueryHookResult = ReturnType<typeof useGetAnswersByQuestionIdLazyQuery>;
 export type GetAnswersByQuestionIdQueryResult = Apollo.QueryResult<GetAnswersByQuestionIdQuery, GetAnswersByQuestionIdQueryVariables>;
+export const GetAnswerByUserIdDocument = gql`
+    query GetAnswerByUserId($question_id: ID!, $user_id: ID!) {
+  getAnswerByUserId(question_id: $question_id, user_id: $user_id) {
+    error
+    answers {
+      ...AnswerFragment
+    }
+  }
+}
+    ${AnswerFragmentFragmentDoc}`;
+
+/**
+ * __useGetAnswerByUserIdQuery__
+ *
+ * To run a query within a React component, call `useGetAnswerByUserIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAnswerByUserIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAnswerByUserIdQuery({
+ *   variables: {
+ *      question_id: // value for 'question_id'
+ *      user_id: // value for 'user_id'
+ *   },
+ * });
+ */
+export function useGetAnswerByUserIdQuery(baseOptions: Apollo.QueryHookOptions<GetAnswerByUserIdQuery, GetAnswerByUserIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAnswerByUserIdQuery, GetAnswerByUserIdQueryVariables>(GetAnswerByUserIdDocument, options);
+      }
+export function useGetAnswerByUserIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAnswerByUserIdQuery, GetAnswerByUserIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAnswerByUserIdQuery, GetAnswerByUserIdQueryVariables>(GetAnswerByUserIdDocument, options);
+        }
+export type GetAnswerByUserIdQueryHookResult = ReturnType<typeof useGetAnswerByUserIdQuery>;
+export type GetAnswerByUserIdLazyQueryHookResult = ReturnType<typeof useGetAnswerByUserIdLazyQuery>;
+export type GetAnswerByUserIdQueryResult = Apollo.QueryResult<GetAnswerByUserIdQuery, GetAnswerByUserIdQueryVariables>;
 export const GetQuestionStatisticDocument = gql`
     query getQuestionStatistic($question_id: ID!) {
   getQuestionStatistic(question_id: $question_id) {
@@ -9543,6 +9634,54 @@ export function useTranslateWordsAndPhrasesByChatGpt4Mutation(baseOptions?: Apol
 export type TranslateWordsAndPhrasesByChatGpt4MutationHookResult = ReturnType<typeof useTranslateWordsAndPhrasesByChatGpt4Mutation>;
 export type TranslateWordsAndPhrasesByChatGpt4MutationResult = Apollo.MutationResult<TranslateWordsAndPhrasesByChatGpt4Mutation>;
 export type TranslateWordsAndPhrasesByChatGpt4MutationOptions = Apollo.BaseMutationOptions<TranslateWordsAndPhrasesByChatGpt4Mutation, TranslateWordsAndPhrasesByChatGpt4MutationVariables>;
+export const TranslateWordsAndPhrasesByChatGptfakeDocument = gql`
+    mutation TranslateWordsAndPhrasesByChatGPTFAKE($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String, $to_language_code: String!, $to_dialect_code: String, $to_geo_code: String) {
+  translateWordsAndPhrasesByChatGPTFAKE(
+    from_language: {language_code: $from_language_code, dialect_code: $from_dialect_code, geo_code: $from_geo_code}
+    to_language: {language_code: $to_language_code, dialect_code: $to_dialect_code, geo_code: $to_geo_code}
+  ) {
+    error
+    result {
+      requestedCharacters
+      totalPhraseCount
+      totalWordCount
+      translatedPhraseCount
+      translatedWordCount
+    }
+  }
+}
+    `;
+export type TranslateWordsAndPhrasesByChatGptfakeMutationFn = Apollo.MutationFunction<TranslateWordsAndPhrasesByChatGptfakeMutation, TranslateWordsAndPhrasesByChatGptfakeMutationVariables>;
+
+/**
+ * __useTranslateWordsAndPhrasesByChatGptfakeMutation__
+ *
+ * To run a mutation, you first call `useTranslateWordsAndPhrasesByChatGptfakeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTranslateWordsAndPhrasesByChatGptfakeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [translateWordsAndPhrasesByChatGptfakeMutation, { data, loading, error }] = useTranslateWordsAndPhrasesByChatGptfakeMutation({
+ *   variables: {
+ *      from_language_code: // value for 'from_language_code'
+ *      from_dialect_code: // value for 'from_dialect_code'
+ *      from_geo_code: // value for 'from_geo_code'
+ *      to_language_code: // value for 'to_language_code'
+ *      to_dialect_code: // value for 'to_dialect_code'
+ *      to_geo_code: // value for 'to_geo_code'
+ *   },
+ * });
+ */
+export function useTranslateWordsAndPhrasesByChatGptfakeMutation(baseOptions?: Apollo.MutationHookOptions<TranslateWordsAndPhrasesByChatGptfakeMutation, TranslateWordsAndPhrasesByChatGptfakeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TranslateWordsAndPhrasesByChatGptfakeMutation, TranslateWordsAndPhrasesByChatGptfakeMutationVariables>(TranslateWordsAndPhrasesByChatGptfakeDocument, options);
+      }
+export type TranslateWordsAndPhrasesByChatGptfakeMutationHookResult = ReturnType<typeof useTranslateWordsAndPhrasesByChatGptfakeMutation>;
+export type TranslateWordsAndPhrasesByChatGptfakeMutationResult = Apollo.MutationResult<TranslateWordsAndPhrasesByChatGptfakeMutation>;
+export type TranslateWordsAndPhrasesByChatGptfakeMutationOptions = Apollo.BaseMutationOptions<TranslateWordsAndPhrasesByChatGptfakeMutation, TranslateWordsAndPhrasesByChatGptfakeMutationVariables>;
 export const TranslateMissingWordsAndPhrasesByChatGptDocument = gql`
     mutation TranslateMissingWordsAndPhrasesByChatGPT($from_language_code: String!, $from_dialect_code: String, $from_geo_code: String, $to_language_code: String!, $to_dialect_code: String, $to_geo_code: String, $version: String!) {
   translateMissingWordsAndPhrasesByChatGpt(
@@ -10368,6 +10507,36 @@ export function useSubscribeToTranslationReportSubscription(baseOptions?: Apollo
       }
 export type SubscribeToTranslationReportSubscriptionHookResult = ReturnType<typeof useSubscribeToTranslationReportSubscription>;
 export type SubscribeToTranslationReportSubscriptionResult = Apollo.SubscriptionResult<SubscribeToTranslationReportSubscription>;
+export const SubscribeToGptProgressDocument = gql`
+    subscription SubscribeToGptProgress {
+  ChatGptTranslateProgress {
+    progress
+    version
+  }
+}
+    `;
+
+/**
+ * __useSubscribeToGptProgressSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToGptProgressSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToGptProgressSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToGptProgressSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToGptProgressSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToGptProgressSubscription, SubscribeToGptProgressSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToGptProgressSubscription, SubscribeToGptProgressSubscriptionVariables>(SubscribeToGptProgressDocument, options);
+      }
+export type SubscribeToGptProgressSubscriptionHookResult = ReturnType<typeof useSubscribeToGptProgressSubscription>;
+export type SubscribeToGptProgressSubscriptionResult = Apollo.SubscriptionResult<SubscribeToGptProgressSubscription>;
 export const UserReadDocument = gql`
     query UserRead($userId: ID!) {
   userReadResolver(input: {user_id: $userId}) {
@@ -10562,6 +10731,7 @@ export const namedOperations = {
     PostRead: 'PostRead',
     GetQuestionOnWordRangesByDocumentId: 'GetQuestionOnWordRangesByDocumentId',
     GetAnswersByQuestionId: 'GetAnswersByQuestionId',
+    GetAnswerByUserId: 'GetAnswerByUserId',
     getQuestionStatistic: 'getQuestionStatistic',
     GetAllSiteTextDefinitions: 'GetAllSiteTextDefinitions',
     GetAllTranslationFromSiteTextDefinitionID: 'GetAllTranslationFromSiteTextDefinitionID',
@@ -10633,6 +10803,7 @@ export const namedOperations = {
     TranslateWordsAndPhrasesByGoogle: 'TranslateWordsAndPhrasesByGoogle',
     TranslateWordsAndPhrasesByChatGPT35: 'TranslateWordsAndPhrasesByChatGPT35',
     TranslateWordsAndPhrasesByChatGPT4: 'TranslateWordsAndPhrasesByChatGPT4',
+    TranslateWordsAndPhrasesByChatGPTFAKE: 'TranslateWordsAndPhrasesByChatGPTFAKE',
     TranslateMissingWordsAndPhrasesByChatGPT: 'TranslateMissingWordsAndPhrasesByChatGPT',
     TranslateMissingWordsAndPhrasesByGoogle: 'TranslateMissingWordsAndPhrasesByGoogle',
     TranslateMissingWordsAndPhrasesByDeepL: 'TranslateMissingWordsAndPhrasesByDeepL',
@@ -10656,7 +10827,8 @@ export const namedOperations = {
   Subscription: {
     SubscribeToDataGenProgress: 'SubscribeToDataGenProgress',
     SubscribeToZipMap: 'SubscribeToZipMap',
-    SubscribeToTranslationReport: 'SubscribeToTranslationReport'
+    SubscribeToTranslationReport: 'SubscribeToTranslationReport',
+    SubscribeToGptProgress: 'SubscribeToGptProgress'
   },
   Fragment: {
     UserFields: 'UserFields',

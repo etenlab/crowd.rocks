@@ -56,6 +56,12 @@ enum BotType {
   Smartcat
 }
 
+enum ChatGPTVersion {
+  Fake
+  Four
+  Three
+}
+
 input CreateQuestionOnWordRangeUpsertInput {
   begin_document_word_entry_id: ID!
   end_document_word_entry_id: ID!
@@ -387,6 +393,11 @@ input FromWordAndDefintionlikeStringUpsertInput {
   wordlike_string: String!
 }
 
+type GPTTranslateProgress {
+  progress: Int!
+  version: ChatGPTVersion!
+}
+
 type GenericOutput {
   error: ErrorType!
 }
@@ -690,6 +701,7 @@ type Mutation {
   translateMissingWordsAndPhrasesBySmartcat(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByChatGPT4(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByChatGPT35(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
+  translateWordsAndPhrasesByChatGPTFAKE(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByDeepL(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByGoogle(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
   translateWordsAndPhrasesByLilt(from_language: LanguageInput!, to_language: LanguageInput!): TranslateAllWordsAndPhrasesByBotOutput!
@@ -1122,6 +1134,7 @@ type Query {
   getAllSiteTextLanguageList: SiteTextLanguageListOutput!
   getAllSiteTextLanguageListWithRate: SiteTextLanguageWithTranslationInfoListOutput!
   getAllTranslationFromSiteTextDefinitionID(dialect_code: String, geo_code: String, language_code: String!, site_text_id: ID!, site_text_type_is_word: Boolean!): TranslationWithVoteListOutput!
+  getAnswerByUserId(question_id: ID!, user_id: ID!): AnswersOutput!
   getAnswersByQuestionIds(ids: [ID!]!): AnswersOutput!
   getDocument(input: GetDocumentInput!): GetDocumentOutput!
   getDocumentTextFromRanges(ranges: [WordRangeInput!]!): TextFromRangesOutput!
@@ -1434,6 +1447,7 @@ type StartZipMapOutput {
 }
 
 type Subscription {
+  ChatGptTranslateProgress: GPTTranslateProgress!
   DataGenerationReport: DataGenProgress!
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
   ZipMapReport: ZipMapResult!

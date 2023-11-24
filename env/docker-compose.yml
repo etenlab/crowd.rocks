@@ -9,7 +9,9 @@ networks:
 
 services:
   postgres_1:
-    image: postgres
+    build:
+        context: postgres
+        dockerfile: Dockerfile
     networks:
       par_net:
         ipv4_address: 10.2.1.2
@@ -20,10 +22,10 @@ services:
       POSTGRES_DB: crowdrocks
     ports:
       - "5434:5432"
-    command: ["postgres", "-c", "log_statement=all"]
 
   pgadmin:
     image: dpage/pgadmin4
+    container_name: postgres_1    
     networks:
       par_net:
         ipv4_address: 10.2.1.4

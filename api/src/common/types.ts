@@ -150,6 +150,16 @@ export enum ErrorType {
   BotTranslationLanguagesListError = 'BotTranslationLanguagesListError',
 }
 
+export enum ChatGPTVersion {
+  Three = 'gpt-3.5-turbo',
+  Four = 'gpt-4',
+  Fake = 'FAKE',
+}
+
+registerEnumType(ChatGPTVersion, {
+  name: 'ChatGPTVersion',
+});
+
 registerEnumType(ErrorType, {
   name: 'ErrorType',
 });

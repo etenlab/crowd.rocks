@@ -1,6 +1,11 @@
-import { ReactNode, useRef, useEffect } from 'react';
+import { ReactNode, useRef } from 'react';
 
-import { IonPage, IonContent, IonHeader } from '@ionic/react';
+import {
+  IonPage,
+  IonContent,
+  IonHeader,
+  useIonViewDidEnter,
+} from '@ionic/react';
 import { Modal, FullModal } from '../modal';
 
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -20,12 +25,12 @@ export function PageLayout({ children, header }: PageLayoutProps) {
   const ref = useRef<HTMLElement | null>();
   const contentRef = useRef<HTMLIonContentElement>(null);
 
-  useEffect(() => {
+  useIonViewDidEnter(() => {
     ref.current = document.getElementById('crowd-rock-app');
     contentRef.current
       ?.getScrollElement()
       .then((value) => setIonContentScrollElement(value));
-  }, [setIonContentScrollElement]);
+  });
 
   return (
     <IonPage>
