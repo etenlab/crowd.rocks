@@ -205,11 +205,12 @@ export function PericopiesTrListPage() {
                     key={pericopeTr.cursor}
                     original={{
                       word: pericopeTr.node.pericope_text,
-                      description: 'asdf',
+                      description: pericopeTr.node.pericope_description_text,
                     }}
                     translation={{
                       word: pericopeTr.node.translation?.translation || '',
-                      description: 'ZXCc',
+                      description:
+                        pericopeTr.node.description_translation || '',
                     }}
                   />
                 ),

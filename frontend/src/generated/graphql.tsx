@@ -1312,8 +1312,10 @@ export type PericopeEdge = {
   node: Pericope;
 };
 
-export type PericopeTextWithTranslation = {
-  __typename?: 'PericopeTextWithTranslation';
+export type PericopeTextWithTranslationAndDescription = {
+  __typename?: 'PericopeTextWithTranslationAndDescription';
+  description_translation?: Maybe<Scalars['String']['output']>;
+  pericope_description_text: Scalars['String']['output'];
   pericope_id: Scalars['ID']['output'];
   pericope_text: Scalars['String']['output'];
   translation?: Maybe<PericopeTranslation>;
@@ -1324,7 +1326,7 @@ export type PericopeTranslation = {
   created_at: Scalars['DateTime']['output'];
   created_by: Scalars['String']['output'];
   language: LanguageOutput;
-  percope_id: Scalars['String']['output'];
+  pericope_id: Scalars['String']['output'];
   pericope_translation_id: Scalars['ID']['output'];
   translation: Scalars['String']['output'];
 };
@@ -1388,7 +1390,7 @@ export type PericopiesTextsWithTranslationConnection = {
 export type PericopiesTextsWithTranslationEdge = {
   __typename?: 'PericopiesTextsWithTranslationEdge';
   cursor: Scalars['ID']['output'];
-  node: PericopeTextWithTranslation;
+  node: PericopeTextWithTranslationAndDescription;
 };
 
 export type Phrase = {
@@ -3706,11 +3708,11 @@ export type MarkNotificationReadMutation = { __typename?: 'Mutation', markNotifi
 
 export type LanguageOutputFragmentFragment = { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
-export type PericopeTranslationFragmentFragment = { __typename?: 'PericopeTranslation', pericope_translation_id: string, percope_id: string, translation: string, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
+export type PericopeTranslationFragmentFragment = { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
 
-export type PericopeTextWithTranslationFragmentFragment = { __typename?: 'PericopeTextWithTranslation', pericope_id: string, pericope_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, percope_id: string, translation: string, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null };
+export type PericopeTextWithTranslationAndDescriptionFragmentFragment = { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id: string, pericope_text: string, pericope_description_text: string, description_translation?: string | null, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null };
 
-export type PericopiesTextsWithTranslationEdgeFragmentFragment = { __typename?: 'PericopiesTextsWithTranslationEdge', cursor: string, node: { __typename?: 'PericopeTextWithTranslation', pericope_id: string, pericope_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, percope_id: string, translation: string, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
+export type PericopiesTextsWithTranslationEdgeFragmentFragment = { __typename?: 'PericopiesTextsWithTranslationEdge', cursor: string, node: { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id: string, pericope_text: string, pericope_description_text: string, description_translation?: string | null, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
 
 export type GetPericopiesTrQueryVariables = Exact<{
   documentId: Scalars['String']['input'];
@@ -3723,7 +3725,7 @@ export type GetPericopiesTrQueryVariables = Exact<{
 }>;
 
 
-export type GetPericopiesTrQuery = { __typename?: 'Query', getPericopiesTr: { __typename?: 'PericopiesTextsWithTranslationConnection', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null }, edges: Array<{ __typename?: 'PericopiesTextsWithTranslationEdge', cursor: string, node: { __typename?: 'PericopeTextWithTranslation', pericope_id: string, pericope_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, percope_id: string, translation: string, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } }> } };
+export type GetPericopiesTrQuery = { __typename?: 'Query', getPericopiesTr: { __typename?: 'PericopiesTextsWithTranslationConnection', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null }, edges: Array<{ __typename?: 'PericopiesTextsWithTranslationEdge', cursor: string, node: { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id: string, pericope_text: string, pericope_description_text: string, description_translation?: string | null, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } }> } };
 
 export type PericopeFragmentFragment = { __typename?: 'Pericope', pericope_id: string, start_word: string };
 
@@ -4805,7 +4807,7 @@ export const LanguageOutputFragmentFragmentDoc = gql`
 export const PericopeTranslationFragmentFragmentDoc = gql`
     fragment PericopeTranslationFragment on PericopeTranslation {
   pericope_translation_id
-  percope_id
+  pericope_id
   translation
   created_by
   created_at
@@ -4814,23 +4816,25 @@ export const PericopeTranslationFragmentFragmentDoc = gql`
   }
 }
     ${LanguageOutputFragmentFragmentDoc}`;
-export const PericopeTextWithTranslationFragmentFragmentDoc = gql`
-    fragment PericopeTextWithTranslationFragment on PericopeTextWithTranslation {
+export const PericopeTextWithTranslationAndDescriptionFragmentFragmentDoc = gql`
+    fragment PericopeTextWithTranslationAndDescriptionFragment on PericopeTextWithTranslationAndDescription {
   pericope_id
   pericope_text
   translation {
     ...PericopeTranslationFragment
   }
+  pericope_description_text
+  description_translation
 }
     ${PericopeTranslationFragmentFragmentDoc}`;
 export const PericopiesTextsWithTranslationEdgeFragmentFragmentDoc = gql`
     fragment PericopiesTextsWithTranslationEdgeFragment on PericopiesTextsWithTranslationEdge {
   cursor
   node {
-    ...PericopeTextWithTranslationFragment
+    ...PericopeTextWithTranslationAndDescriptionFragment
   }
 }
-    ${PericopeTextWithTranslationFragmentFragmentDoc}`;
+    ${PericopeTextWithTranslationAndDescriptionFragmentFragmentDoc}`;
 export const PericopeFragmentFragmentDoc = gql`
     fragment PericopeFragment on Pericope {
   pericope_id
@@ -10870,7 +10874,7 @@ export const namedOperations = {
     MapVoteStatusFragment: 'MapVoteStatusFragment',
     LanguageOutputFragment: 'LanguageOutputFragment',
     PericopeTranslationFragment: 'PericopeTranslationFragment',
-    PericopeTextWithTranslationFragment: 'PericopeTextWithTranslationFragment',
+    PericopeTextWithTranslationAndDescriptionFragment: 'PericopeTextWithTranslationAndDescriptionFragment',
     PericopiesTextsWithTranslationEdgeFragment: 'PericopiesTextsWithTranslationEdgeFragment',
     PericopeFragment: 'PericopeFragment',
     PericopeVoteStatusFragment: 'PericopeVoteStatusFragment',

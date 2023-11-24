@@ -9575,9 +9575,37 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PericopeTextWithTranslation",
+        "name": "PericopeTextWithTranslationAndDescription",
         "description": null,
         "fields": [
+          {
+            "name": "description_translation",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pericope_description_text",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "pericope_id",
             "description": null,
@@ -9682,7 +9710,7 @@
             "deprecationReason": null
           },
           {
-            "name": "percope_id",
+            "name": "pericope_id",
             "description": null,
             "args": [],
             "type": {
@@ -10261,7 +10289,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PericopeTextWithTranslation",
+                "name": "PericopeTextWithTranslationAndDescription",
                 "ofType": null
               }
             },

@@ -776,7 +776,9 @@ type PericopeEdge {
   node: Pericope!
 }
 
-type PericopeTextWithTranslation {
+type PericopeTextWithTranslationAndDescription {
+  description_translation: String
+  pericope_description_text: String!
   pericope_id: ID!
   pericope_text: String!
   translation: PericopeTranslation
@@ -786,7 +788,7 @@ type PericopeTranslation {
   created_at: DateTime!
   created_by: String!
   language: LanguageOutput!
-  percope_id: String!
+  pericope_id: String!
   pericope_translation_id: ID!
   translation: String!
 }
@@ -841,7 +843,7 @@ type PericopiesTextsWithTranslationConnection {
 
 type PericopiesTextsWithTranslationEdge {
   cursor: ID!
-  node: PericopeTextWithTranslation!
+  node: PericopeTextWithTranslationAndDescription!
 }
 
 type Phrase {

@@ -6,7 +6,7 @@ fragment LanguageOutputFragment on LanguageOutput {
 
 fragment PericopeTranslationFragment on PericopeTranslation {
   pericope_translation_id
-  percope_id
+  pericope_id
   translation
   created_by
   created_at
@@ -15,18 +15,20 @@ fragment PericopeTranslationFragment on PericopeTranslation {
   }
 }
 
-fragment PericopeTextWithTranslationFragment on PericopeTextWithTranslation {
+fragment PericopeTextWithTranslationAndDescriptionFragment on PericopeTextWithTranslationAndDescription {
   pericope_id
   pericope_text
   translation {
     ...PericopeTranslationFragment
   }
+  pericope_description_text
+  description_translation
 }
 
 fragment PericopiesTextsWithTranslationEdgeFragment on PericopiesTextsWithTranslationEdge {
   cursor
   node {
-    ...PericopeTextWithTranslationFragment
+    ...PericopeTextWithTranslationAndDescriptionFragment
   }
 }
 

@@ -83,3 +83,52 @@ export function getPericopeTranslationSql({
     [translationIds],
   ];
 }
+
+export type PericopeDescriptionWithTranslationSqlR = {
+  pericope_id: string;
+  description: string;
+  translation: string;
+  t_language_code: string;
+  t_dialect_code: string;
+  t_geo_code: string;
+};
+export function getPericopeDescriptionWithTranslationSql({
+  pericopiesIds,
+  targetLang: { language_code, dialect_code, geo_code },
+}: {
+  pericopiesIds: string[];
+  targetLang: LanguageInput;
+}): [string, [string[], string, string?, string?]] {
+  const params: [string[], string, string?, string?] = [
+    pericopiesIds,
+    language_code,
+  ];
+  let langRestrictionClause = ` and pdt.language_code = $${params.length}`;
+
+  if (dialect_code) {
+    params.push(dialect_code);
+    langRestrictionClause += ` and pdt.dialect_code = $${params.length}`;
+  }
+  if (geo_code) {
+    params.push(geo_code);
+    langRestrictionClause += ` and pdt.geo_code = $${params.length}`;
+  }
+  return [
+    `
+        select
+          p.pericope_id,
+          pd.description,
+          pdt.translation
+        from
+          pericopies p
+        join pericope_descriptions pd on
+          p.pericope_id = pd.pericope_id
+        left join pericope_description_translations pdt on
+          pd.pericope_description_id = pdt.pericope_description_id
+        where true
+          and p.pericope_id = any($1)
+          ${langRestrictionClause}
+    `,
+    params,
+  ];
+}

@@ -6,9 +6,11 @@ import { PostgresService } from '../../core/postgres.service';
 import { LanguageInput } from '../common/types';
 import { PericopiesService } from '../pericopies/pericopies.service';
 import {
+  getPericopeDescriptionWithTranslationSql,
   getPericopeTanslationsIdsWithVotesSql,
   getPericopeTranslationSql,
   GetPericopeTranslationSqlR,
+  PericopeDescriptionWithTranslationSqlR,
   PericopeTanslationsIdsWithVotesSqlR,
 } from './sql-string';
 import {
@@ -66,7 +68,7 @@ export class PericopeTrService {
       const endCursor: string = pericopies.at(-1)!.cursor;
 
       for (const pericope of pericopies) {
-        const [words, translation] = await Promise.all([
+        const [words, translation, descriptionsWithTr] = await Promise.all([
           this.pericopiesService.getWordsTillNextPericope(
             documentId,
             pericope.start_word,
@@ -75,11 +77,16 @@ export class PericopeTrService {
             pericope.pericope_id,
             targetLang,
           ),
+          this.getPericopiesDescriptionsWithTranslation(
+            [pericope.pericope_id],
+            targetLang,
+          ),
         ]);
 
         const pericope_text = words
           .map((w) => w.wordlike_string)
           .join(WORDS_JOINER);
+        const descriptionWithTr = descriptionsWithTr[0];
 
         if (!!onlyTranslatedTo && !translation) continue;
         if (!!onlyNotTranslatedTo && translation) continue;
@@ -91,12 +98,14 @@ export class PericopeTrService {
           continue;
         }
 
-        const edge = {
+        const edge: PericopiesTextsWithTranslationEdge = {
           cursor: pericope.cursor,
           node: {
             pericope_id: pericope.pericope_id,
             pericope_text,
             translation,
+            pericope_description_text: descriptionWithTr?.description || '',
+            description_translation: descriptionWithTr?.translation || '',
           },
         };
         edges.push(edge);
@@ -120,6 +129,20 @@ export class PericopeTrService {
         pageInfo: errorishPageInfo,
       };
     }
+  }
+
+  async getPericopiesDescriptionsWithTranslation(
+    pericopiesIds: string[],
+    targetLang: LanguageInput,
+  ): Promise<PericopeDescriptionWithTranslationSqlR[]> {
+    const resQ =
+      await this.pg.pool.query<PericopeDescriptionWithTranslationSqlR>(
+        ...getPericopeDescriptionWithTranslationSql({
+          pericopiesIds,
+          targetLang,
+        }),
+      );
+    return resQ.rows;
   }
 
   async getRecomendedPericopeTranslation(
@@ -161,7 +184,7 @@ export class PericopeTrService {
     return resQ.rows.map(
       (r) =>
         ({
-          percope_id: r.pericope_id,
+          pericope_id: r.pericope_id,
           pericope_translation_id: r.pericope_translation_id,
           language: {
             language_code: r.language_code,
