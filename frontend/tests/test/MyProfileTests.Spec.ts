@@ -1,6 +1,7 @@
 import { chromium, expect, test } from '@playwright/test';
 import HomePO from '../pages/HomePage';
 import { leftMenu } from '../enums/Enums';
+import pageUrls from '../constants/PageUrls';
 import MenuPage from '../pages/MenuPage';
 import ProfilePage from '../pages/ProfilePage';
 import RegisterData from '../data-factory/RegisterData';
@@ -17,7 +18,7 @@ test.beforeAll(async () => {
   const registerPage = new RegistrationPage(page);
 
   //Navigate to the URL
-  await page.goto('/US/en/1/register');
+  await page.goto(pageUrls.RegisterPage);
 
   //Verify the title of the page
   expect(await registerPage.isRegisterPageTitleVisible()).toBeTruthy();
@@ -37,7 +38,7 @@ test('1: Verify that user can navigate to profile page and able to edit username
   const profilePage = new ProfilePage(page);
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
   await loginPage.loginToApp(registerData);
 
   //Click on left menu for myprofile and verify the page title
@@ -67,7 +68,7 @@ test('2: Verify that username is not changed after clicking on the cancel button
   const profilePage = new ProfilePage(page);
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
   await loginPage.loginToApp(registerData);
 
   //Click on left menu for myprofile and verify the page title
@@ -94,7 +95,7 @@ test('3: Verify that user is naviagted to reset a password page ', async ({
   const profilePage = new ProfilePage(page);
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
   await loginPage.loginToApp(registerData);
 
   //Click on left menu for myprofile and verify the page title

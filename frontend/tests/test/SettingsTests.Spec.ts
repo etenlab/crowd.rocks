@@ -4,6 +4,7 @@ import HomePage from '../pages/HomePage';
 import SettingsPage from '../pages/SettingsPage';
 import SettingsData from '../data-factory/SettingsData';
 import { settings, leftMenu } from '../enums/Enums';
+import pageUrls from '../constants/PageUrls';
 
 test.skip('Verify that user is navigated to settings page & all the settings options are available on the setting page', async ({
   page,
@@ -14,7 +15,7 @@ test.skip('Verify that user is navigated to settings page & all the settings opt
   const settingsDataList = SettingsData.allSettingsList();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/home');
+  await page.goto(pageUrls.HomePage);
 
   //Expand the menu and click on settings
   await homePage.clickOnExpandMenu();
@@ -37,7 +38,7 @@ test('Verify that all the Beta tools are displayed when user enable beta tools t
   const getSettingsList = SettingsData.allSettingsList();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/settings');
+  await page.goto(pageUrls.SettingsPage);
 
   //Get the settings page list and verify the beta tools is displayed
   const lists = await settingsPage.getAllSettingFeaturesList();
@@ -51,7 +52,7 @@ test('Verify that all the Beta tools are displayed when user enable beta tools t
   expect(await homePage.isLanguageTextVisible()).toBeTruthy();
 
   //Expand the menu and click on settings
-  await page.goto('/US/en/1/settings');
+  await page.goto(pageUrls.SettingsPage);
 
   //Click on beta toggle button
   await settingsPage.clickOnToggleButton(settings.BetaTools, false);
@@ -68,7 +69,7 @@ test('Verify that dark UI is display when user enable dark mode toggle button', 
   const getSettingsList = SettingsData.allSettingsList();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/settings');
+  await page.goto(pageUrls.SettingsPage);
 
   //Get the settings page list and verify the beta tools is displayed
   const lists = await settingsPage.getAllSettingFeaturesList();
@@ -88,7 +89,7 @@ test('Verify that light UI is display when user disable dark mode toggle button'
   const getSettingsList = SettingsData.allSettingsList();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/settings');
+  await page.goto(pageUrls.SettingsPage);
 
   //Get the settings page list and verify the beta tools is displayed
   const lists = await settingsPage.getAllSettingFeaturesList();

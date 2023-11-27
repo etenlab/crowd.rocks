@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import MenuPage from '../pages/MenuPage';
 import HomePage from '../pages/HomePage';
+import pageUrls from '../constants/PageUrls';
 import { language, leftMenu } from '../enums/Enums';
 import AppLanguagePage from '../pages/AppLanguagePage';
 import AppLanguageData from '../data-factory/AppLanguageData';
@@ -13,7 +14,7 @@ test('1: Verify that the user is navigated to App Language page & able to change
   const appLanguagePage = new AppLanguagePage(page);
 
   //Navigate to the URL
-  await page.goto('/US/en/1/home');
+  await page.goto(pageUrls.HomePage);
 
   //Expand the menu and click on app language
   await homePage.clickOnExpandMenu();
@@ -43,7 +44,7 @@ test('2: Verify that user can check the different available lanugages', async ({
   const appLanguagePage = new AppLanguagePage(page);
 
   //Navigate to the URL
-  await page.goto('/US/en/1/home');
+  await page.goto(pageUrls.HomePage);
 
   //Expand the menu and click on app language
   await homePage.clickOnExpandMenu();
@@ -67,7 +68,7 @@ test('3: Verify that the default selected language remains selected when user ch
   const appLanguagePage = new AppLanguagePage(page);
 
   //Navigate to the URL
-  await page.goto('/US/en/1/home');
+  await page.goto(pageUrls.HomePage);
 
   //Expand the menu and click on app language
   await homePage.clickOnExpandMenu();

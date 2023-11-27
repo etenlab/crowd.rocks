@@ -6,6 +6,7 @@ import HomePO from '../pages/HomePage';
 import MenuPO from '../pages/MenuPage';
 import LoginDTO from '../data-objects/LoginDto';
 import { leftMenu } from '../enums/Enums';
+import pageUrls from '../constants/PageUrls';
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test('1: Verify that user is register/logout and login again successfully', async ({
@@ -18,7 +19,7 @@ test('1: Verify that user is register/logout and login again successfully', asyn
   const registerData = RegisterData.validRegisterData();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Verify the login header text
   expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
@@ -61,7 +62,7 @@ test.skip('2: Verify that email field is mandatory', async ({ page }) => {
   const registerData = RegisterData.registerDataWithoutEmail();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Verify the login header text
   expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
@@ -88,7 +89,7 @@ test.skip('3: Verify that username field is mandatory', async ({ page }) => {
   const registerData = RegisterData.registerDataWithoutUserName();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Verify the login header text
   expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
@@ -117,7 +118,7 @@ test.skip('4: Verify that password field is mandatory', async ({ page }) => {
   const registerData = RegisterData.registerDataWithoutPassword();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Verify the login header text
   expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
@@ -146,7 +147,7 @@ test.skip('5: Verify that validation shown for invalid email format', async ({
   const registerData = RegisterData.registerDataWithInvalidEmailFormat();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Verify the login header text
   expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
