@@ -13,10 +13,10 @@ import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useGetAllDocumentsLazyQuery } from '../../../generated/graphql';
 
-import { DocumentList } from '../DocumentList/DocumentList';
 import { DocumentUploadModal } from './DocumentUploadModal';
 
 import { PAGE_SIZE } from '../../../const/commonConst';
+import { DocumentList } from '../DocumentList';
 
 export function DocumentsPage() {
   const { tr } = useTr();

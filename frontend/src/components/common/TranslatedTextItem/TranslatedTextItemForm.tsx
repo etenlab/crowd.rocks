@@ -14,9 +14,9 @@ import { CheckCircle } from '../icons/CheckCircle';
 
 import { useTr } from '../../../hooks/useTr';
 
-import { Item } from './WordItemViewer';
+import { Item } from './TranslatedTextItemViewer';
 
-export type WordItemFormProps = {
+export type TranslatedTextItemFormProps = {
   saving?: boolean;
   original: Item;
   initialFormData: Item;
@@ -24,17 +24,17 @@ export type WordItemFormProps = {
   onCancel(): void;
 };
 
-export function WordItemForm({
+export function TranslatedTextItemForm({
   saving,
   original,
   initialFormData,
   onConfirm,
   onCancel,
-}: WordItemFormProps) {
+}: TranslatedTextItemFormProps) {
   const { tr } = useTr();
   const theme = useTheme();
 
-  const [translation, setTranslation] = useState<string>(initialFormData.word);
+  const [translation, setTranslation] = useState<string>(initialFormData.text);
   const [description, setDescription] = useState<string>(
     initialFormData.description,
   );
@@ -57,7 +57,7 @@ export function WordItemForm({
           })}
         >
           <Typography variant="h3" color="text.white">
-            {original.word}
+            {original.text}
           </Typography>
           <Typography variant="body2" color="text.white">
             {original.description}

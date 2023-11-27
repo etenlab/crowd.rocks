@@ -1,0 +1,1 @@
+export { NewTranslationForm } from './NewTranslationForm';

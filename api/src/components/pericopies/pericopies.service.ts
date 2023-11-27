@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
-import { pgClientOrPool } from 'src/common/utility';
+import { calc_vote_weight, pgClientOrPool } from 'src/common/utility';
 
 import { ErrorType } from 'src/common/types';
 
@@ -22,6 +22,10 @@ import {
   getPericopiesObjByIds,
   GetPericopiesObjByDocumentId,
   getPericopiesObjByDocumentId,
+  getPericopiesWithVotesByDocumentIdSql,
+  PericopeWithVotesSqlR,
+  DocumentWordSqlR,
+  getWordsTillNextPericopeSql,
 } from './sql-string';
 import {
   GetDocumentWordEntriesTotalPageSize,
@@ -128,7 +132,7 @@ export class PericopiesService {
     document_id: number,
     first: number | null,
     after: string | null,
-    pgClient,
+    pgClient: PoolClient | null,
   ): Promise<PericopeWithVotesListConnection> {
     try {
       const res = await pgClientOrPool({
@@ -238,5 +242,50 @@ export class PericopiesService {
         totalEdges: 0,
       },
     };
+  }
+
+  async getRecomendedPericopiesByDocumentId(
+    documentId: string,
+    first: number | null,
+    after: string | null,
+  ): Promise<PericopeWithVotesSqlR[]> {
+    try {
+      const resQ = await this.pg.pool.query<PericopeWithVotesSqlR>(
+        ...getPericopiesWithVotesByDocumentIdSql({ documentId, after, first }),
+      );
+      return this.filterRecomendedPericopies(resQ.rows);
+    } catch (error) {
+      Logger.error(
+        `PericopiesService#getRecomendedPericopiesIdsByDocumentId: ${JSON.stringify(
+          error,
+        )}`,
+      );
+      return [];
+    }
+  }
+
+  filterRecomendedPericopies(
+    pericopies: PericopeWithVotesSqlR[],
+  ): PericopeWithVotesSqlR[] {
+    return pericopies.filter(
+      (p) => calc_vote_weight(p.upvotes, p.downvotes) >= 0,
+    );
+  }
+
+  async getWordsTillNextPericope(
+    documentId: string,
+    start_word_id: string,
+  ): Promise<DocumentWordSqlR[]> {
+    try {
+      const resQ = await this.pg.pool.query<DocumentWordSqlR>(
+        ...getWordsTillNextPericopeSql({ documentId, start_word_id }),
+      );
+      return resQ.rows;
+    } catch (error) {
+      Logger.error(
+        `PericopiesService#getWordsTillNextPericope: ${JSON.stringify(error)}`,
+      );
+      return [];
+    }
   }
 }

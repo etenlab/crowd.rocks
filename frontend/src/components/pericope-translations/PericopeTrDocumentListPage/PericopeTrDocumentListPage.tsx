@@ -5,7 +5,6 @@ import { useDebounce } from 'use-debounce';
 
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
-import { LangSelector } from '../../common/LangSelector/LangSelector';
 import { SearchInput } from '../../common/forms/SearchInput';
 
 import { useTr } from '../../../hooks/useTr';
@@ -15,7 +14,7 @@ import { useGetAllDocumentsLazyQuery } from '../../../generated/graphql';
 import { PAGE_SIZE } from '../../../const/commonConst';
 import { DocumentList } from '../../documents/DocumentList';
 
-export function PericopeDocumentListPage() {
+export function PericopeTrDocumentListPage() {
   const { tr } = useTr();
   const history = useHistory();
   const { nation_id, language_id, cluster_id } = useParams<{
@@ -30,7 +29,6 @@ export function PericopeDocumentListPage() {
         langauges: { sourceLang },
       },
     },
-    actions: { setSourceLanguage },
   } = useAppContext();
 
   const [getAllDocuments, { data }] = useGetAllDocumentsLazyQuery();
@@ -55,10 +53,10 @@ export function PericopeDocumentListPage() {
     }
   }, [getAllDocuments, sourceLang, bouncedFilter]);
 
-  const handleGoToDocumentViewer = useCallback(
+  const handleGoToPericopeTrList = useCallback(
     (documentId: string) => {
       history.push(
-        `/${nation_id}/${language_id}/${cluster_id}/pericopies/documents/${documentId}`,
+        `/${nation_id}/${language_id}/${cluster_id}/pericope-translations/for-document/${documentId}`,
       );
     },
     [cluster_id, history, language_id, nation_id],
@@ -66,18 +64,9 @@ export function PericopeDocumentListPage() {
 
   return (
     <PageLayout>
-      <Caption>{tr('Pericope Tool')}</Caption>
+      <Caption>{tr('Translation')}</Caption>
 
       <Stack gap="32px">
-        <LangSelector
-          title={tr('Select your language')}
-          selected={sourceLang}
-          onChange={(_sourceLangTag, sourceLangInfo) => {
-            setSourceLanguage(sourceLangInfo);
-          }}
-          onClearClick={() => setSourceLanguage(null)}
-        />
-
         <Stack gap="8px">
           <Typography variant="h3" color="dark">
             {`${data?.getAllDocuments.pageInfo.totalEdges || 0} ${tr(
@@ -96,7 +85,7 @@ export function PericopeDocumentListPage() {
 
       {sourceLang ? (
         <DocumentList
-          onClickItem={handleGoToDocumentViewer}
+          onClickItem={handleGoToPericopeTrList}
           filter={bouncedFilter}
           language={sourceLang}
         />

@@ -4,7 +4,7 @@ import { useIonToast } from '@ionic/react';
 
 import { typeOfString, StringContentTypes } from '../../../common/utility';
 
-import { WordForm } from '../../common/forms/WordForm';
+import { TextForm } from '../../common/forms/TextForm';
 
 import { useTr } from '../../../hooks/useTr';
 
@@ -109,10 +109,10 @@ export function NewTranslationForm({
           {tr('Add your translation')}
         </Typography>
 
-        <WordForm
-          word={translation}
+        <TextForm
+          text={translation}
           description={description}
-          wordPlaceholder={tr('Your translation')}
+          textPlaceholder={tr('Your translation')}
           descriptionPlaceholder={tr('Description')}
           onChange={handleChangeWordForm}
           disabled={saving}
