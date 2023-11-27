@@ -12,7 +12,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { useGetAllDocumentsLazyQuery } from '../../../generated/graphql';
 
 import { PAGE_SIZE } from '../../../const/commonConst';
-import { DocumentList } from '../../common/DocumentList';
+import { DocumentList } from '../../documents/DocumentList';
 
 export function PericopeTrDocumentListPage() {
   const { tr } = useTr();

@@ -16,7 +16,7 @@ import { useGetAllDocumentsLazyQuery } from '../../../generated/graphql';
 import { DocumentUploadModal } from './DocumentUploadModal';
 
 import { PAGE_SIZE } from '../../../const/commonConst';
-import { DocumentList } from '../../common/DocumentList';
+import { DocumentList } from '../DocumentList';
 
 export function DocumentsPage() {
   const { tr } = useTr();
