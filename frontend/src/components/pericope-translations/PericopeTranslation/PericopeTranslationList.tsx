@@ -16,17 +16,15 @@ import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 import { TextCard } from '../../common/TextCard';
 import { useToggleTranslationVoteStatusWithRefetchMutation } from '../../../hooks/useToggleTranslationVoteStatusMutation';
 
-export type MapWordOrPhraseTranslationListProps = {
-  definition_id: string;
-  definition_type: string;
+export type PericopeTranslationListProps = {
+  pericope_id: string;
   tempTranslation?: string;
 };
 
-export function MapWordOrPhraseTranslationList({
-  definition_id,
-  definition_type,
+export function PericopeTranslationList({
+  pericope_id,
   tempTranslation,
-}: MapWordOrPhraseTranslationListProps) {
+}: PericopeTranslationListProps) {
   const {
     states: {
       global: {

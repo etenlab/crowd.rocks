@@ -7,11 +7,7 @@ import { TableNameType } from '../../../generated/graphql';
 
 import { useTr } from '../../../hooks/useTr';
 
-import {
-  PERICOPIES_FLAGS,
-  WORD_AND_PHRASE_FLAGS,
-  authorizedForAnyFlag,
-} from '../../flags/flagGroups';
+import { PERICOPIES_FLAGS, authorizedForAnyFlag } from '../../flags/flagGroups';
 
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { FlagV2 } from '../../flags/Flag';
@@ -25,13 +21,10 @@ import { Box } from '@mui/material';
 
 import { useIonToast } from '@ionic/react';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { PericopeTranslationList } from './PericopeTranslationList';
 
 export function PericopeTranslation() {
   const { tr } = useTr();
-  const { definition_id, type: definition_type } = useParams<{
-    definition_id: string;
-    type: string;
-  }>();
   const {
     states: {
       global: {
@@ -43,7 +36,26 @@ export function PericopeTranslation() {
 
   const [openForm, setOpenForm] = useState<boolean>(false);
 
-  const getPericopeAsOriginal = () => {};
+  // mock query
+  const getPericope = useCallback((): {
+    data: {
+      getPericope: {
+        pericope_id: string;
+        text: string;
+        description: string;
+      };
+    };
+  } => {
+    return {
+      data: {
+        getPericope: {
+          pericope_id: '1',
+          text: 'mock_text',
+          description: 'mock_description',
+        },
+      },
+    };
+  }, []);
 
   const handleCancelForm = () => {
     setOpenForm(false);
@@ -69,19 +81,15 @@ export function PericopeTranslation() {
     setOpenForm(true);
   };
 
-  const original = useMemo(() => {
-    const wordOrPhrase =
-      getPericopeAsOriginal.data?.getPericopeAsOriginal.pericope;
+  const original = useMemo<{
+    pericope_id: string;
+    text: string;
+    description: string;
+  }>(() => {
+    const pericope = getPericope().data?.getPericope;
 
-    return {
-      isWord,
-      isPhrase,
-      wordOrPhrase,
-      value,
-      id,
-      definition: wordOrPhrase?.definition,
-    } as { text: string; description: string };
-  }, [getPericopeAsOriginal]);
+    return pericope;
+  }, [getPericope]);
 
   const formCom = openForm ? (
     <NewTranslationForm onCancel={handleCancelForm} onSave={handleSaveForm} />
@@ -98,7 +106,7 @@ export function PericopeTranslation() {
       key: 'flag_button',
       component: (
         <FlagV2
-          parent_id={definition_id}
+          parent_id={original.pericope_id}
           parent_table={TableNameType.Pericopies}
           flag_names={PERICOPIES_FLAGS}
         />
@@ -112,7 +120,7 @@ export function PericopeTranslation() {
 
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography variant="h1" sx={{ paddingTop: '5px' }}>
-          {original.value}
+          {original.text}
         </Typography>
         <Stack
           direction="row"
@@ -121,15 +129,13 @@ export function PericopeTranslation() {
           gap="14px"
         >
           <DiscussionIconButton
-            parent_id={original.id}
-            parent_table={
-              original.isWord ? TableNameType.Words : TableNameType.Phrases
-            }
+            parent_id={original.pericope_id}
+            parent_table={TableNameType.Pericopies}
             flex="1"
           />
           <Box
             sx={{
-              display: authorizedForAnyFlag(WORD_AND_PHRASE_FLAGS)
+              display: authorizedForAnyFlag(PERICOPIES_FLAGS)
                 ? undefined
                 : 'none',
             }}
@@ -140,7 +146,7 @@ export function PericopeTranslation() {
       </Stack>
 
       <Typography variant="body1" color="text.gray">
-        {original.definition}
+        {original.description}
       </Typography>
 
       <Divider />
@@ -150,10 +156,7 @@ export function PericopeTranslation() {
       {formCom}
       {formButtonCom}
 
-      <MapWordOrPhraseTranslationList
-        definition_id={definition_id}
-        definition_type={definition_type}
-      />
+      <PericopeTranslationList pericope_id={original.pericope_id} />
     </>
   );
 }
