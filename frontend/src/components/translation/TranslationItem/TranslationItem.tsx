@@ -248,7 +248,7 @@ export function TranslationItem({
     }
 
     return {
-      word,
+      text: word,
       description,
     };
   }, [data, loading, error]);
