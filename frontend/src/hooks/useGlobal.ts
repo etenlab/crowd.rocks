@@ -10,7 +10,6 @@ import {
   changeSiteTextTargetLanguage as changeSiteTextTargetLanguageAction,
   setTargetLanguage as setTargetLangAction,
   setSourceLanguage as setSourceLangAction,
-  setUpdatedTrDefinitionIds as setUpdatedTrDefinitionIdsAction,
   setTempTranslation as setTempTranslationAction,
   clearTempTranslation as clearTempTranslationAction,
 } from '../reducers/global.actions';
@@ -90,15 +89,6 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     dispatchRef.current.dispatch(setSourceLangAction(language));
   }, []);
 
-  const setUpdatedTrDefinitionIds = useCallback(
-    (definitionIds: Array<string>) => {
-      dispatchRef.current.dispatch(
-        setUpdatedTrDefinitionIdsAction(definitionIds),
-      );
-    },
-    [],
-  );
-
   const setTempTranslation = useCallback(
     (key: string, value: { translation: string; description: string }) => {
       dispatchRef.current.dispatch(setTempTranslationAction(key, value));
@@ -120,7 +110,6 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     changeSiteTextTargetLanguage,
     setSourceLanguage,
     setTargetLanguage,
-    setUpdatedTrDefinitionIds,
     setTempTranslation,
     clearTempTranslation,
   };
