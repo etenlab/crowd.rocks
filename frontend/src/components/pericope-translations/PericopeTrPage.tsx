@@ -3,7 +3,6 @@ import { useAppContext } from '../../hooks/useAppContext';
 import { PageLayout } from '../common/PageLayout';
 import { Caption } from '../common/Caption/Caption';
 import { useTr } from '../../hooks/useTr';
-import { useIonRouter } from '@ionic/react';
 import { LangSelector } from '../common/LangSelector/LangSelector';
 import { Button } from '@mui/material';
 
@@ -18,7 +17,6 @@ export const PericopeTrPage: React.FC<PericopeTrPageProps> = ({
 }: PericopeTrPageProps) => {
   const { nation_id, language_id } = match.params;
   const { tr } = useTr();
-  const router = useIonRouter();
   const history = useHistory();
   const {
     states: {
@@ -39,7 +37,7 @@ export const PericopeTrPage: React.FC<PericopeTrPageProps> = ({
     <PageLayout>
       <Caption
         onBackClick={() => {
-          router.push(`/${nation_id}/${language_id}/1/home`);
+          history.push(`/${nation_id}/${language_id}/1/home`);
         }}
       >
         {tr('Translation')}
