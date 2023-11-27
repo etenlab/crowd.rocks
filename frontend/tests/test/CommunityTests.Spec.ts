@@ -1,20 +1,45 @@
 import { chromium, expect, test } from '@playwright/test';
 import ForumsPage from '../pages/ForumsPage';
+import RegistrationPage from '../pages/RegistrationPage';
+import RegisterData from '../data-factory/RegisterData';
+import LoginPage from '../pages/LoginPage';
 import pageUrls from '../constants/PageUrls';
 
+const registerData = RegisterData.validRegisterData();
 const forumName = 'Automation Forum ' + Math.random();
 const forumDescription = 'Automation Forum Description ' + Math.random();
 const editedForumName = 'Automation Edited Forum ' + Math.random();
 const forumNameWithoutDescription =
   'Automation Forum without Description ' + Math.random();
+test.use({ storageState: { cookies: [], origins: [] } });
+
+test.beforeAll(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const registerPage = new RegistrationPage(page);
+
+  //Navigate to the URL
+  await page.goto(pageUrls.RegisterPage);
+
+  //Verify the title of the page
+  expect(await registerPage.isRegisterPageTitleVisible()).toBeTruthy();
+
+  //Fill and submit the register form
+  await registerPage.fillRegistrationForm(registerData);
+  await registerPage.clickOnRegisterButton();
+  await page.waitForTimeout(4000);
+});
 
 test('1: Verify that user redirected on community page and able to create new forums', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
+  const loginPage = new LoginPage(page);
 
   //Navigate to the URL
-  await page.goto(pageUrls.HomePage);
+  await page.goto(pageUrls.LoginPage);
+  await loginPage.loginToApp(registerData);
 
   //Click on community tab and verify that user redirected on community page
   await forumsPage.clickOnCommunitySection();
@@ -42,6 +67,11 @@ test('2: Verify that search functionality is working properly', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
+  const loginPage = new LoginPage(page);
+
+  //Navigate to the URL
+  await page.goto(pageUrls.LoginPage);
+  await loginPage.loginToApp(registerData);
 
   //Navigate to the URL
   await page.goto(pageUrls.ForumPage);
@@ -55,9 +85,14 @@ test('3: Verify that user is able to create forum without adding the description
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
+  const loginPage = new LoginPage(page);
+
+  //Navigate to the URL
+  await page.goto(pageUrls.LoginPage);
+  await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await page.goto(pageUrls.ForumPage);
+  await forumsPage.clickOnCommunitySection();
 
   //Create a new forum without adding the description
   await forumsPage.clickOnTheAddNewButton();
@@ -74,9 +109,14 @@ test('4: Verify that validation message is appeared when user passes blank forum
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
+  const loginPage = new LoginPage(page);
+
+  //Navigate to the URL
+  await page.goto(pageUrls.LoginPage);
+  await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await page.goto(pageUrls.ForumPage);
+  await forumsPage.clickOnCommunitySection();
 
   //Create a new forum
   await forumsPage.clickOnTheAddNewButton();
@@ -93,9 +133,14 @@ test('5: Verify that validation message is appeared when user only enters forum 
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
+  const loginPage = new LoginPage(page);
+
+  //Navigate to the URL
+  await page.goto(pageUrls.LoginPage);
+  await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await page.goto(pageUrls.ForumPage);
+  await forumsPage.clickOnCommunitySection();
 
   //Create a new forum
   await forumsPage.clickOnTheAddNewButton();
@@ -112,9 +157,14 @@ test('6: Verify that forum is not created when click on cancel button after ente
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
+  const loginPage = new LoginPage(page);
+
+  //Navigate to the URL
+  await page.goto(pageUrls.LoginPage);
+  await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await page.goto(pageUrls.ForumPage);
+  await forumsPage.clickOnCommunitySection();
 
   //Create a new forum
   await forumsPage.clickOnTheAddNewButton();
@@ -129,10 +179,15 @@ test('7: Verify that user can edit the created forum and can search the edited f
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
+  const loginPage = new LoginPage(page);
   const forumDescriptionEdit = 'TestForum Description Edit' + Math.random();
 
+  //Navigate to the URL
+  await page.goto(pageUrls.LoginPage);
+  await loginPage.loginToApp(registerData);
+
   //Navigate to the forums page
-  await page.goto(pageUrls.ForumPage);
+  await forumsPage.clickOnCommunitySection();
 
   //Edit the forum details and click on the save button
   await forumsPage.searchForumName(forumName.toLowerCase());
@@ -155,10 +210,15 @@ test.afterAll('Delete Forum', async () => {
   const context = await browser.newContext();
   const page = await context.newPage();
   const forumsPage = new ForumsPage(page);
+  const loginPage = new LoginPage(page);
   const forumsList = [editedForumName, forumNameWithoutDescription];
 
+  //Navigate to the URL
+  await page.goto(pageUrls.LoginPage);
+  await loginPage.loginToApp(registerData);
+
   //Navigate to the forums page
-  await page.goto(pageUrls.ForumPage);
+  await forumsPage.clickOnCommunitySection();
 
   //Delete all forums
   for (const forum of forumsList) {
