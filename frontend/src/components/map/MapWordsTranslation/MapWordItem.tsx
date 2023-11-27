@@ -222,7 +222,7 @@ export function MapWordItem({ original }: MapWordItemProps) {
     }
 
     return {
-      word,
+      text: word,
       description,
     };
   }, [data, loading, error]);
