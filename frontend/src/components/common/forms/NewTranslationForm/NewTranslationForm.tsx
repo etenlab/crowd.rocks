@@ -1,24 +1,11 @@
 import { useState, useCallback } from 'react';
 import { Stack, Typography, Button, CircularProgress } from '@mui/material';
 import { useIonToast } from '@ionic/react';
-
-// import { typeOfString, StringContentTypes } from '../../../common/utility';
-
-import { TextForm } from '../../common/forms/TextForm';
-
-import { useTr } from '../../../hooks/useTr';
-// import { useAppContext } from '../../../hooks/useAppContext';
-
-// import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
-import { CheckCircle } from '../../common/icons/CheckCircle';
-// import {
-//   GetRecommendedTranslationFromDefinitionIdDocument,
-//   GetTranslationsByFromDefinitionIdDocument,
-// } from '../../../generated/graphql';
+import { TextForm } from '../TextForm';
+import { useTr } from '../../../../hooks/useTr';
+import { CheckCircle } from '../../icons/CheckCircle';
 
 export type NewTranslationForm = {
-  // definition_id: string;
-  // definition_type: string;
   onSave: ({
     translation,
     description,
@@ -29,30 +16,14 @@ export type NewTranslationForm = {
   onCancel: () => void;
 };
 
-export function NewTranslationForm({
-  // definition_id,
-  // definition_type,
-  onCancel,
-  onSave,
-}: NewTranslationForm) {
+export function NewTranslationForm({ onCancel, onSave }: NewTranslationForm) {
   const { tr } = useTr();
   const [present] = useIonToast();
-  // const {
-  //   states: {
-  //     global: {
-  //       langauges: { targetLang },
-  //     },
-  //   },
-  // } = useAppContext();
 
   const [translation, setTranslation] = useState<string>('');
   const [description, setDescription] = useState<string>('');
 
   const [saving, setSaving] = useState<boolean>(false);
-
-  // const [upsertTranslation] =
-  //   useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
-
   const handleNewTranslation = useCallback(async () => {
     if (translation.trim() === '') {
       present({
@@ -74,16 +45,6 @@ export function NewTranslationForm({
       return;
     }
 
-    // if (!targetLang?.lang) {
-    //   present({
-    //     message: `${tr('Target language must be selected')}`,
-    //     duration: 1500,
-    //     position: 'top',
-    //     color: 'warning',
-    //   });
-    //   return;
-    // }
-
     setSaving(true);
 
     await onSave({
@@ -91,23 +52,6 @@ export function NewTranslationForm({
       description,
     });
 
-    //   upsertTranslation({
-    //   variables: {
-    //     language_code: targetLang?.lang.tag,
-    //     dialect_code: targetLang?.dialect?.tag,
-    //     geo_code: targetLang?.region?.tag,
-    //     word_or_phrase: translation,
-    //     definition: description,
-    //     from_definition_id: definition_id,
-    //     from_definition_type_is_word:
-    //       definition_type === StringContentTypes.WORD,
-    //     is_type_word: typeOfString(translation) === StringContentTypes.WORD,
-    //   },
-    //   refetchQueries: [
-    //     GetTranslationsByFromDefinitionIdDocument,
-    //     GetRecommendedTranslationFromDefinitionIdDocument,
-    //   ],
-    // });
     setTranslation('');
     setDescription('');
 

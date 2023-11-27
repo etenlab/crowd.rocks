@@ -18,8 +18,8 @@ import {
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { FlagV2 } from '../../flags/Flag';
 import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
-import { NewTranslationForm } from './NewTranslationForm';
-import { MapWordOrPhraseTranslationList } from './MapWordOrPhraseTranslantionList';
+import { NewTranslationForm } from '../../common/forms/NewTranslationForm/NewTranslationForm';
+import { MapWordOrPhraseTranslationList } from './MapWordOrPhraseTranslationList';
 import { Box } from '@mui/material';
 import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 import { StringContentTypes, typeOfString } from '../../../common/utility';

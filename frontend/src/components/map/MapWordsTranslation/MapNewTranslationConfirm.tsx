@@ -14,7 +14,7 @@ import { useQuery } from '../../../hooks/useQuery';
 import { InfoFill } from '../../common/icons/InfoFill';
 import { AddCircle } from '../../common/icons/AddCircle';
 import { TranslatedTextItemViewer } from '../../common/TranslatedTextItem';
-import { MapWordOrPhraseTranslationList } from '../MapWordOrPhraseTranslation/MapWordOrPhraseTranslantionList';
+import { MapWordOrPhraseTranslationList } from '../MapWordOrPhraseTranslation/MapWordOrPhraseTranslationList';
 import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 
 export function MapNewTranslationConfirm() {
