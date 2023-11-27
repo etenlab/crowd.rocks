@@ -210,7 +210,8 @@ export function PericopiesTrListPage() {
                     translation={{
                       text: pericopeTr.node.translation?.translation || '',
                       description:
-                        pericopeTr.node.description_translation || '',
+                        pericopeTr.node.translation?.description_translation ||
+                        '',
                     }}
                   />
                 ),

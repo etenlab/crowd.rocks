@@ -1,10 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { languageInput2tag } from '../../../../utils/dist';
 import { ErrorType } from '../../common/types';
 import { calc_vote_weight } from '../../common/utility';
 import { PostgresService } from '../../core/postgres.service';
 import { LanguageInput } from '../common/types';
-import { PericopiesService } from '../pericopies/pericopies.service';
+import {
+  PericopiesService,
+  WORDS_JOINER,
+} from '../pericopies/pericopies.service';
 import {
   getPericopeDescriptionWithTranslationSql,
   getPericopeTanslationsIdsWithVotesSql,
@@ -19,8 +21,6 @@ import {
   PericopiesTextsWithTranslationConnection,
   PericopiesTextsWithTranslationEdge,
 } from './types';
-
-const WORDS_JOINER = ' ';
 
 const errorishPageInfo = {
   hasNextPage: false,
@@ -103,9 +103,9 @@ export class PericopeTrService {
           node: {
             pericope_id: pericope.pericope_id,
             pericope_text,
-            translation,
             pericope_description_text: descriptionWithTr?.description || '',
-            description_translation: descriptionWithTr?.translation || '',
+            translation,
+            error: ErrorType.NoError,
           },
         };
         edges.push(edge);
@@ -192,6 +192,7 @@ export class PericopeTrService {
             geo_code: r.geo_code,
           },
           translation: r.translation,
+          description_translation: r.description_translation,
           created_at: r.created_at,
           created_by: r.created_by,
         } as PericopeTranslation),

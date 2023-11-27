@@ -14,6 +14,7 @@ import {
   PericopeWithVotesListConnection,
   PericopeWithVote,
   PericopeWithVotesEdge,
+  PericopeTextWithDescription,
 } from './types';
 import {
   PericopeUpsertsProcedureOutput,
@@ -31,6 +32,8 @@ import {
   GetDocumentWordEntriesTotalPageSize,
   getDocumentWordEntriesTotalPageSize,
 } from '../documents/sql-string';
+
+export const WORDS_JOINER = ' ';
 
 @Injectable()
 export class PericopiesService {
@@ -286,6 +289,42 @@ export class PericopiesService {
         `PericopiesService#getWordsTillNextPericope: ${JSON.stringify(error)}`,
       );
       return [];
+    }
+  }
+
+  async getPericopeTextWithDescription(
+    pericopeId: string,
+  ): Promise<PericopeTextWithDescription> {
+    try {
+      const pericopeDocumentQ = await this.pg.pool.query<PericopeDocumentSqlR>(
+        ...getPericopeDocumentSql({ pericopeId }),
+      );
+
+      const pericopeWords = await this.getWordsTillNextPericope(
+        pericopeDocumentQ.rows[0].document_id,
+        pericopeDocumentQ.rows[0].start_word_id,
+      );
+
+      const pericope_description_text = await this.pg.pool.query<string>(
+        ...getPericopeDescriptionTextSql({ pericopeId }),
+      );
+
+      return {
+        error: ErrorType.PericopeNotFound,
+        pericope_id: null,
+        pericope_description_text,
+        pericope_text: pericopeWords.join(WORDS_JOINER),
+      };
+    } catch (error) {
+      Logger.error(
+        `PericopiesService#getPericopeText: ${JSON.stringify(error)}`,
+      );
+      return {
+        error: ErrorType.PericopeNotFound,
+        pericope_id: null,
+        pericope_description_text: '',
+        pericope_text: '',
+      };
     }
   }
 }

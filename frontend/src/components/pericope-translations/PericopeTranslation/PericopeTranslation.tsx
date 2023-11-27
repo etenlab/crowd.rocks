@@ -21,9 +21,10 @@ import { Box } from '@mui/material';
 
 import { useIonToast } from '@ionic/react';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { PericopeTranslationList } from './PericopeTranslationList';
+import { PericopeTranslationList } from './PericopeTranslationsList';
 
 export function PericopeTranslation() {
+  const { pericopeId } = useParams<{ pericopeId: string }>();
   const { tr } = useTr();
   const {
     states: {
@@ -36,26 +37,7 @@ export function PericopeTranslation() {
 
   const [openForm, setOpenForm] = useState<boolean>(false);
 
-  // mock query
-  const getPericope = useCallback((): {
-    data: {
-      getPericope: {
-        pericope_id: string;
-        text: string;
-        description: string;
-      };
-    };
-  } => {
-    return {
-      data: {
-        getPericope: {
-          pericope_id: '1',
-          text: 'mock_text',
-          description: 'mock_description',
-        },
-      },
-    };
-  }, []);
+  const getPericopeTr = useGetPericopeTextQuery({});
 
   const handleCancelForm = () => {
     setOpenForm(false);
@@ -86,10 +68,10 @@ export function PericopeTranslation() {
     text: string;
     description: string;
   }>(() => {
-    const pericope = getPericope().data?.getPericope;
+    const pericope = getPericopeTr();
 
     return pericope;
-  }, [getPericope]);
+  }, [getPericopeText, pericopeId]);
 
   const formCom = openForm ? (
     <NewTranslationForm onCancel={handleCancelForm} onSave={handleSaveForm} />

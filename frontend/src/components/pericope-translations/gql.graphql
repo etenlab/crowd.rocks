@@ -8,6 +8,7 @@ fragment PericopeTranslationFragment on PericopeTranslation {
   pericope_translation_id
   pericope_id
   translation
+  description_translation
   created_by
   created_at
   language {
@@ -22,7 +23,6 @@ fragment PericopeTextWithTranslationAndDescriptionFragment on PericopeTextWithTr
     ...PericopeTranslationFragment
   }
   pericope_description_text
-  description_translation
 }
 
 fragment PericopiesTextsWithTranslationEdgeFragment on PericopiesTextsWithTranslationEdge {

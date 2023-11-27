@@ -777,7 +777,6 @@ type PericopeEdge {
 }
 
 type PericopeTextWithTranslationAndDescription {
-  description_translation: String
   pericope_description_text: String!
   pericope_id: ID!
   pericope_text: String!
@@ -787,10 +786,23 @@ type PericopeTextWithTranslationAndDescription {
 type PericopeTranslation {
   created_at: DateTime!
   created_by: String!
+  description_translation: String!
   language: LanguageOutput!
   pericope_id: String!
   pericope_translation_id: ID!
   translation: String!
+}
+
+type PericopeTranslationWithVotes {
+  created_at: DateTime!
+  created_by: String!
+  description_translation: String!
+  downvotes: Int!
+  language: LanguageOutput!
+  pericope_id: String!
+  pericope_translation_id: ID!
+  translation: String!
+  upvotes: Int!
 }
 
 type PericopeVote {

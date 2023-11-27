@@ -55,6 +55,7 @@ export type GetPericopeTranslationSqlR = {
   pericope_translation_id: string;
   pericope_id: string;
   translation: string;
+  description_translation: string;
   language_code: string;
   dialect_code: string;
   geo_code: string;
@@ -69,15 +70,19 @@ export function getPericopeTranslationSql({
   return [
     `
       select 
-        pt.pericope_translation_id, 
         pt.pericope_id,
-        pt.translation,
+        pt.pericope_translation_id, 
+        pt.translation as translation,
+	      pdt.translation as description_translations,
         pt.language_code,
         pt.dialect_code,
         pt.geo_code,
         pt.created_at,
         pt.created_by
-      from pericope_translations pt where 
+      from pericope_translations pt
+      left join pericope_descriptions pd on pt.pericope_id = pd.pericope_id
+      left join pericope_description_translations pdt on pd.pericope_description_id = pdt.pericope_description_id 
+      where true and
         pericope_translation_id = any($1)
     `,
     [translationIds],
