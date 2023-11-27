@@ -2,50 +2,56 @@ import { useState, useCallback } from 'react';
 import { Stack, Typography, Button, CircularProgress } from '@mui/material';
 import { useIonToast } from '@ionic/react';
 
-import { typeOfString, StringContentTypes } from '../../../common/utility';
+// import { typeOfString, StringContentTypes } from '../../../common/utility';
 
-import { WordForm } from '../../common/forms/WordForm';
+import { TextForm } from '../../common/forms/TextForm';
 
 import { useTr } from '../../../hooks/useTr';
-import { useAppContext } from '../../../hooks/useAppContext';
+// import { useAppContext } from '../../../hooks/useAppContext';
 
-import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
+// import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 import { CheckCircle } from '../../common/icons/CheckCircle';
-import {
-  GetRecommendedTranslationFromDefinitionIdDocument,
-  GetTranslationsByFromDefinitionIdDocument,
-} from '../../../generated/graphql';
+// import {
+//   GetRecommendedTranslationFromDefinitionIdDocument,
+//   GetTranslationsByFromDefinitionIdDocument,
+// } from '../../../generated/graphql';
 
 export type NewTranslationForm = {
-  definition_id: string;
-  definition_type: string;
-  onCancel(): void;
+  // definition_id: string;
+  // definition_type: string;
+  onSave: ({
+    translation,
+    description,
+  }: {
+    translation: string;
+    description: string;
+  }) => void;
+  onCancel: () => void;
 };
 
 export function NewTranslationForm({
+  // definition_id,
+  // definition_type,
   onCancel,
-  definition_id,
-  definition_type,
+  onSave,
 }: NewTranslationForm) {
   const { tr } = useTr();
   const [present] = useIonToast();
-  const {
-    states: {
-      global: {
-        langauges: { targetLang },
-        // maps: { updatedTrDefinitionIds },
-      },
-    },
-    // actions: { setUpdatedTrDefinitionIds },
-  } = useAppContext();
+  // const {
+  //   states: {
+  //     global: {
+  //       langauges: { targetLang },
+  //     },
+  //   },
+  // } = useAppContext();
 
   const [translation, setTranslation] = useState<string>('');
   const [description, setDescription] = useState<string>('');
 
   const [saving, setSaving] = useState<boolean>(false);
 
-  const [upsertTranslation] =
-    useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
+  // const [upsertTranslation] =
+  //   useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
 
   const handleNewTranslation = useCallback(async () => {
     if (translation.trim() === '') {
@@ -68,51 +74,45 @@ export function NewTranslationForm({
       return;
     }
 
-    if (!targetLang?.lang) {
-      present({
-        message: `${tr('Target language must be selected')}`,
-        duration: 1500,
-        position: 'top',
-        color: 'warning',
-      });
-      return;
-    }
+    // if (!targetLang?.lang) {
+    //   present({
+    //     message: `${tr('Target language must be selected')}`,
+    //     duration: 1500,
+    //     position: 'top',
+    //     color: 'warning',
+    //   });
+    //   return;
+    // }
+
     setSaving(true);
 
-    await upsertTranslation({
-      variables: {
-        language_code: targetLang?.lang.tag,
-        dialect_code: targetLang?.dialect?.tag,
-        geo_code: targetLang?.region?.tag,
-        word_or_phrase: translation,
-        definition: description,
-        from_definition_id: definition_id,
-        from_definition_type_is_word:
-          definition_type === StringContentTypes.WORD,
-        is_type_word: typeOfString(translation) === StringContentTypes.WORD,
-      },
-      refetchQueries: [
-        GetTranslationsByFromDefinitionIdDocument,
-        GetRecommendedTranslationFromDefinitionIdDocument,
-      ],
+    await onSave({
+      translation,
+      description,
     });
+
+    //   upsertTranslation({
+    //   variables: {
+    //     language_code: targetLang?.lang.tag,
+    //     dialect_code: targetLang?.dialect?.tag,
+    //     geo_code: targetLang?.region?.tag,
+    //     word_or_phrase: translation,
+    //     definition: description,
+    //     from_definition_id: definition_id,
+    //     from_definition_type_is_word:
+    //       definition_type === StringContentTypes.WORD,
+    //     is_type_word: typeOfString(translation) === StringContentTypes.WORD,
+    //   },
+    //   refetchQueries: [
+    //     GetTranslationsByFromDefinitionIdDocument,
+    //     GetRecommendedTranslationFromDefinitionIdDocument,
+    //   ],
+    // });
     setTranslation('');
     setDescription('');
-    // setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]); //IMO deprecated, need to check
 
     setSaving(false);
-  }, [
-    definition_id,
-    definition_type,
-    description,
-    present,
-    targetLang?.dialect?.tag,
-    targetLang?.lang,
-    targetLang?.region?.tag,
-    tr,
-    translation,
-    upsertTranslation,
-  ]);
+  }, [description, onSave, present, tr, translation]);
 
   const handleChangeWordForm = (word: string, description: string) => {
     setTranslation(word);
@@ -126,10 +126,10 @@ export function NewTranslationForm({
           {tr('Add your translation')}
         </Typography>
 
-        <WordForm
-          word={translation}
+        <TextForm
+          text={translation}
           description={description}
-          wordPlaceholder={tr('Your translation')}
+          textPlaceholder={tr('Your translation')}
           descriptionPlaceholder={tr('Description')}
           onChange={handleChangeWordForm}
           disabled={saving}
