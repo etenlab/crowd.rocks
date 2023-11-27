@@ -1,16 +1,19 @@
 import { Typography, Stack, Box, Divider } from '@mui/material';
 
 export type Item = {
-  word: string;
+  text: string;
   description: string;
 };
 
-export type WordItemViewerProps = {
+export type TranslatedTextItemViewerProps = {
   original: Item;
   viewData: Item;
 };
 
-export function WordItemViewer({ original, viewData }: WordItemViewerProps) {
+export function TranslatedTextItemViewer({
+  original,
+  viewData,
+}: TranslatedTextItemViewerProps) {
   return (
     <Stack>
       <Box
@@ -22,7 +25,7 @@ export function WordItemViewer({ original, viewData }: WordItemViewerProps) {
         })}
       >
         <Typography variant="h3" color="text.white">
-          {original.word}
+          {original.text}
         </Typography>
         <Typography variant="body2" color="text.white">
           {original.description}
@@ -37,7 +40,7 @@ export function WordItemViewer({ original, viewData }: WordItemViewerProps) {
         })}
       >
         <Typography variant="h3" sx={{ padding: '12px 16px' }}>
-          {viewData.word}
+          {viewData.text}
         </Typography>
         <Divider />
         <Typography variant="body1" sx={{ padding: '12px 16px' }}>

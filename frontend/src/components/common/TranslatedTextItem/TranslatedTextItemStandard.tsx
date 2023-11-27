@@ -2,9 +2,9 @@ import { MouseEventHandler } from 'react';
 import { Typography, Box, IconButton } from '@mui/material';
 import { NavArrowRight } from '../icons/NavArrowRight';
 
-import { Item } from './WordItemViewer';
+import { Item } from './TranslatedTextItemViewer';
 
-export type WordItemStandardProps = {
+export type TranslatedTextItemStandardProps = {
   original: Item;
   translation?: Item;
   onDetail(): void;
@@ -12,13 +12,13 @@ export type WordItemStandardProps = {
   disabledDetail?: boolean;
 };
 
-export function WordItemStandard({
+export function TranslatedTextItemStandard({
   original,
   translation,
   disabledDetail,
   onDetail,
   onClick,
-}: WordItemStandardProps) {
+}: TranslatedTextItemStandardProps) {
   const handleClick: MouseEventHandler<HTMLButtonElement> = (e) => {
     onDetail();
 
@@ -37,10 +37,10 @@ export function WordItemStandard({
         background: 'default',
       })}
     >
-      <Typography variant="h3">{original.word}</Typography>
+      <Typography variant="h3">{original.text}</Typography>
       {translation ? (
         <Typography variant="body2" color="text.gray">
-          {translation.word}
+          {translation.text}
         </Typography>
       ) : null}
 

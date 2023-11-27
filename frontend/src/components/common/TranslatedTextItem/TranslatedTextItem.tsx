@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 
-import { WordItemStandard } from './WordItemStandard';
-import { WordItemForm } from './WordItemForm';
+import { TranslatedTextItemStandard } from './TranslatedTextItemStandard';
+import { TranslatedTextItemForm } from './TranslatedTextItemForm';
 
 type Item = {
-  word: string;
+  text: string;
   description: string;
 };
 
-export type WordItemProps = {
+export type TranslatedTextItemProps = {
   saving?: boolean;
   error?: boolean;
   original: Item;
@@ -20,7 +20,7 @@ export type WordItemProps = {
   disabledDetail?: boolean;
 };
 
-export function WordItem({
+export function TranslatedTextItem({
   saving,
   error,
   original,
@@ -30,7 +30,7 @@ export function WordItem({
   onDetail,
   onConfirm,
   onCancel,
-}: WordItemProps) {
+}: TranslatedTextItemProps) {
   const [isForm, setIsForm] = useState<boolean>(false);
   const [savingState, setSavingState] = useState<'start' | 'progress' | 'end'>(
     'end',
@@ -82,9 +82,9 @@ export function WordItem({
 
   if (isForm) {
     return (
-      <WordItemForm
+      <TranslatedTextItemForm
         original={original}
-        initialFormData={initFormData || { word: '', description: '' }}
+        initialFormData={initFormData || { text: '', description: '' }}
         onCancel={handleCancel}
         onConfirm={handleConfirm}
         saving={savingState !== 'end'}
@@ -92,7 +92,7 @@ export function WordItem({
     );
   } else {
     return (
-      <WordItemStandard
+      <TranslatedTextItemStandard
         original={original}
         translation={translation}
         onDetail={onDetail}

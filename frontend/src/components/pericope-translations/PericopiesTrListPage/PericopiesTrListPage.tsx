@@ -204,11 +204,11 @@ export function PericopiesTrListPage() {
                   <PericopeTrItem
                     key={pericopeTr.cursor}
                     original={{
-                      word: pericopeTr.node.pericope_text,
+                      text: pericopeTr.node.pericope_text,
                       description: pericopeTr.node.pericope_description_text,
                     }}
                     translation={{
-                      word: pericopeTr.node.translation?.translation || '',
+                      text: pericopeTr.node.translation?.translation || '',
                       description:
                         pericopeTr.node.description_translation || '',
                     }}

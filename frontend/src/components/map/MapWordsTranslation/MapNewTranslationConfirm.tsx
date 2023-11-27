@@ -13,7 +13,7 @@ import { useQuery } from '../../../hooks/useQuery';
 
 import { InfoFill } from '../../common/icons/InfoFill';
 import { AddCircle } from '../../common/icons/AddCircle';
-import { WordItemViewer } from '../../common/WordItem';
+import { TranslatedTextItemViewer } from '../../common/TranslatedTextItem';
 import { MapWordOrPhraseTranslationList } from '../MapWordOrPhraseTranslation/MapWordOrPhraseTranslantionList';
 import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 
@@ -226,13 +226,13 @@ export function MapNewTranslationConfirm() {
       </Stack>
 
       {viewData ? (
-        <WordItemViewer
+        <TranslatedTextItemViewer
           original={{
-            word: original.value || '',
+            text: original.value || '',
             description: original.definition || '',
           }}
           viewData={{
-            word: viewData.translation,
+            text: viewData.translation,
             description: viewData.description,
           }}
         />

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Item } from '../../common/WordItem/WordItemViewer';
-import { WordItem } from '../../common/WordItem';
+import { Item } from '../../common/TranslatedTextItem/TranslatedTextItemViewer';
+import { TranslatedTextItem } from '../../common/TranslatedTextItem';
 
 type TPericopeItemParams = {
   original: Item;
@@ -23,9 +23,9 @@ export function PericopeTrItem({ original, translation }: TPericopeItemParams) {
   };
 
   return (
-    <WordItem
+    <TranslatedTextItem
       original={{
-        word: original.word,
+        text: original.text,
         description: original.description,
       }}
       translation={translation || undefined}
