@@ -1,6 +1,6 @@
 import { styled } from '@mui/material';
 
-export const Word = styled('div')({
+export const Word = styled('div')(({ theme }) => ({
   display: 'inline-block',
   position: 'relative',
   padding: '0px 3px',
@@ -9,15 +9,14 @@ export const Word = styled('div')({
   fontFamily: 'Poppins',
   fontWeight: 400,
   lineHeight: '32px',
-  letterSpacing: '-0.28px',
   '&.edit': {
     cursor: 'pointer',
   },
   '&.edit:hover': {
-    background: '#EFF1F8',
+    background: theme.palette.background.blue_20,
   },
   '&.selected': {
-    background: '#EFF1F8',
+    background: theme.palette.background.blue_20,
     fontWeight: 600,
     letterSpacing: '-0.5px',
   },
@@ -27,7 +26,7 @@ export const Word = styled('div')({
   '&.right-boundary': {
     borderRadius: '0 5px 5px 0',
   },
-});
+}));
 
 export const Dot = styled('div')(({ theme }) => ({
   position: 'absolute',

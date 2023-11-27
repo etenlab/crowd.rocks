@@ -109,6 +109,15 @@ query GetAnswersByQuestionId($id: ID!) {
   }
 }
 
+query GetAnswerByUserId($question_id: ID!, $user_id: ID!) {
+  getAnswerByUserId(question_id: $question_id, user_id: $user_id) {
+    error
+    answers {
+      ...AnswerFragment
+    }
+  }
+}
+
 query getQuestionStatistic($question_id: ID!) {
   getQuestionStatistic(question_id: $question_id) {
     error

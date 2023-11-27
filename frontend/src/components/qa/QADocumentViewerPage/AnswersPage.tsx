@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router';
 import { Divider, Stack, Typography, Button } from '@mui/material';
 
@@ -11,8 +11,10 @@ import { Item } from '../styled';
 import { AnswerForm } from './AnswerForm';
 
 import { useTr } from '../../../hooks/useTr';
+import { globals } from '../../../services/globals';
 
 import {
+  useGetAnswerByUserIdLazyQuery,
   useGetDocumentTextFromRangesLazyQuery,
   useGetQuestionStatisticQuery,
   useReadWordRangeLazyQuery,
@@ -29,6 +31,9 @@ export function AnswersPage() {
       question_id,
     },
   });
+  const [getAnswerByUserId, { data: myAnswerData }] =
+    useGetAnswerByUserIdLazyQuery();
+
   const [readWordRange, { data: wordRangeData }] = useReadWordRangeLazyQuery();
   const [getDocumentTextFromRange, { data: textFromRangeData }] =
     useGetDocumentTextFromRangesLazyQuery();
@@ -70,6 +75,24 @@ export function AnswersPage() {
     }
   }, [getDocumentTextFromRange, wordRangeData]);
 
+  const questionWithStatistic =
+    statisticData?.getQuestionStatistic.question_with_statistic || null;
+  const pieceOfText =
+    textFromRangeData?.getDocumentTextFromRanges.list[0].piece_of_text || '';
+
+  useEffect(() => {
+    const user_id = globals.get_user_id();
+
+    if (user_id && questionWithStatistic) {
+      getAnswerByUserId({
+        variables: {
+          user_id: user_id + '',
+          question_id: questionWithStatistic.question_id,
+        },
+      });
+    }
+  }, [getAnswerByUserId, questionWithStatistic]);
+
   const handleCloseAnswerForm = () => {
     setShowAnswerForm(false);
   };
@@ -78,20 +101,28 @@ export function AnswersPage() {
     setShowAnswerForm(true);
   };
 
-  const questionWithStatistic =
-    statisticData?.getQuestionStatistic.question_with_statistic || null;
-  const pieceOfText =
-    textFromRangeData?.getDocumentTextFromRanges.list[0].piece_of_text || '';
+  const myAnswer = useMemo(() => {
+    if (!myAnswerData) {
+      return null;
+    }
+
+    if (myAnswerData.getAnswerByUserId.answers.length === 0) {
+      return null;
+    }
+
+    return myAnswerData.getAnswerByUserId.answers[0];
+  }, [myAnswerData]);
 
   const answerFormCom =
     showAnswerForm && questionWithStatistic ? (
       <AnswerForm
         question={questionWithStatistic}
         onClose={handleCloseAnswerForm}
+        initialItems={myAnswer?.question_items || []}
       />
     ) : (
       <Button variant="contained" color="blue" onClick={handleOpenAnswerForm}>
-        {tr('Add Answer')}
+        {myAnswer ? tr('Update Answer') : tr('Add Answer')}
       </Button>
     );
 

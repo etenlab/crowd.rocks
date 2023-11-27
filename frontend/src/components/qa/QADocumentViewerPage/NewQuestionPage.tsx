@@ -317,6 +317,7 @@ export function NewQuestionPage() {
                 fontWeight: 400,
                 lineHeight: '22px',
                 letterSpacing: '-0.28px',
+                backgroundColor: 'transparent',
               })}
               value={question}
               placeholder={tr('Ask a question')}

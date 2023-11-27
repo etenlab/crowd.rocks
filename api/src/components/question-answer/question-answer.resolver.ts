@@ -168,6 +168,16 @@ export class QuestionAndAnswersResolver {
     );
   }
 
+  @Query(() => AnswersOutput)
+  async getAnswerByUserId(
+    @Args('question_id', { type: () => ID }) question_id: string,
+    @Args('user_id', { type: () => ID }) user_id: string,
+  ): Promise<AnswersOutput> {
+    Logger.log('getAnswerByUserId, ids:', { question_id, user_id });
+
+    return this.answerService.getAnswerByUserId(+question_id, +user_id, null);
+  }
+
   @Mutation(() => AnswersOutput)
   async upsertAnswers(
     @Args('input', { type: () => [AnswerUpsertInput] })
