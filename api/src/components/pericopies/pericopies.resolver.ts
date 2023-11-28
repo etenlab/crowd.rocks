@@ -9,10 +9,7 @@ import {
   Int,
 } from '@nestjs/graphql';
 import { getBearer } from 'src/common/utility';
-import {
-  GetPericopeTextInput,
-  PericopeTextWithDescription,
-} from '../pericope-translations/types';
+import { GetPericopeTextInput } from '../pericope-translations/types';
 
 import { PericopeVotesService } from './pericope-votes.service';
 import { PericopiesService } from './pericopies.service';
@@ -21,6 +18,7 @@ import {
   PericopiesOutput,
   PericopeVoteStatusOutput,
   PericopeWithVotesListConnection,
+  PericopeTextWithDescription,
 } from './types';
 
 @Injectable()
@@ -117,9 +115,11 @@ export class PericopiesResolver {
   }
 
   @Query(() => PericopeTextWithDescription)
-  async useGetPericopeTextQuery(
+  async getPericopeTextAndDesctiption(
     @Args('input') input: GetPericopeTextInput,
   ): Promise<PericopeTextWithDescription> {
-    return this.pericopiesService.getPericopeTextWithDescription(input);
+    return this.pericopiesService.getPericopeTextWithDescription(
+      input.pericopeId,
+    );
   }
 }

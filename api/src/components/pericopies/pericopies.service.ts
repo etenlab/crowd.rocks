@@ -27,6 +27,10 @@ import {
   PericopeWithVotesSqlR,
   DocumentWordSqlR,
   getWordsTillNextPericopeSql,
+  GetPericopeDocumentSqlR,
+  getPericopeDocumentSql,
+  GetPericopeDescripionSqlR,
+  getPericopeDescripionSql,
 } from './sql-string';
 import {
   GetDocumentWordEntriesTotalPageSize,
@@ -296,28 +300,49 @@ export class PericopiesService {
     pericopeId: string,
   ): Promise<PericopeTextWithDescription> {
     try {
-      const pericopeDocumentQ = await this.pg.pool.query<PericopeDocumentSqlR>(
-        ...getPericopeDocumentSql({ pericopeId }),
-      );
+      const pericopeDocumentQ =
+        await this.pg.pool.query<GetPericopeDocumentSqlR>(
+          ...getPericopeDocumentSql({ pericopeIds: [pericopeId] }),
+        );
 
       const pericopeWords = await this.getWordsTillNextPericope(
         pericopeDocumentQ.rows[0].document_id,
-        pericopeDocumentQ.rows[0].start_word_id,
+        pericopeDocumentQ.rows[0].start_word,
       );
 
-      const pericope_description_text = await this.pg.pool.query<string>(
-        ...getPericopeDescriptionTextSql({ pericopeId }),
-      );
+      const pericopeDescriptionTextRows =
+        await this.pg.pool.query<GetPericopeDescripionSqlR>(
+          ...getPericopeDescripionSql({ pericopeIds: [pericopeId] }),
+        );
+
+      const pericope_description_text =
+        pericopeDescriptionTextRows.rows[0]?.description || '';
+
+      if (!(pericopeWords.length > 0)) {
+        Logger.error(
+          `PericopiesService#getPericopeTextWithDescription: Pericope words not found`,
+        );
+        return {
+          error: ErrorType.PericopeNotFound,
+          pericope_id: null,
+          pericope_description_text: '',
+          pericope_text: '',
+        };
+      }
 
       return {
-        error: ErrorType.PericopeNotFound,
-        pericope_id: null,
+        error: ErrorType.NoError,
+        pericope_id: pericopeId,
         pericope_description_text,
-        pericope_text: pericopeWords.join(WORDS_JOINER),
+        pericope_text: pericopeWords
+          .map((w) => w.wordlike_string)
+          .join(WORDS_JOINER),
       };
     } catch (error) {
       Logger.error(
-        `PericopiesService#getPericopeText: ${JSON.stringify(error)}`,
+        `PericopiesService#getPericopeTextWithDescription: ${JSON.stringify(
+          error,
+        )}`,
       );
       return {
         error: ErrorType.PericopeNotFound,

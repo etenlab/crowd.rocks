@@ -443,6 +443,10 @@ type GetOrigMapsListOutput {
   mapList: [MapDetailsOutput!]!
 }
 
+input GetPericopeTextInput {
+  pericopeId: String!
+}
+
 input GetPericopiesTrInput {
   documentId: String!
   filter: String
@@ -776,9 +780,17 @@ type PericopeEdge {
   node: Pericope!
 }
 
-type PericopeTextWithTranslationAndDescription {
+type PericopeTextWithDescription {
+  error: ErrorType!
   pericope_description_text: String!
-  pericope_id: ID!
+  pericope_id: ID
+  pericope_text: String!
+}
+
+type PericopeTextWithTranslationAndDescription {
+  error: ErrorType!
+  pericope_description_text: String!
+  pericope_id: ID
   pericope_text: String!
   translation: PericopeTranslation
 }
@@ -786,7 +798,7 @@ type PericopeTextWithTranslationAndDescription {
 type PericopeTranslation {
   created_at: DateTime!
   created_by: String!
-  description_translation: String!
+  description_translation: String
   language: LanguageOutput!
   pericope_id: String!
   pericope_translation_id: ID!
@@ -796,7 +808,7 @@ type PericopeTranslation {
 type PericopeTranslationWithVotes {
   created_at: DateTime!
   created_by: String!
-  description_translation: String!
+  description_translation: String
   downvotes: Int!
   language: LanguageOutput!
   pericope_id: String!
@@ -1163,6 +1175,7 @@ type Query {
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapWordsAndPhrasesCount(input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesCountOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
+  getPericopeTextAndDesctiption(input: GetPericopeTextInput!): PericopeTextWithDescription!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
   getPericopiesByDocumentId(after: ID, document_id: ID!, first: Int): PericopeWithVotesListConnection!
   getPericopiesTr(after: ID, first: Int, input: GetPericopiesTrInput!): PericopiesTextsWithTranslationConnection!

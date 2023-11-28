@@ -8,7 +8,7 @@ import {
   WORDS_JOINER,
 } from '../pericopies/pericopies.service';
 import {
-  getPericopeDescriptionWithTranslationSql,
+  getPericopiesDescriptions,
   getPericopeTanslationsIdsWithVotesSql,
   getPericopeTranslationSql,
   GetPericopeTranslationSqlR,
@@ -77,10 +77,7 @@ export class PericopeTrService {
             pericope.pericope_id,
             targetLang,
           ),
-          this.getPericopiesDescriptionsWithTranslation(
-            [pericope.pericope_id],
-            targetLang,
-          ),
+          this.getPericopiesDescriptions([pericope.pericope_id]),
         ]);
 
         const pericope_text = words
@@ -131,15 +128,13 @@ export class PericopeTrService {
     }
   }
 
-  async getPericopiesDescriptionsWithTranslation(
+  async getPericopiesDescriptions(
     pericopiesIds: string[],
-    targetLang: LanguageInput,
   ): Promise<PericopeDescriptionWithTranslationSqlR[]> {
     const resQ =
       await this.pg.pool.query<PericopeDescriptionWithTranslationSqlR>(
-        ...getPericopeDescriptionWithTranslationSql({
+        ...getPericopiesDescriptions({
           pericopiesIds,
-          targetLang,
         }),
       );
     return resQ.rows;

@@ -73,7 +73,7 @@ export function getPericopeTranslationSql({
         pt.pericope_id,
         pt.pericope_translation_id, 
         pt.translation as translation,
-	      pdt.translation as description_translations,
+	      pdt.translation as description_translation,
         pt.language_code,
         pt.dialect_code,
         pt.geo_code,
@@ -93,46 +93,25 @@ export type PericopeDescriptionWithTranslationSqlR = {
   pericope_id: string;
   description: string;
   translation: string;
-  t_language_code: string;
-  t_dialect_code: string;
-  t_geo_code: string;
 };
-export function getPericopeDescriptionWithTranslationSql({
+export function getPericopiesDescriptions({
   pericopiesIds,
-  targetLang: { language_code, dialect_code, geo_code },
 }: {
   pericopiesIds: string[];
-  targetLang: LanguageInput;
-}): [string, [string[], string, string?, string?]] {
-  const params: [string[], string, string?, string?] = [
-    pericopiesIds,
-    language_code,
-  ];
-  let langRestrictionClause = ` and pdt.language_code = $${params.length}`;
+}): [string, [string[]]] {
+  const params: [string[]] = [pericopiesIds];
 
-  if (dialect_code) {
-    params.push(dialect_code);
-    langRestrictionClause += ` and pdt.dialect_code = $${params.length}`;
-  }
-  if (geo_code) {
-    params.push(geo_code);
-    langRestrictionClause += ` and pdt.geo_code = $${params.length}`;
-  }
   return [
     `
-        select
-          p.pericope_id,
-          pd.description,
-          pdt.translation
-        from
-          pericopies p
-        join pericope_descriptions pd on
-          p.pericope_id = pd.pericope_id
-        left join pericope_description_translations pdt on
-          pd.pericope_description_id = pdt.pericope_description_id
-        where true
-          and p.pericope_id = any($1)
-          ${langRestrictionClause}
+      select
+      pd.pericope_id,
+      pd.description,
+      pdt.translation
+      from pericope_descriptions pd
+      left join pericope_description_translations pdt on
+        pd.pericope_description_id = pdt.pericope_description_id
+      where true
+        and pd.pericope_id = any($1)
     `,
     params,
   ];

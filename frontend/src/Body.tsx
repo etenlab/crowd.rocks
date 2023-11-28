@@ -101,7 +101,8 @@ import { DataGeneratorPage } from './components/data-generator/DataGeneratorPage
 import { PericopeTrPage } from './components/pericope-translations/PericopeTrPage';
 import { PericopeTrDocumentListPage } from './components/pericope-translations/PericopeTrDocumentListPage';
 import { PericopiesTrList } from './components/pericope-translations/PericopiesTrListPage';
-import { PericopeTranslationList } from './components/pericope-translations/PericopeTranslation/PericopeTranslationsList';
+import { PericopeTranslationPage } from './components/pericope-translations/PericopeTranslationPage/PericopeTranslationPage';
+// import { PericopeTranslationList } from './components/pericope-translations/PericopeTranslationPage/PericopeTranslationsList';
 
 export function Body() {
   const { tr } = useTr();
@@ -607,7 +608,7 @@ export function Body() {
             <Route
               exact
               path="/:nation_id/:language_id/:cluster_id/pericope-translations/pericope/:pericopeId"
-              component={PericopeTranslationList}
+              component={PericopeTranslationPage}
             />
             <Route
               exact

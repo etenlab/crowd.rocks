@@ -82,11 +82,8 @@ export class RecomendedPericopeConnection extends GenericOutput {
 }
 
 @ObjectType()
-export class PericopeText extends GenericOutput {
+export class PericopeTextWithDescription extends GenericOutput {
   @Field(() => ID, { nullable: true }) pericope_id: string | null;
   @Field(() => String) pericope_text: string;
-}
-@ObjectType()
-export class PericopeTextWithDescription extends PericopeText {
   @Field(() => String) pericope_description_text: string;
 }

@@ -257,3 +257,50 @@ export function getWordsTillNextPericopeSql({
     params,
   ];
 }
+
+export type GetPericopeDocumentSqlR = {
+  pericope_id: string;
+  document_id: string;
+  start_word: string;
+};
+export function getPericopeDocumentSql({
+  pericopeIds,
+}: {
+  pericopeIds: string[];
+}): [string, [string[]]] {
+  return [
+    `
+      select
+        p.pericope_id,
+        dwe.document_id,
+        p.start_word
+      from pericopies p
+      join document_word_entries dwe on p.start_word = dwe.document_word_entry_id
+      where pericope_id = any($1);
+    `,
+    [pericopeIds],
+  ];
+}
+
+export type GetPericopeDescripionSqlR = {
+  pericope_id: string;
+  pericope_description_id: string;
+  description: string;
+};
+export function getPericopeDescripionSql({
+  pericopeIds,
+}: {
+  pericopeIds: string[];
+}): [string, [string[]]] {
+  return [
+    `
+      select
+      	pd.pericope_id,
+        pd.pericope_description_id, 
+        pd.description
+      from pericope_descriptions pd
+      where pd.pericope_id = any($1);
+    `,
+    [pericopeIds],
+  ];
+}

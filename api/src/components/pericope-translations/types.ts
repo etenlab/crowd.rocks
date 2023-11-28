@@ -8,7 +8,9 @@ export class PericopeTranslation {
   @Field(() => ID) pericope_translation_id: string;
   @Field(() => String) pericope_id: string;
   @Field(() => String) translation: string;
-  @Field(() => String) description_translation: string;
+  @Field(() => String, { nullable: true }) description_translation:
+    | string
+    | null;
   @Field(() => LanguageOutput) language: LanguageOutput;
   @Field(() => String) created_by: string;
   @Field(() => Date) created_at: string;

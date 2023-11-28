@@ -1,9 +1,12 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useParams } from 'react-router';
 import { Divider, Stack, Typography, Button } from '@mui/material';
 
 import { Caption } from '../../common/Caption/Caption';
-import { TableNameType } from '../../../generated/graphql';
+import {
+  TableNameType,
+  useGetPericopeTextAndDesctiptionQuery,
+} from '../../../generated/graphql';
 
 import { useTr } from '../../../hooks/useTr';
 
@@ -21,9 +24,10 @@ import { Box } from '@mui/material';
 
 import { useIonToast } from '@ionic/react';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { PericopeTranslationList } from './PericopeTranslationsList';
+// import { PericopeTranslationList } from './PericopeTranslationsList';
+import { PageLayout } from '../../common/PageLayout';
 
-export function PericopeTranslation() {
+export function PericopeTranslationPage() {
   const { pericopeId } = useParams<{ pericopeId: string }>();
   const { tr } = useTr();
   const {
@@ -37,7 +41,10 @@ export function PericopeTranslation() {
 
   const [openForm, setOpenForm] = useState<boolean>(false);
 
-  const getPericopeTr = useGetPericopeTextQuery({});
+  const pericopeTrData = useGetPericopeTextAndDesctiptionQuery({
+    variables: { pericopeId },
+  });
+  const pericopeTr = pericopeTrData.data?.getPericopeTextAndDesctiption;
 
   const handleCancelForm = () => {
     setOpenForm(false);
@@ -63,16 +70,6 @@ export function PericopeTranslation() {
     setOpenForm(true);
   };
 
-  const original = useMemo<{
-    pericope_id: string;
-    text: string;
-    description: string;
-  }>(() => {
-    const pericope = getPericopeTr();
-
-    return pericope;
-  }, [getPericopeText, pericopeId]);
-
   const formCom = openForm ? (
     <NewTranslationForm onCancel={handleCancelForm} onSave={handleSaveForm} />
   ) : null;
@@ -83,12 +80,12 @@ export function PericopeTranslation() {
     </Button>
   ) : null;
 
-  const dropDownList = [
+  const dropDownList = pericopeTr?.pericope_id && [
     {
       key: 'flag_button',
       component: (
         <FlagV2
-          parent_id={original.pericope_id}
+          parent_id={pericopeTr.pericope_id}
           parent_table={TableNameType.Pericopies}
           flag_names={PERICOPIES_FLAGS}
         />
@@ -97,48 +94,56 @@ export function PericopeTranslation() {
   ];
 
   return (
-    <>
+    <PageLayout>
       <Caption>{tr('Details')}</Caption>
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="h1" sx={{ paddingTop: '5px' }}>
-          {original.text}
-        </Typography>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          gap="14px"
-        >
-          <DiscussionIconButton
-            parent_id={original.pericope_id}
-            parent_table={TableNameType.Pericopies}
-            flex="1"
-          />
-          <Box
-            sx={{
-              display: authorizedForAnyFlag(PERICOPIES_FLAGS)
-                ? undefined
-                : 'none',
-            }}
+      {pericopeTr?.pericope_id && dropDownList && (
+        <>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
           >
-            <MoreHorizButton dropDownList={dropDownList} />
-          </Box>
-        </Stack>
-      </Stack>
+            <Typography variant="h1" sx={{ paddingTop: '5px' }}>
+              {pericopeTr.pericope_text}
+            </Typography>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              gap="14px"
+            >
+              <DiscussionIconButton
+                parent_id={pericopeTr.pericope_id}
+                parent_table={TableNameType.Pericopies}
+                flex="1"
+              />
+              <Box
+                sx={{
+                  display: authorizedForAnyFlag(PERICOPIES_FLAGS)
+                    ? undefined
+                    : 'none',
+                }}
+              >
+                <MoreHorizButton dropDownList={dropDownList} />
+              </Box>
+            </Stack>
+          </Stack>
 
-      <Typography variant="body1" color="text.gray">
-        {original.description}
-      </Typography>
+          <Typography variant="body1" color="text.gray">
+            {pericopeTr.pericope_description_text}
+          </Typography>
 
-      <Divider />
+          <Divider />
 
-      <Typography variant="h3">{tr('Translations')}</Typography>
+          <Typography variant="h3">{tr('Translations')}</Typography>
 
-      {formCom}
-      {formButtonCom}
+          {formCom}
+          {formButtonCom}
 
-      <PericopeTranslationList pericope_id={original.pericope_id} />
-    </>
+          {/* <PericopeTranslationList pericope_id={pericopeTr.pericope_id} /> */}
+        </>
+      )}
+    </PageLayout>
   );
 }

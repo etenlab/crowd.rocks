@@ -490,6 +490,10 @@ export type GetOrigMapsListOutput = {
   mapList: Array<MapDetailsOutput>;
 };
 
+export type GetPericopeTextInput = {
+  pericopeId: Scalars['String']['input'];
+};
+
 export type GetPericopiesTrInput = {
   documentId: Scalars['String']['input'];
   filter?: InputMaybe<Scalars['String']['input']>;
@@ -1312,10 +1316,19 @@ export type PericopeEdge = {
   node: Pericope;
 };
 
+export type PericopeTextWithDescription = {
+  __typename?: 'PericopeTextWithDescription';
+  error: ErrorType;
+  pericope_description_text: Scalars['String']['output'];
+  pericope_id?: Maybe<Scalars['ID']['output']>;
+  pericope_text: Scalars['String']['output'];
+};
+
 export type PericopeTextWithTranslationAndDescription = {
   __typename?: 'PericopeTextWithTranslationAndDescription';
+  error: ErrorType;
   pericope_description_text: Scalars['String']['output'];
-  pericope_id: Scalars['ID']['output'];
+  pericope_id?: Maybe<Scalars['ID']['output']>;
   pericope_text: Scalars['String']['output'];
   translation?: Maybe<PericopeTranslation>;
 };
@@ -1324,7 +1337,7 @@ export type PericopeTranslation = {
   __typename?: 'PericopeTranslation';
   created_at: Scalars['DateTime']['output'];
   created_by: Scalars['String']['output'];
-  description_translation: Scalars['String']['output'];
+  description_translation?: Maybe<Scalars['String']['output']>;
   language: LanguageOutput;
   pericope_id: Scalars['String']['output'];
   pericope_translation_id: Scalars['ID']['output'];
@@ -1335,7 +1348,7 @@ export type PericopeTranslationWithVotes = {
   __typename?: 'PericopeTranslationWithVotes';
   created_at: Scalars['DateTime']['output'];
   created_by: Scalars['String']['output'];
-  description_translation: Scalars['String']['output'];
+  description_translation?: Maybe<Scalars['String']['output']>;
   downvotes: Scalars['Int']['output'];
   language: LanguageOutput;
   pericope_id: Scalars['String']['output'];
@@ -1747,6 +1760,7 @@ export type Query = {
   getOrigMapWordsAndPhrases: MapWordsAndPhrasesConnection;
   getOrigMapWordsAndPhrasesCount: MapWordsAndPhrasesCountOutput;
   getOrigMapsList: GetOrigMapsListOutput;
+  getPericopeTextAndDesctiption: PericopeTextWithDescription;
   getPericopeVoteStatus: PericopeVoteStatusOutput;
   getPericopiesByDocumentId: PericopeWithVotesListConnection;
   getPericopiesTr: PericopiesTextsWithTranslationConnection;
@@ -1950,6 +1964,11 @@ export type QueryGetOrigMapWordsAndPhrasesCountArgs = {
 
 export type QueryGetOrigMapsListArgs = {
   input: GetOrigMapListInput;
+};
+
+
+export type QueryGetPericopeTextAndDesctiptionArgs = {
+  input: GetPericopeTextInput;
 };
 
 
@@ -3721,11 +3740,11 @@ export type MarkNotificationReadMutation = { __typename?: 'Mutation', markNotifi
 
 export type LanguageOutputFragmentFragment = { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null };
 
-export type PericopeTranslationFragmentFragment = { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, description_translation: string, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
+export type PericopeTranslationFragmentFragment = { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, description_translation?: string | null, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
 
-export type PericopeTextWithTranslationAndDescriptionFragmentFragment = { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id: string, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, description_translation: string, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null };
+export type PericopeTextWithTranslationAndDescriptionFragmentFragment = { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id?: string | null, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, description_translation?: string | null, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null };
 
-export type PericopiesTextsWithTranslationEdgeFragmentFragment = { __typename?: 'PericopiesTextsWithTranslationEdge', cursor: string, node: { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id: string, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, description_translation: string, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
+export type PericopiesTextsWithTranslationEdgeFragmentFragment = { __typename?: 'PericopiesTextsWithTranslationEdge', cursor: string, node: { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id?: string | null, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, description_translation?: string | null, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
 
 export type GetPericopiesTrQueryVariables = Exact<{
   documentId: Scalars['String']['input'];
@@ -3738,7 +3757,14 @@ export type GetPericopiesTrQueryVariables = Exact<{
 }>;
 
 
-export type GetPericopiesTrQuery = { __typename?: 'Query', getPericopiesTr: { __typename?: 'PericopiesTextsWithTranslationConnection', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null }, edges: Array<{ __typename?: 'PericopiesTextsWithTranslationEdge', cursor: string, node: { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id: string, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, description_translation: string, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } }> } };
+export type GetPericopiesTrQuery = { __typename?: 'Query', getPericopiesTr: { __typename?: 'PericopiesTextsWithTranslationConnection', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null }, edges: Array<{ __typename?: 'PericopiesTextsWithTranslationEdge', cursor: string, node: { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id?: string | null, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, description_translation?: string | null, created_by: string, created_at: any, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } }> } };
+
+export type GetPericopeTextAndDesctiptionQueryVariables = Exact<{
+  pericopeId: Scalars['String']['input'];
+}>;
+
+
+export type GetPericopeTextAndDesctiptionQuery = { __typename?: 'Query', getPericopeTextAndDesctiption: { __typename?: 'PericopeTextWithDescription', error: ErrorType, pericope_id?: string | null, pericope_text: string, pericope_description_text: string } };
 
 export type PericopeFragmentFragment = { __typename?: 'Pericope', pericope_id: string, start_word: string };
 
@@ -7940,6 +7966,44 @@ export function useGetPericopiesTrLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type GetPericopiesTrQueryHookResult = ReturnType<typeof useGetPericopiesTrQuery>;
 export type GetPericopiesTrLazyQueryHookResult = ReturnType<typeof useGetPericopiesTrLazyQuery>;
 export type GetPericopiesTrQueryResult = Apollo.QueryResult<GetPericopiesTrQuery, GetPericopiesTrQueryVariables>;
+export const GetPericopeTextAndDesctiptionDocument = gql`
+    query GetPericopeTextAndDesctiption($pericopeId: String!) {
+  getPericopeTextAndDesctiption(input: {pericopeId: $pericopeId}) {
+    error
+    pericope_id
+    pericope_text
+    pericope_description_text
+  }
+}
+    `;
+
+/**
+ * __useGetPericopeTextAndDesctiptionQuery__
+ *
+ * To run a query within a React component, call `useGetPericopeTextAndDesctiptionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPericopeTextAndDesctiptionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPericopeTextAndDesctiptionQuery({
+ *   variables: {
+ *      pericopeId: // value for 'pericopeId'
+ *   },
+ * });
+ */
+export function useGetPericopeTextAndDesctiptionQuery(baseOptions: Apollo.QueryHookOptions<GetPericopeTextAndDesctiptionQuery, GetPericopeTextAndDesctiptionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPericopeTextAndDesctiptionQuery, GetPericopeTextAndDesctiptionQueryVariables>(GetPericopeTextAndDesctiptionDocument, options);
+      }
+export function useGetPericopeTextAndDesctiptionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPericopeTextAndDesctiptionQuery, GetPericopeTextAndDesctiptionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPericopeTextAndDesctiptionQuery, GetPericopeTextAndDesctiptionQueryVariables>(GetPericopeTextAndDesctiptionDocument, options);
+        }
+export type GetPericopeTextAndDesctiptionQueryHookResult = ReturnType<typeof useGetPericopeTextAndDesctiptionQuery>;
+export type GetPericopeTextAndDesctiptionLazyQueryHookResult = ReturnType<typeof useGetPericopeTextAndDesctiptionLazyQuery>;
+export type GetPericopeTextAndDesctiptionQueryResult = Apollo.QueryResult<GetPericopeTextAndDesctiptionQuery, GetPericopeTextAndDesctiptionQueryVariables>;
 export const GetPericopiesByDocumentIdDocument = gql`
     query GetPericopiesByDocumentId($document_id: ID!, $first: Int, $after: ID) {
   getPericopiesByDocumentId(
@@ -10739,6 +10803,7 @@ export const namedOperations = {
     GetMapVoteStatus: 'GetMapVoteStatus',
     ListNotifications: 'ListNotifications',
     GetPericopiesTr: 'GetPericopiesTr',
+    GetPericopeTextAndDesctiption: 'GetPericopeTextAndDesctiption',
     GetPericopiesByDocumentId: 'GetPericopiesByDocumentId',
     GetPericopeVoteStatus: 'GetPericopeVoteStatus',
     PhraseDefinitionRead: 'PhraseDefinitionRead',

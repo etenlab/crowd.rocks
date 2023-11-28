@@ -60,3 +60,12 @@ query GetPericopiesTr(
     }
   }
 }
+
+query GetPericopeTextAndDesctiption($pericopeId: String!) {
+  getPericopeTextAndDesctiption(input: { pericopeId: $pericopeId }) {
+    error
+    pericope_id
+    pericope_text
+    pericope_description_text
+  }
+}
