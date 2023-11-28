@@ -125,6 +125,13 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           isShown: () => !!settings?.isBetaTools,
         },
         {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/tagging-tool`,
+          icon: brushOutline,
+          title: tr('Tagging Tool'),
+          description: tr('Tagging Tool'),
+          isShown: () => !!settings?.isBetaTools,
+        },
+        {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/data-generator`,
           icon: cogOutline,
           title: tr('Data Generator (For development only)'),

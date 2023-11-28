@@ -89,6 +89,9 @@ import { NewQuestionPage } from './components/qa/QADocumentViewerPage/NewQuestio
 import { PericopeDocumentListPage } from './components/pericopies/PericopeDocumentListPage';
 import { PericopeDocumentViewerPage } from './components/pericopies/PericopeDocumentViewerPage';
 
+import { TaggingDocumentListPage } from './components/tagging/TaggingDocumentListPage';
+import { TaggingDocumentViewerPage } from './components/tagging/TaggingDocumentViewerPage';
+
 import { Icons } from './components/demo/Icons';
 import { Forms } from './components/demo/Forms';
 
@@ -579,6 +582,16 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/qa/new-question/:begin_document_word_entry_id/:end_document_word_entry_id"
               component={NewQuestionPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/tagging-tool"
+              component={TaggingDocumentListPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/tagging-tool/documents/:document_id"
+              component={TaggingDocumentViewerPage}
             />
             <Route
               exact
