@@ -17,6 +17,7 @@ import {
   PericopiesOutput,
   PericopeVoteStatusOutput,
   PericopeWithVotesListConnection,
+  PericopeDeleteOutput,
 } from './types';
 
 @Injectable()
@@ -68,6 +69,21 @@ export class PericopiesResolver {
 
     return this.pericopiesService.upserts(
       startWords.map((word) => +word),
+      getBearer(req) || '',
+      null,
+    );
+  }
+
+  @Mutation(() => PericopeDeleteOutput)
+  async deletePericopies(
+    @Args('pericope_id', { type: () => ID })
+    pericope_id: string,
+    @Context() req: any,
+  ): Promise<PericopeDeleteOutput> {
+    Logger.log('deletePericopies: ', pericope_id);
+
+    return this.pericopiesService.delete(
+      +pericope_id,
       getBearer(req) || '',
       null,
     );
