@@ -3,7 +3,6 @@ import { ApolloCache } from '@apollo/client';
 import {
   GetWordRangeTagsByDocumentIdQuery,
   GetWordRangeTagsByDocumentIdDocument,
-  GetQuestionOnWordRangesByDocumentIdDocument,
   GetWordRangeTagsByBeginWordEntryIdDocument,
   GetWordRangeTagsByBeginWordEntryIdQuery,
   WordRangeTagsEdge,
@@ -75,7 +74,7 @@ export function updateCacheWithCreateWordRangeTags(
       );
     } else {
       cache.writeQuery<GetWordRangeTagsByDocumentIdQuery>({
-        query: GetQuestionOnWordRangesByDocumentIdDocument,
+        query: GetWordRangeTagsByDocumentIdDocument,
         variables: {
           document_id: documentId + '',
         },
