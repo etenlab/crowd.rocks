@@ -13,6 +13,7 @@ import { Popover } from '@mui/material';
 import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
 import { Dot } from '../../documents/DocumentViewer/styled';
 import { DocumentViewer } from '../../documents/DocumentViewer';
+import { OrangeAddButton } from '../../common/buttons/OrangeAddButton';
 
 import {
   QuestionOnWordRange,
@@ -20,9 +21,9 @@ import {
 } from '../../../generated/graphql';
 
 import { useAppContext } from '../../../hooks/useAppContext';
+import { useTr } from '../../../hooks/useTr';
 
 import { PieceOfTextModal } from './PieceOfTextModal';
-import { QuestionAddButton } from './QuestionAddButton';
 import { QuestionsModal } from './QuestionsModal';
 
 import { TempPage } from '../../documents/DocumentViewer/DocumentViewer';
@@ -50,6 +51,7 @@ export function QADocumentViewer({
     language_id: string;
     cluster_id: string;
   }>();
+  const { tr } = useTr();
 
   const {
     actions: { createModal },
@@ -240,7 +242,10 @@ export function QADocumentViewer({
 
       openModal(
         <PieceOfTextModal
-          questions={questions}
+          ranges={questions.map((question) => ({
+            begin_document_word_entry_id: question.begin.document_word_entry_id,
+            end_document_word_entry_id: question.end.document_word_entry_id,
+          }))}
           onSelectPiece={handleSelectPiece}
           onClose={closeModal}
         />,
@@ -315,7 +320,10 @@ export function QADocumentViewer({
           },
         }}
       >
-        <QuestionAddButton onClickAddButton={handleAddQuestionButton} />
+        <OrangeAddButton
+          onClickAddButton={handleAddQuestionButton}
+          label={tr('Ask Question')}
+        />
       </Popover>
     ) : null;
 
