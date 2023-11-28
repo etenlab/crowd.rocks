@@ -13,7 +13,7 @@ import { WordRange } from 'src/components/documents/types';
 import {
   WordRangeTagWithVotesOutput,
   WordRangeTagsListConnection,
-  WordRangeTag,
+  WordRangeTagWithVote,
   WordRangeTagVoteStatus,
 } from './types';
 
@@ -231,10 +231,17 @@ export class WordRangeTagsService {
   async createTaggingOnWordRange(
     begin_document_word_entry_id: number,
     end_document_word_entry_id: number,
-    tag_name: string,
+    tag_names: string[],
     token,
     pgClient: PoolClient | null,
   ): Promise<WordRangeTagWithVotesOutput> {
+    if (tag_names.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        word_range_tags: [],
+      };
+    }
+
     if (!(await this.authService.is_authorized(token))) {
       return {
         error: ErrorType.Unauthorized,
@@ -268,10 +275,10 @@ export class WordRangeTagsService {
 
       return this.upserts(
         [
-          {
-            word_range_id: +word_ranges[0].word_range_id,
+          ...tag_names.map((tag_name) => ({
+            word_range_id: +word_ranges[0]!.word_range_id,
             tag_name,
-          },
+          })),
         ],
         token,
         pgClient,
@@ -323,7 +330,7 @@ export class WordRangeTagsService {
           .map((word_range) => word_range) as WordRange[]
       ).map((word_range) => +word_range.word_range_id);
 
-      const wordRangeTagsMap = new Map<string, WordRangeTag[]>();
+      const wordRangeTagsMap = new Map<string, WordRangeTagWithVote[]>();
 
       const { error, word_range_tags } = await this.reads(
         wordRangeIds,
@@ -362,7 +369,7 @@ export class WordRangeTagsService {
       });
 
       const wordRangeTagEdges = edges.map((edge) => {
-        const node: WordRangeTag[] = [];
+        const node: WordRangeTagWithVote[] = [];
 
         edge.node.map((item) => {
           const entries = wordRangeTagsMap.get(item.word_range_id);

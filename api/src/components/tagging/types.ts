@@ -50,7 +50,7 @@ export class WordRangeTagVoteStatusOutput extends GenericOutput {
 @ObjectType()
 export class WordRangeTagsEdge {
   @Field(() => ID) cursor: string;
-  @Field(() => [WordRangeTag]) node: WordRangeTag[];
+  @Field(() => [WordRangeTagWithVote]) node: WordRangeTagWithVote[];
 }
 
 @ObjectType()

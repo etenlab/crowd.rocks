@@ -50,7 +50,7 @@ export class TaggingsResolver {
   async upsertWordRangeTag(
     @Args('word_range_id', { type: () => ID })
     word_range_id: string,
-    @Args('tag_name', { type: () => ID })
+    @Args('tag_name', { type: () => String })
     tag_name: string,
     @Context() req: any,
   ): Promise<WordRangeTagWithVotesOutput> {
@@ -69,20 +69,20 @@ export class TaggingsResolver {
     begin_document_word_entry_id: string,
     @Args('end_document_word_entry_id', { type: () => ID })
     end_document_word_entry_id: string,
-    @Args('tag_name', { type: () => ID })
-    tag_name: string,
+    @Args('tag_names', { type: () => [String!]! })
+    tag_names: string[],
     @Context() req: any,
   ): Promise<WordRangeTagWithVotesOutput> {
     Logger.log('createTaggingOnWordRange: ', {
       begin_document_word_entry_id,
       end_document_word_entry_id,
-      tag_name,
+      tag_names,
     });
 
     return this.wordRangeTagsService.createTaggingOnWordRange(
       +begin_document_word_entry_id,
       +end_document_word_entry_id,
-      tag_name,
+      tag_names,
       getBearer(req) || '',
       null,
     );
