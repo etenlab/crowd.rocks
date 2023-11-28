@@ -3,6 +3,7 @@ import { relayStylePagination } from '@apollo/client/utilities';
 import {
   PericopeWithVotesListConnection,
   QuestionOnWordRangesListConnection,
+  WordRangeTagsListConnection,
 } from './generated/graphql';
 
 type GetPericopiesByDocumentIdMerge = Omit<
@@ -16,6 +17,15 @@ type GetPericopiesByDocumentIdMerge = Omit<
 
 type GetQuestionOnWordRangesByDocumentIdMerge = Omit<
   QuestionOnWordRangesListConnection,
+  'edges'
+> & {
+  edges: {
+    __ref: string;
+  }[];
+};
+
+type GetWordRangeTagsByDocumentIdMerge = Omit<
+  WordRangeTagsListConnection,
   'edges'
 > & {
   edges: {
@@ -77,6 +87,40 @@ export const typePolicies: TypePolicies = {
         merge(
           existing: GetQuestionOnWordRangesByDocumentIdMerge | undefined,
           incoming: GetQuestionOnWordRangesByDocumentIdMerge,
+        ) {
+          if (existing) {
+            const edgesMap = new Map<string, { __ref: string }>();
+
+            existing.edges.forEach((edge) => {
+              edgesMap.set(edge.__ref, edge);
+            });
+
+            incoming.edges.forEach((edge) => {
+              edgesMap.set(edge.__ref, edge);
+            });
+
+            const edges: {
+              __ref: string;
+            }[] = [];
+
+            for (const edge of edgesMap.values()) {
+              edges.push(edge);
+            }
+
+            return {
+              ...existing,
+              edges,
+            };
+          } else {
+            return { ...incoming };
+          }
+        },
+      },
+      getWordRangeTagsByDocumentId: {
+        keyArgs: ['document_id'],
+        merge(
+          existing: GetWordRangeTagsByDocumentIdMerge | undefined,
+          incoming: GetWordRangeTagsByDocumentIdMerge,
         ) {
           if (existing) {
             const edgesMap = new Map<string, { __ref: string }>();
@@ -242,6 +286,18 @@ export const typePolicies: TypePolicies = {
   },
   PericopeVoteStatus: {
     keyFields: ['pericope_id'],
+  },
+  WordRangeTagWithVote: {
+    keyFields: ['word_range_tag_id'],
+  },
+  WordRangeTag: {
+    keyFields: ['word_range_tag_id'],
+  },
+  WordRangeTagVoteStatus: {
+    keyFields: ['word_range_tag_id'],
+  },
+  WordRangeTagsEdge: {
+    keyFields: ['cursor'],
   },
   Forum: {
     keyFields: ['forum_id'],

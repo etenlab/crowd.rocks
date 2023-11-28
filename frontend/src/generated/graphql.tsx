@@ -1739,6 +1739,7 @@ export type Query = {
   getWordDefinitionsByLanguage: WordDefinitionWithVoteListOutput;
   getWordDefinitionsByWordId: WordDefinitionWithVoteListOutput;
   getWordRangeTagVoteStatus: WordRangeTagVoteStatusOutput;
+  getWordRangeTagsByBeginWordEntryId: WordRangeTagWithVotesOutput;
   getWordRangeTagsByDocumentId: WordRangeTagsListConnection;
   getWordRangesByBeginIds: WordRangesOutput;
   getWordRangesByDocumentId: WordRangesListConnection;
@@ -2077,6 +2078,11 @@ export type QueryGetWordDefinitionsByWordIdArgs = {
 
 export type QueryGetWordRangeTagVoteStatusArgs = {
   word_range_tag_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetWordRangeTagsByBeginWordEntryIdArgs = {
+  begin_document_word_entry_id: Scalars['ID']['input'];
 };
 
 
@@ -4071,6 +4077,13 @@ export type GetWordRangeTagsByDocumentIdQueryVariables = Exact<{
 
 
 export type GetWordRangeTagsByDocumentIdQuery = { __typename?: 'Query', getWordRangeTagsByDocumentId: { __typename?: 'WordRangeTagsListConnection', error: ErrorType, edges: Array<{ __typename?: 'WordRangeTagsEdge', cursor: string, node: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } }> }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+
+export type GetWordRangeTagsByBeginWordEntryIdQueryVariables = Exact<{
+  begin_document_word_entry_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetWordRangeTagsByBeginWordEntryIdQuery = { __typename?: 'Query', getWordRangeTagsByBeginWordEntryId: { __typename?: 'WordRangeTagWithVotesOutput', error: ErrorType, word_range_tags: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } } | null> } };
 
 export type GetWordRangeTagVoteStatusQueryVariables = Exact<{
   word_range_tag_id: Scalars['ID']['input'];
@@ -9269,6 +9282,46 @@ export function useGetWordRangeTagsByDocumentIdLazyQuery(baseOptions?: Apollo.La
 export type GetWordRangeTagsByDocumentIdQueryHookResult = ReturnType<typeof useGetWordRangeTagsByDocumentIdQuery>;
 export type GetWordRangeTagsByDocumentIdLazyQueryHookResult = ReturnType<typeof useGetWordRangeTagsByDocumentIdLazyQuery>;
 export type GetWordRangeTagsByDocumentIdQueryResult = Apollo.QueryResult<GetWordRangeTagsByDocumentIdQuery, GetWordRangeTagsByDocumentIdQueryVariables>;
+export const GetWordRangeTagsByBeginWordEntryIdDocument = gql`
+    query GetWordRangeTagsByBeginWordEntryId($begin_document_word_entry_id: ID!) {
+  getWordRangeTagsByBeginWordEntryId(
+    begin_document_word_entry_id: $begin_document_word_entry_id
+  ) {
+    error
+    word_range_tags {
+      ...WordRangeTagWithVoteFragment
+    }
+  }
+}
+    ${WordRangeTagWithVoteFragmentFragmentDoc}`;
+
+/**
+ * __useGetWordRangeTagsByBeginWordEntryIdQuery__
+ *
+ * To run a query within a React component, call `useGetWordRangeTagsByBeginWordEntryIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetWordRangeTagsByBeginWordEntryIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetWordRangeTagsByBeginWordEntryIdQuery({
+ *   variables: {
+ *      begin_document_word_entry_id: // value for 'begin_document_word_entry_id'
+ *   },
+ * });
+ */
+export function useGetWordRangeTagsByBeginWordEntryIdQuery(baseOptions: Apollo.QueryHookOptions<GetWordRangeTagsByBeginWordEntryIdQuery, GetWordRangeTagsByBeginWordEntryIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetWordRangeTagsByBeginWordEntryIdQuery, GetWordRangeTagsByBeginWordEntryIdQueryVariables>(GetWordRangeTagsByBeginWordEntryIdDocument, options);
+      }
+export function useGetWordRangeTagsByBeginWordEntryIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetWordRangeTagsByBeginWordEntryIdQuery, GetWordRangeTagsByBeginWordEntryIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetWordRangeTagsByBeginWordEntryIdQuery, GetWordRangeTagsByBeginWordEntryIdQueryVariables>(GetWordRangeTagsByBeginWordEntryIdDocument, options);
+        }
+export type GetWordRangeTagsByBeginWordEntryIdQueryHookResult = ReturnType<typeof useGetWordRangeTagsByBeginWordEntryIdQuery>;
+export type GetWordRangeTagsByBeginWordEntryIdLazyQueryHookResult = ReturnType<typeof useGetWordRangeTagsByBeginWordEntryIdLazyQuery>;
+export type GetWordRangeTagsByBeginWordEntryIdQueryResult = Apollo.QueryResult<GetWordRangeTagsByBeginWordEntryIdQuery, GetWordRangeTagsByBeginWordEntryIdQueryVariables>;
 export const GetWordRangeTagVoteStatusDocument = gql`
     query GetWordRangeTagVoteStatus($word_range_tag_id: ID!) {
   getWordRangeTagVoteStatus(word_range_tag_id: $word_range_tag_id) {
@@ -10955,6 +11008,7 @@ export const namedOperations = {
     GetAllRecommendedSiteTextTranslationList: 'GetAllRecommendedSiteTextTranslationList',
     GetAllSiteTextLanguageListWithRate: 'GetAllSiteTextLanguageListWithRate',
     GetWordRangeTagsByDocumentId: 'GetWordRangeTagsByDocumentId',
+    GetWordRangeTagsByBeginWordEntryId: 'GetWordRangeTagsByBeginWordEntryId',
     GetWordRangeTagVoteStatus: 'GetWordRangeTagVoteStatus',
     GetTranslationLanguageInfo: 'GetTranslationLanguageInfo',
     GetTranslationsByFromDefinitionId: 'GetTranslationsByFromDefinitionId',
