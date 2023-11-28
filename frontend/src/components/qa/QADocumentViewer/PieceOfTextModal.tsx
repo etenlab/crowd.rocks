@@ -15,22 +15,26 @@ import { Cancel } from '../../common/icons/Cancel';
 import { useTr } from '../../../hooks/useTr';
 import {
   WordRangeInput,
-  QuestionOnWordRange,
   useGetDocumentTextFromRangesLazyQuery,
 } from '../../../generated/graphql';
 
+type Range = {
+  begin_document_word_entry_id: string;
+  end_document_word_entry_id: string;
+};
+
 type PieceOfTextModalProps = {
-  questions: QuestionOnWordRange[];
+  ranges: Range[];
   onSelectPiece(
     pieceOfText: string,
-    startWordEntryId: string,
-    endWordEntryId: string,
+    begin_document_word_entry_id: string,
+    end_document_word_entry_id: string,
   ): void;
   onClose(): void;
 };
 
 export function PieceOfTextModal({
-  questions,
+  ranges,
   onSelectPiece,
   onClose,
 }: PieceOfTextModalProps) {
@@ -41,9 +45,9 @@ export function PieceOfTextModal({
   useEffect(() => {
     const pieceOfTextsMap = new Map<string, boolean>();
 
-    for (const question of questions) {
-      const begin = question.begin.document_word_entry_id;
-      const end = question.end.document_word_entry_id;
+    for (const range of ranges) {
+      const begin = range.begin_document_word_entry_id;
+      const end = range.end_document_word_entry_id;
       const key = JSON.stringify({
         begin,
         end,
@@ -52,10 +56,10 @@ export function PieceOfTextModal({
       pieceOfTextsMap.set(key, true);
     }
 
-    const ranges: WordRangeInput[] = [];
+    const input: WordRangeInput[] = [];
 
     for (const key of pieceOfTextsMap.keys()) {
-      ranges.push({
+      input.push({
         begin_document_word_entry_id: JSON.parse(key).begin,
         end_document_word_entry_id: JSON.parse(key).end,
       });
@@ -63,10 +67,10 @@ export function PieceOfTextModal({
 
     getDocumentTextFromRange({
       variables: {
-        ranges,
+        ranges: input,
       },
     });
-  }, [getDocumentTextFromRange, questions]);
+  }, [getDocumentTextFromRange, ranges]);
 
   const pieceOfTexts = useMemo(() => {
     if (!data || loading) {

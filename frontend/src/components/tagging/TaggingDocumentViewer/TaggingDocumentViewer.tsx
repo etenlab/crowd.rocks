@@ -7,26 +7,26 @@ import {
   ReactNode,
   MouseEvent,
 } from 'react';
-import { useHistory, useParams } from 'react-router';
 import { Popover } from '@mui/material';
 
 import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
 import { Dot } from '../../documents/DocumentViewer/styled';
 import { DocumentViewer } from '../../documents/DocumentViewer';
-import { OrangeAddButton } from '../../common/buttons/OrangeAddButton';
 
 import {
-  QuestionOnWordRange,
-  useGetQuestionOnWordRangesByDocumentIdQuery,
+  WordRangeTagWithVote,
+  useGetWordRangeTagsByDocumentIdQuery,
 } from '../../../generated/graphql';
 
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useTr } from '../../../hooks/useTr';
 
-import { PieceOfTextModal } from './PieceOfTextModal';
-import { QuestionsModal } from './QuestionsModal';
+import { PieceOfTextModal } from '../../qa/QADocumentViewer/PieceOfTextModal';
+import { OrangeAddButton } from '../../common/buttons/OrangeAddButton';
+import { TagAddingModal } from './TagAddingModal';
 
 import { TempPage } from '../../documents/DocumentViewer/DocumentViewer';
+import { TagsListModal } from './TagsListModal';
 
 export type RangeItem = {
   entryId: string;
@@ -34,30 +34,23 @@ export type RangeItem = {
   element: HTMLElement | null;
 };
 
-type QADocumentViewerProps = {
+type TaggingDocumentViewerProps = {
   documentId: string;
   mode: ViewMode;
   customScrollParent?: HTMLElement;
 };
 
-export function QADocumentViewer({
+export function TaggingDocumentViewer({
   documentId,
   mode,
   customScrollParent,
-}: QADocumentViewerProps) {
-  const history = useHistory();
-  const { nation_id, language_id, cluster_id } = useParams<{
-    nation_id: string;
-    language_id: string;
-    cluster_id: string;
-  }>();
+}: TaggingDocumentViewerProps) {
   const { tr } = useTr();
-
   const {
     actions: { createModal },
   } = useAppContext();
 
-  const { data, fetchMore } = useGetQuestionOnWordRangesByDocumentIdQuery({
+  const { data, fetchMore } = useGetWordRangeTagsByDocumentIdQuery({
     variables: {
       document_id: documentId,
       first: 1,
@@ -72,8 +65,8 @@ export function QADocumentViewer({
 
   const [requiredPage, setRequiredPage] = useState<TempPage | null>(null);
 
-  const questionsMapRef = useRef(new Map<string, QuestionOnWordRange>());
-  const questionsGroupMapRef = useRef(new Map<string, QuestionOnWordRange[]>());
+  const taggingsMapRef = useRef(new Map<string, WordRangeTagWithVote>());
+  const taggingsGroupMapRef = useRef(new Map<string, WordRangeTagWithVote[]>());
 
   const { openModal, closeModal } = createModal();
 
@@ -101,21 +94,21 @@ export function QADocumentViewer({
 
   const dots = useMemo(() => {
     if (data) {
-      data.getQuestionOnWordRangesByDocumentId.edges.forEach((edge) => {
-        edge.node.forEach((question) => {
-          const exists = questionsMapRef.current.get(question.question_id);
+      data.getWordRangeTagsByDocumentId.edges.forEach((edge) => {
+        edge.node.forEach((tag) => {
+          const exists = taggingsMapRef.current.get(tag.word_range_tag_id);
 
           if (!exists) {
-            questionsMapRef.current.set(question.question_id, question);
+            taggingsMapRef.current.set(tag.word_range_tag_id, tag);
 
-            const key = question.begin.document_word_entry_id;
+            const key = tag.word_range.begin.document_word_entry_id;
 
-            const arr = questionsGroupMapRef.current.get(key);
+            const arr = taggingsGroupMapRef.current.get(key);
 
             if (arr) {
-              arr.push(question);
+              arr.push(tag);
             } else {
-              questionsGroupMapRef.current.set(key, [question]);
+              taggingsGroupMapRef.current.set(key, [tag]);
             }
           }
         });
@@ -127,8 +120,8 @@ export function QADocumentViewer({
       component?: ReactNode;
     }[] = [];
 
-    for (const key of questionsGroupMapRef.current.keys()) {
-      const arr = questionsGroupMapRef.current.get(key) || [];
+    for (const key of taggingsGroupMapRef.current.keys()) {
+      const arr = taggingsGroupMapRef.current.get(key) || [];
 
       if (arr.length > 0) {
         dots.push({
@@ -195,56 +188,31 @@ export function QADocumentViewer({
     [],
   );
 
-  const handleSelectQuestion = useCallback(
-    (question: QuestionOnWordRange) => {
-      setRange({
-        begin: {
-          entryId: question.begin.document_word_entry_id,
-          order: 0,
-          element: null,
-        },
-        end: {
-          entryId: question.end.document_word_entry_id,
-          order: 0,
-          element: null,
-        },
-      });
-
-      history.push(
-        `/${nation_id}/${language_id}/${cluster_id}/qa/answers/${question.question_id}`,
-      );
-    },
-    [cluster_id, history, language_id, nation_id],
-  );
-
   const handleSelectPiece = useCallback(
     (pieceOfText: string, beginWordEntryId: string, endWordEntryId: string) => {
-      const questions =
-        questionsGroupMapRef.current.get(beginWordEntryId) || [];
-
       openModal(
-        <QuestionsModal
+        <TagsListModal
           pieceOfText={pieceOfText}
-          questions={questions.filter(
-            (item) => item.end.document_word_entry_id === endWordEntryId,
-          )}
-          onSelectQuestion={handleSelectQuestion}
+          begin_document_word_entry_id={beginWordEntryId}
+          end_document_word_entry_id={endWordEntryId}
           onClose={closeModal}
         />,
       );
     },
-    [closeModal, handleSelectQuestion, openModal],
+    [closeModal, openModal],
   );
 
   const handleSelectDot = useCallback(
     (entryId: string) => {
-      const questions = questionsGroupMapRef.current.get(entryId) || [];
+      const taggings = taggingsGroupMapRef.current.get(entryId) || [];
 
       openModal(
         <PieceOfTextModal
-          ranges={questions.map((question) => ({
-            begin_document_word_entry_id: question.begin.document_word_entry_id,
-            end_document_word_entry_id: question.end.document_word_entry_id,
+          ranges={taggings.map((tag) => ({
+            begin_document_word_entry_id:
+              tag.word_range.begin.document_word_entry_id,
+            end_document_word_entry_id:
+              tag.word_range.end.document_word_entry_id,
           }))}
           onSelectPiece={handleSelectPiece}
           onClose={closeModal}
@@ -281,23 +249,18 @@ export function QADocumentViewer({
     setRequiredPage(page);
   }, []);
 
-  const handleAddQuestionButton = useCallback(() => {
+  const handleAddTag = useCallback(() => {
     if (range.begin && range.end) {
-      history.push(
-        `/${nation_id}/${language_id}/${cluster_id}/qa/new-question/${range.begin.entryId}/${range.end.entryId}`,
+      openModal(
+        <TagAddingModal
+          begin_document_word_entry_id={range.begin.entryId}
+          end_document_word_entry_id={range.end.entryId}
+          onClose={closeModal}
+        />,
       );
+      handleCancel();
     }
-
-    handleCancel();
-  }, [
-    range.begin,
-    range.end,
-    handleCancel,
-    history,
-    nation_id,
-    language_id,
-    cluster_id,
-  ]);
+  }, [range.begin, range.end, openModal, closeModal, handleCancel]);
 
   const popoverCom =
     range.begin && range.end && mode === 'edit' && range.begin.element ? (
@@ -321,8 +284,8 @@ export function QADocumentViewer({
         }}
       >
         <OrangeAddButton
-          onClickAddButton={handleAddQuestionButton}
-          label={tr('Ask Question')}
+          onClickAddButton={handleAddTag}
+          label={tr('Add Tag')}
         />
       </Popover>
     ) : null;

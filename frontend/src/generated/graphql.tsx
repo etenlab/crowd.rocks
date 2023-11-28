@@ -282,6 +282,9 @@ export enum ErrorType {
   WordLikeStringInsertFailed = 'WordLikeStringInsertFailed',
   WordNotFound = 'WordNotFound',
   WordRangeInsertFailed = 'WordRangeInsertFailed',
+  WordRangeNotExists = 'WordRangeNotExists',
+  WordRangeTagInsertFailed = 'WordRangeTagInsertFailed',
+  WordRangeTagNotFound = 'WordRangeTagNotFound',
   WordToPhraseTranslationNotFound = 'WordToPhraseTranslationNotFound',
   WordToWordTranslationNotFound = 'WordToWordTranslationNotFound',
   WordVoteNotFound = 'WordVoteNotFound'
@@ -716,6 +719,7 @@ export type Mutation = {
   avatarUpdateResolver: AvatarUpdateOutput;
   botTranslateDocument: DocumentUploadOutput;
   createQuestionOnWordRange: QuestionOnWordRangesOutput;
+  createTaggingOnWordRange: WordRangeTagWithVotesOutput;
   documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
   forceMarkAndRetranslateOriginalMapsIds: GenericOutput;
@@ -760,6 +764,7 @@ export type Mutation = {
   togglePhraseVoteStatus: PhraseVoteStatusOutputRow;
   toggleTranslationVoteStatus: TranslationVoteStatusOutputRow;
   toggleWordDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
+  toggleWordRangeTagVoteStatus: WordRangeTagVoteStatusOutput;
   toggleWordToPhraseTrVoteStatus: WordToPhraseTranslationVoteStatusOutputRow;
   toggleWordVoteStatus: WordVoteStatusOutputRow;
   translateAllWordsAndPhrasesByDeepL: GenericOutput;
@@ -791,6 +796,7 @@ export type Mutation = {
   upsertTranslation: TranslationOutput;
   upsertTranslationFromWordAndDefinitionlikeString: TranslationOutput;
   upsertWordDefinitionFromWordAndDefinitionlikeString: WordDefinitionOutput;
+  upsertWordRangeTag: WordRangeTagWithVotesOutput;
   upsertWordRanges: WordRangesOutput;
   versionCreateResolver: VersionCreateOutput;
   wordDefinitionUpsert: WordDefinitionOutput;
@@ -818,6 +824,13 @@ export type MutationBotTranslateDocumentArgs = {
 
 export type MutationCreateQuestionOnWordRangeArgs = {
   input: CreateQuestionOnWordRangeUpsertInput;
+};
+
+
+export type MutationCreateTaggingOnWordRangeArgs = {
+  begin_document_word_entry_id: Scalars['ID']['input'];
+  end_document_word_entry_id: Scalars['ID']['input'];
+  tag_names: Array<Scalars['String']['input']>;
 };
 
 
@@ -1042,6 +1055,12 @@ export type MutationToggleWordDefinitionVoteStatusArgs = {
 };
 
 
+export type MutationToggleWordRangeTagVoteStatusArgs = {
+  vote: Scalars['Boolean']['input'];
+  word_range_tag_id: Scalars['ID']['input'];
+};
+
+
 export type MutationToggleWordToPhraseTrVoteStatusArgs = {
   vote: Scalars['Boolean']['input'];
   word_to_phrase_translation_id: Scalars['ID']['input'];
@@ -1221,6 +1240,12 @@ export type MutationUpsertTranslationFromWordAndDefinitionlikeStringArgs = {
 
 export type MutationUpsertWordDefinitionFromWordAndDefinitionlikeStringArgs = {
   input: FromWordAndDefintionlikeStringUpsertInput;
+};
+
+
+export type MutationUpsertWordRangeTagArgs = {
+  tag_name: Scalars['String']['input'];
+  word_range_id: Scalars['ID']['input'];
 };
 
 
@@ -1761,6 +1786,9 @@ export type Query = {
   getWordDefinitionsByFlag: WordDefinitionListConnection;
   getWordDefinitionsByLanguage: WordDefinitionWithVoteListOutput;
   getWordDefinitionsByWordId: WordDefinitionWithVoteListOutput;
+  getWordRangeTagVoteStatus: WordRangeTagVoteStatusOutput;
+  getWordRangeTagsByBeginWordEntryId: WordRangeTagWithVotesOutput;
+  getWordRangeTagsByDocumentId: WordRangeTagsListConnection;
   getWordRangesByBeginIds: WordRangesOutput;
   getWordRangesByDocumentId: WordRangesListConnection;
   getWordToPhraseTrVoteStatus: WordToPhraseTranslationVoteStatusOutputRow;
@@ -2100,6 +2128,23 @@ export type QueryGetWordDefinitionsByLanguageArgs = {
 
 export type QueryGetWordDefinitionsByWordIdArgs = {
   word_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetWordRangeTagVoteStatusArgs = {
+  word_range_tag_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetWordRangeTagsByBeginWordEntryIdArgs = {
+  begin_document_word_entry_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetWordRangeTagsByDocumentIdArgs = {
+  after?: InputMaybe<Scalars['ID']['input']>;
+  document_id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2555,6 +2600,7 @@ export enum TableNameType {
   Threads = 'threads',
   TranslatedMaps = 'translated_maps',
   WordDefinitions = 'word_definitions',
+  WordRangeTags = 'word_range_tags',
   WordRanges = 'word_ranges',
   WordToPhraseTranslations = 'word_to_phrase_translations',
   WordToWordTranslations = 'word_to_word_translations',
@@ -2853,6 +2899,54 @@ export type WordRange = {
 export type WordRangeInput = {
   begin_document_word_entry_id: Scalars['String']['input'];
   end_document_word_entry_id: Scalars['String']['input'];
+};
+
+export type WordRangeTag = {
+  __typename?: 'WordRangeTag';
+  tag_name: Scalars['String']['output'];
+  word_range: WordRange;
+  word_range_tag_id: Scalars['ID']['output'];
+};
+
+export type WordRangeTagVoteStatus = {
+  __typename?: 'WordRangeTagVoteStatus';
+  downvotes: Scalars['Int']['output'];
+  upvotes: Scalars['Int']['output'];
+  word_range_tag_id: Scalars['ID']['output'];
+};
+
+export type WordRangeTagVoteStatusOutput = {
+  __typename?: 'WordRangeTagVoteStatusOutput';
+  error: ErrorType;
+  vote_status?: Maybe<WordRangeTagVoteStatus>;
+};
+
+export type WordRangeTagWithVote = {
+  __typename?: 'WordRangeTagWithVote';
+  downvotes: Scalars['Int']['output'];
+  tag_name: Scalars['String']['output'];
+  upvotes: Scalars['Int']['output'];
+  word_range: WordRange;
+  word_range_tag_id: Scalars['ID']['output'];
+};
+
+export type WordRangeTagWithVotesOutput = {
+  __typename?: 'WordRangeTagWithVotesOutput';
+  error: ErrorType;
+  word_range_tags: Array<Maybe<WordRangeTagWithVote>>;
+};
+
+export type WordRangeTagsEdge = {
+  __typename?: 'WordRangeTagsEdge';
+  cursor: Scalars['ID']['output'];
+  node: Array<WordRangeTagWithVote>;
+};
+
+export type WordRangeTagsListConnection = {
+  __typename?: 'WordRangeTagsListConnection';
+  edges: Array<WordRangeTagsEdge>;
+  error: ErrorType;
+  pageInfo: PageInfo;
 };
 
 export type WordRangesEdge = {
@@ -4043,6 +4137,62 @@ export type SiteTextUpsertMutationVariables = Exact<{
 
 export type SiteTextUpsertMutation = { __typename?: 'Mutation', siteTextUpsert: { __typename?: 'SiteTextDefinitionOutput', error: ErrorType, site_text_definition?: { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | { __typename?: 'SiteTextWordDefinition', site_text_id: string, word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } } | null } };
 
+export type WordRangeTagWithVoteFragmentFragment = { __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } };
+
+export type WordRangeTagVoteStatusFragmentFragment = { __typename?: 'WordRangeTagVoteStatus', downvotes: number, upvotes: number, word_range_tag_id: string };
+
+export type WordRangeTagFragmentFragment = { __typename?: 'WordRangeTag', word_range_tag_id: string, tag_name: string, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } };
+
+export type WordRangeTagsEdgeFragmentFragment = { __typename?: 'WordRangeTagsEdge', cursor: string, node: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } }> };
+
+export type GetWordRangeTagsByDocumentIdQueryVariables = Exact<{
+  document_id: Scalars['ID']['input'];
+  after?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GetWordRangeTagsByDocumentIdQuery = { __typename?: 'Query', getWordRangeTagsByDocumentId: { __typename?: 'WordRangeTagsListConnection', error: ErrorType, edges: Array<{ __typename?: 'WordRangeTagsEdge', cursor: string, node: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } }> }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+
+export type GetWordRangeTagsByBeginWordEntryIdQueryVariables = Exact<{
+  begin_document_word_entry_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetWordRangeTagsByBeginWordEntryIdQuery = { __typename?: 'Query', getWordRangeTagsByBeginWordEntryId: { __typename?: 'WordRangeTagWithVotesOutput', error: ErrorType, word_range_tags: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } } | null> } };
+
+export type GetWordRangeTagVoteStatusQueryVariables = Exact<{
+  word_range_tag_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetWordRangeTagVoteStatusQuery = { __typename?: 'Query', getWordRangeTagVoteStatus: { __typename?: 'WordRangeTagVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'WordRangeTagVoteStatus', downvotes: number, upvotes: number, word_range_tag_id: string } | null } };
+
+export type CreateTaggingOnWordRangeMutationVariables = Exact<{
+  begin_document_word_entry_id: Scalars['ID']['input'];
+  end_document_word_entry_id: Scalars['ID']['input'];
+  tag_names: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type CreateTaggingOnWordRangeMutation = { __typename?: 'Mutation', createTaggingOnWordRange: { __typename?: 'WordRangeTagWithVotesOutput', error: ErrorType, word_range_tags: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } } | null> } };
+
+export type UpsertWordRangeTagMutationVariables = Exact<{
+  word_range_id: Scalars['ID']['input'];
+  tag_name: Scalars['String']['input'];
+}>;
+
+
+export type UpsertWordRangeTagMutation = { __typename?: 'Mutation', upsertWordRangeTag: { __typename?: 'WordRangeTagWithVotesOutput', error: ErrorType, word_range_tags: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } } | null> } };
+
+export type ToggleWordRangeTagVoteStatusMutationVariables = Exact<{
+  word_range_tag_id: Scalars['ID']['input'];
+  vote: Scalars['Boolean']['input'];
+}>;
+
+
+export type ToggleWordRangeTagVoteStatusMutation = { __typename?: 'Mutation', toggleWordRangeTagVoteStatus: { __typename?: 'WordRangeTagVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'WordRangeTagVoteStatus', downvotes: number, upvotes: number, word_range_tag_id: string } | null } };
+
 export type WordToWordTranslationWithVoteFragmentFragment = { __typename?: 'WordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } };
 
 export type WordToPhraseTranslationWithVoteFragmentFragment = { __typename?: 'WordToPhraseTranslationWithVote', word_to_phrase_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, to_phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } };
@@ -5160,6 +5310,41 @@ export const SiteTextLanguageWithTranslationInfoFragmentFragmentDoc = gql`
   translated_count
 }
     `;
+export const WordRangeTagVoteStatusFragmentFragmentDoc = gql`
+    fragment WordRangeTagVoteStatusFragment on WordRangeTagVoteStatus {
+  downvotes
+  upvotes
+  word_range_tag_id
+}
+    `;
+export const WordRangeTagFragmentFragmentDoc = gql`
+    fragment WordRangeTagFragment on WordRangeTag {
+  word_range_tag_id
+  tag_name
+  word_range {
+    ...WordRangeFragment
+  }
+}
+    ${WordRangeFragmentFragmentDoc}`;
+export const WordRangeTagWithVoteFragmentFragmentDoc = gql`
+    fragment WordRangeTagWithVoteFragment on WordRangeTagWithVote {
+  word_range_tag_id
+  tag_name
+  word_range {
+    ...WordRangeFragment
+  }
+  downvotes
+  upvotes
+}
+    ${WordRangeFragmentFragmentDoc}`;
+export const WordRangeTagsEdgeFragmentFragmentDoc = gql`
+    fragment WordRangeTagsEdgeFragment on WordRangeTagsEdge {
+  cursor
+  node {
+    ...WordRangeTagWithVoteFragment
+  }
+}
+    ${WordRangeTagWithVoteFragmentFragmentDoc}`;
 export const WordToWordTranslationFragmentFragmentDoc = gql`
     fragment WordToWordTranslationFragment on WordToWordTranslation {
   word_to_word_translation_id
@@ -9214,6 +9399,248 @@ export function useSiteTextUpsertMutation(baseOptions?: Apollo.MutationHookOptio
 export type SiteTextUpsertMutationHookResult = ReturnType<typeof useSiteTextUpsertMutation>;
 export type SiteTextUpsertMutationResult = Apollo.MutationResult<SiteTextUpsertMutation>;
 export type SiteTextUpsertMutationOptions = Apollo.BaseMutationOptions<SiteTextUpsertMutation, SiteTextUpsertMutationVariables>;
+export const GetWordRangeTagsByDocumentIdDocument = gql`
+    query GetWordRangeTagsByDocumentId($document_id: ID!, $after: ID, $first: Int) {
+  getWordRangeTagsByDocumentId(
+    document_id: $document_id
+    after: $after
+    first: $first
+  ) {
+    error
+    edges {
+      ...WordRangeTagsEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+    ${WordRangeTagsEdgeFragmentFragmentDoc}
+${PageInfoFragmentFragmentDoc}`;
+
+/**
+ * __useGetWordRangeTagsByDocumentIdQuery__
+ *
+ * To run a query within a React component, call `useGetWordRangeTagsByDocumentIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetWordRangeTagsByDocumentIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetWordRangeTagsByDocumentIdQuery({
+ *   variables: {
+ *      document_id: // value for 'document_id'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function useGetWordRangeTagsByDocumentIdQuery(baseOptions: Apollo.QueryHookOptions<GetWordRangeTagsByDocumentIdQuery, GetWordRangeTagsByDocumentIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetWordRangeTagsByDocumentIdQuery, GetWordRangeTagsByDocumentIdQueryVariables>(GetWordRangeTagsByDocumentIdDocument, options);
+      }
+export function useGetWordRangeTagsByDocumentIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetWordRangeTagsByDocumentIdQuery, GetWordRangeTagsByDocumentIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetWordRangeTagsByDocumentIdQuery, GetWordRangeTagsByDocumentIdQueryVariables>(GetWordRangeTagsByDocumentIdDocument, options);
+        }
+export type GetWordRangeTagsByDocumentIdQueryHookResult = ReturnType<typeof useGetWordRangeTagsByDocumentIdQuery>;
+export type GetWordRangeTagsByDocumentIdLazyQueryHookResult = ReturnType<typeof useGetWordRangeTagsByDocumentIdLazyQuery>;
+export type GetWordRangeTagsByDocumentIdQueryResult = Apollo.QueryResult<GetWordRangeTagsByDocumentIdQuery, GetWordRangeTagsByDocumentIdQueryVariables>;
+export const GetWordRangeTagsByBeginWordEntryIdDocument = gql`
+    query GetWordRangeTagsByBeginWordEntryId($begin_document_word_entry_id: ID!) {
+  getWordRangeTagsByBeginWordEntryId(
+    begin_document_word_entry_id: $begin_document_word_entry_id
+  ) {
+    error
+    word_range_tags {
+      ...WordRangeTagWithVoteFragment
+    }
+  }
+}
+    ${WordRangeTagWithVoteFragmentFragmentDoc}`;
+
+/**
+ * __useGetWordRangeTagsByBeginWordEntryIdQuery__
+ *
+ * To run a query within a React component, call `useGetWordRangeTagsByBeginWordEntryIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetWordRangeTagsByBeginWordEntryIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetWordRangeTagsByBeginWordEntryIdQuery({
+ *   variables: {
+ *      begin_document_word_entry_id: // value for 'begin_document_word_entry_id'
+ *   },
+ * });
+ */
+export function useGetWordRangeTagsByBeginWordEntryIdQuery(baseOptions: Apollo.QueryHookOptions<GetWordRangeTagsByBeginWordEntryIdQuery, GetWordRangeTagsByBeginWordEntryIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetWordRangeTagsByBeginWordEntryIdQuery, GetWordRangeTagsByBeginWordEntryIdQueryVariables>(GetWordRangeTagsByBeginWordEntryIdDocument, options);
+      }
+export function useGetWordRangeTagsByBeginWordEntryIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetWordRangeTagsByBeginWordEntryIdQuery, GetWordRangeTagsByBeginWordEntryIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetWordRangeTagsByBeginWordEntryIdQuery, GetWordRangeTagsByBeginWordEntryIdQueryVariables>(GetWordRangeTagsByBeginWordEntryIdDocument, options);
+        }
+export type GetWordRangeTagsByBeginWordEntryIdQueryHookResult = ReturnType<typeof useGetWordRangeTagsByBeginWordEntryIdQuery>;
+export type GetWordRangeTagsByBeginWordEntryIdLazyQueryHookResult = ReturnType<typeof useGetWordRangeTagsByBeginWordEntryIdLazyQuery>;
+export type GetWordRangeTagsByBeginWordEntryIdQueryResult = Apollo.QueryResult<GetWordRangeTagsByBeginWordEntryIdQuery, GetWordRangeTagsByBeginWordEntryIdQueryVariables>;
+export const GetWordRangeTagVoteStatusDocument = gql`
+    query GetWordRangeTagVoteStatus($word_range_tag_id: ID!) {
+  getWordRangeTagVoteStatus(word_range_tag_id: $word_range_tag_id) {
+    error
+    vote_status {
+      ...WordRangeTagVoteStatusFragment
+    }
+  }
+}
+    ${WordRangeTagVoteStatusFragmentFragmentDoc}`;
+
+/**
+ * __useGetWordRangeTagVoteStatusQuery__
+ *
+ * To run a query within a React component, call `useGetWordRangeTagVoteStatusQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetWordRangeTagVoteStatusQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetWordRangeTagVoteStatusQuery({
+ *   variables: {
+ *      word_range_tag_id: // value for 'word_range_tag_id'
+ *   },
+ * });
+ */
+export function useGetWordRangeTagVoteStatusQuery(baseOptions: Apollo.QueryHookOptions<GetWordRangeTagVoteStatusQuery, GetWordRangeTagVoteStatusQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetWordRangeTagVoteStatusQuery, GetWordRangeTagVoteStatusQueryVariables>(GetWordRangeTagVoteStatusDocument, options);
+      }
+export function useGetWordRangeTagVoteStatusLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetWordRangeTagVoteStatusQuery, GetWordRangeTagVoteStatusQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetWordRangeTagVoteStatusQuery, GetWordRangeTagVoteStatusQueryVariables>(GetWordRangeTagVoteStatusDocument, options);
+        }
+export type GetWordRangeTagVoteStatusQueryHookResult = ReturnType<typeof useGetWordRangeTagVoteStatusQuery>;
+export type GetWordRangeTagVoteStatusLazyQueryHookResult = ReturnType<typeof useGetWordRangeTagVoteStatusLazyQuery>;
+export type GetWordRangeTagVoteStatusQueryResult = Apollo.QueryResult<GetWordRangeTagVoteStatusQuery, GetWordRangeTagVoteStatusQueryVariables>;
+export const CreateTaggingOnWordRangeDocument = gql`
+    mutation CreateTaggingOnWordRange($begin_document_word_entry_id: ID!, $end_document_word_entry_id: ID!, $tag_names: [String!]!) {
+  createTaggingOnWordRange(
+    begin_document_word_entry_id: $begin_document_word_entry_id
+    end_document_word_entry_id: $end_document_word_entry_id
+    tag_names: $tag_names
+  ) {
+    error
+    word_range_tags {
+      ...WordRangeTagWithVoteFragment
+    }
+  }
+}
+    ${WordRangeTagWithVoteFragmentFragmentDoc}`;
+export type CreateTaggingOnWordRangeMutationFn = Apollo.MutationFunction<CreateTaggingOnWordRangeMutation, CreateTaggingOnWordRangeMutationVariables>;
+
+/**
+ * __useCreateTaggingOnWordRangeMutation__
+ *
+ * To run a mutation, you first call `useCreateTaggingOnWordRangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateTaggingOnWordRangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createTaggingOnWordRangeMutation, { data, loading, error }] = useCreateTaggingOnWordRangeMutation({
+ *   variables: {
+ *      begin_document_word_entry_id: // value for 'begin_document_word_entry_id'
+ *      end_document_word_entry_id: // value for 'end_document_word_entry_id'
+ *      tag_names: // value for 'tag_names'
+ *   },
+ * });
+ */
+export function useCreateTaggingOnWordRangeMutation(baseOptions?: Apollo.MutationHookOptions<CreateTaggingOnWordRangeMutation, CreateTaggingOnWordRangeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateTaggingOnWordRangeMutation, CreateTaggingOnWordRangeMutationVariables>(CreateTaggingOnWordRangeDocument, options);
+      }
+export type CreateTaggingOnWordRangeMutationHookResult = ReturnType<typeof useCreateTaggingOnWordRangeMutation>;
+export type CreateTaggingOnWordRangeMutationResult = Apollo.MutationResult<CreateTaggingOnWordRangeMutation>;
+export type CreateTaggingOnWordRangeMutationOptions = Apollo.BaseMutationOptions<CreateTaggingOnWordRangeMutation, CreateTaggingOnWordRangeMutationVariables>;
+export const UpsertWordRangeTagDocument = gql`
+    mutation UpsertWordRangeTag($word_range_id: ID!, $tag_name: String!) {
+  upsertWordRangeTag(word_range_id: $word_range_id, tag_name: $tag_name) {
+    error
+    word_range_tags {
+      ...WordRangeTagWithVoteFragment
+    }
+  }
+}
+    ${WordRangeTagWithVoteFragmentFragmentDoc}`;
+export type UpsertWordRangeTagMutationFn = Apollo.MutationFunction<UpsertWordRangeTagMutation, UpsertWordRangeTagMutationVariables>;
+
+/**
+ * __useUpsertWordRangeTagMutation__
+ *
+ * To run a mutation, you first call `useUpsertWordRangeTagMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertWordRangeTagMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertWordRangeTagMutation, { data, loading, error }] = useUpsertWordRangeTagMutation({
+ *   variables: {
+ *      word_range_id: // value for 'word_range_id'
+ *      tag_name: // value for 'tag_name'
+ *   },
+ * });
+ */
+export function useUpsertWordRangeTagMutation(baseOptions?: Apollo.MutationHookOptions<UpsertWordRangeTagMutation, UpsertWordRangeTagMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertWordRangeTagMutation, UpsertWordRangeTagMutationVariables>(UpsertWordRangeTagDocument, options);
+      }
+export type UpsertWordRangeTagMutationHookResult = ReturnType<typeof useUpsertWordRangeTagMutation>;
+export type UpsertWordRangeTagMutationResult = Apollo.MutationResult<UpsertWordRangeTagMutation>;
+export type UpsertWordRangeTagMutationOptions = Apollo.BaseMutationOptions<UpsertWordRangeTagMutation, UpsertWordRangeTagMutationVariables>;
+export const ToggleWordRangeTagVoteStatusDocument = gql`
+    mutation ToggleWordRangeTagVoteStatus($word_range_tag_id: ID!, $vote: Boolean!) {
+  toggleWordRangeTagVoteStatus(word_range_tag_id: $word_range_tag_id, vote: $vote) {
+    error
+    vote_status {
+      ...WordRangeTagVoteStatusFragment
+    }
+  }
+}
+    ${WordRangeTagVoteStatusFragmentFragmentDoc}`;
+export type ToggleWordRangeTagVoteStatusMutationFn = Apollo.MutationFunction<ToggleWordRangeTagVoteStatusMutation, ToggleWordRangeTagVoteStatusMutationVariables>;
+
+/**
+ * __useToggleWordRangeTagVoteStatusMutation__
+ *
+ * To run a mutation, you first call `useToggleWordRangeTagVoteStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useToggleWordRangeTagVoteStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [toggleWordRangeTagVoteStatusMutation, { data, loading, error }] = useToggleWordRangeTagVoteStatusMutation({
+ *   variables: {
+ *      word_range_tag_id: // value for 'word_range_tag_id'
+ *      vote: // value for 'vote'
+ *   },
+ * });
+ */
+export function useToggleWordRangeTagVoteStatusMutation(baseOptions?: Apollo.MutationHookOptions<ToggleWordRangeTagVoteStatusMutation, ToggleWordRangeTagVoteStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ToggleWordRangeTagVoteStatusMutation, ToggleWordRangeTagVoteStatusMutationVariables>(ToggleWordRangeTagVoteStatusDocument, options);
+      }
+export type ToggleWordRangeTagVoteStatusMutationHookResult = ReturnType<typeof useToggleWordRangeTagVoteStatusMutation>;
+export type ToggleWordRangeTagVoteStatusMutationResult = Apollo.MutationResult<ToggleWordRangeTagVoteStatusMutation>;
+export type ToggleWordRangeTagVoteStatusMutationOptions = Apollo.BaseMutationOptions<ToggleWordRangeTagVoteStatusMutation, ToggleWordRangeTagVoteStatusMutationVariables>;
 export const GetTranslationLanguageInfoDocument = gql`
     query GetTranslationLanguageInfo($from_language_code: ID!, $to_language_code: ID) {
   getLanguageTranslationInfo(
@@ -10746,6 +11173,9 @@ export const namedOperations = {
     GetAllRecommendedSiteTextTranslationListByLanguage: 'GetAllRecommendedSiteTextTranslationListByLanguage',
     GetAllRecommendedSiteTextTranslationList: 'GetAllRecommendedSiteTextTranslationList',
     GetAllSiteTextLanguageListWithRate: 'GetAllSiteTextLanguageListWithRate',
+    GetWordRangeTagsByDocumentId: 'GetWordRangeTagsByDocumentId',
+    GetWordRangeTagsByBeginWordEntryId: 'GetWordRangeTagsByBeginWordEntryId',
+    GetWordRangeTagVoteStatus: 'GetWordRangeTagVoteStatus',
     GetTranslationLanguageInfo: 'GetTranslationLanguageInfo',
     GetTranslationsByFromDefinitionId: 'GetTranslationsByFromDefinitionId',
     GetRecommendedTranslationFromDefinitionID: 'GetRecommendedTranslationFromDefinitionID',
@@ -10804,6 +11234,9 @@ export const namedOperations = {
     UpsertAnswer: 'UpsertAnswer',
     UpsertSiteTextTranslation: 'UpsertSiteTextTranslation',
     SiteTextUpsert: 'SiteTextUpsert',
+    CreateTaggingOnWordRange: 'CreateTaggingOnWordRange',
+    UpsertWordRangeTag: 'UpsertWordRangeTag',
+    ToggleWordRangeTagVoteStatus: 'ToggleWordRangeTagVoteStatus',
     TranslateWordsAndPhrasesByGoogle: 'TranslateWordsAndPhrasesByGoogle',
     TranslateWordsAndPhrasesByChatGPT35: 'TranslateWordsAndPhrasesByChatGPT35',
     TranslateWordsAndPhrasesByChatGPT4: 'TranslateWordsAndPhrasesByChatGPT4',
@@ -10903,6 +11336,10 @@ export const namedOperations = {
     SiteTextLanguageFragment: 'SiteTextLanguageFragment',
     TranslationWithVoteListByLanguageFragment: 'TranslationWithVoteListByLanguageFragment',
     SiteTextLanguageWithTranslationInfoFragment: 'SiteTextLanguageWithTranslationInfoFragment',
+    WordRangeTagWithVoteFragment: 'WordRangeTagWithVoteFragment',
+    WordRangeTagVoteStatusFragment: 'WordRangeTagVoteStatusFragment',
+    WordRangeTagFragment: 'WordRangeTagFragment',
+    WordRangeTagsEdgeFragment: 'WordRangeTagsEdgeFragment',
     WordToWordTranslationWithVoteFragment: 'WordToWordTranslationWithVoteFragment',
     WordToPhraseTranslationWithVoteFragment: 'WordToPhraseTranslationWithVoteFragment',
     PhraseToWordTranslationWithVoteFragment: 'PhraseToWordTranslationWithVoteFragment',
