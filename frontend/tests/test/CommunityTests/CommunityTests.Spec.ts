@@ -1,9 +1,9 @@
 import { chromium, expect, test } from '@playwright/test';
-import ForumsPage from '../pages/ForumsPage';
-import RegistrationPage from '../pages/RegistrationPage';
-import RegisterData from '../data-factory/RegisterData';
-import LoginPage from '../pages/LoginPage';
-import pageUrls from '../constants/PageUrls';
+import RegistrationPage from '../../pages/RegistrationPage';
+import RegisterData from '../../data-factory/RegisterData';
+import LoginPage from '../../pages/LoginPage';
+import pageUrls from '../../constants/PageUrls';
+import ForumsPage from '../../pages/Community/ForumsPage';
 
 const registerData = RegisterData.validRegisterData();
 const forumName = 'Automation Forum ' + Math.random();
@@ -63,7 +63,35 @@ test('1: Verify that user redirected on community page and able to create new fo
   expect(await forumsPage.isCreatedForumVisible(forumName)).toBeTruthy();
 });
 
-test('2: Verify that search functionality is working properly', async ({
+test('2: Verify that user is not allow to create a forum with a Forum Name which is already exist', async ({
+  page,
+}) => {
+  const forumsPage = new ForumsPage(page);
+  const loginPage = new LoginPage(page);
+
+  //Navigate to the URL
+  await page.goto(pageUrls.LoginPage);
+  await loginPage.loginToApp(registerData);
+
+  //Click on community tab and verify that user redirected on community page
+  await forumsPage.clickOnCommunitySection();
+  expect(await forumsPage.isPageTitleVisible()).toBeTruthy();
+
+  //Click on the add new button and verify that 'add new forum' popup is appeared
+  await forumsPage.clickOnTheAddNewButton();
+  expect(await forumsPage.isAddNewForumPopupVisible()).toBeTruthy();
+
+  //Create a new forum
+  await forumsPage.fillForumDetails(forumName, forumDescription);
+  await forumsPage.clickOnAddNewForumPopupCreateNewButton();
+
+  //Verify the validation message
+  expect(await forumsPage.getValidationMessage()).toEqual(
+    'Failed at creating new forum! [ForumUpsertFailed]',
+  );
+});
+
+test('3: Verify that search functionality is working properly', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
@@ -81,7 +109,7 @@ test('2: Verify that search functionality is working properly', async ({
   expect(await forumsPage.isCreatedForumVisible(forumName)).toBeTruthy();
 });
 
-test('3: Verify that user is able to create forum without adding the description', async ({
+test('4: Verify that user is able to create forum without adding the description', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
@@ -105,7 +133,7 @@ test('3: Verify that user is able to create forum without adding the description
   );
 });
 
-test('4: Verify that validation message is appeared when user passes blank forum details', async ({
+test('5: Verify that validation message is appeared when user passes blank forum details', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
@@ -129,7 +157,7 @@ test('4: Verify that validation message is appeared when user passes blank forum
   );
 });
 
-test('5: Verify that validation message is appeared when user only enters forum description', async ({
+test('6: Verify that validation message is appeared when user only enters forum description', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
@@ -153,7 +181,7 @@ test('5: Verify that validation message is appeared when user only enters forum 
   );
 });
 
-test('6: Verify that forum is not created when click on cancel button after entering the valid forum details', async ({
+test('7: Verify that forum is not created when click on cancel button after entering the valid forum details', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
@@ -175,7 +203,7 @@ test('6: Verify that forum is not created when click on cancel button after ente
   expect(await forumsPage.isAddNewForumPopupVisible()).toBeFalsy();
 });
 
-test('7: Verify that user can edit the created forum and can search the edited forum using search bar', async ({
+test('8: Verify that user can edit the created forum and can search the edited forum using search bar', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
