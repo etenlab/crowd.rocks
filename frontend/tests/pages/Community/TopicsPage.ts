@@ -1,6 +1,6 @@
 import BasePage from '../BasePage';
 
-const addNewForumPopupForumName = `input[placeholder='Forum Name']`;
+const addNewForumPopupForumName = `input[placeholder='Topic Name']`;
 const addNewForumPopupDescription = `textarea[placeholder='Description...']`;
 const totalTopicsCount = `(//div[@class='MuiBox-root css-0'])[2]//following-sibling::div`;
 const threadAndPostCount = (topicsName: string) =>
