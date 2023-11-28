@@ -1,0 +1,96 @@
+fragment WordRangeTagWithVoteFragment on WordRangeTagWithVote {
+  word_range_tag_id
+  tag_name
+  word_range {
+    ...WordRangeFragment
+  }
+  downvotes
+  upvotes
+}
+
+fragment WordRangeTagVoteStatusFragment on WordRangeTagVoteStatus {
+  downvotes
+  upvotes
+  word_range_tag_id
+}
+
+fragment WordRangeTagFragment on WordRangeTag {
+  word_range_tag_id
+  tag_name
+  word_range {
+    ...WordRangeFragment
+  }
+}
+
+fragment WordRangeTagsEdgeFragment on WordRangeTagsEdge {
+  cursor
+  node {
+    ...WordRangeTagWithVoteFragment
+  }
+}
+
+query GetWordRangeTagsByDocumentId($document_id: ID!, $after: ID, $first: Int) {
+  getWordRangeTagsByDocumentId(
+    document_id: $document_id
+    after: $after
+    first: $first
+  ) {
+    error
+    edges {
+      ...WordRangeTagsEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+
+query GetWordRangeTagVoteStatus($word_range_tag_id: ID!) {
+  getWordRangeTagVoteStatus(word_range_tag_id: $word_range_tag_id) {
+    error
+    vote_status {
+      ...WordRangeTagVoteStatusFragment
+    }
+  }
+}
+
+mutation CreateTaggingOnWordRange(
+  $begin_document_word_entry_id: ID!
+  $end_document_word_entry_id: ID!
+  $tag_names: [String!]!
+) {
+  createTaggingOnWordRange(
+    begin_document_word_entry_id: $begin_document_word_entry_id
+    end_document_word_entry_id: $end_document_word_entry_id
+    tag_names: $tag_names
+  ) {
+    error
+    word_range_tags {
+      ...WordRangeTagWithVoteFragment
+    }
+  }
+}
+
+mutation UpsertWordRangeTag($word_range_id: ID!, $tag_name: String!) {
+  upsertWordRangeTag(word_range_id: $word_range_id, tag_name: $tag_name) {
+    error
+    word_range_tags {
+      ...WordRangeTagWithVoteFragment
+    }
+  }
+}
+
+mutation ToggleWordRangeTagVoteStatus(
+  $word_range_tag_id: ID!
+  $vote: Boolean!
+) {
+  toggleWordRangeTagVoteStatus(
+    word_range_tag_id: $word_range_tag_id
+    vote: $vote
+  ) {
+    error
+    vote_status {
+      ...WordRangeTagVoteStatusFragment
+    }
+  }
+}
