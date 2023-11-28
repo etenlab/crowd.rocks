@@ -26,6 +26,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 
 import { PericopeDocumentViewer } from '../PericopeDocumentViewer/PericopeDocumentViewer';
 import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
+import { globals } from '../../../services/globals';
 
 export function PericopeDocumentViewerPage() {
   const { tr } = useTr();
@@ -100,6 +101,10 @@ export function PericopeDocumentViewerPage() {
     });
   };
 
+  const sameUser = document
+    ? +document.created_by === globals.get_user_id()
+    : false;
+
   return (
     <PageLayout>
       <Caption>{tr('Details')}</Caption>
@@ -119,11 +124,11 @@ export function PericopeDocumentViewerPage() {
           onClick={handleToggleMode}
           variant="text"
           sx={{ display: 'flex', alignItem: 'center', gap: '6px' }}
+          disabled={!sameUser}
+          endIcon={<Switch checked={mode === 'edit'} disabled={!sameUser} />}
+          color="gray"
         >
-          <Typography variant="h5" color="text.gray">
-            {tr('Edit mode')}
-          </Typography>
-          <Switch checked={mode === 'edit'} />
+          {tr('Edit mode')}
         </Button>
         <MoreHorizButton dropDownList={dropDownList} />
       </Stack>
