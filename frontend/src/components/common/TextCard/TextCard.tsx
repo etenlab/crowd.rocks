@@ -16,8 +16,8 @@ export type Author = {
   createdByBot?: boolean;
 };
 
-export type WordCardProps = {
-  word: string;
+export type TextCardProps = {
+  text: string;
   description: string;
   vote?: {
     upVotes: number;
@@ -37,14 +37,14 @@ export type WordCardProps = {
   author?: Author;
 };
 
-export function WordCard({
-  word,
+export function TextCard({
+  text,
   description,
   vote,
   discussion,
   flags,
   author,
-}: WordCardProps) {
+}: TextCardProps) {
   const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
   const discussionBtnCom = discussion ? (
     <DiscussionIconButton {...discussion} flex="1" />
@@ -82,7 +82,7 @@ export function WordCard({
       >
         <Stack>
           <Typography variant="h3" color="text.dark">
-            {word}
+            {text}
           </Typography>
           <Typography variant="body2" color="text.gray">
             {description}

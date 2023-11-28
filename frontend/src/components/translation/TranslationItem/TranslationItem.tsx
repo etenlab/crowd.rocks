@@ -12,7 +12,7 @@ import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../
 
 import { useTranslationTools } from '../hooks/useTranslationTools';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { WordItem } from '../../common/WordItem';
+import { TranslatedTextItem } from '../../common/TranslatedTextItem';
 import { OriginalData } from '../hooks/useTranslationTools';
 import { langInfo2tag } from '../../../../../utils';
 
@@ -248,15 +248,15 @@ export function TranslationItem({
     }
 
     return {
-      word,
+      text: word,
       description,
     };
   }, [data, loading, error]);
 
   return (
-    <WordItem
+    <TranslatedTextItem
       original={{
-        word: original.wordOrPhrase.likeString,
+        text: original.wordOrPhrase.likeString,
         description: original.definition.likeString,
       }}
       translation={translation || undefined}

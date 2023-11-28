@@ -101,6 +101,9 @@ import { useColorModeContext } from './theme';
 
 import { apollo_client } from './App';
 import { DataGeneratorPage } from './components/data-generator/DataGeneratorPage';
+import { PericopeTrPage } from './components/pericope-translations/PericopeTrPage';
+import { PericopeTrDocumentListPage } from './components/pericope-translations/PericopeTrDocumentListPage';
+import { PericopiesTrList } from './components/pericope-translations/PericopiesTrListPage';
 
 export function Body() {
   const { tr } = useTr();
@@ -597,6 +600,21 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/pericopies"
               component={PericopeDocumentListPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/pericope-translations"
+              component={PericopeTrPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/pericope-translations/documents"
+              component={PericopeTrDocumentListPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/pericope-translations/for-document/:documentId"
+              component={PericopiesTrList}
             />
             <Route
               exact

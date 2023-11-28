@@ -381,4 +381,23 @@ export class DocumentWordEntriesService {
       },
     };
   }
+
+  /**
+   * not used by now (made specialized method for pericope) but might be useful
+   */
+  //   async getOrderedWordsFromDocumentId(params: {
+  //     documentId: string;
+  //     start_word_id: string;
+  //     end_word_id?: string | undefined;
+  //   }): Promise<OrderedWordsFromDocument[]> {
+  //     try {
+  //       const resQ = await this.pg.pool.query<OrderedWordsFromDocument>(
+  //         ...getOrderedWordsFromDocumentIdSQL(params),
+  //       );
+  //       return resQ.rows;
+  //     } catch (error) {
+  //       Logger.error(JSON.stringify(error));
+  //       return [];
+  //     }
+  //   }
 }

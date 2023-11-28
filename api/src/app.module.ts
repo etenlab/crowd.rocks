@@ -34,6 +34,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ScheduledTasksModule } from './scheduled-tasks/scheduledTasks.module';
 import { MiddlewareModule } from './middleware/middleware.module';
 import { HttpLoggerMiddleware } from './middleware/http-logger.middleware';
+import { PericopeTrModule } from './components/pericope-translations/pericope-tr.module';
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { HttpLoggerMiddleware } from './middleware/http-logger.middleware';
     PopulatorModule,
     ScheduleModule.forRoot(),
     ScheduledTasksModule,
+    PericopeTrModule,
   ],
   controllers: [],
   providers: [],
