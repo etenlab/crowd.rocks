@@ -59,7 +59,7 @@ export function TaggingDocumentListPage() {
   const handleGoToDocumentViewer = useCallback(
     (documentId: string) => {
       history.push(
-        `/${nation_id}/${language_id}/${cluster_id}/tagging-tools/documents/${documentId}`,
+        `/${nation_id}/${language_id}/${cluster_id}/tagging-tool/documents/${documentId}`,
       );
     },
     [cluster_id, history, language_id, nation_id],

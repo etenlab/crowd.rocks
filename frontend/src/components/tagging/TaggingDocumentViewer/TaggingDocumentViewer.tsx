@@ -190,15 +190,11 @@ export function TaggingDocumentViewer({
 
   const handleSelectPiece = useCallback(
     (pieceOfText: string, beginWordEntryId: string, endWordEntryId: string) => {
-      const taggings = taggingsGroupMapRef.current.get(beginWordEntryId) || [];
-
       openModal(
         <TagsListModal
           pieceOfText={pieceOfText}
-          tags={taggings.filter(
-            (item) =>
-              item.word_range.end.document_word_entry_id === endWordEntryId,
-          )}
+          begin_document_word_entry_id={beginWordEntryId}
+          end_document_word_entry_id={endWordEntryId}
           onClose={closeModal}
         />,
       );
