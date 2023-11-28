@@ -577,6 +577,9 @@ export class DatabaseVersionControlService {
       './src/core/sql/tagging/word_range_tag_vote_toggle-v11.sql',
     );
 
+    // document
+    await this.runSqlFile('./src/core/sql/document/word_range_upsert-v11.sql');
+
     // set version
     await this.setVersionNumber(11);
   }

@@ -24,7 +24,7 @@ begin
     return;
   end if;
 
-  if v_current_word_range_id is null or p_word_range_tag then
+  if p_word_range_id is null or p_word_range_tag is null then
     p_error_type := 'InvalidInputs';
     return;
   end if;

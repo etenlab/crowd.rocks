@@ -17,7 +17,7 @@ declare
 begin
    -- validate inputs
   v_word_range_ids_length := array_length(p_word_range_ids::bigint[], 1);
-  v_word_range_tags_length := array_length(p_word_range_tags::bigint[], 1);
+  v_word_range_tags_length := array_length(p_word_range_tags::jsonb[], 1);
 
   if v_word_range_ids_length != v_word_range_tags_length then
     p_error_type := "InvalidInputs";

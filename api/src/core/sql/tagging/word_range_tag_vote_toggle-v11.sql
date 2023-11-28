@@ -2,7 +2,7 @@ create or replace procedure word_range_tag_vote_toggle(
   in p_word_range_tag_id bigint,
   in p_vote boolean,
   in p_token varchar(512),
-  inout p_words_vote_id bigint,
+  inout p_word_range_tags_vote_id bigint,
   inout p_error_type varchar(32)
 )
 language plpgsql
