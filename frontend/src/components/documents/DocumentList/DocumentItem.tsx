@@ -15,7 +15,7 @@ import { useTr } from '../../../hooks/useTr';
 import { languageOutline } from 'ionicons/icons';
 import { IonIcon } from '@ionic/react';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { DocumentBotTranslateModal } from '../DocumentsPage/DocumentBotTranslateModal';
+import { DocumentBotTranslateModal } from '../../documents/DocumentsPage/DocumentBotTranslateModal';
 
 type DocumentItemProps = {
   document: TextyDocument;

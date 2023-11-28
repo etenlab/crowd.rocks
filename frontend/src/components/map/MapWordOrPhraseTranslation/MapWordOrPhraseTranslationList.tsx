@@ -18,7 +18,7 @@ import {
 
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
-import { WordCard } from '../../common/WordCard';
+import { TextCard } from '../../common/TextCard';
 import { useToggleTranslationVoteStatusWithRefetchMutation } from '../../../hooks/useToggleTranslationVoteStatusMutation';
 
 export type MapWordOrPhraseTranslationListProps = {
@@ -128,9 +128,9 @@ export function MapWordOrPhraseTranslationList({
           }
 
           return (
-            <WordCard
+            <TextCard
               key={item.key}
-              word={item.value}
+              text={item.value}
               description={item.definition}
               discussion={{
                 parent_id: item.parent.id,

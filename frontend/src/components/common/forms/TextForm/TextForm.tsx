@@ -1,22 +1,22 @@
 import { InputBase, Divider, Stack } from '@mui/material';
 
-export type WordFormProps = {
-  word: string;
-  wordPlaceholder?: string;
+export type TextFormProps = {
+  text: string;
+  textPlaceholder?: string;
   description: string;
   descriptionPlaceholder?: string;
   onChange(word: string, description: string): void;
   disabled?: boolean;
 };
 
-export function WordForm({
-  word,
-  wordPlaceholder,
+export function TextForm({
+  text: word,
+  textPlaceholder: wordPlaceholder,
   description,
   descriptionPlaceholder,
   onChange,
   disabled,
-}: WordFormProps) {
+}: TextFormProps) {
   return (
     <Stack
       sx={(theme) => ({

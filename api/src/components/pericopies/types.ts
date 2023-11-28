@@ -66,3 +66,17 @@ export class PericopeWithVotesListConnection extends GenericOutput {
   edges: PericopeWithVotesEdge[];
   @Field(() => PageInfo) pageInfo: PageInfo;
 }
+
+// minimalistic pericopies without splitting by pages and without votes
+@ObjectType()
+export class PericopeEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => Pericope) node: Pericope;
+}
+
+@ObjectType()
+export class RecomendedPericopeConnection extends GenericOutput {
+  @Field(() => [PericopeEdge])
+  edges: PericopeEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
+}

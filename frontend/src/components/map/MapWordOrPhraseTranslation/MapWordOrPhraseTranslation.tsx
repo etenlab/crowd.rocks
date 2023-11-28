@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { Divider, Stack, Typography, Button } from '@mui/material';
 
@@ -18,9 +18,17 @@ import {
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { FlagV2 } from '../../flags/Flag';
 import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
-import { NewTranslationForm } from './NewTranslationForm';
-import { MapWordOrPhraseTranslationList } from './MapWordOrPhraseTranslantionList';
+import { NewTranslationForm } from '../../common/forms/NewTranslationForm/NewTranslationForm';
+import { MapWordOrPhraseTranslationList } from './MapWordOrPhraseTranslationList';
 import { Box } from '@mui/material';
+import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
+import { StringContentTypes, typeOfString } from '../../../common/utility';
+import {
+  GetRecommendedTranslationFromDefinitionIdDocument,
+  GetTranslationsByFromDefinitionIdDocument,
+} from '../../../generated/graphql';
+import { useIonToast } from '@ionic/react';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 export function MapWordOrPhraseTranslation() {
   const { tr } = useTr();
@@ -28,6 +36,14 @@ export function MapWordOrPhraseTranslation() {
     definition_id: string;
     type: string;
   }>();
+  const {
+    states: {
+      global: {
+        langauges: { targetLang },
+      },
+    },
+  } = useAppContext();
+  const [present] = useIonToast();
 
   const [openForm, setOpenForm] = useState<boolean>(false);
 
@@ -38,9 +54,59 @@ export function MapWordOrPhraseTranslation() {
     },
   });
 
+  const [upsertTranslation] =
+    useUpsertTranslationFromWordAndDefinitionlikeStringMutation();
+
   const handleCancelForm = () => {
     setOpenForm(false);
   };
+
+  const handleSaveForm = useCallback(
+    async ({
+      translation,
+      description,
+    }: {
+      translation: string;
+      description: string;
+    }) => {
+      if (!targetLang?.lang) {
+        present({
+          message: `${tr('Target language must be selected')}`,
+          duration: 1500,
+          position: 'top',
+          color: 'warning',
+        });
+        return;
+      }
+      upsertTranslation({
+        variables: {
+          language_code: targetLang?.lang.tag,
+          dialect_code: targetLang?.dialect?.tag,
+          geo_code: targetLang?.region?.tag,
+          word_or_phrase: translation,
+          definition: description,
+          from_definition_id: definition_id,
+          from_definition_type_is_word:
+            definition_type === StringContentTypes.WORD,
+          is_type_word: typeOfString(translation) === StringContentTypes.WORD,
+        },
+        refetchQueries: [
+          GetTranslationsByFromDefinitionIdDocument,
+          GetRecommendedTranslationFromDefinitionIdDocument,
+        ],
+      });
+    },
+    [
+      definition_id,
+      definition_type,
+      present,
+      targetLang?.dialect?.tag,
+      targetLang?.lang,
+      targetLang?.region?.tag,
+      tr,
+      upsertTranslation,
+    ],
+  );
 
   const handleOpenForm = () => {
     setOpenForm(true);
@@ -73,11 +139,7 @@ export function MapWordOrPhraseTranslation() {
   }, [wordOrPhraseQ]);
 
   const wordFormCom = openForm ? (
-    <NewTranslationForm
-      definition_id={definition_id}
-      definition_type={definition_type}
-      onCancel={handleCancelForm}
-    />
+    <NewTranslationForm onCancel={handleCancelForm} onSave={handleSaveForm} />
   ) : null;
 
   const wordFormButtonCom = !openForm ? (

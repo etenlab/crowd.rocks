@@ -535,6 +535,9 @@ export class DatabaseVersionControlService {
   }
 
   async loadVersion11(): Promise<void> {
+    //schema
+    await this.runSqlFile('./src/core/sql/schema/v11.schema.sql');
+
     // batch bot register
     await this.runSqlFile(
       './src/core/sql/authentication/batch-register-bot.sql',

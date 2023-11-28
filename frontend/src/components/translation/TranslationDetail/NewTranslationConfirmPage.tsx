@@ -21,7 +21,7 @@ import { useQuery } from '../../../hooks/useQuery';
 import { PageLayout } from '../../common/PageLayout';
 import { InfoFill } from '../../common/icons/InfoFill';
 import { AddCircle } from '../../common/icons/AddCircle';
-import { WordItemViewer } from '../../common/WordItem';
+import { TranslatedTextItemViewer } from '../../common/TranslatedTextItem';
 import { TranslationList } from './TranslantionList';
 
 export function NewTranslationConfirmPage() {
@@ -259,13 +259,13 @@ export function NewTranslationConfirmPage() {
       </Stack>
 
       {viewData ? (
-        <WordItemViewer
+        <TranslatedTextItemViewer
           original={{
-            word: wordOrPhrase?.wordOrPhrase || '',
+            text: wordOrPhrase?.wordOrPhrase || '',
             description: wordOrPhrase?.definition || '',
           }}
           viewData={{
-            word: viewData.translation,
+            text: viewData.translation,
             description: viewData.description,
           }}
         />

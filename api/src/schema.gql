@@ -216,6 +216,7 @@ enum ErrorType {
   PasswordInvalid
   PasswordTooLong
   PasswordTooShort
+  PericopeGetTranslationError
   PericopeInsertFailed
   PericopeNotFound
   PericopeVoteToggleFailed
@@ -440,6 +441,14 @@ input GetOrigMapWordsAndPhrasesInput {
 
 type GetOrigMapsListOutput {
   mapList: [MapDetailsOutput!]!
+}
+
+input GetPericopiesTrInput {
+  documentId: String!
+  filter: String
+  onlyNotTranslatedTo: LanguageInput
+  onlyTranslatedTo: LanguageInput
+  targetLang: LanguageInput!
 }
 
 type IFile {
@@ -762,6 +771,28 @@ type Pericope {
   start_word: String!
 }
 
+type PericopeEdge {
+  cursor: ID!
+  node: Pericope!
+}
+
+type PericopeTextWithTranslationAndDescription {
+  description_translation: String
+  pericope_description_text: String!
+  pericope_id: ID!
+  pericope_text: String!
+  translation: PericopeTranslation
+}
+
+type PericopeTranslation {
+  created_at: DateTime!
+  created_by: String!
+  language: LanguageOutput!
+  pericope_id: String!
+  pericope_translation_id: ID!
+  translation: String!
+}
+
 type PericopeVote {
   last_updated_at: DateTime!
   pericope_id: ID!
@@ -802,6 +833,17 @@ type PericopeWithVotesListConnection {
 type PericopiesOutput {
   error: ErrorType!
   pericopies: [Pericope]!
+}
+
+type PericopiesTextsWithTranslationConnection {
+  edges: [PericopiesTextsWithTranslationEdge!]!
+  error: ErrorType!
+  pageInfo: PageInfo!
+}
+
+type PericopiesTextsWithTranslationEdge {
+  cursor: ID!
+  node: PericopeTextWithTranslationAndDescription!
 }
 
 type Phrase {
@@ -1111,6 +1153,7 @@ type Query {
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
   getPericopiesByDocumentId(after: ID, document_id: ID!, first: Int): PericopeWithVotesListConnection!
+  getPericopiesTr(after: ID, first: Int, input: GetPericopiesTrInput!): PericopiesTextsWithTranslationConnection!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!
   getPhraseDefinitionsByFlag(after: ID, first: Int, flag_name: FlagType!): PhraseDefinitionListConnection!
   getPhraseDefinitionsByLanguage(input: LanguageInput!): PhraseDefinitionWithVoteListOutput!
