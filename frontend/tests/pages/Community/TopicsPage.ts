@@ -63,7 +63,7 @@ class TopicsPage extends BasePage {
 
   async clickOnBackArrowButton(forumName: string) {
     await this.page.locator(backArrowButton(forumName)).click();
-    await this.page.waitForTimeout(1000);
+    await this.page.waitForTimeout(3000);
   }
 }
 export default TopicsPage;
