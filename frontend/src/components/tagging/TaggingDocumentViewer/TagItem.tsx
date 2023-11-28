@@ -4,17 +4,18 @@ import { Stack, Typography } from '@mui/material';
 import {
   TableNameType,
   WordRangeTagWithVote,
-  useToggleWordRangeTagVoteStatusMutation,
 } from '../../../generated/graphql';
+import { useToggleWordRangeTagVoteStatusMutation } from '../../../hooks/useToggleWordRangeTagVoteStatusMutation';
 
 import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 
 type TagItemProps = {
   tag: WordRangeTagWithVote;
+  onClose(): void;
 };
 
-export function TagItem({ tag }: TagItemProps) {
+export function TagItem({ tag, onClose }: TagItemProps) {
   const [toggleWordRangeTagVoteStatus] =
     useToggleWordRangeTagVoteStatusMutation();
 
@@ -58,6 +59,7 @@ export function TagItem({ tag }: TagItemProps) {
         <DiscussionIconButton
           parent_table={TableNameType.WordRangeTags}
           parent_id={tag.word_range_tag_id}
+          onClick={() => onClose()}
           flex="1"
         />
       </Stack>
