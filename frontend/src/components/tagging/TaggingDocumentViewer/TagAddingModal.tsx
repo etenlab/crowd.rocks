@@ -8,10 +8,8 @@ import { Input } from '../../common/forms/Input';
 
 import { useTr } from '../../../hooks/useTr';
 
-import {
-  useCreateTaggingOnWordRangeMutation,
-  useGetDocumentTextFromRangesLazyQuery,
-} from '../../../generated/graphql';
+import { useGetDocumentTextFromRangesLazyQuery } from '../../../generated/graphql';
+import { useCreateTaggingOnWordRangeMutation } from '../../../hooks/useCreateTaggingOnWordRangeMutation';
 
 type TagAddingModalProps = {
   begin_document_word_entry_id: string;
@@ -27,12 +25,17 @@ export function TagAddingModal({
   const { tr } = useTr();
   const [tagNameItems, setTagNameItems] = useState<
     { key: string; value: string }[]
-  >([]);
+  >([
+    {
+      key: 1 + '',
+      value: '',
+    },
+  ]);
   const [invalidMessage, setInvalidMessage] = useState<{
     invalidItems: string[];
     message: string;
   } | null>(null);
-  const tagNameItemKeyRef = useRef<number>(1);
+  const tagNameItemKeyRef = useRef<number>(2);
 
   const [createTaggingOnWordRange] = useCreateTaggingOnWordRangeMutation();
   const [getDocumentTextFromRange, { data: textFromRangeData }] =
@@ -123,6 +126,8 @@ export function TagAddingModal({
         tag_names: tagNameItems.map((item) => item.value),
       },
     });
+
+    onClose();
   };
 
   const handleClearTagNameItem = (key: string) => {
@@ -205,7 +210,7 @@ export function TagAddingModal({
 
       <Button
         variant="text"
-        startIcon={<AddCircle sx={{ fontSize: 20 }} />}
+        startIcon={<AddCircle sx={{ fontSize: 20, marginLeft: '4px' }} />}
         color="orange"
         onClick={handleAddTagNameItem}
         sx={{ justifyContent: 'flex-start', padding: 0 }}
