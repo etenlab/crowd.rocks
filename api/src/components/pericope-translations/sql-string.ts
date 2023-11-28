@@ -89,29 +89,25 @@ export function getPericopeTranslationSql({
   ];
 }
 
-export type PericopeDescriptionWithTranslationSqlR = {
+export type PericopeDescriptionSqlR = {
   pericope_id: string;
   description: string;
-  translation: string;
 };
-export function getPericopiesDescriptions({
-  pericopiesIds,
+export function getPericopeDescription({
+  pericopeId,
 }: {
-  pericopiesIds: string[];
-}): [string, [string[]]] {
-  const params: [string[]] = [pericopiesIds];
+  pericopeId: string;
+}): [string, [string]] {
+  const params: [string] = [pericopeId];
 
   return [
     `
       select
       pd.pericope_id,
-      pd.description,
-      pdt.translation
+      pd.description
       from pericope_descriptions pd
-      left join pericope_description_translations pdt on
-        pd.pericope_description_id = pdt.pericope_description_id
       where true
-        and pd.pericope_id = any($1)
+        and pd.pericope_id =$1
     `,
     params,
   ];

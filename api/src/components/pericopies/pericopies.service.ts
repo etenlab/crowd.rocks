@@ -31,11 +31,16 @@ import {
   getPericopeDocumentSql,
   GetPericopeDescripionSqlR,
   getPericopeDescripionSql,
+  GetNextWordSqlR,
+  getNextWordSql,
+  getWordsTillEndOfDocumentSql,
+  WordsTillEndOfDocumentSqlR,
 } from './sql-string';
 import {
   GetDocumentWordEntriesTotalPageSize,
   getDocumentWordEntriesTotalPageSize,
 } from '../documents/sql-string';
+import { start } from 'repl';
 
 export const WORDS_JOINER = ' ';
 
@@ -253,12 +258,10 @@ export class PericopiesService {
 
   async getRecomendedPericopiesByDocumentId(
     documentId: string,
-    first: number | null,
-    after: string | null,
   ): Promise<PericopeWithVotesSqlR[]> {
     try {
       const resQ = await this.pg.pool.query<PericopeWithVotesSqlR>(
-        ...getPericopiesWithVotesByDocumentIdSql({ documentId, after, first }),
+        ...getPericopiesWithVotesByDocumentIdSql({ documentId }),
       );
       return this.filterRecomendedPericopies(resQ.rows);
     } catch (error) {
@@ -277,6 +280,41 @@ export class PericopiesService {
     return pericopies.filter(
       (p) => calc_vote_weight(p.upvotes, p.downvotes) >= 0,
     );
+  }
+
+  async getWordsTillEndOfDocument(
+    documentId: string,
+    start_word_id: string,
+  ): Promise<WordsTillEndOfDocumentSqlR[]> {
+    try {
+      const resQ = await this.pg.pool.query<WordsTillEndOfDocumentSqlR>(
+        ...getWordsTillEndOfDocumentSql({ documentId, start_word_id }),
+      );
+      const pericopeWords = resQ.rows;
+
+      return pericopeWords;
+    } catch (error) {
+      Logger.error(
+        `PericopiesService#getWordsTillNextPericope: ${JSON.stringify(error)}`,
+      );
+      return [];
+    }
+  }
+
+  async getFirstWordOfDocument(document_id: string): Promise<string | null> {
+    const resQ = await this.pg.pool.query(
+      `
+      select
+        dwe.document_word_entry_id 
+      from
+        document_word_entries dwe
+      where
+        document_id = $1
+        and parent_document_word_entry_id is null
+    `,
+      [document_id],
+    );
+    return resQ.rows[0]?.document_word_entry_id || null;
   }
 
   async getWordsTillNextPericope(

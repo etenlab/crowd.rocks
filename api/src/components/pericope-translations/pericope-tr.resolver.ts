@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Args, ID, Int, Query, Resolver } from '@nestjs/graphql';
 import { PericopeTrService } from './pericope-tr.service';
 import {
@@ -17,6 +17,8 @@ export class PericopeTrResolver {
     @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
   ): Promise<PericopiesTextsWithTranslationConnection> {
+    Logger.log(`PericopeTrResolver#getPericopiesTr`);
+    console.log(JSON.stringify(input), first, after);
     return this.pericopeTrService.getPericopiesTextsWithTranslationConnection(
       input,
       first,
