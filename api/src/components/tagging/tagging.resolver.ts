@@ -46,6 +46,22 @@ export class TaggingsResolver {
     );
   }
 
+  @Query(() => WordRangeTagWithVotesOutput)
+  async getWordRangeTagsByBeginWordEntryId(
+    @Args('begin_document_word_entry_id', { type: () => ID })
+    begin_document_word_entry_id: string,
+  ): Promise<WordRangeTagWithVotesOutput> {
+    Logger.log(
+      'getWordRangeTagsByBeginWordEntryId',
+      JSON.stringify({ begin_document_word_entry_id }, null, 2),
+    );
+
+    return this.wordRangeTagsService.getWordRangeTagsByBeginWordEntryId(
+      +begin_document_word_entry_id,
+      null,
+    );
+  }
+
   @Mutation(() => WordRangeTagWithVotesOutput)
   async upsertWordRangeTag(
     @Args('word_range_id', { type: () => ID })

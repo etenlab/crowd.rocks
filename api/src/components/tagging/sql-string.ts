@@ -26,7 +26,9 @@ export function callWordRangeTagUpsertsProcedure({
 export type WordRangeTagRow = {
   word_range_tag_id: string;
   word_range_id: string;
-  word_range_tag: string;
+  word_range_tag: {
+    tag_name: string;
+  };
 };
 
 export function getWordRangeTagsByIds(ids: number[]): [string, [number[]]] {

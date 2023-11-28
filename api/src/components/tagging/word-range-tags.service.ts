@@ -101,7 +101,7 @@ export class WordRangeTagsService {
             return {
               word_range_tag_id: row.word_range_tag_id,
               word_range: wordRange,
-              tag_name: JSON.parse(row.word_range_tag).tag_name,
+              tag_name: row.word_range_tag.tag_name,
               upvotes: 0,
               downvotes: 0,
             };
@@ -109,7 +109,7 @@ export class WordRangeTagsService {
             return {
               word_range_tag_id: row.word_range_tag_id,
               word_range: wordRange,
-              tag_name: JSON.parse(row.word_range_tag).tag_name,
+              tag_name: row.word_range_tag.tag_name,
               upvotes: voteStatus.upvotes,
               downvotes: voteStatus.downvotes,
             };
@@ -147,7 +147,7 @@ export class WordRangeTagsService {
     };
   }
 
-  async getWordRangeTagsByWordRangeId(
+  async getWordRangeTagsByWordRangeIds(
     word_range_ids: number[],
     pgClient: PoolClient | null,
   ): Promise<WordRangeTagWithVotesOutput> {
@@ -332,10 +332,8 @@ export class WordRangeTagsService {
 
       const wordRangeTagsMap = new Map<string, WordRangeTagWithVote[]>();
 
-      const { error, word_range_tags } = await this.reads(
-        wordRangeIds,
-        pgClient,
-      );
+      const { error, word_range_tags } =
+        await this.getWordRangeTagsByWordRangeIds(wordRangeIds, pgClient);
 
       if (error !== ErrorType.NoError) {
         return {
@@ -403,6 +401,40 @@ export class WordRangeTagsService {
         startCursor: null,
         endCursor: null,
       },
+    };
+  }
+
+  async getWordRangeTagsByBeginWordEntryId(
+    begin_document_word_entry_id: number,
+    pgClient: PoolClient | null,
+  ): Promise<WordRangeTagWithVotesOutput> {
+    try {
+      const { error, word_ranges } =
+        await this.wordRangesService.getByBeginWordIds(
+          [begin_document_word_entry_id],
+          pgClient,
+        );
+
+      if (error !== ErrorType.NoError) {
+        return {
+          error,
+          word_range_tags: [],
+        };
+      }
+
+      return this.getWordRangeTagsByWordRangeIds(
+        word_ranges
+          .filter((item) => item)
+          .map((item: WordRange) => +item.word_range_id),
+        pgClient,
+      );
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      word_range_tags: [],
     };
   }
 }
