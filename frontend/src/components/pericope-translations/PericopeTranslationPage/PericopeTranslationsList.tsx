@@ -79,7 +79,12 @@ export function PericopeTranslationList({
               key={tr.pericope_translation_id}
               text={tr.translation}
               description={tr.translation_description || ''}
-              // author={tr.created_by}
+              author={{
+                createdAt: new Date(Number(tr.created_at)),
+                username: tr.created_by_user.avatar,
+                avatar: tr.created_by_user.avatar,
+                createdByBot: tr.created_by_user.is_bot,
+              }}
               vote={{
                 upVotes: 1, // tr.upvotes,
                 downVotes: 2, // tr.downvotes,

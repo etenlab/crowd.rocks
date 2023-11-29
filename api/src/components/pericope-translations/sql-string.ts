@@ -62,7 +62,10 @@ export type GetPericopeTranslationSqlR = {
   dialect_code: string;
   geo_code: string;
   created_at: string;
-  created_by: string;
+  user_id: string;
+  avatar: string;
+  avatar_url: string;
+  is_bot: boolean;
 };
 export function getPericopeTranslationsByIdsSql({
   translationIds,
@@ -80,8 +83,15 @@ export function getPericopeTranslationsByIdsSql({
         pt.dialect_code,
         pt.geo_code,
         pt.created_at,
-        pt.created_by
+        u.user_id,
+        u.is_bot,
+        a.avatar,
+        a.url as avatar_url
       from pericope_translations pt
+      join users u
+        on u.user_id = pt.created_by
+      left join avatars a
+        on u.user_id = a.user_id
       where true and
         pericope_translation_id = any($1)
     `,
@@ -98,7 +108,10 @@ export type GetPericopeTranslationsByPericopeIdSqlR = {
   dialect_code: string;
   geo_code: string;
   created_at: string;
-  created_by: string;
+  user_id: string;
+  avatar: string;
+  avatar_url: string;
+  is_bot: boolean;
   upvotes: number;
   downvotes: number;
 };
@@ -147,13 +160,21 @@ export function getPericopeTranslationsByPericopeIdSql({
           pt.created_at,
           pt.created_by,
           votes.upvotes,
-          votes.downvotes
+          votes.downvotes,
+          u.user_id,
+          u.is_bot,
+          a.avatar,
+          a.url as avatar_url
       from
         pericope_translations pt
       left join pericope_descriptions pd on
         pt.pericope_id = pd.pericope_id
       left join votes on
         pt.pericope_translation_id = votes.pericope_translation_id
+      join users u
+        on u.user_id = pt.created_by
+      left join avatars a
+        on u.user_id = a.user_id
       where
         true
       and
@@ -191,7 +212,11 @@ export function getPericopeDescription({
 export type PericopeTrUpsertProcedureR = {
   p_pericope_translation_id: string;
   p_error_type: ErrorType;
-  p_created_by: string;
+  p_user_id: string;
+  p_avatar: string;
+  p_avatar_url: string;
+  p_is_bot: boolean;
+  p_created_at: string;
 };
 export function callPericopeTrInsertProcedure(
   {
@@ -207,7 +232,7 @@ export function callPericopeTrInsertProcedure(
 ] {
   return [
     `
-      call pericope_translation_insert($1, $2, $3, $4, $5, $6, $7, null, null, null);
+      call pericope_translation_insert($1, $2, $3, $4, $5, $6, $7, null, null, null, null, null, null, null );
     `,
     [
       token,

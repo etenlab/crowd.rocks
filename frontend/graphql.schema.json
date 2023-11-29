@@ -9917,7 +9917,7 @@
         "description": null,
         "fields": [
           {
-            "name": "created_by",
+            "name": "created_at",
             "description": null,
             "args": [],
             "type": {
@@ -9926,6 +9926,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "created_by_user",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
                 "ofType": null
               }
             },
@@ -10020,7 +10036,7 @@
         "description": null,
         "fields": [
           {
-            "name": "created_by",
+            "name": "created_at",
             "description": null,
             "args": [],
             "type": {
@@ -10029,6 +10045,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "created_by_user",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
                 "ofType": null
               }
             },

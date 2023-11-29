@@ -2,6 +2,7 @@ import { Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
 import { LanguageInput, LanguageOutput, PageInfo } from '../common/types';
 import { Pericope, PericopeTextWithDescription } from '../pericopies/types';
+import { User } from '../user/types';
 
 @ObjectType()
 export class PericopeTranslation {
@@ -12,7 +13,8 @@ export class PericopeTranslation {
     | null;
   @Field(() => String) pericope_id: string;
   @Field(() => LanguageOutput) language: LanguageOutput;
-  @Field(() => String) created_by: string;
+  @Field(() => User) created_by_user: User;
+  @Field(() => String) created_at: string;
 }
 @ObjectType()
 export class PericopeTranslationWithVotes extends PericopeTranslation {

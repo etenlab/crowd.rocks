@@ -9,7 +9,10 @@ fragment PericopeTranslationFragment on PericopeTranslation {
   pericope_id
   translation
   translation_description
-  created_by
+  created_by_user {
+    ...UserFields
+  }
+  created_at
   language {
     ...LanguageOutputFragment
   }

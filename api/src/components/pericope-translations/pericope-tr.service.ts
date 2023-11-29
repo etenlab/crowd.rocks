@@ -248,7 +248,12 @@ export class PericopeTrService {
           translation: r.translation,
           translation_description: r.description,
           created_at: r.created_at,
-          created_by: r.created_by,
+          created_by_user: {
+            user_id: r.user_id,
+            avatar: r.avatar,
+            avatar_url: r.avatar_url,
+            is_bot: r.is_bot,
+          },
         } as PericopeTranslation),
     );
   }
@@ -274,7 +279,12 @@ export class PericopeTrService {
           translation: r.translation,
           translation_description: r.description,
           created_at: r.created_at,
-          created_by: r.created_by,
+          created_by_user: {
+            user_id: r.user_id,
+            avatar: r.avatar,
+            avatar_url: r.avatar_url,
+            is_bot: r.is_bot,
+          },
         } as PericopeTranslation),
     );
   }
@@ -292,11 +302,24 @@ export class PericopeTrService {
         `PericopeTrService#addPericopeTrAndDesc`,
       );
     }
+    if (res.rows[0].p_error_type !== ErrorType.NoError) {
+      Logger.error(
+        JSON.stringify(res.rows),
+        `PericopeTrService#addPericopeTrAndDesc`,
+      );
+    }
+
     return {
       pericope_id: input.pericopeId,
       translation: input.translation,
       translation_description: input.tanslation_description,
-      created_by: res.rows[0].p_created_by,
+      created_by_user: {
+        user_id: res.rows[0].p_user_id,
+        avatar: res.rows[0].p_avatar,
+        avatar_url: res.rows[0].p_avatar_url,
+        is_bot: res.rows[0].p_is_bot,
+      },
+      created_at: res.rows[0].p_created_at,
       pericope_translation_id: res.rows[0].p_pericope_translation_id,
       language: input.targetLang,
     };

@@ -810,7 +810,8 @@ type PericopeTextWithTranslationAndDescription {
 }
 
 type PericopeTranslation {
-  created_by: String!
+  created_at: String!
+  created_by_user: User!
   language: LanguageOutput!
   pericope_id: String!
   pericope_translation_id: ID!
@@ -819,7 +820,8 @@ type PericopeTranslation {
 }
 
 type PericopeTranslationWithVotes {
-  created_by: String!
+  created_at: String!
+  created_by_user: User!
   downvotes: Int!
   language: LanguageOutput!
   pericope_id: String!
