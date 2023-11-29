@@ -18,6 +18,22 @@ fragment PericopeTranslationFragment on PericopeTranslation {
   }
 }
 
+fragment PericopeTranslationWithVotesFragment on PericopeTranslationWithVotes {
+  pericope_translation_id
+  pericope_id
+  translation
+  translation_description
+  created_by_user {
+    ...UserFields
+  }
+  created_at
+  language {
+    ...LanguageOutputFragment
+  }
+  upvotes
+  downvotes
+}
+
 fragment PericopeTextWithTranslationAndDescriptionFragment on PericopeTextWithTranslationAndDescription {
   pericope_id
   pericope_text
@@ -71,7 +87,7 @@ query GetPericopeTranslations(
     input: { pericopeId: $pericopeId, targetLang: $targetLang }
   ) {
     translations {
-      ...PericopeTranslationFragment
+      ...PericopeTranslationWithVotesFragment
     }
   }
 }
@@ -100,5 +116,26 @@ mutation AddPericopeTrAndDescTr(
     }
   ) {
     ...PericopeTranslationFragment
+  }
+}
+
+fragment PericopeTrVoteStatusFragment on PericopeTrVoteStatus {
+  pericope_translation_id
+  upvotes
+  downvotes
+}
+
+mutation TogglePericopeTrVoteStatus(
+  $pericope_translation_id: ID!
+  $vote: Boolean!
+) {
+  togglePericopeTrVoteStatus(
+    pericope_translation_id: $pericope_translation_id
+    vote: $vote
+  ) {
+    error
+    vote_status_list {
+      ...PericopeTrVoteStatusFragment
+    }
   }
 }

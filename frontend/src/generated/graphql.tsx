@@ -255,6 +255,8 @@ export enum ErrorType {
   PericopeInsertFailed = 'PericopeInsertFailed',
   PericopeNotFound = 'PericopeNotFound',
   PericopeTranslationInsertFailed = 'PericopeTranslationInsertFailed',
+  PericopeTranslationNotFound = 'PericopeTranslationNotFound',
+  PericopeTranslationVoteToggleFailed = 'PericopeTranslationVoteToggleFailed',
   PericopeVoteToggleFailed = 'PericopeVoteToggleFailed',
   PhraseDefinitionAlreadyExists = 'PhraseDefinitionAlreadyExists',
   PhraseDefinitionNotFound = 'PhraseDefinitionNotFound',
@@ -771,6 +773,7 @@ export type Mutation = {
   threadUpsert: ThreadOutput;
   toggleFlagWithRef: FlagsOutput;
   toggleMapVoteStatus: MapVoteStatusOutputRow;
+  togglePericopeTrVoteStatus: PericopeTrVoteStatusListOutput;
   togglePericopeVoteStatus: PericopeVoteStatusOutput;
   togglePhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   togglePhraseToPhraseTrVoteStatus: PhraseToPhraseTranslationVoteStatusOutputRow;
@@ -1017,6 +1020,12 @@ export type MutationToggleFlagWithRefArgs = {
 export type MutationToggleMapVoteStatusArgs = {
   is_original: Scalars['Boolean']['input'];
   map_id: Scalars['ID']['input'];
+  vote: Scalars['Boolean']['input'];
+};
+
+
+export type MutationTogglePericopeTrVoteStatusArgs = {
+  pericope_translation_id: Scalars['ID']['input'];
   vote: Scalars['Boolean']['input'];
 };
 
@@ -1352,6 +1361,19 @@ export type PericopeTextWithTranslationAndDescription = {
   translation?: Maybe<PericopeTranslation>;
 };
 
+export type PericopeTrVoteStatus = {
+  __typename?: 'PericopeTrVoteStatus';
+  downvotes: Scalars['Int']['output'];
+  pericope_translation_id: Scalars['ID']['output'];
+  upvotes: Scalars['Int']['output'];
+};
+
+export type PericopeTrVoteStatusListOutput = {
+  __typename?: 'PericopeTrVoteStatusListOutput';
+  error: ErrorType;
+  vote_status_list: Array<PericopeTrVoteStatus>;
+};
+
 export type PericopeTranslation = {
   __typename?: 'PericopeTranslation';
   created_at: Scalars['String']['output'];
@@ -1379,7 +1401,7 @@ export type PericopeTranslationWithVotes = {
 export type PericopeTranslationsOutput = {
   __typename?: 'PericopeTranslationsOutput';
   error: ErrorType;
-  translations: Array<PericopeTranslation>;
+  translations: Array<PericopeTranslationWithVotes>;
 };
 
 export type PericopeVote = {
@@ -3773,6 +3795,8 @@ export type LanguageOutputFragmentFragment = { __typename?: 'LanguageOutput', la
 
 export type PericopeTranslationFragmentFragment = { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
 
+export type PericopeTranslationWithVotesFragmentFragment = { __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
+
 export type PericopeTextWithTranslationAndDescriptionFragmentFragment = { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id?: string | null, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null };
 
 export type PericopiesTextsWithTranslationEdgeFragmentFragment = { __typename?: 'PericopiesTextsWithTranslationEdge', cursor: string, node: { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id?: string | null, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } };
@@ -3796,7 +3820,7 @@ export type GetPericopeTranslationsQueryVariables = Exact<{
 }>;
 
 
-export type GetPericopeTranslationsQuery = { __typename?: 'Query', getPericopeTranslations: { __typename?: 'PericopeTranslationsOutput', translations: Array<{ __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
+export type GetPericopeTranslationsQuery = { __typename?: 'Query', getPericopeTranslations: { __typename?: 'PericopeTranslationsOutput', translations: Array<{ __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
 export type GetPericopeTextAndDesctiptionQueryVariables = Exact<{
   pericopeId: Scalars['String']['input'];
@@ -3814,6 +3838,16 @@ export type AddPericopeTrAndDescTrMutationVariables = Exact<{
 
 
 export type AddPericopeTrAndDescTrMutation = { __typename?: 'Mutation', addPericopeTrAndDescTr: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+
+export type PericopeTrVoteStatusFragmentFragment = { __typename?: 'PericopeTrVoteStatus', pericope_translation_id: string, upvotes: number, downvotes: number };
+
+export type TogglePericopeTrVoteStatusMutationVariables = Exact<{
+  pericope_translation_id: Scalars['ID']['input'];
+  vote: Scalars['Boolean']['input'];
+}>;
+
+
+export type TogglePericopeTrVoteStatusMutation = { __typename?: 'Mutation', togglePericopeTrVoteStatus: { __typename?: 'PericopeTrVoteStatusListOutput', error: ErrorType, vote_status_list: Array<{ __typename?: 'PericopeTrVoteStatus', pericope_translation_id: string, upvotes: number, downvotes: number }> } };
 
 export type PericopeFragmentFragment = { __typename?: 'Pericope', pericope_id: string, start_word: string };
 
@@ -4892,6 +4926,24 @@ export const LanguageOutputFragmentFragmentDoc = gql`
   geo_code
 }
     `;
+export const PericopeTranslationWithVotesFragmentFragmentDoc = gql`
+    fragment PericopeTranslationWithVotesFragment on PericopeTranslationWithVotes {
+  pericope_translation_id
+  pericope_id
+  translation
+  translation_description
+  created_by_user {
+    ...UserFields
+  }
+  created_at
+  language {
+    ...LanguageOutputFragment
+  }
+  upvotes
+  downvotes
+}
+    ${UserFieldsFragmentDoc}
+${LanguageOutputFragmentFragmentDoc}`;
 export const PericopeTranslationFragmentFragmentDoc = gql`
     fragment PericopeTranslationFragment on PericopeTranslation {
   pericope_translation_id
@@ -4926,6 +4978,13 @@ export const PericopiesTextsWithTranslationEdgeFragmentFragmentDoc = gql`
   }
 }
     ${PericopeTextWithTranslationAndDescriptionFragmentFragmentDoc}`;
+export const PericopeTrVoteStatusFragmentFragmentDoc = gql`
+    fragment PericopeTrVoteStatusFragment on PericopeTrVoteStatus {
+  pericope_translation_id
+  upvotes
+  downvotes
+}
+    `;
 export const PericopeFragmentFragmentDoc = gql`
     fragment PericopeFragment on Pericope {
   pericope_id
@@ -8024,11 +8083,11 @@ export const GetPericopeTranslationsDocument = gql`
     input: {pericopeId: $pericopeId, targetLang: $targetLang}
   ) {
     translations {
-      ...PericopeTranslationFragment
+      ...PericopeTranslationWithVotesFragment
     }
   }
 }
-    ${PericopeTranslationFragmentFragmentDoc}`;
+    ${PericopeTranslationWithVotesFragmentFragmentDoc}`;
 
 /**
  * __useGetPericopeTranslationsQuery__
@@ -8134,6 +8193,46 @@ export function useAddPericopeTrAndDescTrMutation(baseOptions?: Apollo.MutationH
 export type AddPericopeTrAndDescTrMutationHookResult = ReturnType<typeof useAddPericopeTrAndDescTrMutation>;
 export type AddPericopeTrAndDescTrMutationResult = Apollo.MutationResult<AddPericopeTrAndDescTrMutation>;
 export type AddPericopeTrAndDescTrMutationOptions = Apollo.BaseMutationOptions<AddPericopeTrAndDescTrMutation, AddPericopeTrAndDescTrMutationVariables>;
+export const TogglePericopeTrVoteStatusDocument = gql`
+    mutation TogglePericopeTrVoteStatus($pericope_translation_id: ID!, $vote: Boolean!) {
+  togglePericopeTrVoteStatus(
+    pericope_translation_id: $pericope_translation_id
+    vote: $vote
+  ) {
+    error
+    vote_status_list {
+      ...PericopeTrVoteStatusFragment
+    }
+  }
+}
+    ${PericopeTrVoteStatusFragmentFragmentDoc}`;
+export type TogglePericopeTrVoteStatusMutationFn = Apollo.MutationFunction<TogglePericopeTrVoteStatusMutation, TogglePericopeTrVoteStatusMutationVariables>;
+
+/**
+ * __useTogglePericopeTrVoteStatusMutation__
+ *
+ * To run a mutation, you first call `useTogglePericopeTrVoteStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTogglePericopeTrVoteStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [togglePericopeTrVoteStatusMutation, { data, loading, error }] = useTogglePericopeTrVoteStatusMutation({
+ *   variables: {
+ *      pericope_translation_id: // value for 'pericope_translation_id'
+ *      vote: // value for 'vote'
+ *   },
+ * });
+ */
+export function useTogglePericopeTrVoteStatusMutation(baseOptions?: Apollo.MutationHookOptions<TogglePericopeTrVoteStatusMutation, TogglePericopeTrVoteStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TogglePericopeTrVoteStatusMutation, TogglePericopeTrVoteStatusMutationVariables>(TogglePericopeTrVoteStatusDocument, options);
+      }
+export type TogglePericopeTrVoteStatusMutationHookResult = ReturnType<typeof useTogglePericopeTrVoteStatusMutation>;
+export type TogglePericopeTrVoteStatusMutationResult = Apollo.MutationResult<TogglePericopeTrVoteStatusMutation>;
+export type TogglePericopeTrVoteStatusMutationOptions = Apollo.BaseMutationOptions<TogglePericopeTrVoteStatusMutation, TogglePericopeTrVoteStatusMutationVariables>;
 export const GetPericopiesByDocumentIdDocument = gql`
     query GetPericopiesByDocumentId($document_id: ID!, $first: Int, $after: ID) {
   getPericopiesByDocumentId(
@@ -11003,6 +11102,7 @@ export const namedOperations = {
     DeleteNotification: 'DeleteNotification',
     MarkNotificationRead: 'MarkNotificationRead',
     AddPericopeTrAndDescTr: 'AddPericopeTrAndDescTr',
+    TogglePericopeTrVoteStatus: 'TogglePericopeTrVoteStatus',
     TogglePericopeVoteStatus: 'TogglePericopeVoteStatus',
     UpsertPericope: 'UpsertPericope',
     PhraseDefinitionUpsert: 'PhraseDefinitionUpsert',
@@ -11084,8 +11184,10 @@ export const namedOperations = {
     MapVoteStatusFragment: 'MapVoteStatusFragment',
     LanguageOutputFragment: 'LanguageOutputFragment',
     PericopeTranslationFragment: 'PericopeTranslationFragment',
+    PericopeTranslationWithVotesFragment: 'PericopeTranslationWithVotesFragment',
     PericopeTextWithTranslationAndDescriptionFragment: 'PericopeTextWithTranslationAndDescriptionFragment',
     PericopiesTextsWithTranslationEdgeFragment: 'PericopiesTextsWithTranslationEdgeFragment',
+    PericopeTrVoteStatusFragment: 'PericopeTrVoteStatusFragment',
     PericopeFragment: 'PericopeFragment',
     PericopeVoteStatusFragment: 'PericopeVoteStatusFragment',
     PericopeWithVoteFragment: 'PericopeWithVoteFragment',

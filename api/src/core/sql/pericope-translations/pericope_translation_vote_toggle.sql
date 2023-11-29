@@ -1,9 +1,9 @@
+drop procedure if exists pericope_translation_vote_toggle;
 create or replace procedure pericope_translation_vote_toggle(
---todo:
-  in p_pericope_id bigint,
+  in p_pericope_translation_id bigint,
   in p_vote boolean,
   in p_token varchar(512),
-  inout p_pericope_vote_id bigint,
+  inout p_pericope_translation_vote_id bigint,
   inout p_error_type varchar(32)
 )
 language plpgsql
@@ -11,7 +11,7 @@ as $$
 declare
   v_user_id bigint;
   v_vote boolean;
-  v_pericope_id bigint;
+  v_pericope_translation_id bigint;
 begin
   p_error_type := 'UnknownError';
 
@@ -27,29 +27,29 @@ begin
   end if;
 
   -- validate inpus
-  if p_pericope_id is null or p_vote is null then
+  if p_pericope_translation_id is null or p_vote is null then
     p_error_type := 'InvalidInputs';
     return;
   end if;
 
   -- check for pericope existance
-  v_pericope_id := null;
+  v_pericope_translation_id := null;
 
-  select p_pericope_id
-  from pericopies
-  where pericope_id = p_pericope_id
-  into v_pericope_id;
+  select p_pericope_translation_id
+  from pericope_translations
+  where pericope_translation_id = p_pericope_translation_id
+  into v_pericope_translation_id;
 
-  if v_pericope_id is null then
-    p_error_type := 'PericopeNotFound';
+  if v_pericope_translation_id is null then
+    p_error_type := 'PericopeTranslationNotFound';
     return;
   end if;
 
   v_vote := null;
 
   select vote
-  from pericope_votes
-  where pericope_id = p_pericope_id
+  from pericope_translations_votes
+  where pericope_translation_id = p_pericope_translation_id
     and user_id = v_user_id
   into v_vote;
 
@@ -57,23 +57,23 @@ begin
     p_vote := null;
   end if;
 
-  insert into pericope_votes(pericope_id, user_id, vote)
-  values (p_pericope_id, v_user_id, p_vote)
-  on conflict (pericope_id, user_id)
+  insert into pericope_translations_votes(pericope_translation_id, user_id, vote)
+  values (p_pericope_translation_id, v_user_id, p_vote)
+  on conflict (pericope_translation_id, user_id)
   do update set vote = EXCLUDED.vote
-  returning pericope_vote_id
-  into p_pericope_vote_id;
+  returning pericope_translations_vote_id
+  into p_pericope_translation_vote_id;
 
-  if p_pericope_vote_id is null then
-    select pericope_vote_id
-    from pericope_votes
-    where pericope_id = p_pericope_id
+  if p_pericope_translation_vote_id is null then
+    select pericope_translations_vote_id
+    from pericope_translations_votes
+    where pericope_translation_id = p_pericope_translation_id
       and user_id = v_user_id
-    into p_pericope_vote_id;
+    into p_pericope_translation_vote_id;
   end if;
 
-  if p_pericope_vote_id is null then
-    p_error_type := 'PericopeVoteToggleFailed';
+  if p_pericope_translation_vote_id is null then
+    p_error_type := 'PericopeTranslationVoteToggleFailed';
     return;
   end if;
   

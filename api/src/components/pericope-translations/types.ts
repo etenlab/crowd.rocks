@@ -89,5 +89,19 @@ export class AddPericopeTranslationOutput extends GenericOutput {
 
 @ObjectType()
 export class PericopeTranslationsOutput extends GenericOutput {
-  @Field(() => [PericopeTranslation]) translations: PericopeTranslation[];
+  @Field(() => [PericopeTranslationWithVotes])
+  translations: PericopeTranslationWithVotes[];
+}
+
+@ObjectType()
+export class PericopeTrVoteStatus {
+  @Field(() => ID) pericope_translation_id: string;
+  @Field(() => Int) upvotes: number;
+  @Field(() => Int) downvotes: number;
+}
+
+@ObjectType()
+export class PericopeTrVoteStatusListOutput extends GenericOutput {
+  @Field(() => [PericopeTrVoteStatus])
+  vote_status_list: PericopeTrVoteStatus[];
 }

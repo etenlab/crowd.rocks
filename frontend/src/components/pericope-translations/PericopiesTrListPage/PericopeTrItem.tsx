@@ -74,6 +74,7 @@ export function PericopeTrItem({
           targetLang: langInfo2langInput(targetLang),
         },
       });
+      setSaving(false);
     },
     [addPericopeTr, pericopeId, present, targetLang, tr],
   );

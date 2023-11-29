@@ -15,6 +15,7 @@ import {
   GetPericopiesTrInput,
   PericopeTranslation,
   PericopeTranslationsOutput,
+  PericopeTrVoteStatusListOutput,
   PericopiesTextsWithTranslationConnection,
 } from './types';
 import { BearerTokenAuthGuard } from '../../guards/bearer-token-auth.guard';
@@ -56,6 +57,26 @@ export class PericopeTrResolver {
     return this.pericopeTrService.addPericopeTrAndDesc(input, token);
   }
 
+  @UseGuards(BearerTokenAuthGuard)
+  @Mutation(() => PericopeTrVoteStatusListOutput)
+  async togglePericopeTrVoteStatus(
+    @Args('pericope_translation_id', { type: () => ID })
+    pericope_translation_id: string,
+    @Args('vote', { type: () => Boolean }) vote: boolean,
+    @Context() req: any,
+  ): Promise<PericopeTrVoteStatusListOutput> {
+    Logger.log(
+      `${JSON.stringify(pericope_translation_id)}`,
+      `PericopeTrResolver#togglePericopeTrVoteStatus`,
+    );
+
+    return this.pericopeTrService.toggleVoteStatus(
+      pericope_translation_id,
+      vote,
+      req.req.token as string,
+    );
+  }
+
   @Query(() => PericopeTranslationsOutput)
   async getPericopeTranslations(
     @Args('input') input: GetPericopeTranslationsInput,
@@ -72,7 +93,11 @@ export class PericopeTrResolver {
         );
       return {
         error: ErrorType.NoError,
-        translations,
+        translations: translations.map((t) => ({
+          ...t,
+          upvotes: t.upvotes || 0,
+          downvotes: t.downvotes || 0,
+        })),
       };
     } catch (error) {
       Logger.error(error, `PericopeTrResolver#getPericopeTranslations`);

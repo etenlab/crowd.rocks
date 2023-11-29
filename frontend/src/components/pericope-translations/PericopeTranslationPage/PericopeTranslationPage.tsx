@@ -5,6 +5,7 @@ import { Divider, Stack, Typography, Button } from '@mui/material';
 import { Caption } from '../../common/Caption/Caption';
 import {
   TableNameType,
+  useAddPericopeTrAndDescTrMutation,
   useGetPericopeTextAndDesctiptionQuery,
 } from '../../../generated/graphql';
 
@@ -26,6 +27,7 @@ import { useIonToast } from '@ionic/react';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { PericopeTranslationList } from './PericopeTranslationsList';
 import { PageLayout } from '../../common/PageLayout';
+import { langInfo2langInput } from '../../../../../utils';
 
 export function PericopeTranslationPage() {
   const { pericopeId } = useParams<{ pericopeId: string }>();
@@ -46,6 +48,18 @@ export function PericopeTranslationPage() {
   });
   const pericopeTr = pericopeTrData.data?.getPericopeTextAndDesctiption;
 
+  const [addPericopeTr] = useAddPericopeTrAndDescTrMutation({
+    onError: (error) => {
+      console.log(error);
+      present({
+        message: tr('Error with creating translation for pericope'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+    },
+  });
+
   const handleCancelForm = () => {
     setOpenForm(false);
   };
@@ -61,9 +75,17 @@ export function PericopeTranslationPage() {
         });
         return;
       }
-      console.log('mocked save translation ', text, description);
+      await addPericopeTr({
+        variables: {
+          pericopeId,
+          tanslation_description: description,
+          translation: text,
+          targetLang: langInfo2langInput(targetLang),
+        },
+      });
+      setOpenForm(false);
     },
-    [present, targetLang?.lang, tr],
+    [addPericopeTr, pericopeId, present, targetLang, tr],
   );
 
   const handleOpenForm = () => {

@@ -227,6 +227,8 @@ enum ErrorType {
   PericopeInsertFailed
   PericopeNotFound
   PericopeTranslationInsertFailed
+  PericopeTranslationNotFound
+  PericopeTranslationVoteToggleFailed
   PericopeVoteToggleFailed
   PhraseDefinitionAlreadyExists
   PhraseDefinitionNotFound
@@ -699,6 +701,7 @@ type Mutation {
   threadUpsert(input: ThreadUpsertInput!): ThreadOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   toggleMapVoteStatus(is_original: Boolean!, map_id: ID!, vote: Boolean!): MapVoteStatusOutputRow!
+  togglePericopeTrVoteStatus(pericope_translation_id: ID!, vote: Boolean!): PericopeTrVoteStatusListOutput!
   togglePericopeVoteStatus(pericope_id: ID!, vote: Boolean!): PericopeVoteStatusOutput!
   togglePhraseDefinitionVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
   togglePhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!, vote: Boolean!): PhraseToPhraseTranslationVoteStatusOutputRow!
@@ -809,6 +812,17 @@ type PericopeTextWithTranslationAndDescription {
   translation: PericopeTranslation
 }
 
+type PericopeTrVoteStatus {
+  downvotes: Int!
+  pericope_translation_id: ID!
+  upvotes: Int!
+}
+
+type PericopeTrVoteStatusListOutput {
+  error: ErrorType!
+  vote_status_list: [PericopeTrVoteStatus!]!
+}
+
 type PericopeTranslation {
   created_at: String!
   created_by_user: User!
@@ -833,7 +847,7 @@ type PericopeTranslationWithVotes {
 
 type PericopeTranslationsOutput {
   error: ErrorType!
-  translations: [PericopeTranslation!]!
+  translations: [PericopeTranslationWithVotes!]!
 }
 
 type PericopeVote {

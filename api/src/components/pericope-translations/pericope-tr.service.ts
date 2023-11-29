@@ -16,14 +16,21 @@ import {
   getPericopeTranslationsByPericopeIdSql,
   GetPericopeTranslationsByPericopeIdSqlR,
   GetPericopeTranslationSqlR,
+  getPericopeTrVoteStatusFromPericopeIdsSql,
+  GetPericopeTrVoteStatusSqlR,
   PericopeDescriptionSqlR,
   PericopeTanslationsIdsWithVotesSqlR,
   PericopeTrUpsertProcedureR,
+  togglePericopeTrVoteStatusSql,
+  TogglePericopeTrVoteStatusSqlR,
 } from './sql-string';
 import {
   AddPericopeTranslationInput,
   GetPericopiesTrInput,
   PericopeTranslation,
+  PericopeTranslationWithVotes,
+  PericopeTrVoteStatus,
+  PericopeTrVoteStatusListOutput,
   PericopiesTextsWithTranslationConnection,
   PericopiesTextsWithTranslationEdge,
 } from './types';
@@ -261,7 +268,7 @@ export class PericopeTrService {
   async getPericopeTranslationsByPericopeId(
     pericopeId: string,
     targetLang: LanguageInput,
-  ): Promise<PericopeTranslation[]> {
+  ): Promise<PericopeTranslationWithVotes[]> {
     const resQ =
       await this.pg.pool.query<GetPericopeTranslationsByPericopeIdSqlR>(
         ...getPericopeTranslationsByPericopeIdSql({ pericopeId, targetLang }),
@@ -285,7 +292,9 @@ export class PericopeTrService {
             avatar_url: r.avatar_url,
             is_bot: r.is_bot,
           },
-        } as PericopeTranslation),
+          upvotes: r.upvotes,
+          downvotes: r.downvotes,
+        } as PericopeTranslationWithVotes),
     );
   }
 
@@ -322,6 +331,78 @@ export class PericopeTrService {
       created_at: res.rows[0].p_created_at,
       pericope_translation_id: res.rows[0].p_pericope_translation_id,
       language: input.targetLang,
+    };
+  }
+
+  async toggleVoteStatus(
+    pericope_translation_id: string,
+    vote: boolean,
+    token: string,
+  ): Promise<PericopeTrVoteStatusListOutput> {
+    try {
+      const res = await this.pg.pool.query<TogglePericopeTrVoteStatusSqlR>(
+        ...togglePericopeTrVoteStatusSql({
+          pericope_translation_id,
+          vote,
+          token,
+        }),
+      );
+
+      const creatingError = res.rows[0].p_error_type;
+      const maps_vote_id = res.rows[0].p_maps_vote_id;
+
+      if (creatingError !== ErrorType.NoError || !maps_vote_id) {
+        return {
+          error: creatingError,
+          vote_status_list: [],
+        };
+      }
+
+      return this.getVoteStatusFromIds([pericope_translation_id]);
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      vote_status_list: [],
+    };
+  }
+
+  async getVoteStatusFromIds(
+    pericopeTrIds: string[],
+  ): Promise<PericopeTrVoteStatusListOutput> {
+    try {
+      const res = await this.pg.pool.query<GetPericopeTrVoteStatusSqlR>(
+        ...getPericopeTrVoteStatusFromPericopeIdsSql(pericopeTrIds),
+      );
+
+      const voteStatusMap = new Map<string, PericopeTrVoteStatus>();
+
+      res.rows.forEach((row) =>
+        voteStatusMap.set(row.pericope_translation_id, row),
+      );
+
+      return {
+        error: ErrorType.NoError,
+        vote_status_list: pericopeTrIds.map((pericope_translation_id) => {
+          const voteStatus = voteStatusMap.get(pericope_translation_id + '');
+
+          return voteStatus
+            ? voteStatus
+            : {
+                pericope_translation_id: pericope_translation_id + '',
+                upvotes: 0,
+                downvotes: 0,
+              };
+        }),
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
+    return {
+      error: ErrorType.UnknownError,
+      vote_status_list: [],
     };
   }
 }

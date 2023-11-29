@@ -245,3 +245,58 @@ export function callPericopeTrInsertProcedure(
     ],
   ];
 }
+
+export type TogglePericopeTrVoteStatusSqlR = {
+  p_maps_vote_id: string;
+  p_error_type: ErrorType;
+};
+
+export function togglePericopeTrVoteStatusSql({
+  pericope_translation_id,
+  vote,
+  token,
+}: {
+  pericope_translation_id: string;
+  vote: boolean;
+  token: string;
+}): [string, [string, boolean, string]] {
+  return [
+    `
+        call pericope_translation_vote_toggle($1, $2, $3, 0, '');
+      `,
+    [pericope_translation_id, vote, token],
+  ];
+}
+
+export type GetPericopeTrVoteStatusSqlR = {
+  pericope_translation_id: string;
+  upvotes: number;
+  downvotes: number;
+};
+export function getPericopeTrVoteStatusFromPericopeIdsSql(
+  pericopeTrIds: string[],
+): [string, [string[]]] {
+  return [
+    `
+      select 
+        v.pericope_translation_id as pericope_translation_id, 
+        count(
+          case when v.vote = true then 1 else null end
+        ) as upvotes, 
+        count(
+          case when v.vote = false then 1 else null end
+        ) as downvotes 
+      from 
+        pericope_translations_votes AS v 
+      where 
+        v.pericope_translation_id = any($1)
+      group BY 
+        v.pericope_translation_id 
+      order by 
+        count(
+          case when v.vote = true then 1 when v.vote = false then 0 else null end
+        ) desc;
+    `,
+    [pericopeTrIds],
+  ];
+}

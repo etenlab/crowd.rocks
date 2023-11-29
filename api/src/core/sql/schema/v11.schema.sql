@@ -65,3 +65,5 @@ ALTER TABLE pericope_description_translations ADD CONSTRAINT pericope_descriptio
 
 ALTER TABLE public.pericope_translations ADD description varchar NULL;
 DROP TABLE if exists public.pericope_description_translations;
+ALTER TABLE pericope_translations_votes drop CONSTRAINT if exists pericope_translations_votes_user_id_pericope_id_key;
+ALTER TABLE pericope_translations_votes ADD CONSTRAINT pericope_translations_votes_user_id_pericope_id_key UNIQUE (user_id, pericope_translation_id);

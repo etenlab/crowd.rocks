@@ -1,18 +1,24 @@
 import { Stack, LinearProgress } from '@mui/material';
 
-import { useGetPericopeTranslationsQuery } from '../../../generated/graphql';
+import {
+  ErrorType,
+  useGetPericopeTranslationsQuery,
+  useTogglePericopeTrVoteStatusMutation,
+} from '../../../generated/graphql';
 
 import { useAppContext } from '../../../hooks/useAppContext';
 
 import { TextCard } from '../../common/TextCard';
 import { langInfo2langInput } from '../../../../../utils';
+import { useCallback, useEffect } from 'react';
+import { useIonToast } from '@ionic/react';
 export type PericopeTranslationListProps = {
   pericope_id: string;
   tempTranslation?: string;
 };
 
 export function PericopeTranslationList({
-  pericope_id, // tempTranslation,
+  pericope_id,
 }: PericopeTranslationListProps) {
   const {
     states: {
@@ -21,7 +27,7 @@ export function PericopeTranslationList({
       },
     },
   } = useAppContext();
-  // const [present] = useIonToast();
+  const [present] = useIonToast();
 
   const translationsQ = useGetPericopeTranslationsQuery({
     variables: {
@@ -33,35 +39,35 @@ export function PericopeTranslationList({
     fetchPolicy: 'no-cache',
   }).data?.getPericopeTranslations;
 
-  // const [toggleTrVoteStatus, { data: voteData, loading: voteLoading }] =
-  //   useTogglePericopeTranslationVoteMutation();
+  const [toggleTrVoteStatus, { data: voteData, loading: voteLoading }] =
+    useTogglePericopeTrVoteStatusMutation();
 
-  // useEffect(() => {
-  //   if (voteLoading) return;
-  //   if (
-  //     voteData &&
-  //     voteData?.toggleTranslationVoteStatus.error !== ErrorType.NoError
-  //   ) {
-  //     present({
-  //       message: voteData?.toggleTranslationVoteStatus.error,
-  //       duration: 1500,
-  //       position: 'top',
-  //       color: 'danger',
-  //     });
-  //   }
-  // }, [present, voteData, voteLoading]);
+  useEffect(() => {
+    if (voteLoading) return;
+    if (
+      voteData &&
+      voteData?.togglePericopeTrVoteStatus.error !== ErrorType.NoError
+    ) {
+      present({
+        message: voteData?.togglePericopeTrVoteStatus.error,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+    }
+  }, [present, voteData, voteLoading]);
 
-  // const handleVoteClick = useCallback(
-  //   (translation_id: string, vote: boolean): void => {
-  //     toggleTrVoteStatus({
-  //       variables: {
-  //         translation_id,
-  //         vote,
-  //       },
-  //     });
-  //   },
-  //   [toggleTrVoteStatus],
-  // );
+  const handleVoteClick = useCallback(
+    (pericope_translation_id: string, vote: boolean): void => {
+      toggleTrVoteStatus({
+        variables: {
+          pericope_translation_id,
+          vote,
+        },
+      });
+    },
+    [toggleTrVoteStatus],
+  );
 
   return (
     <Stack gap="24px">
@@ -86,13 +92,13 @@ export function PericopeTranslationList({
                 createdByBot: tr.created_by_user.is_bot,
               }}
               vote={{
-                upVotes: 1, // tr.upvotes,
-                downVotes: 2, // tr.downvotes,
+                upVotes: tr.upvotes,
+                downVotes: tr.downvotes,
                 onVoteUpClick: () => {
-                  // handleVoteClick(item.id, true);
+                  handleVoteClick(tr.pericope_translation_id, true);
                 },
                 onVoteDownClick: () => {
-                  // handleVoteClick(item.id, false);
+                  handleVoteClick(tr.pericope_translation_id, false);
                 },
               }}
             />
