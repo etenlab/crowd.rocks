@@ -2592,6 +2592,8 @@ export type Subscription = {
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult;
   ZipMapReport: ZipMapResult;
   documentAdded: DocumentUploadOutput;
+  wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput;
+  wordRangeTagWithVoteAdded: WordRangeTagWithVotesOutput;
 };
 
 export enum SubscriptionStatus {
@@ -4218,6 +4220,16 @@ export type ToggleWordRangeTagVoteStatusMutationVariables = Exact<{
 
 
 export type ToggleWordRangeTagVoteStatusMutation = { __typename?: 'Mutation', toggleWordRangeTagVoteStatus: { __typename?: 'WordRangeTagVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'WordRangeTagVoteStatus', downvotes: number, upvotes: number, word_range_tag_id: string } | null } };
+
+export type SubscribeToWordRangeTagVoteStatusToggledSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToWordRangeTagVoteStatusToggledSubscription = { __typename?: 'Subscription', wordRangeTagVoteStatusToggled: { __typename?: 'WordRangeTagVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'WordRangeTagVoteStatus', downvotes: number, upvotes: number, word_range_tag_id: string } | null } };
+
+export type SubscribeToWordRangeTagWithVoteAddedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToWordRangeTagWithVoteAddedSubscription = { __typename?: 'Subscription', wordRangeTagWithVoteAdded: { __typename?: 'WordRangeTagWithVotesOutput', error: ErrorType, word_range_tags: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } } | null> } };
 
 export type WordToWordTranslationWithVoteFragmentFragment = { __typename?: 'WordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } };
 
@@ -9734,6 +9746,70 @@ export function useToggleWordRangeTagVoteStatusMutation(baseOptions?: Apollo.Mut
 export type ToggleWordRangeTagVoteStatusMutationHookResult = ReturnType<typeof useToggleWordRangeTagVoteStatusMutation>;
 export type ToggleWordRangeTagVoteStatusMutationResult = Apollo.MutationResult<ToggleWordRangeTagVoteStatusMutation>;
 export type ToggleWordRangeTagVoteStatusMutationOptions = Apollo.BaseMutationOptions<ToggleWordRangeTagVoteStatusMutation, ToggleWordRangeTagVoteStatusMutationVariables>;
+export const SubscribeToWordRangeTagVoteStatusToggledDocument = gql`
+    subscription SubscribeToWordRangeTagVoteStatusToggled {
+  wordRangeTagVoteStatusToggled {
+    error
+    vote_status {
+      ...WordRangeTagVoteStatusFragment
+    }
+  }
+}
+    ${WordRangeTagVoteStatusFragmentFragmentDoc}`;
+
+/**
+ * __useSubscribeToWordRangeTagVoteStatusToggledSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToWordRangeTagVoteStatusToggledSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToWordRangeTagVoteStatusToggledSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToWordRangeTagVoteStatusToggledSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToWordRangeTagVoteStatusToggledSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToWordRangeTagVoteStatusToggledSubscription, SubscribeToWordRangeTagVoteStatusToggledSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToWordRangeTagVoteStatusToggledSubscription, SubscribeToWordRangeTagVoteStatusToggledSubscriptionVariables>(SubscribeToWordRangeTagVoteStatusToggledDocument, options);
+      }
+export type SubscribeToWordRangeTagVoteStatusToggledSubscriptionHookResult = ReturnType<typeof useSubscribeToWordRangeTagVoteStatusToggledSubscription>;
+export type SubscribeToWordRangeTagVoteStatusToggledSubscriptionResult = Apollo.SubscriptionResult<SubscribeToWordRangeTagVoteStatusToggledSubscription>;
+export const SubscribeToWordRangeTagWithVoteAddedDocument = gql`
+    subscription SubscribeToWordRangeTagWithVoteAdded {
+  wordRangeTagWithVoteAdded {
+    error
+    word_range_tags {
+      ...WordRangeTagWithVoteFragment
+    }
+  }
+}
+    ${WordRangeTagWithVoteFragmentFragmentDoc}`;
+
+/**
+ * __useSubscribeToWordRangeTagWithVoteAddedSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToWordRangeTagWithVoteAddedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToWordRangeTagWithVoteAddedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToWordRangeTagWithVoteAddedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToWordRangeTagWithVoteAddedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToWordRangeTagWithVoteAddedSubscription, SubscribeToWordRangeTagWithVoteAddedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToWordRangeTagWithVoteAddedSubscription, SubscribeToWordRangeTagWithVoteAddedSubscriptionVariables>(SubscribeToWordRangeTagWithVoteAddedDocument, options);
+      }
+export type SubscribeToWordRangeTagWithVoteAddedSubscriptionHookResult = ReturnType<typeof useSubscribeToWordRangeTagWithVoteAddedSubscription>;
+export type SubscribeToWordRangeTagWithVoteAddedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToWordRangeTagWithVoteAddedSubscription>;
 export const GetTranslationLanguageInfoDocument = gql`
     query GetTranslationLanguageInfo($from_language_code: ID!, $to_language_code: ID) {
   getLanguageTranslationInfo(
@@ -11359,6 +11435,8 @@ export const namedOperations = {
     SubscribeToDataGenProgress: 'SubscribeToDataGenProgress',
     SubscribeToDocumentAdded: 'SubscribeToDocumentAdded',
     SubscribeToZipMap: 'SubscribeToZipMap',
+    SubscribeToWordRangeTagVoteStatusToggled: 'SubscribeToWordRangeTagVoteStatusToggled',
+    SubscribeToWordRangeTagWithVoteAdded: 'SubscribeToWordRangeTagWithVoteAdded',
     SubscribeToTranslationReport: 'SubscribeToTranslationReport',
     SubscribeToGptProgress: 'SubscribeToGptProgress'
   },

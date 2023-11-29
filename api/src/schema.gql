@@ -1469,6 +1469,8 @@ type Subscription {
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
   ZipMapReport: ZipMapResult!
   documentAdded: DocumentUploadOutput!
+  wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput!
+  wordRangeTagWithVoteAdded: WordRangeTagWithVotesOutput!
 }
 
 enum SubscriptionStatus {

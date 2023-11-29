@@ -17,6 +17,8 @@ import {
   WordRangeTagWithVote,
   useGetWordRangeTagsByDocumentIdQuery,
 } from '../../../generated/graphql';
+import { useSubscribeToWordRangeTagVoteStatusToggledSubscription } from '../../../hooks/useToggleWordRangeTagVoteStatusMutation';
+import { useSubscribeToWordRangeTagWithVoteAddedSubscription } from '../../../hooks/useCreateTaggingOnWordRangeMutation';
 
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useTr } from '../../../hooks/useTr';
@@ -57,6 +59,8 @@ export function TaggingDocumentViewer({
       after: null,
     },
   });
+  useSubscribeToWordRangeTagVoteStatusToggledSubscription();
+  useSubscribeToWordRangeTagWithVoteAddedSubscription();
 
   const [range, setRange] = useState<{
     begin?: RangeItem;

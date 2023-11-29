@@ -1,6 +1,9 @@
 import { useIonToast } from '@ionic/react';
 
-import { useToggleWordRangeTagVoteStatusMutation as useGeneratedToggleWordRangeTagVoteStatusMutation } from '../generated/graphql';
+import {
+  useToggleWordRangeTagVoteStatusMutation as useGeneratedToggleWordRangeTagVoteStatusMutation,
+  useSubscribeToWordRangeTagVoteStatusToggledSubscription as useGeneratedSubscribeToWordRangeTagVoteStatusToggledSubscription,
+} from '../generated/graphql';
 
 import { ErrorType } from '../generated/graphql';
 
@@ -37,6 +40,27 @@ export function useToggleWordRangeTagVoteStatusMutation() {
           color: 'danger',
         });
         redirectOnUnauth(data?.toggleWordRangeTagVoteStatus.error);
+      }
+    },
+  });
+}
+
+export function useSubscribeToWordRangeTagVoteStatusToggledSubscription() {
+  return useGeneratedSubscribeToWordRangeTagVoteStatusToggledSubscription({
+    onData({ client, data: result }) {
+      const { data, error } = result;
+      if (
+        !error &&
+        data &&
+        data.wordRangeTagVoteStatusToggled.vote_status &&
+        data.wordRangeTagVoteStatusToggled.error === ErrorType.NoError
+      ) {
+        const newVoteStatus = data.wordRangeTagVoteStatusToggled.vote_status;
+
+        updateCacheWithToggleWordRangeTagVoteStatus(
+          client.cache,
+          newVoteStatus,
+        );
       }
     },
   });
