@@ -1,6 +1,9 @@
 import { useIonToast } from '@ionic/react';
 
-import { useDeletePericopeMutation as useGeneratedDeletePericopeMutation } from '../generated/graphql';
+import {
+  useDeletePericopeMutation as useGeneratedDeletePericopeMutation,
+  useSubscribeToPericopieDeletedSubscription as useGeneratedSubscribeToPericopieDeletedSubscription,
+} from '../generated/graphql';
 
 import { ErrorType } from '../generated/graphql';
 
@@ -17,26 +20,40 @@ export function useDeletePericopeMutation() {
   return useGeneratedDeletePericopeMutation({
     update(cache, { data, errors }) {
       if (
-        !errors &&
-        data &&
-        data.deletePericopies.pericope_id &&
-        data.deletePericopies.error === ErrorType.NoError
+        errors ||
+        !data ||
+        !data.deletePericopie.pericope_id ||
+        data.deletePericopie.error !== ErrorType.NoError
       ) {
-        const pericope_id = data.deletePericopies.pericope_id;
-
-        updateCacheWithDeletePericope(cache, pericope_id);
-      } else {
         console.log('useDeletePericopeMutation: ', errors);
-        console.log(data?.deletePericopies.error);
+        console.log(data?.deletePericopie.error);
 
         present({
           message: `${tr('Failed at deleteing a Pericope!')} [${data
-            ?.deletePericopies.error}]`,
+            ?.deletePericopie.error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',
         });
-        redirectOnUnauth(data?.deletePericopies.error);
+        redirectOnUnauth(data?.deletePericopie.error);
+      }
+    },
+  });
+}
+
+export function useSubscribeToPericopieDeletedSubscription() {
+  return useGeneratedSubscribeToPericopieDeletedSubscription({
+    onData({ client, data: result }) {
+      const { data, error } = result;
+      if (
+        !error &&
+        data &&
+        data.pericopeDeleted.pericope_id &&
+        data.pericopeDeleted.error === ErrorType.NoError
+      ) {
+        const pericope_id = data.pericopeDeleted.pericope_id;
+
+        updateCacheWithDeletePericope(client.cache, pericope_id);
       }
     },
   });

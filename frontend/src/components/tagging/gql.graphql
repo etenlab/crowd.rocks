@@ -105,3 +105,21 @@ mutation ToggleWordRangeTagVoteStatus(
     }
   }
 }
+
+subscription SubscribeToWordRangeTagVoteStatusToggled {
+  wordRangeTagVoteStatusToggled {
+    error
+    vote_status {
+      ...WordRangeTagVoteStatusFragment
+    }
+  }
+}
+
+subscription SubscribeToWordRangeTagWithVoteAdded {
+  wordRangeTagWithVoteAdded {
+    error
+    word_range_tags {
+      ...WordRangeTagWithVoteFragment
+    }
+  }
+}

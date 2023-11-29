@@ -170,3 +170,30 @@ mutation UpsertAnswer(
     }
   }
 }
+
+subscription SubscribeToQuestionsOnWordRangeAdded {
+  questionsOnWordRangeAdded {
+    error
+    questions {
+      ...QuestionOnWordRangeFragment
+    }
+  }
+}
+
+subscription SubscribeToQuestionsAdded {
+  questionsAdded {
+    error
+    questions {
+      ...QuestionFragment
+    }
+  }
+}
+
+subscription SubscribeToAnswersAdded {
+  answersAdded {
+    error
+    answers {
+      ...AnswerFragment
+    }
+  }
+}

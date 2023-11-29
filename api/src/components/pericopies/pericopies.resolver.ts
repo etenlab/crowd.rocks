@@ -1,13 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import {
   Args,
   Query,
   Resolver,
   Mutation,
+  Subscription,
   Context,
   ID,
   Int,
 } from '@nestjs/graphql';
+import { PubSub } from 'graphql-subscriptions';
+import { SubscriptionToken } from 'src/common/subscription-token';
+import { PUB_SUB } from 'src/pubSub.module';
+
 import { getBearer } from 'src/common/utility';
 
 import { PericopeVotesService } from './pericope-votes.service';
@@ -24,6 +29,7 @@ import {
 @Resolver()
 export class PericopiesResolver {
   constructor(
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private pericopiesService: PericopiesService,
     private pericopeVotesService: PericopeVotesService,
   ) {}
@@ -59,36 +65,6 @@ export class PericopiesResolver {
     );
   }
 
-  @Mutation(() => PericopiesOutput)
-  async upsertPericopies(
-    @Args('startWords', { type: () => [String] })
-    startWords: string[],
-    @Context() req: any,
-  ): Promise<PericopiesOutput> {
-    Logger.log('upsertPericopies: ', startWords);
-
-    return this.pericopiesService.upserts(
-      startWords.map((word) => +word),
-      getBearer(req) || '',
-      null,
-    );
-  }
-
-  @Mutation(() => PericopeDeleteOutput)
-  async deletePericopies(
-    @Args('pericope_id', { type: () => ID })
-    pericope_id: string,
-    @Context() req: any,
-  ): Promise<PericopeDeleteOutput> {
-    Logger.log('deletePericopies: ', pericope_id);
-
-    return this.pericopiesService.delete(
-      +pericope_id,
-      getBearer(req) || '',
-      null,
-    );
-  }
-
   @Query(() => PericopeVoteStatusOutput)
   async getPericopeVoteStatus(
     @Args('pericope_id', { type: () => ID }) pericope_id: string,
@@ -107,6 +83,62 @@ export class PericopiesResolver {
     };
   }
 
+  @Mutation(() => PericopiesOutput)
+  async upsertPericopies(
+    @Args('startWords', { type: () => [String] })
+    startWords: string[],
+    @Context() req: any,
+  ): Promise<PericopiesOutput> {
+    Logger.log('upsertPericopies: ', startWords);
+
+    const newPericopies = await this.pericopiesService.upserts(
+      startWords.map((word) => +word),
+      getBearer(req) || '',
+      null,
+    );
+
+    this.pubSub.publish(SubscriptionToken.pericopiesAdded, {
+      [SubscriptionToken.pericopiesAdded]: newPericopies,
+    });
+
+    return newPericopies;
+  }
+
+  @Subscription(() => PericopiesOutput, {
+    name: SubscriptionToken.pericopiesAdded,
+  })
+  subscribeToPericopiesAdded() {
+    return this.pubSub.asyncIterator(SubscriptionToken.pericopiesAdded);
+  }
+
+  @Mutation(() => PericopeDeleteOutput)
+  async deletePericopie(
+    @Args('pericope_id', { type: () => ID })
+    pericope_id: string,
+    @Context() req: any,
+  ): Promise<PericopeDeleteOutput> {
+    Logger.log('deletePericopies: ', pericope_id);
+
+    const deletedPericope = await this.pericopiesService.delete(
+      +pericope_id,
+      getBearer(req) || '',
+      null,
+    );
+
+    this.pubSub.publish(SubscriptionToken.pericopeDeleted, {
+      [SubscriptionToken.pericopeDeleted]: deletedPericope,
+    });
+
+    return deletedPericope;
+  }
+
+  @Subscription(() => PericopeDeleteOutput, {
+    name: SubscriptionToken.pericopeDeleted,
+  })
+  subscribeToPericopeDeleted() {
+    return this.pubSub.asyncIterator(SubscriptionToken.pericopeDeleted);
+  }
+
   @Mutation(() => PericopeVoteStatusOutput)
   async togglePericopeVoteStatus(
     @Args('pericope_id', { type: () => ID })
@@ -120,11 +152,26 @@ export class PericopiesResolver {
       vote,
     });
 
-    return this.pericopeVotesService.toggleVoteStatus(
+    const newVoteStatus = await this.pericopeVotesService.toggleVoteStatus(
       +pericope_id,
       vote,
       getBearer(req) || '',
       null,
+    );
+
+    this.pubSub.publish(SubscriptionToken.pericopeVoteStatusToggled, {
+      [SubscriptionToken.pericopeVoteStatusToggled]: newVoteStatus,
+    });
+
+    return newVoteStatus;
+  }
+
+  @Subscription(() => PericopeVoteStatusOutput, {
+    name: SubscriptionToken.pericopeVoteStatusToggled,
+  })
+  subscribeToPericopeVoteStatusToggled() {
+    return this.pubSub.asyncIterator(
+      SubscriptionToken.pericopeVoteStatusToggled,
     );
   }
 }

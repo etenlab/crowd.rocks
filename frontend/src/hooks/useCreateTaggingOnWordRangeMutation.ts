@@ -1,5 +1,8 @@
 import { useIonToast } from '@ionic/react';
-import { useCreateTaggingOnWordRangeMutation as useGeneratedCreateTaggingOnWordRangeMutation } from '../generated/graphql';
+import {
+  useCreateTaggingOnWordRangeMutation as useGeneratedCreateTaggingOnWordRangeMutation,
+  useSubscribeToWordRangeTagWithVoteAddedSubscription as useGeneratedSubscribeToWordRangeTagWithVoteAddedSubscription,
+} from '../generated/graphql';
 
 import { ErrorType } from '../generated/graphql';
 
@@ -14,17 +17,19 @@ export function useCreateTaggingOnWordRangeMutation() {
   const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedCreateTaggingOnWordRangeMutation({
-    update(cache, { data, errors }) {
+    update(_cache, { data, errors }) {
       if (
         !errors &&
         data &&
         data.createTaggingOnWordRange.word_range_tags.length > 0 &&
         data.createTaggingOnWordRange.error === ErrorType.NoError
       ) {
-        const new_word_range_tags =
-          data.createTaggingOnWordRange.word_range_tags;
-
-        updateCacheWithCreateWordRangeTags(cache, new_word_range_tags);
+        present({
+          message: `${tr('Success at creating new tags!')}`,
+          duration: 1500,
+          position: 'top',
+          color: 'success',
+        });
       } else {
         console.log('useCreateTaggingOnWordRangeMutation: ', errors);
         console.log(data?.createTaggingOnWordRange.error);
@@ -37,6 +42,25 @@ export function useCreateTaggingOnWordRangeMutation() {
           color: 'danger',
         });
         redirectOnUnauth(data?.createTaggingOnWordRange.error);
+      }
+    },
+  });
+}
+
+export function useSubscribeToWordRangeTagWithVoteAddedSubscription() {
+  return useGeneratedSubscribeToWordRangeTagWithVoteAddedSubscription({
+    onData({ client, data: result }) {
+      const { data, error } = result;
+      if (
+        !error &&
+        data &&
+        data.wordRangeTagWithVoteAdded.word_range_tags.length > 0 &&
+        data.wordRangeTagWithVoteAdded.error === ErrorType.NoError
+      ) {
+        const new_word_range_tags =
+          data.wordRangeTagWithVoteAdded.word_range_tags;
+
+        updateCacheWithCreateWordRangeTags(client.cache, new_word_range_tags);
       }
     },
   });

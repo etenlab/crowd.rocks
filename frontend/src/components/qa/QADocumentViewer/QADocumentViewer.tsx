@@ -19,6 +19,7 @@ import {
   QuestionOnWordRange,
   useGetQuestionOnWordRangesByDocumentIdQuery,
 } from '../../../generated/graphql';
+import { useSubscribeToQuestionsOnWordRangeAddedSubscription } from '../../../hooks/useCreateQuestionOnWordRangeMutation';
 
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useTr } from '../../../hooks/useTr';
@@ -64,6 +65,7 @@ export function QADocumentViewer({
       after: null,
     },
   });
+  useSubscribeToQuestionsOnWordRangeAddedSubscription();
 
   const [range, setRange] = useState<{
     begin?: RangeItem;

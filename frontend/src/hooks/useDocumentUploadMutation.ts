@@ -1,6 +1,9 @@
 import { useIonToast } from '@ionic/react';
 
-import { useDocumentUploadMutation as useGeneratedDocumentUploadMutation } from '../generated/graphql';
+import {
+  useDocumentUploadMutation as useGeneratedDocumentUploadMutation,
+  useSubscribeToDocumentAddedSubscription as useGeneratedSubscribeToDocumentAddedSubscription,
+} from '../generated/graphql';
 
 import { ErrorType } from '../generated/graphql';
 
@@ -12,6 +15,42 @@ import { useUnauthorizedRedirect } from './useUnauthorizedRedirect';
 import { langInfo2String, subTags2LangInfo } from '../../../utils';
 
 export function useDocumentUploadMutation() {
+  const { tr } = useTr();
+  const [present] = useIonToast();
+  const redirectOnUnauth = useUnauthorizedRedirect();
+
+  return useGeneratedDocumentUploadMutation({
+    update(_cache, { data, errors }) {
+      if (
+        errors ||
+        !data ||
+        !data.documentUpload.document ||
+        data.documentUpload.error !== ErrorType.NoError
+      ) {
+        console.log('useDocumentUploadMutation: ', errors);
+        console.log(data?.documentUpload.error);
+
+        present({
+          message: `${tr('Failed at uploading new Document!')} [${data
+            ?.documentUpload.error}]`,
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+        redirectOnUnauth(data?.documentUpload.error);
+      } else {
+        present({
+          message: tr('Success at uploading new document!'),
+          duration: 1500,
+          position: 'top',
+          color: 'success',
+        });
+      }
+    },
+  });
+}
+
+export function useSubscribeToDocumentAddedSubscription() {
   const {
     states: {
       nonPersistent: {
@@ -19,19 +58,17 @@ export function useDocumentUploadMutation() {
       },
     },
   } = useAppContext();
-  const { tr } = useTr();
-  const [present] = useIonToast();
-  const redirectOnUnauth = useUnauthorizedRedirect();
 
-  return useGeneratedDocumentUploadMutation({
-    update(cache, { data, errors }) {
+  return useGeneratedSubscribeToDocumentAddedSubscription({
+    onData({ client, data: result }) {
+      const { data, error } = result;
       if (
-        !errors &&
+        !error &&
         data &&
-        data.documentUpload.document &&
-        data.documentUpload.error === ErrorType.NoError
+        data.documentAdded.document &&
+        data.documentAdded.error === ErrorType.NoError
       ) {
-        const newDocument = data.documentUpload.document;
+        const newDocument = data.documentAdded.document;
 
         const variablesList = Object.values(getAllDocuments).filter((item) => {
           if (
@@ -56,26 +93,7 @@ export function useDocumentUploadMutation() {
           }
         });
 
-        updateCacheWithUploadDocument(cache, newDocument, variablesList);
-
-        present({
-          message: tr('Success at uploading new document!'),
-          duration: 1500,
-          position: 'top',
-          color: 'success',
-        });
-      } else {
-        console.log('useDocumentUploadMutation: ', errors);
-        console.log(data?.documentUpload.error);
-
-        present({
-          message: `${tr('Failed at uploading new Document!')} [${data
-            ?.documentUpload.error}]`,
-          duration: 1500,
-          position: 'top',
-          color: 'danger',
-        });
-        redirectOnUnauth(data?.documentUpload.error);
+        updateCacheWithUploadDocument(client.cache, newDocument, variablesList);
       }
     },
   });
