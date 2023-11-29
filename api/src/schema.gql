@@ -719,7 +719,6 @@ type Mutation {
   upsertFromTranslationlikeString(fromInput: SiteTextTranslationsFromInput!, toInput: SiteTextTranslationsToInput!): TranslationOutput!
   upsertPericopies(startWords: [String!]!): PericopiesOutput!
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString(input: FromPhraseAndDefintionlikeStringUpsertInput!): PhraseDefinitionOutput!
-  upsertQuestionItems(items: [String!]!): QuestionItemsOutput!
   upsertQuestions(input: [QuestionUpsertInput!]!): QuestionsOutput!
   upsertSiteTextTranslation(input: SiteTextTranslationUpsertInput!): TranslationOutput!
   upsertTranslation(from_definition_id: ID!, from_definition_type_is_word: Boolean!, to_definition_id: ID!, to_definition_type_is_word: Boolean!): TranslationOutput!
@@ -1468,10 +1467,13 @@ type Subscription {
   DataGenerationReport: DataGenProgress!
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
   ZipMapReport: ZipMapResult!
+  answersAdded: AnswersOutput!
   documentAdded: DocumentUploadOutput!
   pericopeDeleted: PericopeDeleteOutput!
   pericopeVoteStatusToggled: PericopeVoteStatusOutput!
   pericopiesAdded: PericopiesOutput!
+  questionsAdded: QuestionsOutput!
+  questionsOnWordRangeAdded: QuestionOnWordRangesOutput!
   wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput!
   wordRangeTagWithVoteAdded: WordRangeTagWithVotesOutput!
 }
