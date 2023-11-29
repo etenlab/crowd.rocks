@@ -3,6 +3,8 @@ import BasePage from '../BasePage';
 const addNewForumPopupForumName = `input[placeholder='Topic Name']`;
 const addNewForumPopupDescription = `textarea[placeholder='Description...']`;
 const totalTopicsCount = `(//div[@class='MuiBox-root css-0'])[2]//following-sibling::div`;
+const meatballsMenuButton = (topicsName: string) =>
+  `//h3[text()='${topicsName}']//..//..//button`;
 const threadAndPostCount = (topicsName: string) =>
   `//h3[text()='${topicsName}']//..//..//..//div//h4`;
 const backArrowButton = (forumName: string) =>
@@ -56,7 +58,10 @@ class TopicsPage extends BasePage {
     const postsCount = x?.split(' ') || 0;
     return postsCount[0];
   }
-
+  async clickOnEditButton(communityName: string) {
+    await this.page.locator(meatballsMenuButton(communityName)).click();
+    await this.page.getByRole('button', { name: 'Edit' }).click();
+  }
   async getTopicsCount() {
     return await this.page.locator(totalTopicsCount).count();
   }

@@ -88,7 +88,7 @@ class ForumPage extends BasePage {
   }
 
   async searchForumName(forumName: string) {
-    await this.page.getByPlaceholder('Search by...').fill(forumName);
+    await this.page.getByPlaceholder('Search by...').last().fill(forumName);
     await this.page.waitForTimeout(2000);
   }
 
@@ -103,17 +103,17 @@ class ForumPage extends BasePage {
   async getThreadsCount(forumName: string) {
     const x = await this.page
       .locator(threadAndPostCount(forumName))
-      .first()
-      .textContent();
-    const threadsCount = x?.split(' ') || 0;
+      .allTextContents();
+    const threadsCount = x[1]?.split(' ') || 0;
     return threadsCount[0];
   }
 
   async getTopicsCount(forumName: string) {
     const x = await this.page
       .locator(threadAndPostCount(forumName))
-      .allTextContents();
-    const topicsCount = x[1]?.split(' ') || 0;
+      .first()
+      .textContent();
+    const topicsCount = x?.split(' ') || 0;
     return topicsCount[0];
   }
 
