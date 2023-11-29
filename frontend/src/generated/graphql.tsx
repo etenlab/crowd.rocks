@@ -2591,6 +2591,7 @@ export type Subscription = {
   DataGenerationReport: DataGenProgress;
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult;
   ZipMapReport: ZipMapResult;
+  documentAdded: DocumentUploadOutput;
 };
 
 export enum SubscriptionStatus {
@@ -3452,6 +3453,11 @@ export type BotTranslateDocumentMutationVariables = Exact<{
 
 
 export type BotTranslateDocumentMutation = { __typename?: 'Mutation', botTranslateDocument: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_by: string } | null } };
+
+export type SubscribeToDocumentAddedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToDocumentAddedSubscription = { __typename?: 'Subscription', documentAdded: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_by: string } | null } };
 
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -6528,6 +6534,38 @@ export function useBotTranslateDocumentMutation(baseOptions?: Apollo.MutationHoo
 export type BotTranslateDocumentMutationHookResult = ReturnType<typeof useBotTranslateDocumentMutation>;
 export type BotTranslateDocumentMutationResult = Apollo.MutationResult<BotTranslateDocumentMutation>;
 export type BotTranslateDocumentMutationOptions = Apollo.BaseMutationOptions<BotTranslateDocumentMutation, BotTranslateDocumentMutationVariables>;
+export const SubscribeToDocumentAddedDocument = gql`
+    subscription SubscribeToDocumentAdded {
+  documentAdded {
+    error
+    document {
+      ...TextyDocumentFragment
+    }
+  }
+}
+    ${TextyDocumentFragmentFragmentDoc}`;
+
+/**
+ * __useSubscribeToDocumentAddedSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToDocumentAddedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToDocumentAddedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToDocumentAddedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToDocumentAddedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToDocumentAddedSubscription, SubscribeToDocumentAddedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToDocumentAddedSubscription, SubscribeToDocumentAddedSubscriptionVariables>(SubscribeToDocumentAddedDocument, options);
+      }
+export type SubscribeToDocumentAddedSubscriptionHookResult = ReturnType<typeof useSubscribeToDocumentAddedSubscription>;
+export type SubscribeToDocumentAddedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToDocumentAddedSubscription>;
 export const EmailResponseDocument = gql`
     mutation EmailResponse($token: String!) {
   emailResponseResolver(input: {token: $token}) {
@@ -11319,6 +11357,7 @@ export const namedOperations = {
   },
   Subscription: {
     SubscribeToDataGenProgress: 'SubscribeToDataGenProgress',
+    SubscribeToDocumentAdded: 'SubscribeToDocumentAdded',
     SubscribeToZipMap: 'SubscribeToZipMap',
     SubscribeToTranslationReport: 'SubscribeToTranslationReport',
     SubscribeToGptProgress: 'SubscribeToGptProgress'

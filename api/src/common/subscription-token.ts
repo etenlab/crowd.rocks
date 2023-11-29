@@ -3,4 +3,5 @@ export class SubscriptionToken {
   static ZipMapReport = 'ZipMapReport';
   static DataGenerationReport = 'DataGenerationReport';
   static ChatGptTranslateProgress = 'ChatGptTranslateProgress';
+  static documentAdded = 'documentAdded';
 }

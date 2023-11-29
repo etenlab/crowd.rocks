@@ -1468,6 +1468,7 @@ type Subscription {
   DataGenerationReport: DataGenProgress!
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
   ZipMapReport: ZipMapResult!
+  documentAdded: DocumentUploadOutput!
 }
 
 enum SubscriptionStatus {

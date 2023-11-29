@@ -1,13 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import {
   Args,
   Context,
   Int,
-  Mutation,
-  Query,
-  Resolver,
   ID,
+  Query,
+  Mutation,
+  Subscription,
+  Resolver,
 } from '@nestjs/graphql';
+import { PubSub } from 'graphql-subscriptions';
+import { SubscriptionToken } from 'src/common/subscription-token';
+import { PUB_SUB } from 'src/pubSub.module';
 
 import { ErrorType } from '../../common/types';
 import { getBearer } from '../../common/utility';
@@ -35,6 +39,7 @@ import { LanguageInput } from '../common/types';
 @Resolver()
 export class DocumentsResolver {
   constructor(
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private authenticationService: AuthenticationService,
     private documentsSevice: DocumentsService,
     private documentWordEntriesService: DocumentWordEntriesService,
@@ -55,10 +60,16 @@ export class DocumentsResolver {
       };
     }
 
-    return this.documentsSevice.saveDocument({
+    const newDocument = await this.documentsSevice.saveDocument({
       document: input.document,
       token: getBearer(req) || '',
     });
+
+    this.pubSub.publish(SubscriptionToken.documentAdded, {
+      [SubscriptionToken.documentAdded]: newDocument,
+    });
+
+    return newDocument;
   }
 
   @Query(() => DocumentListConnection)
@@ -178,5 +189,12 @@ export class DocumentsResolver {
     Logger.log('upsertWordRanges: ', JSON.stringify(input, null, 2));
 
     return this.wordRangesService.upserts(input, getBearer(req) || '', null);
+  }
+
+  @Subscription(() => DocumentUploadOutput, {
+    name: SubscriptionToken.documentAdded,
+  })
+  subscribeToDocumentAdded() {
+    return this.pubSub.asyncIterator(SubscriptionToken.documentAdded);
   }
 }
