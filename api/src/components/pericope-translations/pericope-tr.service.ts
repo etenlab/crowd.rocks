@@ -12,7 +12,9 @@ import {
   callPericopeTrInsertProcedure,
   getPericopeDescription,
   getPericopeTanslationsIdsWithVotesSql,
-  getPericopeTranslationSql,
+  getPericopeTranslationsByIdsSql,
+  getPericopeTranslationsByPericopeIdSql,
+  GetPericopeTranslationsByPericopeIdSqlR,
   GetPericopeTranslationSqlR,
   PericopeDescriptionSqlR,
   PericopeTanslationsIdsWithVotesSqlR,
@@ -231,8 +233,35 @@ export class PericopeTrService {
     translationIds: string[],
   ): Promise<PericopeTranslation[]> {
     const resQ = await this.pg.pool.query<GetPericopeTranslationSqlR>(
-      ...getPericopeTranslationSql({ translationIds }),
+      ...getPericopeTranslationsByIdsSql({ translationIds }),
     );
+    return resQ.rows.map(
+      (r) =>
+        ({
+          pericope_id: r.pericope_id,
+          pericope_translation_id: r.pericope_translation_id,
+          language: {
+            language_code: r.language_code,
+            dialect_code: r.dialect_code,
+            geo_code: r.geo_code,
+          },
+          translation: r.translation,
+          description_translation_id: r.description_translation_id,
+          description_translation: r.description_translation,
+          created_at: r.created_at,
+          created_by: r.created_by,
+        } as PericopeTranslation),
+    );
+  }
+
+  async getPericopeTranslationsByPericopeId(
+    pericopeId: string,
+    targetLang: LanguageInput,
+  ): Promise<PericopeTranslation[]> {
+    const resQ =
+      await this.pg.pool.query<GetPericopeTranslationsByPericopeIdSqlR>(
+        ...getPericopeTranslationsByPericopeIdSql({ pericopeId, targetLang }),
+      );
     return resQ.rows.map(
       (r) =>
         ({
@@ -270,8 +299,8 @@ export class PericopeTrService {
       translation: input.translation,
       description_translation: input.description_tr,
       created_by: res.rows[0].p_created_by,
-      pericope_translation_id: res.rows[0].p_translation_id,
-      description_translation_id: res.rows[0].p_description_tr_id,
+      pericope_translation_id: res.rows[0].p_pericope_translation_id,
+      description_translation_id: res.rows[0].p_pericope_description_tr_id,
       language: input.targetLang,
     };
   }

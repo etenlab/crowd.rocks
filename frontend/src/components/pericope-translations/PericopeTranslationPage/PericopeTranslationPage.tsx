@@ -24,7 +24,7 @@ import { Box } from '@mui/material';
 
 import { useIonToast } from '@ionic/react';
 import { useAppContext } from '../../../hooks/useAppContext';
-// import { PericopeTranslationList } from './PericopeTranslationsList';
+import { PericopeTranslationList } from './PericopeTranslationsList';
 import { PageLayout } from '../../common/PageLayout';
 
 export function PericopeTranslationPage() {
@@ -141,7 +141,7 @@ export function PericopeTranslationPage() {
           {formCom}
           {formButtonCom}
 
-          {/* <PericopeTranslationList pericope_id={pericopeTr.pericope_id} /> */}
+          <PericopeTranslationList pericope_id={pericopeTr.pericope_id} />
         </>
       )}
     </PageLayout>

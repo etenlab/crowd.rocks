@@ -8,16 +8,17 @@ import {
   Query,
   Resolver,
 } from '@nestjs/graphql';
-import { getBearer } from '../../common/utility';
 import { PericopeTrService } from './pericope-tr.service';
 import {
   AddPericopeTrAndDescInput,
-  AddPericopeTrAndDescOutput,
+  GetPericopeTranslationsInput,
   GetPericopiesTrInput,
   PericopeTranslation,
+  PericopeTranslationsOutput,
   PericopiesTextsWithTranslationConnection,
 } from './types';
 import { BearerTokenAuthGuard } from '../../guards/bearer-token-auth.guard';
+import { ErrorType } from '../../common/types';
 
 @Injectable()
 @Resolver()
@@ -53,5 +54,32 @@ export class PericopeTrResolver {
     );
     const token = req.req.token as string;
     return this.pericopeTrService.addPericopeTrAndDesc(input, token);
+  }
+
+  @Query(() => PericopeTranslationsOutput)
+  async getPericopeTranslations(
+    @Args('input') input: GetPericopeTranslationsInput,
+  ): Promise<PericopeTranslationsOutput> {
+    Logger.log(
+      `${JSON.stringify(input)}`,
+      `PericopeTrResolver#getPericopeTranslations`,
+    );
+    try {
+      const translations =
+        await this.pericopeTrService.getPericopeTranslationsByPericopeId(
+          input.pericopeId,
+          input.targetLang,
+        );
+      return {
+        error: ErrorType.NoError,
+        translations,
+      };
+    } catch (error) {
+      Logger.error(error, `PericopeTrResolver#getPericopeTranslations`);
+      return {
+        error: ErrorType.PericopeGetTranslationError,
+        translations: [],
+      };
+    }
   }
 }

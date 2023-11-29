@@ -60,6 +60,19 @@ query GetPericopiesTr(
   }
 }
 
+query GetPericopeTranslations(
+  $pericopeId: String!
+  $targetLang: LanguageInput!
+) {
+  getPericopeTranslations(
+    input: { pericopeId: $pericopeId, targetLang: $targetLang }
+  ) {
+    translations {
+      ...PericopeTranslationFragment
+    }
+  }
+}
+
 query GetPericopeTextAndDesctiption($pericopeId: String!) {
   getPericopeTextAndDesctiption(input: { pericopeId: $pericopeId }) {
     error

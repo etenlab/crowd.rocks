@@ -502,6 +502,11 @@ export type GetPericopeTextInput = {
   pericopeId: Scalars['String']['input'];
 };
 
+export type GetPericopeTranslationsInput = {
+  pericopeId: Scalars['String']['input'];
+  targetLang: LanguageInput;
+};
+
 export type GetPericopiesTrInput = {
   documentId: Scalars['String']['input'];
   filter?: InputMaybe<Scalars['String']['input']>;
@@ -1371,6 +1376,12 @@ export type PericopeTranslationWithVotes = {
   upvotes: Scalars['Int']['output'];
 };
 
+export type PericopeTranslationsOutput = {
+  __typename?: 'PericopeTranslationsOutput';
+  error: ErrorType;
+  translations: Array<PericopeTranslation>;
+};
+
 export type PericopeVote = {
   __typename?: 'PericopeVote';
   last_updated_at: Scalars['DateTime']['output'];
@@ -1775,6 +1786,7 @@ export type Query = {
   getOrigMapWordsAndPhrasesCount: MapWordsAndPhrasesCountOutput;
   getOrigMapsList: GetOrigMapsListOutput;
   getPericopeTextAndDesctiption: PericopeTextWithDescription;
+  getPericopeTranslations: PericopeTranslationsOutput;
   getPericopeVoteStatus: PericopeVoteStatusOutput;
   getPericopiesByDocumentId: PericopeWithVotesListConnection;
   getPericopiesTr: PericopiesTextsWithTranslationConnection;
@@ -1983,6 +1995,11 @@ export type QueryGetOrigMapsListArgs = {
 
 export type QueryGetPericopeTextAndDesctiptionArgs = {
   input: GetPericopeTextInput;
+};
+
+
+export type QueryGetPericopeTranslationsArgs = {
+  input: GetPericopeTranslationsInput;
 };
 
 
@@ -3772,6 +3789,14 @@ export type GetPericopiesTrQueryVariables = Exact<{
 
 
 export type GetPericopiesTrQuery = { __typename?: 'Query', getPericopiesTr: { __typename?: 'PericopiesTextsWithTranslationConnection', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null }, edges: Array<{ __typename?: 'PericopiesTextsWithTranslationEdge', cursor: string, node: { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id?: string | null, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, description_translation?: string | null, created_by: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } }> } };
+
+export type GetPericopeTranslationsQueryVariables = Exact<{
+  pericopeId: Scalars['String']['input'];
+  targetLang: LanguageInput;
+}>;
+
+
+export type GetPericopeTranslationsQuery = { __typename?: 'Query', getPericopeTranslations: { __typename?: 'PericopeTranslationsOutput', translations: Array<{ __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, description_translation?: string | null, created_by: string, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
 export type GetPericopeTextAndDesctiptionQueryVariables = Exact<{
   pericopeId: Scalars['String']['input'];
@@ -7989,6 +8014,46 @@ export function useGetPericopiesTrLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type GetPericopiesTrQueryHookResult = ReturnType<typeof useGetPericopiesTrQuery>;
 export type GetPericopiesTrLazyQueryHookResult = ReturnType<typeof useGetPericopiesTrLazyQuery>;
 export type GetPericopiesTrQueryResult = Apollo.QueryResult<GetPericopiesTrQuery, GetPericopiesTrQueryVariables>;
+export const GetPericopeTranslationsDocument = gql`
+    query GetPericopeTranslations($pericopeId: String!, $targetLang: LanguageInput!) {
+  getPericopeTranslations(
+    input: {pericopeId: $pericopeId, targetLang: $targetLang}
+  ) {
+    translations {
+      ...PericopeTranslationFragment
+    }
+  }
+}
+    ${PericopeTranslationFragmentFragmentDoc}`;
+
+/**
+ * __useGetPericopeTranslationsQuery__
+ *
+ * To run a query within a React component, call `useGetPericopeTranslationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPericopeTranslationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPericopeTranslationsQuery({
+ *   variables: {
+ *      pericopeId: // value for 'pericopeId'
+ *      targetLang: // value for 'targetLang'
+ *   },
+ * });
+ */
+export function useGetPericopeTranslationsQuery(baseOptions: Apollo.QueryHookOptions<GetPericopeTranslationsQuery, GetPericopeTranslationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPericopeTranslationsQuery, GetPericopeTranslationsQueryVariables>(GetPericopeTranslationsDocument, options);
+      }
+export function useGetPericopeTranslationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPericopeTranslationsQuery, GetPericopeTranslationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPericopeTranslationsQuery, GetPericopeTranslationsQueryVariables>(GetPericopeTranslationsDocument, options);
+        }
+export type GetPericopeTranslationsQueryHookResult = ReturnType<typeof useGetPericopeTranslationsQuery>;
+export type GetPericopeTranslationsLazyQueryHookResult = ReturnType<typeof useGetPericopeTranslationsLazyQuery>;
+export type GetPericopeTranslationsQueryResult = Apollo.QueryResult<GetPericopeTranslationsQuery, GetPericopeTranslationsQueryVariables>;
 export const GetPericopeTextAndDesctiptionDocument = gql`
     query GetPericopeTextAndDesctiption($pericopeId: String!) {
   getPericopeTextAndDesctiption(input: {pericopeId: $pericopeId}) {
@@ -10864,6 +10929,7 @@ export const namedOperations = {
     GetMapVoteStatus: 'GetMapVoteStatus',
     ListNotifications: 'ListNotifications',
     GetPericopiesTr: 'GetPericopiesTr',
+    GetPericopeTranslations: 'GetPericopeTranslations',
     GetPericopeTextAndDesctiption: 'GetPericopeTextAndDesctiption',
     GetPericopiesByDocumentId: 'GetPericopiesByDocumentId',
     GetPericopeVoteStatus: 'GetPericopeVoteStatus',

@@ -65,6 +65,11 @@ export class GetPericopiesTrInput {
   onlyNotTranslatedTo?: LanguageInput | null;
 }
 @InputType()
+export class GetPericopeTranslationsInput {
+  @Field(() => String) pericopeId: string;
+  @Field(() => LanguageInput) targetLang: LanguageInput;
+}
+@InputType()
 export class GetPericopeTextInput {
   @Field(() => String) pericopeId: string;
 }
@@ -81,4 +86,9 @@ export class AddPericopeTrAndDescInput {
 export class AddPericopeTrAndDescOutput extends GenericOutput {
   @Field(() => PericopiesTextsWithTranslationEdge)
   pericopeWithTranslationEdge: PericopiesTextsWithTranslationEdge;
+}
+
+@ObjectType()
+export class PericopeTranslationsOutput extends GenericOutput {
+  @Field(() => [PericopeTranslation]) translations: PericopeTranslation[];
 }

@@ -455,6 +455,11 @@ input GetPericopeTextInput {
   pericopeId: String!
 }
 
+input GetPericopeTranslationsInput {
+  pericopeId: String!
+  targetLang: LanguageInput!
+}
+
 input GetPericopiesTrInput {
   documentId: String!
   filter: String
@@ -826,6 +831,11 @@ type PericopeTranslationWithVotes {
   upvotes: Int!
 }
 
+type PericopeTranslationsOutput {
+  error: ErrorType!
+  translations: [PericopeTranslation!]!
+}
+
 type PericopeVote {
   last_updated_at: DateTime!
   pericope_id: ID!
@@ -1185,6 +1195,7 @@ type Query {
   getOrigMapWordsAndPhrasesCount(input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesCountOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
   getPericopeTextAndDesctiption(input: GetPericopeTextInput!): PericopeTextWithDescription!
+  getPericopeTranslations(input: GetPericopeTranslationsInput!): PericopeTranslationsOutput!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
   getPericopiesByDocumentId(after: ID, document_id: ID!, first: Int): PericopeWithVotesListConnection!
   getPericopiesTr(after: ID, first: Int, input: GetPericopiesTrInput!): PericopiesTextsWithTranslationConnection!
