@@ -211,7 +211,7 @@ export function PericopiesTrListPage() {
                     translation={{
                       text: pericopeTr.node.translation?.translation || '',
                       description:
-                        pericopeTr.node.translation?.description_translation ||
+                        pericopeTr.node.translation?.translation_description ||
                         '',
                     }}
                   />

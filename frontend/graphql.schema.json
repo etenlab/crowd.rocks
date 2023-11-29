@@ -94,12 +94,12 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "AddPericopeTrAndDescInput",
+        "name": "AddPericopeTranslationInput",
         "description": null,
         "fields": null,
         "inputFields": [
           {
-            "name": "description_tr",
+            "name": "pericopeId",
             "description": null,
             "type": {
               "kind": "NON_NULL",
@@ -115,7 +115,7 @@
             "deprecationReason": null
           },
           {
-            "name": "pericopeId",
+            "name": "tanslation_description",
             "description": null,
             "type": {
               "kind": "NON_NULL",
@@ -5817,7 +5817,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "AddPericopeTrAndDescInput",
+                    "name": "AddPericopeTranslationInput",
                     "ofType": null
                   }
                 },
@@ -9933,30 +9933,6 @@
             "deprecationReason": null
           },
           {
-            "name": "description_translation",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "description_translation_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "language",
             "description": null,
             "args": [],
@@ -10019,6 +9995,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "translation_description",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -10043,30 +10031,6 @@
                 "name": "String",
                 "ofType": null
               }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "description_translation",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "description_translation_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -10147,6 +10111,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "translation_description",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null

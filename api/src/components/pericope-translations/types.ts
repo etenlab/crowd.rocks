@@ -7,10 +7,7 @@ import { Pericope, PericopeTextWithDescription } from '../pericopies/types';
 export class PericopeTranslation {
   @Field(() => ID) pericope_translation_id: string;
   @Field(() => String) translation: string;
-  @Field(() => String, { nullable: true }) description_translation_id:
-    | string
-    | null;
-  @Field(() => String, { nullable: true }) description_translation:
+  @Field(() => String, { nullable: true }) translation_description:
     | string
     | null;
   @Field(() => String) pericope_id: string;
@@ -75,15 +72,15 @@ export class GetPericopeTextInput {
 }
 
 @InputType()
-export class AddPericopeTrAndDescInput {
+export class AddPericopeTranslationInput {
   @Field(() => String) pericopeId: string;
   @Field(() => LanguageInput) targetLang: LanguageInput;
   @Field(() => String) translation: string;
-  @Field(() => String) description_tr: string;
+  @Field(() => String) tanslation_description: string;
 }
 
 @ObjectType()
-export class AddPericopeTrAndDescOutput extends GenericOutput {
+export class AddPericopeTranslationOutput extends GenericOutput {
   @Field(() => PericopiesTextsWithTranslationEdge)
   pericopeWithTranslationEdge: PericopiesTextsWithTranslationEdge;
 }

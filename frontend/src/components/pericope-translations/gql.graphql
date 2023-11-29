@@ -8,7 +8,7 @@ fragment PericopeTranslationFragment on PericopeTranslation {
   pericope_translation_id
   pericope_id
   translation
-  description_translation
+  translation_description
   created_by
   language {
     ...LanguageOutputFragment
@@ -86,14 +86,14 @@ mutation AddPericopeTrAndDescTr(
   $pericopeId: String!
   $targetLang: LanguageInput!
   $translation: String!
-  $description_tr: String!
+  $tanslation_description: String!
 ) {
   addPericopeTrAndDescTr(
     input: {
       pericopeId: $pericopeId
       targetLang: $targetLang
       translation: $translation
-      description_tr: $description_tr
+      tanslation_description: $tanslation_description
     }
   ) {
     ...PericopeTranslationFragment

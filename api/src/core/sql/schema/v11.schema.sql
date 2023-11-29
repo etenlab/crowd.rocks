@@ -2,6 +2,7 @@ create table if not exists pericope_translations (
   pericope_translation_id bigserial primary key,
   pericope_id bigint not null references pericopies(pericope_id),
   translation varchar not null,
+  description varchar not null,
   language_code varchar(32) not null,
   dialect_code varchar(32),
   geo_code varchar(32),
@@ -35,19 +36,19 @@ ALTER TABLE public.pericope_descriptions DROP CONSTRAINT if exists pericope_desc
 
 ALTER TABLE public.pericope_descriptions ADD CONSTRAINT pericope_descriptions_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(user_id);
 ALTER TABLE public.pericope_descriptions ADD constraint pericope_descriptions_pericope_id_fkey FOREIGN KEY (pericope_id) REFERENCES public.pericopies(pericope_id);
---
-drop table if exists pericope_description_translations;
-CREATE table pericope_description_translations  (
-	pericope_description_translation_id bigserial NOT null primary key,
-	pericope_description_id int8 NOT NULL,
-	translation text NOT NULL,
-	language_code varchar(32) not null,
-	dialect_code varchar(32),
-	geo_code varchar(32),
-	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	created_by int8 NOT NULL,
-	CONSTRAINT pericope_descriptions_tr_pericope_id_description_key UNIQUE (pericope_description_id, translation)
-);
+
+-- drop table if exists pericope_description_translations;
+-- CREATE table pericope_description_translations  (
+-- 	pericope_description_translation_id bigserial NOT null primary key,
+-- 	pericope_description_id int8 NOT NULL,
+-- 	translation text NOT NULL,
+-- 	language_code varchar(32) not null,
+-- 	dialect_code varchar(32),
+-- 	geo_code varchar(32),
+-- 	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+-- 	created_by int8 NOT NULL,
+-- 	CONSTRAINT pericope_descriptions_tr_pericope_id_description_key UNIQUE (pericope_description_id, translation)
+-- );
 
 drop index if exists idx__description_translation__pericope_descriptions;
 drop index if exists idx__pericope_description_id__pericope_descriptions;
@@ -60,3 +61,7 @@ ALTER TABLE pericope_description_translations drop CONSTRAINT if exists pericope
 ALTER TABLE pericope_description_translations drop CONSTRAINT if exists pericope_description_translations_pericope_id_fkey;
 ALTER TABLE pericope_description_translations ADD CONSTRAINT pericope_description_translations_created_by_fkey FOREIGN KEY (created_by) REFERENCES users(user_id);
 ALTER TABLE pericope_description_translations ADD CONSTRAINT pericope_description_translations_pericope_id_fkey FOREIGN KEY (pericope_description_id) REFERENCES pericope_descriptions(pericope_description_id);
+---
+
+ALTER TABLE public.pericope_translations ADD description varchar NULL;
+DROP TABLE if exists public.pericope_description_translations;

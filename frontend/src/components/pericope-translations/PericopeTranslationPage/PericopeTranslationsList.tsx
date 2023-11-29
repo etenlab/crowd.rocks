@@ -78,7 +78,7 @@ export function PericopeTranslationList({
             <TextCard
               key={tr.pericope_translation_id}
               text={tr.translation}
-              description={tr.description_translation || ''}
+              description={tr.translation_description || ''}
               // author={tr.created_by}
               vote={{
                 upVotes: 1, // tr.upvotes,

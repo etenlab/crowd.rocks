@@ -12,9 +12,9 @@ type AddNotificationOutput {
   notification: Notification
 }
 
-input AddPericopeTrAndDescInput {
-  description_tr: String!
+input AddPericopeTranslationInput {
   pericopeId: String!
+  tanslation_description: String!
   targetLang: LanguageInput!
   translation: String!
 }
@@ -658,7 +658,7 @@ type MarkNotificationReadOutput {
 
 type Mutation {
   addNotification(input: AddNotificationInput!): AddNotificationOutput!
-  addPericopeTrAndDescTr(input: AddPericopeTrAndDescInput!): PericopeTranslation!
+  addPericopeTrAndDescTr(input: AddPericopeTranslationInput!): PericopeTranslation!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   botTranslateDocument(input: BotTranslateDocumentInput!): DocumentUploadOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
@@ -811,23 +811,21 @@ type PericopeTextWithTranslationAndDescription {
 
 type PericopeTranslation {
   created_by: String!
-  description_translation: String
-  description_translation_id: String
   language: LanguageOutput!
   pericope_id: String!
   pericope_translation_id: ID!
   translation: String!
+  translation_description: String
 }
 
 type PericopeTranslationWithVotes {
   created_by: String!
-  description_translation: String
-  description_translation_id: String
   downvotes: Int!
   language: LanguageOutput!
   pericope_id: String!
   pericope_translation_id: ID!
   translation: String!
+  translation_description: String
   upvotes: Int!
 }
 

@@ -10,7 +10,7 @@ import {
 } from '@nestjs/graphql';
 import { PericopeTrService } from './pericope-tr.service';
 import {
-  AddPericopeTrAndDescInput,
+  AddPericopeTranslationInput,
   GetPericopeTranslationsInput,
   GetPericopiesTrInput,
   PericopeTranslation,
@@ -45,7 +45,7 @@ export class PericopeTrResolver {
   @UseGuards(BearerTokenAuthGuard)
   @Mutation(() => PericopeTranslation)
   async addPericopeTrAndDescTr(
-    @Args('input') input: AddPericopeTrAndDescInput,
+    @Args('input') input: AddPericopeTranslationInput,
     @Context() req: any,
   ): Promise<PericopeTranslation> {
     Logger.log(

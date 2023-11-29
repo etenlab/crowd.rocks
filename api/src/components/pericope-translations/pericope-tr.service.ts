@@ -21,7 +21,7 @@ import {
   PericopeTrUpsertProcedureR,
 } from './sql-string';
 import {
-  AddPericopeTrAndDescInput,
+  AddPericopeTranslationInput,
   GetPericopiesTrInput,
   PericopeTranslation,
   PericopiesTextsWithTranslationConnection,
@@ -246,8 +246,7 @@ export class PericopeTrService {
             geo_code: r.geo_code,
           },
           translation: r.translation,
-          description_translation_id: r.description_translation_id,
-          description_translation: r.description_translation,
+          translation_description: r.description,
           created_at: r.created_at,
           created_by: r.created_by,
         } as PericopeTranslation),
@@ -273,8 +272,7 @@ export class PericopeTrService {
             geo_code: r.geo_code,
           },
           translation: r.translation,
-          description_translation_id: r.description_translation_id,
-          description_translation: r.description_translation,
+          translation_description: r.description,
           created_at: r.created_at,
           created_by: r.created_by,
         } as PericopeTranslation),
@@ -282,7 +280,7 @@ export class PericopeTrService {
   }
 
   async addPericopeTrAndDesc(
-    input: AddPericopeTrAndDescInput,
+    input: AddPericopeTranslationInput,
     token: string,
   ): Promise<PericopeTranslation> {
     const res = await this.pg.pool.query<PericopeTrUpsertProcedureR>(
@@ -297,10 +295,9 @@ export class PericopeTrService {
     return {
       pericope_id: input.pericopeId,
       translation: input.translation,
-      description_translation: input.description_tr,
+      translation_description: input.tanslation_description,
       created_by: res.rows[0].p_created_by,
       pericope_translation_id: res.rows[0].p_pericope_translation_id,
-      description_translation_id: res.rows[0].p_pericope_description_tr_id,
       language: input.targetLang,
     };
   }

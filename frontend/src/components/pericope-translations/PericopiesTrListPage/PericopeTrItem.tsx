@@ -55,7 +55,7 @@ export function PericopeTrItem({
   });
 
   const handleConfirm = useCallback(
-    async (translation: string, description_tr: string) => {
+    async (translation: string, tanslation_description: string) => {
       if (!targetLang) {
         present({
           message: tr('Target language is not defined'),
@@ -69,7 +69,7 @@ export function PericopeTrItem({
       await addPericopeTr({
         variables: {
           pericopeId,
-          description_tr,
+          tanslation_description,
           translation,
           targetLang: langInfo2langInput(targetLang),
         },
