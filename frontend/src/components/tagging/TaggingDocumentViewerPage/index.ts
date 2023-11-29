@@ -1,0 +1,1 @@
+export { TaggingDocumentViewerPage } from './TaggingDocumentViewerPage';

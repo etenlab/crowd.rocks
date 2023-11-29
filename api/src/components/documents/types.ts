@@ -13,6 +13,7 @@ export class TextyDocument {
   @Field(() => String) language_code: string;
   @Field(() => String, { nullable: true }) dialect_code: string | null;
   @Field(() => String, { nullable: true }) geo_code: string | null;
+  @Field(() => String) created_by: string;
 }
 
 @ObjectType()

@@ -569,6 +569,24 @@ export class DatabaseVersionControlService {
       './src/core/sql/translation/word_to_word/translation_vote_set-v11.sql',
     );
 
+    // tagging
+    await this.runSqlFile(
+      './src/core/sql/tagging/word_range_tag_upsert-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/tagging/batch_word_range_tag_upsert-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/tagging/word_range_tag_vote_toggle-v11.sql',
+    );
+
+    // document
+    await this.runSqlFile('./src/core/sql/document/word_range_upsert-v11.sql');
+
+    // pericopes
+    await this.runSqlFile('./src/core/sql/pericopes/pericope_upsert-v11.sql');
+    await this.runSqlFile('./src/core/sql/pericopes/pericope_delete-v11.sql');
+
     // set version
     await this.setVersionNumber(11);
   }

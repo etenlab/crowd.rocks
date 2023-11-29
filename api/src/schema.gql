@@ -254,6 +254,9 @@ enum ErrorType {
   WordLikeStringInsertFailed
   WordNotFound
   WordRangeInsertFailed
+  WordRangeNotExists
+  WordRangeTagInsertFailed
+  WordRangeTagNotFound
   WordToPhraseTranslationNotFound
   WordToWordTranslationNotFound
   WordVoteNotFound
@@ -644,6 +647,8 @@ type Mutation {
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   botTranslateDocument(input: BotTranslateDocumentInput!): DocumentUploadOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
+  createTaggingOnWordRange(begin_document_word_entry_id: ID!, end_document_word_entry_id: ID!, tag_names: [String!]!): WordRangeTagWithVotesOutput!
+  deletePericopies(pericope_id: ID!): PericopeDeleteOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   forceMarkAndRetranslateOriginalMapsIds(originalMapsIds: [String!]!): GenericOutput!
@@ -688,6 +693,7 @@ type Mutation {
   togglePhraseVoteStatus(phrase_id: ID!, vote: Boolean!): PhraseVoteStatusOutputRow!
   toggleTranslationVoteStatus(from_definition_type_is_word: Boolean!, to_definition_type_is_word: Boolean!, translation_id: ID!, vote: Boolean!): TranslationVoteStatusOutputRow!
   toggleWordDefinitionVoteStatus(vote: Boolean!, word_definition_id: ID!): DefinitionVoteStatusOutputRow!
+  toggleWordRangeTagVoteStatus(vote: Boolean!, word_range_tag_id: ID!): WordRangeTagVoteStatusOutput!
   toggleWordToPhraseTrVoteStatus(vote: Boolean!, word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
   toggleWordVoteStatus(vote: Boolean!, word_id: ID!): WordVoteStatusOutputRow!
   translateAllWordsAndPhrasesByDeepL(from_language: LanguageInput!): GenericOutput!
@@ -719,6 +725,7 @@ type Mutation {
   upsertTranslation(from_definition_id: ID!, from_definition_type_is_word: Boolean!, to_definition_id: ID!, to_definition_type_is_word: Boolean!): TranslationOutput!
   upsertTranslationFromWordAndDefinitionlikeString(from_definition_id: ID!, from_definition_type_is_word: Boolean!, to_definition_input: ToDefinitionInput!): TranslationOutput!
   upsertWordDefinitionFromWordAndDefinitionlikeString(input: FromWordAndDefintionlikeStringUpsertInput!): WordDefinitionOutput!
+  upsertWordRangeTag(tag_name: String!, word_range_id: ID!): WordRangeTagWithVotesOutput!
   upsertWordRanges(input: [WordRangeInput!]!): WordRangesOutput!
   versionCreateResolver(input: VersionCreateInput!): VersionCreateOutput!
   wordDefinitionUpsert(input: WordDefinitionUpsertInput!): WordDefinitionOutput!
@@ -769,6 +776,11 @@ input PasswordResetFormInput {
 type Pericope {
   pericope_id: ID!
   start_word: String!
+}
+
+type PericopeDeleteOutput {
+  error: ErrorType!
+  pericope_id: ID
 }
 
 type PericopeEdge {
@@ -1178,6 +1190,9 @@ type Query {
   getWordDefinitionsByFlag(after: ID, first: Int, flag_name: FlagType!): WordDefinitionListConnection!
   getWordDefinitionsByLanguage(input: LanguageInput!): WordDefinitionWithVoteListOutput!
   getWordDefinitionsByWordId(word_id: ID!): WordDefinitionWithVoteListOutput!
+  getWordRangeTagVoteStatus(word_range_tag_id: ID!): WordRangeTagVoteStatusOutput!
+  getWordRangeTagsByBeginWordEntryId(begin_document_word_entry_id: ID!): WordRangeTagWithVotesOutput!
+  getWordRangeTagsByDocumentId(after: ID, document_id: ID!, first: Int): WordRangeTagsListConnection!
   getWordRangesByBeginIds(ids: [ID!]!): WordRangesOutput!
   getWordRangesByDocumentId(after: ID, document_id: ID!, first: Int): WordRangesListConnection!
   getWordToPhraseTrVoteStatus(word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
@@ -1474,6 +1489,7 @@ enum TableNameType {
   threads
   translated_maps
   word_definitions
+  word_range_tags
   word_ranges
   word_to_phrase_translations
   word_to_word_translations
@@ -1492,6 +1508,7 @@ type TextFromRangesOutput {
 }
 
 type TextyDocument {
+  created_by: String!
   dialect_code: String
   document_id: ID!
   file_id: String!
@@ -1743,6 +1760,47 @@ type WordRange {
 input WordRangeInput {
   begin_document_word_entry_id: String!
   end_document_word_entry_id: String!
+}
+
+type WordRangeTag {
+  tag_name: String!
+  word_range: WordRange!
+  word_range_tag_id: ID!
+}
+
+type WordRangeTagVoteStatus {
+  downvotes: Int!
+  upvotes: Int!
+  word_range_tag_id: ID!
+}
+
+type WordRangeTagVoteStatusOutput {
+  error: ErrorType!
+  vote_status: WordRangeTagVoteStatus
+}
+
+type WordRangeTagWithVote {
+  downvotes: Int!
+  tag_name: String!
+  upvotes: Int!
+  word_range: WordRange!
+  word_range_tag_id: ID!
+}
+
+type WordRangeTagWithVotesOutput {
+  error: ErrorType!
+  word_range_tags: [WordRangeTagWithVote]!
+}
+
+type WordRangeTagsEdge {
+  cursor: ID!
+  node: [WordRangeTagWithVote!]!
+}
+
+type WordRangeTagsListConnection {
+  edges: [WordRangeTagsEdge!]!
+  error: ErrorType!
+  pageInfo: PageInfo!
 }
 
 type WordRangesEdge {

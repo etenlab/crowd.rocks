@@ -24,11 +24,10 @@ import { useGetDocumentQuery } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
-import { PericopeDocumentViewer } from '../PericopeDocumentViewer/PericopeDocumentViewer';
+import { TaggingDocumentViewer } from '../TaggingDocumentViewer/TaggingDocumentViewer';
 import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
-import { globals } from '../../../services/globals';
 
-export function PericopeDocumentViewerPage() {
+export function TaggingDocumentViewerPage() {
   const { tr } = useTr();
   const { document_id } = useParams<{ document_id: string }>();
   const {
@@ -80,17 +79,6 @@ export function PericopeDocumentViewerPage() {
     },
   ].filter((item) => item.component !== null);
 
-  if (!document) {
-    return (
-      <PageLayout>
-        <Caption>{tr('Details')}</Caption>
-        <Box style={{ textAlign: 'center' }}>
-          <CircularProgress />
-        </Box>
-      </PageLayout>
-    );
-  }
-
   const handleToggleMode = () => {
     setMode((mode) => {
       if (mode === 'view') {
@@ -101,53 +89,66 @@ export function PericopeDocumentViewerPage() {
     });
   };
 
-  const sameUser = document
-    ? +document.created_by === globals.get_user_id()
-    : false;
+  if (!document) {
+    return (
+      <PageLayout>
+        <Caption>{tr('Tagging Tool')}</Caption>
+        <Box style={{ textAlign: 'center' }}>
+          <CircularProgress />
+        </Box>
+      </PageLayout>
+    );
+  } else {
+    return (
+      <PageLayout>
+        <Stack gap="20px">
+          <Caption>{tr('Tagging Tool')}</Caption>
 
-  return (
-    <PageLayout>
-      <Caption>{tr('Details')}</Caption>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Tag
+              label={langInfo2String(
+                subTags2LangInfo({
+                  lang: document.language_code,
+                  dialect: document.dialect_code || undefined,
+                  region: document.geo_code || undefined,
+                }),
+              )}
+              color="blue"
+            />
+            <Button
+              onClick={handleToggleMode}
+              variant="text"
+              sx={{ display: 'flex', alignItem: 'center', gap: '6px' }}
+            >
+              <Typography variant="h5" color="text.gray">
+                {tr('Edit mode')}
+              </Typography>
+              <Switch checked={mode === 'edit'} />
+            </Button>
+            <MoreHorizButton dropDownList={dropDownList} />
+          </Stack>
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Tag
-          label={langInfo2String(
-            subTags2LangInfo({
-              lang: document.language_code,
-              dialect: document.dialect_code || undefined,
-              region: document.geo_code || undefined,
-            }),
-          )}
-          color="blue"
-        />
-        <Button
-          onClick={handleToggleMode}
-          variant="text"
-          sx={{ display: 'flex', alignItem: 'center', gap: '6px' }}
-          disabled={!sameUser}
-          endIcon={<Switch checked={mode === 'edit'} disabled={!sameUser} />}
-          color="gray"
-        >
-          {tr('Edit mode')}
-        </Button>
-        <MoreHorizButton dropDownList={dropDownList} />
-      </Stack>
+          <Divider />
 
-      <Divider />
+          <Typography variant="h4" sx={{ fontWeight: 500 }}>
+            {document.file_name}
+          </Typography>
 
-      <Typography variant="h4" sx={{ fontWeight: 500 }}>
-        {document.file_name}
-      </Typography>
-
-      <PericopeDocumentViewer
-        documentId={document_id}
-        mode={mode}
-        customScrollParent={
-          pageStatus === 'shown' && ionContentScrollElement
-            ? ionContentScrollElement
-            : undefined
-        }
-      />
-    </PageLayout>
-  );
+          <TaggingDocumentViewer
+            documentId={document_id}
+            mode={mode}
+            customScrollParent={
+              pageStatus === 'shown' && ionContentScrollElement
+                ? ionContentScrollElement
+                : undefined
+            }
+          />
+        </Stack>
+      </PageLayout>
+    );
+  }
 }

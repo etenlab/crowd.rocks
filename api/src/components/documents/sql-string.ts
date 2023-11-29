@@ -10,6 +10,7 @@ export type GetDocumentById = {
   language_code: string;
   dialect_code: string | null;
   geo_code: string | null;
+  created_by: string;
 };
 
 export function getDocumentById(document_id: number): [string, [number]] {
@@ -22,7 +23,8 @@ export function getDocumentById(document_id: number): [string, [number]] {
         d.geo_code,
         d.file_id,
         f.file_name,
-        f.file_url
+        f.file_url,
+        d.created_by
       from
         documents d
       left join files f on
@@ -93,7 +95,8 @@ export function getAllDocuments({
         d.geo_code,
         d.file_id,
         f.file_name,
-        f.file_url
+        f.file_url,
+        d.created_by
       from
         documents d
       left join files f on
