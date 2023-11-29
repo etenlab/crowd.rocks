@@ -5845,7 +5845,7 @@
             "deprecationReason": null
           },
           {
-            "name": "deletePericopies",
+            "name": "deletePericopie",
             "description": null,
             "args": [
               {
@@ -19552,6 +19552,54 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "DocumentUploadOutput",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pericopeDeleted",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PericopeDeleteOutput",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pericopeVoteStatusToggled",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PericopeVoteStatusOutput",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pericopiesAdded",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PericopiesOutput",
                 "ofType": null
               }
             },

@@ -17,9 +17,13 @@ import { PericopeAddButton } from './PericopeAddButton';
 import { TempPage } from '../../documents/DocumentViewer/DocumentViewer';
 
 import {
-  useGetPericopiesByDocumentIdQuery,
   PericopeWithVote,
+  useGetPericopiesByDocumentIdQuery,
 } from '../../../generated/graphql';
+import { useSubscribeToPericopiesAddedSubscription } from '../../../hooks/useUpsertPericopeMutation';
+import { useSubscribeToPericopieDeletedSubscription } from '../../../hooks/useDeletePericopeMutation';
+import { useSubscribeToPericopeVoteStatusToggledSubscription } from '../../../hooks/useTogglePericopeVoteStatusMutation';
+
 import { PericopeDeleteButton } from './PericopeDeleteButton';
 
 type PericopeDocumentViewerProps = {
@@ -40,6 +44,9 @@ export function PericopeDocumentViewer({
       after: null,
     },
   });
+  useSubscribeToPericopiesAddedSubscription();
+  useSubscribeToPericopieDeletedSubscription();
+  useSubscribeToPericopeVoteStatusToggledSubscription();
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedWordEntryId, setSelectedWordEntryId] = useState<string | null>(

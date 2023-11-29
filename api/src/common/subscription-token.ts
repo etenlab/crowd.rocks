@@ -6,4 +6,7 @@ export class SubscriptionToken {
   static documentAdded = 'documentAdded';
   static wordRangeTagWithVoteAdded = 'wordRangeTagWithVoteAdded';
   static wordRangeTagVoteStatusToggled = 'wordRangeTagVoteStatusToggled';
+  static pericopiesAdded = 'pericopiesAdded';
+  static pericopeDeleted = 'pericopeDeleted';
+  static pericopeVoteStatusToggled = 'pericopeVoteStatusToggled';
 }

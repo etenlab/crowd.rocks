@@ -648,7 +648,7 @@ type Mutation {
   botTranslateDocument(input: BotTranslateDocumentInput!): DocumentUploadOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
   createTaggingOnWordRange(begin_document_word_entry_id: ID!, end_document_word_entry_id: ID!, tag_names: [String!]!): WordRangeTagWithVotesOutput!
-  deletePericopies(pericope_id: ID!): PericopeDeleteOutput!
+  deletePericopie(pericope_id: ID!): PericopeDeleteOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   forceMarkAndRetranslateOriginalMapsIds(originalMapsIds: [String!]!): GenericOutput!
@@ -1469,6 +1469,9 @@ type Subscription {
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
   ZipMapReport: ZipMapResult!
   documentAdded: DocumentUploadOutput!
+  pericopeDeleted: PericopeDeleteOutput!
+  pericopeVoteStatusToggled: PericopeVoteStatusOutput!
+  pericopiesAdded: PericopiesOutput!
   wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput!
   wordRangeTagWithVoteAdded: WordRangeTagWithVotesOutput!
 }
