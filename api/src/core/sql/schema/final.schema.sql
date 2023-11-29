@@ -572,7 +572,7 @@ create table pericopies(
 create table pericope_votes(
   pericope_vote_id bigserial primary key,
   user_id bigint not null references users(user_id),
-  pericope_id bigint not null references pericopies(pericope_id),
+  pericope_id bigint not null references pericopies(pericope_id) on delete cascade,
   vote bool,
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, pericope_id)

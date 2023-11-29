@@ -65,3 +65,10 @@ mutation UpsertPericope($startWord: String!) {
     }
   }
 }
+
+mutation DeletePericope($pericope_id: ID!) {
+  deletePericopies(pericope_id: $pericope_id) {
+    error
+    pericope_id
+  }
+}

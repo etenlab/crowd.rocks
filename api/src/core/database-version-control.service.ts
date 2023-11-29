@@ -583,6 +583,10 @@ export class DatabaseVersionControlService {
     // document
     await this.runSqlFile('./src/core/sql/document/word_range_upsert-v11.sql');
 
+    // pericopes
+    await this.runSqlFile('./src/core/sql/pericopes/pericope_upsert-v11.sql');
+    await this.runSqlFile('./src/core/sql/pericopes/pericope_delete-v11.sql');
+
     // set version
     await this.setVersionNumber(11);
   }

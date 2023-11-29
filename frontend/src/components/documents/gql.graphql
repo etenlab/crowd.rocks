@@ -6,6 +6,7 @@ fragment TextyDocumentFragment on TextyDocument {
   language_code
   dialect_code
   geo_code
+  created_by
 }
 
 fragment DocumentWordEntryFragment on DocumentWordEntry {

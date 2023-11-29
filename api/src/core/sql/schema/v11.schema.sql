@@ -70,3 +70,9 @@ drop index if exists idx__word_range_id__word_range_tags;
 drop index if exists idx__word_range_tag__word_range_tags;
 create index idx__word_range_id__word_range_tags on word_range_tags (word_range_id);
 create index idx__word_range_tag__word_range_tags on word_range_tags (word_range_tag);
+
+alter table pericope_votes 
+drop constraint pericope_votes_pericope_id_fkey;
+
+alter table pericope_votes 
+add constraint pericope_votes_pericope_id_fkey foreign key (pericope_id) references pericopies(pericope_id) on delete cascade;

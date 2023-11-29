@@ -720,6 +720,7 @@ export type Mutation = {
   botTranslateDocument: DocumentUploadOutput;
   createQuestionOnWordRange: QuestionOnWordRangesOutput;
   createTaggingOnWordRange: WordRangeTagWithVotesOutput;
+  deletePericopies: PericopeDeleteOutput;
   documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
   forceMarkAndRetranslateOriginalMapsIds: GenericOutput;
@@ -831,6 +832,11 @@ export type MutationCreateTaggingOnWordRangeArgs = {
   begin_document_word_entry_id: Scalars['ID']['input'];
   end_document_word_entry_id: Scalars['ID']['input'];
   tag_names: Array<Scalars['String']['input']>;
+};
+
+
+export type MutationDeletePericopiesArgs = {
+  pericope_id: Scalars['ID']['input'];
 };
 
 
@@ -1329,6 +1335,12 @@ export type Pericope = {
   __typename?: 'Pericope';
   pericope_id: Scalars['ID']['output'];
   start_word: Scalars['String']['output'];
+};
+
+export type PericopeDeleteOutput = {
+  __typename?: 'PericopeDeleteOutput';
+  error: ErrorType;
+  pericope_id?: Maybe<Scalars['ID']['output']>;
 };
 
 export type PericopeEdge = {
@@ -2622,6 +2634,7 @@ export type TextFromRangesOutput = {
 
 export type TextyDocument = {
   __typename?: 'TextyDocument';
+  created_by: Scalars['String']['output'];
   dialect_code?: Maybe<Scalars['String']['output']>;
   document_id: Scalars['ID']['output'];
   file_id: Scalars['String']['output'];
@@ -3356,7 +3369,7 @@ export type WordUpsertMutationVariables = Exact<{
 
 export type WordUpsertMutation = { __typename?: 'Mutation', wordUpsert: { __typename?: 'WordOutput', error: ErrorType, word?: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } | null } };
 
-export type TextyDocumentFragmentFragment = { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null };
+export type TextyDocumentFragmentFragment = { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_by: string };
 
 export type DocumentWordEntryFragmentFragment = { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } };
 
@@ -3364,7 +3377,7 @@ export type WordRangeFragmentFragment = { __typename?: 'WordRange', word_range_i
 
 export type WordRangesEdgeFragmentFragment = { __typename?: 'WordRangesEdge', cursor: string, node: Array<{ __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } }> };
 
-export type DocumentEdgeFragmentFragment = { __typename?: 'DocumentEdge', cursor: string, node: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } };
+export type DocumentEdgeFragmentFragment = { __typename?: 'DocumentEdge', cursor: string, node: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_by: string } };
 
 export type DocumentWordEntriesEdgeFragmentFragment = { __typename?: 'DocumentWordEntriesEdge', cursor: string, node: Array<{ __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }> };
 
@@ -3373,7 +3386,7 @@ export type DocumentUploadMutationVariables = Exact<{
 }>;
 
 
-export type DocumentUploadMutation = { __typename?: 'Mutation', documentUpload: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
+export type DocumentUploadMutation = { __typename?: 'Mutation', documentUpload: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_by: string } | null } };
 
 export type GetAllDocumentsQueryVariables = Exact<{
   input?: InputMaybe<LanguageInput>;
@@ -3382,14 +3395,14 @@ export type GetAllDocumentsQueryVariables = Exact<{
 }>;
 
 
-export type GetAllDocumentsQuery = { __typename?: 'Query', getAllDocuments: { __typename?: 'DocumentListConnection', error: ErrorType, edges: Array<{ __typename?: 'DocumentEdge', cursor: string, node: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+export type GetAllDocumentsQuery = { __typename?: 'Query', getAllDocuments: { __typename?: 'DocumentListConnection', error: ErrorType, edges: Array<{ __typename?: 'DocumentEdge', cursor: string, node: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_by: string } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
 
 export type GetDocumentQueryVariables = Exact<{
   document_id: Scalars['String']['input'];
 }>;
 
 
-export type GetDocumentQuery = { __typename?: 'Query', getDocument: { __typename?: 'GetDocumentOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
+export type GetDocumentQuery = { __typename?: 'Query', getDocument: { __typename?: 'GetDocumentOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_by: string } | null } };
 
 export type GetDocumentWordEntriesByDocumentIdQueryVariables = Exact<{
   document_id: Scalars['ID']['input'];
@@ -3438,7 +3451,7 @@ export type BotTranslateDocumentMutationVariables = Exact<{
 }>;
 
 
-export type BotTranslateDocumentMutation = { __typename?: 'Mutation', botTranslateDocument: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null } | null } };
+export type BotTranslateDocumentMutation = { __typename?: 'Mutation', botTranslateDocument: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_by: string } | null } };
 
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -3859,6 +3872,13 @@ export type UpsertPericopeMutationVariables = Exact<{
 
 
 export type UpsertPericopeMutation = { __typename?: 'Mutation', upsertPericopies: { __typename?: 'PericopiesOutput', error: ErrorType, pericopies: Array<{ __typename?: 'Pericope', pericope_id: string, start_word: string } | null> } };
+
+export type DeletePericopeMutationVariables = Exact<{
+  pericope_id: Scalars['ID']['input'];
+}>;
+
+
+export type DeletePericopeMutation = { __typename?: 'Mutation', deletePericopies: { __typename?: 'PericopeDeleteOutput', error: ErrorType, pericope_id?: string | null } };
 
 export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } };
 
@@ -4710,6 +4730,7 @@ export const TextyDocumentFragmentFragmentDoc = gql`
   language_code
   dialect_code
   geo_code
+  created_by
 }
     `;
 export const DocumentEdgeFragmentFragmentDoc = gql`
@@ -8271,6 +8292,40 @@ export function useUpsertPericopeMutation(baseOptions?: Apollo.MutationHookOptio
 export type UpsertPericopeMutationHookResult = ReturnType<typeof useUpsertPericopeMutation>;
 export type UpsertPericopeMutationResult = Apollo.MutationResult<UpsertPericopeMutation>;
 export type UpsertPericopeMutationOptions = Apollo.BaseMutationOptions<UpsertPericopeMutation, UpsertPericopeMutationVariables>;
+export const DeletePericopeDocument = gql`
+    mutation DeletePericope($pericope_id: ID!) {
+  deletePericopies(pericope_id: $pericope_id) {
+    error
+    pericope_id
+  }
+}
+    `;
+export type DeletePericopeMutationFn = Apollo.MutationFunction<DeletePericopeMutation, DeletePericopeMutationVariables>;
+
+/**
+ * __useDeletePericopeMutation__
+ *
+ * To run a mutation, you first call `useDeletePericopeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePericopeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePericopeMutation, { data, loading, error }] = useDeletePericopeMutation({
+ *   variables: {
+ *      pericope_id: // value for 'pericope_id'
+ *   },
+ * });
+ */
+export function useDeletePericopeMutation(baseOptions?: Apollo.MutationHookOptions<DeletePericopeMutation, DeletePericopeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePericopeMutation, DeletePericopeMutationVariables>(DeletePericopeDocument, options);
+      }
+export type DeletePericopeMutationHookResult = ReturnType<typeof useDeletePericopeMutation>;
+export type DeletePericopeMutationResult = Apollo.MutationResult<DeletePericopeMutation>;
+export type DeletePericopeMutationOptions = Apollo.BaseMutationOptions<DeletePericopeMutation, DeletePericopeMutationVariables>;
 export const PhraseDefinitionReadDocument = gql`
     query PhraseDefinitionRead($id: ID!) {
   phraseDefinitionRead(id: $id) {
@@ -11225,6 +11280,7 @@ export const namedOperations = {
     MarkNotificationRead: 'MarkNotificationRead',
     TogglePericopeVoteStatus: 'TogglePericopeVoteStatus',
     UpsertPericope: 'UpsertPericope',
+    DeletePericope: 'DeletePericope',
     PhraseDefinitionUpsert: 'PhraseDefinitionUpsert',
     TogglePhraseDefinitionVoteStatus: 'TogglePhraseDefinitionVoteStatus',
     TogglePhraseVoteStatus: 'TogglePhraseVoteStatus',
