@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Item } from '../../common/TranslatedTextItem/TranslatedTextItemViewer';
 import { TranslatedTextItem } from '../../common/TranslatedTextItem';
 import { useHistory, useParams } from 'react-router';
+import { useAddPericopeTrAndDescTrMutation } from '../../../generated/graphql';
+import { useIonToast } from '@ionic/react';
+import { useTr } from '../../../hooks/useTr';
+import { useAppContext } from '../../../hooks/useAppContext';
+import { langInfo2langInput } from '../../../../../utils';
 
 type TPericopeItemParams = {
   original: Item;
@@ -21,6 +26,15 @@ export function PericopeTrItem({
     language_id: string;
     cluster_id: string;
   }>();
+  const {
+    states: {
+      global: {
+        langauges: { targetLang },
+      },
+    },
+  } = useAppContext();
+  const [present] = useIonToast();
+  const { tr } = useTr();
 
   const handleDetail = () => {
     history.push(
@@ -28,10 +42,41 @@ export function PericopeTrItem({
     );
   };
 
-  const handleConfirm = (translation: string, description: string) => {
-    setSaving(true);
-    console.log('handleConfirm', translation, description);
-  };
+  const [addPericopeTr] = useAddPericopeTrAndDescTrMutation({
+    onError: (error) => {
+      console.log(error);
+      present({
+        message: tr('Error with creating translation for pericope'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+    },
+  });
+
+  const handleConfirm = useCallback(
+    async (translation: string, description_tr: string) => {
+      if (!targetLang) {
+        present({
+          message: tr('Target language is not defined'),
+          duration: 1500,
+          position: 'top',
+          color: 'danger',
+        });
+        return;
+      }
+      setSaving(true);
+      await addPericopeTr({
+        variables: {
+          pericopeId,
+          description_tr,
+          translation,
+          targetLang: langInfo2langInput(targetLang),
+        },
+      });
+    },
+    [addPericopeTr, pericopeId, present, targetLang, tr],
+  );
 
   const handleCancel = () => {
     console.log('handleCancel');

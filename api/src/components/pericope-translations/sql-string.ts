@@ -1,4 +1,6 @@
+import { ErrorType, GenericOutput } from '../../common/types';
 import { LanguageInput } from '../common/types';
+import { AddPericopeTrAndDescInput } from './types';
 
 export type PericopeTanslationsIdsWithVotesSqlR = {
   pericope_translation_id: string;
@@ -55,6 +57,7 @@ export type GetPericopeTranslationSqlR = {
   pericope_translation_id: string;
   pericope_id: string;
   translation: string;
+  description_translation_id: string;
   description_translation: string;
   language_code: string;
   dialect_code: string;
@@ -74,6 +77,7 @@ export function getPericopeTranslationSql({
         pt.pericope_translation_id, 
         pt.translation as translation,
 	      pdt.translation as description_translation,
+	      pdt.pericope_description_translation_id as description_translation_id,
         pt.language_code,
         pt.dialect_code,
         pt.geo_code,
@@ -110,5 +114,39 @@ export function getPericopeDescription({
         and pd.pericope_id =$1
     `,
     params,
+  ];
+}
+
+export type PericopeTrUpsertProcedureR = {
+  p_translation_id: string;
+  p_description_tr_id: string;
+  p_error_type: ErrorType;
+  p_created_by: string;
+};
+export function callPericopeTrInsertProcedure(
+  {
+    pericopeId,
+    description_tr,
+    translation,
+    targetLang: { dialect_code, geo_code, language_code },
+  }: AddPericopeTrAndDescInput,
+  token: string,
+): [
+  string,
+  [string, string, string, string, string, string | null, string | null],
+] {
+  return [
+    `
+      call pericope_translation_insert($1, $2, $3, $4, $5, $6, $7, null, null, null, null);
+    `,
+    [
+      token,
+      pericopeId,
+      translation,
+      description_tr,
+      language_code,
+      dialect_code,
+      geo_code,
+    ],
   ];
 }

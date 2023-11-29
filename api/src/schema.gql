@@ -12,6 +12,13 @@ type AddNotificationOutput {
   notification: Notification
 }
 
+input AddPericopeTrAndDescInput {
+  description_tr: String!
+  pericopeId: String!
+  targetLang: LanguageInput!
+  translation: String!
+}
+
 type Answer {
   answer: String
   answer_id: ID!
@@ -219,6 +226,7 @@ enum ErrorType {
   PericopeGetTranslationError
   PericopeInsertFailed
   PericopeNotFound
+  PericopeTranslationInsertFailed
   PericopeVoteToggleFailed
   PhraseDefinitionAlreadyExists
   PhraseDefinitionNotFound
@@ -645,6 +653,7 @@ type MarkNotificationReadOutput {
 
 type Mutation {
   addNotification(input: AddNotificationInput!): AddNotificationOutput!
+  addPericopeTrAndDescTr(input: AddPericopeTrAndDescInput!): PericopeTranslation!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   botTranslateDocument(input: BotTranslateDocumentInput!): DocumentUploadOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
@@ -796,9 +805,9 @@ type PericopeTextWithTranslationAndDescription {
 }
 
 type PericopeTranslation {
-  created_at: DateTime!
   created_by: String!
   description_translation: String
+  description_translation_id: String
   language: LanguageOutput!
   pericope_id: String!
   pericope_translation_id: ID!
@@ -806,9 +815,9 @@ type PericopeTranslation {
 }
 
 type PericopeTranslationWithVotes {
-  created_at: DateTime!
   created_by: String!
   description_translation: String
+  description_translation_id: String
   downvotes: Int!
   language: LanguageOutput!
   pericope_id: String!

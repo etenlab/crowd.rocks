@@ -10,7 +10,6 @@ fragment PericopeTranslationFragment on PericopeTranslation {
   translation
   description_translation
   created_by
-  created_at
   language {
     ...LanguageOutputFragment
   }
@@ -67,5 +66,23 @@ query GetPericopeTextAndDesctiption($pericopeId: String!) {
     pericope_id
     pericope_text
     pericope_description_text
+  }
+}
+
+mutation AddPericopeTrAndDescTr(
+  $pericopeId: String!
+  $targetLang: LanguageInput!
+  $translation: String!
+  $description_tr: String!
+) {
+  addPericopeTrAndDescTr(
+    input: {
+      pericopeId: $pericopeId
+      targetLang: $targetLang
+      translation: $translation
+      description_tr: $description_tr
+    }
+  ) {
+    ...PericopeTranslationFragment
   }
 }

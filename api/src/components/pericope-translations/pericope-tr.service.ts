@@ -9,14 +9,17 @@ import {
 } from '../pericopies/pericopies.service';
 import { WordsTillEndOfDocumentSqlR } from '../pericopies/sql-string';
 import {
+  callPericopeTrInsertProcedure,
   getPericopeDescription,
   getPericopeTanslationsIdsWithVotesSql,
   getPericopeTranslationSql,
   GetPericopeTranslationSqlR,
   PericopeDescriptionSqlR,
   PericopeTanslationsIdsWithVotesSqlR,
+  PericopeTrUpsertProcedureR,
 } from './sql-string';
 import {
+  AddPericopeTrAndDescInput,
   GetPericopiesTrInput,
   PericopeTranslation,
   PericopiesTextsWithTranslationConnection,
@@ -241,10 +244,35 @@ export class PericopeTrService {
             geo_code: r.geo_code,
           },
           translation: r.translation,
+          description_translation_id: r.description_translation_id,
           description_translation: r.description_translation,
           created_at: r.created_at,
           created_by: r.created_by,
         } as PericopeTranslation),
     );
+  }
+
+  async addPericopeTrAndDesc(
+    input: AddPericopeTrAndDescInput,
+    token: string,
+  ): Promise<PericopeTranslation> {
+    const res = await this.pg.pool.query<PericopeTrUpsertProcedureR>(
+      ...callPericopeTrInsertProcedure(input, token),
+    );
+    if (res.rows.length != 1) {
+      Logger.error(
+        `resQ.rows.length != 1: ${JSON.stringify(res.rows)}`,
+        `PericopeTrService#addPericopeTrAndDesc`,
+      );
+    }
+    return {
+      pericope_id: input.pericopeId,
+      translation: input.translation,
+      description_translation: input.description_tr,
+      created_by: res.rows[0].p_created_by,
+      pericope_translation_id: res.rows[0].p_translation_id,
+      description_translation_id: res.rows[0].p_description_tr_id,
+      language: input.targetLang,
+    };
   }
 }
