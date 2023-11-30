@@ -30,10 +30,12 @@ export function DocumentsPage() {
   const {
     states: {
       global: {
-        langauges: { sourceLang },
+        langauges: {
+          documentPage: { source: sourceLang },
+        },
       },
     },
-    actions: { setSourceLanguage, createModal },
+    actions: { changeDocumentSourceLanguage, createModal },
   } = useAppContext();
 
   const [getAllDocuments, { data }] = useGetAllDocumentsLazyQuery();
@@ -82,9 +84,9 @@ export function DocumentsPage() {
           title={tr('Select your language')}
           selected={sourceLang}
           onChange={(_sourceLangTag, sourceLangInfo) => {
-            setSourceLanguage(sourceLangInfo);
+            changeDocumentSourceLanguage(sourceLangInfo);
           }}
-          onClearClick={() => setSourceLanguage(null)}
+          onClearClick={() => changeDocumentSourceLanguage(null)}
         />
 
         <Stack gap="8px">

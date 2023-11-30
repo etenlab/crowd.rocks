@@ -19,7 +19,7 @@ import { DocumentUploadModal } from '../../documents/DocumentsPage/DocumentUploa
 import { PAGE_SIZE } from '../../../const/commonConst';
 import { DocumentList } from '../../documents/DocumentList';
 
-export function DocumentListPage() {
+export function SuperDocumentListPage() {
   const { tr } = useTr();
   const history = useHistory();
   const { nation_id, language_id, cluster_id } = useParams<{
