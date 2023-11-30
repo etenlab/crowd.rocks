@@ -13,10 +13,10 @@ const registerData = RegisterData.validRegisterData();
 const forumName = 'Automation Forum ' + Math.random();
 const forumDescription = 'Automation Forum Description ' + Math.random();
 const topicName = 'Automation Topic ' + Math.random();
+const topicDescription = 'Automation Topic Description ' + Math.random();
 const topicWithoutDescription =
   'Automation topic without description' + Math.random();
 const editedTopicName = 'Automation Edited topic ' + Math.random();
-const topicDescription = 'Automation Topic Description ' + Math.random();
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test.beforeAll(async () => {
@@ -79,7 +79,7 @@ test('1: Verify that user is able to create new topic successfully', async ({
   await homePage.clickOnCommunitySection();
 
   //Search the forum name and click on the forum
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.clickOnTheForum(forumName);
 
   //Create a new topic
@@ -110,7 +110,7 @@ test('2: Verify that user is not allowed to create a topic with a topic Name whi
   await homePage.clickOnCommunitySection();
 
   //Search the forum name and click on the forum
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.clickOnTheForum(forumName);
 
   //Create a new topic
@@ -141,11 +141,11 @@ test('3: Verify that search functionality is working properly', async ({
   await homePage.clickOnCommunitySection();
 
   //Search the forum name and click on the forum
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.clickOnTheForum(forumName);
 
   //Verify that user can search the forum by using search bar
-  await forumsPage.searchForumName(topicName.toLowerCase());
+  await commonPage.searchName(topicName.toLowerCase());
   expect(await commonPage.isCreatedCommunityVisible(topicName)).toBeTruthy();
 });
 
@@ -156,6 +156,7 @@ test('4: Verify that user is able to create topic without adding the description
   const loginPage = new LoginPage(page);
   const commonPage = new CommonPage(page);
   const homePage = new HomePage(page);
+  const topicsPage = new TopicsPage(page);
 
   //Navigate to the URL
   await page.goto(pageUrls.LoginPage);
@@ -165,16 +166,16 @@ test('4: Verify that user is able to create topic without adding the description
   await homePage.clickOnCommunitySection();
 
   //Search the forum name and click on the forum
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.clickOnTheForum(forumName);
 
   //Create a new forum without adding the description
   await commonPage.clickOnAddNewButton(community.Topics);
-  await forumsPage.fillForumDetails(topicWithoutDescription, '');
+  await topicsPage.fillTopicDetails(topicWithoutDescription, '');
   await commonPage.clickOnCreateNewButton();
 
   //Verify the validation messsage
-  expect(await forumsPage.getValidationMessage()).toEqual(
+  expect(await commonPage.getValidationMessage()).toEqual(
     'Success at creating new forum folder!',
   );
 });
@@ -186,6 +187,7 @@ test('5: Verify that validation message is appeared when user passes blank topic
   const loginPage = new LoginPage(page);
   const commonPage = new CommonPage(page);
   const homePage = new HomePage(page);
+  const topicsPage = new TopicsPage(page);
 
   //Navigate to the URL
   await page.goto(pageUrls.LoginPage);
@@ -195,17 +197,17 @@ test('5: Verify that validation message is appeared when user passes blank topic
   await homePage.clickOnCommunitySection();
 
   //Search the forum name and click on the forum
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.clickOnTheForum(forumName);
 
   //Create a new forum without adding the description
   await commonPage.clickOnAddNewButton(community.Topics);
-  await forumsPage.fillForumDetails('', '');
+  await topicsPage.fillTopicDetails('', '');
   await commonPage.clickOnCreateNewButton();
 
   //Verify the validation messsage
-  expect(await forumsPage.getValidationMessage()).toEqual(
-    'Folder name cannot be empty string!',
+  expect(await commonPage.getValidationMessage()).toEqual(
+    'Topic name cannot be empty string!',
   );
 });
 
@@ -216,6 +218,7 @@ test('6: Verify that validation message is appeared when user passes only descri
   const loginPage = new LoginPage(page);
   const commonPage = new CommonPage(page);
   const homePage = new HomePage(page);
+  const topicsPage = new TopicsPage(page);
 
   //Navigate to the URL
   await page.goto(pageUrls.LoginPage);
@@ -225,17 +228,17 @@ test('6: Verify that validation message is appeared when user passes only descri
   await homePage.clickOnCommunitySection();
 
   //Search the forum name and click on the forum
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.clickOnTheForum(forumName);
 
   //Create a new forum without adding the description
   await commonPage.clickOnAddNewButton(community.Topics);
-  await forumsPage.fillForumDetails('', topicDescription);
+  await topicsPage.fillTopicDetails('', topicDescription);
   await commonPage.clickOnCreateNewButton();
 
   //Verify the validation messsage
-  expect(await forumsPage.getValidationMessage()).toEqual(
-    'Folder name cannot be empty string!',
+  expect(await commonPage.getValidationMessage()).toEqual(
+    'Topic name cannot be empty string!',
   );
 });
 
@@ -256,12 +259,12 @@ test('7: Verify that topic is not created when click on cancel button after ente
   await homePage.clickOnCommunitySection();
 
   //Search the forum name and click on the forum
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.clickOnTheForum(forumName);
 
   //Create a new forum without adding the description
   await commonPage.clickOnAddNewButton(community.Topics);
-  await forumsPage.fillForumDetails(topicName, topicDescription);
+  await topicsPage.fillTopicDetails(topicName, topicDescription);
   await commonPage.clickOnCancelButton();
 
   //Verify the validation messsage
@@ -285,7 +288,7 @@ test('8: Verify that user can edit the created topic and can search the edited t
   await forumsPage.clickOnCommunitySection();
 
   //Search the forum name and click on the forum
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.clickOnTheForum(forumName);
 
   //Edit the forum details and click on the save button
@@ -295,13 +298,15 @@ test('8: Verify that user can edit the created topic and can search the edited t
   await commonPage.clickOnSaveButton();
 
   //Verify the Validation message
-  expect(await forumsPage.getValidationMessage()).toEqual(
+  expect(await commonPage.getValidationMessage()).toEqual(
     'Success at updating forum folder!',
   );
   //Verify the edited forum is displayed on the forums page
   await page.waitForTimeout(4000);
-  await forumsPage.searchForumName(editedTopicName.toLowerCase());
-  expect(await forumsPage.isEditedForumVisible(editedTopicName)).toBeTruthy();
+  await commonPage.searchName(editedTopicName.toLowerCase());
+  expect(
+    await commonPage.isCreatedCommunityVisible(editedTopicName),
+  ).toBeTruthy();
 });
 
 test.afterAll('Delete Forum', async () => {
@@ -310,6 +315,7 @@ test.afterAll('Delete Forum', async () => {
   const page = await context.newPage();
   const forumsPage = new ForumsPage(page);
   const loginPage = new LoginPage(page);
+  const commonPage = new CommonPage(page);
 
   //Navigate to the URL
   await page.goto(pageUrls.LoginPage);
@@ -319,7 +325,7 @@ test.afterAll('Delete Forum', async () => {
   await forumsPage.clickOnCommunitySection();
 
   //Delete all forums
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.deleteForum(forumName);
   await browser.close();
 });

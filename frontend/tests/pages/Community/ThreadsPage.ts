@@ -2,6 +2,8 @@ import BasePage from '../BasePage';
 
 const threadNameTextbox = `input[placeholder='Thread Name']`;
 const totalThreadsCount = `(//div[@class='MuiBox-root css-0'])[3]//following-sibling::div`;
+const meatballsMenuButton = (threadsName: string) =>
+  `(//h3[text()='${threadsName}']//..//..//button)[2]`;
 const postButton = (threadName: string) =>
   `//h3[text()='${threadName}']//..//button`;
 const backArrowButton = (topicName: string) =>
@@ -32,7 +34,10 @@ class ThreadsPage extends BasePage {
   async getThreadsCount() {
     return await this.page.locator(totalThreadsCount).count();
   }
-
+  async clickOnEditButton(threadName: string) {
+    await this.page.locator(meatballsMenuButton(threadName)).click();
+    await this.page.getByRole('button', { name: 'Edit' }).click();
+  }
   async clickOnBackArrowButton(topicName: string) {
     await this.page.locator(backArrowButton(topicName)).click();
   }

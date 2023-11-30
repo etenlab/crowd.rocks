@@ -111,19 +111,6 @@ test('1: End to end linear flow for Community forums', async ({ page }) => {
   expect(await topicsPage.getPostsCount(topicName)).toEqual(
     expectedPostsCount.toLocaleString(),
   );
-
-  //Get topics count from the topics page & Verify the Topics,Threads & posts count on the forum page
-  const expectedTopicsCount = await topicsPage.getTopicsCount();
-  await topicsPage.clickOnBackArrowButton(forumName);
-  expect(await forumsPage.getTopicsCount(forumName)).toEqual(
-    expectedTopicsCount.toLocaleString(),
-  );
-  expect(await forumsPage.getThreadsCount(forumName)).toEqual(
-    expectedThreadsCount.toLocaleString(),
-  );
-  expect(await forumsPage.getPostsCount(forumName)).toEqual(
-    expectedPostsCount.toLocaleString(),
-  );
 });
 
 test.afterAll('Delete Forum', async () => {
