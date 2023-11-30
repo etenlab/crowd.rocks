@@ -42,17 +42,7 @@ export function PericopeTrItem({
     );
   };
 
-  const [addPericopeTr] = useAddPericopeTrMutation({
-    onError: (error) => {
-      console.log(error);
-      present({
-        message: tr('Error with creating translation for pericope'),
-        duration: 1500,
-        position: 'top',
-        color: 'danger',
-      });
-    },
-  });
+  const [addPericopeTr] = useAddPericopeTrMutation();
 
   const handleConfirm = useCallback(
     async (translation: string, tanslation_description: string) => {
