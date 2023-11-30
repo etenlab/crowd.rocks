@@ -27,6 +27,12 @@ class HomePage extends BasePage {
     await this.page.locator(languageText).waitFor();
     return await this.page.locator(languageText).isVisible();
   }
+  async clickOnCommunitySection() {
+    await this.page
+      .locator('ion-card-header')
+      .filter({ hasText: 'Forums' })
+      .click();
+  }
 }
 
 export default HomePage;

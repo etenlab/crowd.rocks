@@ -19,3 +19,9 @@ export enum leftMenu {
   Logout = 'Logout',
   MyProfile = 'My profile',
 }
+
+export enum community {
+  Forums = 'Forums',
+  Topics = 'Topics',
+  Threads = 'Threads',
+}
