@@ -1,12 +1,18 @@
 import { useCallback, useState } from 'react';
 import { useParams } from 'react-router';
-import { Divider, Stack, Typography, Button } from '@mui/material';
+import {
+  Divider,
+  Stack,
+  Typography,
+  Button,
+  LinearProgress,
+} from '@mui/material';
 
 import { Caption } from '../../common/Caption/Caption';
 import {
   TableNameType,
-  useAddPericopeTrAndDescTrMutation,
   useGetPericopeTextAndDesctiptionQuery,
+  useGetPericopeTranslationsQuery,
 } from '../../../generated/graphql';
 
 import { useTr } from '../../../hooks/useTr';
@@ -28,6 +34,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { PericopeTranslationList } from './PericopeTranslationsList';
 import { PageLayout } from '../../common/PageLayout';
 import { langInfo2langInput } from '../../../../../utils';
+import { useAddPericopeTrMutation } from '../../../hooks/useAddPericopeTrMutation';
 
 export function PericopeTranslationPage() {
   const { pericopeId } = useParams<{ pericopeId: string }>();
@@ -46,19 +53,19 @@ export function PericopeTranslationPage() {
   const pericopeTrData = useGetPericopeTextAndDesctiptionQuery({
     variables: { pericopeId },
   });
+
+  const translationsQ = useGetPericopeTranslationsQuery({
+    variables: {
+      pericopeId,
+      targetLang: targetLang
+        ? langInfo2langInput(targetLang)
+        : { language_code: '' },
+    },
+  }).data?.getPericopeTranslations;
+
   const pericopeTr = pericopeTrData.data?.getPericopeTextAndDesctiption;
 
-  const [addPericopeTr] = useAddPericopeTrAndDescTrMutation({
-    onError: (error) => {
-      console.log(error);
-      present({
-        message: tr('Error with creating translation for pericope'),
-        duration: 1500,
-        position: 'top',
-        color: 'danger',
-      });
-    },
-  });
+  const [addPericopeTr] = useAddPericopeTrMutation();
 
   const handleCancelForm = () => {
     setOpenForm(false);
@@ -163,7 +170,13 @@ export function PericopeTranslationPage() {
           {formCom}
           {formButtonCom}
 
-          <PericopeTranslationList pericope_id={pericopeTr.pericope_id} />
+          {translationsQ?.translations ? (
+            <PericopeTranslationList
+              translations={translationsQ?.translations}
+            />
+          ) : (
+            <LinearProgress />
+          )}
         </>
       )}
     </PageLayout>

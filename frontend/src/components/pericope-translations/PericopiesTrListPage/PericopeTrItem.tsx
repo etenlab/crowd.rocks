@@ -2,11 +2,11 @@ import { useCallback, useState } from 'react';
 import { Item } from '../../common/TranslatedTextItem/TranslatedTextItemViewer';
 import { TranslatedTextItem } from '../../common/TranslatedTextItem';
 import { useHistory, useParams } from 'react-router';
-import { useAddPericopeTrAndDescTrMutation } from '../../../generated/graphql';
 import { useIonToast } from '@ionic/react';
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { langInfo2langInput } from '../../../../../utils';
+import { useAddPericopeTrMutation } from '../../../hooks/useAddPericopeTrMutation';
 
 type TPericopeItemParams = {
   original: Item;
@@ -42,7 +42,7 @@ export function PericopeTrItem({
     );
   };
 
-  const [addPericopeTr] = useAddPericopeTrAndDescTrMutation({
+  const [addPericopeTr] = useAddPericopeTrMutation({
     onError: (error) => {
       console.log(error);
       present({

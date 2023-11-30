@@ -101,13 +101,13 @@ query GetPericopeTextAndDesctiption($pericopeId: String!) {
   }
 }
 
-mutation AddPericopeTrAndDescTr(
+mutation AddPericopeTr(
   $pericopeId: String!
   $targetLang: LanguageInput!
   $translation: String!
   $tanslation_description: String!
 ) {
-  addPericopeTrAndDescTr(
+  addPericopeTr(
     input: {
       pericopeId: $pericopeId
       targetLang: $targetLang

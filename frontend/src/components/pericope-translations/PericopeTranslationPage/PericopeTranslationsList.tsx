@@ -2,42 +2,22 @@ import { Stack, LinearProgress } from '@mui/material';
 
 import {
   ErrorType,
-  useGetPericopeTranslationsQuery,
+  PericopeTranslationWithVotes,
   useTogglePericopeTrVoteStatusMutation,
 } from '../../../generated/graphql';
 
-import { useAppContext } from '../../../hooks/useAppContext';
-
 import { TextCard } from '../../common/TextCard';
-import { langInfo2langInput } from '../../../../../utils';
 import { useCallback, useEffect } from 'react';
 import { useIonToast } from '@ionic/react';
+
 export type PericopeTranslationListProps = {
-  pericope_id: string;
-  tempTranslation?: string;
+  translations: PericopeTranslationWithVotes[];
 };
 
 export function PericopeTranslationList({
-  pericope_id,
+  translations,
 }: PericopeTranslationListProps) {
-  const {
-    states: {
-      global: {
-        langauges: { targetLang },
-      },
-    },
-  } = useAppContext();
   const [present] = useIonToast();
-
-  const translationsQ = useGetPericopeTranslationsQuery({
-    variables: {
-      pericopeId: pericope_id,
-      targetLang: targetLang
-        ? langInfo2langInput(targetLang)
-        : { language_code: '' },
-    },
-    fetchPolicy: 'no-cache',
-  }).data?.getPericopeTranslations;
 
   const [toggleTrVoteStatus, { data: voteData, loading: voteLoading }] =
     useTogglePericopeTrVoteStatusMutation();
@@ -71,15 +51,10 @@ export function PericopeTranslationList({
 
   return (
     <Stack gap="24px">
-      {!translationsQ ? (
+      {!translations ? (
         <LinearProgress />
       ) : (
-        // eslint-disable-next-line prettier/prettier, @typescript-eslint/no-explicit-any
-        translationsQ.translations.map((tr) => {
-          // if (tempTranslation && tempTranslation !== item.value) {
-          //   return null;
-          // }
-
+        translations.map((tr) => {
           return (
             <TextCard
               key={tr.pericope_translation_id}

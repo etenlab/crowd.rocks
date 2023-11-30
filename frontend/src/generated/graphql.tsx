@@ -735,7 +735,7 @@ export type MarkNotificationReadOutput = {
 export type Mutation = {
   __typename?: 'Mutation';
   addNotification: AddNotificationOutput;
-  addPericopeTrAndDescTr: PericopeTranslation;
+  addPericopeTr: PericopeTranslation;
   avatarUpdateResolver: AvatarUpdateOutput;
   botTranslateDocument: DocumentUploadOutput;
   createQuestionOnWordRange: QuestionOnWordRangesOutput;
@@ -833,7 +833,7 @@ export type MutationAddNotificationArgs = {
 };
 
 
-export type MutationAddPericopeTrAndDescTrArgs = {
+export type MutationAddPericopeTrArgs = {
   input: AddPericopeTranslationInput;
 };
 
@@ -3944,7 +3944,7 @@ export type GetPericopeTextAndDesctiptionQueryVariables = Exact<{
 
 export type GetPericopeTextAndDesctiptionQuery = { __typename?: 'Query', getPericopeTextAndDesctiption: { __typename?: 'PericopeTextWithDescription', error: ErrorType, pericope_id?: string | null, pericope_text: string, pericope_description_text: string } };
 
-export type AddPericopeTrAndDescTrMutationVariables = Exact<{
+export type AddPericopeTrMutationVariables = Exact<{
   pericopeId: Scalars['String']['input'];
   targetLang: LanguageInput;
   translation: Scalars['String']['input'];
@@ -3952,7 +3952,7 @@ export type AddPericopeTrAndDescTrMutationVariables = Exact<{
 }>;
 
 
-export type AddPericopeTrAndDescTrMutation = { __typename?: 'Mutation', addPericopeTrAndDescTr: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
+export type AddPericopeTrMutation = { __typename?: 'Mutation', addPericopeTr: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } };
 
 export type PericopeTrVoteStatusFragmentFragment = { __typename?: 'PericopeTrVoteStatus', pericope_translation_id: string, upvotes: number, downvotes: number };
 
@@ -8441,29 +8441,29 @@ export function useGetPericopeTextAndDesctiptionLazyQuery(baseOptions?: Apollo.L
 export type GetPericopeTextAndDesctiptionQueryHookResult = ReturnType<typeof useGetPericopeTextAndDesctiptionQuery>;
 export type GetPericopeTextAndDesctiptionLazyQueryHookResult = ReturnType<typeof useGetPericopeTextAndDesctiptionLazyQuery>;
 export type GetPericopeTextAndDesctiptionQueryResult = Apollo.QueryResult<GetPericopeTextAndDesctiptionQuery, GetPericopeTextAndDesctiptionQueryVariables>;
-export const AddPericopeTrAndDescTrDocument = gql`
-    mutation AddPericopeTrAndDescTr($pericopeId: String!, $targetLang: LanguageInput!, $translation: String!, $tanslation_description: String!) {
-  addPericopeTrAndDescTr(
+export const AddPericopeTrDocument = gql`
+    mutation AddPericopeTr($pericopeId: String!, $targetLang: LanguageInput!, $translation: String!, $tanslation_description: String!) {
+  addPericopeTr(
     input: {pericopeId: $pericopeId, targetLang: $targetLang, translation: $translation, tanslation_description: $tanslation_description}
   ) {
     ...PericopeTranslationFragment
   }
 }
     ${PericopeTranslationFragmentFragmentDoc}`;
-export type AddPericopeTrAndDescTrMutationFn = Apollo.MutationFunction<AddPericopeTrAndDescTrMutation, AddPericopeTrAndDescTrMutationVariables>;
+export type AddPericopeTrMutationFn = Apollo.MutationFunction<AddPericopeTrMutation, AddPericopeTrMutationVariables>;
 
 /**
- * __useAddPericopeTrAndDescTrMutation__
+ * __useAddPericopeTrMutation__
  *
- * To run a mutation, you first call `useAddPericopeTrAndDescTrMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useAddPericopeTrAndDescTrMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useAddPericopeTrMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddPericopeTrMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [addPericopeTrAndDescTrMutation, { data, loading, error }] = useAddPericopeTrAndDescTrMutation({
+ * const [addPericopeTrMutation, { data, loading, error }] = useAddPericopeTrMutation({
  *   variables: {
  *      pericopeId: // value for 'pericopeId'
  *      targetLang: // value for 'targetLang'
@@ -8472,13 +8472,13 @@ export type AddPericopeTrAndDescTrMutationFn = Apollo.MutationFunction<AddPerico
  *   },
  * });
  */
-export function useAddPericopeTrAndDescTrMutation(baseOptions?: Apollo.MutationHookOptions<AddPericopeTrAndDescTrMutation, AddPericopeTrAndDescTrMutationVariables>) {
+export function useAddPericopeTrMutation(baseOptions?: Apollo.MutationHookOptions<AddPericopeTrMutation, AddPericopeTrMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<AddPericopeTrAndDescTrMutation, AddPericopeTrAndDescTrMutationVariables>(AddPericopeTrAndDescTrDocument, options);
+        return Apollo.useMutation<AddPericopeTrMutation, AddPericopeTrMutationVariables>(AddPericopeTrDocument, options);
       }
-export type AddPericopeTrAndDescTrMutationHookResult = ReturnType<typeof useAddPericopeTrAndDescTrMutation>;
-export type AddPericopeTrAndDescTrMutationResult = Apollo.MutationResult<AddPericopeTrAndDescTrMutation>;
-export type AddPericopeTrAndDescTrMutationOptions = Apollo.BaseMutationOptions<AddPericopeTrAndDescTrMutation, AddPericopeTrAndDescTrMutationVariables>;
+export type AddPericopeTrMutationHookResult = ReturnType<typeof useAddPericopeTrMutation>;
+export type AddPericopeTrMutationResult = Apollo.MutationResult<AddPericopeTrMutation>;
+export type AddPericopeTrMutationOptions = Apollo.BaseMutationOptions<AddPericopeTrMutation, AddPericopeTrMutationVariables>;
 export const TogglePericopeTrVoteStatusDocument = gql`
     mutation TogglePericopeTrVoteStatus($pericope_translation_id: ID!, $vote: Boolean!) {
   togglePericopeTrVoteStatus(
@@ -11920,7 +11920,7 @@ export const namedOperations = {
     AddNotification: 'AddNotification',
     DeleteNotification: 'DeleteNotification',
     MarkNotificationRead: 'MarkNotificationRead',
-    AddPericopeTrAndDescTr: 'AddPericopeTrAndDescTr',
+    AddPericopeTr: 'AddPericopeTr',
     TogglePericopeTrVoteStatus: 'TogglePericopeTrVoteStatus',
     TogglePericopeVoteStatus: 'TogglePericopeVoteStatus',
     UpsertPericope: 'UpsertPericope',

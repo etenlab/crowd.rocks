@@ -663,7 +663,7 @@ type MarkNotificationReadOutput {
 
 type Mutation {
   addNotification(input: AddNotificationInput!): AddNotificationOutput!
-  addPericopeTrAndDescTr(input: AddPericopeTranslationInput!): PericopeTranslation!
+  addPericopeTr(input: AddPericopeTranslationInput!): PericopeTranslation!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   botTranslateDocument(input: BotTranslateDocumentInput!): DocumentUploadOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!

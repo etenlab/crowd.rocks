@@ -5836,7 +5836,7 @@
             "deprecationReason": null
           },
           {
-            "name": "addPericopeTrAndDescTr",
+            "name": "addPericopeTr",
             "description": null,
             "args": [
               {

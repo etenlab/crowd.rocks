@@ -45,14 +45,11 @@ export class PericopeTrResolver {
 
   @UseGuards(BearerTokenAuthGuard)
   @Mutation(() => PericopeTranslation)
-  async addPericopeTrAndDescTr(
+  async addPericopeTr(
     @Args('input') input: AddPericopeTranslationInput,
     @Context() req: any,
   ): Promise<PericopeTranslation> {
-    Logger.log(
-      `${JSON.stringify(input)}`,
-      `PericopeTrResolver#addPericopeTrAndDesc`,
-    );
+    Logger.log(`${JSON.stringify(input)}`, `PericopeTrResolver#addPericopeTr`);
     const token = req.req.token as string;
     return this.pericopeTrService.addPericopeTrAndDesc(input, token);
   }
