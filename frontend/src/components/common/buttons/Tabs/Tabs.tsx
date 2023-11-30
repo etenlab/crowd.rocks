@@ -1,13 +1,13 @@
 import { Stack, Button } from '@mui/material';
 
-export type TabsProps = {
+export type TabsProps<T> = {
   tabs: {
     label: string;
-    value: string;
+    value: T;
   }[];
-  selected: string | null;
-  onChange(tab: string): void;
-  disabled: string[];
+  selected: T | null;
+  onChange(tab: T): void;
+  disabled?: T[];
 };
 
 const getBorderRadius = (currentIndex: number, total: number) => {
@@ -54,13 +54,13 @@ const getBorderRight = (currentIndex: number, selectedIndex: number) => {
   }
 };
 
-export function Tabs({ tabs, selected, onChange, disabled }: TabsProps) {
+export function Tabs<T>({ tabs, selected, onChange, disabled }: TabsProps<T>) {
   const selectedIndex = tabs.findIndex((tab) => tab.value === selected);
   return (
     <Stack direction="row">
       {tabs.map((tab, index) => (
         <Button
-          key={tab.value}
+          key={tab.value as string}
           variant="outlined"
           sx={(theme) => ({
             borderRadius: getBorderRadius(index, tabs.length),
@@ -73,7 +73,9 @@ export function Tabs({ tabs, selected, onChange, disabled }: TabsProps) {
           color={selected === tab.value ? 'blue' : 'gray'}
           onClick={() => onChange(tab.value)}
           fullWidth
-          disabled={disabled.findIndex((item) => item === tab.value) !== -1}
+          disabled={
+            disabled && disabled.findIndex((item) => item === tab.value) !== -1
+          }
         >
           {tab.label}
         </Button>

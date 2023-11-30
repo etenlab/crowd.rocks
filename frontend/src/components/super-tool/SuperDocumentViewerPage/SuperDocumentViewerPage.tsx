@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 
-import { langInfo2String, subTags2LangInfo } from '../../../../../utils/dist';
+import { langInfo2String, subTags2LangInfo } from '../../../../../utils';
 import { downloadFromUrl } from '../../../common/utility';
 
 import { PageLayout } from '../../common/PageLayout';
@@ -88,7 +88,7 @@ export function SuperDocumentViewerPage() {
 
   return (
     <PageLayout>
-      <Caption>{tr('Details')}</Caption>
+      <Caption>{tr('Super Tool')}</Caption>
 
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Tag
