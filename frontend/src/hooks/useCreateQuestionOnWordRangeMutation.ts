@@ -1,6 +1,9 @@
 import { useIonToast } from '@ionic/react';
 
-import { useCreateQuestionOnWordRangeMutation as useGeneratedCreateQuestionOnWordRangeMutation } from '../generated/graphql';
+import {
+  useCreateQuestionOnWordRangeMutation as useGeneratedCreateQuestionOnWordRangeMutation,
+  useSubscribeToQuestionsOnWordRangeAddedSubscription as useGeneratedSubscribeToQuestionsOnWordRangeAddedSubscription,
+} from '../generated/graphql';
 
 import { ErrorType } from '../generated/graphql';
 
@@ -15,17 +18,12 @@ export function useCreateQuestionOnWordRangeMutation() {
   const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedCreateQuestionOnWordRangeMutation({
-    update(cache, { data, errors }) {
+    update(_cache, { data, errors }) {
       if (
-        !errors &&
-        data &&
-        data.createQuestionOnWordRange.questions.length === 1 &&
-        data.createQuestionOnWordRange.error === ErrorType.NoError
+        errors ||
+        !data ||
+        data.createQuestionOnWordRange.error !== ErrorType.NoError
       ) {
-        const newQuestion = data.createQuestionOnWordRange.questions[0]!;
-
-        updateCacheWithCreateQuestionOnWordRange(cache, newQuestion);
-      } else {
         console.log('useCreateQuestionOnWordRangeMutation: ', errors);
         console.log(data?.createQuestionOnWordRange.error);
 
@@ -39,6 +37,24 @@ export function useCreateQuestionOnWordRangeMutation() {
         console.log(errors);
         console.log(data);
         redirectOnUnauth(data?.createQuestionOnWordRange.error);
+      }
+    },
+  });
+}
+
+export function useSubscribeToQuestionsOnWordRangeAddedSubscription() {
+  return useGeneratedSubscribeToQuestionsOnWordRangeAddedSubscription({
+    onData({ client, data: result }) {
+      const { data, error } = result;
+      if (
+        !error &&
+        data &&
+        data.questionsOnWordRangeAdded.questions.length === 1 &&
+        data.questionsOnWordRangeAdded.error === ErrorType.NoError
+      ) {
+        const newQuestion = data.questionsOnWordRangeAdded.questions[0]!;
+
+        updateCacheWithCreateQuestionOnWordRange(client.cache, newQuestion);
       }
     },
   });

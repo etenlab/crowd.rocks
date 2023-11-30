@@ -173,3 +173,12 @@ mutation BotTranslateDocument(
     error
   }
 }
+
+subscription SubscribeToDocumentAdded {
+  documentAdded {
+    error
+    document {
+      ...TextyDocumentFragment
+    }
+  }
+}

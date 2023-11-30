@@ -720,7 +720,7 @@ export type Mutation = {
   botTranslateDocument: DocumentUploadOutput;
   createQuestionOnWordRange: QuestionOnWordRangesOutput;
   createTaggingOnWordRange: WordRangeTagWithVotesOutput;
-  deletePericopies: PericopeDeleteOutput;
+  deletePericopie: PericopeDeleteOutput;
   documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
   forceMarkAndRetranslateOriginalMapsIds: GenericOutput;
@@ -791,7 +791,6 @@ export type Mutation = {
   upsertFromTranslationlikeString: TranslationOutput;
   upsertPericopies: PericopiesOutput;
   upsertPhraseDefinitionFromPhraseAndDefinitionlikeString: PhraseDefinitionOutput;
-  upsertQuestionItems: QuestionItemsOutput;
   upsertQuestions: QuestionsOutput;
   upsertSiteTextTranslation: TranslationOutput;
   upsertTranslation: TranslationOutput;
@@ -835,7 +834,7 @@ export type MutationCreateTaggingOnWordRangeArgs = {
 };
 
 
-export type MutationDeletePericopiesArgs = {
+export type MutationDeletePericopieArgs = {
   pericope_id: Scalars['ID']['input'];
 };
 
@@ -1211,11 +1210,6 @@ export type MutationUpsertPericopiesArgs = {
 
 export type MutationUpsertPhraseDefinitionFromPhraseAndDefinitionlikeStringArgs = {
   input: FromPhraseAndDefintionlikeStringUpsertInput;
-};
-
-
-export type MutationUpsertQuestionItemsArgs = {
-  items: Array<Scalars['String']['input']>;
 };
 
 
@@ -2591,6 +2585,15 @@ export type Subscription = {
   DataGenerationReport: DataGenProgress;
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult;
   ZipMapReport: ZipMapResult;
+  answersAdded: AnswersOutput;
+  documentAdded: DocumentUploadOutput;
+  pericopeDeleted: PericopeDeleteOutput;
+  pericopeVoteStatusToggled: PericopeVoteStatusOutput;
+  pericopiesAdded: PericopiesOutput;
+  questionsAdded: QuestionsOutput;
+  questionsOnWordRangeAdded: QuestionOnWordRangesOutput;
+  wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput;
+  wordRangeTagWithVoteAdded: WordRangeTagWithVotesOutput;
 };
 
 export enum SubscriptionStatus {
@@ -3453,6 +3456,11 @@ export type BotTranslateDocumentMutationVariables = Exact<{
 
 export type BotTranslateDocumentMutation = { __typename?: 'Mutation', botTranslateDocument: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_by: string } | null } };
 
+export type SubscribeToDocumentAddedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToDocumentAddedSubscription = { __typename?: 'Subscription', documentAdded: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_by: string } | null } };
+
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
 }>;
@@ -3878,7 +3886,22 @@ export type DeletePericopeMutationVariables = Exact<{
 }>;
 
 
-export type DeletePericopeMutation = { __typename?: 'Mutation', deletePericopies: { __typename?: 'PericopeDeleteOutput', error: ErrorType, pericope_id?: string | null } };
+export type DeletePericopeMutation = { __typename?: 'Mutation', deletePericopie: { __typename?: 'PericopeDeleteOutput', error: ErrorType, pericope_id?: string | null } };
+
+export type SubscribeToPericopiesAddedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToPericopiesAddedSubscription = { __typename?: 'Subscription', pericopiesAdded: { __typename?: 'PericopiesOutput', error: ErrorType, pericopies: Array<{ __typename?: 'Pericope', pericope_id: string, start_word: string } | null> } };
+
+export type SubscribeToPericopieDeletedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToPericopieDeletedSubscription = { __typename?: 'Subscription', pericopeDeleted: { __typename?: 'PericopeDeleteOutput', error: ErrorType, pericope_id?: string | null } };
+
+export type SubscribeToPericopeVoteStatusToggledSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToPericopeVoteStatusToggledSubscription = { __typename?: 'Subscription', pericopeVoteStatusToggled: { __typename?: 'PericopeVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'PericopeVoteStatus', pericope_id: string, upvotes: number, downvotes: number } | null } };
 
 export type PhraseFragmentFragment = { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } };
 
@@ -4043,6 +4066,21 @@ export type UpsertAnswerMutationVariables = Exact<{
 
 
 export type UpsertAnswerMutation = { __typename?: 'Mutation', upsertAnswers: { __typename?: 'AnswersOutput', error: ErrorType, answers: Array<{ __typename?: 'Answer', answer_id: string, question_id: string, answer?: string | null, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } | null> } };
+
+export type SubscribeToQuestionsOnWordRangeAddedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToQuestionsOnWordRangeAddedSubscription = { __typename?: 'Subscription', questionsOnWordRangeAdded: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
+
+export type SubscribeToQuestionsAddedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToQuestionsAddedSubscription = { __typename?: 'Subscription', questionsAdded: { __typename?: 'QuestionsOutput', error: ErrorType, questions: Array<{ __typename?: 'Question', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } | null> } };
+
+export type SubscribeToAnswersAddedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToAnswersAddedSubscription = { __typename?: 'Subscription', answersAdded: { __typename?: 'AnswersOutput', error: ErrorType, answers: Array<{ __typename?: 'Answer', answer_id: string, question_id: string, answer?: string | null, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } | null> } };
 
 export type SiteTextPhraseDefinitionFragmentFragment = { __typename?: 'SiteTextPhraseDefinition', site_text_id: string, phrase_definition: { __typename?: 'PhraseDefinition', phrase_definition_id: string, definition: string, created_at: any, phrase: { __typename?: 'Phrase', phrase_id: string, phrase: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } };
 
@@ -4212,6 +4250,16 @@ export type ToggleWordRangeTagVoteStatusMutationVariables = Exact<{
 
 
 export type ToggleWordRangeTagVoteStatusMutation = { __typename?: 'Mutation', toggleWordRangeTagVoteStatus: { __typename?: 'WordRangeTagVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'WordRangeTagVoteStatus', downvotes: number, upvotes: number, word_range_tag_id: string } | null } };
+
+export type SubscribeToWordRangeTagVoteStatusToggledSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToWordRangeTagVoteStatusToggledSubscription = { __typename?: 'Subscription', wordRangeTagVoteStatusToggled: { __typename?: 'WordRangeTagVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'WordRangeTagVoteStatus', downvotes: number, upvotes: number, word_range_tag_id: string } | null } };
+
+export type SubscribeToWordRangeTagWithVoteAddedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscribeToWordRangeTagWithVoteAddedSubscription = { __typename?: 'Subscription', wordRangeTagWithVoteAdded: { __typename?: 'WordRangeTagWithVotesOutput', error: ErrorType, word_range_tags: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } } | null> } };
 
 export type WordToWordTranslationWithVoteFragmentFragment = { __typename?: 'WordToWordTranslationWithVote', word_to_word_translation_id: string, downvotes: number, upvotes: number, from_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, to_word_definition: { __typename?: 'WordDefinition', word_definition_id: string, definition: string, created_at: any, word: { __typename?: 'Word', word_id: string, word: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_at: any, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } }, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean } } };
 
@@ -6528,6 +6576,38 @@ export function useBotTranslateDocumentMutation(baseOptions?: Apollo.MutationHoo
 export type BotTranslateDocumentMutationHookResult = ReturnType<typeof useBotTranslateDocumentMutation>;
 export type BotTranslateDocumentMutationResult = Apollo.MutationResult<BotTranslateDocumentMutation>;
 export type BotTranslateDocumentMutationOptions = Apollo.BaseMutationOptions<BotTranslateDocumentMutation, BotTranslateDocumentMutationVariables>;
+export const SubscribeToDocumentAddedDocument = gql`
+    subscription SubscribeToDocumentAdded {
+  documentAdded {
+    error
+    document {
+      ...TextyDocumentFragment
+    }
+  }
+}
+    ${TextyDocumentFragmentFragmentDoc}`;
+
+/**
+ * __useSubscribeToDocumentAddedSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToDocumentAddedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToDocumentAddedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToDocumentAddedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToDocumentAddedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToDocumentAddedSubscription, SubscribeToDocumentAddedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToDocumentAddedSubscription, SubscribeToDocumentAddedSubscriptionVariables>(SubscribeToDocumentAddedDocument, options);
+      }
+export type SubscribeToDocumentAddedSubscriptionHookResult = ReturnType<typeof useSubscribeToDocumentAddedSubscription>;
+export type SubscribeToDocumentAddedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToDocumentAddedSubscription>;
 export const EmailResponseDocument = gql`
     mutation EmailResponse($token: String!) {
   emailResponseResolver(input: {token: $token}) {
@@ -8294,7 +8374,7 @@ export type UpsertPericopeMutationResult = Apollo.MutationResult<UpsertPericopeM
 export type UpsertPericopeMutationOptions = Apollo.BaseMutationOptions<UpsertPericopeMutation, UpsertPericopeMutationVariables>;
 export const DeletePericopeDocument = gql`
     mutation DeletePericope($pericope_id: ID!) {
-  deletePericopies(pericope_id: $pericope_id) {
+  deletePericopie(pericope_id: $pericope_id) {
     error
     pericope_id
   }
@@ -8326,6 +8406,100 @@ export function useDeletePericopeMutation(baseOptions?: Apollo.MutationHookOptio
 export type DeletePericopeMutationHookResult = ReturnType<typeof useDeletePericopeMutation>;
 export type DeletePericopeMutationResult = Apollo.MutationResult<DeletePericopeMutation>;
 export type DeletePericopeMutationOptions = Apollo.BaseMutationOptions<DeletePericopeMutation, DeletePericopeMutationVariables>;
+export const SubscribeToPericopiesAddedDocument = gql`
+    subscription SubscribeToPericopiesAdded {
+  pericopiesAdded {
+    error
+    pericopies {
+      ...PericopeFragment
+    }
+  }
+}
+    ${PericopeFragmentFragmentDoc}`;
+
+/**
+ * __useSubscribeToPericopiesAddedSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToPericopiesAddedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToPericopiesAddedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToPericopiesAddedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToPericopiesAddedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToPericopiesAddedSubscription, SubscribeToPericopiesAddedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToPericopiesAddedSubscription, SubscribeToPericopiesAddedSubscriptionVariables>(SubscribeToPericopiesAddedDocument, options);
+      }
+export type SubscribeToPericopiesAddedSubscriptionHookResult = ReturnType<typeof useSubscribeToPericopiesAddedSubscription>;
+export type SubscribeToPericopiesAddedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToPericopiesAddedSubscription>;
+export const SubscribeToPericopieDeletedDocument = gql`
+    subscription SubscribeToPericopieDeleted {
+  pericopeDeleted {
+    error
+    pericope_id
+  }
+}
+    `;
+
+/**
+ * __useSubscribeToPericopieDeletedSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToPericopieDeletedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToPericopieDeletedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToPericopieDeletedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToPericopieDeletedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToPericopieDeletedSubscription, SubscribeToPericopieDeletedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToPericopieDeletedSubscription, SubscribeToPericopieDeletedSubscriptionVariables>(SubscribeToPericopieDeletedDocument, options);
+      }
+export type SubscribeToPericopieDeletedSubscriptionHookResult = ReturnType<typeof useSubscribeToPericopieDeletedSubscription>;
+export type SubscribeToPericopieDeletedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToPericopieDeletedSubscription>;
+export const SubscribeToPericopeVoteStatusToggledDocument = gql`
+    subscription SubscribeToPericopeVoteStatusToggled {
+  pericopeVoteStatusToggled {
+    error
+    vote_status {
+      ...PericopeVoteStatusFragment
+    }
+  }
+}
+    ${PericopeVoteStatusFragmentFragmentDoc}`;
+
+/**
+ * __useSubscribeToPericopeVoteStatusToggledSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToPericopeVoteStatusToggledSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToPericopeVoteStatusToggledSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToPericopeVoteStatusToggledSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToPericopeVoteStatusToggledSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToPericopeVoteStatusToggledSubscription, SubscribeToPericopeVoteStatusToggledSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToPericopeVoteStatusToggledSubscription, SubscribeToPericopeVoteStatusToggledSubscriptionVariables>(SubscribeToPericopeVoteStatusToggledDocument, options);
+      }
+export type SubscribeToPericopeVoteStatusToggledSubscriptionHookResult = ReturnType<typeof useSubscribeToPericopeVoteStatusToggledSubscription>;
+export type SubscribeToPericopeVoteStatusToggledSubscriptionResult = Apollo.SubscriptionResult<SubscribeToPericopeVoteStatusToggledSubscription>;
 export const PhraseDefinitionReadDocument = gql`
     query PhraseDefinitionRead($id: ID!) {
   phraseDefinitionRead(id: $id) {
@@ -8969,6 +9143,102 @@ export function useUpsertAnswerMutation(baseOptions?: Apollo.MutationHookOptions
 export type UpsertAnswerMutationHookResult = ReturnType<typeof useUpsertAnswerMutation>;
 export type UpsertAnswerMutationResult = Apollo.MutationResult<UpsertAnswerMutation>;
 export type UpsertAnswerMutationOptions = Apollo.BaseMutationOptions<UpsertAnswerMutation, UpsertAnswerMutationVariables>;
+export const SubscribeToQuestionsOnWordRangeAddedDocument = gql`
+    subscription SubscribeToQuestionsOnWordRangeAdded {
+  questionsOnWordRangeAdded {
+    error
+    questions {
+      ...QuestionOnWordRangeFragment
+    }
+  }
+}
+    ${QuestionOnWordRangeFragmentFragmentDoc}`;
+
+/**
+ * __useSubscribeToQuestionsOnWordRangeAddedSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToQuestionsOnWordRangeAddedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToQuestionsOnWordRangeAddedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToQuestionsOnWordRangeAddedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToQuestionsOnWordRangeAddedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToQuestionsOnWordRangeAddedSubscription, SubscribeToQuestionsOnWordRangeAddedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToQuestionsOnWordRangeAddedSubscription, SubscribeToQuestionsOnWordRangeAddedSubscriptionVariables>(SubscribeToQuestionsOnWordRangeAddedDocument, options);
+      }
+export type SubscribeToQuestionsOnWordRangeAddedSubscriptionHookResult = ReturnType<typeof useSubscribeToQuestionsOnWordRangeAddedSubscription>;
+export type SubscribeToQuestionsOnWordRangeAddedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToQuestionsOnWordRangeAddedSubscription>;
+export const SubscribeToQuestionsAddedDocument = gql`
+    subscription SubscribeToQuestionsAdded {
+  questionsAdded {
+    error
+    questions {
+      ...QuestionFragment
+    }
+  }
+}
+    ${QuestionFragmentFragmentDoc}`;
+
+/**
+ * __useSubscribeToQuestionsAddedSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToQuestionsAddedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToQuestionsAddedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToQuestionsAddedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToQuestionsAddedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToQuestionsAddedSubscription, SubscribeToQuestionsAddedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToQuestionsAddedSubscription, SubscribeToQuestionsAddedSubscriptionVariables>(SubscribeToQuestionsAddedDocument, options);
+      }
+export type SubscribeToQuestionsAddedSubscriptionHookResult = ReturnType<typeof useSubscribeToQuestionsAddedSubscription>;
+export type SubscribeToQuestionsAddedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToQuestionsAddedSubscription>;
+export const SubscribeToAnswersAddedDocument = gql`
+    subscription SubscribeToAnswersAdded {
+  answersAdded {
+    error
+    answers {
+      ...AnswerFragment
+    }
+  }
+}
+    ${AnswerFragmentFragmentDoc}`;
+
+/**
+ * __useSubscribeToAnswersAddedSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToAnswersAddedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToAnswersAddedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToAnswersAddedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToAnswersAddedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToAnswersAddedSubscription, SubscribeToAnswersAddedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToAnswersAddedSubscription, SubscribeToAnswersAddedSubscriptionVariables>(SubscribeToAnswersAddedDocument, options);
+      }
+export type SubscribeToAnswersAddedSubscriptionHookResult = ReturnType<typeof useSubscribeToAnswersAddedSubscription>;
+export type SubscribeToAnswersAddedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToAnswersAddedSubscription>;
 export const GetAllSiteTextDefinitionsDocument = gql`
     query GetAllSiteTextDefinitions($filter: String, $onlyNotTranslated: Boolean, $onlyTranslated: Boolean, $quickFilter: String, $targetLanguage: LanguageInput, $first: Int, $after: ID) {
   getAllSiteTextDefinitions(
@@ -9696,6 +9966,70 @@ export function useToggleWordRangeTagVoteStatusMutation(baseOptions?: Apollo.Mut
 export type ToggleWordRangeTagVoteStatusMutationHookResult = ReturnType<typeof useToggleWordRangeTagVoteStatusMutation>;
 export type ToggleWordRangeTagVoteStatusMutationResult = Apollo.MutationResult<ToggleWordRangeTagVoteStatusMutation>;
 export type ToggleWordRangeTagVoteStatusMutationOptions = Apollo.BaseMutationOptions<ToggleWordRangeTagVoteStatusMutation, ToggleWordRangeTagVoteStatusMutationVariables>;
+export const SubscribeToWordRangeTagVoteStatusToggledDocument = gql`
+    subscription SubscribeToWordRangeTagVoteStatusToggled {
+  wordRangeTagVoteStatusToggled {
+    error
+    vote_status {
+      ...WordRangeTagVoteStatusFragment
+    }
+  }
+}
+    ${WordRangeTagVoteStatusFragmentFragmentDoc}`;
+
+/**
+ * __useSubscribeToWordRangeTagVoteStatusToggledSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToWordRangeTagVoteStatusToggledSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToWordRangeTagVoteStatusToggledSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToWordRangeTagVoteStatusToggledSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToWordRangeTagVoteStatusToggledSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToWordRangeTagVoteStatusToggledSubscription, SubscribeToWordRangeTagVoteStatusToggledSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToWordRangeTagVoteStatusToggledSubscription, SubscribeToWordRangeTagVoteStatusToggledSubscriptionVariables>(SubscribeToWordRangeTagVoteStatusToggledDocument, options);
+      }
+export type SubscribeToWordRangeTagVoteStatusToggledSubscriptionHookResult = ReturnType<typeof useSubscribeToWordRangeTagVoteStatusToggledSubscription>;
+export type SubscribeToWordRangeTagVoteStatusToggledSubscriptionResult = Apollo.SubscriptionResult<SubscribeToWordRangeTagVoteStatusToggledSubscription>;
+export const SubscribeToWordRangeTagWithVoteAddedDocument = gql`
+    subscription SubscribeToWordRangeTagWithVoteAdded {
+  wordRangeTagWithVoteAdded {
+    error
+    word_range_tags {
+      ...WordRangeTagWithVoteFragment
+    }
+  }
+}
+    ${WordRangeTagWithVoteFragmentFragmentDoc}`;
+
+/**
+ * __useSubscribeToWordRangeTagWithVoteAddedSubscription__
+ *
+ * To run a query within a React component, call `useSubscribeToWordRangeTagWithVoteAddedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToWordRangeTagWithVoteAddedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscribeToWordRangeTagWithVoteAddedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscribeToWordRangeTagWithVoteAddedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToWordRangeTagWithVoteAddedSubscription, SubscribeToWordRangeTagWithVoteAddedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<SubscribeToWordRangeTagWithVoteAddedSubscription, SubscribeToWordRangeTagWithVoteAddedSubscriptionVariables>(SubscribeToWordRangeTagWithVoteAddedDocument, options);
+      }
+export type SubscribeToWordRangeTagWithVoteAddedSubscriptionHookResult = ReturnType<typeof useSubscribeToWordRangeTagWithVoteAddedSubscription>;
+export type SubscribeToWordRangeTagWithVoteAddedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToWordRangeTagWithVoteAddedSubscription>;
 export const GetTranslationLanguageInfoDocument = gql`
     query GetTranslationLanguageInfo($from_language_code: ID!, $to_language_code: ID) {
   getLanguageTranslationInfo(
@@ -11319,7 +11653,16 @@ export const namedOperations = {
   },
   Subscription: {
     SubscribeToDataGenProgress: 'SubscribeToDataGenProgress',
+    SubscribeToDocumentAdded: 'SubscribeToDocumentAdded',
     SubscribeToZipMap: 'SubscribeToZipMap',
+    SubscribeToPericopiesAdded: 'SubscribeToPericopiesAdded',
+    SubscribeToPericopieDeleted: 'SubscribeToPericopieDeleted',
+    SubscribeToPericopeVoteStatusToggled: 'SubscribeToPericopeVoteStatusToggled',
+    SubscribeToQuestionsOnWordRangeAdded: 'SubscribeToQuestionsOnWordRangeAdded',
+    SubscribeToQuestionsAdded: 'SubscribeToQuestionsAdded',
+    SubscribeToAnswersAdded: 'SubscribeToAnswersAdded',
+    SubscribeToWordRangeTagVoteStatusToggled: 'SubscribeToWordRangeTagVoteStatusToggled',
+    SubscribeToWordRangeTagWithVoteAdded: 'SubscribeToWordRangeTagWithVoteAdded',
     SubscribeToTranslationReport: 'SubscribeToTranslationReport',
     SubscribeToGptProgress: 'SubscribeToGptProgress'
   },

@@ -1,10 +1,10 @@
 import { Stack } from '@mui/material';
 
-// import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
+import { VoteButtonsHorizontal } from '../../common/VoteButtonsHorizontal';
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton/DiscussionIconButton';
 
 import { TableNameType, PericopeWithVote } from '../../../generated/graphql';
-// import { useTogglePericopeVoteStatusMutation } from '../../../hooks/useTogglePericopeVoteStatusMutation';
+import { useTogglePericopeVoteStatusMutation } from '../../../hooks/useTogglePericopeVoteStatusMutation';
 
 type PericopeReactionProps = {
   pericope: PericopeWithVote;
@@ -12,25 +12,25 @@ type PericopeReactionProps = {
 };
 
 export function PericopeReaction({ pericope, onClose }: PericopeReactionProps) {
-  // const [togglePericopeVoteStatus] = useTogglePericopeVoteStatusMutation();
+  const [togglePericopeVoteStatus] = useTogglePericopeVoteStatusMutation();
 
-  // const handleUpClick = () => {
-  //   togglePericopeVoteStatus({
-  //     variables: {
-  //       pericope_id: pericope.pericope_id,
-  //       vote: true,
-  //     },
-  //   });
-  // };
+  const handleUpClick = () => {
+    togglePericopeVoteStatus({
+      variables: {
+        pericope_id: pericope.pericope_id,
+        vote: true,
+      },
+    });
+  };
 
-  // const handleDownClick = () => {
-  //   togglePericopeVoteStatus({
-  //     variables: {
-  //       pericope_id: pericope.pericope_id,
-  //       vote: false,
-  //     },
-  //   });
-  // };
+  const handleDownClick = () => {
+    togglePericopeVoteStatus({
+      variables: {
+        pericope_id: pericope.pericope_id,
+        vote: false,
+      },
+    });
+  };
 
   return (
     <Stack
@@ -44,12 +44,12 @@ export function PericopeReaction({ pericope, onClose }: PericopeReactionProps) {
         backgroundColor: theme.palette.background.white,
       })}
     >
-      {/* <VoteButtonsHorizontal
+      <VoteButtonsHorizontal
         upVotes={pericope.upvotes}
         downVotes={pericope.downvotes}
         onVoteDownClick={handleDownClick}
         onVoteUpClick={handleUpClick}
-      /> */}
+      />
       <DiscussionIconButton
         parent_id={pericope.pericope_id}
         parent_table={TableNameType.Pericopies}

@@ -1,8 +1,8 @@
 import { useIonToast } from '@ionic/react';
 
 import {
-  GetQuestionStatisticDocument,
   useUpsertAnswerMutation as useGeneratedUpsertAnswerMutation,
+  useSubscribeToAnswersAddedSubscription as useGeneratedSubscribeToAnswersAddedSubscription,
 } from '../generated/graphql';
 
 import { ErrorType } from '../generated/graphql';
@@ -18,17 +18,8 @@ export function useUpsertAnswerMutation() {
   const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedUpsertAnswerMutation({
-    update(cache, { data, errors }) {
-      if (
-        !errors &&
-        data &&
-        data.upsertAnswers.answers.length > 0 &&
-        data.upsertAnswers.error === ErrorType.NoError
-      ) {
-        const newAnswer = data.upsertAnswers.answers[0]!;
-
-        updateCacheWithUpsertAnswer(cache, newAnswer);
-      } else {
+    update(_cache, { data, errors }) {
+      if (errors || !data || data.upsertAnswers.error !== ErrorType.NoError) {
         console.log('useUpsertAnswerMutation: ', errors);
         console.log(data?.upsertAnswers.error);
 
@@ -42,6 +33,23 @@ export function useUpsertAnswerMutation() {
         redirectOnUnauth(data?.upsertAnswers.error);
       }
     },
-    refetchQueries: [GetQuestionStatisticDocument],
+  });
+}
+
+export function useSubscribeToAnswersAddedSubscription() {
+  return useGeneratedSubscribeToAnswersAddedSubscription({
+    onData({ client, data: result }) {
+      const { data, error } = result;
+      if (
+        !error &&
+        data &&
+        data.answersAdded.answers.length > 0 &&
+        data.answersAdded.error === ErrorType.NoError
+      ) {
+        const newAnswer = data.answersAdded.answers[0]!;
+
+        updateCacheWithUpsertAnswer(client.cache, newAnswer);
+      }
+    },
   });
 }
