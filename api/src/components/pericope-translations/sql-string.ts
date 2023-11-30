@@ -247,7 +247,7 @@ export function callPericopeTrInsertProcedure(
 }
 
 export type TogglePericopeTrVoteStatusSqlR = {
-  p_maps_vote_id: string;
+  p_pericope_translation_vote_id: string;
   p_error_type: ErrorType;
 };
 

@@ -349,9 +349,13 @@ export class PericopeTrService {
       );
 
       const creatingError = res.rows[0].p_error_type;
-      const maps_vote_id = res.rows[0].p_maps_vote_id;
+      const pericope_translation_vote_id =
+        res.rows[0].p_pericope_translation_vote_id;
 
-      if (creatingError !== ErrorType.NoError || !maps_vote_id) {
+      if (
+        creatingError !== ErrorType.NoError ||
+        !pericope_translation_vote_id
+      ) {
         return {
           error: creatingError,
           vote_status_list: [],

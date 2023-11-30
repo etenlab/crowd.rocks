@@ -3,12 +3,12 @@ import { Stack, LinearProgress } from '@mui/material';
 import {
   ErrorType,
   PericopeTranslationWithVotes,
-  useTogglePericopeTrVoteStatusMutation,
 } from '../../../generated/graphql';
 
 import { TextCard } from '../../common/TextCard';
 import { useCallback, useEffect } from 'react';
 import { useIonToast } from '@ionic/react';
+import { useTogglePericopeTrVoteStatusMutation } from '../../../hooks/useTogglePericopeTrVoteStatusMutation';
 
 export type PericopeTranslationListProps = {
   translations: PericopeTranslationWithVotes[];
