@@ -21,6 +21,25 @@ export function callPericopeUpsertsProcedure({
   ];
 }
 
+export type PericopeDeleteProcedureOutput = {
+  p_error_type: ErrorType;
+};
+
+export function callPericopeDeleteProcedure({
+  pericope_id,
+  token,
+}: {
+  pericope_id: number;
+  token: string;
+}): [string, [number, string]] {
+  return [
+    `
+      call pericope_delete($1, $2, '');
+    `,
+    [pericope_id, token],
+  ];
+}
+
 export type GetPericopiesObjectRow = {
   pericope_id: string;
   start_word: string;

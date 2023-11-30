@@ -63,7 +63,21 @@ ALTER TABLE pericope_description_translations ADD CONSTRAINT pericope_descriptio
 ALTER TABLE pericope_description_translations ADD CONSTRAINT pericope_description_translations_pericope_id_fkey FOREIGN KEY (pericope_description_id) REFERENCES pericope_descriptions(pericope_description_id);
 ---
 
+drop index if exists idx__document_word_entry_id__document_word_entry_tags;
+drop index if exists idx__document_word_entry_tag__document_word_entry_tags;
+create index idx__document_word_entry_id__document_word_entry_tags on document_word_entry_tags (document_word_entry_id);
+create index idx__document_word_entry_tag__document_word_entry_tags on document_word_entry_tags (document_word_entry_tag);
+
+drop index if exists idx__word_range_id__word_range_tags;
+drop index if exists idx__word_range_tag__word_range_tags;
+create index idx__word_range_id__word_range_tags on word_range_tags (word_range_id);
+create index idx__word_range_tag__word_range_tags on word_range_tags (word_range_tag);
+
+alter table pericope_votes drop constraint pericope_votes_pericope_id_fkey;
+alter table pericope_votes add constraint pericope_votes_pericope_id_fkey foreign key (pericope_id) references pericopies(pericope_id) on delete cascade;
+
 ALTER TABLE public.pericope_translations ADD description varchar NULL;
+
 DROP TABLE if exists public.pericope_description_translations;
 ALTER TABLE pericope_translations_votes drop CONSTRAINT if exists pericope_translations_votes_user_id_pericope_id_key;
 ALTER TABLE pericope_translations_votes ADD CONSTRAINT pericope_translations_votes_user_id_pericope_id_key UNIQUE (user_id, pericope_translation_id);

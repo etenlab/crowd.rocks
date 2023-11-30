@@ -134,6 +134,9 @@ export enum ErrorType {
   DocumentWordEntryAlreadyExists = 'DocumentWordEntryAlreadyExists',
   DocumentWordEntryNotFound = 'DocumentWordEntryNotFound',
   WordRangeInsertFailed = 'WordRangeInsertFailed',
+  WordRangeNotExists = 'WordRangeNotExists',
+  WordRangeTagInsertFailed = 'WordRangeTagInsertFailed',
+  WordRangeTagNotFound = 'WordRangeTagNotFound',
   DamagedDocumentWordEntryBlock = 'DamagedDocumentWordEntryBlock',
 
   QuestionItemInsertFailed = 'QuestionItemInsertFailed',
@@ -191,6 +194,7 @@ export enum TableNameType {
   documents = 'documents',
   document_word_entries = 'document_word_entries',
   word_ranges = 'word_ranges',
+  word_range_tags = 'word_range_tags',
   original_maps = 'original_maps',
   translated_maps = 'translated_maps',
   pericopies = 'pericopies',

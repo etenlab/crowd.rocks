@@ -1,17 +1,16 @@
 import { Stack, Typography } from '@mui/material';
 
-import { useTr } from '../../../hooks/useTr';
-import { AddCircle } from '../../common/icons/AddCircle';
+import { AddCircle } from '../../../common/icons/AddCircle';
 
-type QuestionAddButtonProps = {
+type OrangeAddButtonProps = {
   onClickAddButton(): void;
+  label: string;
 };
 
-export function QuestionAddButton({
+export function OrangeAddButton({
   onClickAddButton,
-}: QuestionAddButtonProps) {
-  const { tr } = useTr();
-
+  label,
+}: OrangeAddButtonProps) {
   return (
     <Stack
       onClick={onClickAddButton}
@@ -29,7 +28,7 @@ export function QuestionAddButton({
     >
       <AddCircle sx={{ fontSize: 20 }} />
       <Typography variant="h5" sx={{ fontWeight: 600 }} color="text.orange">
-        {tr('Ask Question')}
+        {label}
       </Typography>
     </Stack>
   );

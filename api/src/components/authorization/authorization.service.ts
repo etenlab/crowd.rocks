@@ -18,4 +18,18 @@ export class AuthorizationService {
       return true;
     }
   }
+
+  async is_same_user(userId: number, token?: string): Promise<boolean> {
+    if (!token) {
+      return false;
+    }
+
+    const currentUserId = await this.authService.get_user_id_from_bearer(token);
+
+    if (userId === currentUserId) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

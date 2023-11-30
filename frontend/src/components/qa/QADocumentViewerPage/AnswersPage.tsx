@@ -19,6 +19,8 @@ import {
   useGetQuestionStatisticQuery,
   useReadWordRangeLazyQuery,
 } from '../../../generated/graphql';
+import { useSubscribeToAnswersAddedSubscription } from '../../../hooks/useUpsertAnswerMutation';
+
 import { AnswerList } from './AnswerList';
 import { Statistics } from './Statistics';
 
@@ -33,6 +35,7 @@ export function AnswersPage() {
   });
   const [getAnswerByUserId, { data: myAnswerData }] =
     useGetAnswerByUserIdLazyQuery();
+  useSubscribeToAnswersAddedSubscription();
 
   const [readWordRange, { data: wordRangeData }] = useReadWordRangeLazyQuery();
   const [getDocumentTextFromRange, { data: textFromRangeData }] =

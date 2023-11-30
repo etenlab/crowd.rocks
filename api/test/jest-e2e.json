@@ -10,5 +10,5 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "testTimeout": 300000
+  "testTimeout": 180000
 }

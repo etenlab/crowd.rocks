@@ -572,7 +572,7 @@ create table pericopies(
 create table pericope_votes(
   pericope_vote_id bigserial primary key,
   user_id bigint not null references users(user_id),
-  pericope_id bigint not null references pericopies(pericope_id),
+  pericope_id bigint not null references pericopies(pericope_id) on delete cascade,
   vote bool,
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, pericope_id)
@@ -594,6 +594,8 @@ create table document_word_entry_tags (
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__document_word_entry_id__document_word_entry_tags on document_word_entry_tags (document_word_entry_id);
+create index idx__document_word_entry_tag__document_word_entry_tags on document_word_entry_tags (document_word_entry_tag);
 
 create table word_range_tags (
   word_range_tag_id bigserial primary key,
@@ -602,6 +604,8 @@ create table word_range_tags (
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__word_range_id__word_range_tags on word_range_tags (word_range_id);
+create index idx__word_range_tag__word_range_tags on word_range_tags (word_range_tag);
 
 -- voting
 create table document_tags_votes(

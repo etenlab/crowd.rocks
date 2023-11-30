@@ -193,7 +193,6 @@ export class WordRangesService {
         );
 
         if (!beginDocumentWordEntry || !endDocumentWordEntry) {
-          console.log(beginDocumentWordEntry, endDocumentWordEntry);
           return {
             error: ErrorType.InvalidInputs,
             list: [],
@@ -204,10 +203,6 @@ export class WordRangesService {
           beginDocumentWordEntry.document_id !==
           endDocumentWordEntry.document_id
         ) {
-          console.log(
-            beginDocumentWordEntry.document_id,
-            endDocumentWordEntry.document_id,
-          );
           return {
             error: ErrorType.InvalidInputs,
             list: [],
@@ -219,7 +214,6 @@ export class WordRangesService {
         const endPageNumber = endDocumentWordEntry.page;
 
         if (beginPageNumber > endPageNumber) {
-          console.log(beginPageNumber, endPageNumber);
           return {
             error: ErrorType.InvalidInputs,
             list: [],
@@ -278,7 +272,6 @@ export class WordRangesService {
           );
 
           if (beginIndex === -1 || endIndex === -1 || beginIndex > endIndex) {
-            console.log(beginIndex, endIndex);
             return {
               error: ErrorType.InvalidInputs,
               list: [],
@@ -447,7 +440,6 @@ export class WordRangesService {
       const startPage = after ? +JSON.parse(after).page + 1 : 1;
 
       for (let i = 0; maxPage >= startPage + i; i++) {
-        console.log(maxPage, startPage + i);
         const entries = pageMap.get(startPage + i);
 
         if (entries) {

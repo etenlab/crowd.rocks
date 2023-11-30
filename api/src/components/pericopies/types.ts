@@ -37,6 +37,12 @@ export class PericopiesOutput extends GenericOutput {
 }
 
 @ObjectType()
+export class PericopeDeleteOutput extends GenericOutput {
+  @Field(() => ID, { nullable: true })
+  pericope_id: string | null;
+}
+
+@ObjectType()
 export class PericopeVotesOutput extends GenericOutput {
   @Field(() => [PericopeVote], { nullable: 'items' })
   pericope_votes: (PericopeVote | null)[];

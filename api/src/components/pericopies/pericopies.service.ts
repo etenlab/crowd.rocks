@@ -15,6 +15,7 @@ import {
   PericopeWithVote,
   PericopeWithVotesEdge,
   PericopeTextWithDescription,
+  PericopeDeleteOutput,
 } from './types';
 import {
   PericopeUpsertsProcedureOutput,
@@ -31,16 +32,15 @@ import {
   getPericopeDocumentSql,
   GetPericopeDescripionSqlR,
   getPericopeDescripionSql,
-  GetNextWordSqlR,
-  getNextWordSql,
   getWordsTillEndOfDocumentSql,
   WordsTillEndOfDocumentSqlR,
+  PericopeDeleteProcedureOutput,
+  callPericopeDeleteProcedure,
 } from './sql-string';
 import {
   GetDocumentWordEntriesTotalPageSize,
   getDocumentWordEntriesTotalPageSize,
 } from '../documents/sql-string';
-import { start } from 'repl';
 
 export const WORDS_JOINER = ' ';
 
@@ -110,6 +110,8 @@ export class PericopiesService {
       const creatingErrors = res.rows[0].p_error_types;
       const pericope_ids = res.rows[0].p_pericope_ids;
 
+      console.log(res.rows);
+
       if (creatingError !== ErrorType.NoError) {
         return {
           error: creatingError,
@@ -137,6 +139,52 @@ export class PericopiesService {
     return {
       error: ErrorType.UnknownError,
       pericopies: [],
+    };
+  }
+
+  async delete(
+    pericope_id: number,
+    token: string,
+    pgClient: PoolClient | null,
+  ): Promise<PericopeDeleteOutput> {
+    if (!(await this.authService.is_authorized(token))) {
+      return {
+        error: ErrorType.Unauthorized,
+        pericope_id: null,
+      };
+    }
+
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<PericopeDeleteProcedureOutput>(
+        ...callPericopeDeleteProcedure({
+          pericope_id,
+          token,
+        }),
+      );
+
+      const deleteError = res.rows[0].p_error_type;
+
+      if (deleteError !== ErrorType.NoError) {
+        return {
+          error: deleteError,
+          pericope_id: null,
+        };
+      }
+
+      return {
+        error: ErrorType.NoError,
+        pericope_id: pericope_id + '',
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      pericope_id: null,
     };
   }
 

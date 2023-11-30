@@ -65,3 +65,35 @@ mutation UpsertPericope($startWord: String!) {
     }
   }
 }
+
+mutation DeletePericope($pericope_id: ID!) {
+  deletePericopie(pericope_id: $pericope_id) {
+    error
+    pericope_id
+  }
+}
+
+subscription SubscribeToPericopiesAdded {
+  pericopiesAdded {
+    error
+    pericopies {
+      ...PericopeFragment
+    }
+  }
+}
+
+subscription SubscribeToPericopieDeleted {
+  pericopeDeleted {
+    error
+    pericope_id
+  }
+}
+
+subscription SubscribeToPericopeVoteStatusToggled {
+  pericopeVoteStatusToggled {
+    error
+    vote_status {
+      ...PericopeVoteStatusFragment
+    }
+  }
+}
