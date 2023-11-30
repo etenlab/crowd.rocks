@@ -92,6 +92,8 @@ import { PericopeDocumentViewerPage } from './components/pericopies/PericopeDocu
 import { TaggingDocumentListPage } from './components/tagging/TaggingDocumentListPage';
 import { TaggingDocumentViewerPage } from './components/tagging/TaggingDocumentViewerPage';
 
+import { DocumentListPage } from './components/super-tool/DocumentListPage/DocumentListPage';
+
 import { Icons } from './components/demo/Icons';
 import { Forms } from './components/demo/Forms';
 
@@ -620,6 +622,11 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/pericopies/documents/:document_id"
               component={PericopeDocumentViewerPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/super-tool/documents"
+              component={DocumentListPage}
             />
             <Route exact path="/demos/icons" component={Icons} />
             <Route exact path="/demos/forms" component={Forms} />
