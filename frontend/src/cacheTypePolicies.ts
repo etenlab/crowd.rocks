@@ -48,6 +48,7 @@ export const typePolicies: TypePolicies = {
       getForumFoldersList: relayStylePagination(['forum_id', 'filter']),
       getThreadsList: relayStylePagination(['forum_folder_id', 'filter']),
       getAllDocuments: relayStylePagination(['input']),
+      // getPericopiesTr: relayStylePagination(['input']),
       getPericopiesByDocumentId: {
         keyArgs: ['document_id'],
         merge(
@@ -322,5 +323,8 @@ export const typePolicies: TypePolicies = {
   },
   ThreadEdge: {
     keyFields: ['cursor'],
+  },
+  PericopeTextWithTranslationAndDescription: {
+    keyFields: ['pericope_id'],
   },
 };
