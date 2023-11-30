@@ -26,6 +26,8 @@ test.beforeAll(async () => {
   const registerPage = new RegistrationPage(page);
   const forumsPage = new ForumsPage(page);
   const loginPage = new LoginPage(page);
+  const homePage = new HomePage(page);
+  const commonPage = new CommonPage(page);
 
   //Navigate to the URL
   await page.goto(pageUrls.RegisterPage);
@@ -43,19 +45,19 @@ test.beforeAll(async () => {
   await loginPage.loginToApp(registerData);
 
   //Click on community tab and verify that user redirected on community page
-  await forumsPage.clickOnCommunitySection();
+  await homePage.clickOnCommunitySection();
   expect(await forumsPage.isPageTitleVisible()).toBeTruthy();
 
   //Click on the add new button and verify that 'add new forum' popup is appeared
-  await forumsPage.clickOnTheAddNewButton();
+  await commonPage.clickOnAddNewButton(community.Forums);
   expect(await forumsPage.isAddNewForumPopupVisible()).toBeTruthy();
 
   //Create a new forum
   await forumsPage.fillForumDetails(forumName, forumDescription);
-  await forumsPage.clickOnAddNewForumPopupCreateNewButton();
+  await commonPage.clickOnCreateNewButton();
 
   //Verify the validation message
-  expect(await forumsPage.getValidationMessage()).toEqual(
+  expect(await commonPage.getValidationMessage()).toEqual(
     'Success at creating new forum!',
   );
 
@@ -278,6 +280,7 @@ test('8: Verify that user can edit the created topic and can search the edited t
   const loginPage = new LoginPage(page);
   const topicsPage = new TopicsPage(page);
   const commonPage = new CommonPage(page);
+  const homePage = new HomePage(page);
   const topicDescriptionEdit = 'TestTopic Description Edit' + Math.random();
 
   //Navigate to the URL
@@ -285,7 +288,7 @@ test('8: Verify that user can edit the created topic and can search the edited t
   await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await forumsPage.clickOnCommunitySection();
+  await homePage.clickOnCommunitySection();
 
   //Search the forum name and click on the forum
   await commonPage.searchName(forumName.toLowerCase());
@@ -314,6 +317,7 @@ test.afterAll('Delete Forum', async () => {
   const context = await browser.newContext();
   const page = await context.newPage();
   const forumsPage = new ForumsPage(page);
+  const homePage = new HomePage(page);
   const loginPage = new LoginPage(page);
   const commonPage = new CommonPage(page);
 
@@ -322,7 +326,7 @@ test.afterAll('Delete Forum', async () => {
   await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await forumsPage.clickOnCommunitySection();
+  await homePage.clickOnCommunitySection();
 
   //Delete all forums
   await commonPage.searchName(forumName.toLowerCase());

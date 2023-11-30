@@ -70,7 +70,7 @@ test('1: End to end linear flow for Community forums', async ({ page }) => {
   await homePage.clickOnCommunitySection();
 
   //Search the forum name and click on the forum
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.clickOnTheForum(forumName);
 
   //Create a new topic
@@ -118,6 +118,7 @@ test.afterAll('Delete Forum', async () => {
   const context = await browser.newContext();
   const page = await context.newPage();
   const forumsPage = new ForumsPage(page);
+  const commonPage = new CommonPage(page);
   const loginPage = new LoginPage(page);
   const homePage = new HomePage(page);
   const forumsList = [forumName];
@@ -131,7 +132,7 @@ test.afterAll('Delete Forum', async () => {
 
   //Delete all forums
   for (const forum of forumsList) {
-    await forumsPage.searchForumName(forum.toLowerCase());
+    await commonPage.searchName(forum.toLowerCase());
     await forumsPage.deleteForum(forum);
   }
   await browser.close();

@@ -28,6 +28,7 @@ test.beforeAll(async () => {
   const topicsPage = new TopicsPage(page);
   const loginPage = new LoginPage(page);
   const commonPage = new CommonPage(page);
+  const homePage = new HomePage(page);
 
   //Navigate to the URL
   await page.goto(pageUrls.RegisterPage);
@@ -45,24 +46,24 @@ test.beforeAll(async () => {
   await loginPage.loginToApp(registerData);
 
   //Click on community tab and verify that user redirected on community page
-  await forumsPage.clickOnCommunitySection();
+  await homePage.clickOnCommunitySection();
   expect(await forumsPage.isPageTitleVisible()).toBeTruthy();
 
   //Click on the add new button and verify that 'add new forum' popup is appeared
-  await forumsPage.clickOnTheAddNewButton();
+  await commonPage.clickOnAddNewButton(community.Forums);
   expect(await forumsPage.isAddNewForumPopupVisible()).toBeTruthy();
 
   //Create a new forum
   await forumsPage.fillForumDetails(forumName, forumDescription);
-  await forumsPage.clickOnAddNewForumPopupCreateNewButton();
+  await commonPage.clickOnCreateNewButton();
 
   //Verify the validation message
-  expect(await forumsPage.getValidationMessage()).toEqual(
+  expect(await commonPage.getValidationMessage()).toEqual(
     'Success at creating new forum!',
   );
 
   //Search the forum name and click on the forum
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.clickOnTheForum(forumName);
 
   //Create a new topic
@@ -72,7 +73,7 @@ test.beforeAll(async () => {
   await commonPage.clickOnCreateNewButton();
 
   //Verify the validation messsage
-  expect(await forumsPage.getValidationMessage()).toEqual(
+  expect(await commonPage.getValidationMessage()).toEqual(
     'Success at creating new forum folder!',
   );
   await browser.close();
@@ -84,6 +85,7 @@ async function navigateToThreadsPage(
   homePage: HomePage,
   forumsPage: ForumsPage,
   topicsPage: TopicsPage,
+  commonPage: CommonPage,
 ) {
   //Login with valid credentials
   await page.goto(pageUrls.LoginPage);
@@ -93,7 +95,7 @@ async function navigateToThreadsPage(
   await homePage.clickOnCommunitySection();
 
   //Search the forum name and click on the forum
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.clickOnTheForum(forumName);
 
   await topicsPage.clickOnTheTopic(topicName);
@@ -116,6 +118,7 @@ test('1: Verify that user is able to create new thread successfully', async ({
     homePage,
     forumsPage,
     topicsPage,
+    commonPage,
   );
 
   //Create a new thread
@@ -146,6 +149,7 @@ test('2: Verify that user is not allowed to create a thread with a thread Name w
     homePage,
     forumsPage,
     topicsPage,
+    commonPage,
   );
 
   //Create a new thread
@@ -176,6 +180,7 @@ test('3: Verify that search functionality is working properly', async ({
     homePage,
     forumsPage,
     topicsPage,
+    commonPage,
   );
 
   //Verify that user can search the forum by using search bar
@@ -200,8 +205,8 @@ test('5: Verify that validation message is appeared when user passes blank threa
     homePage,
     forumsPage,
     topicsPage,
+    commonPage,
   );
-
   //Create a new forum without adding the description
   await commonPage.clickOnAddNewButton(community.Threads);
   await threadsPage.fillThreadName('');
@@ -213,7 +218,7 @@ test('5: Verify that validation message is appeared when user passes blank threa
   );
 });
 
-test('7: Verify that thread is not created when click on cancel button after entering the valid thread name', async ({
+test('6: Verify that thread is not created when click on cancel button after entering the valid thread name', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
@@ -230,6 +235,7 @@ test('7: Verify that thread is not created when click on cancel button after ent
     homePage,
     forumsPage,
     topicsPage,
+    commonPage,
   );
 
   //Create a new forum without adding the description
@@ -241,7 +247,7 @@ test('7: Verify that thread is not created when click on cancel button after ent
   expect(await threadsPage.isAddNewThreadPopupVisible()).toBeFalsy();
 });
 
-test('8: Verify that user can edit the created topic and can search the edited topic using search bar', async ({
+test('7: Verify that user can edit the created topic and can search the edited topic using search bar', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
@@ -258,6 +264,7 @@ test('8: Verify that user can edit the created topic and can search the edited t
     homePage,
     forumsPage,
     topicsPage,
+    commonPage,
   );
 
   //Edit the forum details and click on the save button
@@ -267,7 +274,7 @@ test('8: Verify that user can edit the created topic and can search the edited t
   await commonPage.clickOnSaveButton();
 
   //Verify the Validation message
-  expect(await forumsPage.getValidationMessage()).toEqual(
+  expect(await commonPage.getValidationMessage()).toEqual(
     'Success at updating thread!',
   );
   //Verify the edited forum is displayed on the forums page
@@ -284,16 +291,17 @@ test.afterAll('Delete Forum', async () => {
   const page = await context.newPage();
   const forumsPage = new ForumsPage(page);
   const loginPage = new LoginPage(page);
-
+  const commonPage = new CommonPage(page);
+  const homePage = new HomePage(page);
   //Navigate to the URL
   await page.goto(pageUrls.LoginPage);
   await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await forumsPage.clickOnCommunitySection();
+  await homePage.clickOnCommunitySection();
 
   //Delete all forums
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.deleteForum(forumName);
   await browser.close();
 });
