@@ -14,6 +14,7 @@ import { SubscriptionToken } from 'src/common/subscription-token';
 import { PUB_SUB } from 'src/pubSub.module';
 
 import { getBearer } from 'src/common/utility';
+import { GetPericopeTextInput } from '../pericope-translations/types';
 
 import { PericopeVotesService } from './pericope-votes.service';
 import { PericopiesService } from './pericopies.service';
@@ -22,6 +23,7 @@ import {
   PericopiesOutput,
   PericopeVoteStatusOutput,
   PericopeWithVotesListConnection,
+  PericopeTextWithDescription,
   PericopeDeleteOutput,
 } from './types';
 
@@ -172,6 +174,15 @@ export class PericopiesResolver {
   subscribeToPericopeVoteStatusToggled() {
     return this.pubSub.asyncIterator(
       SubscriptionToken.pericopeVoteStatusToggled,
+    );
+  }
+
+  @Query(() => PericopeTextWithDescription)
+  async getPericopeTextAndDesctiption(
+    @Args('input') input: GetPericopeTextInput,
+  ): Promise<PericopeTextWithDescription> {
+    return this.pericopiesService.getPericopeTextWithDescription(
+      input.pericopeId,
     );
   }
 }

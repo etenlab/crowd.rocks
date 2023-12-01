@@ -2,6 +2,7 @@ create table if not exists pericope_translations (
   pericope_translation_id bigserial primary key,
   pericope_id bigint not null references pericopies(pericope_id),
   translation varchar not null,
+  description varchar not null,
   language_code varchar(32) not null,
   dialect_code varchar(32),
   geo_code varchar(32),
@@ -35,31 +36,11 @@ ALTER TABLE public.pericope_descriptions DROP CONSTRAINT if exists pericope_desc
 
 ALTER TABLE public.pericope_descriptions ADD CONSTRAINT pericope_descriptions_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(user_id);
 ALTER TABLE public.pericope_descriptions ADD constraint pericope_descriptions_pericope_id_fkey FOREIGN KEY (pericope_id) REFERENCES public.pericopies(pericope_id);
---
+
 drop table if exists pericope_description_translations;
-CREATE table pericope_description_translations  (
-	pericope_description_translation_id bigserial NOT null primary key,
-	pericope_description_id int8 NOT NULL,
-	translation text NOT NULL,
-	language_code varchar(32) not null,
-	dialect_code varchar(32),
-	geo_code varchar(32),
-	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	created_by int8 NOT NULL,
-	CONSTRAINT pericope_descriptions_tr_pericope_id_description_key UNIQUE (pericope_description_id, translation)
-);
 
-drop index if exists idx__description_translation__pericope_descriptions;
 drop index if exists idx__pericope_description_id__pericope_descriptions;
-CREATE INDEX idx__description_translation__pericope_descriptions ON pericope_description_translations USING gin (translation gin_trgm_ops);
 CREATE INDEX idx__pericope_description_id__pericope_descriptions ON pericope_descriptions USING btree (pericope_description_id);
-
--- pericope_descriptions foreign keys
-
-ALTER TABLE pericope_description_translations drop CONSTRAINT if exists pericope_description_translations_created_by_fkey;
-ALTER TABLE pericope_description_translations drop CONSTRAINT if exists pericope_description_translations_pericope_id_fkey;
-ALTER TABLE pericope_description_translations ADD CONSTRAINT pericope_description_translations_created_by_fkey FOREIGN KEY (created_by) REFERENCES users(user_id);
-ALTER TABLE pericope_description_translations ADD CONSTRAINT pericope_description_translations_pericope_id_fkey FOREIGN KEY (pericope_description_id) REFERENCES pericope_descriptions(pericope_description_id);
 
 drop index if exists idx__document_word_entry_id__document_word_entry_tags;
 drop index if exists idx__document_word_entry_tag__document_word_entry_tags;
@@ -71,8 +52,11 @@ drop index if exists idx__word_range_tag__word_range_tags;
 create index idx__word_range_id__word_range_tags on word_range_tags (word_range_id);
 create index idx__word_range_tag__word_range_tags on word_range_tags (word_range_tag);
 
-alter table pericope_votes 
-drop constraint pericope_votes_pericope_id_fkey;
+alter table pericope_votes drop constraint pericope_votes_pericope_id_fkey;
+alter table pericope_votes add constraint pericope_votes_pericope_id_fkey foreign key (pericope_id) references pericopies(pericope_id) on delete cascade;
 
-alter table pericope_votes 
-add constraint pericope_votes_pericope_id_fkey foreign key (pericope_id) references pericopies(pericope_id) on delete cascade;
+ALTER TABLE public.pericope_translations add if not exists description varchar NULL;
+
+DROP TABLE if exists public.pericope_description_translations;
+ALTER TABLE pericope_translations_votes drop CONSTRAINT if exists pericope_translations_votes_user_id_pericope_id_key;
+ALTER TABLE pericope_translations_votes ADD CONSTRAINT pericope_translations_votes_user_id_pericope_id_key UNIQUE (user_id, pericope_translation_id);

@@ -40,10 +40,10 @@ export function MapNewTranslationConfirm() {
     states: {
       global: {
         langauges: { targetLang },
-        maps: { tempTranslations, updatedTrDefinitionIds },
+        maps: { tempTranslations },
       },
     },
-    actions: { clearTempTranslation, setUpdatedTrDefinitionIds },
+    actions: { clearTempTranslation },
   } = useAppContext();
 
   const wordOrPhraseQ = useGetMapWordOrPhraseAsOrigByDefinitionIdQuery({
@@ -144,8 +144,6 @@ export function MapNewTranslationConfirm() {
         },
       });
 
-      setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]);
-
       clearTempTranslation(`${definition_id}:${definition_type}`);
 
       setSaving(false);
@@ -157,10 +155,8 @@ export function MapNewTranslationConfirm() {
     definition_type,
     goToTranslation,
     saving,
-    setUpdatedTrDefinitionIds,
     targetLang,
     tempTranslations,
-    updatedTrDefinitionIds,
     upsertTranslation,
   ]);
 

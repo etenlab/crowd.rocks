@@ -166,7 +166,6 @@ export function togglePericopeVoteStatus({
 }
 
 export type PericopeWithVotesSqlR = {
-  cursor: string;
   pericope_id: string;
   start_word: string;
   upvotes: number;
@@ -174,24 +173,10 @@ export type PericopeWithVotesSqlR = {
 };
 export function getPericopiesWithVotesByDocumentIdSql({
   documentId,
-  after,
-  first,
 }: {
   documentId: string;
-  after: string | null;
-  first: number | null;
 }): [string, [string, string?, number?]] {
   const params: [string, string?, number?] = [documentId];
-  let afterClause = '';
-  let firstClause = '';
-  if (after) {
-    params.push(after);
-    afterClause += ` and p.pericope_id >= $${params.length}`;
-  }
-  if (first) {
-    params.push(first);
-    firstClause += ` limit $${params.length}`;
-  }
   return [
     ` 
       with votes as (
@@ -209,7 +194,6 @@ export function getPericopiesWithVotesByDocumentIdSql({
               v.pericope_id 
       )
       select 
-        p.pericope_id as cursor, 
         p.pericope_id as pericope_id, 
         p.start_word, 
         votes.upvotes, 
@@ -219,9 +203,6 @@ export function getPericopiesWithVotesByDocumentIdSql({
       join document_word_entries dwe on p.start_word = dwe.document_word_entry_id  
       join  documents d ON d.document_id =dwe.document_id
       where d.document_id = $1
-      ${afterClause}
-      order by p.pericope_id
-      ${firstClause}
     `,
     params,
   ];
@@ -274,5 +255,122 @@ export function getWordsTillNextPericopeSql({
       order by level
     `,
     params,
+  ];
+}
+
+export type WordsTillEndOfDocumentSqlR = {
+  document_word_entry_id: string;
+  wordlike_string: string;
+  pericope_id: string | null;
+  level: number;
+};
+export function getWordsTillEndOfDocumentSql({
+  documentId,
+  start_word_id,
+}: {
+  documentId: string;
+  start_word_id: string;
+}): [string, [string, string]] {
+  const params: [string, string] = [documentId, start_word_id];
+
+  return [
+    ` 
+      WITH RECURSIVE DWE_CTE AS (
+        SELECT
+          document_word_entry_id,
+          document_id,
+          wordlike_string_id,
+          parent_document_word_entry_id,
+          null :: bigint as pericope_id,
+          1 AS level
+        FROM public.document_word_entries
+        WHERE document_id=$1
+        and document_word_entry_id = $2
+      --
+        UNION
+        SELECT
+          dwe.document_word_entry_id,
+          dwe.document_id,
+          dwe.wordlike_string_id,
+          dwe.parent_document_word_entry_id,
+          p.pericope_id as pericope_id,
+          DWE_CTE.level +1 as level
+        FROM public.document_word_entries dwe
+        left join pericopies p on document_word_entry_id = p.start_word
+        JOIN DWE_CTE ON DWE_CTE.document_word_entry_id = dwe.parent_document_word_entry_id
+        where dwe.document_id=$1
+      )
+      SELECT DWE_CTE.document_word_entry_id, ws.wordlike_string, DWE_CTE.document_id, level, pericope_id
+      FROM DWE_CTE
+      join wordlike_strings ws on DWE_CTE.wordlike_string_id = ws.wordlike_string_id
+      order by level
+    `,
+    params,
+  ];
+}
+
+export type GetNextWordSqlR = {
+  document_word_entry_id: string | null;
+};
+export function getNextWordSql({
+  word_id,
+}: {
+  word_id: string;
+}): [string, [string]] {
+  const params: [string] = [word_id];
+  return [
+    `
+    select dwe.document_word_entry_id from document_word_entries dwe 
+    where true 
+    and dwe.parent_document_word_entry_id =$1
+  `,
+    params,
+  ];
+}
+
+export type GetPericopeDocumentSqlR = {
+  pericope_id: string;
+  document_id: string;
+  start_word: string;
+};
+export function getPericopeDocumentSql({
+  pericopeIds,
+}: {
+  pericopeIds: string[];
+}): [string, [string[]]] {
+  return [
+    `
+      select
+        p.pericope_id,
+        dwe.document_id,
+        p.start_word
+      from pericopies p
+      join document_word_entries dwe on p.start_word = dwe.document_word_entry_id
+      where pericope_id = any($1);
+    `,
+    [pericopeIds],
+  ];
+}
+
+export type GetPericopeDescripionSqlR = {
+  pericope_id: string;
+  pericope_description_id: string;
+  description: string;
+};
+export function getPericopeDescripionSql({
+  pericopeIds,
+}: {
+  pericopeIds: string[];
+}): [string, [string[]]] {
+  return [
+    `
+      select
+      	pd.pericope_id,
+        pd.pericope_description_id, 
+        pd.description
+      from pericope_descriptions pd
+      where pd.pericope_id = any($1);
+    `,
+    [pericopeIds],
   ];
 }

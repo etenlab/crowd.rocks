@@ -14,6 +14,7 @@ import {
   PericopeWithVotesListConnection,
   PericopeWithVote,
   PericopeWithVotesEdge,
+  PericopeTextWithDescription,
   PericopeDeleteOutput,
 } from './types';
 import {
@@ -27,6 +28,12 @@ import {
   PericopeWithVotesSqlR,
   DocumentWordSqlR,
   getWordsTillNextPericopeSql,
+  GetPericopeDocumentSqlR,
+  getPericopeDocumentSql,
+  GetPericopeDescripionSqlR,
+  getPericopeDescripionSql,
+  getWordsTillEndOfDocumentSql,
+  WordsTillEndOfDocumentSqlR,
   PericopeDeleteProcedureOutput,
   callPericopeDeleteProcedure,
 } from './sql-string';
@@ -34,6 +41,8 @@ import {
   GetDocumentWordEntriesTotalPageSize,
   getDocumentWordEntriesTotalPageSize,
 } from '../documents/sql-string';
+
+export const WORDS_JOINER = ' ';
 
 @Injectable()
 export class PericopiesService {
@@ -297,12 +306,10 @@ export class PericopiesService {
 
   async getRecomendedPericopiesByDocumentId(
     documentId: string,
-    first: number | null,
-    after: string | null,
   ): Promise<PericopeWithVotesSqlR[]> {
     try {
       const resQ = await this.pg.pool.query<PericopeWithVotesSqlR>(
-        ...getPericopiesWithVotesByDocumentIdSql({ documentId, after, first }),
+        ...getPericopiesWithVotesByDocumentIdSql({ documentId }),
       );
       return this.filterRecomendedPericopies(resQ.rows);
     } catch (error) {
@@ -323,6 +330,41 @@ export class PericopiesService {
     );
   }
 
+  async getWordsTillEndOfDocument(
+    documentId: string,
+    start_word_id: string,
+  ): Promise<WordsTillEndOfDocumentSqlR[]> {
+    try {
+      const resQ = await this.pg.pool.query<WordsTillEndOfDocumentSqlR>(
+        ...getWordsTillEndOfDocumentSql({ documentId, start_word_id }),
+      );
+      const pericopeWords = resQ.rows;
+
+      return pericopeWords;
+    } catch (error) {
+      Logger.error(
+        `PericopiesService#getWordsTillNextPericope: ${JSON.stringify(error)}`,
+      );
+      return [];
+    }
+  }
+
+  async getFirstWordOfDocument(document_id: string): Promise<string | null> {
+    const resQ = await this.pg.pool.query(
+      `
+      select
+        dwe.document_word_entry_id 
+      from
+        document_word_entries dwe
+      where
+        document_id = $1
+        and parent_document_word_entry_id is null
+    `,
+      [document_id],
+    );
+    return resQ.rows[0]?.document_word_entry_id || null;
+  }
+
   async getWordsTillNextPericope(
     documentId: string,
     start_word_id: string,
@@ -337,6 +379,63 @@ export class PericopiesService {
         `PericopiesService#getWordsTillNextPericope: ${JSON.stringify(error)}`,
       );
       return [];
+    }
+  }
+
+  async getPericopeTextWithDescription(
+    pericopeId: string,
+  ): Promise<PericopeTextWithDescription> {
+    try {
+      const pericopeDocumentQ =
+        await this.pg.pool.query<GetPericopeDocumentSqlR>(
+          ...getPericopeDocumentSql({ pericopeIds: [pericopeId] }),
+        );
+
+      const pericopeWords = await this.getWordsTillNextPericope(
+        pericopeDocumentQ.rows[0].document_id,
+        pericopeDocumentQ.rows[0].start_word,
+      );
+
+      const pericopeDescriptionTextRows =
+        await this.pg.pool.query<GetPericopeDescripionSqlR>(
+          ...getPericopeDescripionSql({ pericopeIds: [pericopeId] }),
+        );
+
+      const pericope_description_text =
+        pericopeDescriptionTextRows.rows[0]?.description || '';
+
+      if (!(pericopeWords.length > 0)) {
+        Logger.error(
+          `PericopiesService#getPericopeTextWithDescription: Pericope words not found`,
+        );
+        return {
+          error: ErrorType.PericopeNotFound,
+          pericope_id: null,
+          pericope_description_text: '',
+          pericope_text: '',
+        };
+      }
+
+      return {
+        error: ErrorType.NoError,
+        pericope_id: pericopeId,
+        pericope_description_text,
+        pericope_text: pericopeWords
+          .map((w) => w.wordlike_string)
+          .join(WORDS_JOINER),
+      };
+    } catch (error) {
+      Logger.error(
+        `PericopiesService#getPericopeTextWithDescription: ${JSON.stringify(
+          error,
+        )}`,
+      );
+      return {
+        error: ErrorType.PericopeNotFound,
+        pericope_id: null,
+        pericope_description_text: '',
+        pericope_text: '',
+      };
     }
   }
 }

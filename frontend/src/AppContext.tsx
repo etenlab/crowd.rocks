@@ -54,7 +54,6 @@ export interface ContextType {
     changeSiteTextTargetLanguage: (langInfo: LanguageInfo | null) => void;
     setSourceLanguage: (targetLanguage: LanguageInfo | null) => void;
     setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
-    setUpdatedTrDefinitionIds: (definitionIds: Array<string>) => void;
     createModal(): {
       openModal(component: ReactNode, mode?: ModalMode): void;
       closeModal(): void;
@@ -121,7 +120,6 @@ export function AppContextProvider({ children }: AppProviderProps) {
     changeDocumentSourceLanguage,
     changeDocumentTargetLanguage,
     changeSiteTextTargetLanguage,
-    setUpdatedTrDefinitionIds,
     setTempTranslation,
     clearTempTranslation,
   } = useGlobal({
@@ -372,7 +370,6 @@ export function AppContextProvider({ children }: AppProviderProps) {
       changeSiteTextTargetLanguage,
       setSourceLanguage,
       setTargetLanguage,
-      setUpdatedTrDefinitionIds,
       createModal,
       removeModal,
       setTempTranslation,

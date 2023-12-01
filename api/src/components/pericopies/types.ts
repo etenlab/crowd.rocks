@@ -86,3 +86,10 @@ export class RecomendedPericopeConnection extends GenericOutput {
   edges: PericopeEdge[];
   @Field(() => PageInfo) pageInfo: PageInfo;
 }
+
+@ObjectType()
+export class PericopeTextWithDescription extends GenericOutput {
+  @Field(() => ID, { nullable: true }) pericope_id: string | null;
+  @Field(() => String) pericope_text: string;
+  @Field(() => String) pericope_description_text: string;
+}

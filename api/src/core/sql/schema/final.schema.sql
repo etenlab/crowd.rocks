@@ -901,19 +901,4 @@ CREATE INDEX idx__pericope_id__pericope_descriptions ON public.pericope_descript
 ALTER TABLE public.pericope_descriptions ADD CONSTRAINT pericope_descriptions_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(user_id);
 ALTER TABLE public.pericope_descriptions ADD CONSTRAINT pericope_descriptions_pericope_id_fkey FOREIGN KEY (pericope_id) REFERENCES public.pericopies(pericope_id);
 --
-
-CREATE table if not exists pericope_description_translations  (
-	pericope_description_translation_id bigserial NOT null primary key,
-	pericope_description_id int8 NOT NULL,
-	translation text NOT NULL,
-	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	created_by int8 NOT NULL,
-	CONSTRAINT pericope_descriptions_tr_pericope_id_description_key UNIQUE (pericope_description_id, translation)
-);
-CREATE INDEX idx__description_translation__pericope_descriptions ON pericope_description_translations USING gin (translation gin_trgm_ops);
 CREATE INDEX idx__pericope_description_id__pericope_descriptions ON pericope_descriptions USING btree (pericope_description_id);
-
--- pericope_descriptions foreign keys
-
-ALTER TABLE pericope_description_translations ADD CONSTRAINT pericope_description_translations_created_by_fkey FOREIGN KEY (created_by) REFERENCES users(user_id);
-ALTER TABLE pericope_description_translations ADD CONSTRAINT pericope_description_translations_pericope_id_fkey FOREIGN KEY (pericope_description_id) REFERENCES pericope_descriptions(pericope_description_id);

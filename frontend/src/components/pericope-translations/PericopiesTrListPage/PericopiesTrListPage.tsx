@@ -203,6 +203,7 @@ export function PericopiesTrListPage() {
                 pericopeTr.node && (
                   <PericopeTrItem
                     key={pericopeTr.cursor}
+                    pericopeId={pericopeTr.node.pericope_id || ''}
                     original={{
                       text: pericopeTr.node.pericope_text,
                       description: pericopeTr.node.pericope_description_text,
@@ -210,7 +211,8 @@ export function PericopiesTrListPage() {
                     translation={{
                       text: pericopeTr.node.translation?.translation || '',
                       description:
-                        pericopeTr.node.description_translation || '',
+                        pericopeTr.node.translation?.translation_description ||
+                        '',
                     }}
                   />
                 ),

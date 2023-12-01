@@ -144,9 +144,12 @@ export enum ErrorType {
   AnswerInsertFailed = 'AnswerInsertFailed',
 
   PericopeInsertFailed = 'PericopeInsertFailed',
+  PericopeTranslationInsertFailed = 'PericopeTranslationInsertFailed',
   PericopeNotFound = 'PericopeNotFound',
+  PericopeTranslationNotFound = 'PericopeTranslationNotFound',
   PericopeGetTranslationError = 'PericopeGetTranslationError',
   PericopeVoteToggleFailed = 'PericopeVoteToggleFailed',
+  PericopeTranslationVoteToggleFailed = 'PericopeTranslationVoteToggleFailed',
   BotTranslationError = 'BotTranslationError',
 
   BotTranslationBotNotFound = 'BotTranslationBotNotFound',
