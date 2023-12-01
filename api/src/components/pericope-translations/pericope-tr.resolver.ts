@@ -15,11 +15,12 @@ import {
   GetPericopiesTrInput,
   PericopeTranslation,
   PericopeTranslationsOutput,
-  PericopeTrVoteStatusListOutput,
+  PericopeTrVoteStatusAndBestTrListOutput,
   PericopiesTextsWithTranslationConnection,
 } from './types';
 import { BearerTokenAuthGuard } from '../../guards/bearer-token-auth.guard';
 import { ErrorType } from '../../common/types';
+import { LanguageInput } from '../common/types';
 
 @Injectable()
 @Resolver()
@@ -55,23 +56,41 @@ export class PericopeTrResolver {
   }
 
   @UseGuards(BearerTokenAuthGuard)
-  @Mutation(() => PericopeTrVoteStatusListOutput)
+  @Mutation(() => PericopeTrVoteStatusAndBestTrListOutput)
   async togglePericopeTrVoteStatus(
     @Args('pericope_translation_id', { type: () => ID })
     pericope_translation_id: string,
     @Args('vote', { type: () => Boolean }) vote: boolean,
     @Context() req: any,
-  ): Promise<PericopeTrVoteStatusListOutput> {
+  ): Promise<PericopeTrVoteStatusAndBestTrListOutput> {
     Logger.log(
       `${JSON.stringify(pericope_translation_id)}`,
       `PericopeTrResolver#togglePericopeTrVoteStatus`,
     );
 
-    return this.pericopeTrService.toggleVoteStatus(
+    const vote_status_list = await this.pericopeTrService.toggleVoteStatus(
       pericope_translation_id,
       vote,
       req.req.token as string,
     );
+
+    const pIdsLangs: { pericopeId: string; lang: LanguageInput }[] =
+      await this.pericopeTrService.getPericopeIdsAndLangsOfTranslationIds(
+        vote_status_list.vote_status_list.map((v) => v.pericope_translation_id),
+      );
+
+    const bestTrListPromises: Promise<PericopeTranslation | null>[] =
+      pIdsLangs.map((pIdLang) => {
+        return this.pericopeTrService.getRecomendedPericopeTranslation(
+          pIdLang.pericopeId,
+          pIdLang.lang,
+        );
+      });
+
+    return {
+      ...vote_status_list,
+      best_translation_list: await Promise.all(bestTrListPromises),
+    };
   }
 
   @Query(() => PericopeTranslationsOutput)

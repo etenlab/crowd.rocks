@@ -778,7 +778,7 @@ export type Mutation = {
   threadUpsert: ThreadOutput;
   toggleFlagWithRef: FlagsOutput;
   toggleMapVoteStatus: MapVoteStatusOutputRow;
-  togglePericopeTrVoteStatus: PericopeTrVoteStatusListOutput;
+  togglePericopeTrVoteStatus: PericopeTrVoteStatusAndBestTrListOutput;
   togglePericopeVoteStatus: PericopeVoteStatusOutput;
   togglePhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
   togglePhraseToPhraseTrVoteStatus: PhraseToPhraseTranslationVoteStatusOutputRow;
@@ -1399,8 +1399,9 @@ export type PericopeTrVoteStatus = {
   upvotes: Scalars['Int']['output'];
 };
 
-export type PericopeTrVoteStatusListOutput = {
-  __typename?: 'PericopeTrVoteStatusListOutput';
+export type PericopeTrVoteStatusAndBestTrListOutput = {
+  __typename?: 'PericopeTrVoteStatusAndBestTrListOutput';
+  best_translation_list: Array<PericopeTranslation>;
   error: ErrorType;
   vote_status_list: Array<PericopeTrVoteStatus>;
 };
@@ -3962,7 +3963,7 @@ export type TogglePericopeTrVoteStatusMutationVariables = Exact<{
 }>;
 
 
-export type TogglePericopeTrVoteStatusMutation = { __typename?: 'Mutation', togglePericopeTrVoteStatus: { __typename?: 'PericopeTrVoteStatusListOutput', error: ErrorType, vote_status_list: Array<{ __typename?: 'PericopeTrVoteStatus', pericope_translation_id: string, upvotes: number, downvotes: number }> } };
+export type TogglePericopeTrVoteStatusMutation = { __typename?: 'Mutation', togglePericopeTrVoteStatus: { __typename?: 'PericopeTrVoteStatusAndBestTrListOutput', error: ErrorType, vote_status_list: Array<{ __typename?: 'PericopeTrVoteStatus', pericope_translation_id: string, upvotes: number, downvotes: number }>, best_translation_list: Array<{ __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
 export type PericopeFragmentFragment = { __typename?: 'Pericope', pericope_id: string, start_word: string };
 
@@ -8489,9 +8490,13 @@ export const TogglePericopeTrVoteStatusDocument = gql`
     vote_status_list {
       ...PericopeTrVoteStatusFragment
     }
+    best_translation_list {
+      ...PericopeTranslationFragment
+    }
   }
 }
-    ${PericopeTrVoteStatusFragmentFragmentDoc}`;
+    ${PericopeTrVoteStatusFragmentFragmentDoc}
+${PericopeTranslationFragmentFragmentDoc}`;
 export type TogglePericopeTrVoteStatusMutationFn = Apollo.MutationFunction<TogglePericopeTrVoteStatusMutation, TogglePericopeTrVoteStatusMutationVariables>;
 
 /**

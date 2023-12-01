@@ -137,5 +137,8 @@ mutation TogglePericopeTrVoteStatus(
     vote_status_list {
       ...PericopeTrVoteStatusFragment
     }
+    best_translation_list {
+      ...PericopeTranslationFragment
+    }
   }
 }

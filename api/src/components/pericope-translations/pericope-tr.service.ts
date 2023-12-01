@@ -409,4 +409,35 @@ export class PericopeTrService {
       vote_status_list: [],
     };
   }
+
+  async getPericopeIdsAndLangsOfTranslationIds(
+    pericope_translation_ids: string[],
+  ): Promise<Array<{ pericopeId: string; lang: LanguageInput }>> {
+    const res = await this.pg.pool.query<{
+      pericope_id: string;
+      language_code: string;
+      dialect_code: string;
+      geo_code: string;
+    }>(
+      `
+      select 
+        pt.pericope_id,
+        pt.language_code,
+        pt.dialect_code,
+        pt.geo_code
+        from pericope_translations pt
+        where pt.pericope_translation_id  = any($1)
+    `,
+      [pericope_translation_ids],
+    );
+
+    return res.rows.map((row) => ({
+      pericopeId: row.pericope_id,
+      lang: {
+        language_code: row.language_code,
+        dialect_code: row.dialect_code,
+        geo_code: row.geo_code,
+      },
+    }));
+  }
 }

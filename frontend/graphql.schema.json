@@ -7405,7 +7405,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PericopeTrVoteStatusListOutput",
+                "name": "PericopeTrVoteStatusAndBestTrListOutput",
                 "ofType": null
               }
             },
@@ -10253,9 +10253,33 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PericopeTrVoteStatusListOutput",
+        "name": "PericopeTrVoteStatusAndBestTrListOutput",
         "description": null,
         "fields": [
+          {
+            "name": "best_translation_list",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "PericopeTranslation",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "error",
             "description": null,

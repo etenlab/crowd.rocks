@@ -105,3 +105,8 @@ export class PericopeTrVoteStatusListOutput extends GenericOutput {
   @Field(() => [PericopeTrVoteStatus])
   vote_status_list: PericopeTrVoteStatus[];
 }
+@ObjectType()
+export class PericopeTrVoteStatusAndBestTrListOutput extends PericopeTrVoteStatusListOutput {
+  @Field(() => [PericopeTranslation])
+  best_translation_list: Array<PericopeTranslation | null>;
+}

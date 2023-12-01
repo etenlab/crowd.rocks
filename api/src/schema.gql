@@ -706,7 +706,7 @@ type Mutation {
   threadUpsert(input: ThreadUpsertInput!): ThreadOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   toggleMapVoteStatus(is_original: Boolean!, map_id: ID!, vote: Boolean!): MapVoteStatusOutputRow!
-  togglePericopeTrVoteStatus(pericope_translation_id: ID!, vote: Boolean!): PericopeTrVoteStatusListOutput!
+  togglePericopeTrVoteStatus(pericope_translation_id: ID!, vote: Boolean!): PericopeTrVoteStatusAndBestTrListOutput!
   togglePericopeVoteStatus(pericope_id: ID!, vote: Boolean!): PericopeVoteStatusOutput!
   togglePhraseDefinitionVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
   togglePhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!, vote: Boolean!): PhraseToPhraseTranslationVoteStatusOutputRow!
@@ -829,7 +829,8 @@ type PericopeTrVoteStatus {
   upvotes: Int!
 }
 
-type PericopeTrVoteStatusListOutput {
+type PericopeTrVoteStatusAndBestTrListOutput {
+  best_translation_list: [PericopeTranslation!]!
   error: ErrorType!
   vote_status_list: [PericopeTrVoteStatus!]!
 }

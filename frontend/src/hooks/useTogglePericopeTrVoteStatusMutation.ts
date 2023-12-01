@@ -24,10 +24,18 @@ export function useTogglePericopeTrVoteStatusMutation() {
         data.togglePericopeTrVoteStatus.vote_status_list[0] &&
         data.togglePericopeTrVoteStatus.error === ErrorType.NoError
       ) {
+        // note: index [0] is because we are toggling single vote related to one definite pericope_translaion_id
+        // so we're expecting only single row.
         const newVoteStatus =
           data.togglePericopeTrVoteStatus.vote_status_list[0];
+        const newBestTranslation =
+          data.togglePericopeTrVoteStatus.best_translation_list[0];
 
-        updateCacheWithTogglePericopeTrVoteStatus(cache, newVoteStatus);
+        updateCacheWithTogglePericopeTrVoteStatus(
+          cache,
+          newVoteStatus,
+          newBestTranslation,
+        );
       } else {
         present({
           message: `${tr('Failed at voting!')} [${data
