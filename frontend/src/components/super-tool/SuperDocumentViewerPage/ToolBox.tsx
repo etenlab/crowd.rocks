@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 
-import { Stack, Typography, Button } from '@mui/material';
+import { Stack, Typography, Button, Divider } from '@mui/material';
 
 import { langInfo2String, subTags2LangInfo } from '../../../../../utils';
 import { downloadFromUrl } from '../../../common/utility';
@@ -13,6 +13,7 @@ import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 import { Select, OptionItem } from '../../common/forms/Select';
 import { SearchInput } from '../../common/forms/SearchInput';
 import { Search } from '../../common/icons/Search';
+import { Switch } from '../../common/buttons/Switch';
 
 import { TextyDocument } from '../../../generated/graphql';
 
@@ -37,6 +38,8 @@ export enum FilterKind {
 }
 
 export type ToolBoxProps = {
+  mode: 'view' | 'edit';
+  onToggleMode(): void;
   tab: TabKind;
   onChangeTab(tab: TabKind): void;
   tool: OptionItem;
@@ -46,9 +49,12 @@ export type ToolBoxProps = {
   stringFilter: string;
   onChangeStringFilter(str: string): void;
   document: TextyDocument;
+  disabledEditButton: boolean;
 };
 
 export function ToolBox({
+  mode,
+  onToggleMode,
   tab,
   onChangeTab,
   tool,
@@ -58,6 +64,7 @@ export function ToolBox({
   stringFilter,
   onChangeStringFilter,
   document,
+  disabledEditButton,
 }: ToolBoxProps) {
   const { tr } = useTr();
   const {
@@ -178,6 +185,7 @@ export function ToolBox({
       >
         <Stack sx={{ flex: 1 }}>
           <Select
+            label={tr('Select sort filter')}
             placeholder={tr('Select sort filter')}
             options={filterOptions}
             value={filter}
@@ -212,6 +220,7 @@ export function ToolBox({
   const toolCom =
     tab === TabKind.Document ? (
       <Select
+        label={tr('Select the tool')}
         placeholder={tr('Select the tool')}
         options={toolOptions}
         value={tool}
@@ -240,6 +249,21 @@ export function ToolBox({
             <Typography variant="h4" sx={{ fontWeight: 500 }}>
               {document.file_name}
             </Typography>
+            <Button
+              onClick={onToggleMode}
+              variant="text"
+              sx={{ display: 'flex', alignItem: 'center', gap: '6px' }}
+              disabled={disabledEditButton}
+              endIcon={
+                <Switch
+                  checked={mode === 'edit'}
+                  disabled={disabledEditButton}
+                />
+              }
+              color="gray"
+            >
+              {tr('Edit mode')}
+            </Button>
             <MoreHorizButton dropDownList={dropDownList} />
           </Stack>
           <Stack
@@ -258,6 +282,7 @@ export function ToolBox({
               direction="row"
               alignItems="center"
               justifyContent="space-between"
+              sx={{ flex: 1 }}
             >
               <Typography
                 variant="body2"
@@ -268,10 +293,12 @@ export function ToolBox({
               </Typography>
               <Tag label={langInfo2String(target || undefined)} color="blue" />
             </Stack>
+            <Divider orientation="vertical" />
             <Stack
               direction="row"
               alignItems="center"
               justifyContent="space-between"
+              sx={{ flex: 1 }}
             >
               <Typography
                 variant="body2"
