@@ -23,6 +23,7 @@ import { useSubscribeToAnswersAddedSubscription } from '../../../hooks/useUpsert
 
 import { AnswerList } from './AnswerList';
 import { Statistics } from './Statistics';
+import { Tabs } from '../../common/buttons/Tabs';
 
 export function AnswersPage() {
   const { tr } = useTr();
@@ -45,6 +46,17 @@ export function AnswersPage() {
     'Answers',
   );
   const [showAnswerForm, setShowAnswerForm] = useState<boolean>(false);
+
+  const tabs = [
+    {
+      label: tr('Answers'),
+      value: 'Answers',
+    },
+    {
+      label: tr('Statistics'),
+      value: 'Statistics',
+    },
+  ];
 
   useEffect(() => {
     if (statisticData) {
@@ -158,46 +170,17 @@ export function AnswersPage() {
       <Stack gap="24px">
         <Stack gap="24px">
           {!showAnswerForm ? (
-            <Stack direction="row">
-              <Button
-                variant="outlined"
-                sx={(theme) => ({
-                  borderRadius: '10px 0 0 10px',
-                  borderRight: currentTab === 'Answers' ? '' : 'none',
-                  backgroundColor:
-                    currentTab === 'Answers'
-                      ? theme.palette.background.blue_10
-                      : '',
-                })}
-                color={currentTab === 'Answers' ? 'blue' : 'gray'}
-                onClick={() => setCurrentTab('Answers')}
-                fullWidth
-              >
-                {tr('Answers')}
-              </Button>
-              <Button
-                variant="outlined"
-                sx={(theme) => ({
-                  borderRadius: '0 10px 10px 0',
-                  borderLeft: currentTab === 'Statistics' ? '' : 'none',
-                  backgroundColor:
-                    currentTab === 'Statistics'
-                      ? theme.palette.background.blue_10
-                      : '',
-                })}
-                color={currentTab === 'Statistics' ? 'blue' : 'gray'}
-                onClick={() => setCurrentTab('Statistics')}
-                fullWidth
-                disabled={
-                  !questionWithStatistic ||
-                  questionWithStatistic.question_items.length === 0
-                    ? true
-                    : false
-                }
-              >
-                {tr('Statistics')}
-              </Button>
-            </Stack>
+            <Tabs
+              tabs={tabs}
+              selected={currentTab}
+              onChange={(tab) => setCurrentTab(tab as 'Answers' | 'Statistics')}
+              disabled={
+                !questionWithStatistic ||
+                questionWithStatistic.question_items.length === 0
+                  ? ['Statistics']
+                  : []
+              }
+            />
           ) : null}
 
           {answerFormCom}

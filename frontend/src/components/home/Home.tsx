@@ -100,6 +100,13 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           isShown: () => true,
         },
         {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/super-tool/documents`,
+          icon: mapOutline,
+          title: tr('Super Tool'),
+          description: tr('Super Tool'),
+          isShown: () => !!settings?.isBetaTools,
+        },
+        {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/documents`,
           icon: mapOutline,
           title: tr('Documents'),

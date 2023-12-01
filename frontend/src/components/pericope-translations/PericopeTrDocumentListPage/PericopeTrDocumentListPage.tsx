@@ -26,7 +26,9 @@ export function PericopeTrDocumentListPage() {
   const {
     states: {
       global: {
-        langauges: { sourceLang },
+        langauges: {
+          documentPage: { source: sourceLang },
+        },
       },
     },
   } = useAppContext();
