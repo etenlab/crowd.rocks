@@ -1,7 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ErrorType } from '../../common/types';
 import { calc_vote_weight } from '../../common/utility';
 import { PostgresService } from '../../core/postgres.service';
+import { PUB_SUB } from '../../pubSub.module';
+import { PubSub } from 'graphql-subscriptions';
 import { LanguageInput } from '../common/types';
 import {
   PericopiesService,
@@ -34,6 +36,7 @@ import {
   PericopiesTextsWithTranslationConnection,
   PericopiesTextsWithTranslationEdge,
 } from './types';
+import { SubscriptionToken } from '../../common/subscription-token';
 
 const errorishPageInfo = {
   hasNextPage: false,
@@ -42,11 +45,14 @@ const errorishPageInfo = {
   endCursor: null,
 };
 
+const PAGE_SIZE = 30; // todo: same as at frontend, so maybe move it to common utils lib
+
 @Injectable()
 export class PericopeTrService {
   constructor(
     private pg: PostgresService,
     private pericopiesService: PericopiesService,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
   async getPericopiesTextsWithTranslationConnection(
@@ -439,5 +445,26 @@ export class PericopeTrService {
         geo_code: row.geo_code,
       },
     }));
+  }
+
+  async publishNewRecommendedPericopiesTr({
+    documentId,
+    targetLang,
+  }: {
+    documentId: string;
+    targetLang: LanguageInput;
+  }): Promise<void> {
+    const newPericopiesTr: PericopiesTextsWithTranslationConnection =
+      await this.getPericopiesTextsWithTranslationConnection(
+        {
+          documentId,
+          targetLang,
+        },
+        PAGE_SIZE,
+        null,
+      );
+    this.pubSub.publish(SubscriptionToken.pericopiesRecommendedHasChanged, {
+      [SubscriptionToken.pericopiesRecommendedHasChanged]: newPericopiesTr,
+    });
   }
 }

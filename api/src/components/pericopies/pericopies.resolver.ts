@@ -26,6 +26,7 @@ import {
   PericopeTextWithDescription,
   PericopeDeleteOutput,
 } from './types';
+import { PericopeTrService } from '../pericope-translations/pericope-tr.service';
 
 @Injectable()
 @Resolver()
@@ -34,6 +35,7 @@ export class PericopiesResolver {
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private pericopiesService: PericopiesService,
     private pericopeVotesService: PericopeVotesService,
+    private pericopeTrService: PericopeTrService,
   ) {}
 
   @Query(() => PericopiesOutput)
@@ -102,6 +104,17 @@ export class PericopiesResolver {
     this.pubSub.publish(SubscriptionToken.pericopiesAdded, {
       [SubscriptionToken.pericopiesAdded]: newPericopies,
     });
+
+    if (newPericopies.pericopies[0]?.pericope_id) {
+      const dIdsAdnLangs =
+        await this.pericopiesService.getDocumentIdsAndLangsOfPericopeIds([
+          newPericopies.pericopies[0]?.pericope_id,
+        ]);
+      this.pericopeTrService.publishNewRecommendedPericopiesTr({
+        documentId: dIdsAdnLangs[0].documentId,
+        targetLang: dIdsAdnLangs[0].lang,
+      });
+    }
 
     return newPericopies;
   }

@@ -1,4 +1,4 @@
-import { Injectable, Logger, UseGuards } from '@nestjs/common';
+import { Inject, Injectable, Logger, UseGuards } from '@nestjs/common';
 import {
   Args,
   Context,
@@ -7,6 +7,7 @@ import {
   Mutation,
   Query,
   Resolver,
+  Subscription,
 } from '@nestjs/graphql';
 import { PericopeTrService } from './pericope-tr.service';
 import {
@@ -21,11 +22,17 @@ import {
 import { BearerTokenAuthGuard } from '../../guards/bearer-token-auth.guard';
 import { ErrorType } from '../../common/types';
 import { LanguageInput } from '../common/types';
+import { SubscriptionToken } from '../../common/subscription-token';
+import { PUB_SUB } from '../../pubSub.module';
+import { PubSub } from 'graphql-subscriptions';
 
 @Injectable()
 @Resolver()
 export class PericopeTrResolver {
-  constructor(private pericopeTrService: PericopeTrService) {}
+  constructor(
+    private pericopeTrService: PericopeTrService,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
+  ) {}
 
   @Query(() => PericopiesTextsWithTranslationConnection)
   async getPericopiesTr(
@@ -122,5 +129,15 @@ export class PericopeTrResolver {
         translations: [],
       };
     }
+  }
+
+  @Subscription(() => PericopiesTextsWithTranslationConnection, {
+    name: SubscriptionToken.pericopiesRecommendedHasChanged,
+  })
+  async subscribeToPericopiesTextsWithTranslation() {
+    console.log('subscribeTo pericopiesRecommendedHasChanged');
+    return this.pubSub.asyncIterator(
+      SubscriptionToken.pericopiesRecommendedHasChanged,
+    );
   }
 }

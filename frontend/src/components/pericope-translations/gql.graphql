@@ -142,3 +142,14 @@ mutation TogglePericopeTrVoteStatus(
     }
   }
 }
+
+subscription SubscribeToPericopiesTr {
+  pericopiesRecommendedHasChanged {
+    edges {
+      ...PericopiesTextsWithTranslationEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}

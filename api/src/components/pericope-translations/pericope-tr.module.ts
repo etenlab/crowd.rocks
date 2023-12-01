@@ -14,6 +14,6 @@ import { PericopiesModule } from '../pericopies/pericopies.module';
     forwardRef(() => AuthenticationModule),
   ],
   providers: [PericopeTrService, PericopeTrResolver],
-  exports: [],
+  exports: [PericopeTrService],
 })
 export class PericopeTrModule {}

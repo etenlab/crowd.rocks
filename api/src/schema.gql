@@ -1532,6 +1532,7 @@ type Subscription {
   pericopeDeleted: PericopeDeleteOutput!
   pericopeVoteStatusToggled: PericopeVoteStatusOutput!
   pericopiesAdded: PericopiesOutput!
+  pericopiesRecommendedHasChanged: PericopiesTextsWithTranslationConnection!
   questionsAdded: QuestionsOutput!
   questionsOnWordRangeAdded: QuestionOnWordRangesOutput!
   wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput!
