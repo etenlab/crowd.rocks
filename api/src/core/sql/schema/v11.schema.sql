@@ -60,3 +60,8 @@ ALTER TABLE public.pericope_translations add if not exists description varchar N
 DROP TABLE if exists public.pericope_description_translations;
 ALTER TABLE pericope_translations_votes drop CONSTRAINT if exists pericope_translations_votes_user_id_pericope_id_key;
 ALTER TABLE pericope_translations_votes ADD CONSTRAINT pericope_translations_votes_user_id_pericope_id_key UNIQUE (user_id, pericope_translation_id);
+
+ALTER TABLE public.pericope_translations DROP CONSTRAINT pericope_translations_pericope_id_fkey;
+ALTER TABLE public.pericope_translations ADD CONSTRAINT pericope_translations_pericope_id_fkey FOREIGN KEY (pericope_id) REFERENCES public.pericopies(pericope_id) ON DELETE CASCADE;
+ALTER TABLE public.pericope_translations_votes DROP CONSTRAINT pericope_translations_votes_pericope_translation_id_fkey;
+ALTER TABLE public.pericope_translations_votes ADD CONSTRAINT pericope_translations_votes_pericope_translation_id_fkey FOREIGN KEY (pericope_translation_id) REFERENCES public.pericope_translations(pericope_translation_id) ON DELETE CASCADE;
