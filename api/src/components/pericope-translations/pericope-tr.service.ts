@@ -89,7 +89,7 @@ export class PericopeTrService {
       const edges: Array<PericopiesTextsWithTranslationEdge> = [];
 
       for (let i = startIdx; i <= count && i < allPericopies.length; i++) {
-        if (!allPericopies[i].pericopeId) continue; // first pericope could be absent
+        if (!allPericopies[i]?.pericopeId) continue; // first pericope could be absent
         const [translation, description] = await Promise.all([
           this.getRecomendedPericopeTranslation(
             allPericopies[i].pericopeId,

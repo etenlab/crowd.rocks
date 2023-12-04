@@ -281,9 +281,10 @@ export function getWordsTillEndOfDocumentSql({
           document_id,
           wordlike_string_id,
           parent_document_word_entry_id,
-          null :: bigint as pericope_id,
+          p.pericope_id as pericope_id,
           1 AS level
         FROM public.document_word_entries
+        left join pericopies p on document_word_entry_id = p.start_word
         WHERE document_id=$1
         and document_word_entry_id = $2
       --
