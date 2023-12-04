@@ -190,14 +190,13 @@ export class PericopeTrService {
         currPericopeid = word.pericope_id;
         currPericopeCursor++;
       }
-      // it's better to make ordered_pericopies plain zero-based array
-      ordered_pericopies[currPericopeCursor - 1] = {
+      ordered_pericopies[currPericopeCursor] = {
         pericopeCursor: currPericopeCursor,
         pericopeId: currPericopeid,
         words: [...(ordered_pericopies[currPericopeCursor]?.words || []), word],
       };
     });
-    return ordered_pericopies;
+    return ordered_pericopies.slice(1);
   }
 
   async getPericopeDescription(
