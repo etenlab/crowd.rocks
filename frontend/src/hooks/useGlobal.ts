@@ -7,10 +7,11 @@ import {
   changeAppLanguage as changeAppLanguageAction,
   changeTranslationSourceLanguage as changeTranslationSourceLanguageAction,
   changeTranslationTargetLanguage as changeTranslationTargetLanguageAction,
+  changeDocumentSourceLanguage as changeDocumentSourceLanguageAction,
+  changeDocumentTargetLanguage as changeDocumentTargetLanguageAction,
   changeSiteTextTargetLanguage as changeSiteTextTargetLanguageAction,
   setTargetLanguage as setTargetLangAction,
   setSourceLanguage as setSourceLangAction,
-  setUpdatedTrDefinitionIds as setUpdatedTrDefinitionIdsAction,
   setTempTranslation as setTempTranslationAction,
   clearTempTranslation as clearTempTranslationAction,
 } from '../reducers/global.actions';
@@ -55,6 +56,24 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     dispatchRef.current.dispatch(changeAppLanguageAction(langInfo));
   }, []);
 
+  const changeDocumentSourceLanguage = useCallback(
+    (langInfo: LanguageInfo | null) => {
+      dispatchRef.current.dispatch(
+        changeDocumentSourceLanguageAction(langInfo),
+      );
+    },
+    [],
+  );
+
+  const changeDocumentTargetLanguage = useCallback(
+    (langInfo: LanguageInfo | null) => {
+      dispatchRef.current.dispatch(
+        changeDocumentTargetLanguageAction(langInfo),
+      );
+    },
+    [],
+  );
+
   const changeTranslationSourceLanguage = useCallback(
     (langInfo: LanguageInfo | null) => {
       dispatchRef.current.dispatch(
@@ -90,15 +109,6 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     dispatchRef.current.dispatch(setSourceLangAction(language));
   }, []);
 
-  const setUpdatedTrDefinitionIds = useCallback(
-    (definitionIds: Array<string>) => {
-      dispatchRef.current.dispatch(
-        setUpdatedTrDefinitionIdsAction(definitionIds),
-      );
-    },
-    [],
-  );
-
   const setTempTranslation = useCallback(
     (key: string, value: { translation: string; description: string }) => {
       dispatchRef.current.dispatch(setTempTranslationAction(key, value));
@@ -117,10 +127,11 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     changeAppLanguage,
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
+    changeDocumentSourceLanguage,
+    changeDocumentTargetLanguage,
     changeSiteTextTargetLanguage,
     setSourceLanguage,
     setTargetLanguage,
-    setUpdatedTrDefinitionIds,
     setTempTranslation,
     clearTempTranslation,
   };

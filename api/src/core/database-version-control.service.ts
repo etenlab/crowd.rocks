@@ -584,8 +584,16 @@ export class DatabaseVersionControlService {
     await this.runSqlFile('./src/core/sql/document/word_range_upsert-v11.sql');
 
     // pericopes
-    await this.runSqlFile('./src/core/sql/pericopes/pericope_upsert-v11.sql');
-    await this.runSqlFile('./src/core/sql/pericopes/pericope_delete-v11.sql');
+    await this.runSqlFile('./src/core/sql/pericopies/pericope_upsert-v11.sql');
+    await this.runSqlFile('./src/core/sql/pericopies/pericope_delete-v11.sql');
+
+    // pericope-translations
+    await this.runSqlFile(
+      './src/core/sql/pericope-translations/pericope_translation_insert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/pericope-translations/pericope_translation_vote_toggle.sql',
+    );
 
     // set version
     await this.setVersionNumber(11);

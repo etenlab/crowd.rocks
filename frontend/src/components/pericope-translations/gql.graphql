@@ -8,11 +8,30 @@ fragment PericopeTranslationFragment on PericopeTranslation {
   pericope_translation_id
   pericope_id
   translation
-  created_by
+  translation_description
+  created_by_user {
+    ...UserFields
+  }
   created_at
   language {
     ...LanguageOutputFragment
   }
+}
+
+fragment PericopeTranslationWithVotesFragment on PericopeTranslationWithVotes {
+  pericope_translation_id
+  pericope_id
+  translation
+  translation_description
+  created_by_user {
+    ...UserFields
+  }
+  created_at
+  language {
+    ...LanguageOutputFragment
+  }
+  upvotes
+  downvotes
 }
 
 fragment PericopeTextWithTranslationAndDescriptionFragment on PericopeTextWithTranslationAndDescription {
@@ -22,7 +41,6 @@ fragment PericopeTextWithTranslationAndDescriptionFragment on PericopeTextWithTr
     ...PericopeTranslationFragment
   }
   pericope_description_text
-  description_translation
 }
 
 fragment PericopiesTextsWithTranslationEdgeFragment on PericopiesTextsWithTranslationEdge {
@@ -57,6 +75,70 @@ query GetPericopiesTr(
     }
     edges {
       ...PericopiesTextsWithTranslationEdgeFragment
+    }
+  }
+}
+
+query GetPericopeTranslations(
+  $pericopeId: String!
+  $targetLang: LanguageInput!
+) {
+  getPericopeTranslations(
+    input: { pericopeId: $pericopeId, targetLang: $targetLang }
+  ) {
+    translations {
+      ...PericopeTranslationWithVotesFragment
+    }
+  }
+}
+
+query GetPericopeTextAndDesctiption($pericopeId: String!) {
+  getPericopeTextAndDesctiption(input: { pericopeId: $pericopeId }) {
+    error
+    pericope_id
+    pericope_text
+    pericope_description_text
+  }
+}
+
+mutation AddPericopeTr(
+  $pericopeId: String!
+  $targetLang: LanguageInput!
+  $translation: String!
+  $tanslation_description: String!
+) {
+  addPericopeTr(
+    input: {
+      pericopeId: $pericopeId
+      targetLang: $targetLang
+      translation: $translation
+      tanslation_description: $tanslation_description
+    }
+  ) {
+    ...PericopeTranslationFragment
+  }
+}
+
+fragment PericopeTrVoteStatusFragment on PericopeTrVoteStatus {
+  pericope_translation_id
+  upvotes
+  downvotes
+}
+
+mutation TogglePericopeTrVoteStatus(
+  $pericope_translation_id: ID!
+  $vote: Boolean!
+) {
+  togglePericopeTrVoteStatus(
+    pericope_translation_id: $pericope_translation_id
+    vote: $vote
+  ) {
+    error
+    vote_status_list {
+      ...PericopeTrVoteStatusFragment
+    }
+    best_translation_list {
+      ...PericopeTranslationFragment
     }
   }
 }

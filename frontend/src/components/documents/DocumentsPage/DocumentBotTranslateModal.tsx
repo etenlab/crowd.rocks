@@ -40,7 +40,9 @@ export function DocumentBotTranslateModal({
   const {
     states: {
       global: {
-        langauges: { sourceLang },
+        langauges: {
+          documentPage: { source: sourceLang },
+        },
       },
     },
   } = useAppContext();

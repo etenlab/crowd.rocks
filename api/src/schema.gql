@@ -12,6 +12,13 @@ type AddNotificationOutput {
   notification: Notification
 }
 
+input AddPericopeTranslationInput {
+  pericopeId: String!
+  tanslation_description: String!
+  targetLang: LanguageInput!
+  translation: String!
+}
+
 type Answer {
   answer: String
   answer_id: ID!
@@ -219,6 +226,9 @@ enum ErrorType {
   PericopeGetTranslationError
   PericopeInsertFailed
   PericopeNotFound
+  PericopeTranslationInsertFailed
+  PericopeTranslationNotFound
+  PericopeTranslationVoteToggleFailed
   PericopeVoteToggleFailed
   PhraseDefinitionAlreadyExists
   PhraseDefinitionNotFound
@@ -446,6 +456,15 @@ type GetOrigMapsListOutput {
   mapList: [MapDetailsOutput!]!
 }
 
+input GetPericopeTextInput {
+  pericopeId: String!
+}
+
+input GetPericopeTranslationsInput {
+  pericopeId: String!
+  targetLang: LanguageInput!
+}
+
 input GetPericopiesTrInput {
   documentId: String!
   filter: String
@@ -644,6 +663,7 @@ type MarkNotificationReadOutput {
 
 type Mutation {
   addNotification(input: AddNotificationInput!): AddNotificationOutput!
+  addPericopeTr(input: AddPericopeTranslationInput!): PericopeTranslation!
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   botTranslateDocument(input: BotTranslateDocumentInput!): DocumentUploadOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
@@ -686,6 +706,7 @@ type Mutation {
   threadUpsert(input: ThreadUpsertInput!): ThreadOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   toggleMapVoteStatus(is_original: Boolean!, map_id: ID!, vote: Boolean!): MapVoteStatusOutputRow!
+  togglePericopeTrVoteStatus(pericope_translation_id: ID!, vote: Boolean!): PericopeTrVoteStatusAndBestTrListOutput!
   togglePericopeVoteStatus(pericope_id: ID!, vote: Boolean!): PericopeVoteStatusOutput!
   togglePhraseDefinitionVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
   togglePhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!, vote: Boolean!): PhraseToPhraseTranslationVoteStatusOutputRow!
@@ -787,21 +808,58 @@ type PericopeEdge {
   node: Pericope!
 }
 
-type PericopeTextWithTranslationAndDescription {
-  description_translation: String
+type PericopeTextWithDescription {
+  error: ErrorType!
   pericope_description_text: String!
-  pericope_id: ID!
+  pericope_id: ID
+  pericope_text: String!
+}
+
+type PericopeTextWithTranslationAndDescription {
+  error: ErrorType!
+  pericope_description_text: String!
+  pericope_id: ID
   pericope_text: String!
   translation: PericopeTranslation
 }
 
+type PericopeTrVoteStatus {
+  downvotes: Int!
+  pericope_translation_id: ID!
+  upvotes: Int!
+}
+
+type PericopeTrVoteStatusAndBestTrListOutput {
+  best_translation_list: [PericopeTranslation!]!
+  error: ErrorType!
+  vote_status_list: [PericopeTrVoteStatus!]!
+}
+
 type PericopeTranslation {
-  created_at: DateTime!
-  created_by: String!
+  created_at: String!
+  created_by_user: User!
   language: LanguageOutput!
   pericope_id: String!
   pericope_translation_id: ID!
   translation: String!
+  translation_description: String
+}
+
+type PericopeTranslationWithVotes {
+  created_at: String!
+  created_by_user: User!
+  downvotes: Int!
+  language: LanguageOutput!
+  pericope_id: String!
+  pericope_translation_id: ID!
+  translation: String!
+  translation_description: String
+  upvotes: Int!
+}
+
+type PericopeTranslationsOutput {
+  error: ErrorType!
+  translations: [PericopeTranslationWithVotes!]!
 }
 
 type PericopeVote {
@@ -1162,6 +1220,8 @@ type Query {
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapWordsAndPhrasesCount(input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesCountOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
+  getPericopeTextAndDesctiption(input: GetPericopeTextInput!): PericopeTextWithDescription!
+  getPericopeTranslations(input: GetPericopeTranslationsInput!): PericopeTranslationsOutput!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
   getPericopiesByDocumentId(after: ID, document_id: ID!, first: Int): PericopeWithVotesListConnection!
   getPericopiesTr(after: ID, first: Int, input: GetPericopiesTrInput!): PericopiesTextsWithTranslationConnection!

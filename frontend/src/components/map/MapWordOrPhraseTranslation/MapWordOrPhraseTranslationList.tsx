@@ -36,10 +36,8 @@ export function MapWordOrPhraseTranslationList({
     states: {
       global: {
         langauges: { targetLang },
-        maps: { updatedTrDefinitionIds },
       },
     },
-    actions: { setUpdatedTrDefinitionIds },
   } = useAppContext();
   const { getTransformedTranslations } = useMapTranslationTools();
   const [origAndTr, setOrigAndTr] = useState<{
@@ -107,14 +105,8 @@ export function MapWordOrPhraseTranslationList({
           vote,
         },
       });
-      setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]);
     },
-    [
-      definition_id,
-      setUpdatedTrDefinitionIds,
-      toggleTrVoteStatus,
-      updatedTrDefinitionIds,
-    ],
+    [toggleTrVoteStatus],
   );
 
   return (

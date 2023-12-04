@@ -4,19 +4,20 @@ import { useIonToast } from '@ionic/react';
 import { TextForm } from '../TextForm';
 import { useTr } from '../../../../hooks/useTr';
 import { CheckCircle } from '../../icons/CheckCircle';
+export type TextAndDesctiption = {
+  text: string;
+  description: string;
+};
 
-export type NewTranslationForm = {
-  onSave: ({
-    translation,
-    description,
-  }: {
-    translation: string;
-    description: string;
-  }) => void;
+export type NewTranslationFormParams = {
+  onSave: ({ text, description }: TextAndDesctiption) => void;
   onCancel: () => void;
 };
 
-export function NewTranslationForm({ onCancel, onSave }: NewTranslationForm) {
+export function NewTranslationForm({
+  onCancel,
+  onSave,
+}: NewTranslationFormParams) {
   const { tr } = useTr();
   const [present] = useIonToast();
 
@@ -48,7 +49,7 @@ export function NewTranslationForm({ onCancel, onSave }: NewTranslationForm) {
     setSaving(true);
 
     await onSave({
-      translation,
+      text: translation,
       description,
     });
 

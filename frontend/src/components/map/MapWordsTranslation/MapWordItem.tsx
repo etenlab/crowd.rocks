@@ -32,14 +32,10 @@ export function MapWordItem({ original }: MapWordItemProps) {
     states: {
       global: {
         langauges: { targetLang },
-        maps: { tempTranslations, updatedTrDefinitionIds },
+        maps: { tempTranslations },
       },
     },
-    actions: {
-      setTempTranslation,
-      clearTempTranslation,
-      setUpdatedTrDefinitionIds,
-    },
+    actions: { setTempTranslation, clearTempTranslation },
   } = useAppContext();
   const { getTransformedTranslations } = useMapTranslationTools();
 
@@ -131,11 +127,6 @@ export function MapWordItem({ original }: MapWordItemProps) {
           refetchQueries: [GetRecommendedTranslationFromDefinitionIdDocument],
         });
 
-        setUpdatedTrDefinitionIds([
-          ...updatedTrDefinitionIds,
-          original.o_definition_id,
-        ]);
-
         clearTempTranslation(`${original.o_definition_id}:${original.type}`);
         setSaving(false);
       }
@@ -152,8 +143,6 @@ export function MapWordItem({ original }: MapWordItemProps) {
     nation_id,
     language_id,
     upsertTranslation,
-    setUpdatedTrDefinitionIds,
-    updatedTrDefinitionIds,
     clearTempTranslation,
     getTranslationsQ,
   ]);

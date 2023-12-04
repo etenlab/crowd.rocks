@@ -18,7 +18,10 @@ import {
 import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { FlagV2 } from '../../flags/Flag';
 import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
-import { NewTranslationForm } from '../../common/forms/NewTranslationForm/NewTranslationForm';
+import {
+  NewTranslationForm,
+  TextAndDesctiption,
+} from '../../common/forms/NewTranslationForm/NewTranslationForm';
 import { MapWordOrPhraseTranslationList } from './MapWordOrPhraseTranslationList';
 import { Box } from '@mui/material';
 import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
@@ -62,13 +65,7 @@ export function MapWordOrPhraseTranslation() {
   };
 
   const handleSaveForm = useCallback(
-    async ({
-      translation,
-      description,
-    }: {
-      translation: string;
-      description: string;
-    }) => {
+    async ({ text, description }: TextAndDesctiption) => {
       if (!targetLang?.lang) {
         present({
           message: `${tr('Target language must be selected')}`,
@@ -83,12 +80,12 @@ export function MapWordOrPhraseTranslation() {
           language_code: targetLang?.lang.tag,
           dialect_code: targetLang?.dialect?.tag,
           geo_code: targetLang?.region?.tag,
-          word_or_phrase: translation,
+          word_or_phrase: text,
           definition: description,
           from_definition_id: definition_id,
           from_definition_type_is_word:
             definition_type === StringContentTypes.WORD,
-          is_type_word: typeOfString(translation) === StringContentTypes.WORD,
+          is_type_word: typeOfString(text) === StringContentTypes.WORD,
         },
         refetchQueries: [
           GetTranslationsByFromDefinitionIdDocument,

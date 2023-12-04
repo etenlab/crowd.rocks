@@ -92,6 +92,9 @@ import { PericopeDocumentViewerPage } from './components/pericopies/PericopeDocu
 import { TaggingDocumentListPage } from './components/tagging/TaggingDocumentListPage';
 import { TaggingDocumentViewerPage } from './components/tagging/TaggingDocumentViewerPage';
 
+import { SuperDocumentListPage } from './components/super-tool/SuperDocumentListPage/SuperDocumentListPage';
+import { SuperDocumentViewerPage } from './components/super-tool/SuperDocumentViewerPage/SuperDocumentViewerPage';
+
 import { Icons } from './components/demo/Icons';
 import { Forms } from './components/demo/Forms';
 
@@ -104,6 +107,8 @@ import { DataGeneratorPage } from './components/data-generator/DataGeneratorPage
 import { PericopeTrPage } from './components/pericope-translations/PericopeTrPage';
 import { PericopeTrDocumentListPage } from './components/pericope-translations/PericopeTrDocumentListPage';
 import { PericopiesTrList } from './components/pericope-translations/PericopiesTrListPage';
+import { PericopeTranslationPage } from './components/pericope-translations/PericopeTranslationPage/PericopeTranslationPage';
+// import { PericopeTranslationList } from './components/pericope-translations/PericopeTranslationPage/PericopeTranslationsList';
 
 export function Body() {
   const { tr } = useTr();
@@ -618,8 +623,23 @@ export function Body() {
             />
             <Route
               exact
+              path="/:nation_id/:language_id/:cluster_id/pericope-translations/pericope/:pericopeId"
+              component={PericopeTranslationPage}
+            />
+            <Route
+              exact
               path="/:nation_id/:language_id/:cluster_id/pericopies/documents/:document_id"
               component={PericopeDocumentViewerPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/super-tool/documents"
+              component={SuperDocumentListPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/super-tool/documents/:document_id"
+              component={SuperDocumentViewerPage}
             />
             <Route exact path="/demos/icons" component={Icons} />
             <Route exact path="/demos/forms" component={Forms} />
