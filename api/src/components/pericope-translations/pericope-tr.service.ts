@@ -85,7 +85,7 @@ export class PericopeTrService {
       );
 
       const startIdx = after
-        ? allPericopies.findIndex((p) => String(p.pericopeCursor) === after)
+        ? allPericopies.findIndex((p) => String(p.pericopeCursor) === after) + 1
         : 0;
       const count = first ? first : (allPericopies.length = startIdx);
 
@@ -94,8 +94,12 @@ export class PericopeTrService {
 
       const edges: Array<PericopiesTextsWithTranslationEdge> = [];
 
-      for (let i = startIdx; i <= count && i < allPericopies.length; i++) {
-        if (!allPericopies[i].pericopeId) continue; // first pericope could be absent
+      for (
+        let i = startIdx;
+        i < startIdx + count && i < allPericopies.length;
+        i++
+      ) {
+        if (!allPericopies[i]?.pericopeId) continue; // first pericope could be absent
         const [translation, description] = await Promise.all([
           this.getRecomendedPericopeTranslation(
             allPericopies[i].pericopeId,
@@ -192,7 +196,8 @@ export class PericopeTrService {
         currPericopeid = word.pericope_id;
         currPericopeCursor++;
       }
-      ordered_pericopies[currPericopeCursor] = {
+      // it's better to make ordered_pericopies plain zero-based array
+      ordered_pericopies[currPericopeCursor - 1] = {
         pericopeCursor: currPericopeCursor,
         pericopeId: currPericopeid,
         words: [...(ordered_pericopies[currPericopeCursor]?.words || []), word],

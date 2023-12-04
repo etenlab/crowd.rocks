@@ -1,0 +1,1 @@
+export { SuperPericopiesTranslator } from './SuperPericopiesTranslator';

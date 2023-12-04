@@ -48,7 +48,7 @@ export const typePolicies: TypePolicies = {
       getForumFoldersList: relayStylePagination(['forum_id', 'filter']),
       getThreadsList: relayStylePagination(['forum_folder_id', 'filter']),
       getAllDocuments: relayStylePagination(['input']),
-      getPericopiesTr: relayStylePagination(),
+      getPericopiesTr: relayStylePagination(['input']),
       getPericopiesByDocumentId: {
         keyArgs: ['document_id'],
         merge(

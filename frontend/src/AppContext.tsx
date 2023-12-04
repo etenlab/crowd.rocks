@@ -49,6 +49,8 @@ export interface ContextType {
     changeAppLanguage: (langInfo: LanguageInfo) => void;
     changeTranslationSourceLanguage: (langInfo: LanguageInfo | null) => void;
     changeTranslationTargetLanguage: (langInfo: LanguageInfo | null) => void;
+    changeDocumentSourceLanguage: (langInfo: LanguageInfo | null) => void;
+    changeDocumentTargetLanguage: (langInfo: LanguageInfo | null) => void;
     changeSiteTextTargetLanguage: (langInfo: LanguageInfo | null) => void;
     setSourceLanguage: (targetLanguage: LanguageInfo | null) => void;
     setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
@@ -115,6 +117,8 @@ export function AppContextProvider({ children }: AppProviderProps) {
     setTargetLanguage,
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
+    changeDocumentSourceLanguage,
+    changeDocumentTargetLanguage,
     changeSiteTextTargetLanguage,
     setTempTranslation,
     clearTempTranslation,
@@ -163,9 +167,6 @@ export function AppContextProvider({ children }: AppProviderProps) {
         data.getAllRecommendedSiteTextTranslationListByLanguage.error !==
         ErrorType.NoError
       ) {
-        console.log(
-          data.getAllRecommendedSiteTextTranslationListByLanguage.error,
-        );
         toastPresent({
           message:
             data.getAllRecommendedSiteTextTranslationListByLanguage.error,
@@ -364,6 +365,8 @@ export function AppContextProvider({ children }: AppProviderProps) {
       changeAppLanguage,
       changeTranslationSourceLanguage,
       changeTranslationTargetLanguage,
+      changeDocumentSourceLanguage,
+      changeDocumentTargetLanguage,
       changeSiteTextTargetLanguage,
       setSourceLanguage,
       setTargetLanguage,

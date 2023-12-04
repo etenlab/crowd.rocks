@@ -1,9 +1,12 @@
 import { chromium, expect, test } from '@playwright/test';
-import ForumsPage from '../pages/ForumsPage';
-import RegistrationPage from '../pages/RegistrationPage';
-import RegisterData from '../data-factory/RegisterData';
-import LoginPage from '../pages/LoginPage';
-import pageUrls from '../constants/PageUrls';
+import RegistrationPage from '../../pages/RegistrationPage';
+import RegisterData from '../../data-factory/RegisterData';
+import LoginPage from '../../pages/LoginPage';
+import pageUrls from '../../constants/PageUrls';
+import ForumsPage from '../../pages/Community/ForumsPage';
+import HomePage from '../../pages/HomePage';
+import CommonPage from '../../pages/Community/CommonPage';
+import { community } from '../../enums/Enums';
 
 const registerData = RegisterData.validRegisterData();
 const forumName = 'Automation Forum ' + Math.random();
@@ -36,150 +39,193 @@ test('1: Verify that user redirected on community page and able to create new fo
 }) => {
   const forumsPage = new ForumsPage(page);
   const loginPage = new LoginPage(page);
+  const homePage = new HomePage(page);
+  const commonPage = new CommonPage(page);
 
   //Navigate to the URL
   await page.goto(pageUrls.LoginPage);
   await loginPage.loginToApp(registerData);
 
   //Click on community tab and verify that user redirected on community page
-  await forumsPage.clickOnCommunitySection();
+  await homePage.clickOnCommunitySection();
   expect(await forumsPage.isPageTitleVisible()).toBeTruthy();
 
   //Click on the add new button and verify that 'add new forum' popup is appeared
-  await forumsPage.clickOnTheAddNewButton();
+  await commonPage.clickOnAddNewButton(community.Forums);
   expect(await forumsPage.isAddNewForumPopupVisible()).toBeTruthy();
 
   //Create a new forum
   await forumsPage.fillForumDetails(forumName, forumDescription);
-  await forumsPage.clickOnAddNewForumPopupCreateNewButton();
+  await commonPage.clickOnCreateNewButton();
 
   //Verify the validation message
-  expect(await forumsPage.getValidationMessage()).toEqual(
+  expect(await commonPage.getValidationMessage()).toEqual(
     'Success at creating new forum!',
   );
 
   //Verify the created forum is displayed on the forums page
   await page.waitForTimeout(4000);
-  expect(await forumsPage.isCreatedForumVisible(forumName)).toBeTruthy();
+  expect(await commonPage.isCreatedCommunityVisible(forumName)).toBeTruthy();
 });
 
-test('2: Verify that search functionality is working properly', async ({
+test('2: Verify that user is not allow to create a forum with a Forum Name which is already exist', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
   const loginPage = new LoginPage(page);
+  const homePage = new HomePage(page);
+  const commonPage = new CommonPage(page);
+
+  //Navigate to the URL
+  await page.goto(pageUrls.LoginPage);
+  await loginPage.loginToApp(registerData);
+
+  //Click on community tab and verify that user redirected on community page
+  await homePage.clickOnCommunitySection();
+  expect(await forumsPage.isPageTitleVisible()).toBeTruthy();
+
+  //Click on the add new button and verify that 'add new forum' popup is appeared
+  await commonPage.clickOnAddNewButton(community.Forums);
+  expect(await forumsPage.isAddNewForumPopupVisible()).toBeTruthy();
+
+  //Create a new forum
+  await forumsPage.fillForumDetails(forumName, forumDescription);
+  await commonPage.clickOnCreateNewButton();
+
+  //Verify the validation message
+  expect(await commonPage.getValidationMessage()).toEqual(
+    'Failed at creating new forum! [ForumUpsertFailed]',
+  );
+});
+
+test('3: Verify that search functionality is working properly', async ({
+  page,
+}) => {
+  const loginPage = new LoginPage(page);
+  const homePage = new HomePage(page);
+  const commonPage = new CommonPage(page);
 
   //Navigate to the URL
   await page.goto(pageUrls.LoginPage);
   await loginPage.loginToApp(registerData);
 
   //Navigate to the URL
-  await page.goto(pageUrls.ForumPage);
+  await homePage.clickOnCommunitySection();
 
   //Verify that user can search the forum by using search bar
-  await forumsPage.searchForumName(forumName.toLowerCase());
-  expect(await forumsPage.isCreatedForumVisible(forumName)).toBeTruthy();
+  await commonPage.searchName(forumName.toLowerCase());
+  expect(await commonPage.isCreatedCommunityVisible(forumName)).toBeTruthy();
 });
 
-test('3: Verify that user is able to create forum without adding the description', async ({
+test('4: Verify that user is able to create forum without adding the description', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
   const loginPage = new LoginPage(page);
+  const homePage = new HomePage(page);
+  const commonPage = new CommonPage(page);
 
   //Navigate to the URL
   await page.goto(pageUrls.LoginPage);
   await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await forumsPage.clickOnCommunitySection();
+  await homePage.clickOnCommunitySection();
 
   //Create a new forum without adding the description
-  await forumsPage.clickOnTheAddNewButton();
+  await commonPage.clickOnAddNewButton(community.Forums);
   await forumsPage.fillForumDetails(forumNameWithoutDescription, '');
-  await forumsPage.clickOnAddNewForumPopupCreateNewButton();
+  await commonPage.clickOnCreateNewButton();
 
   //Verify the validation messsage
-  expect(await forumsPage.getValidationMessage()).toEqual(
+  expect(await commonPage.getValidationMessage()).toEqual(
     'Success at creating new forum!',
   );
 });
 
-test('4: Verify that validation message is appeared when user passes blank forum details', async ({
+test('5: Verify that validation message is appeared when user passes blank forum details', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
   const loginPage = new LoginPage(page);
+  const homePage = new HomePage(page);
+  const commonPage = new CommonPage(page);
 
   //Navigate to the URL
   await page.goto(pageUrls.LoginPage);
   await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await forumsPage.clickOnCommunitySection();
+  await homePage.clickOnCommunitySection();
 
   //Create a new forum
-  await forumsPage.clickOnTheAddNewButton();
+  await commonPage.clickOnAddNewButton(community.Forums);
   await forumsPage.fillForumDetails('', '');
-  await forumsPage.clickOnAddNewForumPopupCreateNewButton();
+  await commonPage.clickOnCreateNewButton();
 
   //Verify the validation messsage
-  expect(await forumsPage.getValidationMessage()).toEqual(
+  expect(await commonPage.getValidationMessage()).toEqual(
     'Forum name cannot be empty string!',
   );
 });
 
-test('5: Verify that validation message is appeared when user only enters forum description', async ({
+test('6: Verify that validation message is appeared when user only enters forum description', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
   const loginPage = new LoginPage(page);
+  const homePage = new HomePage(page);
+  const commonPage = new CommonPage(page);
 
   //Navigate to the URL
   await page.goto(pageUrls.LoginPage);
   await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await forumsPage.clickOnCommunitySection();
+  await homePage.clickOnCommunitySection();
 
   //Create a new forum
-  await forumsPage.clickOnTheAddNewButton();
+  await commonPage.clickOnAddNewButton(community.Forums);
   await forumsPage.fillForumDetails('', 'Test Description');
-  await forumsPage.clickOnAddNewForumPopupCreateNewButton();
+  await commonPage.clickOnCreateNewButton();
 
   //Verify the validation messsage
-  expect(await forumsPage.getValidationMessage()).toEqual(
+  expect(await commonPage.getValidationMessage()).toEqual(
     'Forum name cannot be empty string!',
   );
 });
 
-test('6: Verify that forum is not created when click on cancel button after entering the valid forum details', async ({
+test('7: Verify that forum is not created when click on cancel button after entering the valid forum details', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
   const loginPage = new LoginPage(page);
+  const homePage = new HomePage(page);
+  const commonPage = new CommonPage(page);
 
   //Navigate to the URL
   await page.goto(pageUrls.LoginPage);
   await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await forumsPage.clickOnCommunitySection();
+  await homePage.clickOnCommunitySection();
 
   //Create a new forum
-  await forumsPage.clickOnTheAddNewButton();
+  await commonPage.clickOnAddNewButton(community.Forums);
   await forumsPage.fillForumDetails(forumName, forumDescription);
-  await forumsPage.clickOnAddNewForumPopupCancelButton();
+  await commonPage.clickOnCreateNewButton();
 
   //verify that forum is not created
   expect(await forumsPage.isAddNewForumPopupVisible()).toBeFalsy();
 });
 
-test('7: Verify that user can edit the created forum and can search the edited forum using search bar', async ({
+test('8: Verify that user can edit the created forum and can search the edited forum using search bar', async ({
   page,
 }) => {
   const forumsPage = new ForumsPage(page);
   const loginPage = new LoginPage(page);
+  const homePage = new HomePage(page);
+  const commonPage = new CommonPage(page);
   const forumDescriptionEdit = 'TestForum Description Edit' + Math.random();
 
   //Navigate to the URL
@@ -187,22 +233,24 @@ test('7: Verify that user can edit the created forum and can search the edited f
   await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await forumsPage.clickOnCommunitySection();
+  await homePage.clickOnCommunitySection();
 
   //Edit the forum details and click on the save button
-  await forumsPage.searchForumName(forumName.toLowerCase());
+  await commonPage.searchName(forumName.toLowerCase());
   await forumsPage.clickOnEditForumButton(forumName);
   await forumsPage.fillForumDetails(editedForumName, forumDescriptionEdit);
-  await forumsPage.clickOnSaveButton();
+  await commonPage.clickOnSaveButton();
 
   //Verify the Validation message
-  expect(await forumsPage.getValidationMessage()).toEqual(
+  expect(await commonPage.getValidationMessage()).toEqual(
     'Success at updating forum!',
   );
   //Verify the edited forum is displayed on the forums page
   await page.waitForTimeout(4000);
-  await forumsPage.searchForumName(editedForumName.toLowerCase());
-  expect(await forumsPage.isEditedForumVisible(editedForumName)).toBeTruthy();
+  await commonPage.searchName(editedForumName.toLowerCase());
+  expect(
+    await commonPage.isCreatedCommunityVisible(editedForumName),
+  ).toBeTruthy();
 });
 
 test.afterAll('Delete Forum', async () => {
@@ -211,6 +259,8 @@ test.afterAll('Delete Forum', async () => {
   const page = await context.newPage();
   const forumsPage = new ForumsPage(page);
   const loginPage = new LoginPage(page);
+  const homePage = new HomePage(page);
+  const commonPage = new CommonPage(page);
   const forumsList = [editedForumName, forumNameWithoutDescription];
 
   //Navigate to the URL
@@ -218,11 +268,11 @@ test.afterAll('Delete Forum', async () => {
   await loginPage.loginToApp(registerData);
 
   //Navigate to the forums page
-  await forumsPage.clickOnCommunitySection();
+  await homePage.clickOnCommunitySection();
 
   //Delete all forums
   for (const forum of forumsList) {
-    await forumsPage.searchForumName(forum.toLowerCase());
+    await commonPage.searchName(forum.toLowerCase());
     await forumsPage.deleteForum(forum);
   }
   await browser.close();

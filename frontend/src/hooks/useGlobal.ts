@@ -7,6 +7,8 @@ import {
   changeAppLanguage as changeAppLanguageAction,
   changeTranslationSourceLanguage as changeTranslationSourceLanguageAction,
   changeTranslationTargetLanguage as changeTranslationTargetLanguageAction,
+  changeDocumentSourceLanguage as changeDocumentSourceLanguageAction,
+  changeDocumentTargetLanguage as changeDocumentTargetLanguageAction,
   changeSiteTextTargetLanguage as changeSiteTextTargetLanguageAction,
   setTargetLanguage as setTargetLangAction,
   setSourceLanguage as setSourceLangAction,
@@ -53,6 +55,24 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
   const changeAppLanguage = useCallback((langInfo: LanguageInfo) => {
     dispatchRef.current.dispatch(changeAppLanguageAction(langInfo));
   }, []);
+
+  const changeDocumentSourceLanguage = useCallback(
+    (langInfo: LanguageInfo | null) => {
+      dispatchRef.current.dispatch(
+        changeDocumentSourceLanguageAction(langInfo),
+      );
+    },
+    [],
+  );
+
+  const changeDocumentTargetLanguage = useCallback(
+    (langInfo: LanguageInfo | null) => {
+      dispatchRef.current.dispatch(
+        changeDocumentTargetLanguageAction(langInfo),
+      );
+    },
+    [],
+  );
 
   const changeTranslationSourceLanguage = useCallback(
     (langInfo: LanguageInfo | null) => {
@@ -107,6 +127,8 @@ export function useGlobal({ dispatch }: UseGlobalProps) {
     changeAppLanguage,
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
+    changeDocumentSourceLanguage,
+    changeDocumentTargetLanguage,
     changeSiteTextTargetLanguage,
     setSourceLanguage,
     setTargetLanguage,

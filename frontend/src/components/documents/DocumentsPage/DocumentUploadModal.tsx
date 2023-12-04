@@ -39,10 +39,12 @@ export function DocumentUploadModal({ onClose }: DocumentUploadModalProps) {
   const {
     states: {
       global: {
-        langauges: { sourceLang },
+        langauges: {
+          documentPage: { source: sourceLang },
+        },
       },
     },
-    actions: { setSourceLanguage },
+    actions: { changeDocumentSourceLanguage },
   } = useAppContext();
 
   const [uploadFile, { loading: uploading }] = useUploadFileMutation();
@@ -139,9 +141,9 @@ export function DocumentUploadModal({ onClose }: DocumentUploadModalProps) {
         title={tr('Select document language')}
         selected={sourceLang}
         onChange={(_sourceLangTag, sourceLangInfo) => {
-          setSourceLanguage(sourceLangInfo);
+          changeDocumentSourceLanguage(sourceLangInfo);
         }}
-        onClearClick={() => setSourceLanguage(null)}
+        onClearClick={() => changeDocumentSourceLanguage(null)}
       />
 
       <FileUpload

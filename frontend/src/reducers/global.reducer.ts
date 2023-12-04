@@ -10,6 +10,10 @@ export interface StateType {
       source: LanguageInfo | null;
       target: LanguageInfo | null;
     };
+    documentPage: {
+      source: LanguageInfo | null;
+      target: LanguageInfo | null;
+    };
     siteTextStringPage: {
       target: LanguageInfo | null;
     };
@@ -38,6 +42,10 @@ export const initialState: StateType = {
       },
     },
     translationPage: {
+      source: null,
+      target: null,
+    },
+    documentPage: {
       source: null,
       target: null,
     },
@@ -124,6 +132,30 @@ export function reducer(
           ...prevState.langauges,
           translationPage: {
             ...prevState.langauges.translationPage,
+            target: action.payload as LanguageInfo | null,
+          },
+        },
+      };
+    }
+    case actions.CHANGE_DOCUMENT_PAGE_SOURCE_LANGAUGE: {
+      return {
+        ...prevState,
+        langauges: {
+          ...prevState.langauges,
+          documentPage: {
+            ...prevState.langauges.documentPage,
+            source: action.payload as LanguageInfo | null,
+          },
+        },
+      };
+    }
+    case actions.CHANGE_DOCUMENT_PAGE_TARGET_LANGAUGE: {
+      return {
+        ...prevState,
+        langauges: {
+          ...prevState.langauges,
+          documentPage: {
+            ...prevState.langauges.documentPage,
             target: action.payload as LanguageInfo | null,
           },
         },

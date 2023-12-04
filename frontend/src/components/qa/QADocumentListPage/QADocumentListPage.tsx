@@ -27,10 +27,12 @@ export function QADocumentListPage() {
   const {
     states: {
       global: {
-        langauges: { sourceLang },
+        langauges: {
+          documentPage: { source: sourceLang },
+        },
       },
     },
-    actions: { setSourceLanguage },
+    actions: { changeDocumentSourceLanguage },
   } = useAppContext();
 
   const [getAllDocuments, { data }] = useGetAllDocumentsLazyQuery();
@@ -73,9 +75,9 @@ export function QADocumentListPage() {
           title={tr('Select your language')}
           selected={sourceLang}
           onChange={(_sourceLangTag, sourceLangInfo) => {
-            setSourceLanguage(sourceLangInfo);
+            changeDocumentSourceLanguage(sourceLangInfo);
           }}
-          onClearClick={() => setSourceLanguage(null)}
+          onClearClick={() => changeDocumentSourceLanguage(null)}
         />
 
         <Stack gap="8px">
