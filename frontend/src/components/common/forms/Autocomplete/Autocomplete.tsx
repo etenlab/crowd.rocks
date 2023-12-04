@@ -9,9 +9,9 @@ import { StyledPaper } from './styled';
 
 import { useAppContext } from '../../../../hooks/useAppContext';
 
-export type OptionItem = {
+export type OptionItem<T = unknown> = {
   label: string;
-  value: unknown;
+  value: T;
   endBadge?: ReactNode;
 };
 
