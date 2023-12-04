@@ -36,7 +36,6 @@ import {
   PericopiesTextsWithTranslationConnection,
   PericopiesTextsWithTranslationEdge,
 } from './types';
-import { SubscriptionToken } from '../../common/subscription-token';
 
 const errorishPageInfo = {
   hasNextPage: false,
@@ -44,8 +43,6 @@ const errorishPageInfo = {
   startCursor: null,
   endCursor: null,
 };
-
-const PAGE_SIZE = 30; // todo: same as at frontend, so maybe move it to common utils lib
 
 @Injectable()
 export class PericopeTrService {
@@ -450,26 +447,5 @@ export class PericopeTrService {
         geo_code: row.geo_code,
       },
     }));
-  }
-
-  async publishNewRecommendedPericopiesTr({
-    documentId,
-    targetLang,
-  }: {
-    documentId: string;
-    targetLang: LanguageInput;
-  }): Promise<void> {
-    const newPericopiesTr: PericopiesTextsWithTranslationConnection =
-      await this.getPericopiesTextsWithTranslationConnection(
-        {
-          documentId,
-          targetLang,
-        },
-        PAGE_SIZE,
-        null,
-      );
-    this.pubSub.publish(SubscriptionToken.pericopiesRecommendedHasChanged, {
-      [SubscriptionToken.pericopiesRecommendedHasChanged]: newPericopiesTr,
-    });
   }
 }

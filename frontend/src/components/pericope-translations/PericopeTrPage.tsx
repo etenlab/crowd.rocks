@@ -5,8 +5,6 @@ import { Caption } from '../common/Caption/Caption';
 import { useTr } from '../../hooks/useTr';
 import { LangSelector } from '../common/LangSelector/LangSelector';
 import { Button } from '@mui/material';
-import { useSubscribeToPericopiesTrSubscription } from '../../hooks/useSubscribeToPericopiesTextsWithTranslation';
-import { useEffect } from 'react';
 
 interface PericopeTrPageProps
   extends RouteComponentProps<{
@@ -34,13 +32,6 @@ export const PericopeTrPage: React.FC<PericopeTrPageProps> = ({
       `/${nation_id}/${language_id}/1/pericope-translations/documents`,
     );
   };
-
-  const { data: pericopeTrSubsData, error: pericopeTrSubsError } =
-    useSubscribeToPericopiesTrSubscription();
-
-  useEffect(() => {
-    console.log(`PericopeTrPage`, pericopeTrSubsData, pericopeTrSubsError);
-  }, [pericopeTrSubsData, pericopeTrSubsError]);
 
   return (
     <PageLayout>

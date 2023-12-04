@@ -1371,6 +1371,11 @@ type QuestionsOutput {
   questions: [Question]!
 }
 
+type RecomendedPericopiesChangedAtDocumentId {
+  documentId: String!
+  error: ErrorType!
+}
+
 input RegisterInput {
   avatar: String!
   email: String!
@@ -1532,9 +1537,9 @@ type Subscription {
   pericopeDeleted: PericopeDeleteOutput!
   pericopeVoteStatusToggled: PericopeVoteStatusOutput!
   pericopiesAdded: PericopiesOutput!
-  pericopiesRecommendedHasChanged: PericopiesTextsWithTranslationConnection!
   questionsAdded: QuestionsOutput!
   questionsOnWordRangeAdded: QuestionOnWordRangesOutput!
+  recommendedPericopiesChanged: RecomendedPericopiesChangedAtDocumentId!
   wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput!
   wordRangeTagWithVoteAdded: WordRangeTagWithVotesOutput!
 }

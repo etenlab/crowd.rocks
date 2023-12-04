@@ -110,3 +110,8 @@ export class PericopeTrVoteStatusAndBestTrListOutput extends PericopeTrVoteStatu
   @Field(() => [PericopeTranslation])
   best_translation_list: Array<PericopeTranslation | null>;
 }
+
+@ObjectType()
+export class RecomendedPericopiesChangedAtDocumentId extends GenericOutput {
+  @Field(() => String) documentId: string;
+}

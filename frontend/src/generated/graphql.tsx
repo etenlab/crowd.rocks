@@ -2496,6 +2496,12 @@ export type QuestionsOutput = {
   questions: Array<Maybe<Question>>;
 };
 
+export type RecomendedPericopiesChangedAtDocumentId = {
+  __typename?: 'RecomendedPericopiesChangedAtDocumentId';
+  documentId: Scalars['String']['output'];
+  error: ErrorType;
+};
+
 export type RegisterInput = {
   avatar: Scalars['String']['input'];
   email: Scalars['String']['input'];
@@ -2676,9 +2682,9 @@ export type Subscription = {
   pericopeDeleted: PericopeDeleteOutput;
   pericopeVoteStatusToggled: PericopeVoteStatusOutput;
   pericopiesAdded: PericopiesOutput;
-  pericopiesRecommendedHasChanged: PericopiesTextsWithTranslationConnection;
   questionsAdded: QuestionsOutput;
   questionsOnWordRangeAdded: QuestionOnWordRangesOutput;
+  recommendedPericopiesChanged: RecomendedPericopiesChangedAtDocumentId;
   wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput;
   wordRangeTagWithVoteAdded: WordRangeTagWithVotesOutput;
 };
@@ -3966,10 +3972,10 @@ export type TogglePericopeTrVoteStatusMutationVariables = Exact<{
 
 export type TogglePericopeTrVoteStatusMutation = { __typename?: 'Mutation', togglePericopeTrVoteStatus: { __typename?: 'PericopeTrVoteStatusAndBestTrListOutput', error: ErrorType, vote_status_list: Array<{ __typename?: 'PericopeTrVoteStatus', pericope_translation_id: string, upvotes: number, downvotes: number }>, best_translation_list: Array<{ __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
-export type SubscribeToPericopiesTrSubscriptionVariables = Exact<{ [key: string]: never; }>;
+export type SubscribeToRecomendedPericopiesChangedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SubscribeToPericopiesTrSubscription = { __typename?: 'Subscription', pericopiesRecommendedHasChanged: { __typename?: 'PericopiesTextsWithTranslationConnection', edges: Array<{ __typename?: 'PericopiesTextsWithTranslationEdge', cursor: string, node: { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id?: string | null, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null } }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+export type SubscribeToRecomendedPericopiesChangedSubscription = { __typename?: 'Subscription', recommendedPericopiesChanged: { __typename?: 'RecomendedPericopiesChangedAtDocumentId', documentId: string } };
 
 export type PericopeFragmentFragment = { __typename?: 'Pericope', pericope_id: string, start_word: string };
 
@@ -8530,41 +8536,35 @@ export function useTogglePericopeTrVoteStatusMutation(baseOptions?: Apollo.Mutat
 export type TogglePericopeTrVoteStatusMutationHookResult = ReturnType<typeof useTogglePericopeTrVoteStatusMutation>;
 export type TogglePericopeTrVoteStatusMutationResult = Apollo.MutationResult<TogglePericopeTrVoteStatusMutation>;
 export type TogglePericopeTrVoteStatusMutationOptions = Apollo.BaseMutationOptions<TogglePericopeTrVoteStatusMutation, TogglePericopeTrVoteStatusMutationVariables>;
-export const SubscribeToPericopiesTrDocument = gql`
-    subscription SubscribeToPericopiesTr {
-  pericopiesRecommendedHasChanged {
-    edges {
-      ...PericopiesTextsWithTranslationEdgeFragment
-    }
-    pageInfo {
-      ...PageInfoFragment
-    }
+export const SubscribeToRecomendedPericopiesChangedDocument = gql`
+    subscription SubscribeToRecomendedPericopiesChanged {
+  recommendedPericopiesChanged {
+    documentId
   }
 }
-    ${PericopiesTextsWithTranslationEdgeFragmentFragmentDoc}
-${PageInfoFragmentFragmentDoc}`;
+    `;
 
 /**
- * __useSubscribeToPericopiesTrSubscription__
+ * __useSubscribeToRecomendedPericopiesChangedSubscription__
  *
- * To run a query within a React component, call `useSubscribeToPericopiesTrSubscription` and pass it any options that fit your needs.
- * When your component renders, `useSubscribeToPericopiesTrSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useSubscribeToRecomendedPericopiesChangedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscribeToRecomendedPericopiesChangedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useSubscribeToPericopiesTrSubscription({
+ * const { data, loading, error } = useSubscribeToRecomendedPericopiesChangedSubscription({
  *   variables: {
  *   },
  * });
  */
-export function useSubscribeToPericopiesTrSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToPericopiesTrSubscription, SubscribeToPericopiesTrSubscriptionVariables>) {
+export function useSubscribeToRecomendedPericopiesChangedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<SubscribeToRecomendedPericopiesChangedSubscription, SubscribeToRecomendedPericopiesChangedSubscriptionVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useSubscription<SubscribeToPericopiesTrSubscription, SubscribeToPericopiesTrSubscriptionVariables>(SubscribeToPericopiesTrDocument, options);
+        return Apollo.useSubscription<SubscribeToRecomendedPericopiesChangedSubscription, SubscribeToRecomendedPericopiesChangedSubscriptionVariables>(SubscribeToRecomendedPericopiesChangedDocument, options);
       }
-export type SubscribeToPericopiesTrSubscriptionHookResult = ReturnType<typeof useSubscribeToPericopiesTrSubscription>;
-export type SubscribeToPericopiesTrSubscriptionResult = Apollo.SubscriptionResult<SubscribeToPericopiesTrSubscription>;
+export type SubscribeToRecomendedPericopiesChangedSubscriptionHookResult = ReturnType<typeof useSubscribeToRecomendedPericopiesChangedSubscription>;
+export type SubscribeToRecomendedPericopiesChangedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToRecomendedPericopiesChangedSubscription>;
 export const GetPericopiesByDocumentIdDocument = gql`
     query GetPericopiesByDocumentId($document_id: ID!, $first: Int, $after: ID) {
   getPericopiesByDocumentId(
@@ -12011,7 +12011,7 @@ export const namedOperations = {
     SubscribeToDataGenProgress: 'SubscribeToDataGenProgress',
     SubscribeToDocumentAdded: 'SubscribeToDocumentAdded',
     SubscribeToZipMap: 'SubscribeToZipMap',
-    SubscribeToPericopiesTr: 'SubscribeToPericopiesTr',
+    SubscribeToRecomendedPericopiesChanged: 'SubscribeToRecomendedPericopiesChanged',
     SubscribeToPericopiesAdded: 'SubscribeToPericopiesAdded',
     SubscribeToPericopieDeleted: 'SubscribeToPericopieDeleted',
     SubscribeToPericopeVoteStatusToggled: 'SubscribeToPericopeVoteStatusToggled',

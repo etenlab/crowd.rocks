@@ -18770,6 +18770,49 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "RecomendedPericopiesChangedAtDocumentId",
+        "description": null,
+        "fields": [
+          {
+            "name": "documentId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "error",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "ErrorType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "INPUT_OBJECT",
         "name": "RegisterInput",
         "description": null,
@@ -20312,22 +20355,6 @@
             "deprecationReason": null
           },
           {
-            "name": "pericopiesRecommendedHasChanged",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PericopiesTextsWithTranslationConnection",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "questionsAdded",
             "description": null,
             "args": [],
@@ -20353,6 +20380,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "QuestionOnWordRangesOutput",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "recommendedPericopiesChanged",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "RecomendedPericopiesChangedAtDocumentId",
                 "ofType": null
               }
             },

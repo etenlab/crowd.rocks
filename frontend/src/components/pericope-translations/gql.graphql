@@ -143,13 +143,8 @@ mutation TogglePericopeTrVoteStatus(
   }
 }
 
-subscription SubscribeToPericopiesTr {
-  pericopiesRecommendedHasChanged {
-    edges {
-      ...PericopiesTextsWithTranslationEdgeFragment
-    }
-    pageInfo {
-      ...PageInfoFragment
-    }
+subscription SubscribeToRecomendedPericopiesChanged {
+  recommendedPericopiesChanged {
+    documentId
   }
 }

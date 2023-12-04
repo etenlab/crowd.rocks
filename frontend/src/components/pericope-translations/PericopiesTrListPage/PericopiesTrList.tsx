@@ -9,7 +9,10 @@ import {
 } from '@ionic/react';
 import { useTr } from '../../../hooks/useTr';
 import { FilterKind } from '../../super-tool/SuperDocumentViewerPage/ToolBox';
-import { useGetPericopiesTrLazyQuery } from '../../../generated/graphql';
+import {
+  useGetPericopiesTrLazyQuery,
+  useSubscribeToRecomendedPericopiesChangedSubscription,
+} from '../../../generated/graphql';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { useCallback, useEffect } from 'react';
 import { langInfo2langInput } from '../../../../../utils';
@@ -28,8 +31,13 @@ export function PericopiesTrList({
 }: PericopiesTrListProps) {
   const { tr } = useTr();
   const [present] = useIonToast();
-  const [getPericopiesTr, { data: pericopies, fetchMore, loading }] =
-    useGetPericopiesTrLazyQuery();
+  const [
+    getPericopiesTr,
+    { data: pericopies, fetchMore, loading, refetch: refetchPericopiesTrQuery },
+  ] = useGetPericopiesTrLazyQuery();
+
+  const { data: recomendedPericopiesChangedSubscriptionData } =
+    useSubscribeToRecomendedPericopiesChangedSubscription({});
 
   const {
     states: {
@@ -38,6 +46,20 @@ export function PericopiesTrList({
       },
     },
   } = useAppContext();
+
+  useEffect(() => {
+    if (
+      recomendedPericopiesChangedSubscriptionData?.recommendedPericopiesChanged
+        .documentId !== documentId
+    ) {
+      return;
+    }
+    refetchPericopiesTrQuery();
+  }, [
+    documentId,
+    recomendedPericopiesChangedSubscriptionData,
+    refetchPericopiesTrQuery,
+  ]);
 
   useEffect(() => {
     if (!targetLang) {
