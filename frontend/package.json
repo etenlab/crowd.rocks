@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:test": "tsc && vite build --mode test",
-    "build:local": "tsc && vite build --mode local-dev",
+    "build:test": "node generate-build-version && tsc && vite build --mode test",
+    "build:local": "node generate-build-version && tsc && vite build --mode local-dev",
     "build:staging": "node generate-build-version && tsc && vite build --mode staging",
-    "build:prod": "tsc && vite build",
+    "build:prod": "node generate-build-version && tsc && vite build",
     "format": "prettier --write \"src/**/*.{ts,tsx,md,mdx,js,jsx}\"",
     "preview": "vite preview",
     "test.e2e": "cypress run",
