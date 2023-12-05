@@ -9,14 +9,12 @@ import {
 } from '@ionic/react';
 import { useTr } from '../../../hooks/useTr';
 import { FilterKind } from '../../super-tool/SuperDocumentViewerPage/ToolBox';
-import {
-  useGetPericopiesTrLazyQuery,
-  useSubscribeToRecomendedPericopiesChangedSubscription,
-} from '../../../generated/graphql';
+import { useGetPericopiesTrQuery } from '../../../generated/graphql';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { langInfo2langInput } from '../../../../../utils';
 import { PAGE_SIZE } from '../../../const/commonConst';
+import { useSubscribeToRecomendedPericopiesChangedSubscription } from '../../../hooks/useCusomSubscribeToRecomendedPericopiesChanged';
 
 export type PericopiesTrListProps = {
   documentId: string;
@@ -31,75 +29,35 @@ export function PericopiesTrList({
 }: PericopiesTrListProps) {
   const { tr } = useTr();
   const [present] = useIonToast();
-  const [
-    getPericopiesTr,
-    { data: pericopies, fetchMore, loading, refetch: refetchPericopiesTrQuery },
-  ] = useGetPericopiesTrLazyQuery();
-
-  const { data: recomendedPericopiesChangedSubscriptionData } =
-    useSubscribeToRecomendedPericopiesChangedSubscription({});
 
   const {
     states: {
       global: {
-        langauges: { sourceLang, targetLang },
+        langauges: {
+          documentPage: { source: sourceLang, target: targetLang },
+        },
       },
     },
   } = useAppContext();
 
-  useEffect(() => {
-    if (
-      recomendedPericopiesChangedSubscriptionData?.recommendedPericopiesChanged
-        .documentId !== documentId
-    ) {
-      return;
-    }
-    refetchPericopiesTrQuery();
-  }, [
-    documentId,
-    recomendedPericopiesChangedSubscriptionData,
-    refetchPericopiesTrQuery,
-  ]);
+  const { data: pericopies, fetchMore } = useGetPericopiesTrQuery({
+    variables: {
+      documentId,
+      targetLang: langInfo2langInput(targetLang || { lang: { tag: '' } }),
+      filter: stringFilter,
+      onlyNotTranslatedTo:
+        filterKind === FilterKind.NotTranslated && targetLang
+          ? langInfo2langInput(targetLang)
+          : null,
+      onlyTranslatedTo:
+        filterKind === FilterKind.Translated && targetLang
+          ? langInfo2langInput(targetLang)
+          : null,
+      first: PAGE_SIZE,
+    },
+  });
 
-  useEffect(() => {
-    if (!targetLang) {
-      present({
-        message: tr('Target language is not defined'),
-        duration: 1500,
-        position: 'top',
-        color: 'danger',
-      });
-      return;
-    }
-    if (!loading) {
-      getPericopiesTr({
-        variables: {
-          documentId,
-          targetLang: langInfo2langInput(targetLang),
-          filter: stringFilter,
-          onlyNotTranslatedTo:
-            filterKind === FilterKind.NotTranslated && targetLang
-              ? langInfo2langInput(targetLang)
-              : null,
-          onlyTranslatedTo:
-            filterKind === FilterKind.Translated && targetLang
-              ? langInfo2langInput(targetLang)
-              : null,
-          first: PAGE_SIZE,
-        },
-      });
-    }
-  }, [
-    getPericopiesTr,
-    targetLang,
-    loading,
-    sourceLang,
-    present,
-    tr,
-    documentId,
-    stringFilter,
-    filterKind,
-  ]);
+  useSubscribeToRecomendedPericopiesChangedSubscription();
 
   const handleInfinite = useCallback(
     async (ev: IonInfiniteScrollCustomEvent<void>) => {
@@ -150,10 +108,7 @@ export function PericopiesTrList({
   return (
     <>
       <Stack gap="16px">
-        <div style={{ textAlign: 'center' }}>
-          {loading && <CircularProgress />}
-        </div>
-        {pericopies &&
+        {pericopies ? (
           pericopies.getPericopiesTr.edges.map(
             (pericopeTr) =>
               pericopeTr.node && (
@@ -172,7 +127,10 @@ export function PericopiesTrList({
                   }}
                 />
               ),
-          )}
+          )
+        ) : (
+          <div style={{ textAlign: 'center' }}>{<CircularProgress />}</div>
+        )}
       </Stack>
 
       <IonInfiniteScroll onIonInfinite={handleInfinite}>

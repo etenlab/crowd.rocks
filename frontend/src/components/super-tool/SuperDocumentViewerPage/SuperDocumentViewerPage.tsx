@@ -23,6 +23,7 @@ import { NavArrowDown } from '../../common/icons/NavArrowDown';
 import { NavArrowUp } from '../../common/icons/NavArrowUp';
 import { SuperDocumentViewer } from '../SuperDocumentViewer/SuperDocumentViewer';
 import { SuperPericopiesTranslator } from '../SuperPericopiesTranslator';
+import { useSubscribeToRecomendedPericopiesChangedSubscription } from '../../../hooks/useCusomSubscribeToRecomendedPericopiesChanged';
 
 export function SuperDocumentViewerPage() {
   const { tr } = useTr();
@@ -55,7 +56,6 @@ export function SuperDocumentViewerPage() {
       document_id,
     },
   });
-
   useIonViewDidEnter(() => {
     setPageStatus('shown');
   });
@@ -63,6 +63,8 @@ export function SuperDocumentViewerPage() {
   useIonViewDidLeave(() => {
     setPageStatus('hidden');
   });
+
+  useSubscribeToRecomendedPericopiesChangedSubscription();
 
   const handleToggleMode = useCallback(() => {
     setMode((mode) => {
