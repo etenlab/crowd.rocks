@@ -22,6 +22,7 @@ import { OptionItem } from '../../common/forms/Autocomplete';
 import { NavArrowDown } from '../../common/icons/NavArrowDown';
 import { NavArrowUp } from '../../common/icons/NavArrowUp';
 import { SuperDocumentViewer } from '../SuperDocumentViewer/SuperDocumentViewer';
+import { SuperPericopiesTranslator } from '../SuperPericopiesTranslator';
 
 export function SuperDocumentViewerPage() {
   const { tr } = useTr();
@@ -43,7 +44,7 @@ export function SuperDocumentViewerPage() {
     label: tr('Pericope'),
     value: SuperToolKind.Pericope,
   });
-  const [filter, setFilter] = useState<OptionItem>({
+  const [filter, setFilter] = useState<OptionItem<FilterKind>>({
     label: tr('All'),
     value: FilterKind.All,
   });
@@ -81,7 +82,7 @@ export function SuperDocumentViewerPage() {
     setTool(tool);
   }, []);
 
-  const handleChangeFilter = useCallback((filter: OptionItem) => {
+  const handleChangeFilter = useCallback((filter: OptionItem<FilterKind>) => {
     setFilter(filter);
   }, []);
 
@@ -201,16 +202,24 @@ export function SuperDocumentViewerPage() {
         <Box sx={{ height: '302px' }} />{' '}
       </Collapse>
 
-      <SuperDocumentViewer
-        documentId={document_id}
-        mode={mode}
-        tool={tool.value as SuperToolKind}
-        customScrollParent={
-          pageStatus === 'shown' && ionContentScrollElement
-            ? ionContentScrollElement
-            : undefined
-        }
-      />
+      {tab === TabKind.Document ? (
+        <SuperDocumentViewer
+          documentId={document_id}
+          mode={mode}
+          tool={tool.value as SuperToolKind}
+          customScrollParent={
+            pageStatus === 'shown' && ionContentScrollElement
+              ? ionContentScrollElement
+              : undefined
+          }
+        />
+      ) : (
+        <SuperPericopiesTranslator
+          documentId={document_id}
+          filterKind={filter.value}
+          stringFilter={stringFilter}
+        />
+      )}
     </PageLayout>
   );
 }
