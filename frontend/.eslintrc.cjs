@@ -11,7 +11,7 @@ module.exports = {
     'plugin:prettier/recommended',
   ],
   plugins: ['react', 'react-hooks'],
-  ignorePatterns: ['src/generated/graphql.tsx'],
+  ignorePatterns: ['src/generated/graphql.tsx', 'generate-build-version.js'],
   parserOptions: {
     ecmaVersion: 2020,
   },
