@@ -2,7 +2,7 @@ name: Build, Dockerize, Upload
 on:
   push:
     branches:
-      - automatic-versoin-bumping
+      - automatic-version-bumping
     paths:
       - "api/**"
       - "frontend/**"
