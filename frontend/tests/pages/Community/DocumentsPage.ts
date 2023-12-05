@@ -5,10 +5,18 @@ const selectedLanguage = (languageName: string) =>
   `//h4[text()='${languageName}']`;
 const languageName = (language: string) =>
   `//h5[text()='${language}']//..//input`;
+const documents = (documentName: string) => `//p[text()='${documentName}']`;
+const meatBallsMenuButton = (documentName: string) =>
+  `//p[text()='${documentName}']//..//..//button`;
 
 class DocumentsPage extends BasePage {
   async isPageTitleVisible() {
     return await this.page.locator(`//h2[text()='Documents']`).isVisible();
+  }
+  async isDocumentDetailsPageVisible() {
+    return await this.page
+      .getByRole('heading', { name: 'Details' })
+      .isVisible();
   }
   async clickOnSelectYourLanguageDropdown() {
     await this.page
@@ -58,9 +66,33 @@ class DocumentsPage extends BasePage {
   async clickOnCancelButton() {
     await this.page.getByRole('button', { name: 'Cancel' }).click();
   }
-  async uploadTextFile() {
-    const filePath = 'C:/Users/Piyush Patel/Desktop/sample3.txt';
+  async uploadTextFile(filePath: string) {
     await this.page.setInputFiles('input[type="file"]', filePath);
+  }
+  async clickOnUploadButton() {
+    await this.page.getByRole('button', { name: 'Upload' }).click();
+  }
+  async searchDocuments(documentName: string) {
+    await this.page
+      .getByPlaceholder(`Search by document...`)
+      .fill(documentName);
+    await this.page.waitForTimeout(1000);
+  }
+  async clickOnDocument(documentName: string) {
+    await this.page.locator(documents(documentName)).click();
+  }
+  async isCreatedDocumentVisible(documentName: string) {
+    return await this.page.locator(documents(documentName)).isVisible();
+  }
+  async clickOnMeatBallsMenuButton(documentName: string) {
+    await this.page.locator(meatBallsMenuButton(documentName)).click();
+  }
+  async clickOnGoToDocumentsButton() {
+    await this.page.getByRole('button', { name: 'Go to Documents' }).click();
+  }
+  async downloadDocument(documentName: string) {
+    await this.clickOnMeatBallsMenuButton(documentName);
+    await this.page.getByRole('button', { name: 'Download' }).click();
   }
 }
 
