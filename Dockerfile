@@ -6,6 +6,7 @@ WORKDIR /usr/src/etenlab/crowd-rocks
 COPY frontend /frontend/
 COPY api /api/
 COPY utils /utils/
+COPY ./package.json ./package.json
 
 ARG BUILD_MODE
 
