@@ -101,12 +101,20 @@ export class PericopeTrVoteStatus {
 }
 
 @ObjectType()
-export class PericopeTrVoteStatusListOutput extends GenericOutput {
-  @Field(() => [PericopeTrVoteStatus])
-  vote_status_list: PericopeTrVoteStatus[];
+export class PericopeTrVoteStatusOutput extends GenericOutput {
+  @Field(() => PericopeTrVoteStatus)
+  vote_status: PericopeTrVoteStatus | null;
 }
 @ObjectType()
-export class PericopeTrVoteStatusAndBestTrListOutput extends PericopeTrVoteStatusListOutput {
-  @Field(() => [PericopeTranslation])
-  best_translation_list: Array<PericopeTranslation | null>;
+export class PericopeTrVoteStatusAndBestTrOutput extends PericopeTrVoteStatusOutput {
+  @Field(() => PericopeTranslation)
+  best_translation: PericopeTranslation | null;
+}
+
+@ObjectType()
+export class BestPericopeTrChanged extends GenericOutput {
+  @Field(() => PericopeTranslation, { nullable: true })
+  newPericopeTr: PericopeTranslation | null;
+  @Field(() => PericopeTrVoteStatus, { nullable: true })
+  newVoteStatus: PericopeTrVoteStatus | null;
 }

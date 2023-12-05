@@ -29,8 +29,7 @@ import {
   GetPericopiesTrInput,
   PericopeTranslation,
   PericopeTranslationWithVotes,
-  PericopeTrVoteStatus,
-  PericopeTrVoteStatusListOutput,
+  PericopeTrVoteStatusOutput,
   PericopiesTextsWithTranslationConnection,
   PericopiesTextsWithTranslationEdge,
 } from './types';
@@ -190,14 +189,13 @@ export class PericopeTrService {
         currPericopeid = word.pericope_id;
         currPericopeCursor++;
       }
-      // it's better to make ordered_pericopies plain zero-based array
-      ordered_pericopies[currPericopeCursor - 1] = {
+      ordered_pericopies[currPericopeCursor] = {
         pericopeCursor: currPericopeCursor,
         pericopeId: currPericopeid,
         words: [...(ordered_pericopies[currPericopeCursor]?.words || []), word],
       };
     });
-    return ordered_pericopies;
+    return ordered_pericopies.slice(1);
   }
 
   async getPericopeDescription(
@@ -343,7 +341,7 @@ export class PericopeTrService {
     pericope_translation_id: string,
     vote: boolean,
     token: string,
-  ): Promise<PericopeTrVoteStatusListOutput> {
+  ): Promise<PericopeTrVoteStatusOutput> {
     try {
       const res = await this.pg.pool.query<TogglePericopeTrVoteStatusSqlR>(
         ...togglePericopeTrVoteStatusSql({
@@ -363,55 +361,43 @@ export class PericopeTrService {
       ) {
         return {
           error: creatingError,
-          vote_status_list: [],
+          vote_status: null,
         };
       }
 
-      return this.getVoteStatusFromIds([pericope_translation_id]);
+      return this.getVoteStatusOfPericopeTrId(pericope_translation_id);
     } catch (e) {
       console.error(e);
     }
 
     return {
       error: ErrorType.UnknownError,
-      vote_status_list: [],
+      vote_status: null,
     };
   }
 
-  async getVoteStatusFromIds(
-    pericopeTrIds: string[],
-  ): Promise<PericopeTrVoteStatusListOutput> {
+  async getVoteStatusOfPericopeTrId(
+    pericopeTrId: string,
+  ): Promise<PericopeTrVoteStatusOutput> {
     try {
       const res = await this.pg.pool.query<GetPericopeTrVoteStatusSqlR>(
-        ...getPericopeTrVoteStatusFromPericopeIdsSql(pericopeTrIds),
-      );
-
-      const voteStatusMap = new Map<string, PericopeTrVoteStatus>();
-
-      res.rows.forEach((row) =>
-        voteStatusMap.set(row.pericope_translation_id, row),
+        ...getPericopeTrVoteStatusFromPericopeIdsSql([pericopeTrId]),
       );
 
       return {
         error: ErrorType.NoError,
-        vote_status_list: pericopeTrIds.map((pericope_translation_id) => {
-          const voteStatus = voteStatusMap.get(pericope_translation_id + '');
-
-          return voteStatus
-            ? voteStatus
-            : {
-                pericope_translation_id: pericope_translation_id + '',
-                upvotes: 0,
-                downvotes: 0,
-              };
-        }),
+        vote_status: {
+          pericope_translation_id: res.rows[0].pericope_translation_id,
+          upvotes: res.rows[0].upvotes || 0,
+          downvotes: res.rows[0].downvotes || 0,
+        },
       };
     } catch (e) {
       Logger.error(e);
     }
     return {
       error: ErrorType.UnknownError,
-      vote_status_list: [],
+      vote_status: null,
     };
   }
 

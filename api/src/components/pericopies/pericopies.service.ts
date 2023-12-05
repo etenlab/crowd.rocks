@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
 import { calc_vote_weight, pgClientOrPool } from 'src/common/utility';
@@ -41,6 +41,7 @@ import {
   GetDocumentWordEntriesTotalPageSize,
   getDocumentWordEntriesTotalPageSize,
 } from '../documents/sql-string';
+import { LanguageInput } from '../common/types';
 
 export const WORDS_JOINER = ' ';
 
@@ -437,5 +438,38 @@ export class PericopiesService {
         pericope_text: '',
       };
     }
+  }
+
+  async getDocumentIdsAndLangsOfPericopeIds(
+    pericope_ids: string[],
+  ): Promise<Array<{ documentId: string; lang: LanguageInput }>> {
+    const res = await this.pg.pool.query<{
+      document_id: string;
+      language_code: string;
+      dialect_code: string;
+      geo_code: string;
+    }>(
+      `
+        select 
+        d.document_id,
+        d.language_code,
+        d.dialect_code,
+        d.geo_code 
+        from pericopies p 
+        left join document_word_entries dwe on p.start_word = dwe.document_word_entry_id 
+        left join documents d on dwe.document_id =d.document_id 
+        where p.pericope_id =  any($1)
+    `,
+      [pericope_ids],
+    );
+
+    return res.rows.map((row) => ({
+      documentId: row.document_id,
+      lang: {
+        language_code: row.language_code,
+        dialect_code: row.dialect_code,
+        geo_code: row.geo_code,
+      },
+    }));
   }
 }

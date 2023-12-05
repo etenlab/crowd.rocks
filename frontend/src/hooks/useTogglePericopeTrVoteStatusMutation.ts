@@ -21,15 +21,12 @@ export function useTogglePericopeTrVoteStatusMutation() {
       if (
         !errors &&
         data &&
-        data.togglePericopeTrVoteStatus.vote_status_list[0] &&
+        data.togglePericopeTrVoteStatus.vote_status &&
         data.togglePericopeTrVoteStatus.error === ErrorType.NoError
       ) {
-        // note: index [0] is because we are toggling single vote related to one definite pericope_translaion_id
-        // so we're expecting only single row.
-        const newVoteStatus =
-          data.togglePericopeTrVoteStatus.vote_status_list[0];
+        const newVoteStatus = data.togglePericopeTrVoteStatus.vote_status;
         const newBestTranslation =
-          data.togglePericopeTrVoteStatus.best_translation_list[0];
+          data.togglePericopeTrVoteStatus.best_translation;
 
         updateCacheWithTogglePericopeTrVoteStatus(
           cache,
@@ -49,21 +46,3 @@ export function useTogglePericopeTrVoteStatusMutation() {
     },
   });
 }
-
-// export function useSubscribeToPericopeVoteStatusToggledSubscription() {
-//   return useGeneratedSubscribeToPericopeVoteStatusToggledSubscription({
-//     onData({ client, data: result }) {
-//       const { data, error } = result;
-//       if (
-//         !error &&
-//         data &&
-//         data.pericopeVoteStatusToggled.vote_status &&
-//         data.pericopeVoteStatusToggled.error === ErrorType.NoError
-//       ) {
-//         const newVoteStatus = data.pericopeVoteStatusToggled.vote_status;
-
-//         updateCacheWithTogglePericopeVoteStatus(client.cache, newVoteStatus);
-//       }
-//     },
-//   });
-// }

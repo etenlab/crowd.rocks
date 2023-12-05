@@ -9,6 +9,7 @@ import { TextCard } from '../../common/TextCard';
 import { useCallback, useEffect } from 'react';
 import { useIonToast } from '@ionic/react';
 import { useTogglePericopeTrVoteStatusMutation } from '../../../hooks/useTogglePericopeTrVoteStatusMutation';
+import { useBestPericopeTrChangedSubscription } from '../../../hooks/useSubscribeToRecomendedPericopies';
 
 export type PericopeTranslationListProps = {
   translations: PericopeTranslationWithVotes[];
@@ -21,6 +22,8 @@ export function PericopeTranslationList({
 
   const [toggleTrVoteStatus, { data: voteData, loading: voteLoading }] =
     useTogglePericopeTrVoteStatusMutation();
+
+  useBestPericopeTrChangedSubscription();
 
   useEffect(() => {
     if (voteLoading) return;
