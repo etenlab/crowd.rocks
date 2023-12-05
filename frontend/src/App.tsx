@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
@@ -48,6 +49,8 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { createUploadLink } from 'apollo-upload-client';
 import { typePolicies } from './cacheTypePolicies';
 import { createClient } from 'graphql-ws';
+
+import { useCacheBuster } from './hooks/useCacheBuster';
 
 console.info('Runninig in environment: ' + import.meta.env.MODE);
 
@@ -112,23 +115,34 @@ export const apollo_client = new ApolloClient({
 (window as any).cacheApollo = apollo_client;
 
 const App: React.FC = () => {
-  return (
-    <IonApp>
-      <ApolloProvider client={apollo_client}>
-        <AppContextProvider>
-          <ThemeProvider autoDetectPrefersDarkMode={false}>
-            <IonReactRouter>
-              <IonRouterOutlet>
-                <Route path="/">
-                  <Body />
-                </Route>
-              </IonRouterOutlet>
-            </IonReactRouter>
-          </ThemeProvider>
-        </AppContextProvider>
-      </ApolloProvider>
-    </IonApp>
-  );
+  const { loading, isLatestVersion, refreshCacheAndReload, latestVersion } =
+    useCacheBuster();
+
+  useEffect(() => {
+    if (!loading && !isLatestVersion) refreshCacheAndReload(latestVersion);
+  }, [loading, isLatestVersion, refreshCacheAndReload, latestVersion]);
+
+  if (loading || !isLatestVersion) {
+    return null;
+  } else {
+    return (
+      <IonApp>
+        <ApolloProvider client={apollo_client}>
+          <AppContextProvider>
+            <ThemeProvider autoDetectPrefersDarkMode={false}>
+              <IonReactRouter>
+                <IonRouterOutlet>
+                  <Route path="/">
+                    <Body />
+                  </Route>
+                </IonRouterOutlet>
+              </IonReactRouter>
+            </ThemeProvider>
+          </AppContextProvider>
+        </ApolloProvider>
+      </IonApp>
+    );
+  }
 };
 
 export default App;
