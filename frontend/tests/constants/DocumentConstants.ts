@@ -1,8 +1,10 @@
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Define the base directory for test data
-const baseTestDataDirectory =
-  'D:/Etenlabs/Repos/Latest/crowd.rocks/frontend/tests/testData/';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const baseTestDataDirectory = path.join(__dirname, '../testData/');
 
 // Define the constants
 const constants = {
