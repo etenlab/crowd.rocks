@@ -14,10 +14,7 @@ import { SubscriptionToken } from 'src/common/subscription-token';
 import { PUB_SUB } from 'src/pubSub.module';
 
 import { getBearer } from 'src/common/utility';
-import {
-  GetPericopeTextInput,
-  RecomendedPericopiesChangedAtDocumentId,
-} from '../pericope-translations/types';
+import { GetPericopeTextInput } from '../pericope-translations/types';
 
 import { PericopeVotesService } from './pericope-votes.service';
 import { PericopiesService } from './pericopies.service';
@@ -28,8 +25,8 @@ import {
   PericopeWithVotesListConnection,
   PericopeTextWithDescription,
   PericopeDeleteOutput,
+  RecomendedPericopiesChangedAtDocumentId,
 } from './types';
-import { PericopeTrService } from '../pericope-translations/pericope-tr.service';
 
 @Injectable()
 @Resolver()
@@ -38,7 +35,6 @@ export class PericopiesResolver {
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private pericopiesService: PericopiesService,
     private pericopeVotesService: PericopeVotesService,
-    private pericopeTrService: PericopeTrService,
   ) {}
 
   @Query(() => PericopiesOutput)
@@ -127,7 +123,6 @@ export class PericopiesResolver {
     name: SubscriptionToken.recommendedPericopiesChanged,
   })
   async subscribeToRecommendedPericopiesChanged() {
-    console.log('subscribeToRecommendedPericopiesChanged');
     return this.pubSub.asyncIterator(
       SubscriptionToken.recommendedPericopiesChanged,
     );

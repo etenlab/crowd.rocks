@@ -134,10 +134,10 @@ mutation TogglePericopeTrVoteStatus(
     vote: $vote
   ) {
     error
-    vote_status_list {
+    vote_status {
       ...PericopeTrVoteStatusFragment
     }
-    best_translation_list {
+    best_translation {
       ...PericopeTranslationFragment
     }
   }
@@ -146,5 +146,16 @@ mutation TogglePericopeTrVoteStatus(
 subscription SubscribeToRecomendedPericopiesChanged {
   recommendedPericopiesChanged {
     documentId
+  }
+}
+
+subscription BestPericopeTrChanged {
+  bestPericopeTrChanged {
+    newPericopeTr {
+      ...PericopeTranslationFragment
+    }
+    newVoteStatus {
+      ...PericopeTrVoteStatusFragment
+    }
   }
 }

@@ -7,22 +7,24 @@ import {
   Mutation,
   Query,
   Resolver,
+  Subscription,
 } from '@nestjs/graphql';
 import { PericopeTrService } from './pericope-tr.service';
 import {
   AddPericopeTranslationInput,
+  BestPericopeTrChanged,
   GetPericopeTranslationsInput,
   GetPericopiesTrInput,
   PericopeTranslation,
   PericopeTranslationsOutput,
-  PericopeTrVoteStatusAndBestTrListOutput,
+  PericopeTrVoteStatusAndBestTrOutput,
   PericopiesTextsWithTranslationConnection,
 } from './types';
 import { BearerTokenAuthGuard } from '../../guards/bearer-token-auth.guard';
 import { ErrorType } from '../../common/types';
-import { LanguageInput } from '../common/types';
 import { PUB_SUB } from '../../pubSub.module';
 import { PubSub } from 'graphql-subscriptions';
+import { SubscriptionToken } from '../../common/subscription-token';
 
 @Injectable()
 @Resolver()
@@ -61,40 +63,57 @@ export class PericopeTrResolver {
   }
 
   @UseGuards(BearerTokenAuthGuard)
-  @Mutation(() => PericopeTrVoteStatusAndBestTrListOutput)
+  @Mutation(() => PericopeTrVoteStatusAndBestTrOutput)
   async togglePericopeTrVoteStatus(
     @Args('pericope_translation_id', { type: () => ID })
     pericope_translation_id: string,
     @Args('vote', { type: () => Boolean }) vote: boolean,
     @Context() req: any,
-  ): Promise<PericopeTrVoteStatusAndBestTrListOutput> {
+  ): Promise<PericopeTrVoteStatusAndBestTrOutput> {
     Logger.log(
       `${JSON.stringify(pericope_translation_id)}`,
       `PericopeTrResolver#togglePericopeTrVoteStatus`,
     );
 
-    const vote_status_list = await this.pericopeTrService.toggleVoteStatus(
+    const { pericopeId, lang } = (
+      await this.pericopeTrService.getPericopeIdsAndLangsOfTranslationIds([
+        pericope_translation_id,
+      ])
+    )[0];
+
+    const oldBestTr =
+      await this.pericopeTrService.getRecomendedPericopeTranslation(
+        pericopeId,
+        lang,
+      );
+
+    const vote_status = await this.pericopeTrService.toggleVoteStatus(
       pericope_translation_id,
       vote,
       req.req.token as string,
     );
 
-    const pIdsLangs: { pericopeId: string; lang: LanguageInput }[] =
-      await this.pericopeTrService.getPericopeIdsAndLangsOfTranslationIds(
-        vote_status_list.vote_status_list.map((v) => v.pericope_translation_id),
+    const best_translation =
+      await this.pericopeTrService.getRecomendedPericopeTranslation(
+        pericopeId,
+        lang,
       );
 
-    const bestTrListPromises: Promise<PericopeTranslation | null>[] =
-      pIdsLangs.map((pIdLang) => {
-        return this.pericopeTrService.getRecomendedPericopeTranslation(
-          pIdLang.pericopeId,
-          pIdLang.lang,
-        );
+    if (
+      best_translation?.pericope_translation_id !==
+      oldBestTr?.pericope_translation_id
+    ) {
+      this.pubSub.publish(SubscriptionToken.bestPericopeTrChanged, {
+        [SubscriptionToken.bestPericopeTrChanged]: {
+          newPericopeTr: best_translation,
+          newVoteStatus: vote_status.vote_status,
+        } as BestPericopeTrChanged,
       });
+    }
 
     return {
-      ...vote_status_list,
-      best_translation_list: await Promise.all(bestTrListPromises),
+      ...vote_status,
+      best_translation,
     };
   }
 
@@ -127,5 +146,13 @@ export class PericopeTrResolver {
         translations: [],
       };
     }
+  }
+
+  @Subscription(() => BestPericopeTrChanged, {
+    name: SubscriptionToken.bestPericopeTrChanged,
+  })
+  async bestPericopeTrChanged() {
+    console.log('PericopeTrResolver#bestPericopeTrChanged');
+    return this.pubSub.asyncIterator(SubscriptionToken.bestPericopeTrChanged);
   }
 }

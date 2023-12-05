@@ -459,6 +459,57 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "BestPericopeTrChanged",
+        "description": null,
+        "fields": [
+          {
+            "name": "error",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "ErrorType",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "newPericopeTr",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PericopeTranslation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "newVoteStatus",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PericopeTrVoteStatus",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "SCALAR",
         "name": "Boolean",
         "description": "The `Boolean` scalar type represents `true` or `false`.",
@@ -7405,7 +7456,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "PericopeTrVoteStatusAndBestTrListOutput",
+                "name": "PericopeTrVoteStatusAndBestTrOutput",
                 "ofType": null
               }
             },
@@ -10253,28 +10304,20 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PericopeTrVoteStatusAndBestTrListOutput",
+        "name": "PericopeTrVoteStatusAndBestTrOutput",
         "description": null,
         "fields": [
           {
-            "name": "best_translation_list",
+            "name": "best_translation",
             "description": null,
             "args": [],
             "type": {
               "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "PericopeTranslation",
-                    "ofType": null
-                  }
-                }
+                "kind": "OBJECT",
+                "name": "PericopeTranslation",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -10297,24 +10340,16 @@
             "deprecationReason": null
           },
           {
-            "name": "vote_status_list",
+            "name": "vote_status",
             "description": null,
             "args": [],
             "type": {
               "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "PericopeTrVoteStatus",
-                    "ofType": null
-                  }
-                }
+                "kind": "OBJECT",
+                "name": "PericopeTrVoteStatus",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -20284,6 +20319,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "AnswersOutput",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "bestPericopeTrChanged",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "BestPericopeTrChanged",
                 "ofType": null
               }
             },

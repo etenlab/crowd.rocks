@@ -14,7 +14,7 @@ import { useAppContext } from '../../../hooks/useAppContext';
 import { useCallback } from 'react';
 import { langInfo2langInput } from '../../../../../utils';
 import { PAGE_SIZE } from '../../../const/commonConst';
-import { useSubscribeToRecomendedPericopiesChangedSubscription } from '../../../hooks/useCusomSubscribeToRecomendedPericopiesChanged';
+import { useSubscribeToRecomendedPericopiesChangedSubscription } from '../../../hooks/useSubscribeToRecomendedPericopiesChanged';
 
 export type PericopiesTrListProps = {
   documentId: string;

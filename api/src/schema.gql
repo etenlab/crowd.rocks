@@ -48,6 +48,12 @@ type AvatarUpdateOutput {
   user: User
 }
 
+type BestPericopeTrChanged {
+  error: ErrorType!
+  newPericopeTr: PericopeTranslation
+  newVoteStatus: PericopeTrVoteStatus
+}
+
 input BotTranslateDocumentInput {
   botType: BotType!
   documentId: String!
@@ -706,7 +712,7 @@ type Mutation {
   threadUpsert(input: ThreadUpsertInput!): ThreadOutput!
   toggleFlagWithRef(name: String!, parent_id: String!, parent_table: TableNameType!): FlagsOutput!
   toggleMapVoteStatus(is_original: Boolean!, map_id: ID!, vote: Boolean!): MapVoteStatusOutputRow!
-  togglePericopeTrVoteStatus(pericope_translation_id: ID!, vote: Boolean!): PericopeTrVoteStatusAndBestTrListOutput!
+  togglePericopeTrVoteStatus(pericope_translation_id: ID!, vote: Boolean!): PericopeTrVoteStatusAndBestTrOutput!
   togglePericopeVoteStatus(pericope_id: ID!, vote: Boolean!): PericopeVoteStatusOutput!
   togglePhraseDefinitionVoteStatus(phrase_definition_id: ID!, vote: Boolean!): DefinitionVoteStatusOutputRow!
   togglePhraseToPhraseTrVoteStatus(phrase_to_phrase_translation_id: ID!, vote: Boolean!): PhraseToPhraseTranslationVoteStatusOutputRow!
@@ -829,10 +835,10 @@ type PericopeTrVoteStatus {
   upvotes: Int!
 }
 
-type PericopeTrVoteStatusAndBestTrListOutput {
-  best_translation_list: [PericopeTranslation!]!
+type PericopeTrVoteStatusAndBestTrOutput {
+  best_translation: PericopeTranslation!
   error: ErrorType!
-  vote_status_list: [PericopeTrVoteStatus!]!
+  vote_status: PericopeTrVoteStatus!
 }
 
 type PericopeTranslation {
@@ -1533,6 +1539,7 @@ type Subscription {
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
   ZipMapReport: ZipMapResult!
   answersAdded: AnswersOutput!
+  bestPericopeTrChanged: BestPericopeTrChanged!
   documentAdded: DocumentUploadOutput!
   pericopeDeleted: PericopeDeleteOutput!
   pericopeVoteStatusToggled: PericopeVoteStatusOutput!
