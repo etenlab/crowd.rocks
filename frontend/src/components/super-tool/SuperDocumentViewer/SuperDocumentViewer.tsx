@@ -1,7 +1,7 @@
 import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
 
 import { SuperToolKind } from '../SuperDocumentViewerPage/ToolBox';
-import { PericopeDocumentViewer } from '../../pericopies/PericopeDocumentViewer';
+import { PericopeDocumentViewerV2 } from '../../pericopies/PericopeDocumentViewer';
 import { TaggingDocumentViewer } from '../../tagging/TaggingDocumentViewer';
 import { QADocumentViewer } from '../../qa/QADocumentViewer';
 
@@ -20,9 +20,8 @@ export function SuperDocumentViewer({
 }: SuperDocumentViewerProps) {
   if (tool === SuperToolKind.Pericope) {
     return (
-      <PericopeDocumentViewer
+      <PericopeDocumentViewerV2
         documentId={documentId}
-        mode={mode}
         customScrollParent={customScrollParent}
       />
     );
