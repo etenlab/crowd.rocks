@@ -331,6 +331,9 @@ export class PericopiesService {
     );
   }
 
+  /**
+   * @returns WordsTillEndOfDocumentSqlR[] - words are already ordered by level of joining, i.e. by the order of appearence in the text
+   */
   async getWordsTillEndOfDocument(
     documentId: string,
     start_word_id: string,

@@ -318,6 +318,12 @@ export type FileUploadUrlResponse = {
   url: Scalars['String']['output'];
 };
 
+export type FileUrlOutput = {
+  __typename?: 'FileUrlOutput';
+  error: ErrorType;
+  fileUrl?: Maybe<Scalars['String']['output']>;
+};
+
 export type Flag = {
   __typename?: 'Flag';
   created_at: Scalars['String']['output'];
@@ -748,6 +754,7 @@ export type Mutation = {
   createQuestionOnWordRange: QuestionOnWordRangesOutput;
   createTaggingOnWordRange: WordRangeTagWithVotesOutput;
   deletePericopie: PericopeDeleteOutput;
+  documentByPericopiesTranslate: FileUrlOutput;
   documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
   forceMarkAndRetranslateOriginalMapsIds: GenericOutput;
@@ -869,6 +876,11 @@ export type MutationCreateTaggingOnWordRangeArgs = {
 
 export type MutationDeletePericopieArgs = {
   pericope_id: Scalars['ID']['input'];
+};
+
+
+export type MutationDocumentByPericopiesTranslateArgs = {
+  input: TranslateDocumentByPericopiesInput;
 };
 
 
@@ -2823,6 +2835,11 @@ export type TranslateAllWordsAndPhrasesByBotResult = {
   translatedWordCount: Scalars['Int']['output'];
 };
 
+export type TranslateDocumentByPericopiesInput = {
+  documentId: Scalars['String']['input'];
+  targetLang: LanguageInput;
+};
+
 export type TranslatedLanguageInfoInput = {
   fromLanguageCode: Scalars['ID']['input'];
   toLanguageCode?: InputMaybe<Scalars['ID']['input']>;
@@ -3561,6 +3578,14 @@ export type SubscribeToDocumentAddedSubscriptionVariables = Exact<{ [key: string
 
 
 export type SubscribeToDocumentAddedSubscription = { __typename?: 'Subscription', documentAdded: { __typename?: 'DocumentUploadOutput', error: ErrorType, document?: { __typename?: 'TextyDocument', document_id: string, file_id: string, file_name: string, file_url: string, language_code: string, dialect_code?: string | null, geo_code?: string | null, created_by: string } | null } };
+
+export type DocumentByPericopiesTranslateMutationVariables = Exact<{
+  documentId: Scalars['String']['input'];
+  targetLang: LanguageInput;
+}>;
+
+
+export type DocumentByPericopiesTranslateMutation = { __typename?: 'Mutation', documentByPericopiesTranslate: { __typename?: 'FileUrlOutput', fileUrl?: string | null } };
 
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -6784,6 +6809,42 @@ export function useSubscribeToDocumentAddedSubscription(baseOptions?: Apollo.Sub
       }
 export type SubscribeToDocumentAddedSubscriptionHookResult = ReturnType<typeof useSubscribeToDocumentAddedSubscription>;
 export type SubscribeToDocumentAddedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToDocumentAddedSubscription>;
+export const DocumentByPericopiesTranslateDocument = gql`
+    mutation DocumentByPericopiesTranslate($documentId: String!, $targetLang: LanguageInput!) {
+  documentByPericopiesTranslate(
+    input: {documentId: $documentId, targetLang: $targetLang}
+  ) {
+    fileUrl
+  }
+}
+    `;
+export type DocumentByPericopiesTranslateMutationFn = Apollo.MutationFunction<DocumentByPericopiesTranslateMutation, DocumentByPericopiesTranslateMutationVariables>;
+
+/**
+ * __useDocumentByPericopiesTranslateMutation__
+ *
+ * To run a mutation, you first call `useDocumentByPericopiesTranslateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDocumentByPericopiesTranslateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [documentByPericopiesTranslateMutation, { data, loading, error }] = useDocumentByPericopiesTranslateMutation({
+ *   variables: {
+ *      documentId: // value for 'documentId'
+ *      targetLang: // value for 'targetLang'
+ *   },
+ * });
+ */
+export function useDocumentByPericopiesTranslateMutation(baseOptions?: Apollo.MutationHookOptions<DocumentByPericopiesTranslateMutation, DocumentByPericopiesTranslateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DocumentByPericopiesTranslateMutation, DocumentByPericopiesTranslateMutationVariables>(DocumentByPericopiesTranslateDocument, options);
+      }
+export type DocumentByPericopiesTranslateMutationHookResult = ReturnType<typeof useDocumentByPericopiesTranslateMutation>;
+export type DocumentByPericopiesTranslateMutationResult = Apollo.MutationResult<DocumentByPericopiesTranslateMutation>;
+export type DocumentByPericopiesTranslateMutationOptions = Apollo.BaseMutationOptions<DocumentByPericopiesTranslateMutation, DocumentByPericopiesTranslateMutationVariables>;
 export const EmailResponseDocument = gql`
     mutation EmailResponse($token: String!) {
   emailResponseResolver(input: {token: $token}) {
@@ -11992,6 +12053,7 @@ export const namedOperations = {
     DocumentUpload: 'DocumentUpload',
     UpsertWordRange: 'UpsertWordRange',
     BotTranslateDocument: 'BotTranslateDocument',
+    DocumentByPericopiesTranslate: 'DocumentByPericopiesTranslate',
     EmailResponse: 'EmailResponse',
     UploadFile: 'UploadFile',
     ToggleFlagWithRef: 'ToggleFlagWithRef',

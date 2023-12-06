@@ -32,8 +32,11 @@ import {
   WordRangesOutput,
   WordRangeInput,
   WordRangesListConnection,
+  TranslateDocumentByPericopiesInput,
+  FileUrlOutput,
 } from './types';
 import { LanguageInput } from '../common/types';
+import { DocumentTranslateService } from './document-translation.service';
 
 @Injectable()
 @Resolver()
@@ -44,6 +47,7 @@ export class DocumentsResolver {
     private documentsSevice: DocumentsService,
     private documentWordEntriesService: DocumentWordEntriesService,
     private wordRangesService: WordRangesService,
+    private documentTranslateService: DocumentTranslateService,
   ) {}
 
   @Mutation(() => DocumentUploadOutput)
@@ -189,6 +193,17 @@ export class DocumentsResolver {
     Logger.log('upsertWordRanges: ', JSON.stringify(input, null, 2));
 
     return this.wordRangesService.upserts(input, getBearer(req) || '', null);
+  }
+
+  @Mutation(() => FileUrlOutput)
+  async documentByPericopiesTranslate(
+    @Args('input', { type: () => TranslateDocumentByPericopiesInput })
+    input: TranslateDocumentByPericopiesInput,
+  ): Promise<FileUrlOutput> {
+    return this.documentTranslateService.translateByPericopies(
+      input.documentId,
+      input.targetLang,
+    );
   }
 
   @Subscription(() => DocumentUploadOutput, {

@@ -288,6 +288,11 @@ type FileUploadUrlResponse {
   url: String!
 }
 
+type FileUrlOutput {
+  error: ErrorType!
+  fileUrl: String
+}
+
 type Flag {
   created_at: String!
   created_by: ID!
@@ -675,6 +680,7 @@ type Mutation {
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
   createTaggingOnWordRange(begin_document_word_entry_id: ID!, end_document_word_entry_id: ID!, tag_names: [String!]!): WordRangeTagWithVotesOutput!
   deletePericopie(pericope_id: ID!): PericopeDeleteOutput!
+  documentByPericopiesTranslate(input: TranslateDocumentByPericopiesInput!): FileUrlOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   forceMarkAndRetranslateOriginalMapsIds(originalMapsIds: [String!]!): GenericOutput!
@@ -1665,6 +1671,11 @@ type TranslateAllWordsAndPhrasesByBotResult {
   totalWordCount: Int!
   translatedPhraseCount: Int!
   translatedWordCount: Int!
+}
+
+input TranslateDocumentByPericopiesInput {
+  documentId: String!
+  targetLang: LanguageInput!
 }
 
 input TranslatedLanguageInfoInput {
