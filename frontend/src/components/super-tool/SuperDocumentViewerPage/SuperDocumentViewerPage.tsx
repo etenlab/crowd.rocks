@@ -128,7 +128,7 @@ export function SuperDocumentViewerPage() {
           zIndex: 10,
           width: matches ? 'calc(777px)' : 'calc(100%)',
           background: (theme) => theme.palette.background.white,
-          marginLeft: '-15px',
+          marginLeft: '-30px',
           padding: '15px',
           borderRadius: '0 0 20px 20px',
           boxShadow: '0px 5px 14px 0px rgba(128, 136, 163, 0.20)',

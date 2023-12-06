@@ -9,6 +9,7 @@ export type VoteButtonsHerizontalProps = {
   onVoteDownClick: () => void;
   upVotes: number;
   downVotes: number;
+  flex?: string;
 };
 
 export function VoteButtonsHorizontal({
@@ -16,6 +17,7 @@ export function VoteButtonsHorizontal({
   onVoteDownClick,
   upVotes,
   downVotes,
+  flex,
 }: VoteButtonsHerizontalProps) {
   const [selected, setSelected] = useState<string>('');
 
@@ -30,7 +32,7 @@ export function VoteButtonsHorizontal({
   };
 
   return (
-    <Stack direction="row" gap="16px">
+    <Stack direction="row" gap="16px" sx={{ flex: flex ? flex : '' }}>
       <UpvoteButton
         selected={selected === 'upvote'}
         upvotes={upVotes + ''}
