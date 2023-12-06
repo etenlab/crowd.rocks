@@ -14,8 +14,6 @@ export function useBestPericopeTrChangedSubscription() {
         data.data.bestPericopeTrChanged.newVoteStatus,
         data.data.bestPericopeTrChanged.newPericopeTr,
       );
-      client.cache;
-      console.log(data);
     },
   });
 }
