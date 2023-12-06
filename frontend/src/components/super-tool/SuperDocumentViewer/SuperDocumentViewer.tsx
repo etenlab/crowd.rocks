@@ -43,4 +43,5 @@ export function SuperDocumentViewer({
       />
     );
   }
+  return null;
 }

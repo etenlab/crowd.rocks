@@ -25,6 +25,7 @@ import {
   PericopeWithVotesListConnection,
   PericopeTextWithDescription,
   PericopeDeleteOutput,
+  RecomendedPericopiesChangedAtDocumentId,
 } from './types';
 
 @Injectable()
@@ -103,7 +104,28 @@ export class PericopiesResolver {
       [SubscriptionToken.pericopiesAdded]: newPericopies,
     });
 
+    if (newPericopies.pericopies[0]?.pericope_id) {
+      const documentsData =
+        await this.pericopiesService.getDocumentIdsAndLangsOfPericopeIds([
+          newPericopies.pericopies[0]?.pericope_id,
+        ]);
+      this.pubSub.publish(SubscriptionToken.recommendedPericopiesChanged, {
+        [SubscriptionToken.recommendedPericopiesChanged]: {
+          documentId: documentsData[0].documentId,
+        },
+      });
+    }
+
     return newPericopies;
+  }
+
+  @Subscription(() => RecomendedPericopiesChangedAtDocumentId, {
+    name: SubscriptionToken.recommendedPericopiesChanged,
+  })
+  async subscribeToRecommendedPericopiesChanged() {
+    return this.pubSub.asyncIterator(
+      SubscriptionToken.recommendedPericopiesChanged,
+    );
   }
 
   @Subscription(() => PericopiesOutput, {
@@ -121,6 +143,11 @@ export class PericopiesResolver {
   ): Promise<PericopeDeleteOutput> {
     Logger.log('deletePericopies: ', pericope_id);
 
+    const documentsData =
+      await this.pericopiesService.getDocumentIdsAndLangsOfPericopeIds([
+        pericope_id,
+      ]);
+
     const deletedPericope = await this.pericopiesService.delete(
       +pericope_id,
       getBearer(req) || '',
@@ -130,6 +157,14 @@ export class PericopiesResolver {
     this.pubSub.publish(SubscriptionToken.pericopeDeleted, {
       [SubscriptionToken.pericopeDeleted]: deletedPericope,
     });
+
+    if (documentsData[0].documentId) {
+      this.pubSub.publish(SubscriptionToken.recommendedPericopiesChanged, {
+        [SubscriptionToken.recommendedPericopiesChanged]: {
+          documentId: documentsData[0].documentId,
+        },
+      });
+    }
 
     return deletedPericope;
   }
