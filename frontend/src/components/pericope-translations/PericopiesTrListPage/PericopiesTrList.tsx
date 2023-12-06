@@ -55,6 +55,7 @@ export function PericopiesTrList({
           : null,
       first: PAGE_SIZE,
     },
+    fetchPolicy: 'network-only',
   });
 
   useSubscribeToRecomendedPericopiesChangedSubscription();
