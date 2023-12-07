@@ -29,7 +29,9 @@ export function PericopeTrItem({
   const {
     states: {
       global: {
-        langauges: { targetLang },
+        langauges: {
+          documentPage: { target: targetLang },
+        },
       },
     },
   } = useAppContext();

@@ -291,7 +291,16 @@ export function ToolBox({
               >
                 {tr('Source')}:
               </Typography>
-              <Tag label={langInfo2String(target || undefined)} color="blue" />
+              <Tag
+                label={langInfo2String(
+                  subTags2LangInfo({
+                    lang: document.language_code,
+                    dialect: document.dialect_code || undefined,
+                    region: document.geo_code || undefined,
+                  }),
+                )}
+                color="blue"
+              />
             </Stack>
             <Divider orientation="vertical" />
             <Stack
@@ -308,13 +317,7 @@ export function ToolBox({
                 {tr('Target')}:
               </Typography>
               <Tag
-                label={langInfo2String(
-                  subTags2LangInfo({
-                    lang: document.language_code,
-                    dialect: document.dialect_code || undefined,
-                    region: document.geo_code || undefined,
-                  }),
-                )}
+                label={langInfo2String(target || undefined)}
                 color="orange"
               />
             </Stack>
