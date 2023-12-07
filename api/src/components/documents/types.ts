@@ -141,4 +141,5 @@ export class TranslateDocumentByPericopiesInput {
 @ObjectType()
 export class FileUrlOutput extends GenericOutput {
   @Field(() => String, { nullable: true }) fileUrl: string | null;
+  @Field(() => String, { nullable: true }) fileName: string | null;
 }

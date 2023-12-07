@@ -30,10 +30,11 @@ export class DocumentTranslateService {
     const document = await this.documentsService.getDocument(
       Number(documentId),
     );
-    if (document.error || !document.document?.file_name) {
+    if (document.error !== ErrorType.NoError || !document.document?.file_name) {
       return {
         error: ErrorType.DocumentNotFound,
         fileUrl: null,
+        fileName: null,
       };
     }
     const start_word = await this.pericopiesService.getFirstWordOfDocument(
@@ -59,7 +60,9 @@ export class DocumentTranslateService {
       pericopeTranslationsPromises,
     );
     const fileContentStream = Readable.from([
-      pericopiesTranslations.join(WORDS_JOINER),
+      pericopiesTranslations
+        .map((pt) => pt?.translation || '')
+        .join(WORDS_JOINER),
     ]);
     const newFileName = putLangCodesToFileName(
       document.document.file_name,
@@ -72,6 +75,6 @@ export class DocumentTranslateService {
       newFileName,
       DEFAULT_TEXTY_FILE_MIME_TYPE,
     );
-    return { error: ErrorType.NoError, fileUrl };
+    return { error: ErrorType.NoError, fileUrl, fileName: newFileName };
   }
 }

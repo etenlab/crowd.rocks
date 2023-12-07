@@ -190,7 +190,10 @@ export class DocumentsResolver {
     input: WordRangeInput[],
     @Context() req: any,
   ): Promise<WordRangesOutput> {
-    Logger.log('upsertWordRanges: ', JSON.stringify(input, null, 2));
+    Logger.log(
+      'DocumentsResolver#upsertWordRanges: ',
+      JSON.stringify(input, null, 2),
+    );
 
     return this.wordRangesService.upserts(input, getBearer(req) || '', null);
   }
@@ -200,6 +203,10 @@ export class DocumentsResolver {
     @Args('input', { type: () => TranslateDocumentByPericopiesInput })
     input: TranslateDocumentByPericopiesInput,
   ): Promise<FileUrlOutput> {
+    Logger.log(
+      'DocumentsResolver#documentByPericopiesTranslate: ',
+      JSON.stringify(input, null, 2),
+    );
     return this.documentTranslateService.translateByPericopies(
       input.documentId,
       input.targetLang,

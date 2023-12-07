@@ -15,33 +15,38 @@ import {
 } from '../../../generated/graphql';
 
 import { LangSelector } from '../../common/LangSelector/LangSelector';
-import { useCallback, useEffect, useState } from 'react';
-import { LanguageInfo, langInfo2langInput } from '../../../../../utils';
+import { useCallback } from 'react';
+import { langInfo2langInput } from '../../../../../utils';
 import { NavArrowRight } from '../../common/icons/NavArrowRight';
 import { useIonToast } from '@ionic/react';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 type DocumentPericopiesTranslateModalProps = {
   onClose(): void;
   document: TextyDocument;
+  doShowLangSelector?: boolean;
 };
 
 export function DocumentPericopiesTranslateModal({
   onClose,
   document,
+  doShowLangSelector = true,
 }: DocumentPericopiesTranslateModalProps) {
   const { tr } = useTr();
+  const {
+    states: {
+      global: {
+        langauges: {
+          documentPage: { target: targetLang },
+        },
+      },
+    },
+    actions: { changeDocumentTargetLanguage },
+  } = useAppContext();
   const [present] = useIonToast();
-
-  const [enabledTags, setEnabledTags] = useState<string[]>();
 
   const [documentByPericopiesTranslate, { loading, data }] =
     useDocumentByPericopiesTranslateMutation();
-
-  const [targetLang, setTargetLanguage] = useState<LanguageInfo | null>(null);
-
-  useEffect(() => {
-    setEnabledTags(['uk']); //todo
-  }, []);
 
   const translateFn = useCallback(() => {
     if (!targetLang) {
@@ -71,17 +76,16 @@ export function DocumentPericopiesTranslateModal({
   let content = tr('Click the button below to download translation.');
   let bottomCom = (
     <Stack gap="16px">
-      {
+      {doShowLangSelector && (
         <LangSelector
           title={tr('Select target language')}
           selected={targetLang}
-          onChange={(_sourceLangTag, sourceLangInfo) => {
-            setTargetLanguage(sourceLangInfo);
+          onChange={(_langTag, lang) => {
+            changeDocumentTargetLanguage(lang);
           }}
-          enabledTags={enabledTags}
-          onClearClick={() => setTargetLanguage(null)}
+          onClearClick={() => changeDocumentTargetLanguage(null)}
         />
-      }
+      )}
       {targetLang && (
         <Button
           variant="contained"
@@ -116,18 +120,20 @@ export function DocumentPericopiesTranslateModal({
 
   if (data && data.documentByPericopiesTranslate.fileUrl) {
     title = tr('Great news!');
-    content = tr('The document translated successfully!');
+    content = tr('Click the link below to download translated file.');
     bottomCom = (
       <Stack gap="16px">
-        <a href={data.documentByPericopiesTranslate.fileUrl}>file</a>
-        {/* <Button
+        <a href={data.documentByPericopiesTranslate.fileUrl}>
+          {data.documentByPericopiesTranslate.fileName}
+        </a>
+        <Button
           variant="contained"
           color="blue"
           onClick={onClose}
           startIcon={<Check sx={{ fontSize: 24 }} />}
         >
-          {tr('Go to Documents')}
-        </Button> */}
+          {tr('Close')}
+        </Button>
       </Stack>
     );
   }
@@ -145,7 +151,7 @@ export function DocumentPericopiesTranslateModal({
           onClick={onClose}
           startIcon={<Check sx={{ fontSize: 24 }} />}
         >
-          {tr('Go to Documents')}
+          {tr('Close')}
         </Button>
       </Stack>
     );

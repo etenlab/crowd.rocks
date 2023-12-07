@@ -321,6 +321,7 @@ export type FileUploadUrlResponse = {
 export type FileUrlOutput = {
   __typename?: 'FileUrlOutput';
   error: ErrorType;
+  fileName?: Maybe<Scalars['String']['output']>;
   fileUrl?: Maybe<Scalars['String']['output']>;
 };
 
@@ -3585,7 +3586,7 @@ export type DocumentByPericopiesTranslateMutationVariables = Exact<{
 }>;
 
 
-export type DocumentByPericopiesTranslateMutation = { __typename?: 'Mutation', documentByPericopiesTranslate: { __typename?: 'FileUrlOutput', fileUrl?: string | null } };
+export type DocumentByPericopiesTranslateMutation = { __typename?: 'Mutation', documentByPericopiesTranslate: { __typename?: 'FileUrlOutput', fileUrl?: string | null, fileName?: string | null } };
 
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -6815,6 +6816,7 @@ export const DocumentByPericopiesTranslateDocument = gql`
     input: {documentId: $documentId, targetLang: $targetLang}
   ) {
     fileUrl
+    fileName
   }
 }
     `;

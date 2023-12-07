@@ -69,9 +69,7 @@ export function PericopeTrItem({
     [addPericopeTr, pericopeId, present, targetLang, tr],
   );
 
-  const handleCancel = () => {
-    console.log('handleCancel');
-  };
+  const handleCancel = () => {};
 
   return (
     <TranslatedTextItem

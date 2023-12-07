@@ -290,6 +290,7 @@ type FileUploadUrlResponse {
 
 type FileUrlOutput {
   error: ErrorType!
+  fileName: String
   fileUrl: String
 }
 
