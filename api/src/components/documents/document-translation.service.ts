@@ -13,6 +13,7 @@ import { putLangCodesToFileName } from '../../common/utility';
 import { ErrorType } from '../../common/types';
 
 const DEFAULT_TEXTY_FILE_MIME_TYPE = 'text/plain';
+const TEXT_IF_NO_TRANSLATION_NO_ORIGINAL = '_error_';
 
 @Injectable()
 export class DocumentTranslateService {
@@ -56,14 +57,27 @@ export class DocumentTranslateService {
     const pericopeTranslationsPromises = pericopeIds.map((pId) =>
       this.pericopeTrService.getRecomendedPericopeTranslation(pId, targetLang),
     );
+    const pericopiesOriginalsPromises = pericopeIds.map((pid) =>
+      this.pericopiesService.getPericopeTextWithDescription(pid),
+    );
+
     const pericopiesTranslations = await Promise.all(
       pericopeTranslationsPromises,
     );
-    const fileContentStream = Readable.from([
-      pericopiesTranslations
-        .map((pt) => pt?.translation || '')
-        .join(WORDS_JOINER),
-    ]);
+    const pericopiesOriginals = await Promise.all(pericopiesOriginalsPromises);
+    const finalStrings = pericopeIds.map((pId) => {
+      const tr = pericopiesTranslations.find(
+        (pt) => pt?.pericope_id === pId,
+      )?.translation;
+      return (
+        tr ||
+        pericopiesOriginals.find((po) => po.pericope_id === pId)
+          ?.pericope_text ||
+        TEXT_IF_NO_TRANSLATION_NO_ORIGINAL
+      );
+    });
+
+    const fileContentStream = Readable.from([finalStrings.join(WORDS_JOINER)]);
     const newFileName = putLangCodesToFileName(
       document.document.file_name,
       targetLang,

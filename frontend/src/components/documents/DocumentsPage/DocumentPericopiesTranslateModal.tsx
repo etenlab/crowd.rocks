@@ -73,7 +73,9 @@ export function DocumentPericopiesTranslateModal({
   ]);
 
   let title = tr('Translate using pericopies translations');
-  let content = tr('Click the button below to download translation.');
+  let content = tr(
+    'Click the button below to compose file from translated pericopies.',
+  );
   let bottomCom = (
     <Stack gap="16px">
       {doShowLangSelector && (
@@ -96,7 +98,7 @@ export function DocumentPericopiesTranslateModal({
             translateFn();
           }}
         >
-          {tr('Download translation')}
+          {tr('Start')}
         </Button>
       )}
       <Button variant="contained" color="gray_stroke" onClick={onClose}>
@@ -106,8 +108,8 @@ export function DocumentPericopiesTranslateModal({
   );
 
   if (loading) {
-    title = tr('Translating document');
-    content = tr('Started document translating ... ');
+    title = tr('Composing document');
+    content = tr('Started document composition ... ');
     bottomCom = (
       <Stack gap="16px">
         <LinearProgress color="orange" />
@@ -119,7 +121,7 @@ export function DocumentPericopiesTranslateModal({
   }
 
   if (data && data.documentByPericopiesTranslate.fileUrl) {
-    title = tr('Great news!');
+    title = tr('Great news, translated file composed!');
     content = tr('Click the link below to download translated file.');
     bottomCom = (
       <Stack gap="16px">
