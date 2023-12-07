@@ -42,6 +42,12 @@ class HomePage extends BasePage {
       .filter({ hasText: 'Documents' })
       .click();
   }
+  async clickOnThePericopeToolSection() {
+    await this.page
+      .locator('ion-card-header')
+      .filter({ hasText: 'Pericope Tool' })
+      .click();
+  }
 }
 
 export default HomePage;
