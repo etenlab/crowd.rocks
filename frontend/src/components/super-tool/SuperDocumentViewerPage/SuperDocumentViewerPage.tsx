@@ -1,13 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useParams } from 'react-router';
 import { useIonViewDidEnter, useIonViewDidLeave } from '@ionic/react';
-import {
-  Box,
-  CircularProgress,
-  useMediaQuery,
-  Collapse,
-  IconButton,
-} from '@mui/material';
+import { Box, CircularProgress, Collapse, Button } from '@mui/material';
 
 import { globals } from '../../../services/globals';
 import { PageLayout } from '../../common/PageLayout';
@@ -33,8 +27,6 @@ export function SuperDocumentViewerPage() {
       components: { ionContentScrollElement },
     },
   } = useAppContext();
-
-  const matches = useMediaQuery('(min-width:765px)');
 
   const [pageStatus, setPageStatus] = useState<'shown' | 'hidden' | null>(null);
   const [expand, setExpand] = useState(true);
@@ -123,36 +115,15 @@ export function SuperDocumentViewerPage() {
         sx={{
           position: 'fixed',
           top: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
           zIndex: 10,
-          width: matches ? 'calc(777px)' : 'calc(100%)',
+          width: '100%',
+          maxWidth: '777px',
           background: (theme) => theme.palette.background.white,
-          marginLeft: '-30px',
-          padding: '15px',
+          padding: expand ? '30px 20px' : '15px 20px',
           borderRadius: '0 0 20px 20px',
           boxShadow: '0px 5px 14px 0px rgba(128, 136, 163, 0.20)',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            bottom: -20,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            borderStyle: 'solid',
-            borderWidth: '20px 30px 0 30px',
-            borderColor: (theme) =>
-              `${theme.palette.background.white} transparent transparent transparent`,
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: -21,
-            left: '50%',
-            zIndex: -1,
-            transform: 'translateX(-50%)',
-            borderStyle: 'solid',
-            borderWidth: '21px 31px 0 31px',
-            borderColor: (theme) =>
-              `${theme.palette.background.gray_stroke} transparent transparent transparent`,
-          },
         }}
       >
         <Collapse in={expand}>
@@ -174,29 +145,38 @@ export function SuperDocumentViewerPage() {
           />
         </Collapse>
         {expand ? (
-          <IconButton
+          <Button
+            variant="contained"
             onClick={handleClose}
             sx={{
               position: 'absolute',
               bottom: -20,
               left: '50%',
+              borderRadius: '50%',
+              minWidth: 0,
               transform: 'translateX(-50%)',
             }}
+            color="blue"
           >
             <NavArrowUp />
-          </IconButton>
+          </Button>
         ) : (
-          <IconButton
+          <Button
+            variant="contained"
             onClick={handleExpand}
             sx={{
               position: 'absolute',
               bottom: -20,
               left: '50%',
+              borderRadius: '50%',
+
+              minWidth: 0,
               transform: 'translateX(-50%)',
             }}
+            color="blue"
           >
             <NavArrowDown />
-          </IconButton>
+          </Button>
         )}
       </Box>
 
