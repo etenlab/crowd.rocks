@@ -11,6 +11,9 @@ import { DocumentWordEntriesService } from './document-word-entries.service';
 import { WordRangesService } from './word-ranges.service';
 import { AuthorizationModule } from '../authorization/authorization.module';
 import { AuthorizationService } from '../authorization/authorization.service';
+import { DocumentTranslateService } from './document-translation.service';
+import { PericopeTrModule } from '../pericope-translations/pericope-tr.module';
+import { PericopiesModule } from '../pericopies/pericopies.module';
 
 @Module({
   imports: [
@@ -18,6 +21,9 @@ import { AuthorizationService } from '../authorization/authorization.service';
     forwardRef(() => AuthenticationModule),
     forwardRef(() => WordsModule),
     forwardRef(() => AuthorizationModule),
+    forwardRef(() => PericopeTrModule),
+    forwardRef(() => PericopiesModule),
+    forwardRef(() => DocumentsModule),
     FileModule,
   ],
   providers: [
@@ -26,6 +32,7 @@ import { AuthorizationService } from '../authorization/authorization.service';
     WordRangesService,
     DocumentsResolver,
     AuthorizationService,
+    DocumentTranslateService,
   ],
   exports: [DocumentsService, DocumentWordEntriesService, WordRangesService],
 })

@@ -19,6 +19,9 @@ import { TextyDocument } from '../../../generated/graphql';
 
 import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
+import { IonIcon } from '@ionic/react';
+import { languageOutline } from 'ionicons/icons';
+import { DocumentPericopiesTranslateModal } from '../../documents/DocumentsPage/DocumentPericopiesTranslateModal';
 
 export enum TabKind {
   Document = 'document',
@@ -75,8 +78,11 @@ export function ToolBox({
         },
       },
     },
+    actions: { createModal },
   } = useAppContext();
   const [showStringSearch, setShowStringSearch] = useState(false);
+
+  const { openModal, closeModal } = createModal();
 
   const tabs = useMemo(
     () => [
@@ -154,6 +160,15 @@ export function ToolBox({
     downloadFromUrl(document.file_name, document.file_url);
   };
 
+  const handlePericopiesTranslate = () => {
+    openModal(
+      <DocumentPericopiesTranslateModal
+        onClose={closeModal}
+        document={document}
+      />,
+    );
+  };
+
   const handleToggleSearchInput = () => {
     setShowStringSearch((_value) => !_value);
   };
@@ -170,6 +185,20 @@ export function ToolBox({
           onClick={handleDownloadFile}
         >
           {tr('Download')}
+        </Button>
+      ),
+    },
+    {
+      key: 'pericopiesTranslateButton',
+      component: (
+        <Button
+          variant="text"
+          startIcon={<IonIcon icon={languageOutline}></IonIcon>}
+          color="dark"
+          sx={{ padding: 0, justifyContent: 'flex-start' }}
+          onClick={handlePericopiesTranslate}
+        >
+          {tr('Translate using pericopies')}
         </Button>
       ),
     },
@@ -291,7 +320,16 @@ export function ToolBox({
               >
                 {tr('Source')}:
               </Typography>
-              <Tag label={langInfo2String(target || undefined)} color="blue" />
+              <Tag
+                label={langInfo2String(
+                  subTags2LangInfo({
+                    lang: document.language_code,
+                    dialect: document.dialect_code || undefined,
+                    region: document.geo_code || undefined,
+                  }),
+                )}
+                color="blue"
+              />
             </Stack>
             <Divider orientation="vertical" />
             <Stack
@@ -308,13 +346,7 @@ export function ToolBox({
                 {tr('Target')}:
               </Typography>
               <Tag
-                label={langInfo2String(
-                  subTags2LangInfo({
-                    lang: document.language_code,
-                    dialect: document.dialect_code || undefined,
-                    region: document.geo_code || undefined,
-                  }),
-                )}
+                label={langInfo2String(target || undefined)}
                 color="orange"
               />
             </Stack>
