@@ -49,7 +49,14 @@ export const useCacheBuster = () => {
 
   useEffect(() => {
     fetch('/meta.json')
-      .then((response) => response.json())
+      .then((response) => {
+        try {
+          return response.json();
+        } catch (error) {
+          console.error(error);
+          return { version: '' };
+        }
+      })
       .then((meta) => {
         const latestVersion = meta.version;
         const currentVersion = appVersion;
