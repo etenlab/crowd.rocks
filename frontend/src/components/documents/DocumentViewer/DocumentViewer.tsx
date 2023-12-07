@@ -415,7 +415,7 @@ export function DocumentViewer({
 
         const wordWidth = context.measureText(wordlikeString).width + padding;
 
-        if (tempRow.width + wordWidth < rowWidth - 20) {
+        if (tempRow.width + wordWidth < rowWidth - 35) {
           tempRow.cols.push({
             wordEntry: entry,
             order: wordCounter,
@@ -443,7 +443,7 @@ export function DocumentViewer({
                   col.order,
                   `0 ${
                     3 +
-                    (rowWidth - tempRow.width - 25) / tempRow.cols.length / 2
+                    (rowWidth - tempRow.width - 35) / tempRow.cols.length / 2
                   }px`,
                 );
 

@@ -56,6 +56,7 @@ export type DocumentViewerV2Props = {
     begin: string;
     end: string;
   }[];
+  selectedPericopeDot?: string;
   dots: {
     entryId: string;
     component?: ReactNode;
@@ -76,6 +77,7 @@ export function DocumentViewerV2({
   documentId,
   range,
   drawRanges,
+  selectedPericopeDot,
   dots,
   onClickWord,
   onChangeRange,
@@ -435,6 +437,7 @@ export function DocumentViewerV2({
     const drawRangeEndMap = new Map<string, { begin: string; end: string }[]>();
 
     let begins: { begin: string; end: string }[] = [];
+    let beginPericopeDot = false;
 
     drawRanges.forEach((item) => {
       const beginArr = drawRangeBeginMap.get(item.begin);
@@ -494,11 +497,25 @@ export function DocumentViewerV2({
       }
 
       const dot = dotsMap.get(entry.id) || null;
+
+      if (
+        selectedPericopeDot &&
+        beginPericopeDot &&
+        dot &&
+        dot.entryId !== selectedPericopeDot
+      ) {
+        beginPericopeDot = false;
+      }
+
+      if (dot && selectedPericopeDot && dot.entryId === selectedPericopeDot) {
+        beginPericopeDot = true;
+      }
+
       const isDot = dot ? true : false;
       const dotCom = dot ? dot.component : null;
 
       let classStr = `edit `;
-      classStr += begins.length > 0 ? 'selected' : '';
+      classStr += begins.length > 0 || beginPericopeDot ? 'selected' : '';
       classStr += ` ${
         entry.id === range?.begin.entryId ? 'left-boundary' : ''
       }`;
@@ -709,6 +726,7 @@ export function DocumentViewerV2({
     range,
     rememberedPage,
     rowWidth,
+    selectedPericopeDot,
     startTimer,
   ]);
 
