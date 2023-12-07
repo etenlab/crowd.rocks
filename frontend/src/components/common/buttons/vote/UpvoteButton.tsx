@@ -6,6 +6,7 @@ export type UpvoteButtonProps = {
   onClick(): void;
   upvotes: string;
   selected?: boolean;
+  flex?: string;
 };
 
 export function UpvoteButton({

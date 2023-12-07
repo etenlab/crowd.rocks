@@ -21,10 +21,10 @@ export const Word = styled('div')(({ theme }) => ({
     letterSpacing: '-0.5px',
   },
   '&.left-boundary': {
-    borderRadius: '5px',
+    borderLeft: `1px solid ${theme.palette.background.blue}`,
   },
   '&.right-boundary': {
-    borderRadius: '0 5px 5px 0',
+    borderRight: `1px solid ${theme.palette.background.blue}`,
   },
 }));
 
