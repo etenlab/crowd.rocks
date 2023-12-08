@@ -121,8 +121,9 @@ export function TagAddingModal({
 
     createTaggingOnWordRange({
       variables: {
-        begin_document_word_entry_id,
-        end_document_word_entry_id,
+        word_ranges: [
+          { begin_document_word_entry_id, end_document_word_entry_id },
+        ],
         tag_names: tagNameItems.map((item) => item.value),
       },
     });
