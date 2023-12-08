@@ -1265,6 +1265,7 @@ type Query {
   getWordRangeTagVoteStatus(word_range_tag_id: ID!): WordRangeTagVoteStatusOutput!
   getWordRangeTagsByBeginWordEntryId(begin_document_word_entry_id: ID!): WordRangeTagWithVotesOutput!
   getWordRangeTagsByDocumentId(after: ID, document_id: ID!, first: Int): WordRangeTagsListConnection!
+  getWordRangeTagsByWordRangeIds(word_range_ids: [ID!]!): WordRangeTagWithVotesOutput!
   getWordRangesByBeginIds(ids: [ID!]!): WordRangesOutput!
   getWordRangesByDocumentId(after: ID, document_id: ID!, first: Int): WordRangesListConnection!
   getWordToPhraseTrVoteStatus(word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!

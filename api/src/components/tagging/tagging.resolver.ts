@@ -55,6 +55,22 @@ export class TaggingsResolver {
   }
 
   @Query(() => WordRangeTagWithVotesOutput)
+  async getWordRangeTagsByWordRangeIds(
+    @Args('word_range_ids', { type: () => [ID!]! })
+    word_range_ids: string[],
+  ): Promise<WordRangeTagWithVotesOutput> {
+    Logger.log(
+      'getWordRangeTagsByWordRangeIds',
+      JSON.stringify({ word_range_ids }, null, 2),
+    );
+
+    return this.wordRangeTagsService.getWordRangeTagsByWordRangeIds(
+      word_range_ids.map((item) => +item),
+      null,
+    );
+  }
+
+  @Query(() => WordRangeTagWithVotesOutput)
   async getWordRangeTagsByBeginWordEntryId(
     @Args('begin_document_word_entry_id', { type: () => ID })
     begin_document_word_entry_id: string,

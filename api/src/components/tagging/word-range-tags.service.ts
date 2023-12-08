@@ -259,8 +259,7 @@ export class WordRangeTagsService {
 
       if (
         wordRangeError !== ErrorType.NoError ||
-        word_ranges.length === 0 ||
-        word_ranges.map((wordRange) => !wordRange).length > 0
+        word_ranges.map((wordRange) => !wordRange).length === 0
       ) {
         return {
           error: wordRangeError,
