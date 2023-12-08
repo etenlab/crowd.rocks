@@ -83,6 +83,12 @@ class PericopeToolPage extends BasePage {
   async getTheDislikeCount() {
     return await this.page.locator(likeDislikeButton).last().textContent();
   }
+  async isDocumentNameIsDisplayed() {
+    return await this.page
+      .locator("//div[@class = 'section']//h4")
+      .first()
+      .textContent();
+  }
 }
 
 export default PericopeToolPage;

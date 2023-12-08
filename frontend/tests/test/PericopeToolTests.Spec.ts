@@ -6,7 +6,6 @@ import DocumentsPage from '../pages/Community/DocumentsPage';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import { language, settings } from '../enums/Enums';
-//import SettingsPage from '../pages/SettingsPage';
 import CommonPage from '../pages/Community/CommonPage';
 import constants from '../constants/DocumentConstants';
 import { writeFileSync } from 'fs';
@@ -77,7 +76,7 @@ async function turnOnBetaTools(page: Page) {
 async function loginWithNewUser(page: Page) {
   const registerPage = new RegistrationPage(page);
   const loginPage = new LoginPage(page);
-  const newUserData = RegisterData.validRegisterData();
+  const newUserData = RegisterData.newUserData();
   //Navigate to the URL
   await page.goto(PageUrls.RegisterPage);
 
@@ -140,9 +139,11 @@ test('Verify that user can add a pericope tools in document successfully', async
   await documentsPage.searchDocuments(documentName.toLocaleLowerCase());
   await documentsPage.clickOnDocument(documentName);
 
+  //verify that document name is displayed in details page
+  expect(await pericopeToolPage.isDocumentNameIsDisplayed()).toBeTruthy();
+
   //Click on edit mode in pericope tool page
   await pericopeToolPage.clickOnEditMode();
-
   await pericopeToolPage.clickOnRandomTextForAddPericopeTool();
 
   await pericopeToolPage.clickOnAddPericopeTool();
@@ -351,4 +352,55 @@ test('Verify that user is not able to add pericope in the document which is crea
   await documentsPage.clickOnDocument(documentName);
 
   expect(await pericopeToolPage.isEditModeButtonDisabled()).toBeTruthy();
+});
+
+test('Verify that user is able to add like/dislike to the pericode in the document which is created by different user', async ({
+  page,
+}) => {
+  const loginPage = new LoginPage(page);
+  const pericopeToolPage = new PericopeToolPage(page);
+  const documentsPage = new DocumentsPage(page);
+  const homePage = new HomePage(page);
+
+  //Login with valid credentials and turn on the beta tools
+  await page.goto(PageUrls.LoginPage);
+  await loginPage.loginToApp(registerData);
+  await turnOnBetaTools(page);
+
+  //Navigate to documents page and select language
+  await homePage.clickOnThePericopeToolSection();
+  expect(await pericopeToolPage.isPageTitleVisible()).toBeTruthy();
+  await pericopeToolPage.clickOnSelectYourLanguageDropdown();
+  await pericopeToolPage.selectLanguage(language.English);
+
+  //Search the document name and click on that document
+  await documentsPage.searchDocuments(documentName.toLocaleLowerCase());
+  await documentsPage.clickOnDocument(documentName);
+
+  //Click on edit mode in pericope tool page
+  await pericopeToolPage.clickOnEditMode();
+  await pericopeToolPage.clickOnRandomTextForAddPericopeTool();
+  await pericopeToolPage.clickOnAddPericopeTool();
+  await pericopeToolPage.clickOnEditMode();
+
+  //add like
+  await pericopeToolPage.clickOnRandomTextForAddPericopeTool();
+  await pericopeToolPage.clickOnLikeButton();
+  expect(await pericopeToolPage.getTheLikeCount()).toEqual('1');
+
+  await loginWithNewUser(page);
+
+  //Navigate to documents page and select language
+  await homePage.clickOnThePericopeToolSection();
+
+  //Search the document name and click on that document
+  await documentsPage.searchDocuments(documentName.toLocaleLowerCase());
+  await documentsPage.clickOnDocument(documentName);
+
+  await pericopeToolPage.clickOnRandomTextForAddPericopeTool();
+  expect(await pericopeToolPage.getTheLikeCount()).toEqual('1');
+
+  //add like
+  await pericopeToolPage.clickOnLikeButton();
+  expect(await pericopeToolPage.getTheLikeCount()).toEqual('2');
 });

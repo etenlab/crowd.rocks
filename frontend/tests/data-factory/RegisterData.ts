@@ -9,7 +9,14 @@ class RegisterData {
     registerData.password = 'automation@123';
     return registerData;
   }
-
+  newUserData() {
+    const registerData = RegisterDto;
+    const x = Math.random() * 100;
+    registerData.email = 'AutomationUser' + x + '@mailinator.com';
+    registerData.username = 'Automation New User';
+    registerData.password = 'automation@123';
+    return registerData;
+  }
   registerDataWithoutEmail() {
     const registerData = RegisterDto;
     registerData.email = '';
