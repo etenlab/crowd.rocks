@@ -9,7 +9,7 @@ import { TextCard } from '../../common/TextCard';
 import { useCallback, useEffect } from 'react';
 import { useIonToast } from '@ionic/react';
 import { useTogglePericopeTrVoteStatusMutation } from '../../../hooks/useTogglePericopeTrVoteStatusMutation';
-import { useBestPericopeTrChangedSubscription } from '../../../hooks/useSubscribeToRecomendedPericopies';
+import { useBestPericopeTrChangedSubscription } from '../../../hooks/useBestPericopeTrChangedSubscription';
 
 export type PericopeTranslationListProps = {
   translations: PericopeTranslationWithVotes[];

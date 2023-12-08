@@ -60,6 +60,7 @@ export function calc_vote_weight(upvotes: number, downvotes: number): number {
 export const putLangCodesToFileName = (
   file_name: string,
   langCodes: LanguageInput,
+  customSuffix?: string,
 ): string => {
   if (!langCodes.language_code) {
     throw new Error(`language_code insn't provided!`);
@@ -75,6 +76,9 @@ export const putLangCodesToFileName = (
   }
   if (langCodes.geo_code) {
     fname += `-${langCodes.geo_code}`;
+  }
+  if (customSuffix?.length && customSuffix?.length > 0) {
+    fname += `.${customSuffix}`;
   }
   fname += '.' + suffixes.join('.');
   return fname;
