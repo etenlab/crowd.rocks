@@ -5,13 +5,14 @@ import RegisterData from '../data-factory/RegisterData';
 import DocumentsPage from '../pages/Community/DocumentsPage';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
-import { language, settings } from '../enums/Enums';
+import { language, leftMenu, settings } from '../enums/Enums';
 import CommonPage from '../pages/Community/CommonPage';
 import constants from '../constants/DocumentConstants';
 import { writeFileSync } from 'fs';
 import PericopeToolPage from '../pages/Community/PericopeToolPage';
 import SettingsPage from '../pages/SettingsPage';
 import PostPage from '../pages/Community/PostPage';
+import MenuPage from '../pages/MenuPage';
 
 const registerData = RegisterData.validRegisterData();
 const documentName = await generateUniqueFileName('txt');
@@ -73,31 +74,10 @@ async function turnOnBetaTools(page: Page) {
   await settingsPage.clickOnToggleButton(settings.BetaTools, true);
   await homePage.clickOnCrowdRocks();
 }
-async function loginWithNewUser(page: Page) {
-  const registerPage = new RegistrationPage(page);
-  const loginPage = new LoginPage(page);
-  const newUserData = RegisterData.newUserData();
-  //Navigate to the URL
-  await page.goto(PageUrls.RegisterPage);
 
-  //Verify the title of the page
-  expect(await registerPage.isRegisterPageTitleVisible()).toBeTruthy();
-
-  //Fill and submit the register form
-  await registerPage.fillRegistrationForm(newUserData);
-  await registerPage.clickOnRegisterButton();
-  await page.waitForTimeout(3000);
-
-  //Login with valid credentials and turn on the beta tools
-  await page.goto(PageUrls.LoginPage);
-  await loginPage.loginToApp(newUserData);
-}
-test('Verify that added document is displayed when user search the document in pericope tool page', async ({
-  page,
-}) => {
+async function clickOnPericopeToolAndSearchDocument(page: Page) {
   const loginPage = new LoginPage(page);
   const pericopeToolPage = new PericopeToolPage(page);
-  const documentsPage = new DocumentsPage(page);
   const homePage = new HomePage(page);
 
   //Login with valid credentials and turn on the beta tools
@@ -110,6 +90,27 @@ test('Verify that added document is displayed when user search the document in p
   expect(await pericopeToolPage.isPageTitleVisible()).toBeTruthy();
   await pericopeToolPage.clickOnSelectYourLanguageDropdown();
   await pericopeToolPage.selectLanguage(language.English);
+}
+
+async function loginWithNewUser(page: Page) {
+  const registerPage = new RegistrationPage(page);
+  const registerData = RegisterData.validRegisterData();
+  //Navigate to the URL
+  await page.goto(PageUrls.RegisterPage);
+
+  //Verify the title of the page
+  expect(await registerPage.isRegisterPageTitleVisible()).toBeTruthy();
+
+  //Fill and submit the register form
+  await registerPage.fillRegistrationForm(registerData);
+  await registerPage.clickOnRegisterButton();
+  await page.waitForTimeout(3000);
+}
+test('Verify that added document is displayed when user search the document in pericope tool page', async ({
+  page,
+}) => {
+  const documentsPage = new DocumentsPage(page);
+  await clickOnPericopeToolAndSearchDocument(page);
 
   //Search the document name and click on that document
   await documentsPage.searchDocuments(documentName.toLocaleLowerCase());
@@ -119,21 +120,9 @@ test('Verify that added document is displayed when user search the document in p
 test('Verify that user can add a pericope tools in document successfully', async ({
   page,
 }) => {
-  const loginPage = new LoginPage(page);
   const pericopeToolPage = new PericopeToolPage(page);
   const documentsPage = new DocumentsPage(page);
-  const homePage = new HomePage(page);
-
-  //Login with valid credentials and turn on the beta tools
-  await page.goto(PageUrls.LoginPage);
-  await loginPage.loginToApp(registerData);
-  await turnOnBetaTools(page);
-
-  //Navigate to documents page and select language
-  await homePage.clickOnThePericopeToolSection();
-  expect(await pericopeToolPage.isPageTitleVisible()).toBeTruthy();
-  await pericopeToolPage.clickOnSelectYourLanguageDropdown();
-  await pericopeToolPage.selectLanguage(language.English);
+  await clickOnPericopeToolAndSearchDocument(page);
 
   //Search the document name and click on that document
   await documentsPage.searchDocuments(documentName.toLocaleLowerCase());
@@ -155,21 +144,9 @@ test('Verify that user can add a pericope tools in document successfully', async
 test('Verify that user is able to add/remove like and dislike in the document text successfully', async ({
   page,
 }) => {
-  const loginPage = new LoginPage(page);
   const pericopeToolPage = new PericopeToolPage(page);
   const documentsPage = new DocumentsPage(page);
-  const homePage = new HomePage(page);
-
-  //Login with valid credentials and turn on the beta tools
-  await page.goto(PageUrls.LoginPage);
-  await loginPage.loginToApp(registerData);
-  await turnOnBetaTools(page);
-
-  //Navigate to documents page and select language
-  await homePage.clickOnThePericopeToolSection();
-  expect(await pericopeToolPage.isPageTitleVisible()).toBeTruthy();
-  await pericopeToolPage.clickOnSelectYourLanguageDropdown();
-  await pericopeToolPage.selectLanguage(language.English);
+  await clickOnPericopeToolAndSearchDocument(page);
 
   //Search the document name and click on that document
   await documentsPage.searchDocuments(documentName.toLocaleLowerCase());
@@ -214,23 +191,13 @@ test('Verify that user is able to add/remove like and dislike in the document te
 test('Verify that user is able to add posts in the added pericode successfully', async ({
   page,
 }) => {
-  const loginPage = new LoginPage(page);
   const pericopeToolPage = new PericopeToolPage(page);
   const documentsPage = new DocumentsPage(page);
-  const homePage = new HomePage(page);
+
   const postPage = new PostPage(page);
   const postTextMessage = 'Automation Post Message' + Math.random();
 
-  //Login with valid credentials and turn on the beta tools
-  await page.goto(PageUrls.LoginPage);
-  await loginPage.loginToApp(registerData);
-  await turnOnBetaTools(page);
-
-  //Navigate to documents page and select language
-  await homePage.clickOnThePericopeToolSection();
-  expect(await pericopeToolPage.isPageTitleVisible()).toBeTruthy();
-  await pericopeToolPage.clickOnSelectYourLanguageDropdown();
-  await pericopeToolPage.selectLanguage(language.English);
+  await clickOnPericopeToolAndSearchDocument(page);
 
   //Search the document name and click on that document
   await documentsPage.searchDocuments(documentName.toLocaleLowerCase());
@@ -248,21 +215,10 @@ test('Verify that user is able to add posts in the added pericode successfully',
 test('Verify that user can delete a pericope tools in document successfully', async ({
   page,
 }) => {
-  const loginPage = new LoginPage(page);
   const pericopeToolPage = new PericopeToolPage(page);
   const documentsPage = new DocumentsPage(page);
-  const homePage = new HomePage(page);
 
-  //Login with valid credentials and turn on the beta tools
-  await page.goto(PageUrls.LoginPage);
-  await loginPage.loginToApp(registerData);
-  await turnOnBetaTools(page);
-
-  //Navigate to documents page and select language
-  await homePage.clickOnThePericopeToolSection();
-  expect(await pericopeToolPage.isPageTitleVisible()).toBeTruthy();
-  await pericopeToolPage.clickOnSelectYourLanguageDropdown();
-  await pericopeToolPage.selectLanguage(language.English);
+  await clickOnPericopeToolAndSearchDocument(page);
 
   //Search the document name and click on that document
   await documentsPage.searchDocuments(documentName.toLocaleLowerCase());
@@ -280,21 +236,10 @@ test('Verify that user can delete a pericope tools in document successfully', as
 test('Verify that user is not able to add the pericope tool when edit mode is off', async ({
   page,
 }) => {
-  const loginPage = new LoginPage(page);
   const pericopeToolPage = new PericopeToolPage(page);
   const documentsPage = new DocumentsPage(page);
-  const homePage = new HomePage(page);
 
-  //Login with valid credentials and turn on the beta tools
-  await page.goto(PageUrls.LoginPage);
-  await loginPage.loginToApp(registerData);
-  await turnOnBetaTools(page);
-
-  //Navigate to documents page and select language
-  await homePage.clickOnThePericopeToolSection();
-  expect(await pericopeToolPage.isPageTitleVisible()).toBeTruthy();
-  await pericopeToolPage.clickOnSelectYourLanguageDropdown();
-  await pericopeToolPage.selectLanguage(language.English);
+  await clickOnPericopeToolAndSearchDocument(page);
 
   //Search the document name and click on that document
   await documentsPage.searchDocuments(documentName.toLocaleLowerCase());
@@ -307,21 +252,10 @@ test('Verify that user is not able to add the pericope tool when edit mode is of
 test('Verify that selected language name is displayed in pericope tool detail page', async ({
   page,
 }) => {
-  const loginPage = new LoginPage(page);
   const pericopeToolPage = new PericopeToolPage(page);
   const documentsPage = new DocumentsPage(page);
-  const homePage = new HomePage(page);
 
-  //Login with valid credentials and turn on the beta tools
-  await page.goto(PageUrls.LoginPage);
-  await loginPage.loginToApp(registerData);
-  await turnOnBetaTools(page);
-
-  //Navigate to documents page and select language
-  await homePage.clickOnThePericopeToolSection();
-  expect(await pericopeToolPage.isPageTitleVisible()).toBeTruthy();
-  await pericopeToolPage.clickOnSelectYourLanguageDropdown();
-  await pericopeToolPage.selectLanguage(language.English);
+  await clickOnPericopeToolAndSearchDocument(page);
 
   //Search the document name and click on that document
   await documentsPage.searchDocuments(documentName.toLocaleLowerCase());
@@ -338,6 +272,7 @@ test('Verify that user is not able to add pericope in the document which is crea
   const pericopeToolPage = new PericopeToolPage(page);
   const documentsPage = new DocumentsPage(page);
   const homePage = new HomePage(page);
+  const leftMenuPage = new MenuPage(page);
   await loginWithNewUser(page);
   await turnOnBetaTools(page);
 
@@ -352,6 +287,9 @@ test('Verify that user is not able to add pericope in the document which is crea
   await documentsPage.clickOnDocument(documentName);
 
   expect(await pericopeToolPage.isEditModeButtonDisabled()).toBeTruthy();
+  //logout from the app
+  await homePage.clickOnExpandMenu();
+  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Logout);
 });
 
 test('Verify that user is able to add like/dislike to the pericode in the document which is created by different user', async ({
