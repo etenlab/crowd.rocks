@@ -181,7 +181,7 @@ export function SuperDocumentViewerPage() {
       </Box>
 
       <Collapse in={expand}>
-        <Box sx={{ height: '302px' }} />{' '}
+        <Box sx={{ height: '340px' }} />
       </Collapse>
 
       {tab === TabKind.Document ? (
