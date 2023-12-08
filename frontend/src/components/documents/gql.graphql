@@ -182,3 +182,15 @@ subscription SubscribeToDocumentAdded {
     }
   }
 }
+
+mutation DocumentByPericopiesTranslate(
+  $documentId: String!
+  $targetLang: LanguageInput!
+) {
+  documentByPericopiesTranslate(
+    input: { documentId: $documentId, targetLang: $targetLang }
+  ) {
+    fileUrl
+    fileName
+  }
+}

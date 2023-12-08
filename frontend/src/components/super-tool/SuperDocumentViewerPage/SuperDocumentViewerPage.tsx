@@ -23,8 +23,7 @@ import { NavArrowDown } from '../../common/icons/NavArrowDown';
 import { NavArrowUp } from '../../common/icons/NavArrowUp';
 import { SuperDocumentViewer } from '../SuperDocumentViewer/SuperDocumentViewer';
 import { SuperPericopiesTranslator } from '../SuperPericopiesTranslator';
-import { useSubscribeToRecomendedPericopiesChangedSubscription } from '../../../hooks/useSubscribeToRecomendedPericopiesChanged';
-import { useBestPericopeTrChangedSubscription } from '../../../hooks/useSubscribeToRecomendedPericopies';
+import { useBestPericopeTrChangedSubscription } from '../../../hooks/useBestPericopeTrChangedSubscription';
 
 export function SuperDocumentViewerPage() {
   const { tr } = useTr();
@@ -65,7 +64,6 @@ export function SuperDocumentViewerPage() {
     setPageStatus('hidden');
   });
 
-  useSubscribeToRecomendedPericopiesChangedSubscription();
   useBestPericopeTrChangedSubscription();
 
   const handleToggleMode = useCallback(() => {
@@ -128,7 +126,7 @@ export function SuperDocumentViewerPage() {
           zIndex: 10,
           width: matches ? 'calc(777px)' : 'calc(100%)',
           background: (theme) => theme.palette.background.white,
-          marginLeft: '-15px',
+          marginLeft: '-30px',
           padding: '15px',
           borderRadius: '0 0 20px 20px',
           boxShadow: '0px 5px 14px 0px rgba(128, 136, 163, 0.20)',

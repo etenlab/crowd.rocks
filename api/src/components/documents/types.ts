@@ -1,6 +1,6 @@
 import { Field, ID, Int, InputType, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from '../../common/types';
-import { PageInfo } from '../common/types';
+import { LanguageInput, PageInfo } from '../common/types';
 
 import { WordlikeString } from '../words/types';
 
@@ -130,4 +130,16 @@ export class TextFromRange {
 @ObjectType()
 export class TextFromRangesOutput extends GenericOutput {
   @Field(() => [TextFromRange]) list: TextFromRange[];
+}
+
+@InputType()
+export class TranslateDocumentByPericopiesInput {
+  @Field(() => String) documentId: string;
+  @Field(() => LanguageInput) targetLang: LanguageInput;
+}
+
+@ObjectType()
+export class FileUrlOutput extends GenericOutput {
+  @Field(() => String, { nullable: true }) fileUrl: string | null;
+  @Field(() => String, { nullable: true }) fileName: string | null;
 }

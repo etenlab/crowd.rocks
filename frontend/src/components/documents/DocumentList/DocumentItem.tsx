@@ -16,6 +16,7 @@ import { languageOutline } from 'ionicons/icons';
 import { IonIcon } from '@ionic/react';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { DocumentBotTranslateModal } from '../../documents/DocumentsPage/DocumentBotTranslateModal';
+import { DocumentPericopiesTranslateModal } from '../DocumentsPage/DocumentPericopiesTranslateModal';
 
 type DocumentItemProps = {
   document: TextyDocument;
@@ -28,6 +29,7 @@ export function DocumentItem({ document, onClickItem }: DocumentItemProps) {
   } = useAppContext();
   const { tr } = useTr();
   const { openModal, closeModal } = createModal();
+  const { openModal: openModal2, closeModal: closeModal2 } = createModal();
   const langInfo = subTags2LangInfo({
     lang: document.language_code,
     dialect: document.dialect_code || undefined,
@@ -45,6 +47,15 @@ export function DocumentItem({ document, onClickItem }: DocumentItemProps) {
   const handleBotTranslate = () => {
     openModal(
       <DocumentBotTranslateModal onClose={closeModal} document={document} />,
+    );
+  };
+
+  const handlePericopiesTranslate = () => {
+    openModal2(
+      <DocumentPericopiesTranslateModal
+        onClose={closeModal2}
+        document={document}
+      />,
     );
   };
 
@@ -74,6 +85,20 @@ export function DocumentItem({ document, onClickItem }: DocumentItemProps) {
           onClick={handleBotTranslate}
         >
           {tr('Translate using bot')}
+        </Button>
+      ),
+    },
+    {
+      key: 'pericopiesTranslateButton',
+      component: (
+        <Button
+          variant="text"
+          startIcon={<IonIcon icon={languageOutline}></IonIcon>}
+          color="dark"
+          sx={{ padding: 0, justifyContent: 'flex-start' }}
+          onClick={handlePericopiesTranslate}
+        >
+          {tr('Translate using pericopies')}
         </Button>
       ),
     },

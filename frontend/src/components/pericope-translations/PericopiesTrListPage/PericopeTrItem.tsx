@@ -29,7 +29,9 @@ export function PericopeTrItem({
   const {
     states: {
       global: {
-        langauges: { targetLang },
+        langauges: {
+          documentPage: { target: targetLang },
+        },
       },
     },
   } = useAppContext();
@@ -69,9 +71,7 @@ export function PericopeTrItem({
     [addPericopeTr, pericopeId, present, targetLang, tr],
   );
 
-  const handleCancel = () => {
-    console.log('handleCancel');
-  };
+  const handleCancel = () => {};
 
   return (
     <TranslatedTextItem

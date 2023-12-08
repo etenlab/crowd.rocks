@@ -21,10 +21,12 @@ export const PericopeTrPage: React.FC<PericopeTrPageProps> = ({
   const {
     states: {
       global: {
-        langauges: { sourceLang, targetLang },
+        langauges: {
+          documentPage: { source: sourceLang, target: targetLang },
+        },
       },
     },
-    actions: { setSourceLanguage, setTargetLanguage },
+    actions: { changeDocumentSourceLanguage, changeDocumentTargetLanguage },
   } = useAppContext();
 
   const handleShowDocuments = () => {
@@ -46,17 +48,17 @@ export const PericopeTrPage: React.FC<PericopeTrPageProps> = ({
         title={tr('Select your language')}
         selected={sourceLang}
         onChange={(_langTag, langInfo) => {
-          setSourceLanguage(langInfo);
+          changeDocumentSourceLanguage(langInfo);
         }}
-        onClearClick={() => setSourceLanguage(null)}
+        onClearClick={() => changeDocumentSourceLanguage(null)}
       />
       <LangSelector
         title={tr('Select target language')}
         selected={targetLang}
         onChange={(_langTag, langInfo) => {
-          setTargetLanguage(langInfo);
+          changeDocumentTargetLanguage(langInfo);
         }}
-        onClearClick={() => setTargetLanguage(null)}
+        onClearClick={() => changeDocumentTargetLanguage(null)}
       />
       <Button
         variant="contained"

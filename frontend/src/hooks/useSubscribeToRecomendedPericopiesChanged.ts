@@ -5,11 +5,10 @@ import {
 
 export function useSubscribeToRecomendedPericopiesChangedSubscription() {
   return useGenSubscribeToRecomendedPericopiesChangedSubscription({
-    onData: ({ data, client }) => {
+    onData: ({ client }) => {
       client.refetchQueries({
         include: [GetPericopiesTrDocument],
       });
-      console.log(data);
     },
   });
 }
