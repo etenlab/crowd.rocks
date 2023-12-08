@@ -65,16 +65,11 @@ query GetWordRangeTagVoteStatus($word_range_tag_id: ID!) {
   }
 }
 
-mutation CreateTaggingOnWordRange(
-  $begin_document_word_entry_id: ID!
-  $end_document_word_entry_id: ID!
+mutation CreateTaggingOnWordRanges(
+  $word_ranges: [WordRangeInput!]!
   $tag_names: [String!]!
 ) {
-  createTaggingOnWordRange(
-    begin_document_word_entry_id: $begin_document_word_entry_id
-    end_document_word_entry_id: $end_document_word_entry_id
-    tag_names: $tag_names
-  ) {
+  createTaggingOnWordRanges(word_ranges: $word_ranges, tag_names: $tag_names) {
     error
     word_range_tags {
       ...WordRangeTagWithVoteFragment

@@ -1,6 +1,6 @@
 import { useIonToast } from '@ionic/react';
 import {
-  useCreateTaggingOnWordRangeMutation as useGeneratedCreateTaggingOnWordRangeMutation,
+  useCreateTaggingOnWordRangesMutation as useGeneratedCreateTaggingOnWordRangeMutation,
   useSubscribeToWordRangeTagWithVoteAddedSubscription as useGeneratedSubscribeToWordRangeTagWithVoteAddedSubscription,
 } from '../generated/graphql';
 
@@ -21,8 +21,8 @@ export function useCreateTaggingOnWordRangeMutation() {
       if (
         !errors &&
         data &&
-        data.createTaggingOnWordRange.word_range_tags.length > 0 &&
-        data.createTaggingOnWordRange.error === ErrorType.NoError
+        data.createTaggingOnWordRanges.word_range_tags.length > 0 &&
+        data.createTaggingOnWordRanges.error === ErrorType.NoError
       ) {
         present({
           message: `${tr('Success at creating new tags!')}`,
@@ -31,17 +31,17 @@ export function useCreateTaggingOnWordRangeMutation() {
           color: 'success',
         });
       } else {
-        console.log('useCreateTaggingOnWordRangeMutation: ', errors);
-        console.log(data?.createTaggingOnWordRange.error);
+        console.log('useCreateTaggingOnWordRangeMutations: ', errors);
+        console.log(data?.createTaggingOnWordRanges.error);
 
         present({
           message: `${tr('Failed at creating new tagging!')} [${data
-            ?.createTaggingOnWordRange.error}]`,
+            ?.createTaggingOnWordRanges.error}]`,
           duration: 1500,
           position: 'top',
           color: 'danger',
         });
-        redirectOnUnauth(data?.createTaggingOnWordRange.error);
+        redirectOnUnauth(data?.createTaggingOnWordRanges.error);
       }
     },
   });
