@@ -40,6 +40,7 @@ export enum ErrorType {
   FileRecordNotFound = 'FileRecordNotFound',
   FileSaveFailed = 'FileSaveFailed',
   FileUpdateFailed = 'FileUpdateFailed',
+  FileUploadFailed = 'FileUploadFailed',
   FileDeleteFailed = 'FileDeleteFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
   FolderIdNotDefined = 'FolderIdNotDefined',
