@@ -11,17 +11,18 @@ import { useTr } from '../../../hooks/useTr';
 import { useGetDocumentTextFromRangesLazyQuery } from '../../../generated/graphql';
 import { useCreateTaggingOnWordRangeMutation } from '../../../hooks/useCreateTaggingOnWordRangeMutation';
 
-type TagAddingModalProps = {
-  begin_document_word_entry_id: string;
-  end_document_word_entry_id: string;
+type TagAddingModalV2Props = {
+  selectedWordRanges: {
+    begin: string;
+    end: string;
+  }[];
   onClose(): void;
 };
 
-export function TagAddingModal({
-  begin_document_word_entry_id,
-  end_document_word_entry_id,
+export function TagAddingModalV2({
+  selectedWordRanges,
   onClose,
-}: TagAddingModalProps) {
+}: TagAddingModalV2Props) {
   const { tr } = useTr();
   const [tagNameItems, setTagNameItems] = useState<
     { key: string; value: string }[]
@@ -38,25 +39,19 @@ export function TagAddingModal({
   const tagNameItemKeyRef = useRef<number>(2);
 
   const [createTaggingOnWordRange] = useCreateTaggingOnWordRangeMutation();
-  const [getDocumentTextFromRange, { data: textFromRangeData }] =
+  const [getDocumentTextFromRanges, { data: textFromRangeData }] =
     useGetDocumentTextFromRangesLazyQuery();
 
   useEffect(() => {
-    getDocumentTextFromRange({
+    getDocumentTextFromRanges({
       variables: {
-        ranges: [
-          {
-            begin_document_word_entry_id: begin_document_word_entry_id,
-            end_document_word_entry_id: end_document_word_entry_id,
-          },
-        ],
+        ranges: selectedWordRanges.map((item) => ({
+          begin_document_word_entry_id: item.begin,
+          end_document_word_entry_id: item.end,
+        })),
       },
     });
-  }, [
-    begin_document_word_entry_id,
-    end_document_word_entry_id,
-    getDocumentTextFromRange,
-  ]);
+  }, [selectedWordRanges, getDocumentTextFromRanges]);
 
   const handleCancel = () => {
     onClose();
@@ -121,9 +116,10 @@ export function TagAddingModal({
 
     createTaggingOnWordRange({
       variables: {
-        word_ranges: [
-          { begin_document_word_entry_id, end_document_word_entry_id },
-        ],
+        word_ranges: selectedWordRanges.map((item) => ({
+          begin_document_word_entry_id: item.begin,
+          end_document_word_entry_id: item.end,
+        })),
         tag_names: tagNameItems.map((item) => item.value),
       },
     });
@@ -165,8 +161,9 @@ export function TagAddingModal({
     tagNameItemKeyRef.current++;
   };
 
-  const pieceOfText =
-    textFromRangeData?.getDocumentTextFromRanges.list[0].piece_of_text || '';
+  const pieceOfText = textFromRangeData?.getDocumentTextFromRanges.list
+    .map((item) => `"${item.piece_of_text}"`)
+    .join(', ');
 
   return (
     <Stack gap="18px">
