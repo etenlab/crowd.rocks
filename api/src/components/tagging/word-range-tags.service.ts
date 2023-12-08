@@ -16,6 +16,7 @@ import {
   WordRangeTagWithVote,
   WordRangeTagVoteStatus,
 } from './types';
+import { WordRangeInput } from '../documents/types';
 
 import {
   getWordRangeTagsByIds,
@@ -228,14 +229,13 @@ export class WordRangeTagsService {
     };
   }
 
-  async createTaggingOnWordRange(
-    begin_document_word_entry_id: number,
-    end_document_word_entry_id: number,
+  async createTaggingOnWordRanges(
+    word_range_inputs: WordRangeInput[],
     tag_names: string[],
     token,
     pgClient: PoolClient | null,
   ): Promise<WordRangeTagWithVotesOutput> {
-    if (tag_names.length === 0) {
+    if (word_range_inputs.length === 0) {
       return {
         error: ErrorType.NoError,
         word_range_tags: [],
@@ -252,12 +252,7 @@ export class WordRangeTagsService {
     try {
       const { error: wordRangeError, word_ranges } =
         await this.wordRangesService.upserts(
-          [
-            {
-              begin_document_word_entry_id: begin_document_word_entry_id + '',
-              end_document_word_entry_id: end_document_word_entry_id + '',
-            },
-          ],
+          word_range_inputs,
           token,
           pgClient,
         );
@@ -265,7 +260,7 @@ export class WordRangeTagsService {
       if (
         wordRangeError !== ErrorType.NoError ||
         word_ranges.length === 0 ||
-        !word_ranges[0]
+        word_ranges.map((wordRange) => !wordRange).length > 0
       ) {
         return {
           error: wordRangeError,
@@ -273,16 +268,25 @@ export class WordRangeTagsService {
         };
       }
 
-      return this.upserts(
-        [
-          ...tag_names.map((tag_name) => ({
-            word_range_id: +word_ranges[0]!.word_range_id,
+      const inputs: {
+        word_range_id: number;
+        tag_name: string;
+      }[] = [];
+
+      word_ranges.forEach((wordRange) => {
+        if (!wordRange) {
+          return;
+        }
+
+        tag_names.forEach((tag_name) =>
+          inputs.push({
+            word_range_id: +wordRange.word_range_id,
             tag_name,
-          })),
-        ],
-        token,
-        pgClient,
-      );
+          }),
+        );
+      });
+
+      return this.upserts(inputs, token, pgClient);
     } catch (e) {
       Logger.error(e);
     }

@@ -679,7 +679,7 @@ type Mutation {
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   botTranslateDocument(input: BotTranslateDocumentInput!): DocumentUploadOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
-  createTaggingOnWordRange(begin_document_word_entry_id: ID!, end_document_word_entry_id: ID!, tag_names: [String!]!): WordRangeTagWithVotesOutput!
+  createTaggingOnWordRanges(tag_names: [String!]!, word_ranges: [WordRangeInput!]!): WordRangeTagWithVotesOutput!
   deletePericopie(pericope_id: ID!): PericopeDeleteOutput!
   documentByPericopiesTranslate(input: TranslateDocumentByPericopiesInput!): FileUrlOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!

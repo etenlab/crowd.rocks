@@ -24,6 +24,8 @@ import {
   WordRangeTagWithVotesOutput,
 } from './types';
 
+import { WordRangeInput } from '../documents/types';
+
 @Injectable()
 @Resolver()
 export class TaggingsResolver {
@@ -113,25 +115,21 @@ export class TaggingsResolver {
   }
 
   @Mutation(() => WordRangeTagWithVotesOutput)
-  async createTaggingOnWordRange(
-    @Args('begin_document_word_entry_id', { type: () => ID })
-    begin_document_word_entry_id: string,
-    @Args('end_document_word_entry_id', { type: () => ID })
-    end_document_word_entry_id: string,
+  async createTaggingOnWordRanges(
+    @Args('word_ranges', { type: () => [WordRangeInput!]! })
+    word_ranges: WordRangeInput[],
     @Args('tag_names', { type: () => [String!]! })
     tag_names: string[],
     @Context() req: any,
   ): Promise<WordRangeTagWithVotesOutput> {
     Logger.log('createTaggingOnWordRange: ', {
-      begin_document_word_entry_id,
-      end_document_word_entry_id,
+      word_ranges,
       tag_names,
     });
 
     const newWordRangeTagWithVotes =
-      await this.wordRangeTagsService.createTaggingOnWordRange(
-        +begin_document_word_entry_id,
-        +end_document_word_entry_id,
+      await this.wordRangeTagsService.createTaggingOnWordRanges(
+        word_ranges,
         tag_names,
         getBearer(req) || '',
         null,
