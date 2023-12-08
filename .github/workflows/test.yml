@@ -82,9 +82,6 @@ jobs:
         with:
           compose-file: "./.github/docker/docker-compose.yml"
           down-flags: "--volumes"
-          services: |
-            postgres
-            api
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_GITHUB_S3_PUSHER_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_GITHUB_S3_PUSHER_SECRET_ACCESS_KEY }}
