@@ -24,6 +24,7 @@ import { useTr } from '../../../hooks/useTr';
 
 import { TagAddingModalV2 } from './TagAddingModalV2';
 import { TagOriginList } from './TagOriginList';
+import { TagPreviewerList } from './TagPreviewerList';
 
 import { TempPage } from '../../documents/DocumentViewer/DocumentViewer';
 
@@ -43,6 +44,7 @@ export function TaggingDocumentViewerV2({
   customScrollParent,
 }: TaggingDocumentViewerV2Props) {
   const { tr } = useTr();
+
   const {
     actions: { createModal },
   } = useAppContext();
@@ -60,6 +62,7 @@ export function TaggingDocumentViewerV2({
   const [selectedWordRanges, setSelectedWordRanges] = useState<
     { begin: string; end: string }[]
   >([]);
+  const [selectedWordEntryId, setSelectedWordEntryId] = useState<string>();
 
   const [requiredPage, setRequiredPage] = useState<TempPage | null>(null);
 
@@ -126,7 +129,7 @@ export function TaggingDocumentViewerV2({
           entryId: key,
           component: (
             <Dot
-              sx={{ backgroundColor: (theme) => theme.palette.background.red }}
+              sx={{ backgroundColor: (theme) => theme.palette.background.blue }}
             />
           ),
         });
@@ -168,6 +171,7 @@ export function TaggingDocumentViewerV2({
 
   const handleWordClick = useCallback(
     (entryId: string) => {
+      setSelectedWordEntryId(entryId);
       handleSelectRange({ begin: entryId, end: entryId });
     },
     [handleSelectRange],
@@ -222,6 +226,9 @@ export function TaggingDocumentViewerV2({
             boxShadow: '0px -5px 14px 0px rgba(128, 136, 163, 0.20)',
           }}
         >
+          <TagPreviewerList
+            begin_document_word_entry_id={selectedWordEntryId}
+          />
           <TagOriginList
             selectedWordRanges={selectedWordRanges}
             onCancel={handleCancelSelection}
