@@ -45,6 +45,15 @@ query GetWordRangeTagsByDocumentId($document_id: ID!, $after: ID, $first: Int) {
   }
 }
 
+query getWordRangeTagsByWordRangeIds($word_range_ids: [ID!]!) {
+  getWordRangeTagsByWordRangeIds(word_range_ids: $word_range_ids) {
+    error
+    word_range_tags {
+      ...WordRangeTagWithVoteFragment
+    }
+  }
+}
+
 query GetWordRangeTagsByBeginWordEntryId($begin_document_word_entry_id: ID!) {
   getWordRangeTagsByBeginWordEntryId(
     begin_document_word_entry_id: $begin_document_word_entry_id
