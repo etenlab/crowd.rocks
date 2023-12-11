@@ -79,6 +79,7 @@ export function PericopeTranslationList({
                   handleVoteClick(tr.pericope_translation_id, false);
                 },
               }}
+              isStarred={tr.isBest || undefined}
             />
           );
         })

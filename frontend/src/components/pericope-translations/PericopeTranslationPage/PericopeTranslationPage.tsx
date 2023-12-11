@@ -35,7 +35,7 @@ import { PericopeTranslationList } from './PericopeTranslationsList';
 import { PageLayout } from '../../common/PageLayout';
 import { langInfo2langInput } from '../../../../../utils';
 import { useAddPericopeTrMutation } from '../../../hooks/useAddPericopeTrMutation';
-import { PericopeTranslatedItem } from './PericopeTranslatedItem';
+import { PericopeTranslated } from './PericopeTranslated';
 
 export function PericopeTranslationPage() {
   const { pericopeId } = useParams<{ pericopeId: string }>();
@@ -56,6 +56,7 @@ export function PericopeTranslationPage() {
   const pericopeData = useGetPericopeTextAndDesctiptionQuery({
     variables: { pericopeId },
   });
+  const pericope = pericopeData.data?.getPericopeTextAndDesctiption;
 
   const translationsQ = useGetPericopeTranslationsQuery({
     variables: {
@@ -65,8 +66,6 @@ export function PericopeTranslationPage() {
         : { language_code: '' },
     },
   }).data?.getPericopeTranslations;
-
-  const pericope = pericopeData.data?.getPericopeTextAndDesctiption;
 
   const [addPericopeTr] = useAddPericopeTrMutation();
 
@@ -136,7 +135,7 @@ export function PericopeTranslationPage() {
             justifyContent="space-between"
             alignItems="center"
           >
-            <PericopeTranslatedItem pericopeTr={pericope} />
+            <Typography variant="body1">{tr('Pericope')}</Typography>
             <Stack
               direction="row"
               justifyContent="space-between"
@@ -147,6 +146,7 @@ export function PericopeTranslationPage() {
                 parent_id={pericope.pericope_id}
                 parent_table={TableNameType.Pericopies}
                 flex="1"
+                variant="contained"
               />
               <Box
                 sx={{
@@ -159,6 +159,12 @@ export function PericopeTranslationPage() {
               </Box>
             </Stack>
           </Stack>
+          <PericopeTranslated
+            pericopeText={pericope}
+            pericopeTrWithVotes={translationsQ?.translations.find(
+              (t) => t.isBest,
+            )}
+          />
 
           <Typography variant="body1" color="text.gray">
             {pericope.pericope_description_text}

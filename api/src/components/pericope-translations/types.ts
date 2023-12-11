@@ -16,10 +16,18 @@ export class PericopeTranslation {
   @Field(() => User) created_by_user: User;
   @Field(() => String) created_at: string;
 }
+
+// @ObjectType()
+// export class PericopeBestTranslationOutput extends GenericOutput {
+//   @Field(() => PericopeTranslation, { nullable: true })
+//   bestTranslation: PericopeTranslation | null;
+// }
+
 @ObjectType()
 export class PericopeTranslationWithVotes extends PericopeTranslation {
   @Field(() => Int) upvotes: number;
   @Field(() => Int) downvotes: number;
+  @Field(() => Boolean, { nullable: true }) isBest: boolean | null;
 }
 
 @ObjectType()

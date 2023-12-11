@@ -32,6 +32,7 @@ fragment PericopeTranslationWithVotesFragment on PericopeTranslationWithVotes {
   }
   upvotes
   downvotes
+  isBest
 }
 
 fragment PericopeTextWithTranslationAndDescriptionFragment on PericopeTextWithTranslationAndDescription {
@@ -100,6 +101,15 @@ query GetPericopeTextAndDesctiption($pericopeId: String!) {
     pericope_description_text
   }
 }
+
+# query GetBestPericopeTr($pericopeId: String!, $targetLang: LanguageInput!) {
+#   getBestPericopeTr(pericopeId: $pericopeId, targetLang: $targetLang) {
+#     error
+#     bestTranslation {
+#       ...PericopeTranslationFragment
+#     }
+#   }
+# }
 
 mutation AddPericopeTr(
   $pericopeId: String!

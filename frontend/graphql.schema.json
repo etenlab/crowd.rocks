@@ -1813,6 +1813,12 @@
             "deprecationReason": null
           },
           {
+            "name": "PericopeBestTranslationNotFound",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "PericopeGetTranslationError",
             "description": null,
             "isDeprecated": false,
@@ -10554,6 +10560,18 @@
                 "name": "Int",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isBest",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null

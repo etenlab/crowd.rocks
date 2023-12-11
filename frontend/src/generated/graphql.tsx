@@ -251,6 +251,7 @@ export enum ErrorType {
   PasswordInvalid = 'PasswordInvalid',
   PasswordTooLong = 'PasswordTooLong',
   PasswordTooShort = 'PasswordTooShort',
+  PericopeBestTranslationNotFound = 'PericopeBestTranslationNotFound',
   PericopeGetTranslationError = 'PericopeGetTranslationError',
   PericopeInsertFailed = 'PericopeInsertFailed',
   PericopeNotFound = 'PericopeNotFound',
@@ -1434,6 +1435,7 @@ export type PericopeTranslationWithVotes = {
   created_at: Scalars['String']['output'];
   created_by_user: User;
   downvotes: Scalars['Int']['output'];
+  isBest?: Maybe<Scalars['Boolean']['output']>;
   language: LanguageOutput;
   pericope_id: Scalars['String']['output'];
   pericope_translation_id: Scalars['ID']['output'];
@@ -3957,7 +3959,7 @@ export type LanguageOutputFragmentFragment = { __typename?: 'LanguageOutput', la
 
 export type PericopeTranslationFragmentFragment = { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
 
-export type PericopeTranslationWithVotesFragmentFragment = { __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
+export type PericopeTranslationWithVotesFragmentFragment = { __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, isBest?: boolean | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
 
 export type PericopeTextWithTranslationAndDescriptionFragmentFragment = { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id?: string | null, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null };
 
@@ -3982,7 +3984,7 @@ export type GetPericopeTranslationsQueryVariables = Exact<{
 }>;
 
 
-export type GetPericopeTranslationsQuery = { __typename?: 'Query', getPericopeTranslations: { __typename?: 'PericopeTranslationsOutput', translations: Array<{ __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
+export type GetPericopeTranslationsQuery = { __typename?: 'Query', getPericopeTranslations: { __typename?: 'PericopeTranslationsOutput', translations: Array<{ __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, isBest?: boolean | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
 export type GetPericopeTextAndDesctiptionQueryVariables = Exact<{
   pericopeId: Scalars['String']['input'];
@@ -5223,6 +5225,7 @@ export const PericopeTranslationWithVotesFragmentFragmentDoc = gql`
   }
   upvotes
   downvotes
+  isBest
 }
     ${UserFieldsFragmentDoc}
 ${LanguageOutputFragmentFragmentDoc}`;

@@ -223,6 +223,7 @@ enum ErrorType {
   PasswordInvalid
   PasswordTooLong
   PasswordTooShort
+  PericopeBestTranslationNotFound
   PericopeGetTranslationError
   PericopeInsertFailed
   PericopeNotFound
@@ -856,6 +857,7 @@ type PericopeTranslationWithVotes {
   created_at: String!
   created_by_user: User!
   downvotes: Int!
+  isBest: Boolean
   language: LanguageOutput!
   pericope_id: String!
   pericope_translation_id: ID!
