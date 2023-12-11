@@ -679,7 +679,7 @@ type Mutation {
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   botTranslateDocument(input: BotTranslateDocumentInput!): DocumentUploadOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
-  createTaggingOnWordRange(begin_document_word_entry_id: ID!, end_document_word_entry_id: ID!, tag_names: [String!]!): WordRangeTagWithVotesOutput!
+  createTaggingOnWordRanges(tag_names: [String!]!, word_ranges: [WordRangeInput!]!): WordRangeTagWithVotesOutput!
   deletePericopie(pericope_id: ID!): PericopeDeleteOutput!
   documentByPericopiesTranslate(input: TranslateDocumentByPericopiesInput!): FileUrlOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
@@ -1265,6 +1265,7 @@ type Query {
   getWordRangeTagVoteStatus(word_range_tag_id: ID!): WordRangeTagVoteStatusOutput!
   getWordRangeTagsByBeginWordEntryId(begin_document_word_entry_id: ID!): WordRangeTagWithVotesOutput!
   getWordRangeTagsByDocumentId(after: ID, document_id: ID!, first: Int): WordRangeTagsListConnection!
+  getWordRangeTagsByWordRangeIds(word_range_ids: [ID!]!): WordRangeTagWithVotesOutput!
   getWordRangesByBeginIds(ids: [ID!]!): WordRangesOutput!
   getWordRangesByDocumentId(after: ID, document_id: ID!, first: Int): WordRangesListConnection!
   getWordToPhraseTrVoteStatus(word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!

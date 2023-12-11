@@ -146,9 +146,10 @@ export function PericopeDocumentViewerV2({
       <DocumentViewerV2
         documentId={documentId}
         drawRanges={drawRanges}
+        selectedPericopeDot={selectedPericope?.start_word}
         dots={dots}
         onChangeRangeText={() => {}}
-        onChangeRange={() => {}}
+        onSelectRange={() => {}}
         onClickWord={handleWordClick}
         onLoadPage={handleLoadPage}
         customScrollParent={customScrollParent}

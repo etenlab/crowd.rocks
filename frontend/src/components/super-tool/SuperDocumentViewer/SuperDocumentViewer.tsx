@@ -2,7 +2,7 @@ import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
 
 import { SuperToolKind } from '../SuperDocumentViewerPage/ToolBox';
 import { PericopeDocumentViewerV2 } from '../../pericopies/PericopeDocumentViewer';
-import { TaggingDocumentViewer } from '../../tagging/TaggingDocumentViewer';
+import { TaggingDocumentViewerV2 } from '../../tagging/TaggingDocumentViewer';
 import { QADocumentViewer } from '../../qa/QADocumentViewer';
 
 type SuperDocumentViewerProps = {
@@ -27,9 +27,8 @@ export function SuperDocumentViewer({
     );
   } else if (tool === SuperToolKind.Tagging) {
     return (
-      <TaggingDocumentViewer
+      <TaggingDocumentViewerV2
         documentId={documentId}
-        mode={mode}
         customScrollParent={customScrollParent}
       />
     );

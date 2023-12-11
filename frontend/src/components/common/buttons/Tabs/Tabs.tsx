@@ -34,7 +34,7 @@ const getBorderLeft = (currentIndex: number, selectedIndex: number) => {
       return 'none';
     }
   } else {
-    if (currentIndex === selectedIndex) {
+    if (currentIndex === selectedIndex || currentIndex === 0) {
       return '';
     } else {
       return 'none';
