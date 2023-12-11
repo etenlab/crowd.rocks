@@ -13,6 +13,7 @@ import PericopeToolPage from '../pages/Community/PericopeToolPage';
 import SettingsPage from '../pages/SettingsPage';
 import PostPage from '../pages/Community/PostPage';
 import MenuPage from '../pages/MenuPage';
+test.use({ storageState: { cookies: [], origins: [] } });
 
 const registerData = RegisterData.validRegisterData();
 const documentName = await generateUniqueFileName('txt');
@@ -106,7 +107,7 @@ async function loginWithNewUser(page: Page) {
   await registerPage.clickOnRegisterButton();
   await page.waitForTimeout(3000);
 }
-test('Verify that added document is displayed when user search the document in pericope tool page', async ({
+test('1: Verify that added document is displayed when user search the document in pericope tool page', async ({
   page,
 }) => {
   const documentsPage = new DocumentsPage(page);
@@ -117,7 +118,7 @@ test('Verify that added document is displayed when user search the document in p
   expect(documentsPage.isCreatedDocumentVisible(documentName)).toBeTruthy();
 });
 
-test('Verify that user can add a pericope tools in document successfully', async ({
+test('2: Verify that user can add a pericopes in document successfully', async ({
   page,
 }) => {
   const pericopeToolPage = new PericopeToolPage(page);
@@ -141,7 +142,7 @@ test('Verify that user can add a pericope tools in document successfully', async
   );
 });
 
-test('Verify that user is able to add/remove like and dislike in the document text successfully', async ({
+test('3: Verify that user is able to add/remove like and dislike on the pericode successfully', async ({
   page,
 }) => {
   const pericopeToolPage = new PericopeToolPage(page);
@@ -188,7 +189,7 @@ test('Verify that user is able to add/remove like and dislike in the document te
   expect(await pericopeToolPage.getTheDislikeCount()).toEqual('0');
 });
 
-test('Verify that user is able to add posts in the added pericode successfully', async ({
+test('4: Verify that user is able to add posts in the added pericode successfully', async ({
   page,
 }) => {
   const pericopeToolPage = new PericopeToolPage(page);
@@ -212,7 +213,7 @@ test('Verify that user is able to add posts in the added pericode successfully',
   expect(await pericopeToolPage.getPostCount()).toEqual('2');
 });
 
-test('Verify that user can delete a pericope tools in document successfully', async ({
+test('5: Verify that user can delete a pericopes in document successfully', async ({
   page,
 }) => {
   const pericopeToolPage = new PericopeToolPage(page);
@@ -227,13 +228,15 @@ test('Verify that user can delete a pericope tools in document successfully', as
   //Click on edit mode in pericope tool page
   await pericopeToolPage.clickOnEditMode();
 
+  //Delete the added pericope
   await pericopeToolPage.clickOnRandomTextForAddPericopeTool();
-
   await pericopeToolPage.clickOnDeletePericopeTool();
+
+  //Verify that added pericode is removed
   expect(await pericopeToolPage.isPericopeToolAdded()).toBeFalsy();
 });
 
-test('Verify that user is not able to add the pericope tool when edit mode is off', async ({
+test('6: Verify that user is not able to add the pericope tool when edit mode is off', async ({
   page,
 }) => {
   const pericopeToolPage = new PericopeToolPage(page);
@@ -249,7 +252,7 @@ test('Verify that user is not able to add the pericope tool when edit mode is of
   expect(await pericopeToolPage.isPericopeToolVisible()).toBeFalsy();
 });
 
-test('Verify that selected language name is displayed in pericope tool detail page', async ({
+test('7: Verify that selected language name is displayed in pericope tool detail page', async ({
   page,
 }) => {
   const pericopeToolPage = new PericopeToolPage(page);
@@ -266,7 +269,7 @@ test('Verify that selected language name is displayed in pericope tool detail pa
   );
 });
 
-test('Verify that user is not able to add pericope in the document which is created by different user', async ({
+test('8: Verify that user is not able to add pericope in the document which is created by different user', async ({
   page,
 }) => {
   const pericopeToolPage = new PericopeToolPage(page);
@@ -292,7 +295,7 @@ test('Verify that user is not able to add pericope in the document which is crea
   await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Logout);
 });
 
-test('Verify that user is able to add like/dislike to the pericode in the document which is created by different user', async ({
+test('9: Verify that user is able to add like/dislike to the pericode in the document which is created by different user', async ({
   page,
 }) => {
   const loginPage = new LoginPage(page);
