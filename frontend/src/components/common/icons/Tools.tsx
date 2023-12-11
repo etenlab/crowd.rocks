@@ -5,7 +5,7 @@ export function Tools(props: SvgIconProps) {
     <SvgIcon {...props}>
       <path
         d="M10.0503 10.6066L2.97923 17.6777C2.19818 18.4587 2.19818 19.7251 2.97923 20.5061V20.5061C3.76027 21.2872 5.0266 21.2872 5.80765 20.5061L12.8787 13.4351"
-        stroke="currentColor"
+        fill="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
