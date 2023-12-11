@@ -48,12 +48,6 @@ type AvatarUpdateOutput {
   user: User
 }
 
-type BestPericopeTrChanged {
-  error: ErrorType!
-  newPericopeTr: PericopeTranslation
-  newVoteStatus: PericopeTrVoteStatus
-}
-
 input BotTranslateDocumentInput {
   botType: BotType!
   documentId: String!
@@ -1547,7 +1541,6 @@ type Subscription {
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
   ZipMapReport: ZipMapResult!
   answersAdded: AnswersOutput!
-  bestPericopeTrChanged: BestPericopeTrChanged!
   documentAdded: DocumentUploadOutput!
   pericopeDeleted: PericopeDeleteOutput!
   pericopeVoteStatusToggled: PericopeVoteStatusOutput!
@@ -1555,6 +1548,7 @@ type Subscription {
   questionsAdded: QuestionsOutput!
   questionsOnWordRangeAdded: QuestionOnWordRangesOutput!
   recommendedPericopiesChanged: RecomendedPericopiesChangedAtDocumentId!
+  votePericopeTrChanged: VotePericopeTrChanged!
   wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput!
   wordRangeTagWithVoteAdded: WordRangeTagWithVotesOutput!
 }
@@ -1776,6 +1770,12 @@ input VersionCreateInput {
 type VersionCreateOutput {
   error: ErrorType!
   version: Version
+}
+
+type VotePericopeTrChanged {
+  error: ErrorType!
+  newPericopeTr: PericopeTranslation
+  newVoteStatus: PericopeTrVoteStatus
 }
 
 type Word {

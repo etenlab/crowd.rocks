@@ -12,7 +12,7 @@ import {
 import { PericopeTrService } from './pericope-tr.service';
 import {
   AddPericopeTranslationInput,
-  BestPericopeTrChanged,
+  VotePericopeTrChanged as VotePericopeTrChanged,
   GetPericopeTranslationsInput,
   GetPericopiesTrInput,
   PericopeTranslation,
@@ -103,11 +103,11 @@ export class PericopeTrResolver {
       best_translation?.pericope_translation_id !==
       oldBestTr?.pericope_translation_id
     ) {
-      this.pubSub.publish(SubscriptionToken.bestPericopeTrChanged, {
-        [SubscriptionToken.bestPericopeTrChanged]: {
+      this.pubSub.publish(SubscriptionToken.votePericopeTrChanged, {
+        [SubscriptionToken.votePericopeTrChanged]: {
           newPericopeTr: best_translation,
           newVoteStatus: vote_status.vote_status,
-        } as BestPericopeTrChanged,
+        } as VotePericopeTrChanged,
       });
     }
 
@@ -148,11 +148,11 @@ export class PericopeTrResolver {
     }
   }
 
-  @Subscription(() => BestPericopeTrChanged, {
-    name: SubscriptionToken.bestPericopeTrChanged,
+  @Subscription(() => VotePericopeTrChanged, {
+    name: SubscriptionToken.votePericopeTrChanged,
   })
-  async bestPericopeTrChanged() {
+  async votePericopeTrChanged() {
     console.log('PericopeTrResolver#bestPericopeTrChanged');
-    return this.pubSub.asyncIterator(SubscriptionToken.bestPericopeTrChanged);
+    return this.pubSub.asyncIterator(SubscriptionToken.votePericopeTrChanged);
   }
 }

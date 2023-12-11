@@ -35,6 +35,7 @@ import { PericopeTranslationList } from './PericopeTranslationsList';
 import { PageLayout } from '../../common/PageLayout';
 import { langInfo2langInput } from '../../../../../utils';
 import { useAddPericopeTrMutation } from '../../../hooks/useAddPericopeTrMutation';
+import { PericopeTranslatedItem } from './PericopeTranslatedItem';
 
 export function PericopeTranslationPage() {
   const { pericopeId } = useParams<{ pericopeId: string }>();
@@ -52,7 +53,7 @@ export function PericopeTranslationPage() {
 
   const [openForm, setOpenForm] = useState<boolean>(false);
 
-  const pericopeTrData = useGetPericopeTextAndDesctiptionQuery({
+  const pericopeData = useGetPericopeTextAndDesctiptionQuery({
     variables: { pericopeId },
   });
 
@@ -65,7 +66,7 @@ export function PericopeTranslationPage() {
     },
   }).data?.getPericopeTranslations;
 
-  const pericopeTr = pericopeTrData.data?.getPericopeTextAndDesctiption;
+  const pericope = pericopeData.data?.getPericopeTextAndDesctiption;
 
   const [addPericopeTr] = useAddPericopeTrMutation();
 
@@ -111,12 +112,12 @@ export function PericopeTranslationPage() {
     </Button>
   ) : null;
 
-  const dropDownList = pericopeTr?.pericope_id && [
+  const dropDownList = pericope?.pericope_id && [
     {
       key: 'flag_button',
       component: (
         <FlagV2
-          parent_id={pericopeTr.pericope_id}
+          parent_id={pericope.pericope_id}
           parent_table={TableNameType.Pericopies}
           flag_names={PERICOPIES_FLAGS}
         />
@@ -128,16 +129,14 @@ export function PericopeTranslationPage() {
     <PageLayout>
       <Caption>{tr('Details')}</Caption>
 
-      {pericopeTr?.pericope_id && dropDownList && (
+      {pericope?.pericope_id && dropDownList && (
         <>
           <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="h1" sx={{ paddingTop: '5px' }}>
-              {pericopeTr.pericope_text}
-            </Typography>
+            <PericopeTranslatedItem pericopeTr={pericope} />
             <Stack
               direction="row"
               justifyContent="space-between"
@@ -145,7 +144,7 @@ export function PericopeTranslationPage() {
               gap="14px"
             >
               <DiscussionIconButton
-                parent_id={pericopeTr.pericope_id}
+                parent_id={pericope.pericope_id}
                 parent_table={TableNameType.Pericopies}
                 flex="1"
               />
@@ -162,7 +161,7 @@ export function PericopeTranslationPage() {
           </Stack>
 
           <Typography variant="body1" color="text.gray">
-            {pericopeTr.pericope_description_text}
+            {pericope.pericope_description_text}
           </Typography>
 
           <Divider />

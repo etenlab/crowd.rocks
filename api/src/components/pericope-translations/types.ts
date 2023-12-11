@@ -112,7 +112,7 @@ export class PericopeTrVoteStatusAndBestTrOutput extends PericopeTrVoteStatusOut
 }
 
 @ObjectType()
-export class BestPericopeTrChanged extends GenericOutput {
+export class VotePericopeTrChanged extends GenericOutput {
   @Field(() => PericopeTranslation, { nullable: true })
   newPericopeTr: PericopeTranslation | null;
   @Field(() => PericopeTrVoteStatus, { nullable: true })

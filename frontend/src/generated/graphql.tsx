@@ -71,13 +71,6 @@ export type AvatarUpdateOutput = {
   user?: Maybe<User>;
 };
 
-export type BestPericopeTrChanged = {
-  __typename?: 'BestPericopeTrChanged';
-  error: ErrorType;
-  newPericopeTr?: Maybe<PericopeTranslation>;
-  newVoteStatus?: Maybe<PericopeTrVoteStatus>;
-};
-
 export type BotTranslateDocumentInput = {
   botType: BotType;
   documentId: Scalars['String']['input'];
@@ -2703,7 +2696,6 @@ export type Subscription = {
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult;
   ZipMapReport: ZipMapResult;
   answersAdded: AnswersOutput;
-  bestPericopeTrChanged: BestPericopeTrChanged;
   documentAdded: DocumentUploadOutput;
   pericopeDeleted: PericopeDeleteOutput;
   pericopeVoteStatusToggled: PericopeVoteStatusOutput;
@@ -2711,6 +2703,7 @@ export type Subscription = {
   questionsAdded: QuestionsOutput;
   questionsOnWordRangeAdded: QuestionOnWordRangesOutput;
   recommendedPericopiesChanged: RecomendedPericopiesChangedAtDocumentId;
+  votePericopeTrChanged: VotePericopeTrChanged;
   wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput;
   wordRangeTagWithVoteAdded: WordRangeTagWithVotesOutput;
 };
@@ -2951,6 +2944,13 @@ export type VersionCreateOutput = {
   __typename?: 'VersionCreateOutput';
   error: ErrorType;
   version?: Maybe<Version>;
+};
+
+export type VotePericopeTrChanged = {
+  __typename?: 'VotePericopeTrChanged';
+  error: ErrorType;
+  newPericopeTr?: Maybe<PericopeTranslation>;
+  newVoteStatus?: Maybe<PericopeTrVoteStatus>;
 };
 
 export type Word = {
@@ -4016,10 +4016,10 @@ export type SubscribeToRecomendedPericopiesChangedSubscriptionVariables = Exact<
 
 export type SubscribeToRecomendedPericopiesChangedSubscription = { __typename?: 'Subscription', recommendedPericopiesChanged: { __typename?: 'RecomendedPericopiesChangedAtDocumentId', documentId: string } };
 
-export type BestPericopeTrChangedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+export type VotePericopeTrChangedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type BestPericopeTrChangedSubscription = { __typename?: 'Subscription', bestPericopeTrChanged: { __typename?: 'BestPericopeTrChanged', newPericopeTr?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null, newVoteStatus?: { __typename?: 'PericopeTrVoteStatus', pericope_translation_id: string, upvotes: number, downvotes: number } | null } };
+export type VotePericopeTrChangedSubscription = { __typename?: 'Subscription', votePericopeTrChanged: { __typename?: 'VotePericopeTrChanged', newPericopeTr?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null, newVoteStatus?: { __typename?: 'PericopeTrVoteStatus', pericope_translation_id: string, upvotes: number, downvotes: number } | null } };
 
 export type PericopeFragmentFragment = { __typename?: 'Pericope', pericope_id: string, start_word: string };
 
@@ -8652,9 +8652,9 @@ export function useSubscribeToRecomendedPericopiesChangedSubscription(baseOption
       }
 export type SubscribeToRecomendedPericopiesChangedSubscriptionHookResult = ReturnType<typeof useSubscribeToRecomendedPericopiesChangedSubscription>;
 export type SubscribeToRecomendedPericopiesChangedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToRecomendedPericopiesChangedSubscription>;
-export const BestPericopeTrChangedDocument = gql`
-    subscription BestPericopeTrChanged {
-  bestPericopeTrChanged {
+export const VotePericopeTrChangedDocument = gql`
+    subscription VotePericopeTrChanged {
+  votePericopeTrChanged {
     newPericopeTr {
       ...PericopeTranslationFragment
     }
@@ -8667,26 +8667,26 @@ export const BestPericopeTrChangedDocument = gql`
 ${PericopeTrVoteStatusFragmentFragmentDoc}`;
 
 /**
- * __useBestPericopeTrChangedSubscription__
+ * __useVotePericopeTrChangedSubscription__
  *
- * To run a query within a React component, call `useBestPericopeTrChangedSubscription` and pass it any options that fit your needs.
- * When your component renders, `useBestPericopeTrChangedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useVotePericopeTrChangedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useVotePericopeTrChangedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useBestPericopeTrChangedSubscription({
+ * const { data, loading, error } = useVotePericopeTrChangedSubscription({
  *   variables: {
  *   },
  * });
  */
-export function useBestPericopeTrChangedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<BestPericopeTrChangedSubscription, BestPericopeTrChangedSubscriptionVariables>) {
+export function useVotePericopeTrChangedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<VotePericopeTrChangedSubscription, VotePericopeTrChangedSubscriptionVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useSubscription<BestPericopeTrChangedSubscription, BestPericopeTrChangedSubscriptionVariables>(BestPericopeTrChangedDocument, options);
+        return Apollo.useSubscription<VotePericopeTrChangedSubscription, VotePericopeTrChangedSubscriptionVariables>(VotePericopeTrChangedDocument, options);
       }
-export type BestPericopeTrChangedSubscriptionHookResult = ReturnType<typeof useBestPericopeTrChangedSubscription>;
-export type BestPericopeTrChangedSubscriptionResult = Apollo.SubscriptionResult<BestPericopeTrChangedSubscription>;
+export type VotePericopeTrChangedSubscriptionHookResult = ReturnType<typeof useVotePericopeTrChangedSubscription>;
+export type VotePericopeTrChangedSubscriptionResult = Apollo.SubscriptionResult<VotePericopeTrChangedSubscription>;
 export const GetPericopiesByDocumentIdDocument = gql`
     query GetPericopiesByDocumentId($document_id: ID!, $first: Int, $after: ID) {
   getPericopiesByDocumentId(
@@ -12169,7 +12169,7 @@ export const namedOperations = {
     SubscribeToDocumentAdded: 'SubscribeToDocumentAdded',
     SubscribeToZipMap: 'SubscribeToZipMap',
     SubscribeToRecomendedPericopiesChanged: 'SubscribeToRecomendedPericopiesChanged',
-    BestPericopeTrChanged: 'BestPericopeTrChanged',
+    VotePericopeTrChanged: 'VotePericopeTrChanged',
     SubscribeToPericopiesAdded: 'SubscribeToPericopiesAdded',
     SubscribeToPericopieDeleted: 'SubscribeToPericopieDeleted',
     SubscribeToPericopeVoteStatusToggled: 'SubscribeToPericopeVoteStatusToggled',

@@ -149,8 +149,8 @@ subscription SubscribeToRecomendedPericopiesChanged {
   }
 }
 
-subscription BestPericopeTrChanged {
-  bestPericopeTrChanged {
+subscription VotePericopeTrChanged {
+  votePericopeTrChanged {
     newPericopeTr {
       ...PericopeTranslationFragment
     }
