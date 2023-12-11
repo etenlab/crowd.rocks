@@ -4,8 +4,10 @@ const languageName = (language: string) =>
   `//h5[text()='${language}']//..//input`;
 const randomText = "(//div[@data-test-id]/div[@data-index='0']//div/div)[1]";
 const selectedLanguageName = "//button[text()='Edit mode']/..//.//span[text()]";
-const likeDislikeButton = "//div[@class='MuiStack-root css-lgk7oi']//button";
-const postButton = `//div[@class='MuiStack-root css-2xeyaa']//button`;
+const likeDislikeButton =
+  "//div[@role='presentation']//div[3]//div//div//button";
+const postButton = `//div[@role='presentation']//div[3]//button`;
+const documentName = "//div[@class = 'section']//h4";
 
 class PericopeToolPage extends BasePage {
   async isPageTitleVisible() {
@@ -58,6 +60,7 @@ class PericopeToolPage extends BasePage {
   }
   async clickOnLikeButton() {
     await this.page.locator(likeDislikeButton).first().click();
+    await this.page.waitForTimeout(1000);
   }
   async getPericopeDotsColor() {
     // Get background color using evaluate method
@@ -70,6 +73,7 @@ class PericopeToolPage extends BasePage {
   }
   async clickOnDislikeButton() {
     await this.page.locator(likeDislikeButton).last().click();
+    await this.page.waitForTimeout(1000);
   }
   async clickOnPostButton() {
     await this.page.locator(postButton).last().click();
@@ -84,10 +88,7 @@ class PericopeToolPage extends BasePage {
     return await this.page.locator(likeDislikeButton).last().textContent();
   }
   async isDocumentNameIsDisplayed() {
-    return await this.page
-      .locator("//div[@class = 'section']//h4")
-      .first()
-      .textContent();
+    return await this.page.locator(documentName).first().textContent();
   }
 }
 
