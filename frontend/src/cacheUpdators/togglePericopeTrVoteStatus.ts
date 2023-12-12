@@ -1,6 +1,9 @@
 import { ApolloCache } from '@apollo/client';
 
 import {
+  GetPericopeTranslationsDocument,
+  GetPericopeTranslationsQuery,
+  LanguageInput,
   PericopeTextWithTranslationAndDescription,
   PericopeTextWithTranslationAndDescriptionFragmentFragmentDoc,
   PericopeTrVoteStatus,
@@ -43,6 +46,7 @@ export function updateCacheWithTogglePericopeTrVoteStatus(
   });
 
   if (newBestTranslation) {
+    // update pericopes translations at all pericopes list (PericopiesTrListPage.tsx)
     cache.updateFragment<PericopeTextWithTranslationAndDescription>(
       {
         id: translationId,
@@ -58,6 +62,42 @@ export function updateCacheWithTogglePericopeTrVoteStatus(
         } else {
           return data;
         }
+      },
+    );
+
+    // update best pericope transltion at detailed page (PericopeTranslationPage.tsx)
+    cache.updateQuery<GetPericopeTranslationsQuery>(
+      {
+        query: GetPericopeTranslationsDocument,
+        variables: {
+          pericopeId: newBestTranslation.pericope_id,
+          targetLang: {
+            language_code: newBestTranslation.language.language_code,
+            dialect_code: newBestTranslation.language.dialect_code,
+            geo_code: newBestTranslation.language.geo_code,
+          } as LanguageInput,
+        },
+      },
+      (data) => {
+        if (!data) {
+          return data;
+        }
+        return {
+          ...data,
+          getPericopeTranslations: {
+            ...data.getPericopeTranslations,
+            translations: data.getPericopeTranslations.translations.map(
+              (oldTr) => {
+                return {
+                  ...oldTr,
+                  isBest:
+                    oldTr.pericope_translation_id ===
+                    newBestTranslation.pericope_translation_id,
+                };
+              },
+            ),
+          },
+        };
       },
     );
   }
