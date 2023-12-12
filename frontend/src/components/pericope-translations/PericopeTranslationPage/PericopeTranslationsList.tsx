@@ -2,7 +2,9 @@ import { Stack, LinearProgress } from '@mui/material';
 
 import {
   ErrorType,
+  FlagType,
   PericopeTranslationWithVotes,
+  TableNameType,
 } from '../../../generated/graphql';
 
 import { TextCard } from '../../common/TextCard';
@@ -80,6 +82,21 @@ export function PericopeTranslationList({
                 },
               }}
               isStarred={tr.isBest || undefined}
+              discussion={{
+                parent_table: TableNameType.PericopeTranslations,
+                parent_id: tr.pericope_translation_id,
+              }}
+              flags={{
+                flag_names: [
+                  {
+                    label: 'FastTranslation',
+                    flag: FlagType.FastTranslation,
+                    role: 'admin-only',
+                  },
+                ],
+                parent_id: tr.pericope_translation_id,
+                parent_table: TableNameType.PericopeTranslations,
+              }}
             />
           );
         })

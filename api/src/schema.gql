@@ -1574,6 +1574,7 @@ enum TableNameType {
   document_word_entries
   documents
   original_maps
+  pericope_translations
   pericopies
   phrase_definitions
   phrase_to_phrase_translations

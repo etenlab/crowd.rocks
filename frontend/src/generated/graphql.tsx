@@ -2735,6 +2735,7 @@ export enum TableNameType {
   DocumentWordEntries = 'document_word_entries',
   Documents = 'documents',
   OriginalMaps = 'original_maps',
+  PericopeTranslations = 'pericope_translations',
   Pericopies = 'pericopies',
   PhraseDefinitions = 'phrase_definitions',
   PhraseToPhraseTranslations = 'phrase_to_phrase_translations',

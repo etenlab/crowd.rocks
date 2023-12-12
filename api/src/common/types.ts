@@ -199,6 +199,7 @@ export enum TableNameType {
   original_maps = 'original_maps',
   translated_maps = 'translated_maps',
   pericopies = 'pericopies',
+  pericope_translations = 'pericope_translations',
 }
 
 registerEnumType(TableNameType, {
