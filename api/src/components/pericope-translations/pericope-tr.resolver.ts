@@ -156,7 +156,7 @@ export class PericopeTrResolver {
     name: SubscriptionToken.votePericopeTrChanged,
   })
   async votePericopeTrChanged() {
-    console.log('PericopeTrResolver#bestPericopeTrChanged');
+    Logger.log('PericopeTrResolver#votePericopeTrChanged Subscription');
     return this.pubSub.asyncIterator(SubscriptionToken.votePericopeTrChanged);
   }
 }
