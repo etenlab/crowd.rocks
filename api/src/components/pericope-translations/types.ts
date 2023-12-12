@@ -17,12 +17,6 @@ export class PericopeTranslation {
   @Field(() => String) created_at: string;
 }
 
-// @ObjectType()
-// export class PericopeBestTranslationOutput extends GenericOutput {
-//   @Field(() => PericopeTranslation, { nullable: true })
-//   bestTranslation: PericopeTranslation | null;
-// }
-
 @ObjectType()
 export class PericopeTranslationWithVotes extends PericopeTranslation {
   @Field(() => Int) upvotes: number;

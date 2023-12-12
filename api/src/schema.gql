@@ -816,6 +816,13 @@ type PericopeEdge {
   node: Pericope!
 }
 
+type PericopeTagsQasCountOutput {
+  error: ErrorType!
+  pericope_id: ID
+  qas_count: String
+  tags_count: String
+}
+
 type PericopeTextWithDescription {
   error: ErrorType!
   pericope_description_text: String!
@@ -1229,6 +1236,7 @@ type Query {
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapWordsAndPhrasesCount(input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesCountOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
+  getPericopeTagsQasCount(pericopeId: String!): PericopeTagsQasCountOutput!
   getPericopeTextAndDesctiption(input: GetPericopeTextInput!): PericopeTextWithDescription!
   getPericopeTranslations(input: GetPericopeTranslationsInput!): PericopeTranslationsOutput!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!

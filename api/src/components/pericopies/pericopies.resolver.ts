@@ -26,6 +26,7 @@ import {
   PericopeTextWithDescription,
   PericopeDeleteOutput,
   RecomendedPericopiesChangedAtDocumentId,
+  PericopeTagsQasCountOutput,
 } from './types';
 
 @Injectable()
@@ -216,8 +217,23 @@ export class PericopiesResolver {
   async getPericopeTextAndDesctiption(
     @Args('input') input: GetPericopeTextInput,
   ): Promise<PericopeTextWithDescription> {
+    Logger.log(
+      `${JSON.stringify(input)}`,
+      `PericopeResolver#getPericopeTextAndDesctiption`,
+    );
     return this.pericopiesService.getPericopeTextWithDescription(
       input.pericopeId,
     );
+  }
+
+  @Query(() => PericopeTagsQasCountOutput)
+  async getPericopeTagsQasCount(
+    @Args('pericopeId') pericopeId: string,
+  ): Promise<PericopeTagsQasCountOutput> {
+    Logger.log(
+      `${JSON.stringify(pericopeId)}`,
+      `PericopeResolver#getPericopeTagsQasCount`,
+    );
+    return this.pericopiesService.getPericopeTagsQasCount(pericopeId);
   }
 }

@@ -11,6 +11,7 @@ import {
 import { Caption } from '../../common/Caption/Caption';
 import {
   TableNameType,
+  useGetPericopeTagsQasCountQuery,
   useGetPericopeTextAndDesctiptionQuery,
   useGetPericopeTranslationsQuery,
 } from '../../../generated/graphql';
@@ -36,6 +37,7 @@ import { PageLayout } from '../../common/PageLayout';
 import { langInfo2langInput } from '../../../../../utils';
 import { useAddPericopeTrMutation } from '../../../hooks/useAddPericopeTrMutation';
 import { PericopeTranslated } from './PericopeTranslated';
+import { ButtonsTagsQAs } from './ButtonsTagsQAs';
 
 export function PericopeTranslationPage() {
   const { pericopeId } = useParams<{ pericopeId: string }>();
@@ -66,6 +68,10 @@ export function PericopeTranslationPage() {
         : { language_code: '' },
     },
   }).data?.getPericopeTranslations;
+
+  const tagsQasCount = useGetPericopeTagsQasCountQuery({
+    variables: { pericopeId },
+  });
 
   const [addPericopeTr] = useAddPericopeTrMutation();
 
@@ -166,9 +172,20 @@ export function PericopeTranslationPage() {
             )}
           />
 
-          <Typography variant="body1" color="text.gray">
-            {pericope.pericope_description_text}
-          </Typography>
+          <ButtonsTagsQAs
+            qasCount={
+              Number(tagsQasCount.data?.getPericopeTagsQasCount.qas_count) || 0
+            }
+            tagsCount={
+              Number(tagsQasCount.data?.getPericopeTagsQasCount.tags_count) || 0
+            }
+            onQAsClick={() =>
+              console.log(`onQAsClick! pericopeId: ${pericopeId}`)
+            }
+            onTagsClick={() =>
+              console.log(`onTagsClick! pericopeId: ${pericopeId}`)
+            }
+          />
 
           <Divider />
 

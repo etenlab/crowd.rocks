@@ -1388,6 +1388,14 @@ export type PericopeEdge = {
   node: Pericope;
 };
 
+export type PericopeTagsQasCountOutput = {
+  __typename?: 'PericopeTagsQasCountOutput';
+  error: ErrorType;
+  pericope_id?: Maybe<Scalars['ID']['output']>;
+  qas_count?: Maybe<Scalars['String']['output']>;
+  tags_count?: Maybe<Scalars['String']['output']>;
+};
+
 export type PericopeTextWithDescription = {
   __typename?: 'PericopeTextWithDescription';
   error: ErrorType;
@@ -1853,6 +1861,7 @@ export type Query = {
   getOrigMapWordsAndPhrases: MapWordsAndPhrasesConnection;
   getOrigMapWordsAndPhrasesCount: MapWordsAndPhrasesCountOutput;
   getOrigMapsList: GetOrigMapsListOutput;
+  getPericopeTagsQasCount: PericopeTagsQasCountOutput;
   getPericopeTextAndDesctiption: PericopeTextWithDescription;
   getPericopeTranslations: PericopeTranslationsOutput;
   getPericopeVoteStatus: PericopeVoteStatusOutput;
@@ -2062,6 +2071,11 @@ export type QueryGetOrigMapWordsAndPhrasesCountArgs = {
 
 export type QueryGetOrigMapsListArgs = {
   input: GetOrigMapListInput;
+};
+
+
+export type QueryGetPericopeTagsQasCountArgs = {
+  pericopeId: Scalars['String']['input'];
 };
 
 
@@ -4046,6 +4060,13 @@ export type GetPericopeVoteStatusQueryVariables = Exact<{
 
 
 export type GetPericopeVoteStatusQuery = { __typename?: 'Query', getPericopeVoteStatus: { __typename?: 'PericopeVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'PericopeVoteStatus', pericope_id: string, upvotes: number, downvotes: number } | null } };
+
+export type GetPericopeTagsQasCountQueryVariables = Exact<{
+  pericopeId: Scalars['String']['input'];
+}>;
+
+
+export type GetPericopeTagsQasCountQuery = { __typename?: 'Query', getPericopeTagsQasCount: { __typename?: 'PericopeTagsQasCountOutput', error: ErrorType, pericope_id?: string | null, tags_count?: string | null, qas_count?: string | null } };
 
 export type TogglePericopeVoteStatusMutationVariables = Exact<{
   pericope_id: Scalars['ID']['input'];
@@ -8776,6 +8797,44 @@ export function useGetPericopeVoteStatusLazyQuery(baseOptions?: Apollo.LazyQuery
 export type GetPericopeVoteStatusQueryHookResult = ReturnType<typeof useGetPericopeVoteStatusQuery>;
 export type GetPericopeVoteStatusLazyQueryHookResult = ReturnType<typeof useGetPericopeVoteStatusLazyQuery>;
 export type GetPericopeVoteStatusQueryResult = Apollo.QueryResult<GetPericopeVoteStatusQuery, GetPericopeVoteStatusQueryVariables>;
+export const GetPericopeTagsQasCountDocument = gql`
+    query GetPericopeTagsQasCount($pericopeId: String!) {
+  getPericopeTagsQasCount(pericopeId: $pericopeId) {
+    error
+    pericope_id
+    tags_count
+    qas_count
+  }
+}
+    `;
+
+/**
+ * __useGetPericopeTagsQasCountQuery__
+ *
+ * To run a query within a React component, call `useGetPericopeTagsQasCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPericopeTagsQasCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPericopeTagsQasCountQuery({
+ *   variables: {
+ *      pericopeId: // value for 'pericopeId'
+ *   },
+ * });
+ */
+export function useGetPericopeTagsQasCountQuery(baseOptions: Apollo.QueryHookOptions<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>(GetPericopeTagsQasCountDocument, options);
+      }
+export function useGetPericopeTagsQasCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>(GetPericopeTagsQasCountDocument, options);
+        }
+export type GetPericopeTagsQasCountQueryHookResult = ReturnType<typeof useGetPericopeTagsQasCountQuery>;
+export type GetPericopeTagsQasCountLazyQueryHookResult = ReturnType<typeof useGetPericopeTagsQasCountLazyQuery>;
+export type GetPericopeTagsQasCountQueryResult = Apollo.QueryResult<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>;
 export const TogglePericopeVoteStatusDocument = gql`
     mutation TogglePericopeVoteStatus($pericope_id: ID!, $vote: Boolean!) {
   togglePericopeVoteStatus(pericope_id: $pericope_id, vote: $vote) {
@@ -12056,6 +12115,7 @@ export const namedOperations = {
     GetPericopeTextAndDesctiption: 'GetPericopeTextAndDesctiption',
     GetPericopiesByDocumentId: 'GetPericopiesByDocumentId',
     GetPericopeVoteStatus: 'GetPericopeVoteStatus',
+    GetPericopeTagsQasCount: 'GetPericopeTagsQasCount',
     PhraseDefinitionRead: 'PhraseDefinitionRead',
     GetPhrasesByLanguage: 'GetPhrasesByLanguage',
     GetPhraseDefinitionsByPhraseId: 'GetPhraseDefinitionsByPhraseId',

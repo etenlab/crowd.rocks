@@ -19,6 +19,7 @@ import {
   PericopeTranslationsOutput,
   PericopeTrVoteStatusAndBestTrOutput,
   PericopiesTextsWithTranslationConnection,
+  GetPericopeTextInput,
   // PericopeBestTranslationOutput,
 } from './types';
 import { BearerTokenAuthGuard } from '../../guards/bearer-token-auth.guard';
@@ -26,6 +27,7 @@ import { ErrorType } from '../../common/types';
 import { PUB_SUB } from '../../pubSub.module';
 import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionToken } from '../../common/subscription-token';
+import { PericopeTagsQasCountOutput } from '../pericopies/types';
 // import { LanguageInput } from '../common/types';
 
 @Injectable()
@@ -157,31 +159,4 @@ export class PericopeTrResolver {
     console.log('PericopeTrResolver#bestPericopeTrChanged');
     return this.pubSub.asyncIterator(SubscriptionToken.votePericopeTrChanged);
   }
-
-  // @Query(() => PericopeBestTranslationOutput)
-  // async getBestPericopeTr(
-  //   @Args('pericopeId') pericopeId: string,
-  //   @Args('targetLang') targetLang: LanguageInput,
-  // ): Promise<PericopeBestTranslationOutput> {
-  //   try {
-  //     const bestTr =
-  //       await this.pericopeTrService.getRecomendedPericopeTranslation(
-  //         pericopeId,
-  //         targetLang,
-  //       );
-  //     if (!bestTr) {
-  //       return {
-  //         error: ErrorType.PericopeBestTranslationNotFound,
-  //         bestTranslation: null,
-  //       };
-  //     }
-  //     return { error: ErrorType.NoError, bestTranslation: bestTr };
-  //   } catch (error) {
-  //     Logger.error(error, `PericopeTrResolver#getBestPericopeTr`);
-  //     return {
-  //       error: ErrorType.PericopeBestTranslationNotFound,
-  //       bestTranslation: null,
-  //     };
-  //   }
-  // }
 }
