@@ -71,6 +71,7 @@ export function PericopeTranslationPage() {
 
   const tagsQasCount = useGetPericopeTagsQasCountQuery({
     variables: { pericopeId },
+    fetchPolicy: 'network-only',
   });
 
   const [addPericopeTr] = useAddPericopeTrMutation();
