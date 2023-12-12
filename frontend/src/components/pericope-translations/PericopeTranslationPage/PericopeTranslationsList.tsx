@@ -2,14 +2,16 @@ import { Stack, LinearProgress } from '@mui/material';
 
 import {
   ErrorType,
+  FlagType,
   PericopeTranslationWithVotes,
+  TableNameType,
 } from '../../../generated/graphql';
 
 import { TextCard } from '../../common/TextCard';
 import { useCallback, useEffect } from 'react';
 import { useIonToast } from '@ionic/react';
 import { useTogglePericopeTrVoteStatusMutation } from '../../../hooks/useTogglePericopeTrVoteStatusMutation';
-import { useBestPericopeTrChangedSubscription } from '../../../hooks/useBestPericopeTrChangedSubscription';
+import { useVotePericopeTrChangedSubscription } from '../../../hooks/useVotePericopeTrChangedSubscription';
 
 export type PericopeTranslationListProps = {
   translations: PericopeTranslationWithVotes[];
@@ -23,7 +25,7 @@ export function PericopeTranslationList({
   const [toggleTrVoteStatus, { data: voteData, loading: voteLoading }] =
     useTogglePericopeTrVoteStatusMutation();
 
-  useBestPericopeTrChangedSubscription();
+  useVotePericopeTrChangedSubscription();
 
   useEffect(() => {
     if (voteLoading) return;
@@ -78,6 +80,22 @@ export function PericopeTranslationList({
                 onVoteDownClick: () => {
                   handleVoteClick(tr.pericope_translation_id, false);
                 },
+              }}
+              isStarred={tr.isBest || undefined}
+              discussion={{
+                parent_table: TableNameType.PericopeTranslations,
+                parent_id: tr.pericope_translation_id,
+              }}
+              flags={{
+                flag_names: [
+                  {
+                    label: 'FastTranslation',
+                    flag: FlagType.FastTranslation,
+                    role: 'admin-only',
+                  },
+                ],
+                parent_id: tr.pericope_translation_id,
+                parent_table: TableNameType.PericopeTranslations,
               }}
             />
           );

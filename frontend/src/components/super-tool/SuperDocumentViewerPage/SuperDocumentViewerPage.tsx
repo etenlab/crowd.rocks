@@ -22,7 +22,7 @@ import { OptionItem } from '../../common/forms/Autocomplete';
 import { Settings } from '../../common/icons/Settings';
 import { SuperDocumentViewer } from '../SuperDocumentViewer/SuperDocumentViewer';
 import { SuperPericopiesTranslator } from '../SuperPericopiesTranslator';
-import { useBestPericopeTrChangedSubscription } from '../../../hooks/useBestPericopeTrChangedSubscription';
+import { useVotePericopeTrChangedSubscription } from '../../../hooks/useVotePericopeTrChangedSubscription';
 
 export function SuperDocumentViewerPage() {
   const { tr } = useTr();
@@ -62,7 +62,7 @@ export function SuperDocumentViewerPage() {
     setPageStatus('hidden');
   });
 
-  useBestPericopeTrChangedSubscription();
+  useVotePericopeTrChangedSubscription();
 
   const handleToggleMode = useCallback(() => {
     setMode((mode) => {

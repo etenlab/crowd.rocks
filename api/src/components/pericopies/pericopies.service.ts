@@ -1,13 +1,14 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PoolClient } from 'pg';
 
 import { calc_vote_weight, pgClientOrPool } from 'src/common/utility';
 
-import { ErrorType } from 'src/common/types';
+import { ErrorType, TableNameType } from 'src/common/types';
 
 import { AuthorizationService } from '../authorization/authorization.service';
 import { PostgresService } from 'src/core/postgres.service';
 import { PericopeVotesService } from './pericope-votes.service';
+import { WordRangesService } from './../documents/word-ranges.service';
 
 import {
   PericopiesOutput,
@@ -16,6 +17,7 @@ import {
   PericopeWithVotesEdge,
   PericopeTextWithDescription,
   PericopeDeleteOutput,
+  PericopeTagsQasCountOutput,
 } from './types';
 import {
   PericopeUpsertsProcedureOutput,
@@ -42,6 +44,8 @@ import {
   getDocumentWordEntriesTotalPageSize,
 } from '../documents/sql-string';
 import { LanguageInput } from '../common/types';
+import { QuestionsService } from '../question-answer/questions.service';
+import { WordRangeTagsService } from '../tagging/word-range-tags.service';
 
 export const WORDS_JOINER = ' ';
 
@@ -51,6 +55,9 @@ export class PericopiesService {
     private pg: PostgresService,
     private pericopeVoteService: PericopeVotesService,
     private authService: AuthorizationService,
+    private wordRangesService: WordRangesService,
+    private questionsService: QuestionsService,
+    private wordRangeTagsService: WordRangeTagsService,
   ) {}
 
   async reads(
@@ -474,5 +481,69 @@ export class PericopiesService {
         geo_code: row.geo_code,
       },
     }));
+  }
+
+  async getPericopeTagsQasCount(
+    pericopeId: string,
+  ): Promise<PericopeTagsQasCountOutput> {
+    try {
+      const pericopeDocumentQ =
+        await this.pg.pool.query<GetPericopeDocumentSqlR>(
+          ...getPericopeDocumentSql({ pericopeIds: [pericopeId] }),
+        );
+
+      const pericopeWords = await this.getWordsTillNextPericope(
+        pericopeDocumentQ.rows[0].document_id,
+        pericopeDocumentQ.rows[0].start_word,
+      );
+
+      const pericopeWordRanges = await this.wordRangesService.getByBeginWordIds(
+        pericopeWords.map((pw) => Number(pw.document_word_entry_id)),
+        null,
+      );
+
+      const qasRefsArray: Array<{
+        parent_table: TableNameType;
+        parent_id: number;
+      }> = pericopeWordRanges.word_ranges
+        .filter((pwr) => pwr?.word_range_id)
+        .map((pwr) => {
+          return {
+            parent_table: TableNameType.word_ranges,
+            parent_id: Number(pwr!.word_range_id),
+          };
+        });
+
+      const qas = await this.questionsService.getQuestionsByRefs(
+        qasRefsArray,
+        null,
+      );
+
+      const tags =
+        await this.wordRangeTagsService.getWordRangeTagsByWordRangeIds(
+          pericopeWordRanges.word_ranges
+            .filter((pwr) => pwr?.word_range_id)
+            .map((pwr) => Number(pwr!.word_range_id)),
+          null,
+        );
+
+      return {
+        error: ErrorType.NoError,
+        pericope_id: pericopeId,
+        qas_count: qas.questions.length,
+        tags_count: tags.word_range_tags.length,
+      };
+    } catch (error) {
+      Logger.error(
+        JSON.stringify(error),
+        'PericopiesService#getPericopeTagsQasCount',
+      );
+      return {
+        error: ErrorType.UnknownError,
+        pericope_id: null,
+        qas_count: null,
+        tags_count: null,
+      };
+    }
   }
 }

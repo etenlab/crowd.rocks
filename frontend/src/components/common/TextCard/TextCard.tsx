@@ -1,4 +1,4 @@
-import { Typography, Stack } from '@mui/material';
+import { Typography, Stack, Box } from '@mui/material';
 
 import { TableNameType } from '../../../generated/graphql';
 
@@ -8,6 +8,7 @@ import { DiscussionIconButton } from '../../Discussion/DiscussionButton';
 import { VoteButtonsHorizontal } from '../VoteButtonsHorizontal';
 import { PostAuthor } from '../PostAuthor';
 import { MoreHorizButton } from '../buttons/MoreHorizButton';
+import { StarYellow } from '../icons/StarYellow';
 
 export type Author = {
   username: string;
@@ -35,6 +36,7 @@ export type TextCardProps = {
     flag_names: FlagName[];
   };
   author?: Author;
+  isStarred?: boolean;
 };
 
 export function TextCard({
@@ -44,6 +46,7 @@ export function TextCard({
   discussion,
   flags,
   author,
+  isStarred,
 }: TextCardProps) {
   const voteButtonCom = vote ? <VoteButtonsHorizontal {...vote} /> : null;
   const discussionBtnCom = discussion ? (
@@ -53,16 +56,19 @@ export function TextCard({
   return (
     <Stack gap="10px">
       <Stack direction="row" justifyContent="space-between">
-        {author ? (
-          <PostAuthor
-            username={author.username}
-            date={author.createdAt}
-            avatar={author.avatar}
-            isCreatedByBot={author.createdByBot}
-          />
-        ) : (
-          <div />
-        )}
+        <Box display={'flex'} alignItems={'center'} gap="20px">
+          {author ? (
+            <PostAuthor
+              username={author.username}
+              date={author.createdAt}
+              avatar={author.avatar}
+              isCreatedByBot={author.createdByBot}
+            />
+          ) : (
+            <div />
+          )}
+          {isStarred && <StarYellow />}
+        </Box>
         {authorizedForAnyFlag(flags?.flag_names ?? []) ? (
           <MoreHorizButton
             dropDownList={

@@ -32,6 +32,7 @@ fragment PericopeTranslationWithVotesFragment on PericopeTranslationWithVotes {
   }
   upvotes
   downvotes
+  isBest
 }
 
 fragment PericopeTextWithTranslationAndDescriptionFragment on PericopeTextWithTranslationAndDescription {
@@ -101,6 +102,15 @@ query GetPericopeTextAndDesctiption($pericopeId: String!) {
   }
 }
 
+# query GetBestPericopeTr($pericopeId: String!, $targetLang: LanguageInput!) {
+#   getBestPericopeTr(pericopeId: $pericopeId, targetLang: $targetLang) {
+#     error
+#     bestTranslation {
+#       ...PericopeTranslationFragment
+#     }
+#   }
+# }
+
 mutation AddPericopeTr(
   $pericopeId: String!
   $targetLang: LanguageInput!
@@ -149,8 +159,8 @@ subscription SubscribeToRecomendedPericopiesChanged {
   }
 }
 
-subscription BestPericopeTrChanged {
-  bestPericopeTrChanged {
+subscription VotePericopeTrChanged {
+  votePericopeTrChanged {
     newPericopeTr {
       ...PericopeTranslationFragment
     }

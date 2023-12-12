@@ -71,13 +71,6 @@ export type AvatarUpdateOutput = {
   user?: Maybe<User>;
 };
 
-export type BestPericopeTrChanged = {
-  __typename?: 'BestPericopeTrChanged';
-  error: ErrorType;
-  newPericopeTr?: Maybe<PericopeTranslation>;
-  newVoteStatus?: Maybe<PericopeTrVoteStatus>;
-};
-
 export type BotTranslateDocumentInput = {
   botType: BotType;
   documentId: Scalars['String']['input'];
@@ -258,6 +251,7 @@ export enum ErrorType {
   PasswordInvalid = 'PasswordInvalid',
   PasswordTooLong = 'PasswordTooLong',
   PasswordTooShort = 'PasswordTooShort',
+  PericopeBestTranslationNotFound = 'PericopeBestTranslationNotFound',
   PericopeGetTranslationError = 'PericopeGetTranslationError',
   PericopeInsertFailed = 'PericopeInsertFailed',
   PericopeNotFound = 'PericopeNotFound',
@@ -1394,6 +1388,14 @@ export type PericopeEdge = {
   node: Pericope;
 };
 
+export type PericopeTagsQasCountOutput = {
+  __typename?: 'PericopeTagsQasCountOutput';
+  error: ErrorType;
+  pericope_id?: Maybe<Scalars['ID']['output']>;
+  qas_count?: Maybe<Scalars['String']['output']>;
+  tags_count?: Maybe<Scalars['String']['output']>;
+};
+
 export type PericopeTextWithDescription = {
   __typename?: 'PericopeTextWithDescription';
   error: ErrorType;
@@ -1441,6 +1443,7 @@ export type PericopeTranslationWithVotes = {
   created_at: Scalars['String']['output'];
   created_by_user: User;
   downvotes: Scalars['Int']['output'];
+  isBest?: Maybe<Scalars['Boolean']['output']>;
   language: LanguageOutput;
   pericope_id: Scalars['String']['output'];
   pericope_translation_id: Scalars['ID']['output'];
@@ -1858,6 +1861,7 @@ export type Query = {
   getOrigMapWordsAndPhrases: MapWordsAndPhrasesConnection;
   getOrigMapWordsAndPhrasesCount: MapWordsAndPhrasesCountOutput;
   getOrigMapsList: GetOrigMapsListOutput;
+  getPericopeTagsQasCount: PericopeTagsQasCountOutput;
   getPericopeTextAndDesctiption: PericopeTextWithDescription;
   getPericopeTranslations: PericopeTranslationsOutput;
   getPericopeVoteStatus: PericopeVoteStatusOutput;
@@ -2067,6 +2071,11 @@ export type QueryGetOrigMapWordsAndPhrasesCountArgs = {
 
 export type QueryGetOrigMapsListArgs = {
   input: GetOrigMapListInput;
+};
+
+
+export type QueryGetPericopeTagsQasCountArgs = {
+  pericopeId: Scalars['String']['input'];
 };
 
 
@@ -2703,7 +2712,6 @@ export type Subscription = {
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult;
   ZipMapReport: ZipMapResult;
   answersAdded: AnswersOutput;
-  bestPericopeTrChanged: BestPericopeTrChanged;
   documentAdded: DocumentUploadOutput;
   pericopeDeleted: PericopeDeleteOutput;
   pericopeVoteStatusToggled: PericopeVoteStatusOutput;
@@ -2711,6 +2719,7 @@ export type Subscription = {
   questionsAdded: QuestionsOutput;
   questionsOnWordRangeAdded: QuestionOnWordRangesOutput;
   recommendedPericopiesChanged: RecomendedPericopiesChangedAtDocumentId;
+  votePericopeTrChanged: VotePericopeTrChanged;
   wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput;
   wordRangeTagWithVoteAdded: WordRangeTagWithVotesOutput;
 };
@@ -2726,6 +2735,7 @@ export enum TableNameType {
   DocumentWordEntries = 'document_word_entries',
   Documents = 'documents',
   OriginalMaps = 'original_maps',
+  PericopeTranslations = 'pericope_translations',
   Pericopies = 'pericopies',
   PhraseDefinitions = 'phrase_definitions',
   PhraseToPhraseTranslations = 'phrase_to_phrase_translations',
@@ -2951,6 +2961,13 @@ export type VersionCreateOutput = {
   __typename?: 'VersionCreateOutput';
   error: ErrorType;
   version?: Maybe<Version>;
+};
+
+export type VotePericopeTrChanged = {
+  __typename?: 'VotePericopeTrChanged';
+  error: ErrorType;
+  newPericopeTr?: Maybe<PericopeTranslation>;
+  newVoteStatus?: Maybe<PericopeTrVoteStatus>;
 };
 
 export type Word = {
@@ -3957,7 +3974,7 @@ export type LanguageOutputFragmentFragment = { __typename?: 'LanguageOutput', la
 
 export type PericopeTranslationFragmentFragment = { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
 
-export type PericopeTranslationWithVotesFragmentFragment = { __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
+export type PericopeTranslationWithVotesFragmentFragment = { __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, isBest?: boolean | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
 
 export type PericopeTextWithTranslationAndDescriptionFragmentFragment = { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id?: string | null, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null };
 
@@ -3982,7 +3999,7 @@ export type GetPericopeTranslationsQueryVariables = Exact<{
 }>;
 
 
-export type GetPericopeTranslationsQuery = { __typename?: 'Query', getPericopeTranslations: { __typename?: 'PericopeTranslationsOutput', translations: Array<{ __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
+export type GetPericopeTranslationsQuery = { __typename?: 'Query', getPericopeTranslations: { __typename?: 'PericopeTranslationsOutput', translations: Array<{ __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, isBest?: boolean | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
 export type GetPericopeTextAndDesctiptionQueryVariables = Exact<{
   pericopeId: Scalars['String']['input'];
@@ -4016,10 +4033,10 @@ export type SubscribeToRecomendedPericopiesChangedSubscriptionVariables = Exact<
 
 export type SubscribeToRecomendedPericopiesChangedSubscription = { __typename?: 'Subscription', recommendedPericopiesChanged: { __typename?: 'RecomendedPericopiesChangedAtDocumentId', documentId: string } };
 
-export type BestPericopeTrChangedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+export type VotePericopeTrChangedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type BestPericopeTrChangedSubscription = { __typename?: 'Subscription', bestPericopeTrChanged: { __typename?: 'BestPericopeTrChanged', newPericopeTr?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null, newVoteStatus?: { __typename?: 'PericopeTrVoteStatus', pericope_translation_id: string, upvotes: number, downvotes: number } | null } };
+export type VotePericopeTrChangedSubscription = { __typename?: 'Subscription', votePericopeTrChanged: { __typename?: 'VotePericopeTrChanged', newPericopeTr?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null, newVoteStatus?: { __typename?: 'PericopeTrVoteStatus', pericope_translation_id: string, upvotes: number, downvotes: number } | null } };
 
 export type PericopeFragmentFragment = { __typename?: 'Pericope', pericope_id: string, start_word: string };
 
@@ -4044,6 +4061,13 @@ export type GetPericopeVoteStatusQueryVariables = Exact<{
 
 
 export type GetPericopeVoteStatusQuery = { __typename?: 'Query', getPericopeVoteStatus: { __typename?: 'PericopeVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'PericopeVoteStatus', pericope_id: string, upvotes: number, downvotes: number } | null } };
+
+export type GetPericopeTagsQasCountQueryVariables = Exact<{
+  pericopeId: Scalars['String']['input'];
+}>;
+
+
+export type GetPericopeTagsQasCountQuery = { __typename?: 'Query', getPericopeTagsQasCount: { __typename?: 'PericopeTagsQasCountOutput', error: ErrorType, pericope_id?: string | null, tags_count?: string | null, qas_count?: string | null } };
 
 export type TogglePericopeVoteStatusMutationVariables = Exact<{
   pericope_id: Scalars['ID']['input'];
@@ -5223,6 +5247,7 @@ export const PericopeTranslationWithVotesFragmentFragmentDoc = gql`
   }
   upvotes
   downvotes
+  isBest
 }
     ${UserFieldsFragmentDoc}
 ${LanguageOutputFragmentFragmentDoc}`;
@@ -8652,9 +8677,9 @@ export function useSubscribeToRecomendedPericopiesChangedSubscription(baseOption
       }
 export type SubscribeToRecomendedPericopiesChangedSubscriptionHookResult = ReturnType<typeof useSubscribeToRecomendedPericopiesChangedSubscription>;
 export type SubscribeToRecomendedPericopiesChangedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToRecomendedPericopiesChangedSubscription>;
-export const BestPericopeTrChangedDocument = gql`
-    subscription BestPericopeTrChanged {
-  bestPericopeTrChanged {
+export const VotePericopeTrChangedDocument = gql`
+    subscription VotePericopeTrChanged {
+  votePericopeTrChanged {
     newPericopeTr {
       ...PericopeTranslationFragment
     }
@@ -8667,26 +8692,26 @@ export const BestPericopeTrChangedDocument = gql`
 ${PericopeTrVoteStatusFragmentFragmentDoc}`;
 
 /**
- * __useBestPericopeTrChangedSubscription__
+ * __useVotePericopeTrChangedSubscription__
  *
- * To run a query within a React component, call `useBestPericopeTrChangedSubscription` and pass it any options that fit your needs.
- * When your component renders, `useBestPericopeTrChangedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useVotePericopeTrChangedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useVotePericopeTrChangedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useBestPericopeTrChangedSubscription({
+ * const { data, loading, error } = useVotePericopeTrChangedSubscription({
  *   variables: {
  *   },
  * });
  */
-export function useBestPericopeTrChangedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<BestPericopeTrChangedSubscription, BestPericopeTrChangedSubscriptionVariables>) {
+export function useVotePericopeTrChangedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<VotePericopeTrChangedSubscription, VotePericopeTrChangedSubscriptionVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useSubscription<BestPericopeTrChangedSubscription, BestPericopeTrChangedSubscriptionVariables>(BestPericopeTrChangedDocument, options);
+        return Apollo.useSubscription<VotePericopeTrChangedSubscription, VotePericopeTrChangedSubscriptionVariables>(VotePericopeTrChangedDocument, options);
       }
-export type BestPericopeTrChangedSubscriptionHookResult = ReturnType<typeof useBestPericopeTrChangedSubscription>;
-export type BestPericopeTrChangedSubscriptionResult = Apollo.SubscriptionResult<BestPericopeTrChangedSubscription>;
+export type VotePericopeTrChangedSubscriptionHookResult = ReturnType<typeof useVotePericopeTrChangedSubscription>;
+export type VotePericopeTrChangedSubscriptionResult = Apollo.SubscriptionResult<VotePericopeTrChangedSubscription>;
 export const GetPericopiesByDocumentIdDocument = gql`
     query GetPericopiesByDocumentId($document_id: ID!, $first: Int, $after: ID) {
   getPericopiesByDocumentId(
@@ -8773,6 +8798,44 @@ export function useGetPericopeVoteStatusLazyQuery(baseOptions?: Apollo.LazyQuery
 export type GetPericopeVoteStatusQueryHookResult = ReturnType<typeof useGetPericopeVoteStatusQuery>;
 export type GetPericopeVoteStatusLazyQueryHookResult = ReturnType<typeof useGetPericopeVoteStatusLazyQuery>;
 export type GetPericopeVoteStatusQueryResult = Apollo.QueryResult<GetPericopeVoteStatusQuery, GetPericopeVoteStatusQueryVariables>;
+export const GetPericopeTagsQasCountDocument = gql`
+    query GetPericopeTagsQasCount($pericopeId: String!) {
+  getPericopeTagsQasCount(pericopeId: $pericopeId) {
+    error
+    pericope_id
+    tags_count
+    qas_count
+  }
+}
+    `;
+
+/**
+ * __useGetPericopeTagsQasCountQuery__
+ *
+ * To run a query within a React component, call `useGetPericopeTagsQasCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPericopeTagsQasCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPericopeTagsQasCountQuery({
+ *   variables: {
+ *      pericopeId: // value for 'pericopeId'
+ *   },
+ * });
+ */
+export function useGetPericopeTagsQasCountQuery(baseOptions: Apollo.QueryHookOptions<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>(GetPericopeTagsQasCountDocument, options);
+      }
+export function useGetPericopeTagsQasCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>(GetPericopeTagsQasCountDocument, options);
+        }
+export type GetPericopeTagsQasCountQueryHookResult = ReturnType<typeof useGetPericopeTagsQasCountQuery>;
+export type GetPericopeTagsQasCountLazyQueryHookResult = ReturnType<typeof useGetPericopeTagsQasCountLazyQuery>;
+export type GetPericopeTagsQasCountQueryResult = Apollo.QueryResult<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>;
 export const TogglePericopeVoteStatusDocument = gql`
     mutation TogglePericopeVoteStatus($pericope_id: ID!, $vote: Boolean!) {
   togglePericopeVoteStatus(pericope_id: $pericope_id, vote: $vote) {
@@ -12053,6 +12116,7 @@ export const namedOperations = {
     GetPericopeTextAndDesctiption: 'GetPericopeTextAndDesctiption',
     GetPericopiesByDocumentId: 'GetPericopiesByDocumentId',
     GetPericopeVoteStatus: 'GetPericopeVoteStatus',
+    GetPericopeTagsQasCount: 'GetPericopeTagsQasCount',
     PhraseDefinitionRead: 'PhraseDefinitionRead',
     GetPhrasesByLanguage: 'GetPhrasesByLanguage',
     GetPhraseDefinitionsByPhraseId: 'GetPhraseDefinitionsByPhraseId',
@@ -12169,7 +12233,7 @@ export const namedOperations = {
     SubscribeToDocumentAdded: 'SubscribeToDocumentAdded',
     SubscribeToZipMap: 'SubscribeToZipMap',
     SubscribeToRecomendedPericopiesChanged: 'SubscribeToRecomendedPericopiesChanged',
-    BestPericopeTrChanged: 'BestPericopeTrChanged',
+    VotePericopeTrChanged: 'VotePericopeTrChanged',
     SubscribeToPericopiesAdded: 'SubscribeToPericopiesAdded',
     SubscribeToPericopieDeleted: 'SubscribeToPericopieDeleted',
     SubscribeToPericopeVoteStatusToggled: 'SubscribeToPericopeVoteStatusToggled',

@@ -9,7 +9,7 @@ export class SubscriptionToken {
   static pericopiesAdded = 'pericopiesAdded';
   static pericopeDeleted = 'pericopeDeleted';
   static pericopeVoteStatusToggled = 'pericopeVoteStatusToggled';
-  static bestPericopeTrChanged = 'bestPericopeTrChanged';
+  static votePericopeTrChanged = 'votePericopeTrChanged';
   static recommendedPericopiesChanged = 'recommendedPericopiesChanged';
   static questionsAdded = 'questionsAdded';
   static questionsOnWordRangeAdded = 'questionsOnWordRangeAdded';
