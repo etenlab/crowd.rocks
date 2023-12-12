@@ -3,6 +3,7 @@ import { Typography, Box, IconButton } from '@mui/material';
 import { NavArrowRight } from '../icons/NavArrowRight';
 
 import { Item } from './TranslatedTextItemViewer';
+import { HrDashed } from '../HrDashed/HrDashed';
 
 export type TranslatedTextItemStandardProps = {
   original: Item;
@@ -38,10 +39,13 @@ export function TranslatedTextItemStandard({
       })}
     >
       <Typography variant="h3">{original.text}</Typography>
-      {translation ? (
-        <Typography variant="body2" color="text.gray">
-          {translation.text}
-        </Typography>
+      {translation?.text ? (
+        <>
+          <Typography variant="body2" color="text.gray">
+            {translation.text}
+          </Typography>
+          <HrDashed />
+        </>
       ) : null}
 
       <Typography
@@ -66,7 +70,6 @@ export function TranslatedTextItemStandard({
           {translation.description}
         </Typography>
       ) : null}
-
       <IconButton
         disabled={disabledDetail}
         onClick={handleClick}
