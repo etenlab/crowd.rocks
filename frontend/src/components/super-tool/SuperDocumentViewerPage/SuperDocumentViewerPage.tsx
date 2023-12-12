@@ -1,7 +1,13 @@
 import { useCallback, useState } from 'react';
 import { useParams } from 'react-router';
 import { useIonViewDidEnter, useIonViewDidLeave } from '@ionic/react';
-import { Box, CircularProgress, Collapse, Button } from '@mui/material';
+import {
+  Box,
+  CircularProgress,
+  Collapse,
+  Button,
+  useMediaQuery,
+} from '@mui/material';
 
 import { globals } from '../../../services/globals';
 import { PageLayout } from '../../common/PageLayout';
@@ -13,8 +19,7 @@ import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { TabKind, ToolBox, SuperToolKind, FilterKind } from './ToolBox';
 import { OptionItem } from '../../common/forms/Autocomplete';
-import { NavArrowDown } from '../../common/icons/NavArrowDown';
-import { NavArrowUp } from '../../common/icons/NavArrowUp';
+import { Settings } from '../../common/icons/Settings';
 import { SuperDocumentViewer } from '../SuperDocumentViewer/SuperDocumentViewer';
 import { SuperPericopiesTranslator } from '../SuperPericopiesTranslator';
 import { useVotePericopeTrChangedSubscription } from '../../../hooks/useVotePericopeTrChangedSubscription';
@@ -22,6 +27,7 @@ import { useVotePericopeTrChangedSubscription } from '../../../hooks/useVotePeri
 export function SuperDocumentViewerPage() {
   const { tr } = useTr();
   const { document_id } = useParams<{ document_id: string }>();
+  const matches = useMediaQuery('(min-width:765px)');
   const {
     states: {
       components: { ionContentScrollElement },
@@ -121,8 +127,7 @@ export function SuperDocumentViewerPage() {
           width: '100%',
           maxWidth: '777px',
           background: (theme) => theme.palette.background.white,
-          padding: expand ? '30px 20px' : '15px 20px',
-          borderRadius: '0 0 20px 20px',
+          padding: expand ? '30px 20px' : '0 20px',
           boxShadow: '0px 5px 14px 0px rgba(128, 136, 163, 0.20)',
         }}
       >
@@ -144,64 +149,55 @@ export function SuperDocumentViewerPage() {
             }
           />
         </Collapse>
-        {expand ? (
-          <Button
-            variant="contained"
-            onClick={handleClose}
-            sx={{
-              position: 'absolute',
-              bottom: -20,
-              left: '50%',
-              borderRadius: '50%',
-              minWidth: 0,
-              transform: 'translateX(-50%)',
-            }}
-            color="blue"
-          >
-            <NavArrowUp />
-          </Button>
-        ) : (
-          <Button
-            variant="contained"
-            onClick={handleExpand}
-            sx={{
-              position: 'absolute',
-              bottom: -20,
-              left: '50%',
-              borderRadius: '50%',
-
-              minWidth: 0,
-              transform: 'translateX(-50%)',
-            }}
-            color="blue"
-          >
-            <NavArrowDown />
-          </Button>
-        )}
       </Box>
 
       <Collapse in={expand}>
         <Box sx={{ height: '340px' }} />
       </Collapse>
 
-      {tab === TabKind.Document ? (
-        <SuperDocumentViewer
-          documentId={document_id}
-          mode={mode}
-          tool={tool.value as SuperToolKind}
-          customScrollParent={
-            pageStatus === 'shown' && ionContentScrollElement
-              ? ionContentScrollElement
-              : undefined
-          }
-        />
-      ) : (
-        <SuperPericopiesTranslator
-          documentId={document_id}
-          filterKind={filter.value}
-          stringFilter={stringFilter}
-        />
-      )}
+      {!expand ? (
+        <Button
+          variant="contained"
+          onClick={handleExpand}
+          sx={{
+            position: 'fixed',
+            zIndex: 9,
+            bottom: 100,
+            right: matches ? `calc(50% - 390px)` : '16px',
+            borderRadius: '10px',
+            padding: '10px',
+            minWidth: 0,
+            transform: 'translateX(-50%)',
+          }}
+          color="blue"
+        >
+          <Settings />
+        </Button>
+      ) : null}
+
+      <Box
+        sx={{ width: '100%', maxWidth: '777px', height: '100vh' }}
+        onClick={handleClose}
+      >
+        {tab === TabKind.Document ? (
+          <SuperDocumentViewer
+            documentId={document_id}
+            mode={mode}
+            tool={tool.value as SuperToolKind}
+            customScrollParent={
+              pageStatus === 'shown' && ionContentScrollElement
+                ? ionContentScrollElement
+                : undefined
+            }
+          />
+        ) : (
+          <SuperPericopiesTranslator
+            documentId={document_id}
+            filterKind={filter.value}
+            stringFilter={stringFilter}
+          />
+        )}
+      </Box>
     </PageLayout>
   );
 }
