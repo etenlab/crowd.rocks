@@ -235,7 +235,6 @@ export function TagAddingModal({
             fullWidth
             onClick={handleSaveTagNames}
             startIcon={<CheckCircle sx={{ fontSize: 20 }} />}
-            disabled={!!invalidMessage}
           >
             {tr('Save')}
           </Button>

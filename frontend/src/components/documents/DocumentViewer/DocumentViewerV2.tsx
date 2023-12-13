@@ -68,9 +68,11 @@ export type DocumentViewerV2Props = {
   ): void;
   documentId: string;
   onSelectRange(range: { begin: string; end: string }): void;
+  onSelectingRange?(status: boolean): void;
   onChangeRangeText(sentence: string): void;
   onLoadPage?(tempPage: TempPage): void;
   customScrollParent?: HTMLElement;
+  disabledRangeSelection?: boolean;
 };
 
 export function DocumentViewerV2({
@@ -80,8 +82,10 @@ export function DocumentViewerV2({
   dots,
   onClickWord,
   onSelectRange,
+  onSelectingRange,
   onChangeRangeText,
   onLoadPage,
+  disabledRangeSelection,
   customScrollParent,
 }: DocumentViewerV2Props) {
   const [getDocumentWordEntriesByDocumentId] =
@@ -367,20 +371,26 @@ export function DocumentViewerV2({
     setRequiredPage(tempPage);
   }, []);
 
-  const startTimer = useCallback((entryId: string, order: number) => {
-    timerRef.current = setTimeout(() => {
-      setRange({
-        begin: {
-          entryId: entryId,
-          order: order,
-        },
-        end: {
-          entryId: entryId,
-          order: order,
-        },
-      });
-    }, 2000);
-  }, []);
+  const startTimer = useCallback(
+    (entryId: string, order: number) => {
+      timerRef.current = setTimeout(() => {
+        if (disabledRangeSelection !== true) {
+          onSelectingRange && onSelectingRange(true);
+          setRange({
+            begin: {
+              entryId: entryId,
+              order: order,
+            },
+            end: {
+              entryId: entryId,
+              order: order,
+            },
+          });
+        }
+      }, 2000);
+    },
+    [disabledRangeSelection, onSelectingRange],
+  );
 
   const cancelTimer = useCallback(() => {
     clearTimeout(timerRef.current);
@@ -659,6 +669,7 @@ export function DocumentViewerV2({
                               end: range.end.entryId,
                             });
                             setRange(null);
+                            onSelectingRange && onSelectingRange(false);
                           }}
                           color="green"
                         >
@@ -668,6 +679,7 @@ export function DocumentViewerV2({
                           onClick={(e) => {
                             e.stopPropagation();
                             setRange(null);
+                            onSelectingRange && onSelectingRange(false);
                           }}
                           color="red"
                         >
@@ -785,6 +797,7 @@ export function DocumentViewerV2({
     handleLoading,
     handleWordClick,
     onSelectRange,
+    onSelectingRange,
     range,
     rememberedPage,
     rowWidth,

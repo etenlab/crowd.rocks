@@ -1,8 +1,8 @@
-import { Stack, Typography } from '@mui/material';
+import { Stack, Typography, Button } from '@mui/material';
 
 import { Checkbox } from '../../common/buttons/Checkbox';
-import { UpvoteButton } from '../../common/buttons/vote/UpvoteButton';
-import { DownvoteButton } from '../../common/buttons/vote/DownvoteButton';
+import { ThumbsUp } from '../../common/icons/ThumbsUp';
+import { ThumbsDown } from '../../common/icons/ThumbsDown';
 
 import { Item } from '../styled';
 
@@ -74,25 +74,44 @@ export function AnswerItem({ question, answer }: AnswerItemProps) {
             date={new Date(answer.created_at)}
             avatar={answer.created_by_user.avatar_url || ''}
           />
-          <Item sx={{ display: 'flex', gap: '16px' }}>
-            {answer.question_items.map((item) =>
-              item.item === 'agree' ? (
-                <UpvoteButton
-                  key={item.question_item_id}
-                  selected
-                  upvotes={tr('Agree')}
-                  onClick={() => {}}
-                />
-              ) : (
-                <DownvoteButton
-                  key={item.question_item_id}
-                  selected
-                  downvotes={tr('Disagree')}
-                  onClick={() => {}}
-                />
-              ),
-            )}
-          </Item>
+
+          {answer.question_items.map((item) =>
+            item.item === 'agree' ? (
+              <Button
+                key={item.question_item_id}
+                variant="outlined"
+                startIcon={
+                  <ThumbsUp sx={{ fontSize: 22, padding: 0 }} color="green" />
+                }
+                color="gray_stroke"
+                sx={{
+                  justifyContent: 'flex-start',
+                  padding: '16px',
+                  color: (theme) => theme.palette.text.dark,
+                  borderColor: (theme) => theme.palette.text.gray_stroke,
+                }}
+              >
+                {tr('Agree')}
+              </Button>
+            ) : (
+              <Button
+                key={item.question_item_id}
+                variant="outlined"
+                startIcon={
+                  <ThumbsDown sx={{ fontSize: 22, padding: 0 }} color="red" />
+                }
+                color="gray_stroke"
+                sx={{
+                  justifyContent: 'flex-start',
+                  padding: '16px',
+                  color: (theme) => theme.palette.text.dark,
+                  borderColor: (theme) => theme.palette.text.gray_stroke,
+                }}
+              >
+                {tr('Disagree')}
+              </Button>
+            ),
+          )}
         </Stack>
       );
     } else if (

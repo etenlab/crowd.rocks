@@ -15,14 +15,17 @@ import {
 import { useSubscribeToPericopiesAddedSubscription } from '../../../hooks/useUpsertPericopeMutation';
 import { useSubscribeToPericopieDeletedSubscription } from '../../../hooks/useDeletePericopeMutation';
 import { useSubscribeToPericopeVoteStatusToggledSubscription } from '../../../hooks/useTogglePericopeVoteStatusMutation';
+import { globals } from '../../../services/globals';
 
 type PericopeDocumentViewerV2Props = {
   documentId: string;
+  documentAuthorId: string;
   customScrollParent?: HTMLElement;
 };
 
 export function PericopeDocumentViewerV2({
   documentId,
+  documentAuthorId,
   customScrollParent,
 }: PericopeDocumentViewerV2Props) {
   const { data, fetchMore } = useGetPericopiesByDocumentIdQuery({
@@ -124,11 +127,15 @@ export function PericopeDocumentViewerV2({
 
   let popoverCom: ReactNode = null;
 
+  const currentUserId = globals.get_user_id();
+  const sameUser =
+    currentUserId && +documentAuthorId === currentUserId ? true : false;
+
   if (selectedPericope) {
     popoverCom = (
       <PericopeReactionV2 pericope={selectedPericope} onClose={handleClose} />
     );
-  } else if (selectedWordEntryId) {
+  } else if (selectedWordEntryId && sameUser) {
     popoverCom = (
       <PericopeAddButtonV2
         wordEntryId={selectedWordEntryId}

@@ -281,10 +281,10 @@ export function NewQuestionPage() {
 
   return (
     <PageLayout>
-      <Caption>{tr('New Question')}</Caption>
+      <Caption>{tr('Ask a Question ')}</Caption>
 
       <Stack gap="20px">
-        <Typography variant="h4">{pieceOfText}</Typography>
+        <Typography variant="h4">{`"${pieceOfText}"`}</Typography>
 
         <Divider />
 
