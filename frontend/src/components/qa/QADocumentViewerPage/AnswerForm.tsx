@@ -1,11 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Stack, Button } from '@mui/material';
+import { Stack, Button, Divider } from '@mui/material';
 
 import { Checkbox } from '../../common/buttons/Checkbox';
 import { Radio } from '../../common/buttons/Radio';
 import { Input } from '../../common/forms/Input';
-import { UpvoteButton } from '../../common/buttons/vote/UpvoteButton';
-import { DownvoteButton } from '../../common/buttons/vote/DownvoteButton';
 
 import { useTr } from '../../../hooks/useTr';
 import { useUpsertAnswerMutation } from '../../../hooks/useUpsertAnswerMutation';
@@ -15,6 +13,7 @@ import {
   QuestionWithStatistic,
 } from '../../../generated/graphql';
 import { Typography } from '@mui/material';
+import { ThumbsUp } from '../../common/icons/ThumbsUp';
 
 export type AnswerFormProps = {
   question: QuestionWithStatistic;
@@ -84,6 +83,7 @@ export function AnswerForm({
   return (
     <Stack gap="20px">
       <Typography variant="h3">{tr('Add answer')}</Typography>
+      <Divider />
       <QuestionItemsForm
         question={question}
         text={text}
@@ -192,22 +192,51 @@ export function QuestionItemsForm({
         question.question_items[1].item === 'agree')
     ) {
       return (
-        <Stack
-          gap="24px"
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <UpvoteButton
-            selected={items[0] === 'agree'}
-            upvotes={tr('Agree')}
+        <Stack gap="16px">
+          <Button
+            variant="outlined"
+            startIcon={
+              <ThumbsUp sx={{ fontSize: 22, padding: 0 }} color="green" />
+            }
             onClick={() => handleChangeChooseOne('agree')}
-          />
-          <DownvoteButton
-            selected={items[0] === 'disagree'}
-            downvotes={tr('Disagree')}
+            color={items[0] === 'agree' ? 'green' : 'gray_stroke'}
+            sx={(theme) => ({
+              justifyContent: 'flex-start',
+              padding: '16px',
+              color:
+                items[0] === 'agree'
+                  ? theme.palette.text.green
+                  : theme.palette.text.dark,
+              backgroundColor:
+                items[0] === 'agree'
+                  ? '#D4F5E5!important'
+                  : theme.palette.background.white,
+            })}
+          >
+            {tr('Agree')}
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={
+              <ThumbsUp sx={{ fontSize: 22, padding: 0 }} color="red" />
+            }
             onClick={() => handleChangeChooseOne('disagree')}
-          />
+            color={items[0] === 'disagree' ? 'red' : 'gray_stroke'}
+            sx={(theme) => ({
+              justifyContent: 'flex-start',
+              padding: '16px',
+              color:
+                items[0] === 'disagree'
+                  ? theme.palette.text.red
+                  : theme.palette.text.dark,
+              backgroundColor:
+                items[0] === 'disagree'
+                  ? '#FFDADA!important'
+                  : theme.palette.background.white,
+            })}
+          >
+            {tr('Disagree')}
+          </Button>
         </Stack>
       );
     } else if (
@@ -219,34 +248,46 @@ export function QuestionItemsForm({
       return (
         <Stack gap="16px">
           <Button
-            variant="text"
+            variant="outlined"
             startIcon={
-              <Radio
-                sx={{ fontSize: 22, padding: 0 }}
-                color={items[0] === 'true' ? 'green' : 'gray_stroke'}
-                checked={items[0] === 'true'}
-              />
+              <Radio sx={{ fontSize: 22, padding: 0 }} color="green" checked />
             }
             onClick={() => handleChangeChooseOne('true')}
-            color="gray"
-            sx={{ justifyContent: 'flex-start', padding: 0 }}
-            disableRipple
+            color={items[0] === 'true' ? 'green' : 'gray_stroke'}
+            sx={(theme) => ({
+              justifyContent: 'flex-start',
+              padding: '16px',
+              color:
+                items[0] === 'true'
+                  ? theme.palette.text.green
+                  : theme.palette.text.dark,
+              backgroundColor:
+                items[0] === 'true'
+                  ? '#D4F5E5!important'
+                  : theme.palette.background.white,
+            })}
           >
             {tr('True')}
           </Button>
           <Button
-            variant="text"
+            variant="outlined"
             startIcon={
-              <Radio
-                sx={{ fontSize: 22, padding: 0 }}
-                color={items[0] === 'false' ? 'red' : 'gray_stroke'}
-                checked={items[0] === 'false'}
-              />
+              <Radio sx={{ fontSize: 22, padding: 0 }} color="red" checked />
             }
-            color="gray"
+            color={items[0] === 'false' ? 'red' : 'gray_stroke'}
             onClick={() => handleChangeChooseOne('false')}
-            sx={{ justifyContent: 'flex-start', padding: 0 }}
-            disableRipple
+            sx={(theme) => ({
+              justifyContent: 'flex-start',
+              padding: '16px',
+              color:
+                items[0] === 'false'
+                  ? theme.palette.text.red
+                  : theme.palette.text.dark,
+              backgroundColor:
+                items[0] === 'false'
+                  ? '#FFDADA!important'
+                  : theme.palette.background.white,
+            })}
           >
             {tr('False')}
           </Button>

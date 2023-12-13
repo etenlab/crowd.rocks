@@ -85,6 +85,7 @@ import { QADocumentListPage } from './components/qa/QADocumentListPage';
 import { QADocumentViewerPage } from './components/qa/QADocumentViewerPage';
 import { AnswersPage } from './components/qa/QADocumentViewerPage/AnswersPage';
 import { NewQuestionPage } from './components/qa/QADocumentViewerPage/NewQuestionPage';
+import { QuestionDetailsPage } from './components/qa/QADocumentViewer/QuestionDetailsPage';
 
 import { PericopeDocumentListPage } from './components/pericopies/PericopeDocumentListPage';
 import { PericopeDocumentViewerPage } from './components/pericopies/PericopeDocumentViewerPage';
@@ -581,6 +582,11 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/qa/documents/:document_id"
               component={QADocumentViewerPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/qa/question-details/:word_range_id"
+              component={QuestionDetailsPage}
             />
             <Route
               exact
