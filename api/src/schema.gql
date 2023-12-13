@@ -1253,7 +1253,9 @@ type Query {
   getPhraseVoteStatus(phrase_id: ID!): PhraseVoteStatusOutputRow!
   getPhraseWithVoteById(phrase_id: ID!): PhraseWithVoteOutput!
   getPhrasesByLanguage(after: ID, first: Int, input: LanguageInput!): PhraseWithVoteListConnection!
+  getQuestionOnWordRangesByBeginWordEntryId(begin_document_word_entry_id: ID!): QuestionOnWordRangesOutput!
   getQuestionOnWordRangesByDocumentId(after: ID, document_id: ID!, first: Int): QuestionOnWordRangesListConnection!
+  getQuestionOnWordRangesByWordRangeId(word_range_id: ID!): QuestionOnWordRangesOutput!
   getQuestionStatistic(question_id: ID!): QuestionWithStatisticOutput!
   getQuestionsByRefs(parent_ids: [ID!]!, parent_tables: [TableNameType!]!): QuestionsOutput!
   getRecommendedTranslationFromDefinitionID(from_definition_id: ID!, from_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteOutput!
