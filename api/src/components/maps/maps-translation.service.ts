@@ -661,6 +661,34 @@ export class MapsTranslationService {
     }
   }
 
+  async checkAndCreateNewlyTranslatedMaps(
+    token: string,
+  ): Promise<Array<string>> {
+    const originalMaps = await this.mapsRepository.getOrigMaps();
+    const newlyTranslatedMapIds: Array<string> = [];
+    for (const om of originalMaps.mapList) {
+      if (!om.mapDetails?.original_map_id) continue;
+      const possibleLangs = await this.mapsRepository.getPossibleMapLanguages(
+        om.mapDetails.original_map_id,
+      );
+      for (const lang of possibleLangs) {
+        const translatedMap = await this.mapsRepository.getTranslatedMaps({
+          originalMapId: Number(om.mapDetails.original_map_id),
+          lang,
+        });
+        if (!translatedMap.mapList || translatedMap.mapList.length === 0) {
+          const newTranslatedMap = await this.translateOrigMapIdToLangs(
+            om.mapDetails.original_map_id,
+            [lang],
+            token,
+          );
+          newlyTranslatedMapIds.push(...newTranslatedMap);
+        }
+      }
+    }
+    return newlyTranslatedMapIds;
+  }
+
   /**
    * Mutates INode sturcture - replaces subnodes' values using provided valuesToReplace
    * @param iNodeStructure INode structure to replace values inside it.
