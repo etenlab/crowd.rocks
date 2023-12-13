@@ -1878,7 +1878,9 @@ export type Query = {
   getPhraseVoteStatus: PhraseVoteStatusOutputRow;
   getPhraseWithVoteById: PhraseWithVoteOutput;
   getPhrasesByLanguage: PhraseWithVoteListConnection;
+  getQuestionOnWordRangesByBeginWordEntryId: QuestionOnWordRangesOutput;
   getQuestionOnWordRangesByDocumentId: QuestionOnWordRangesListConnection;
+  getQuestionOnWordRangesByWordRangeId: QuestionOnWordRangesOutput;
   getQuestionStatistic: QuestionWithStatisticOutput;
   getQuestionsByRefs: QuestionsOutput;
   getRecommendedTranslationFromDefinitionID: TranslationWithVoteOutput;
@@ -2169,10 +2171,20 @@ export type QueryGetPhrasesByLanguageArgs = {
 };
 
 
+export type QueryGetQuestionOnWordRangesByBeginWordEntryIdArgs = {
+  begin_document_word_entry_id: Scalars['ID']['input'];
+};
+
+
 export type QueryGetQuestionOnWordRangesByDocumentIdArgs = {
   after?: InputMaybe<Scalars['ID']['input']>;
   document_id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryGetQuestionOnWordRangesByWordRangeIdArgs = {
+  word_range_id: Scalars['ID']['input'];
 };
 
 
@@ -4227,6 +4239,20 @@ export type GetQuestionOnWordRangesByDocumentIdQueryVariables = Exact<{
 
 
 export type GetQuestionOnWordRangesByDocumentIdQuery = { __typename?: 'Query', getQuestionOnWordRangesByDocumentId: { __typename?: 'QuestionOnWordRangesListConnection', error: ErrorType, edges: Array<{ __typename?: 'QuestionOnWordRangesEdge', cursor: string, node: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } }> }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+
+export type GetQuestionOnWordRangesByBeginWordEntryIdQueryVariables = Exact<{
+  begin_document_word_entry_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetQuestionOnWordRangesByBeginWordEntryIdQuery = { __typename?: 'Query', getQuestionOnWordRangesByBeginWordEntryId: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
+
+export type GetQuestionOnWordRangesByWordRangeIdQueryVariables = Exact<{
+  word_range_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetQuestionOnWordRangesByWordRangeIdQuery = { __typename?: 'Query', getQuestionOnWordRangesByWordRangeId: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
 
 export type GetAnswersByQuestionIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9483,6 +9509,84 @@ export function useGetQuestionOnWordRangesByDocumentIdLazyQuery(baseOptions?: Ap
 export type GetQuestionOnWordRangesByDocumentIdQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByDocumentIdQuery>;
 export type GetQuestionOnWordRangesByDocumentIdLazyQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByDocumentIdLazyQuery>;
 export type GetQuestionOnWordRangesByDocumentIdQueryResult = Apollo.QueryResult<GetQuestionOnWordRangesByDocumentIdQuery, GetQuestionOnWordRangesByDocumentIdQueryVariables>;
+export const GetQuestionOnWordRangesByBeginWordEntryIdDocument = gql`
+    query GetQuestionOnWordRangesByBeginWordEntryId($begin_document_word_entry_id: ID!) {
+  getQuestionOnWordRangesByBeginWordEntryId(
+    begin_document_word_entry_id: $begin_document_word_entry_id
+  ) {
+    error
+    questions {
+      ...QuestionOnWordRangeFragment
+    }
+  }
+}
+    ${QuestionOnWordRangeFragmentFragmentDoc}`;
+
+/**
+ * __useGetQuestionOnWordRangesByBeginWordEntryIdQuery__
+ *
+ * To run a query within a React component, call `useGetQuestionOnWordRangesByBeginWordEntryIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetQuestionOnWordRangesByBeginWordEntryIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetQuestionOnWordRangesByBeginWordEntryIdQuery({
+ *   variables: {
+ *      begin_document_word_entry_id: // value for 'begin_document_word_entry_id'
+ *   },
+ * });
+ */
+export function useGetQuestionOnWordRangesByBeginWordEntryIdQuery(baseOptions: Apollo.QueryHookOptions<GetQuestionOnWordRangesByBeginWordEntryIdQuery, GetQuestionOnWordRangesByBeginWordEntryIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetQuestionOnWordRangesByBeginWordEntryIdQuery, GetQuestionOnWordRangesByBeginWordEntryIdQueryVariables>(GetQuestionOnWordRangesByBeginWordEntryIdDocument, options);
+      }
+export function useGetQuestionOnWordRangesByBeginWordEntryIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetQuestionOnWordRangesByBeginWordEntryIdQuery, GetQuestionOnWordRangesByBeginWordEntryIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetQuestionOnWordRangesByBeginWordEntryIdQuery, GetQuestionOnWordRangesByBeginWordEntryIdQueryVariables>(GetQuestionOnWordRangesByBeginWordEntryIdDocument, options);
+        }
+export type GetQuestionOnWordRangesByBeginWordEntryIdQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByBeginWordEntryIdQuery>;
+export type GetQuestionOnWordRangesByBeginWordEntryIdLazyQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByBeginWordEntryIdLazyQuery>;
+export type GetQuestionOnWordRangesByBeginWordEntryIdQueryResult = Apollo.QueryResult<GetQuestionOnWordRangesByBeginWordEntryIdQuery, GetQuestionOnWordRangesByBeginWordEntryIdQueryVariables>;
+export const GetQuestionOnWordRangesByWordRangeIdDocument = gql`
+    query GetQuestionOnWordRangesByWordRangeId($word_range_id: ID!) {
+  getQuestionOnWordRangesByWordRangeId(word_range_id: $word_range_id) {
+    error
+    questions {
+      ...QuestionOnWordRangeFragment
+    }
+  }
+}
+    ${QuestionOnWordRangeFragmentFragmentDoc}`;
+
+/**
+ * __useGetQuestionOnWordRangesByWordRangeIdQuery__
+ *
+ * To run a query within a React component, call `useGetQuestionOnWordRangesByWordRangeIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetQuestionOnWordRangesByWordRangeIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetQuestionOnWordRangesByWordRangeIdQuery({
+ *   variables: {
+ *      word_range_id: // value for 'word_range_id'
+ *   },
+ * });
+ */
+export function useGetQuestionOnWordRangesByWordRangeIdQuery(baseOptions: Apollo.QueryHookOptions<GetQuestionOnWordRangesByWordRangeIdQuery, GetQuestionOnWordRangesByWordRangeIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetQuestionOnWordRangesByWordRangeIdQuery, GetQuestionOnWordRangesByWordRangeIdQueryVariables>(GetQuestionOnWordRangesByWordRangeIdDocument, options);
+      }
+export function useGetQuestionOnWordRangesByWordRangeIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetQuestionOnWordRangesByWordRangeIdQuery, GetQuestionOnWordRangesByWordRangeIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetQuestionOnWordRangesByWordRangeIdQuery, GetQuestionOnWordRangesByWordRangeIdQueryVariables>(GetQuestionOnWordRangesByWordRangeIdDocument, options);
+        }
+export type GetQuestionOnWordRangesByWordRangeIdQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByWordRangeIdQuery>;
+export type GetQuestionOnWordRangesByWordRangeIdLazyQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByWordRangeIdLazyQuery>;
+export type GetQuestionOnWordRangesByWordRangeIdQueryResult = Apollo.QueryResult<GetQuestionOnWordRangesByWordRangeIdQuery, GetQuestionOnWordRangesByWordRangeIdQueryVariables>;
 export const GetAnswersByQuestionIdDocument = gql`
     query GetAnswersByQuestionId($id: ID!) {
   getAnswersByQuestionIds(ids: [$id]) {
@@ -12123,6 +12227,8 @@ export const namedOperations = {
     GetPhraseWithVoteById: 'GetPhraseWithVoteById',
     PostRead: 'PostRead',
     GetQuestionOnWordRangesByDocumentId: 'GetQuestionOnWordRangesByDocumentId',
+    GetQuestionOnWordRangesByBeginWordEntryId: 'GetQuestionOnWordRangesByBeginWordEntryId',
+    GetQuestionOnWordRangesByWordRangeId: 'GetQuestionOnWordRangesByWordRangeId',
     GetAnswersByQuestionId: 'GetAnswersByQuestionId',
     GetAnswerByUserId: 'GetAnswerByUserId',
     getQuestionStatistic: 'getQuestionStatistic',
