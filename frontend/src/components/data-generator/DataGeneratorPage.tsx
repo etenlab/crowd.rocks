@@ -19,6 +19,8 @@ export function DataGeneratorPage() {
   const [mockUserCount, setMockUserCount] = useState(0);
   const [wordsCount, setWordsCount] = useState(0);
   const [phrasesCount, setPhrasesCount] = useState(0);
+  const [docCount, setDocCount] = useState(0);
+  const [postCount, setPostCount] = useState(0);
 
   const [progress, setProgress] = useState<DataGenProgress | null>(null);
   const { data } = useSubscribeToDataGenProgressSubscription();
@@ -62,13 +64,17 @@ export function DataGeneratorPage() {
         userAmount: mockUserCount,
         phraseAmount: phrasesCount,
         wordAmount: wordsCount,
+        docAmount: docCount,
+        postsPerUser: postCount,
       },
     });
   }, [
+    docCount,
     generateData,
     mapCount,
     mockUserCount,
     phrasesCount,
+    postCount,
     toLanguageCount,
     wordsCount,
   ]);
@@ -127,6 +133,20 @@ export function DataGeneratorPage() {
           />
         </Stack>
         <Stack direction="row" justifyContent="space-between">
+          <Typography variant="body1">
+            # Posts per User (will not be triggered unless user count is
+            supplied)
+          </Typography>
+          <TextField
+            id="mock-post-amount"
+            label="Mock Post Amount"
+            type="number"
+            variant="outlined"
+            size="small"
+            onChange={(e) => setPostCount(+e.target.value)}
+          />
+        </Stack>
+        <Stack direction="row" justifyContent="space-between">
           <Typography variant="body1"># Words</Typography>
           <TextField
             id="mock-words"
@@ -148,6 +168,18 @@ export function DataGeneratorPage() {
             onChange={(e) => setPhrasesCount(+e.target.value)}
           />
         </Stack>
+        <Stack direction="row" justifyContent="space-between">
+          <Typography variant="body1"># Documents</Typography>
+          <TextField
+            id="mock-doc-amount"
+            label="Mock Document Amount"
+            type="number"
+            variant="outlined"
+            size="small"
+            onChange={(e) => setDocCount(+e.target.value)}
+          />
+        </Stack>
+
         {/* <Stack direction="row" justifyContent="space-evenly">
           <Typography variant="body1">Mock map duplications</Typography>
         </Stack>

@@ -15,6 +15,8 @@ export class DataGenInput {
   @Field(() => Int, { nullable: true }) userAmount?: number;
   @Field(() => Int, { nullable: true }) wordAmount?: number;
   @Field(() => Int, { nullable: true }) phraseAmount?: number;
+  @Field(() => Int, { nullable: true }) docAmount?: number;
+  @Field(() => Int, { nullable: true }) postsPerUser?: number;
 }
 
 @ObjectType()

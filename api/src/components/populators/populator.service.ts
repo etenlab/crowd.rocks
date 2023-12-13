@@ -32,12 +32,20 @@ import {
 } from './sql-string';
 import { DataGenProgress } from './types';
 import fetch from 'node-fetch';
+import { FileResolver } from '../file/file.resolver';
+import { DocumentsResolver } from '../documents/documents.resolver';
+import { LoremIpsum } from 'lorem-ipsum';
+import { Readable } from 'stream';
+import { DocumentsService } from '../documents/documents.service';
+import { PostCreateResolver } from '../post/post-create.resolver';
 
 @Injectable()
 export class PopulatorService {
   constructor(
     private httpService: HttpService,
     private mapRes: MapsResolver,
+    private fileRes: FileResolver,
+    private documentsService: DocumentsService,
     private fileService: FileService,
     private aiTranslationService: AiTranslationsService,
     private pg: PostgresService,
@@ -46,6 +54,7 @@ export class PopulatorService {
     private mapVotesService: MapVotesService,
     private wordVotesService: WordVotesService,
     private phraseVotesService: PhraseVotesService,
+    private postCreateResolver: PostCreateResolver,
   ) {}
 
   populateData(
@@ -54,8 +63,10 @@ export class PopulatorService {
     to_languages?: LanguageInput[] | null,
     mapAmount?: number | null,
     userAmount?: number | null,
+    postsPerUser?: number | null,
     wordAmount?: number | null,
     phraseAmount?: number | null,
+    docAmount?: number | null,
   ) {
     const value = new BehaviorSubject({
       output: ``,
@@ -86,7 +97,7 @@ export class PopulatorService {
         return;
       }
 
-      if (!mapAmount) {
+      if (!mapAmount && mapAmount != 0) {
         mapAmount = data.length;
       }
 
@@ -370,16 +381,39 @@ export class PopulatorService {
           'phrase_to_word_translation',
         ];
 
-        value.next({
-          output: `Users voting...`,
-          overallStatus: SubscriptionStatus.Progressing,
-        } as DataGenProgress);
+        // ------------------------------------
+        // Voting and Posts
+        // ------------------------------------
+        const userTokens: string[] = [];
+        const lorem = new LoremIpsum({
+          sentencesPerParagraph: {
+            max: randomInt(5, 50),
+            min: randomInt(1, 5),
+          },
+          wordsPerSentence: {
+            max: randomInt(5, 10),
+            min: randomInt(1, 5),
+          },
+        });
+        for (let i = 0; i < passwords.length; i++) {
+          const { token } = await this.getMockUserToken(
+            emails[i],
+            passwords[i],
+            usernames[i],
+          );
+          userTokens.push(token);
+        }
+
         translationTableNames.forEach(async (table) => {
           const tableIdRes = await this.pg.pool.query(
             `select ${table}_id as id from ${table}s`,
           );
           const tableIds: Array<number> = tableIdRes.rows.map((r) => r.id);
           for (let i = 0; i < userIds.length; i++) {
+            value.next({
+              output: `User ${usernames[i]}: translation voting`,
+              overallStatus: SubscriptionStatus.Progressing,
+            } as DataGenProgress);
             await this.pg.pool.query(
               ...callTranslationVoteSetProcedureByTableName({
                 baseTableName: table,
@@ -389,23 +423,34 @@ export class PopulatorService {
                 userId: userIds[i],
               }),
             );
+            value.next({
+              output: `User ${usernames[i]}: translation posting`,
+              overallStatus: SubscriptionStatus.Progressing,
+            } as DataGenProgress);
+            tableIds.forEach(async (id) => {
+              if (postsPerUser && postsPerUser > 0) {
+                for (let k = 0; k < postsPerUser; k++) {
+                  await this.postCreateResolver.postCreateResolver(
+                    {
+                      content:
+                        '<p>' +
+                        lorem.generateSentences(randomInt(1, 20)) +
+                        '</p>',
+                      parent_id: id,
+                      parent_table: table,
+                    },
+                    { req: { rawHeaders: ['Bearer ' + tokens[i]] } },
+                  );
+                }
+              }
+            });
           }
         });
-
         value.next({
-          output: `${userAmount} users are voting on everything...`,
+          output: `Users posting and voting on other entities...`,
           overallStatus: SubscriptionStatus.Progressing,
-        });
+        } as DataGenProgress);
 
-        const userTokens: string[] = [];
-        for (let i = 0; i < passwords.length; i++) {
-          const { token } = await this.getMockUserToken(
-            emails[i],
-            passwords[i],
-            usernames[i],
-          );
-          userTokens.push(token);
-        }
         let res = await this.pg.pool.query(
           'select original_map_id as id from original_maps',
         );
@@ -416,13 +461,28 @@ export class PopulatorService {
             if (vote == 2) {
               continue;
             }
-            this.mapVotesService.toggleVoteStatus(
+            await this.mapVotesService.toggleVoteStatus(
               ids[i],
               true,
               vote % 2 === 0 ? true : false,
               tokens[g],
               null,
             );
+            if (postsPerUser && postsPerUser > 0) {
+              for (let k = 0; k < postsPerUser; k++) {
+                await this.postCreateResolver.postCreateResolver(
+                  {
+                    content:
+                      '<p>' +
+                      lorem.generateSentences(randomInt(1, 20)) +
+                      '</p>',
+                    parent_id: ids[i],
+                    parent_table: 'original_maps',
+                  },
+                  { req: { rawHeaders: ['Bearer ' + tokens[g]] } },
+                );
+              }
+            }
           }
         }
         res = await this.pg.pool.query(
@@ -442,6 +502,21 @@ export class PopulatorService {
               tokens[g],
               null,
             );
+            if (postsPerUser && postsPerUser > 0) {
+              for (let k = 0; k < postsPerUser; k++) {
+                await this.postCreateResolver.postCreateResolver(
+                  {
+                    content:
+                      '<p>' +
+                      lorem.generateSentences(randomInt(1, 20)) +
+                      '</p>',
+                    parent_id: ids[i],
+                    parent_table: 'translated_maps',
+                  },
+                  { req: { rawHeaders: ['Bearer ' + tokens[g]] } },
+                );
+              }
+            }
           }
         }
         res = await this.pg.pool.query('select word_id as id from words');
@@ -458,6 +533,21 @@ export class PopulatorService {
               tokens[g],
               null,
             );
+            if (postsPerUser && postsPerUser > 0) {
+              for (let k = 0; k < postsPerUser; k++) {
+                await this.postCreateResolver.postCreateResolver(
+                  {
+                    content:
+                      '<p>' +
+                      lorem.generateSentences(randomInt(1, 20)) +
+                      '</p>',
+                    parent_id: ids[i],
+                    parent_table: 'words',
+                  },
+                  { req: { rawHeaders: ['Bearer ' + tokens[g]] } },
+                );
+              }
+            }
           }
         }
         res = await this.pg.pool.query('select phrase_id as id from phrases');
@@ -474,8 +564,76 @@ export class PopulatorService {
               tokens[g],
               null,
             );
+            if (postsPerUser && postsPerUser > 0) {
+              for (let k = 0; k < postsPerUser; k++) {
+                await this.postCreateResolver.postCreateResolver(
+                  {
+                    content:
+                      '<p>' +
+                      lorem.generateSentences(randomInt(1, 20)) +
+                      '</p>',
+                    parent_id: ids[i],
+                    parent_table: 'phrases',
+                  },
+                  { req: { rawHeaders: ['Bearer ' + tokens[g]] } },
+                );
+              }
+            }
           }
         }
+      }
+
+      // --------------------------------
+      // Generate Documents
+      // --------------------------------
+      if (docAmount && docAmount > 0) {
+        for (let i = 0; i < docAmount; i++) {
+          // generate lorem ipsum string
+          value.next({
+            output: `Saving document ${i + 1}`,
+            overallStatus: SubscriptionStatus.Progressing,
+          } as DataGenProgress);
+          const lorem = new LoremIpsum({
+            sentencesPerParagraph: {
+              max: randomInt(5, 50),
+              min: randomInt(1, 5),
+            },
+            wordsPerSentence: {
+              max: randomInt(5, 10),
+              min: randomInt(1, 5),
+            },
+          });
+          const docContent = lorem.generateParagraphs(randomInt(5, 500));
+          const resp = await this.fileService.uploadFile(
+            Readable.from(docContent),
+            'generated' + randomInt(1000),
+            'text/plain',
+            token,
+            undefined,
+          );
+          if (resp.error != ErrorType.NoError || !resp.file) {
+            value.next({
+              output: `Error - ${resp.error} `,
+              overallStatus: SubscriptionStatus.Progressing,
+            } as DataGenProgress);
+          }
+          // create document w/ file id
+          if (resp.file) {
+            await this.documentsService.saveDocument({
+              document: {
+                file_id: resp.file.id + '',
+                language_code: 'en',
+                dialect_code: null,
+                geo_code: null,
+              },
+              token,
+            });
+          }
+        }
+        value.next({
+          output: `Documents Saved`,
+          overallStatus: SubscriptionStatus.Progressing,
+        } as DataGenProgress);
       }
 
       value.next({

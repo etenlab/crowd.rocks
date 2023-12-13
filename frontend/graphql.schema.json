@@ -709,6 +709,18 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "docAmount",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "mapAmount",
             "description": null,
             "type": {
@@ -742,6 +754,18 @@
           },
           {
             "name": "phraseAmount",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "postsPerUser",
             "description": null,
             "type": {
               "kind": "SCALAR",

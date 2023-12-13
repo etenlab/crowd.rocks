@@ -6,6 +6,6 @@ import { FileRepository } from './file.repository';
 @Module({
   providers: [FileResolver, FileService, FileRepository],
   imports: [forwardRef(() => CoreModule)],
-  exports: [FileService],
+  exports: [FileService, FileResolver],
 })
 export class FileModule {}

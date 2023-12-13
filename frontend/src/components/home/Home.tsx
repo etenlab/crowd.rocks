@@ -193,14 +193,14 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/translation`,
           icon: languageOutline,
-          title: tr('Translation'),
+          title: tr('Word & Phrase Translation'),
           description: tr('Translate words and phrases into any language'),
           isShown: () => !!settings?.isBetaTools,
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/fast-translation`,
           icon: flashOutline,
-          title: tr('Fast Translation'),
+          title: tr('Fast Word & Phrase Translation'),
           description: tr('Translate words and phrases into any language'),
           isShown: () => !!settings?.isBetaTools,
         },
