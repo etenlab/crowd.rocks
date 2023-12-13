@@ -437,7 +437,17 @@ export class MapsResolver {
     await this.mapsTranslationService.markTrMapsByOriginalMapsIds(
       originalMapsIds,
     );
-    await this.mapsTranslationService.retranslateMarkedMaps(token);
+    const retranslatedMaps =
+      await this.mapsTranslationService.retranslateMarkedMaps(token);
+    const newlyTranslatedMaps =
+      await this.mapsTranslationService.checkAndCreateNewlyTranslatedMaps(
+        token,
+      );
+    Logger.log(
+      `retranslatedMap ids ${retranslatedMaps}, newlyTranslatedMap ids ${newlyTranslatedMaps}`,
+      'forceMarkAndRetranslateOriginalMapsIds',
+    );
+
     return {
       error: ErrorType.NoError,
     };

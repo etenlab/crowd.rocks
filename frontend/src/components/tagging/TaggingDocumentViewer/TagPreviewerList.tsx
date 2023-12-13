@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { Fragment, useEffect, useMemo } from 'react';
 import { useHistory, useParams } from 'react-router';
 
 import { Stack, Typography, Divider, IconButton, Box } from '@mui/material';
@@ -155,10 +155,9 @@ export function TagPreviewerList({
 
   return (
     <Stack gap="16px">
-      {tagsGroup.map((tag) => (
-        <>
+      {tagsGroup.map((tag, i) => (
+        <Fragment key={tag?.word_range_id || '' + String(i)}>
           <Stack
-            key={tag.word_range_id}
             gap="16px"
             direction="row"
             justifyContent="space-between"
@@ -172,7 +171,7 @@ export function TagPreviewerList({
               sx={{ flex: 1, flexWrap: 'wrap', paddingTop: '5px' }}
             >
               <Typography variant="h4">{tag.piece_of_text}:</Typography>
-              {tag.tag_names.map((tag_name) => (
+              {tag.tag_names.map((tag_name, k) => (
                 <Box
                   sx={(theme) => ({
                     border: `1px solid ${theme.palette.background.gray_stroke}`,
@@ -181,7 +180,7 @@ export function TagPreviewerList({
                     color: theme.palette.background.gray,
                     fontWeight: 500,
                   })}
-                  key={tag_name}
+                  key={tag_name + String(k)}
                 >
                   {tag_name}
                 </Box>
@@ -192,7 +191,7 @@ export function TagPreviewerList({
             </IconButton>
           </Stack>
           <Divider />
-        </>
+        </Fragment>
       ))}
     </Stack>
   );

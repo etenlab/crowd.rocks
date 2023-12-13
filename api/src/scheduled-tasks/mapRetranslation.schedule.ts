@@ -15,10 +15,19 @@ export class MapReTranslationSchedule {
     const token = await this.authenticationService.getAdminToken();
     const retranslated =
       await this.mapsTranslationService.retranslateMarkedMaps(token);
-    if (retranslated.length > 0) {
+    const newlyTranslated =
+      await this.mapsTranslationService.checkAndCreateNewlyTranslatedMaps(
+        token,
+      );
+    if (retranslated.length > 0 || newlyTranslated.length > 0) {
       Logger.log(
         `MapReTranslationSchedule: retranslated maps ${JSON.stringify(
           retranslated,
+        )}`,
+      );
+      Logger.log(
+        `MapReTranslationSchedule: NewlyTranslated maps ${JSON.stringify(
+          newlyTranslated,
         )}`,
       );
     }

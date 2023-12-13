@@ -151,13 +151,21 @@ export function MapDetails() {
 
   const handleRetrnanslateClick = useCallback(
     (originalMapId: string) => {
+      present({
+        message: tr(
+          `Original map id ${originalMapId} is marked for retranslation to all known languages`,
+        ),
+        position: 'top',
+        color: 'success',
+        duration: 2000,
+      });
       forceMarkAndRetranslateOriginalMapsIdsMutation({
         variables: {
           originalMapsIds: [originalMapId],
         },
       });
     },
-    [forceMarkAndRetranslateOriginalMapsIdsMutation],
+    [forceMarkAndRetranslateOriginalMapsIdsMutation, present, tr],
   );
 
   const tagLabel = currMapContent?.mapDetails?.is_original
