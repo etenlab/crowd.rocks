@@ -9,7 +9,6 @@ import {
   useMediaQuery,
 } from '@mui/material';
 
-import { globals } from '../../../services/globals';
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
 
@@ -37,7 +36,6 @@ export function SuperDocumentViewerPage() {
   const [pageStatus, setPageStatus] = useState<'shown' | 'hidden' | null>(null);
   const [expand, setExpand] = useState(true);
 
-  const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [tab, setTab] = useState<TabKind>(TabKind.Document);
   const [tool, setTool] = useState<OptionItem>({
     label: tr('Pericope'),
@@ -64,16 +62,6 @@ export function SuperDocumentViewerPage() {
 
   useVotePericopeTrChangedSubscription();
 
-  const handleToggleMode = useCallback(() => {
-    setMode((mode) => {
-      if (mode === 'view') {
-        return 'edit';
-      } else {
-        return 'view';
-      }
-    });
-  }, []);
-
   const handleChangeTab = useCallback((tab: TabKind) => {
     setTab(tab);
   }, []);
@@ -99,10 +87,6 @@ export function SuperDocumentViewerPage() {
   };
 
   const document = documentData ? documentData.getDocument.document : null;
-
-  const sameUser = document
-    ? +document.created_by === globals.get_user_id()
-    : false;
 
   if (!document) {
     return (
@@ -133,8 +117,6 @@ export function SuperDocumentViewerPage() {
       >
         <Collapse in={expand}>
           <ToolBox
-            mode={mode}
-            onToggleMode={handleToggleMode}
             tab={tab}
             onChangeTab={handleChangeTab}
             tool={tool}
@@ -144,9 +126,6 @@ export function SuperDocumentViewerPage() {
             stringFilter={stringFilter}
             onChangeStringFilter={handleChangeStringFilter}
             document={document}
-            disabledEditButton={
-              tool.value === SuperToolKind.Pericope && !sameUser
-            }
           />
         </Collapse>
       </Box>
@@ -182,7 +161,7 @@ export function SuperDocumentViewerPage() {
         {tab === TabKind.Document ? (
           <SuperDocumentViewer
             documentId={document_id}
-            mode={mode}
+            documentAuthorId={document.created_by}
             tool={tool.value as SuperToolKind}
             customScrollParent={
               pageStatus === 'shown' && ionContentScrollElement

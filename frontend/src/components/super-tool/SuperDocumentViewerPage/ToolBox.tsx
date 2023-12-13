@@ -13,7 +13,6 @@ import { MoreHorizButton } from '../../common/buttons/MoreHorizButton';
 import { Select, OptionItem } from '../../common/forms/Select';
 import { SearchInput } from '../../common/forms/SearchInput';
 import { Search } from '../../common/icons/Search';
-import { Switch } from '../../common/buttons/Switch';
 
 import { TextyDocument } from '../../../generated/graphql';
 
@@ -41,8 +40,6 @@ export enum FilterKind {
 }
 
 export type ToolBoxProps = {
-  mode: 'view' | 'edit';
-  onToggleMode(): void;
   tab: TabKind;
   onChangeTab(tab: TabKind): void;
   tool: OptionItem;
@@ -52,12 +49,9 @@ export type ToolBoxProps = {
   stringFilter: string;
   onChangeStringFilter(str: string): void;
   document: TextyDocument;
-  disabledEditButton: boolean;
 };
 
 export function ToolBox({
-  mode,
-  onToggleMode,
   tab,
   onChangeTab,
   tool,
@@ -67,7 +61,6 @@ export function ToolBox({
   stringFilter,
   onChangeStringFilter,
   document,
-  disabledEditButton,
 }: ToolBoxProps) {
   const { tr } = useTr();
   const {
@@ -278,21 +271,7 @@ export function ToolBox({
             <Typography variant="h4" sx={{ fontWeight: 500 }}>
               {document.file_name}
             </Typography>
-            <Button
-              onClick={onToggleMode}
-              variant="text"
-              sx={{ display: 'flex', alignItem: 'center', gap: '6px' }}
-              disabled={disabledEditButton}
-              endIcon={
-                <Switch
-                  checked={mode === 'edit'}
-                  disabled={disabledEditButton}
-                />
-              }
-              color="gray"
-            >
-              {tr('Edit mode')}
-            </Button>
+
             <MoreHorizButton dropDownList={dropDownList} />
           </Stack>
           <Stack
