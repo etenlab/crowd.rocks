@@ -8,6 +8,10 @@ import {
   QuestionOnWordRangesEdgeFragmentFragmentDoc,
   DocumentWordEntry,
   DocumentWordEntryFragmentFragmentDoc,
+  GetQuestionOnWordRangesByBeginWordEntryIdQuery,
+  GetQuestionOnWordRangesByBeginWordEntryIdDocument,
+  GetQuestionOnWordRangesByWordRangeIdQuery,
+  GetQuestionOnWordRangesByWordRangeIdDocument,
 } from '../generated/graphql';
 
 export function updateCacheWithCreateQuestionOnWordRange(
@@ -15,6 +19,72 @@ export function updateCacheWithCreateQuestionOnWordRange(
   newQuestion: QuestionOnWordRange,
 ) {
   const start_word = newQuestion.begin.document_word_entry_id;
+
+  cache.updateQuery<GetQuestionOnWordRangesByBeginWordEntryIdQuery>(
+    {
+      query: GetQuestionOnWordRangesByBeginWordEntryIdDocument,
+      variables: {
+        begin_document_word_entry_id: start_word,
+      },
+    },
+    (data) => {
+      if (data) {
+        const exists =
+          data.getQuestionOnWordRangesByBeginWordEntryId.questions.filter(
+            (question) => question?.question_id === newQuestion.question_id,
+          );
+
+        if (exists.length > 0) {
+          return data;
+        } else {
+          return {
+            ...data,
+            getQuestionOnWordRangesByBeginWordEntryId: {
+              ...data.getQuestionOnWordRangesByBeginWordEntryId,
+              questions: [
+                ...data.getQuestionOnWordRangesByBeginWordEntryId.questions,
+                newQuestion,
+              ],
+            },
+          };
+        }
+      }
+      return data;
+    },
+  );
+
+  cache.updateQuery<GetQuestionOnWordRangesByWordRangeIdQuery>(
+    {
+      query: GetQuestionOnWordRangesByWordRangeIdDocument,
+      variables: {
+        word_range_id: newQuestion.parent_id,
+      },
+    },
+    (data) => {
+      if (data) {
+        const exists =
+          data.getQuestionOnWordRangesByWordRangeId.questions.filter(
+            (question) => question?.question_id === newQuestion.question_id,
+          );
+
+        if (exists.length > 0) {
+          return data;
+        } else {
+          return {
+            ...data,
+            getQuestionOnWordRangesByWordRangeId: {
+              ...data.getQuestionOnWordRangesByWordRangeId,
+              questions: [
+                ...data.getQuestionOnWordRangesByWordRangeId.questions,
+                newQuestion,
+              ],
+            },
+          };
+        }
+      }
+      return data;
+    },
+  );
 
   const wordEntryData = cache.readFragment<DocumentWordEntry>({
     id: cache.identify({

@@ -11,6 +11,7 @@ import {
 import { Caption } from '../../common/Caption/Caption';
 import {
   TableNameType,
+  useGetPericopeTagsQasCountQuery,
   useGetPericopeTextAndDesctiptionQuery,
   useGetPericopeTranslationsQuery,
 } from '../../../generated/graphql';
@@ -35,6 +36,8 @@ import { PericopeTranslationList } from './PericopeTranslationsList';
 import { PageLayout } from '../../common/PageLayout';
 import { langInfo2langInput } from '../../../../../utils';
 import { useAddPericopeTrMutation } from '../../../hooks/useAddPericopeTrMutation';
+import { PericopeTranslated } from './PericopeTranslated';
+import { ButtonsTagsQAs } from './ButtonsTagsQAs';
 
 export function PericopeTranslationPage() {
   const { pericopeId } = useParams<{ pericopeId: string }>();
@@ -52,9 +55,10 @@ export function PericopeTranslationPage() {
 
   const [openForm, setOpenForm] = useState<boolean>(false);
 
-  const pericopeTrData = useGetPericopeTextAndDesctiptionQuery({
+  const pericopeData = useGetPericopeTextAndDesctiptionQuery({
     variables: { pericopeId },
   });
+  const pericope = pericopeData.data?.getPericopeTextAndDesctiption;
 
   const translationsQ = useGetPericopeTranslationsQuery({
     variables: {
@@ -65,7 +69,10 @@ export function PericopeTranslationPage() {
     },
   }).data?.getPericopeTranslations;
 
-  const pericopeTr = pericopeTrData.data?.getPericopeTextAndDesctiption;
+  const tagsQasCount = useGetPericopeTagsQasCountQuery({
+    variables: { pericopeId },
+    fetchPolicy: 'network-only',
+  });
 
   const [addPericopeTr] = useAddPericopeTrMutation();
 
@@ -111,12 +118,12 @@ export function PericopeTranslationPage() {
     </Button>
   ) : null;
 
-  const dropDownList = pericopeTr?.pericope_id && [
+  const dropDownList = pericope?.pericope_id && [
     {
       key: 'flag_button',
       component: (
         <FlagV2
-          parent_id={pericopeTr.pericope_id}
+          parent_id={pericope.pericope_id}
           parent_table={TableNameType.Pericopies}
           flag_names={PERICOPIES_FLAGS}
         />
@@ -128,16 +135,14 @@ export function PericopeTranslationPage() {
     <PageLayout>
       <Caption>{tr('Details')}</Caption>
 
-      {pericopeTr?.pericope_id && dropDownList && (
+      {pericope?.pericope_id && dropDownList && (
         <>
           <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="h1" sx={{ paddingTop: '5px' }}>
-              {pericopeTr.pericope_text}
-            </Typography>
+            <Typography variant="body1">{tr('Pericope')}</Typography>
             <Stack
               direction="row"
               justifyContent="space-between"
@@ -145,9 +150,10 @@ export function PericopeTranslationPage() {
               gap="14px"
             >
               <DiscussionIconButton
-                parent_id={pericopeTr.pericope_id}
+                parent_id={pericope.pericope_id}
                 parent_table={TableNameType.Pericopies}
                 flex="1"
+                variant="contained"
               />
               <Box
                 sx={{
@@ -160,10 +166,27 @@ export function PericopeTranslationPage() {
               </Box>
             </Stack>
           </Stack>
+          <PericopeTranslated
+            pericopeText={pericope}
+            pericopeTrWithVotes={translationsQ?.translations.find(
+              (t) => t.isBest,
+            )}
+          />
 
-          <Typography variant="body1" color="text.gray">
-            {pericopeTr.pericope_description_text}
-          </Typography>
+          <ButtonsTagsQAs
+            qasCount={
+              Number(tagsQasCount.data?.getPericopeTagsQasCount.qas_count) || 0
+            }
+            tagsCount={
+              Number(tagsQasCount.data?.getPericopeTagsQasCount.tags_count) || 0
+            }
+            onQAsClick={() =>
+              console.log(`onQAsClick! pericopeId: ${pericopeId}`)
+            }
+            onTagsClick={() =>
+              console.log(`onTagsClick! pericopeId: ${pericopeId}`)
+            }
+          />
 
           <Divider />
 

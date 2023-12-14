@@ -1,4 +1,4 @@
-import { ErrorType, GenericOutput } from '../../common/types';
+import { ErrorType } from '../../common/types';
 import { LanguageInput } from '../common/types';
 import { AddPericopeTranslationInput } from './types';
 

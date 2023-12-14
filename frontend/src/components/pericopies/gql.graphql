@@ -48,6 +48,15 @@ query GetPericopeVoteStatus($pericope_id: ID!) {
   }
 }
 
+query GetPericopeTagsQasCount($pericopeId: String!) {
+  getPericopeTagsQasCount(pericopeId: $pericopeId) {
+    error
+    pericope_id
+    tags_count
+    qas_count
+  }
+}
+
 mutation TogglePericopeVoteStatus($pericope_id: ID!, $vote: Boolean!) {
   togglePericopeVoteStatus(pericope_id: $pericope_id, vote: $vote) {
     error

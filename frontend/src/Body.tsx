@@ -85,6 +85,7 @@ import { QADocumentListPage } from './components/qa/QADocumentListPage';
 import { QADocumentViewerPage } from './components/qa/QADocumentViewerPage';
 import { AnswersPage } from './components/qa/QADocumentViewerPage/AnswersPage';
 import { NewQuestionPage } from './components/qa/QADocumentViewerPage/NewQuestionPage';
+import { QuestionDetailsPage } from './components/qa/QADocumentViewer/QuestionDetailsPage';
 
 import { PericopeDocumentListPage } from './components/pericopies/PericopeDocumentListPage';
 import { PericopeDocumentViewerPage } from './components/pericopies/PericopeDocumentViewerPage';
@@ -108,6 +109,7 @@ import { PericopeTrPage } from './components/pericope-translations/PericopeTrPag
 import { PericopeTrDocumentListPage } from './components/pericope-translations/PericopeTrDocumentListPage';
 import { PericopiesTrList } from './components/pericope-translations/PericopiesTrListPage';
 import { PericopeTranslationPage } from './components/pericope-translations/PericopeTranslationPage/PericopeTranslationPage';
+import { TaggingDetailsPage } from './components/tagging/TaggingDocumentViewer/TaggingDetailsPage';
 // import { PericopeTranslationList } from './components/pericope-translations/PericopeTranslationPage/PericopeTranslationsList';
 
 export function Body() {
@@ -583,6 +585,11 @@ export function Body() {
             />
             <Route
               exact
+              path="/:nation_id/:language_id/:cluster_id/qa/question-details/:word_range_id"
+              component={QuestionDetailsPage}
+            />
+            <Route
+              exact
               path="/:nation_id/:language_id/:cluster_id/qa/answers/:question_id"
               component={AnswersPage}
             />
@@ -600,6 +607,11 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/tagging-tool/documents/:document_id"
               component={TaggingDocumentViewerPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/tagging-tool/details/:word_range_id"
+              component={TaggingDetailsPage}
             />
             <Route
               exact

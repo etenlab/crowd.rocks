@@ -363,11 +363,176 @@ export class QuestionsService {
     };
   }
 
+  async getQuestionOnWordRangesByBeginWordEntryId(
+    begin_document_word_entry_id: number,
+    pgClient: PoolClient | null,
+  ): Promise<QuestionOnWordRangesOutput> {
+    try {
+      const { error: wordRangeError, word_ranges } =
+        await this.wordRangesService.getByBeginWordIds(
+          [begin_document_word_entry_id],
+          pgClient,
+        );
+
+      if (wordRangeError !== ErrorType.NoError) {
+        return {
+          error: wordRangeError,
+          questions: [],
+        };
+      }
+
+      const refs = (
+        word_ranges.map((word_range) => word_range) as WordRange[]
+      ).map((word_range) => {
+        return {
+          parent_table: TableNameType.word_ranges,
+          parent_id: +word_range.word_range_id,
+        };
+      });
+
+      const questionsMap = new Map<string, Question[]>();
+
+      const { error: questionError, questions } = await this.getQuestionsByRefs(
+        refs,
+        pgClient,
+      );
+
+      if (questionError !== ErrorType.NoError) {
+        return {
+          error: questionError,
+          questions: [],
+        };
+      }
+
+      questions.forEach((question) => {
+        if (!question) {
+          return;
+        }
+
+        const entries = questionsMap.get(question.parent_id);
+
+        if (entries) {
+          entries.push(question);
+        } else {
+          questionsMap.set(question.parent_id, [question]);
+        }
+      });
+
+      const questionOnWordRanges: QuestionOnWordRange[] = [];
+
+      word_ranges.forEach((word_range) => {
+        if (!word_range) {
+          return;
+        }
+
+        const entries = questionsMap.get(word_range.word_range_id);
+
+        if (entries) {
+          questionOnWordRanges.push(
+            ...entries.map((entry) => ({
+              ...entry,
+              begin: word_range.begin,
+              end: word_range.end,
+            })),
+          );
+        }
+      });
+
+      return {
+        error: ErrorType.NoError,
+        questions: questionOnWordRanges,
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      questions: [],
+    };
+  }
+
+  async getQuestionOnWordRangesByWordRangeId(
+    word_range_id: number,
+    pgClient: PoolClient | null,
+  ): Promise<QuestionOnWordRangesOutput> {
+    try {
+      const { error: wordRangeError, word_ranges } =
+        await this.wordRangesService.reads([word_range_id], pgClient);
+
+      if (wordRangeError !== ErrorType.NoError || word_ranges.length === 0) {
+        return {
+          error: wordRangeError,
+          questions: [],
+        };
+      }
+
+      const questionsMap = new Map<string, Question[]>();
+
+      const { error: questionError, questions } = await this.getQuestionsByRefs(
+        [
+          {
+            parent_table: TableNameType.word_ranges,
+            parent_id: +word_ranges[0]!.word_range_id,
+          },
+        ],
+        pgClient,
+      );
+
+      if (questionError !== ErrorType.NoError) {
+        return {
+          error: questionError,
+          questions: [],
+        };
+      }
+
+      questions.forEach((question) => {
+        if (!question) {
+          return;
+        }
+
+        const entries = questionsMap.get(question.parent_id);
+
+        if (entries) {
+          entries.push(question);
+        } else {
+          questionsMap.set(question.parent_id, [question]);
+        }
+      });
+
+      const questionOnWordRanges: QuestionOnWordRange[] = [];
+
+      const entries = questionsMap.get(word_ranges[0]!.word_range_id);
+
+      if (entries) {
+        questionOnWordRanges.push(
+          ...entries.map((entry) => ({
+            ...entry,
+            begin: word_ranges[0]!.begin,
+            end: word_ranges[0]!.end,
+          })),
+        );
+      }
+
+      return {
+        error: ErrorType.NoError,
+        questions: questionOnWordRanges,
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      questions: [],
+    };
+  }
+
   async getQuestionOnWordRangesByDocumentId(
     document_id: number,
     first: number | null,
     after: string | null,
-    pgClient,
+    pgClient: PoolClient | null,
   ): Promise<QuestionOnWordRangesListConnection> {
     try {
       const {

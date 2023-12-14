@@ -216,7 +216,7 @@ export class PericopeTrService {
     const resQ = await this.pg.pool.query<PericopeTanslationsIdsWithVotesSqlR>(
       ...getPericopeTanslationsIdsWithVotesSql({ pericopeId, targetLang }),
     );
-    const recomendedTranslationIdWithVotes = this.filterRecomendedTranslations(
+    const recomendedTranslationIdWithVotes = this.findBestTranslation(
       resQ.rows,
     );
 
@@ -227,7 +227,7 @@ export class PericopeTrService {
     return recomendedTranslation[0];
   }
 
-  filterRecomendedTranslations(
+  findBestTranslation(
     translations: PericopeTanslationsIdsWithVotesSqlR[],
   ): PericopeTanslationsIdsWithVotesSqlR | null {
     if (!(translations.length > 0)) return null;
@@ -276,29 +276,33 @@ export class PericopeTrService {
       await this.pg.pool.query<GetPericopeTranslationsByPericopeIdSqlR>(
         ...getPericopeTranslationsByPericopeIdSql({ pericopeId, targetLang }),
       );
-    return resQ.rows.map(
-      (r) =>
-        ({
-          pericope_id: r.pericope_id,
-          pericope_translation_id: r.pericope_translation_id,
-          language: {
-            language_code: r.language_code,
-            dialect_code: r.dialect_code,
-            geo_code: r.geo_code,
-          },
-          translation: r.translation,
-          translation_description: r.description,
-          created_at: r.created_at,
-          created_by_user: {
-            user_id: r.user_id,
-            avatar: r.avatar,
-            avatar_url: r.avatar_url,
-            is_bot: r.is_bot,
-          },
-          upvotes: r.upvotes,
-          downvotes: r.downvotes,
-        } as PericopeTranslationWithVotes),
-    );
+    const allTranslations = await resQ.rows.map((r) => ({
+      pericope_id: r.pericope_id,
+      pericope_translation_id: r.pericope_translation_id,
+      language: {
+        language_code: r.language_code,
+        dialect_code: r.dialect_code,
+        geo_code: r.geo_code,
+      },
+      translation: r.translation,
+      translation_description: r.description,
+      created_at: r.created_at,
+      created_by_user: {
+        user_id: r.user_id,
+        avatar: r.avatar,
+        avatar_url: r.avatar_url,
+        is_bot: r.is_bot,
+      },
+      upvotes: r.upvotes,
+      downvotes: r.downvotes,
+    }));
+
+    const bestTranslation = this.findBestTranslation(allTranslations);
+    return allTranslations.map((t) => ({
+      ...t,
+      isBest:
+        t.pericope_translation_id === bestTranslation?.pericope_translation_id,
+    }));
   }
 
   async addPericopeTrAndDesc(

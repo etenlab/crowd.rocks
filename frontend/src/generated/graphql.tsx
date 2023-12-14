@@ -71,13 +71,6 @@ export type AvatarUpdateOutput = {
   user?: Maybe<User>;
 };
 
-export type BestPericopeTrChanged = {
-  __typename?: 'BestPericopeTrChanged';
-  error: ErrorType;
-  newPericopeTr?: Maybe<PericopeTranslation>;
-  newVoteStatus?: Maybe<PericopeTrVoteStatus>;
-};
-
 export type BotTranslateDocumentInput = {
   botType: BotType;
   documentId: Scalars['String']['input'];
@@ -258,6 +251,7 @@ export enum ErrorType {
   PasswordInvalid = 'PasswordInvalid',
   PasswordTooLong = 'PasswordTooLong',
   PasswordTooShort = 'PasswordTooShort',
+  PericopeBestTranslationNotFound = 'PericopeBestTranslationNotFound',
   PericopeGetTranslationError = 'PericopeGetTranslationError',
   PericopeInsertFailed = 'PericopeInsertFailed',
   PericopeNotFound = 'PericopeNotFound',
@@ -753,7 +747,7 @@ export type Mutation = {
   avatarUpdateResolver: AvatarUpdateOutput;
   botTranslateDocument: DocumentUploadOutput;
   createQuestionOnWordRange: QuestionOnWordRangesOutput;
-  createTaggingOnWordRange: WordRangeTagWithVotesOutput;
+  createTaggingOnWordRanges: WordRangeTagWithVotesOutput;
   deletePericopie: PericopeDeleteOutput;
   documentByPericopiesTranslate: FileUrlOutput;
   documentUpload: DocumentUploadOutput;
@@ -868,10 +862,9 @@ export type MutationCreateQuestionOnWordRangeArgs = {
 };
 
 
-export type MutationCreateTaggingOnWordRangeArgs = {
-  begin_document_word_entry_id: Scalars['ID']['input'];
-  end_document_word_entry_id: Scalars['ID']['input'];
+export type MutationCreateTaggingOnWordRangesArgs = {
   tag_names: Array<Scalars['String']['input']>;
+  word_ranges: Array<WordRangeInput>;
 };
 
 
@@ -1395,6 +1388,14 @@ export type PericopeEdge = {
   node: Pericope;
 };
 
+export type PericopeTagsQasCountOutput = {
+  __typename?: 'PericopeTagsQasCountOutput';
+  error: ErrorType;
+  pericope_id?: Maybe<Scalars['ID']['output']>;
+  qas_count?: Maybe<Scalars['String']['output']>;
+  tags_count?: Maybe<Scalars['String']['output']>;
+};
+
 export type PericopeTextWithDescription = {
   __typename?: 'PericopeTextWithDescription';
   error: ErrorType;
@@ -1442,6 +1443,7 @@ export type PericopeTranslationWithVotes = {
   created_at: Scalars['String']['output'];
   created_by_user: User;
   downvotes: Scalars['Int']['output'];
+  isBest?: Maybe<Scalars['Boolean']['output']>;
   language: LanguageOutput;
   pericope_id: Scalars['String']['output'];
   pericope_translation_id: Scalars['ID']['output'];
@@ -1859,6 +1861,7 @@ export type Query = {
   getOrigMapWordsAndPhrases: MapWordsAndPhrasesConnection;
   getOrigMapWordsAndPhrasesCount: MapWordsAndPhrasesCountOutput;
   getOrigMapsList: GetOrigMapsListOutput;
+  getPericopeTagsQasCount: PericopeTagsQasCountOutput;
   getPericopeTextAndDesctiption: PericopeTextWithDescription;
   getPericopeTranslations: PericopeTranslationsOutput;
   getPericopeVoteStatus: PericopeVoteStatusOutput;
@@ -1875,7 +1878,9 @@ export type Query = {
   getPhraseVoteStatus: PhraseVoteStatusOutputRow;
   getPhraseWithVoteById: PhraseWithVoteOutput;
   getPhrasesByLanguage: PhraseWithVoteListConnection;
+  getQuestionOnWordRangesByBeginWordEntryId: QuestionOnWordRangesOutput;
   getQuestionOnWordRangesByDocumentId: QuestionOnWordRangesListConnection;
+  getQuestionOnWordRangesByWordRangeId: QuestionOnWordRangesOutput;
   getQuestionStatistic: QuestionWithStatisticOutput;
   getQuestionsByRefs: QuestionsOutput;
   getRecommendedTranslationFromDefinitionID: TranslationWithVoteOutput;
@@ -1891,6 +1896,7 @@ export type Query = {
   getWordRangeTagVoteStatus: WordRangeTagVoteStatusOutput;
   getWordRangeTagsByBeginWordEntryId: WordRangeTagWithVotesOutput;
   getWordRangeTagsByDocumentId: WordRangeTagsListConnection;
+  getWordRangeTagsByWordRangeIds: WordRangeTagWithVotesOutput;
   getWordRangesByBeginIds: WordRangesOutput;
   getWordRangesByDocumentId: WordRangesListConnection;
   getWordToPhraseTrVoteStatus: WordToPhraseTranslationVoteStatusOutputRow;
@@ -2070,6 +2076,11 @@ export type QueryGetOrigMapsListArgs = {
 };
 
 
+export type QueryGetPericopeTagsQasCountArgs = {
+  pericopeId: Scalars['String']['input'];
+};
+
+
 export type QueryGetPericopeTextAndDesctiptionArgs = {
   input: GetPericopeTextInput;
 };
@@ -2160,10 +2171,20 @@ export type QueryGetPhrasesByLanguageArgs = {
 };
 
 
+export type QueryGetQuestionOnWordRangesByBeginWordEntryIdArgs = {
+  begin_document_word_entry_id: Scalars['ID']['input'];
+};
+
+
 export type QueryGetQuestionOnWordRangesByDocumentIdArgs = {
   after?: InputMaybe<Scalars['ID']['input']>;
   document_id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryGetQuestionOnWordRangesByWordRangeIdArgs = {
+  word_range_id: Scalars['ID']['input'];
 };
 
 
@@ -2257,6 +2278,11 @@ export type QueryGetWordRangeTagsByDocumentIdArgs = {
   after?: InputMaybe<Scalars['ID']['input']>;
   document_id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryGetWordRangeTagsByWordRangeIdsArgs = {
+  word_range_ids: Array<Scalars['ID']['input']>;
 };
 
 
@@ -2698,7 +2724,6 @@ export type Subscription = {
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult;
   ZipMapReport: ZipMapResult;
   answersAdded: AnswersOutput;
-  bestPericopeTrChanged: BestPericopeTrChanged;
   documentAdded: DocumentUploadOutput;
   pericopeDeleted: PericopeDeleteOutput;
   pericopeVoteStatusToggled: PericopeVoteStatusOutput;
@@ -2706,6 +2731,7 @@ export type Subscription = {
   questionsAdded: QuestionsOutput;
   questionsOnWordRangeAdded: QuestionOnWordRangesOutput;
   recommendedPericopiesChanged: RecomendedPericopiesChangedAtDocumentId;
+  votePericopeTrChanged: VotePericopeTrChanged;
   wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput;
   wordRangeTagWithVoteAdded: WordRangeTagWithVotesOutput;
 };
@@ -2721,6 +2747,7 @@ export enum TableNameType {
   DocumentWordEntries = 'document_word_entries',
   Documents = 'documents',
   OriginalMaps = 'original_maps',
+  PericopeTranslations = 'pericope_translations',
   Pericopies = 'pericopies',
   PhraseDefinitions = 'phrase_definitions',
   PhraseToPhraseTranslations = 'phrase_to_phrase_translations',
@@ -2946,6 +2973,13 @@ export type VersionCreateOutput = {
   __typename?: 'VersionCreateOutput';
   error: ErrorType;
   version?: Maybe<Version>;
+};
+
+export type VotePericopeTrChanged = {
+  __typename?: 'VotePericopeTrChanged';
+  error: ErrorType;
+  newPericopeTr?: Maybe<PericopeTranslation>;
+  newVoteStatus?: Maybe<PericopeTrVoteStatus>;
 };
 
 export type Word = {
@@ -3952,7 +3986,7 @@ export type LanguageOutputFragmentFragment = { __typename?: 'LanguageOutput', la
 
 export type PericopeTranslationFragmentFragment = { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
 
-export type PericopeTranslationWithVotesFragmentFragment = { __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
+export type PericopeTranslationWithVotesFragmentFragment = { __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, isBest?: boolean | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } };
 
 export type PericopeTextWithTranslationAndDescriptionFragmentFragment = { __typename?: 'PericopeTextWithTranslationAndDescription', pericope_id?: string | null, pericope_text: string, pericope_description_text: string, translation?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null };
 
@@ -3977,7 +4011,7 @@ export type GetPericopeTranslationsQueryVariables = Exact<{
 }>;
 
 
-export type GetPericopeTranslationsQuery = { __typename?: 'Query', getPericopeTranslations: { __typename?: 'PericopeTranslationsOutput', translations: Array<{ __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
+export type GetPericopeTranslationsQuery = { __typename?: 'Query', getPericopeTranslations: { __typename?: 'PericopeTranslationsOutput', translations: Array<{ __typename?: 'PericopeTranslationWithVotes', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, upvotes: number, downvotes: number, isBest?: boolean | null, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } }> } };
 
 export type GetPericopeTextAndDesctiptionQueryVariables = Exact<{
   pericopeId: Scalars['String']['input'];
@@ -4011,10 +4045,10 @@ export type SubscribeToRecomendedPericopiesChangedSubscriptionVariables = Exact<
 
 export type SubscribeToRecomendedPericopiesChangedSubscription = { __typename?: 'Subscription', recommendedPericopiesChanged: { __typename?: 'RecomendedPericopiesChangedAtDocumentId', documentId: string } };
 
-export type BestPericopeTrChangedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+export type VotePericopeTrChangedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type BestPericopeTrChangedSubscription = { __typename?: 'Subscription', bestPericopeTrChanged: { __typename?: 'BestPericopeTrChanged', newPericopeTr?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null, newVoteStatus?: { __typename?: 'PericopeTrVoteStatus', pericope_translation_id: string, upvotes: number, downvotes: number } | null } };
+export type VotePericopeTrChangedSubscription = { __typename?: 'Subscription', votePericopeTrChanged: { __typename?: 'VotePericopeTrChanged', newPericopeTr?: { __typename?: 'PericopeTranslation', pericope_translation_id: string, pericope_id: string, translation: string, translation_description?: string | null, created_at: string, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, language: { __typename?: 'LanguageOutput', language_code: string, dialect_code?: string | null, geo_code?: string | null } } | null, newVoteStatus?: { __typename?: 'PericopeTrVoteStatus', pericope_translation_id: string, upvotes: number, downvotes: number } | null } };
 
 export type PericopeFragmentFragment = { __typename?: 'Pericope', pericope_id: string, start_word: string };
 
@@ -4039,6 +4073,13 @@ export type GetPericopeVoteStatusQueryVariables = Exact<{
 
 
 export type GetPericopeVoteStatusQuery = { __typename?: 'Query', getPericopeVoteStatus: { __typename?: 'PericopeVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'PericopeVoteStatus', pericope_id: string, upvotes: number, downvotes: number } | null } };
+
+export type GetPericopeTagsQasCountQueryVariables = Exact<{
+  pericopeId: Scalars['String']['input'];
+}>;
+
+
+export type GetPericopeTagsQasCountQuery = { __typename?: 'Query', getPericopeTagsQasCount: { __typename?: 'PericopeTagsQasCountOutput', error: ErrorType, pericope_id?: string | null, tags_count?: string | null, qas_count?: string | null } };
 
 export type TogglePericopeVoteStatusMutationVariables = Exact<{
   pericope_id: Scalars['ID']['input'];
@@ -4198,6 +4239,20 @@ export type GetQuestionOnWordRangesByDocumentIdQueryVariables = Exact<{
 
 
 export type GetQuestionOnWordRangesByDocumentIdQuery = { __typename?: 'Query', getQuestionOnWordRangesByDocumentId: { __typename?: 'QuestionOnWordRangesListConnection', error: ErrorType, edges: Array<{ __typename?: 'QuestionOnWordRangesEdge', cursor: string, node: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } }> }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+
+export type GetQuestionOnWordRangesByBeginWordEntryIdQueryVariables = Exact<{
+  begin_document_word_entry_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetQuestionOnWordRangesByBeginWordEntryIdQuery = { __typename?: 'Query', getQuestionOnWordRangesByBeginWordEntryId: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
+
+export type GetQuestionOnWordRangesByWordRangeIdQueryVariables = Exact<{
+  word_range_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetQuestionOnWordRangesByWordRangeIdQuery = { __typename?: 'Query', getQuestionOnWordRangesByWordRangeId: { __typename?: 'QuestionOnWordRangesOutput', error: ErrorType, questions: Array<{ __typename?: 'QuestionOnWordRange', question_id: string, parent_table: TableNameType, parent_id: string, question: string, question_type_is_multiselect: boolean, created_at: any, question_items: Array<{ __typename?: 'QuestionItem', question_item_id: string, item: string }>, created_by_user: { __typename?: 'User', user_id: string, avatar: string, avatar_url?: string | null, is_bot: boolean }, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null> } };
 
 export type GetAnswersByQuestionIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4386,6 +4441,13 @@ export type GetWordRangeTagsByDocumentIdQueryVariables = Exact<{
 
 export type GetWordRangeTagsByDocumentIdQuery = { __typename?: 'Query', getWordRangeTagsByDocumentId: { __typename?: 'WordRangeTagsListConnection', error: ErrorType, edges: Array<{ __typename?: 'WordRangeTagsEdge', cursor: string, node: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } }> }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
 
+export type GetWordRangeTagsByWordRangeIdsQueryVariables = Exact<{
+  word_range_ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+
+export type GetWordRangeTagsByWordRangeIdsQuery = { __typename?: 'Query', getWordRangeTagsByWordRangeIds: { __typename?: 'WordRangeTagWithVotesOutput', error: ErrorType, word_range_tags: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } } | null> } };
+
 export type GetWordRangeTagsByBeginWordEntryIdQueryVariables = Exact<{
   begin_document_word_entry_id: Scalars['ID']['input'];
 }>;
@@ -4400,14 +4462,13 @@ export type GetWordRangeTagVoteStatusQueryVariables = Exact<{
 
 export type GetWordRangeTagVoteStatusQuery = { __typename?: 'Query', getWordRangeTagVoteStatus: { __typename?: 'WordRangeTagVoteStatusOutput', error: ErrorType, vote_status?: { __typename?: 'WordRangeTagVoteStatus', downvotes: number, upvotes: number, word_range_tag_id: string } | null } };
 
-export type CreateTaggingOnWordRangeMutationVariables = Exact<{
-  begin_document_word_entry_id: Scalars['ID']['input'];
-  end_document_word_entry_id: Scalars['ID']['input'];
+export type CreateTaggingOnWordRangesMutationVariables = Exact<{
+  word_ranges: Array<WordRangeInput> | WordRangeInput;
   tag_names: Array<Scalars['String']['input']> | Scalars['String']['input'];
 }>;
 
 
-export type CreateTaggingOnWordRangeMutation = { __typename?: 'Mutation', createTaggingOnWordRange: { __typename?: 'WordRangeTagWithVotesOutput', error: ErrorType, word_range_tags: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } } | null> } };
+export type CreateTaggingOnWordRangesMutation = { __typename?: 'Mutation', createTaggingOnWordRanges: { __typename?: 'WordRangeTagWithVotesOutput', error: ErrorType, word_range_tags: Array<{ __typename?: 'WordRangeTagWithVote', word_range_tag_id: string, tag_name: string, downvotes: number, upvotes: number, word_range: { __typename?: 'WordRange', word_range_id: string, begin: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } }, end: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } } | null> } };
 
 export type UpsertWordRangeTagMutationVariables = Exact<{
   word_range_id: Scalars['ID']['input'];
@@ -5212,6 +5273,7 @@ export const PericopeTranslationWithVotesFragmentFragmentDoc = gql`
   }
   upvotes
   downvotes
+  isBest
 }
     ${UserFieldsFragmentDoc}
 ${LanguageOutputFragmentFragmentDoc}`;
@@ -8641,9 +8703,9 @@ export function useSubscribeToRecomendedPericopiesChangedSubscription(baseOption
       }
 export type SubscribeToRecomendedPericopiesChangedSubscriptionHookResult = ReturnType<typeof useSubscribeToRecomendedPericopiesChangedSubscription>;
 export type SubscribeToRecomendedPericopiesChangedSubscriptionResult = Apollo.SubscriptionResult<SubscribeToRecomendedPericopiesChangedSubscription>;
-export const BestPericopeTrChangedDocument = gql`
-    subscription BestPericopeTrChanged {
-  bestPericopeTrChanged {
+export const VotePericopeTrChangedDocument = gql`
+    subscription VotePericopeTrChanged {
+  votePericopeTrChanged {
     newPericopeTr {
       ...PericopeTranslationFragment
     }
@@ -8656,26 +8718,26 @@ export const BestPericopeTrChangedDocument = gql`
 ${PericopeTrVoteStatusFragmentFragmentDoc}`;
 
 /**
- * __useBestPericopeTrChangedSubscription__
+ * __useVotePericopeTrChangedSubscription__
  *
- * To run a query within a React component, call `useBestPericopeTrChangedSubscription` and pass it any options that fit your needs.
- * When your component renders, `useBestPericopeTrChangedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useVotePericopeTrChangedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useVotePericopeTrChangedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useBestPericopeTrChangedSubscription({
+ * const { data, loading, error } = useVotePericopeTrChangedSubscription({
  *   variables: {
  *   },
  * });
  */
-export function useBestPericopeTrChangedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<BestPericopeTrChangedSubscription, BestPericopeTrChangedSubscriptionVariables>) {
+export function useVotePericopeTrChangedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<VotePericopeTrChangedSubscription, VotePericopeTrChangedSubscriptionVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useSubscription<BestPericopeTrChangedSubscription, BestPericopeTrChangedSubscriptionVariables>(BestPericopeTrChangedDocument, options);
+        return Apollo.useSubscription<VotePericopeTrChangedSubscription, VotePericopeTrChangedSubscriptionVariables>(VotePericopeTrChangedDocument, options);
       }
-export type BestPericopeTrChangedSubscriptionHookResult = ReturnType<typeof useBestPericopeTrChangedSubscription>;
-export type BestPericopeTrChangedSubscriptionResult = Apollo.SubscriptionResult<BestPericopeTrChangedSubscription>;
+export type VotePericopeTrChangedSubscriptionHookResult = ReturnType<typeof useVotePericopeTrChangedSubscription>;
+export type VotePericopeTrChangedSubscriptionResult = Apollo.SubscriptionResult<VotePericopeTrChangedSubscription>;
 export const GetPericopiesByDocumentIdDocument = gql`
     query GetPericopiesByDocumentId($document_id: ID!, $first: Int, $after: ID) {
   getPericopiesByDocumentId(
@@ -8762,6 +8824,44 @@ export function useGetPericopeVoteStatusLazyQuery(baseOptions?: Apollo.LazyQuery
 export type GetPericopeVoteStatusQueryHookResult = ReturnType<typeof useGetPericopeVoteStatusQuery>;
 export type GetPericopeVoteStatusLazyQueryHookResult = ReturnType<typeof useGetPericopeVoteStatusLazyQuery>;
 export type GetPericopeVoteStatusQueryResult = Apollo.QueryResult<GetPericopeVoteStatusQuery, GetPericopeVoteStatusQueryVariables>;
+export const GetPericopeTagsQasCountDocument = gql`
+    query GetPericopeTagsQasCount($pericopeId: String!) {
+  getPericopeTagsQasCount(pericopeId: $pericopeId) {
+    error
+    pericope_id
+    tags_count
+    qas_count
+  }
+}
+    `;
+
+/**
+ * __useGetPericopeTagsQasCountQuery__
+ *
+ * To run a query within a React component, call `useGetPericopeTagsQasCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPericopeTagsQasCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPericopeTagsQasCountQuery({
+ *   variables: {
+ *      pericopeId: // value for 'pericopeId'
+ *   },
+ * });
+ */
+export function useGetPericopeTagsQasCountQuery(baseOptions: Apollo.QueryHookOptions<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>(GetPericopeTagsQasCountDocument, options);
+      }
+export function useGetPericopeTagsQasCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>(GetPericopeTagsQasCountDocument, options);
+        }
+export type GetPericopeTagsQasCountQueryHookResult = ReturnType<typeof useGetPericopeTagsQasCountQuery>;
+export type GetPericopeTagsQasCountLazyQueryHookResult = ReturnType<typeof useGetPericopeTagsQasCountLazyQuery>;
+export type GetPericopeTagsQasCountQueryResult = Apollo.QueryResult<GetPericopeTagsQasCountQuery, GetPericopeTagsQasCountQueryVariables>;
 export const TogglePericopeVoteStatusDocument = gql`
     mutation TogglePericopeVoteStatus($pericope_id: ID!, $vote: Boolean!) {
   togglePericopeVoteStatus(pericope_id: $pericope_id, vote: $vote) {
@@ -9409,6 +9509,84 @@ export function useGetQuestionOnWordRangesByDocumentIdLazyQuery(baseOptions?: Ap
 export type GetQuestionOnWordRangesByDocumentIdQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByDocumentIdQuery>;
 export type GetQuestionOnWordRangesByDocumentIdLazyQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByDocumentIdLazyQuery>;
 export type GetQuestionOnWordRangesByDocumentIdQueryResult = Apollo.QueryResult<GetQuestionOnWordRangesByDocumentIdQuery, GetQuestionOnWordRangesByDocumentIdQueryVariables>;
+export const GetQuestionOnWordRangesByBeginWordEntryIdDocument = gql`
+    query GetQuestionOnWordRangesByBeginWordEntryId($begin_document_word_entry_id: ID!) {
+  getQuestionOnWordRangesByBeginWordEntryId(
+    begin_document_word_entry_id: $begin_document_word_entry_id
+  ) {
+    error
+    questions {
+      ...QuestionOnWordRangeFragment
+    }
+  }
+}
+    ${QuestionOnWordRangeFragmentFragmentDoc}`;
+
+/**
+ * __useGetQuestionOnWordRangesByBeginWordEntryIdQuery__
+ *
+ * To run a query within a React component, call `useGetQuestionOnWordRangesByBeginWordEntryIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetQuestionOnWordRangesByBeginWordEntryIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetQuestionOnWordRangesByBeginWordEntryIdQuery({
+ *   variables: {
+ *      begin_document_word_entry_id: // value for 'begin_document_word_entry_id'
+ *   },
+ * });
+ */
+export function useGetQuestionOnWordRangesByBeginWordEntryIdQuery(baseOptions: Apollo.QueryHookOptions<GetQuestionOnWordRangesByBeginWordEntryIdQuery, GetQuestionOnWordRangesByBeginWordEntryIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetQuestionOnWordRangesByBeginWordEntryIdQuery, GetQuestionOnWordRangesByBeginWordEntryIdQueryVariables>(GetQuestionOnWordRangesByBeginWordEntryIdDocument, options);
+      }
+export function useGetQuestionOnWordRangesByBeginWordEntryIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetQuestionOnWordRangesByBeginWordEntryIdQuery, GetQuestionOnWordRangesByBeginWordEntryIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetQuestionOnWordRangesByBeginWordEntryIdQuery, GetQuestionOnWordRangesByBeginWordEntryIdQueryVariables>(GetQuestionOnWordRangesByBeginWordEntryIdDocument, options);
+        }
+export type GetQuestionOnWordRangesByBeginWordEntryIdQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByBeginWordEntryIdQuery>;
+export type GetQuestionOnWordRangesByBeginWordEntryIdLazyQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByBeginWordEntryIdLazyQuery>;
+export type GetQuestionOnWordRangesByBeginWordEntryIdQueryResult = Apollo.QueryResult<GetQuestionOnWordRangesByBeginWordEntryIdQuery, GetQuestionOnWordRangesByBeginWordEntryIdQueryVariables>;
+export const GetQuestionOnWordRangesByWordRangeIdDocument = gql`
+    query GetQuestionOnWordRangesByWordRangeId($word_range_id: ID!) {
+  getQuestionOnWordRangesByWordRangeId(word_range_id: $word_range_id) {
+    error
+    questions {
+      ...QuestionOnWordRangeFragment
+    }
+  }
+}
+    ${QuestionOnWordRangeFragmentFragmentDoc}`;
+
+/**
+ * __useGetQuestionOnWordRangesByWordRangeIdQuery__
+ *
+ * To run a query within a React component, call `useGetQuestionOnWordRangesByWordRangeIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetQuestionOnWordRangesByWordRangeIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetQuestionOnWordRangesByWordRangeIdQuery({
+ *   variables: {
+ *      word_range_id: // value for 'word_range_id'
+ *   },
+ * });
+ */
+export function useGetQuestionOnWordRangesByWordRangeIdQuery(baseOptions: Apollo.QueryHookOptions<GetQuestionOnWordRangesByWordRangeIdQuery, GetQuestionOnWordRangesByWordRangeIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetQuestionOnWordRangesByWordRangeIdQuery, GetQuestionOnWordRangesByWordRangeIdQueryVariables>(GetQuestionOnWordRangesByWordRangeIdDocument, options);
+      }
+export function useGetQuestionOnWordRangesByWordRangeIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetQuestionOnWordRangesByWordRangeIdQuery, GetQuestionOnWordRangesByWordRangeIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetQuestionOnWordRangesByWordRangeIdQuery, GetQuestionOnWordRangesByWordRangeIdQueryVariables>(GetQuestionOnWordRangesByWordRangeIdDocument, options);
+        }
+export type GetQuestionOnWordRangesByWordRangeIdQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByWordRangeIdQuery>;
+export type GetQuestionOnWordRangesByWordRangeIdLazyQueryHookResult = ReturnType<typeof useGetQuestionOnWordRangesByWordRangeIdLazyQuery>;
+export type GetQuestionOnWordRangesByWordRangeIdQueryResult = Apollo.QueryResult<GetQuestionOnWordRangesByWordRangeIdQuery, GetQuestionOnWordRangesByWordRangeIdQueryVariables>;
 export const GetAnswersByQuestionIdDocument = gql`
     query GetAnswersByQuestionId($id: ID!) {
   getAnswersByQuestionIds(ids: [$id]) {
@@ -10235,6 +10413,44 @@ export function useGetWordRangeTagsByDocumentIdLazyQuery(baseOptions?: Apollo.La
 export type GetWordRangeTagsByDocumentIdQueryHookResult = ReturnType<typeof useGetWordRangeTagsByDocumentIdQuery>;
 export type GetWordRangeTagsByDocumentIdLazyQueryHookResult = ReturnType<typeof useGetWordRangeTagsByDocumentIdLazyQuery>;
 export type GetWordRangeTagsByDocumentIdQueryResult = Apollo.QueryResult<GetWordRangeTagsByDocumentIdQuery, GetWordRangeTagsByDocumentIdQueryVariables>;
+export const GetWordRangeTagsByWordRangeIdsDocument = gql`
+    query getWordRangeTagsByWordRangeIds($word_range_ids: [ID!]!) {
+  getWordRangeTagsByWordRangeIds(word_range_ids: $word_range_ids) {
+    error
+    word_range_tags {
+      ...WordRangeTagWithVoteFragment
+    }
+  }
+}
+    ${WordRangeTagWithVoteFragmentFragmentDoc}`;
+
+/**
+ * __useGetWordRangeTagsByWordRangeIdsQuery__
+ *
+ * To run a query within a React component, call `useGetWordRangeTagsByWordRangeIdsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetWordRangeTagsByWordRangeIdsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetWordRangeTagsByWordRangeIdsQuery({
+ *   variables: {
+ *      word_range_ids: // value for 'word_range_ids'
+ *   },
+ * });
+ */
+export function useGetWordRangeTagsByWordRangeIdsQuery(baseOptions: Apollo.QueryHookOptions<GetWordRangeTagsByWordRangeIdsQuery, GetWordRangeTagsByWordRangeIdsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetWordRangeTagsByWordRangeIdsQuery, GetWordRangeTagsByWordRangeIdsQueryVariables>(GetWordRangeTagsByWordRangeIdsDocument, options);
+      }
+export function useGetWordRangeTagsByWordRangeIdsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetWordRangeTagsByWordRangeIdsQuery, GetWordRangeTagsByWordRangeIdsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetWordRangeTagsByWordRangeIdsQuery, GetWordRangeTagsByWordRangeIdsQueryVariables>(GetWordRangeTagsByWordRangeIdsDocument, options);
+        }
+export type GetWordRangeTagsByWordRangeIdsQueryHookResult = ReturnType<typeof useGetWordRangeTagsByWordRangeIdsQuery>;
+export type GetWordRangeTagsByWordRangeIdsLazyQueryHookResult = ReturnType<typeof useGetWordRangeTagsByWordRangeIdsLazyQuery>;
+export type GetWordRangeTagsByWordRangeIdsQueryResult = Apollo.QueryResult<GetWordRangeTagsByWordRangeIdsQuery, GetWordRangeTagsByWordRangeIdsQueryVariables>;
 export const GetWordRangeTagsByBeginWordEntryIdDocument = gql`
     query GetWordRangeTagsByBeginWordEntryId($begin_document_word_entry_id: ID!) {
   getWordRangeTagsByBeginWordEntryId(
@@ -10313,13 +10529,9 @@ export function useGetWordRangeTagVoteStatusLazyQuery(baseOptions?: Apollo.LazyQ
 export type GetWordRangeTagVoteStatusQueryHookResult = ReturnType<typeof useGetWordRangeTagVoteStatusQuery>;
 export type GetWordRangeTagVoteStatusLazyQueryHookResult = ReturnType<typeof useGetWordRangeTagVoteStatusLazyQuery>;
 export type GetWordRangeTagVoteStatusQueryResult = Apollo.QueryResult<GetWordRangeTagVoteStatusQuery, GetWordRangeTagVoteStatusQueryVariables>;
-export const CreateTaggingOnWordRangeDocument = gql`
-    mutation CreateTaggingOnWordRange($begin_document_word_entry_id: ID!, $end_document_word_entry_id: ID!, $tag_names: [String!]!) {
-  createTaggingOnWordRange(
-    begin_document_word_entry_id: $begin_document_word_entry_id
-    end_document_word_entry_id: $end_document_word_entry_id
-    tag_names: $tag_names
-  ) {
+export const CreateTaggingOnWordRangesDocument = gql`
+    mutation CreateTaggingOnWordRanges($word_ranges: [WordRangeInput!]!, $tag_names: [String!]!) {
+  createTaggingOnWordRanges(word_ranges: $word_ranges, tag_names: $tag_names) {
     error
     word_range_tags {
       ...WordRangeTagWithVoteFragment
@@ -10327,34 +10539,33 @@ export const CreateTaggingOnWordRangeDocument = gql`
   }
 }
     ${WordRangeTagWithVoteFragmentFragmentDoc}`;
-export type CreateTaggingOnWordRangeMutationFn = Apollo.MutationFunction<CreateTaggingOnWordRangeMutation, CreateTaggingOnWordRangeMutationVariables>;
+export type CreateTaggingOnWordRangesMutationFn = Apollo.MutationFunction<CreateTaggingOnWordRangesMutation, CreateTaggingOnWordRangesMutationVariables>;
 
 /**
- * __useCreateTaggingOnWordRangeMutation__
+ * __useCreateTaggingOnWordRangesMutation__
  *
- * To run a mutation, you first call `useCreateTaggingOnWordRangeMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateTaggingOnWordRangeMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCreateTaggingOnWordRangesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateTaggingOnWordRangesMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createTaggingOnWordRangeMutation, { data, loading, error }] = useCreateTaggingOnWordRangeMutation({
+ * const [createTaggingOnWordRangesMutation, { data, loading, error }] = useCreateTaggingOnWordRangesMutation({
  *   variables: {
- *      begin_document_word_entry_id: // value for 'begin_document_word_entry_id'
- *      end_document_word_entry_id: // value for 'end_document_word_entry_id'
+ *      word_ranges: // value for 'word_ranges'
  *      tag_names: // value for 'tag_names'
  *   },
  * });
  */
-export function useCreateTaggingOnWordRangeMutation(baseOptions?: Apollo.MutationHookOptions<CreateTaggingOnWordRangeMutation, CreateTaggingOnWordRangeMutationVariables>) {
+export function useCreateTaggingOnWordRangesMutation(baseOptions?: Apollo.MutationHookOptions<CreateTaggingOnWordRangesMutation, CreateTaggingOnWordRangesMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateTaggingOnWordRangeMutation, CreateTaggingOnWordRangeMutationVariables>(CreateTaggingOnWordRangeDocument, options);
+        return Apollo.useMutation<CreateTaggingOnWordRangesMutation, CreateTaggingOnWordRangesMutationVariables>(CreateTaggingOnWordRangesDocument, options);
       }
-export type CreateTaggingOnWordRangeMutationHookResult = ReturnType<typeof useCreateTaggingOnWordRangeMutation>;
-export type CreateTaggingOnWordRangeMutationResult = Apollo.MutationResult<CreateTaggingOnWordRangeMutation>;
-export type CreateTaggingOnWordRangeMutationOptions = Apollo.BaseMutationOptions<CreateTaggingOnWordRangeMutation, CreateTaggingOnWordRangeMutationVariables>;
+export type CreateTaggingOnWordRangesMutationHookResult = ReturnType<typeof useCreateTaggingOnWordRangesMutation>;
+export type CreateTaggingOnWordRangesMutationResult = Apollo.MutationResult<CreateTaggingOnWordRangesMutation>;
+export type CreateTaggingOnWordRangesMutationOptions = Apollo.BaseMutationOptions<CreateTaggingOnWordRangesMutation, CreateTaggingOnWordRangesMutationVariables>;
 export const UpsertWordRangeTagDocument = gql`
     mutation UpsertWordRangeTag($word_range_id: ID!, $tag_name: String!) {
   upsertWordRangeTag(word_range_id: $word_range_id, tag_name: $tag_name) {
@@ -12009,12 +12220,15 @@ export const namedOperations = {
     GetPericopeTextAndDesctiption: 'GetPericopeTextAndDesctiption',
     GetPericopiesByDocumentId: 'GetPericopiesByDocumentId',
     GetPericopeVoteStatus: 'GetPericopeVoteStatus',
+    GetPericopeTagsQasCount: 'GetPericopeTagsQasCount',
     PhraseDefinitionRead: 'PhraseDefinitionRead',
     GetPhrasesByLanguage: 'GetPhrasesByLanguage',
     GetPhraseDefinitionsByPhraseId: 'GetPhraseDefinitionsByPhraseId',
     GetPhraseWithVoteById: 'GetPhraseWithVoteById',
     PostRead: 'PostRead',
     GetQuestionOnWordRangesByDocumentId: 'GetQuestionOnWordRangesByDocumentId',
+    GetQuestionOnWordRangesByBeginWordEntryId: 'GetQuestionOnWordRangesByBeginWordEntryId',
+    GetQuestionOnWordRangesByWordRangeId: 'GetQuestionOnWordRangesByWordRangeId',
     GetAnswersByQuestionId: 'GetAnswersByQuestionId',
     GetAnswerByUserId: 'GetAnswerByUserId',
     getQuestionStatistic: 'getQuestionStatistic',
@@ -12028,6 +12242,7 @@ export const namedOperations = {
     GetAllRecommendedSiteTextTranslationList: 'GetAllRecommendedSiteTextTranslationList',
     GetAllSiteTextLanguageListWithRate: 'GetAllSiteTextLanguageListWithRate',
     GetWordRangeTagsByDocumentId: 'GetWordRangeTagsByDocumentId',
+    getWordRangeTagsByWordRangeIds: 'getWordRangeTagsByWordRangeIds',
     GetWordRangeTagsByBeginWordEntryId: 'GetWordRangeTagsByBeginWordEntryId',
     GetWordRangeTagVoteStatus: 'GetWordRangeTagVoteStatus',
     GetTranslationLanguageInfo: 'GetTranslationLanguageInfo',
@@ -12092,7 +12307,7 @@ export const namedOperations = {
     UpsertAnswer: 'UpsertAnswer',
     UpsertSiteTextTranslation: 'UpsertSiteTextTranslation',
     SiteTextUpsert: 'SiteTextUpsert',
-    CreateTaggingOnWordRange: 'CreateTaggingOnWordRange',
+    CreateTaggingOnWordRanges: 'CreateTaggingOnWordRanges',
     UpsertWordRangeTag: 'UpsertWordRangeTag',
     ToggleWordRangeTagVoteStatus: 'ToggleWordRangeTagVoteStatus',
     TranslateWordsAndPhrasesByGoogle: 'TranslateWordsAndPhrasesByGoogle',
@@ -12124,7 +12339,7 @@ export const namedOperations = {
     SubscribeToDocumentAdded: 'SubscribeToDocumentAdded',
     SubscribeToZipMap: 'SubscribeToZipMap',
     SubscribeToRecomendedPericopiesChanged: 'SubscribeToRecomendedPericopiesChanged',
-    BestPericopeTrChanged: 'BestPericopeTrChanged',
+    VotePericopeTrChanged: 'VotePericopeTrChanged',
     SubscribeToPericopiesAdded: 'SubscribeToPericopiesAdded',
     SubscribeToPericopieDeleted: 'SubscribeToPericopieDeleted',
     SubscribeToPericopeVoteStatusToggled: 'SubscribeToPericopeVoteStatusToggled',

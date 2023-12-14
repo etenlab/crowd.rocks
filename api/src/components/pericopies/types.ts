@@ -93,6 +93,13 @@ export class PericopeTextWithDescription extends GenericOutput {
   @Field(() => String) pericope_text: string;
   @Field(() => String) pericope_description_text: string;
 }
+
+@ObjectType()
+export class PericopeTagsQasCountOutput extends GenericOutput {
+  @Field(() => ID, { nullable: true }) pericope_id: string | null;
+  @Field(() => String, { nullable: true }) tags_count: number | null;
+  @Field(() => String, { nullable: true }) qas_count: number | null;
+}
 @ObjectType()
 export class RecomendedPericopiesChangedAtDocumentId extends GenericOutput {
   @Field(() => String) documentId: string;

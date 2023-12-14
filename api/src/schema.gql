@@ -48,12 +48,6 @@ type AvatarUpdateOutput {
   user: User
 }
 
-type BestPericopeTrChanged {
-  error: ErrorType!
-  newPericopeTr: PericopeTranslation
-  newVoteStatus: PericopeTrVoteStatus
-}
-
 input BotTranslateDocumentInput {
   botType: BotType!
   documentId: String!
@@ -229,6 +223,7 @@ enum ErrorType {
   PasswordInvalid
   PasswordTooLong
   PasswordTooShort
+  PericopeBestTranslationNotFound
   PericopeGetTranslationError
   PericopeInsertFailed
   PericopeNotFound
@@ -679,7 +674,7 @@ type Mutation {
   avatarUpdateResolver(input: AvatarUpdateInput!): AvatarUpdateOutput!
   botTranslateDocument(input: BotTranslateDocumentInput!): DocumentUploadOutput!
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
-  createTaggingOnWordRange(begin_document_word_entry_id: ID!, end_document_word_entry_id: ID!, tag_names: [String!]!): WordRangeTagWithVotesOutput!
+  createTaggingOnWordRanges(tag_names: [String!]!, word_ranges: [WordRangeInput!]!): WordRangeTagWithVotesOutput!
   deletePericopie(pericope_id: ID!): PericopeDeleteOutput!
   documentByPericopiesTranslate(input: TranslateDocumentByPericopiesInput!): FileUrlOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
@@ -821,6 +816,13 @@ type PericopeEdge {
   node: Pericope!
 }
 
+type PericopeTagsQasCountOutput {
+  error: ErrorType!
+  pericope_id: ID
+  qas_count: String
+  tags_count: String
+}
+
 type PericopeTextWithDescription {
   error: ErrorType!
   pericope_description_text: String!
@@ -862,6 +864,7 @@ type PericopeTranslationWithVotes {
   created_at: String!
   created_by_user: User!
   downvotes: Int!
+  isBest: Boolean
   language: LanguageOutput!
   pericope_id: String!
   pericope_translation_id: ID!
@@ -1233,6 +1236,7 @@ type Query {
   getOrigMapWordsAndPhrases(after: ID, first: Int, input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesConnection!
   getOrigMapWordsAndPhrasesCount(input: GetOrigMapWordsAndPhrasesInput!): MapWordsAndPhrasesCountOutput!
   getOrigMapsList(input: GetOrigMapListInput!): GetOrigMapsListOutput!
+  getPericopeTagsQasCount(pericopeId: String!): PericopeTagsQasCountOutput!
   getPericopeTextAndDesctiption(input: GetPericopeTextInput!): PericopeTextWithDescription!
   getPericopeTranslations(input: GetPericopeTranslationsInput!): PericopeTranslationsOutput!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
@@ -1249,7 +1253,9 @@ type Query {
   getPhraseVoteStatus(phrase_id: ID!): PhraseVoteStatusOutputRow!
   getPhraseWithVoteById(phrase_id: ID!): PhraseWithVoteOutput!
   getPhrasesByLanguage(after: ID, first: Int, input: LanguageInput!): PhraseWithVoteListConnection!
+  getQuestionOnWordRangesByBeginWordEntryId(begin_document_word_entry_id: ID!): QuestionOnWordRangesOutput!
   getQuestionOnWordRangesByDocumentId(after: ID, document_id: ID!, first: Int): QuestionOnWordRangesListConnection!
+  getQuestionOnWordRangesByWordRangeId(word_range_id: ID!): QuestionOnWordRangesOutput!
   getQuestionStatistic(question_id: ID!): QuestionWithStatisticOutput!
   getQuestionsByRefs(parent_ids: [ID!]!, parent_tables: [TableNameType!]!): QuestionsOutput!
   getRecommendedTranslationFromDefinitionID(from_definition_id: ID!, from_type_is_word: Boolean!, langInfo: LanguageInput!): TranslationWithVoteOutput!
@@ -1265,6 +1271,7 @@ type Query {
   getWordRangeTagVoteStatus(word_range_tag_id: ID!): WordRangeTagVoteStatusOutput!
   getWordRangeTagsByBeginWordEntryId(begin_document_word_entry_id: ID!): WordRangeTagWithVotesOutput!
   getWordRangeTagsByDocumentId(after: ID, document_id: ID!, first: Int): WordRangeTagsListConnection!
+  getWordRangeTagsByWordRangeIds(word_range_ids: [ID!]!): WordRangeTagWithVotesOutput!
   getWordRangesByBeginIds(ids: [ID!]!): WordRangesOutput!
   getWordRangesByDocumentId(after: ID, document_id: ID!, first: Int): WordRangesListConnection!
   getWordToPhraseTrVoteStatus(word_to_phrase_translation_id: ID!): WordToPhraseTranslationVoteStatusOutputRow!
@@ -1546,7 +1553,6 @@ type Subscription {
   TranslationReport: TranslateAllWordsAndPhrasesByBotResult!
   ZipMapReport: ZipMapResult!
   answersAdded: AnswersOutput!
-  bestPericopeTrChanged: BestPericopeTrChanged!
   documentAdded: DocumentUploadOutput!
   pericopeDeleted: PericopeDeleteOutput!
   pericopeVoteStatusToggled: PericopeVoteStatusOutput!
@@ -1554,6 +1560,7 @@ type Subscription {
   questionsAdded: QuestionsOutput!
   questionsOnWordRangeAdded: QuestionOnWordRangesOutput!
   recommendedPericopiesChanged: RecomendedPericopiesChangedAtDocumentId!
+  votePericopeTrChanged: VotePericopeTrChanged!
   wordRangeTagVoteStatusToggled: WordRangeTagVoteStatusOutput!
   wordRangeTagWithVoteAdded: WordRangeTagWithVotesOutput!
 }
@@ -1569,6 +1576,7 @@ enum TableNameType {
   document_word_entries
   documents
   original_maps
+  pericope_translations
   pericopies
   phrase_definitions
   phrase_to_phrase_translations
@@ -1775,6 +1783,12 @@ input VersionCreateInput {
 type VersionCreateOutput {
   error: ErrorType!
   version: Version
+}
+
+type VotePericopeTrChanged {
+  error: ErrorType!
+  newPericopeTr: PericopeTranslation
+  newVoteStatus: PericopeTrVoteStatus
 }
 
 type Word {

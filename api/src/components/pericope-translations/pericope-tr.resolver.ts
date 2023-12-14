@@ -12,19 +12,23 @@ import {
 import { PericopeTrService } from './pericope-tr.service';
 import {
   AddPericopeTranslationInput,
-  BestPericopeTrChanged,
+  VotePericopeTrChanged as VotePericopeTrChanged,
   GetPericopeTranslationsInput,
   GetPericopiesTrInput,
   PericopeTranslation,
   PericopeTranslationsOutput,
   PericopeTrVoteStatusAndBestTrOutput,
   PericopiesTextsWithTranslationConnection,
+  GetPericopeTextInput,
+  // PericopeBestTranslationOutput,
 } from './types';
 import { BearerTokenAuthGuard } from '../../guards/bearer-token-auth.guard';
 import { ErrorType } from '../../common/types';
 import { PUB_SUB } from '../../pubSub.module';
 import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionToken } from '../../common/subscription-token';
+import { PericopeTagsQasCountOutput } from '../pericopies/types';
+// import { LanguageInput } from '../common/types';
 
 @Injectable()
 @Resolver()
@@ -103,11 +107,11 @@ export class PericopeTrResolver {
       best_translation?.pericope_translation_id !==
       oldBestTr?.pericope_translation_id
     ) {
-      this.pubSub.publish(SubscriptionToken.bestPericopeTrChanged, {
-        [SubscriptionToken.bestPericopeTrChanged]: {
+      this.pubSub.publish(SubscriptionToken.votePericopeTrChanged, {
+        [SubscriptionToken.votePericopeTrChanged]: {
           newPericopeTr: best_translation,
           newVoteStatus: vote_status.vote_status,
-        } as BestPericopeTrChanged,
+        } as VotePericopeTrChanged,
       });
     }
 
@@ -148,11 +152,11 @@ export class PericopeTrResolver {
     }
   }
 
-  @Subscription(() => BestPericopeTrChanged, {
-    name: SubscriptionToken.bestPericopeTrChanged,
+  @Subscription(() => VotePericopeTrChanged, {
+    name: SubscriptionToken.votePericopeTrChanged,
   })
-  async bestPericopeTrChanged() {
-    console.log('PericopeTrResolver#bestPericopeTrChanged');
-    return this.pubSub.asyncIterator(SubscriptionToken.bestPericopeTrChanged);
+  async votePericopeTrChanged() {
+    Logger.log('PericopeTrResolver#votePericopeTrChanged Subscription');
+    return this.pubSub.asyncIterator(SubscriptionToken.votePericopeTrChanged);
   }
 }

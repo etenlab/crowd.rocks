@@ -1,20 +1,18 @@
-import { ViewMode } from '../../documents/DocumentViewer/DocumentViewer';
-
 import { SuperToolKind } from '../SuperDocumentViewerPage/ToolBox';
 import { PericopeDocumentViewerV2 } from '../../pericopies/PericopeDocumentViewer';
-import { TaggingDocumentViewer } from '../../tagging/TaggingDocumentViewer';
-import { QADocumentViewer } from '../../qa/QADocumentViewer';
+import { TaggingDocumentViewerV2 } from '../../tagging/TaggingDocumentViewer';
+import { QADocumentViewerV2 } from '../../qa/QADocumentViewer';
 
 type SuperDocumentViewerProps = {
   documentId: string;
-  mode: ViewMode;
+  documentAuthorId: string;
   tool: SuperToolKind;
   customScrollParent?: HTMLElement;
 };
 
 export function SuperDocumentViewer({
   documentId,
-  mode,
+  documentAuthorId,
   tool,
   customScrollParent,
 }: SuperDocumentViewerProps) {
@@ -22,22 +20,21 @@ export function SuperDocumentViewer({
     return (
       <PericopeDocumentViewerV2
         documentId={documentId}
+        documentAuthorId={documentAuthorId}
         customScrollParent={customScrollParent}
       />
     );
   } else if (tool === SuperToolKind.Tagging) {
     return (
-      <TaggingDocumentViewer
+      <TaggingDocumentViewerV2
         documentId={documentId}
-        mode={mode}
         customScrollParent={customScrollParent}
       />
     );
   } else if (tool === SuperToolKind.QA) {
     return (
-      <QADocumentViewer
+      <QADocumentViewerV2
         documentId={documentId}
-        mode={mode}
         customScrollParent={customScrollParent}
       />
     );

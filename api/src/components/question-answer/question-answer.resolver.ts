@@ -113,6 +113,38 @@ export class QuestionAndAnswersResolver {
     );
   }
 
+  @Query(() => QuestionOnWordRangesOutput)
+  async getQuestionOnWordRangesByBeginWordEntryId(
+    @Args('begin_document_word_entry_id', { type: () => ID })
+    begin_document_word_entry_id: string,
+  ): Promise<QuestionOnWordRangesOutput> {
+    Logger.log(
+      'getQuestionOnWordRangesByBeginWordEntryId',
+      JSON.stringify({ begin_document_word_entry_id }, null, 2),
+    );
+
+    return this.questionService.getQuestionOnWordRangesByBeginWordEntryId(
+      +begin_document_word_entry_id,
+      null,
+    );
+  }
+
+  @Query(() => QuestionOnWordRangesOutput)
+  async getQuestionOnWordRangesByWordRangeId(
+    @Args('word_range_id', { type: () => ID })
+    word_range_id: string,
+  ): Promise<QuestionOnWordRangesOutput> {
+    Logger.log(
+      'getQuestionOnWordRangesByWordRangeId',
+      JSON.stringify({ word_range_id }, null, 2),
+    );
+
+    return this.questionService.getQuestionOnWordRangesByWordRangeId(
+      +word_range_id,
+      null,
+    );
+  }
+
   @Query(() => AnswersOutput)
   async readAnswers(
     @Args('ids', { type: () => [ID] }) ids: string[],

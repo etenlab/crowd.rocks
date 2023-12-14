@@ -130,7 +130,7 @@ export function MapList({ match }: MapListProps) {
           after: null,
         };
 
-    getAllMapsList({ variables });
+    getAllMapsList({ variables, fetchPolicy: 'network-only' });
   }, [getAllMapsList, targetLang, bouncedFilter]);
 
   useEffect(() => {

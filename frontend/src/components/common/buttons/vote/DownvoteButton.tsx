@@ -15,12 +15,13 @@ export function DownvoteButton({
 }: DownvoteButtonProps) {
   return (
     <Button
-      variant={selected ? 'contained' : 'outlined'}
+      variant="outlined"
       sx={(theme) => ({
         padding: '5px 10px',
         borderRadius: '6px',
         background: selected ? '#FFDBDB' : '',
         color: selected ? theme.palette.text.red : '',
+        border: selected ? 'none' : '',
       })}
       startIcon={<ThumbsDown sx={{ fontSize: 22 }} />}
       color="red"

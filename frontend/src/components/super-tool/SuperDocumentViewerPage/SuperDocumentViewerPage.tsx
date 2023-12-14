@@ -4,12 +4,11 @@ import { useIonViewDidEnter, useIonViewDidLeave } from '@ionic/react';
 import {
   Box,
   CircularProgress,
-  useMediaQuery,
   Collapse,
-  IconButton,
+  Button,
+  useMediaQuery,
 } from '@mui/material';
 
-import { globals } from '../../../services/globals';
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
 
@@ -19,27 +18,24 @@ import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { TabKind, ToolBox, SuperToolKind, FilterKind } from './ToolBox';
 import { OptionItem } from '../../common/forms/Autocomplete';
-import { NavArrowDown } from '../../common/icons/NavArrowDown';
-import { NavArrowUp } from '../../common/icons/NavArrowUp';
+import { Settings } from '../../common/icons/Settings';
 import { SuperDocumentViewer } from '../SuperDocumentViewer/SuperDocumentViewer';
 import { SuperPericopiesTranslator } from '../SuperPericopiesTranslator';
-import { useBestPericopeTrChangedSubscription } from '../../../hooks/useBestPericopeTrChangedSubscription';
+import { useVotePericopeTrChangedSubscription } from '../../../hooks/useVotePericopeTrChangedSubscription';
 
 export function SuperDocumentViewerPage() {
   const { tr } = useTr();
   const { document_id } = useParams<{ document_id: string }>();
+  const matches = useMediaQuery('(min-width:765px)');
   const {
     states: {
       components: { ionContentScrollElement },
     },
   } = useAppContext();
 
-  const matches = useMediaQuery('(min-width:765px)');
-
   const [pageStatus, setPageStatus] = useState<'shown' | 'hidden' | null>(null);
   const [expand, setExpand] = useState(true);
 
-  const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [tab, setTab] = useState<TabKind>(TabKind.Document);
   const [tool, setTool] = useState<OptionItem>({
     label: tr('Pericope'),
@@ -64,17 +60,7 @@ export function SuperDocumentViewerPage() {
     setPageStatus('hidden');
   });
 
-  useBestPericopeTrChangedSubscription();
-
-  const handleToggleMode = useCallback(() => {
-    setMode((mode) => {
-      if (mode === 'view') {
-        return 'edit';
-      } else {
-        return 'view';
-      }
-    });
-  }, []);
+  useVotePericopeTrChangedSubscription();
 
   const handleChangeTab = useCallback((tab: TabKind) => {
     setTab(tab);
@@ -102,10 +88,6 @@ export function SuperDocumentViewerPage() {
 
   const document = documentData ? documentData.getDocument.document : null;
 
-  const sameUser = document
-    ? +document.created_by === globals.get_user_id()
-    : false;
-
   if (!document) {
     return (
       <PageLayout>
@@ -123,42 +105,18 @@ export function SuperDocumentViewerPage() {
         sx={{
           position: 'fixed',
           top: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
           zIndex: 10,
-          width: matches ? 'calc(777px)' : 'calc(100%)',
+          width: '100%',
+          maxWidth: '777px',
           background: (theme) => theme.palette.background.white,
-          marginLeft: '-30px',
-          padding: '15px',
-          borderRadius: '0 0 20px 20px',
+          padding: expand ? '30px 20px' : '0 20px',
           boxShadow: '0px 5px 14px 0px rgba(128, 136, 163, 0.20)',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            bottom: -20,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            borderStyle: 'solid',
-            borderWidth: '20px 30px 0 30px',
-            borderColor: (theme) =>
-              `${theme.palette.background.white} transparent transparent transparent`,
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: -21,
-            left: '50%',
-            zIndex: -1,
-            transform: 'translateX(-50%)',
-            borderStyle: 'solid',
-            borderWidth: '21px 31px 0 31px',
-            borderColor: (theme) =>
-              `${theme.palette.background.gray_stroke} transparent transparent transparent`,
-          },
         }}
       >
         <Collapse in={expand}>
           <ToolBox
-            mode={mode}
-            onToggleMode={handleToggleMode}
             tab={tab}
             onChangeTab={handleChangeTab}
             tool={tool}
@@ -168,60 +126,57 @@ export function SuperDocumentViewerPage() {
             stringFilter={stringFilter}
             onChangeStringFilter={handleChangeStringFilter}
             document={document}
-            disabledEditButton={
-              tool.value === SuperToolKind.Pericope && !sameUser
-            }
           />
         </Collapse>
-        {expand ? (
-          <IconButton
-            onClick={handleClose}
-            sx={{
-              position: 'absolute',
-              bottom: -20,
-              left: '50%',
-              transform: 'translateX(-50%)',
-            }}
-          >
-            <NavArrowUp />
-          </IconButton>
-        ) : (
-          <IconButton
-            onClick={handleExpand}
-            sx={{
-              position: 'absolute',
-              bottom: -20,
-              left: '50%',
-              transform: 'translateX(-50%)',
-            }}
-          >
-            <NavArrowDown />
-          </IconButton>
-        )}
       </Box>
 
       <Collapse in={expand}>
-        <Box sx={{ height: '302px' }} />{' '}
+        <Box sx={{ height: '340px' }} />
       </Collapse>
 
-      {tab === TabKind.Document ? (
-        <SuperDocumentViewer
-          documentId={document_id}
-          mode={mode}
-          tool={tool.value as SuperToolKind}
-          customScrollParent={
-            pageStatus === 'shown' && ionContentScrollElement
-              ? ionContentScrollElement
-              : undefined
-          }
-        />
-      ) : (
-        <SuperPericopiesTranslator
-          documentId={document_id}
-          filterKind={filter.value}
-          stringFilter={stringFilter}
-        />
-      )}
+      {!expand ? (
+        <Button
+          variant="contained"
+          onClick={handleExpand}
+          sx={{
+            position: 'fixed',
+            zIndex: 9,
+            bottom: 100,
+            right: matches ? `calc(50% - 390px)` : '16px',
+            borderRadius: '10px',
+            padding: '10px',
+            minWidth: 0,
+            transform: 'translateX(-50%)',
+          }}
+          color="blue"
+        >
+          <Settings />
+        </Button>
+      ) : null}
+
+      <Box
+        sx={{ width: '100%', maxWidth: '777px', height: '100vh' }}
+        onClick={handleClose}
+      >
+        {tab === TabKind.Document ? (
+          <SuperDocumentViewer
+            documentId={document_id}
+            documentAuthorId={document.created_by}
+            tool={tool.value as SuperToolKind}
+            customScrollParent={
+              pageStatus === 'shown' && ionContentScrollElement
+                ? ionContentScrollElement
+                : undefined
+            }
+          />
+        ) : (
+          <SuperPericopiesTranslator
+            documentId={document_id}
+            filterKind={filter.value}
+            stringFilter={stringFilter}
+          />
+        )}
+      </Box>
     </PageLayout>
   );
 }

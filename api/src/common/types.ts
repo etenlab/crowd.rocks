@@ -148,6 +148,7 @@ export enum ErrorType {
   PericopeTranslationInsertFailed = 'PericopeTranslationInsertFailed',
   PericopeNotFound = 'PericopeNotFound',
   PericopeTranslationNotFound = 'PericopeTranslationNotFound',
+  PericopeBestTranslationNotFound = 'PericopeBestTranslationNotFound',
   PericopeGetTranslationError = 'PericopeGetTranslationError',
   PericopeVoteToggleFailed = 'PericopeVoteToggleFailed',
   PericopeTranslationVoteToggleFailed = 'PericopeTranslationVoteToggleFailed',
@@ -199,6 +200,7 @@ export enum TableNameType {
   original_maps = 'original_maps',
   translated_maps = 'translated_maps',
   pericopies = 'pericopies',
+  pericope_translations = 'pericope_translations',
 }
 
 registerEnumType(TableNameType, {

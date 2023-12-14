@@ -7,7 +7,7 @@ import {
   ReactNode,
   MouseEvent,
 } from 'react';
-import { Stack } from '@mui/material';
+import { Stack, IconButton } from '@mui/material';
 import { Virtuoso, ListRange, VirtuosoHandle } from 'react-virtuoso';
 
 import { Dot, Word } from './styled';
@@ -15,6 +15,7 @@ import { SkeletonRow } from './SkeletonRow';
 
 import { useGetDocumentWordEntriesByDocumentIdLazyQuery } from '../../../generated/graphql';
 import { DeleteCircle } from '../../common/icons/DeleteCircle';
+import { CheckCircle } from '../../common/icons/CheckCircle';
 
 const DOCUMENT_PAGE_REMEMBER = 'DOCUMENT_PAGE_REMEMBER';
 
@@ -51,11 +52,11 @@ export type DocumentViewerHandle = {
 };
 
 export type DocumentViewerV2Props = {
-  range?: Range;
   drawRanges: {
     begin: string;
     end: string;
   }[];
+  selectedPericopeDot?: string;
   dots: {
     entryId: string;
     component?: ReactNode;
@@ -66,26 +67,31 @@ export type DocumentViewerV2Props = {
     e: MouseEvent<HTMLDivElement>,
   ): void;
   documentId: string;
-  onChangeRange(range: Range): void;
+  onSelectRange(range: { begin: string; end: string }): void;
+  onSelectingRange?(status: boolean): void;
   onChangeRangeText(sentence: string): void;
   onLoadPage?(tempPage: TempPage): void;
   customScrollParent?: HTMLElement;
+  disabledRangeSelection?: boolean;
 };
 
 export function DocumentViewerV2({
   documentId,
-  range,
   drawRanges,
+  selectedPericopeDot,
   dots,
   onClickWord,
-  onChangeRange,
+  onSelectRange,
+  onSelectingRange,
   onChangeRangeText,
   onLoadPage,
+  disabledRangeSelection,
   customScrollParent,
 }: DocumentViewerV2Props) {
   const [getDocumentWordEntriesByDocumentId] =
     useGetDocumentWordEntriesByDocumentIdLazyQuery();
 
+  const [range, setRange] = useState<Range | null>(null);
   const [entriesData, setEntriesData] = useState<(TempPage | WordEntry[])[]>(
     [],
   );
@@ -188,20 +194,20 @@ export function DocumentViewerV2({
         // ...A... ... ...B...
         if (range.begin.entryId === entryId) {
           // ...A(X)... ... ...B...
-          onChangeRange({
+          setRange({
             begin: range.begin,
             end: range.begin,
           });
         } else if (range.end.entryId === entryId) {
           // ...A... ... ...B(X)...
-          onChangeRange({
+          setRange({
             begin: range.end,
             end: range.end,
           });
         } else {
           if (range.begin.order >= index) {
             // ...X ... A... ... ...B...
-            onChangeRange({
+            setRange({
               begin: {
                 entryId,
                 order: index,
@@ -210,7 +216,7 @@ export function DocumentViewerV2({
             });
           } else if (range.end.order <= index) {
             // ... A... ... ...B... X ...
-            onChangeRange({
+            setRange({
               begin: range.begin,
               end: {
                 entryId,
@@ -219,7 +225,7 @@ export function DocumentViewerV2({
             });
           } else if (index - range.begin.order <= range.end.order - index) {
             // ... A... X ... ... ...B...
-            onChangeRange({
+            setRange({
               begin: {
                 entryId,
                 order: index,
@@ -228,7 +234,7 @@ export function DocumentViewerV2({
             });
           } else {
             // ... A... ... X ...B...
-            onChangeRange({
+            setRange({
               begin: range.begin,
               end: {
                 entryId,
@@ -237,11 +243,11 @@ export function DocumentViewerV2({
             });
           }
         }
+      } else {
+        onClickWord(entryId, index, e);
       }
-
-      onClickWord(entryId, index, e);
     },
-    [onChangeRange, onClickWord, range],
+    [onClickWord, range],
   );
 
   const fetchMore = useCallback(
@@ -368,19 +374,22 @@ export function DocumentViewerV2({
   const startTimer = useCallback(
     (entryId: string, order: number) => {
       timerRef.current = setTimeout(() => {
-        onChangeRange({
-          begin: {
-            entryId: entryId,
-            order: order,
-          },
-          end: {
-            entryId: entryId,
-            order: order,
-          },
-        });
+        if (disabledRangeSelection !== true) {
+          onSelectingRange && onSelectingRange(true);
+          setRange({
+            begin: {
+              entryId: entryId,
+              order: order,
+            },
+            end: {
+              entryId: entryId,
+              order: order,
+            },
+          });
+        }
       }, 2000);
     },
-    [onChangeRange],
+    [disabledRangeSelection, onSelectingRange],
   );
 
   const cancelTimer = useCallback(() => {
@@ -435,6 +444,7 @@ export function DocumentViewerV2({
     const drawRangeEndMap = new Map<string, { begin: string; end: string }[]>();
 
     let begins: { begin: string; end: string }[] = [];
+    let beginPericopeDot = false;
 
     drawRanges.forEach((item) => {
       const beginArr = drawRangeBeginMap.get(item.begin);
@@ -494,11 +504,25 @@ export function DocumentViewerV2({
       }
 
       const dot = dotsMap.get(entry.id) || null;
+
+      if (
+        selectedPericopeDot &&
+        beginPericopeDot &&
+        dot &&
+        dot.entryId !== selectedPericopeDot
+      ) {
+        beginPericopeDot = false;
+      }
+
+      if (dot && selectedPericopeDot && dot.entryId === selectedPericopeDot) {
+        beginPericopeDot = true;
+      }
+
       const isDot = dot ? true : false;
       const dotCom = dot ? dot.component : null;
 
       let classStr = `edit `;
-      classStr += begins.length > 0 ? 'selected' : '';
+      classStr += begins.length > 0 || beginPericopeDot ? 'selected' : '';
       classStr += ` ${
         entry.id === range?.begin.entryId ? 'left-boundary' : ''
       }`;
@@ -622,9 +646,46 @@ export function DocumentViewerV2({
                     {wordlikeString}
                     {isDot ? dotCom || <Dot /> : null}
                     {range?.begin.entryId === col.wordEntry.id ? (
-                      <DeleteCircle
-                        sx={{ fontSize: 22, position: 'absolute', top: '-5px' }}
-                      />
+                      <Stack
+                        gap="10px"
+                        direction="row"
+                        alignItems="center"
+                        sx={{
+                          fontSize: 22,
+                          position: 'absolute',
+                          zIndex: 9,
+                          top: rowData.length === 0 ? '45px' : '-45px',
+                          left: '-10px',
+                          backgroundColor: (theme) =>
+                            theme.palette.background.gray,
+                          borderRadius: 10,
+                        }}
+                      >
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectRange({
+                              begin: range.begin.entryId,
+                              end: range.end.entryId,
+                            });
+                            setRange(null);
+                            onSelectingRange && onSelectingRange(false);
+                          }}
+                          color="green"
+                        >
+                          <CheckCircle />
+                        </IconButton>
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setRange(null);
+                            onSelectingRange && onSelectingRange(false);
+                          }}
+                          color="red"
+                        >
+                          <DeleteCircle />
+                        </IconButton>
+                      </Stack>
                     ) : null}
                   </Word>
                 );
@@ -677,9 +738,38 @@ export function DocumentViewerV2({
                 {wordlikeString}
                 {isDot ? dotCom || <Dot /> : null}
                 {range?.begin.entryId === col.wordEntry.id ? (
-                  <DeleteCircle
-                    sx={{ fontSize: 22, position: 'absolute', top: '-5px' }}
-                  />
+                  <Stack
+                    gap="16px"
+                    direction="row"
+                    alignItems="center"
+                    sx={{
+                      fontSize: 22,
+                      position: 'absolute',
+                      top: '-5px',
+                    }}
+                  >
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+
+                        onSelectRange({
+                          begin: range.begin.entryId,
+                          end: range.end.entryId,
+                        });
+                        setRange(null);
+                      }}
+                    >
+                      <CheckCircle />
+                    </IconButton>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setRange(null);
+                      }}
+                    >
+                      <DeleteCircle />
+                    </IconButton>
+                  </Stack>
                 ) : null}
               </Word>
             );
@@ -706,9 +796,12 @@ export function DocumentViewerV2({
     entriesData,
     handleLoading,
     handleWordClick,
+    onSelectRange,
+    onSelectingRange,
     range,
     rememberedPage,
     rowWidth,
+    selectedPericopeDot,
     startTimer,
   ]);
 
