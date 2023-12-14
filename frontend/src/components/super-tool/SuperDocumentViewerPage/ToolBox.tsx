@@ -310,7 +310,7 @@ export function ToolBox({
                 color="blue"
               />
             </Stack>
-            <Divider orientation="vertical" />
+            <Divider orientation="vertical" sx={{ height: '24px' }} />
             <Stack
               direction="row"
               alignItems="center"
