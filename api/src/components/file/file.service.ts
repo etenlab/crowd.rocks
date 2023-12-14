@@ -185,7 +185,12 @@ export class FileService {
       });
     } catch (err) {
       Logger.log(`File upload failed. #file_name[${fileName}]`, err);
-      return { error: ErrorType.FileUpdateFailed, file: null };
+      return {
+        error: `${JSON.stringify(err)}, [AWS_REGION env]: ${
+          process.env.AWS_REGION
+        }` as ErrorType.FileUploadFailed,
+        file: null,
+      };
     }
   }
 

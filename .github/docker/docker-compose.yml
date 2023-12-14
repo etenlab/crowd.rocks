@@ -16,15 +16,18 @@ services:
   api:
     image: etenlab/crowd-rocks:test
     environment:
-      CR_DB_URL: postgres
-      CR_DB_PORT: 5432
-      CR_DB_USER: postgres
-      CR_DB_PASSWORD: asdfasdf
-      CR_DB: crowdrocks
-      ADMIN_PASSWORD: asdfasdf
-      MODE: DEV
-      OPENAI_API_KEY: asdf
-      DEEPL_KEY: asdf
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - CR_DB_URL=postgres
+      - CR_DB_PORT=5432
+      - CR_DB_USER=postgres
+      - CR_DB_PASSWORD=asdfasdf
+      - CR_DB=crowdrocks
+      - ADMIN_PASSWORD=asdfasdf
+      - MODE=DEV
+      - OPENAI_API_KEY=asdf
+      - DEEPL_KEY=asdf
     ports:
       - 3000:3000
     depends_on:

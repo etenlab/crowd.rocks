@@ -28,7 +28,7 @@ class CommonPage extends BasePage {
     return await this.page.getByRole('heading', { name: name }).isVisible();
   }
   async getValidationMessage() {
-    return await this.page.locator(`.toast-message`).textContent();
+    return await this.page.locator(`.toast-message`).last().textContent();
   }
 }
 export default CommonPage;
