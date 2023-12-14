@@ -27,6 +27,7 @@ import {
   PericopeDeleteOutput,
   RecomendedPericopiesChangedAtDocumentId,
   PericopeTagsQasCountOutput,
+  PericopeWithDocumentWordEntryOutput,
 } from './types';
 
 @Injectable()
@@ -46,6 +47,18 @@ export class PericopiesResolver {
 
     return this.pericopiesService.reads(
       ids.map((id) => +id),
+      null,
+    );
+  }
+
+  @Query(() => PericopeWithDocumentWordEntryOutput)
+  async getPericopeWithDocumentWordEntry(
+    @Args('pericope_id', { type: () => ID }) pericope_id: string,
+  ): Promise<PericopeWithDocumentWordEntryOutput> {
+    Logger.log('getPericopeWithDocumentWordEntry, pericope_id:', pericope_id);
+
+    return this.pericopiesService.getPericopeWithDocumentWordEntry(
+      +pericope_id,
       null,
     );
   }

@@ -18,6 +18,7 @@ import {
   PericopeTextWithDescription,
   PericopeDeleteOutput,
   PericopeTagsQasCountOutput,
+  PericopeWithDocumentWordEntryOutput,
 } from './types';
 import {
   PericopeUpsertsProcedureOutput,
@@ -46,6 +47,7 @@ import {
 import { LanguageInput } from '../common/types';
 import { QuestionsService } from '../question-answer/questions.service';
 import { WordRangeTagsService } from '../tagging/word-range-tags.service';
+import { DocumentWordEntriesService } from '../documents/document-word-entries.service';
 
 export const WORDS_JOINER = ' ';
 
@@ -55,6 +57,7 @@ export class PericopiesService {
     private pg: PostgresService,
     private pericopeVoteService: PericopeVotesService,
     private authService: AuthorizationService,
+    private documentWordEntriesSerivce: DocumentWordEntriesService,
     private wordRangesService: WordRangesService,
     private questionsService: QuestionsService,
     private wordRangeTagsService: WordRangeTagsService,
@@ -81,6 +84,56 @@ export class PericopiesService {
     return {
       error: ErrorType.UnknownError,
       pericopies: [],
+    };
+  }
+
+  async getPericopeWithDocumentWordEntry(
+    pericope_id: number,
+    pgClient: PoolClient | null,
+  ): Promise<PericopeWithDocumentWordEntryOutput> {
+    try {
+      const { error: pericopeError, pericopies } = await this.reads(
+        [pericope_id],
+        pgClient,
+      );
+
+      if (pericopeError !== ErrorType.NoError || pericopies.length === 0) {
+        return {
+          error: pericopeError,
+          pericope: null,
+        };
+      }
+
+      const { error: entryError, document_word_entries } =
+        await this.documentWordEntriesSerivce.reads(
+          [+pericopies[0]!.start_word],
+          pgClient,
+        );
+
+      if (
+        entryError !== ErrorType.NoError ||
+        document_word_entries.length === 0
+      ) {
+        return {
+          error: entryError,
+          pericope: null,
+        };
+      }
+
+      return {
+        error: ErrorType.NoError,
+        pericope: {
+          pericope_id: pericopies[0]!.pericope_id,
+          start_word: document_word_entries[0]!,
+        },
+      };
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      pericope: null,
     };
   }
 

@@ -1,11 +1,18 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
 import { PageInfo } from '../common/types';
+import { DocumentWordEntry } from '../documents/types';
 
 @ObjectType()
 export class Pericope {
   @Field(() => ID) pericope_id: string;
   @Field(() => String) start_word: string;
+}
+
+@ObjectType()
+export class PericopeWithDocumentWordEntry {
+  @Field(() => ID) pericope_id: string;
+  @Field(() => DocumentWordEntry) start_word: DocumentWordEntry;
 }
 
 @ObjectType()
@@ -34,6 +41,12 @@ export class PericopeVoteStatus {
 export class PericopiesOutput extends GenericOutput {
   @Field(() => [Pericope], { nullable: 'items' })
   pericopies: (Pericope | null)[];
+}
+
+@ObjectType()
+export class PericopeWithDocumentWordEntryOutput extends GenericOutput {
+  @Field(() => PericopeWithDocumentWordEntry, { nullable: true })
+  pericope: PericopeWithDocumentWordEntry | null;
 }
 
 @ObjectType()
