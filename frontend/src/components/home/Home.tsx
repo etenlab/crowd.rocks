@@ -80,19 +80,6 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
       isShown: () => true,
       subMenu: [
         {
-          link: `/${match.params.nation_id}/${match.params.language_id}/1/maps`,
-          icon: (
-            <IonIcon
-              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
-              size="large"
-              icon={mapOutline}
-            />
-          ),
-          title: tr('Maps'),
-          description: tr('Translate maps into any language'),
-          isShown: () => true,
-        },
-        {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/super-tool/documents`,
           icon: (
             <IonIcon
@@ -107,6 +94,20 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
           ),
           isShown: () => true,
         },
+        {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/maps`,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={mapOutline}
+            />
+          ),
+          title: tr('Maps'),
+          description: tr('Translate maps into any language'),
+          isShown: () => true,
+        },
+
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/documents`,
           icon: (
