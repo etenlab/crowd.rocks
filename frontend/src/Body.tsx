@@ -95,6 +95,7 @@ import { TaggingDocumentViewerPage } from './components/tagging/TaggingDocumentV
 
 import { SuperDocumentListPage } from './components/super-tool/SuperDocumentListPage/SuperDocumentListPage';
 import { SuperDocumentViewerPage } from './components/super-tool/SuperDocumentViewerPage/SuperDocumentViewerPage';
+import { SuperPericopeViewerPage } from './components/super-tool/SuperDocumentViewerPage/SuperPericopeViewerPage';
 
 import { Icons } from './components/demo/Icons';
 import { Forms } from './components/demo/Forms';
@@ -652,6 +653,11 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/super-tool/documents/:document_id"
               component={SuperDocumentViewerPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/pericope-viewer/:pericope_id/:tool_kind"
+              component={SuperPericopeViewerPage}
             />
             <Route exact path="/demos/icons" component={Icons} />
             <Route exact path="/demos/forms" component={Forms} />

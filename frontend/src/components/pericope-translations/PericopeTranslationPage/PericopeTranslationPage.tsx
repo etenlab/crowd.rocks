@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useParams } from 'react-router';
+import { useParams, useHistory } from 'react-router';
 import {
   Divider,
   Stack,
@@ -38,9 +38,16 @@ import { langInfo2langInput } from '../../../../../utils';
 import { useAddPericopeTrMutation } from '../../../hooks/useAddPericopeTrMutation';
 import { PericopeTranslated } from './PericopeTranslated';
 import { ButtonsTagsQAs } from './ButtonsTagsQAs';
+import { SuperToolKind } from '../../super-tool/SuperDocumentViewerPage/ToolBox';
 
 export function PericopeTranslationPage() {
-  const { pericopeId } = useParams<{ pericopeId: string }>();
+  const { pericopeId, nation_id, language_id } = useParams<{
+    pericopeId: string;
+    nation_id: string;
+    language_id: string;
+  }>();
+  const history = useHistory();
+
   const { tr } = useTr();
   const {
     states: {
@@ -106,6 +113,18 @@ export function PericopeTranslationPage() {
 
   const handleOpenForm = () => {
     setOpenForm(true);
+  };
+
+  const handleQAsClick = () => {
+    history.push(
+      `/${nation_id}/${language_id}/1/pericope-viewer/${pericopeId}/${SuperToolKind.QA}`,
+    );
+  };
+
+  const handleTagsClick = () => {
+    history.push(
+      `/${nation_id}/${language_id}/1/pericope-viewer/${pericopeId}/${SuperToolKind.Tagging}`,
+    );
   };
 
   const formCom = openForm ? (
@@ -180,12 +199,8 @@ export function PericopeTranslationPage() {
             tagsCount={
               Number(tagsQasCount.data?.getPericopeTagsQasCount.tags_count) || 0
             }
-            onQAsClick={() =>
-              console.log(`onQAsClick! pericopeId: ${pericopeId}`)
-            }
-            onTagsClick={() =>
-              console.log(`onTagsClick! pericopeId: ${pericopeId}`)
-            }
+            onQAsClick={handleQAsClick}
+            onTagsClick={handleTagsClick}
           />
 
           <Divider />
