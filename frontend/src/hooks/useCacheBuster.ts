@@ -94,9 +94,6 @@ export const useCacheBuster = () => {
             'info:::: ',
             `You already have the latest version - ${latestVersion}. No cache refresh needed.`,
           );
-          console.error(
-            `You already have the latest version - ${latestVersion}. No cache refresh needed.`,
-          );
           setState({ loading: false, isLatestVersion: true, latestVersion });
         }
       });

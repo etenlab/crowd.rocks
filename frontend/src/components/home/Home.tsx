@@ -1,20 +1,8 @@
-import { useState, useEffect } from 'react';
-import {
-  IonCardContent,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonText,
-  useIonRouter,
-  useIonViewWillEnter,
-} from '@ionic/react';
+import { useState, useEffect, ReactNode } from 'react';
+import { useIonViewWillEnter, IonIcon } from '@ionic/react';
 import {
   flashOutline,
   bookOutline,
-  chatbubbleEllipsesOutline,
   languageOutline,
   codeWorkingOutline,
   mapOutline,
@@ -23,19 +11,19 @@ import {
   logoGoogle,
   brushOutline,
   cogOutline,
+  newspaperOutline,
+  cloudUploadOutline,
+  cutOutline,
+  bookmarkOutline,
 } from 'ionicons/icons';
+import { Stack } from '@mui/material';
 import { RouteComponentProps } from 'react-router';
 import './Home.css';
-import {
-  CustomGroup,
-  CustomIonCard,
-  CustomIonLabel,
-  StIonCardTitleContainer,
-} from './styled';
 import { useTr } from '../../hooks/useTr';
 import { PageLayout } from '../common/PageLayout';
 import { ISettings, globals } from '../../services/globals';
 import { useIsAdminLoggedInLazyQuery } from '../../generated/graphql';
+import { CardsMenu, CardsMenuItem } from '../common/CardsMenu/CardsMenu';
 
 interface HomePageProps
   extends RouteComponentProps<{
@@ -47,7 +35,7 @@ interface ISubMenu
   extends Array<{
     isShown: () => boolean;
     link: string;
-    icon: string;
+    icon: ReactNode;
     title: string;
     description: string;
   }> {}
@@ -60,7 +48,6 @@ interface IMenu
   }> {}
 
 const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
-  const router = useIonRouter();
   const { tr } = useTr();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -94,21 +81,41 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
       subMenu: [
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/maps`,
-          icon: mapOutline,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={mapOutline}
+            />
+          ),
           title: tr('Maps'),
           description: tr('Translate maps into any language'),
           isShown: () => true,
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/super-tool/documents`,
-          icon: mapOutline,
-          title: tr('Super Tool'),
-          description: tr('Super Tool'),
-          isShown: () => !!settings?.isBetaTools,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={newspaperOutline}
+            />
+          ),
+          title: tr('Crowd Sourcing Translation'),
+          description: tr(
+            'Upload a document, split into sections, translate sections, add questions and tags',
+          ),
+          isShown: () => true,
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/documents`,
-          icon: mapOutline,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={cloudUploadOutline}
+            />
+          ),
           title: tr('Documents'),
           description: tr(
             'Upload a document to use in other crowd sourcing tools',
@@ -117,7 +124,13 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/qa`,
-          icon: helpCircleOutline,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={helpCircleOutline}
+            />
+          ),
           title: tr('Question & Answer'),
           description: tr(
             'Annotate a text with questions so other users can provide answers',
@@ -126,28 +139,54 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/pericopies`,
-          icon: brushOutline,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={cutOutline}
+            />
+          ),
           title: tr('Pericope Tool'),
-          description: tr('Pericope Tool'),
+          description: tr('Split a document into periscope sections'),
           isShown: () => !!settings?.isBetaTools,
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/tagging-tool`,
-          icon: brushOutline,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={brushOutline}
+            />
+          ),
           title: tr('Tagging Tool'),
-          description: tr('Tagging Tool'),
+          description: tr('Annotate a word or sentence with tags'),
           isShown: () => !!settings?.isBetaTools,
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/pericope-translations`,
-          icon: languageOutline,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={languageOutline}
+            />
+          ),
           title: tr('Translate Pericopies'),
-          description: tr('Translate pericopies defined by pericope tool'),
+          description: tr(
+            'Translate pericope sections defined by pericope tool',
+          ),
           isShown: () => !!settings?.isBetaTools,
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/data-generator`,
-          icon: cogOutline,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={cogOutline}
+            />
+          ),
           title: tr('Data Generator (For development only)'),
           description: tr('Generate fake data to test performance'),
           isShown: () =>
@@ -159,14 +198,20 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
     },
     {
       group: tr('Community'),
-      isShown: () => true,
+      isShown: () => !!settings?.isBetaTools,
       subMenu: [
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/forums`,
-          icon: sendOutline,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={sendOutline}
+            />
+          ),
           title: tr('Forums'),
           description: tr('Hold discussions with other members'),
-          isShown: () => true,
+          isShown: () => !!settings?.isBetaTools,
         },
       ],
     },
@@ -176,14 +221,26 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
       subMenu: [
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/dictionary-list`,
-          icon: bookOutline,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={bookOutline}
+            />
+          ),
           title: tr('Dictionary'),
           description: tr('Manage the words and definitions in a language'),
           isShown: () => !!settings?.isBetaTools,
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/phrase-book-list`,
-          icon: chatbubbleEllipsesOutline,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={bookmarkOutline}
+            />
+          ),
           title: tr('Phrase Book'),
           description: tr(
             'Manage the phrases and phrase definitions in a language',
@@ -192,21 +249,39 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/translation`,
-          icon: languageOutline,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={languageOutline}
+            />
+          ),
           title: tr('Translation'),
           description: tr('Translate words and phrases into any language'),
           isShown: () => !!settings?.isBetaTools,
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/fast-translation`,
-          icon: flashOutline,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={flashOutline}
+            />
+          ),
           title: tr('Fast Translation'),
           description: tr('Translate words and phrases into any language'),
           isShown: () => !!settings?.isBetaTools,
         },
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/ai-controller`,
-          icon: logoGoogle,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={logoGoogle}
+            />
+          ),
           title: tr('AI Controller'),
           description: tr('Use our bots to translate words and phrases'),
           isShown: () =>
@@ -220,8 +295,14 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
       subMenu: [
         {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/site-text-list`,
-          icon: codeWorkingOutline,
-          title: tr('Site Text Strings'),
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={codeWorkingOutline}
+            />
+          ),
+          title: tr('User Interface Translation'),
           description: tr('Help us translate this app into more languages'),
           isShown: () => true,
         },
@@ -229,47 +310,33 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
     },
   ];
 
+  const allMenuItems: {
+    isShown: () => boolean;
+    link: string;
+    icon: ReactNode;
+    title: string;
+    description: string;
+  }[] = [];
+
+  menu.forEach((group) => {
+    allMenuItems.push(...group.subMenu);
+  });
+
   return (
     <PageLayout>
-      {menu.map(
-        (group) =>
-          group.isShown() && (
-            <CustomGroup key={group.group}>
-              <CustomIonLabel>
-                <IonLabel>{group.group}</IonLabel>
-              </CustomIonLabel>
-              <hr style={{ marginTop: '7px', marginBottom: '0px' }} />
-              {group.subMenu.map(
-                (item) =>
-                  item.isShown() && (
-                    <IonItem lines="none" key={item.title}>
-                      <CustomIonCard
-                        onClick={() => {
-                          router.push(item.link);
-                        }}
-                        style={{ cursor: 'pointer', padding: '0px' }}
-                      >
-                        <IonCardHeader>
-                          <StIonCardTitleContainer>
-                            <IonCardTitle>
-                              <div className="home-card-title">
-                                <IonIcon icon={item.icon}></IonIcon>
-                                <div className="home-card-title-text">
-                                  <IonText>{item.title}</IonText>
-                                </div>
-                              </div>
-                            </IonCardTitle>
-                          </StIonCardTitleContainer>
-                        </IonCardHeader>
-                        <IonCardContent>
-                          <IonCardSubtitle>{item.description}</IonCardSubtitle>
-                        </IonCardContent>
-                      </CustomIonCard>
-                    </IonItem>
-                  ),
-              )}
-            </CustomGroup>
-          ),
+      {settings?.isBetaTools ? (
+        menu.map(
+          ({ group, isShown, subMenu }) =>
+            isShown() && (
+              <CardsMenu key={group} label={group} items={subMenu} />
+            ),
+        )
+      ) : (
+        <Stack>
+          {allMenuItems.map((item) => (
+            <CardsMenuItem item={item} key={item.title} />
+          ))}
+        </Stack>
       )}
 
       <div className="home-footer">
@@ -286,7 +353,7 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
                       }
                     }}
                   >
-                    <IonIcon icon={add}></IonIcon>
+                    <IonIcon style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px'}} style={{ color: '#476FFF', marginTop: 50px'}} icon={add}></IonIcon>
                   </IonFabButton>
                 </IonFab> */}
         </div>
