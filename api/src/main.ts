@@ -5,16 +5,16 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 async function bootstrap() {
+  console.log(
+    `==============>  env  AWS_REGION ${process.env.AWS_REGION} AWS_ACCESS_KEY_ID ${process.env.AWS_ACCESS_KEY_ID}`,
+    'FileService#constructor',
+  );
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     origin: '*',
     allowedHeaders: '*',
   });
 
-  console.log(
-    `==============>  env  AWS_REGION ${process.env.AWS_REGION} AWS_ACCESS_KEY_ID ${process.env.AWS_ACCESS_KEY_ID}`,
-    'FileService#constructor',
-  );
   app.use(
     '/graphql',
     graphqlUploadExpress({
