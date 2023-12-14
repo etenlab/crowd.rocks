@@ -27,6 +27,10 @@ export class DatabaseVersionControlService {
 
       if (!exists) {
         console.log('Creating database schema');
+        Logger.debug(
+          `env  AWS_REGION ${process.env.AWS_REGION} AWS_ACCESS_KEY_ID ${process.env.AWS_ACCESS_KEY_ID}`,
+          'FileService#constructor',
+        );
         await this.loadVersion1();
       }
 

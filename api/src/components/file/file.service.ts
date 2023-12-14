@@ -21,12 +21,7 @@ dotenv.config();
 @Injectable()
 export class FileService {
   s3Client: S3Client;
-  constructor(private fileRepository: FileRepository) {
-    Logger.log(
-      `env  AWS_REGION ${process.env.AWS_REGION} AWS_ACCESS_KEY_ID ${process.env.AWS_ACCESS_KEY_ID}`,
-      'FileService#constructor',
-    );
-  }
+  constructor(private fileRepository: FileRepository) {}
 
   private getS3Client(): S3Client {
     if (!this.s3Client) {
