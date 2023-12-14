@@ -897,6 +897,16 @@ type PericopeVoteStatusOutput {
   vote_status: PericopeVoteStatus
 }
 
+type PericopeWithDocumentWordEntry {
+  pericope_id: ID!
+  start_word: DocumentWordEntry!
+}
+
+type PericopeWithDocumentWordEntryOutput {
+  error: ErrorType!
+  pericope: PericopeWithDocumentWordEntry
+}
+
 type PericopeWithVote {
   downvotes: Int!
   pericope_id: ID!
@@ -1240,6 +1250,7 @@ type Query {
   getPericopeTextAndDesctiption(input: GetPericopeTextInput!): PericopeTextWithDescription!
   getPericopeTranslations(input: GetPericopeTranslationsInput!): PericopeTranslationsOutput!
   getPericopeVoteStatus(pericope_id: ID!): PericopeVoteStatusOutput!
+  getPericopeWithDocumentWordEntry(pericope_id: ID!): PericopeWithDocumentWordEntryOutput!
   getPericopiesByDocumentId(after: ID, document_id: ID!, first: Int): PericopeWithVotesListConnection!
   getPericopiesTr(after: ID, first: Int, input: GetPericopiesTrInput!): PericopiesTextsWithTranslationConnection!
   getPhraseDefinitionVoteStatus(phrase_definition_id: ID!): DefinitionVoteStatusOutputRow!

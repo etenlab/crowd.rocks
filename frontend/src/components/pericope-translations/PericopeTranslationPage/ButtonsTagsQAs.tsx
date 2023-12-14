@@ -26,6 +26,7 @@ export function ButtonsTagsQAs({
           color: theme.palette.text.dark,
           border: `1px solid ${theme.palette.text.gray_stroke}`,
         })}
+        color="orange"
       >
         <TagIcon sx={{ marginRight: '10px' }} />
         {tr('Tags')} ({tagsCount})
@@ -38,6 +39,7 @@ export function ButtonsTagsQAs({
           color: theme.palette.text.dark,
           border: `1px solid ${theme.palette.text.gray_stroke}`,
         })}
+        color="orange"
       >
         <QAIcon sx={{ marginRight: '10px' }} />
         {tr('Q&A')} ({qasCount})

@@ -1480,6 +1480,18 @@ export type PericopeVoteStatusOutput = {
   vote_status?: Maybe<PericopeVoteStatus>;
 };
 
+export type PericopeWithDocumentWordEntry = {
+  __typename?: 'PericopeWithDocumentWordEntry';
+  pericope_id: Scalars['ID']['output'];
+  start_word: DocumentWordEntry;
+};
+
+export type PericopeWithDocumentWordEntryOutput = {
+  __typename?: 'PericopeWithDocumentWordEntryOutput';
+  error: ErrorType;
+  pericope?: Maybe<PericopeWithDocumentWordEntry>;
+};
+
 export type PericopeWithVote = {
   __typename?: 'PericopeWithVote';
   downvotes: Scalars['Int']['output'];
@@ -1865,6 +1877,7 @@ export type Query = {
   getPericopeTextAndDesctiption: PericopeTextWithDescription;
   getPericopeTranslations: PericopeTranslationsOutput;
   getPericopeVoteStatus: PericopeVoteStatusOutput;
+  getPericopeWithDocumentWordEntry: PericopeWithDocumentWordEntryOutput;
   getPericopiesByDocumentId: PericopeWithVotesListConnection;
   getPericopiesTr: PericopiesTextsWithTranslationConnection;
   getPhraseDefinitionVoteStatus: DefinitionVoteStatusOutputRow;
@@ -2092,6 +2105,11 @@ export type QueryGetPericopeTranslationsArgs = {
 
 
 export type QueryGetPericopeVoteStatusArgs = {
+  pericope_id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetPericopeWithDocumentWordEntryArgs = {
   pericope_id: Scalars['ID']['input'];
 };
 
@@ -4052,6 +4070,8 @@ export type VotePericopeTrChangedSubscription = { __typename?: 'Subscription', v
 
 export type PericopeFragmentFragment = { __typename?: 'Pericope', pericope_id: string, start_word: string };
 
+export type PericopeWithDocumentWordEntryFragmentFragment = { __typename?: 'PericopeWithDocumentWordEntry', pericope_id: string, start_word: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } };
+
 export type PericopeVoteStatusFragmentFragment = { __typename?: 'PericopeVoteStatus', pericope_id: string, upvotes: number, downvotes: number };
 
 export type PericopeWithVoteFragmentFragment = { __typename?: 'PericopeWithVote', pericope_id: string, start_word: string, downvotes: number, upvotes: number };
@@ -4066,6 +4086,13 @@ export type GetPericopiesByDocumentIdQueryVariables = Exact<{
 
 
 export type GetPericopiesByDocumentIdQuery = { __typename?: 'Query', getPericopiesByDocumentId: { __typename?: 'PericopeWithVotesListConnection', error: ErrorType, edges: Array<{ __typename?: 'PericopeWithVotesEdge', cursor: string, node: Array<{ __typename?: 'PericopeWithVote', pericope_id: string, start_word: string, downvotes: number, upvotes: number }> }>, pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, totalEdges?: number | null } } };
+
+export type GetPericopeWithDocumentWordEntryQueryVariables = Exact<{
+  pericope_id: Scalars['ID']['input'];
+}>;
+
+
+export type GetPericopeWithDocumentWordEntryQuery = { __typename?: 'Query', getPericopeWithDocumentWordEntry: { __typename?: 'PericopeWithDocumentWordEntryOutput', error: ErrorType, pericope?: { __typename?: 'PericopeWithDocumentWordEntry', pericope_id: string, start_word: { __typename?: 'DocumentWordEntry', document_word_entry_id: string, document_id: string, parent_document_word_entry_id?: string | null, page: number, wordlike_string: { __typename?: 'WordlikeString', wordlike_string_id: string, wordlike_string: string } } } | null } };
 
 export type GetPericopeVoteStatusQueryVariables = Exact<{
   pericope_id: Scalars['ID']['input'];
@@ -5324,6 +5351,14 @@ export const PericopeFragmentFragmentDoc = gql`
   start_word
 }
     `;
+export const PericopeWithDocumentWordEntryFragmentFragmentDoc = gql`
+    fragment PericopeWithDocumentWordEntryFragment on PericopeWithDocumentWordEntry {
+  pericope_id
+  start_word {
+    ...DocumentWordEntryFragment
+  }
+}
+    ${DocumentWordEntryFragmentFragmentDoc}`;
 export const PericopeVoteStatusFragmentFragmentDoc = gql`
     fragment PericopeVoteStatusFragment on PericopeVoteStatus {
   pericope_id
@@ -8786,6 +8821,44 @@ export function useGetPericopiesByDocumentIdLazyQuery(baseOptions?: Apollo.LazyQ
 export type GetPericopiesByDocumentIdQueryHookResult = ReturnType<typeof useGetPericopiesByDocumentIdQuery>;
 export type GetPericopiesByDocumentIdLazyQueryHookResult = ReturnType<typeof useGetPericopiesByDocumentIdLazyQuery>;
 export type GetPericopiesByDocumentIdQueryResult = Apollo.QueryResult<GetPericopiesByDocumentIdQuery, GetPericopiesByDocumentIdQueryVariables>;
+export const GetPericopeWithDocumentWordEntryDocument = gql`
+    query GetPericopeWithDocumentWordEntry($pericope_id: ID!) {
+  getPericopeWithDocumentWordEntry(pericope_id: $pericope_id) {
+    error
+    pericope {
+      ...PericopeWithDocumentWordEntryFragment
+    }
+  }
+}
+    ${PericopeWithDocumentWordEntryFragmentFragmentDoc}`;
+
+/**
+ * __useGetPericopeWithDocumentWordEntryQuery__
+ *
+ * To run a query within a React component, call `useGetPericopeWithDocumentWordEntryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPericopeWithDocumentWordEntryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPericopeWithDocumentWordEntryQuery({
+ *   variables: {
+ *      pericope_id: // value for 'pericope_id'
+ *   },
+ * });
+ */
+export function useGetPericopeWithDocumentWordEntryQuery(baseOptions: Apollo.QueryHookOptions<GetPericopeWithDocumentWordEntryQuery, GetPericopeWithDocumentWordEntryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPericopeWithDocumentWordEntryQuery, GetPericopeWithDocumentWordEntryQueryVariables>(GetPericopeWithDocumentWordEntryDocument, options);
+      }
+export function useGetPericopeWithDocumentWordEntryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPericopeWithDocumentWordEntryQuery, GetPericopeWithDocumentWordEntryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPericopeWithDocumentWordEntryQuery, GetPericopeWithDocumentWordEntryQueryVariables>(GetPericopeWithDocumentWordEntryDocument, options);
+        }
+export type GetPericopeWithDocumentWordEntryQueryHookResult = ReturnType<typeof useGetPericopeWithDocumentWordEntryQuery>;
+export type GetPericopeWithDocumentWordEntryLazyQueryHookResult = ReturnType<typeof useGetPericopeWithDocumentWordEntryLazyQuery>;
+export type GetPericopeWithDocumentWordEntryQueryResult = Apollo.QueryResult<GetPericopeWithDocumentWordEntryQuery, GetPericopeWithDocumentWordEntryQueryVariables>;
 export const GetPericopeVoteStatusDocument = gql`
     query GetPericopeVoteStatus($pericope_id: ID!) {
   getPericopeVoteStatus(pericope_id: $pericope_id) {
@@ -12219,6 +12292,7 @@ export const namedOperations = {
     GetPericopeTranslations: 'GetPericopeTranslations',
     GetPericopeTextAndDesctiption: 'GetPericopeTextAndDesctiption',
     GetPericopiesByDocumentId: 'GetPericopiesByDocumentId',
+    GetPericopeWithDocumentWordEntry: 'GetPericopeWithDocumentWordEntry',
     GetPericopeVoteStatus: 'GetPericopeVoteStatus',
     GetPericopeTagsQasCount: 'GetPericopeTagsQasCount',
     PhraseDefinitionRead: 'PhraseDefinitionRead',
@@ -12396,6 +12470,7 @@ export const namedOperations = {
     PericopiesTextsWithTranslationEdgeFragment: 'PericopiesTextsWithTranslationEdgeFragment',
     PericopeTrVoteStatusFragment: 'PericopeTrVoteStatusFragment',
     PericopeFragment: 'PericopeFragment',
+    PericopeWithDocumentWordEntryFragment: 'PericopeWithDocumentWordEntryFragment',
     PericopeVoteStatusFragment: 'PericopeVoteStatusFragment',
     PericopeWithVoteFragment: 'PericopeWithVoteFragment',
     PericopeWithVotesEdgeFragment: 'PericopeWithVotesEdgeFragment',
