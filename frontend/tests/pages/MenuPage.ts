@@ -1,6 +1,7 @@
 import BasePage from './BasePage';
 
 const headerText = '#crowd-rock-app #app-name-text';
+
 const leftMenuFeatureButton = (featureName: string) =>
   `//h4[text()="${featureName}"]`;
 
@@ -17,10 +18,6 @@ class MenuPage extends BasePage {
   async clickOnLeftMenufeatureButton(featureName: string) {
     await this.page.locator(leftMenuFeatureButton(featureName)).first().click();
     await this.page.waitForTimeout(1000);
-  }
-
-  async clickOnCrowdRocks() {
-    await this.page.locator(headerText).first().click();
   }
 }
 

@@ -3,4 +3,4 @@ export class RegisterDto {
   username!: string;
   password!: string;
 }
-export default new RegisterDto();
+export default RegisterDto;

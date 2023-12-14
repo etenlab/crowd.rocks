@@ -44,7 +44,7 @@ class PostPage extends BasePage {
     return await this.page.locator(totalPostsCount).count();
   }
 
-  async createNewPost(message: string, count: number) {
+  async createNewPosts(message: string, count: number) {
     for (let i = 0; i < count; i++) {
       await this.clickOnTheAddNewPostButton();
       await this.clickOnTextFieldForPostMessage();

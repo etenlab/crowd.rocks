@@ -33,7 +33,6 @@ test('Verify that all the Beta tools are displayed when user enable beta tools t
   page,
 }) => {
   const homePage = new HomePage(page);
-  const leftMenuPage = new MenuPage(page);
   const settingsPage = new SettingsPage(page);
   const getSettingsList = SettingsData.allSettingsList();
 
@@ -48,7 +47,7 @@ test('Verify that all the Beta tools are displayed when user enable beta tools t
   await settingsPage.clickOnToggleButton(settings.BetaTools, true);
 
   //Go to the home page and verify the language text is displayed
-  await leftMenuPage.clickOnCrowdRocks();
+  await homePage.clickOnCrowdRocks();
   expect(await homePage.isLanguageTextVisible()).toBeTruthy();
 
   //Expand the menu and click on settings
@@ -58,7 +57,7 @@ test('Verify that all the Beta tools are displayed when user enable beta tools t
   await settingsPage.clickOnToggleButton(settings.BetaTools, false);
 
   //Go to the home page and verify the language text is hide
-  await leftMenuPage.clickOnCrowdRocks();
+  await homePage.clickOnCrowdRocks();
   expect(await homePage.isLanguageTextVisible(false));
 });
 

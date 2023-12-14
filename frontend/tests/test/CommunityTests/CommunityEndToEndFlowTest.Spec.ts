@@ -93,7 +93,7 @@ test('1: End to end linear flow for Community forums', async ({ page }) => {
 
   //Create a new two posts
   await threadsPage.clickOnThreadName(threadNameOne);
-  await postPage.createNewPost(postTextMessage, 2);
+  await postPage.createNewPosts(postTextMessage, 2);
 
   //Get posts count from the post page and verify that on the threads page
   const expectedPostsCount = await postPage.getPostsCount();
