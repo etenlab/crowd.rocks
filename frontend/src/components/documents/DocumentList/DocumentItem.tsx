@@ -70,7 +70,7 @@ export function DocumentItem({ document, onClickItem }: DocumentItemProps) {
           sx={{ padding: 0, justifyContent: 'flex-start' }}
           onClick={handleDownloadFile}
         >
-          {tr('Download')}
+          {tr('Download source')}
         </Button>
       ),
     },
@@ -98,7 +98,7 @@ export function DocumentItem({ document, onClickItem }: DocumentItemProps) {
           sx={{ padding: 0, justifyContent: 'flex-start' }}
           onClick={handlePericopiesTranslate}
         >
-          {tr('Translate using pericopies')}
+          {tr('Show current best translation by votes')}
         </Button>
       ),
     },

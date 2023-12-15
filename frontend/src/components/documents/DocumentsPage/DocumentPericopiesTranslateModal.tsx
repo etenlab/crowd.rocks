@@ -72,7 +72,7 @@ export function DocumentPericopiesTranslateModal({
     tr,
   ]);
 
-  let title = tr('Translate using pericopies translations');
+  let title = tr('Show current best translation by votes');
   let content = tr(
     'Click the button below to compose file from translated pericopies.',
   );
