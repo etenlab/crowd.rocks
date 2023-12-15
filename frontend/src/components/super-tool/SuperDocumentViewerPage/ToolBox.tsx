@@ -252,7 +252,7 @@ export function ToolBox({
 
   return (
     <Stack gap="20px">
-      <Caption>{tr('Super Tool')}</Caption>
+      <Caption>{tr('Crowd Sourcing Translation')}</Caption>
 
       <Stack gap="16px">
         <Tabs
