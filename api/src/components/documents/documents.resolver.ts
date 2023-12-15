@@ -33,7 +33,7 @@ import {
   WordRangeInput,
   WordRangesListConnection,
   TranslateDocumentByPericopiesInput,
-  FileUrlOutput,
+  FileUrlAndContentOutput,
 } from './types';
 import { LanguageInput } from '../common/types';
 import { DocumentTranslateService } from './document-translation.service';
@@ -198,11 +198,11 @@ export class DocumentsResolver {
     return this.wordRangesService.upserts(input, getBearer(req) || '', null);
   }
 
-  @Mutation(() => FileUrlOutput)
+  @Mutation(() => FileUrlAndContentOutput)
   async documentByPericopiesTranslate(
     @Args('input', { type: () => TranslateDocumentByPericopiesInput })
     input: TranslateDocumentByPericopiesInput,
-  ): Promise<FileUrlOutput> {
+  ): Promise<FileUrlAndContentOutput> {
     Logger.log(
       'DocumentsResolver#documentByPericopiesTranslate: ',
       JSON.stringify(input, null, 2),

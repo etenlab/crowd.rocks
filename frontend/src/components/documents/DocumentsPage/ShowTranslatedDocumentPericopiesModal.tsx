@@ -14,24 +14,20 @@ import {
   useDocumentByPericopiesTranslateMutation,
 } from '../../../generated/graphql';
 
-import { LangSelector } from '../../common/LangSelector/LangSelector';
-import { useCallback } from 'react';
 import { langInfo2langInput } from '../../../../../utils';
-import { NavArrowRight } from '../../common/icons/NavArrowRight';
-import { useIonToast } from '@ionic/react';
-import { useAppContext } from '../../../hooks/useAppContext';
 
-type DocumentPericopiesTranslateModalProps = {
+import { useAppContext } from '../../../hooks/useAppContext';
+import { useEffect } from 'react';
+
+type ShowTranslatedDocumentPericopiesModalProps = {
   onClose(): void;
   document: TextyDocument;
-  doShowLangSelector?: boolean;
 };
 
-export function DocumentPericopiesTranslateModal({
+export function ShowTranslatedDocumentPericopiesModal({
   onClose,
   document,
-  doShowLangSelector = true,
-}: DocumentPericopiesTranslateModalProps) {
+}: ShowTranslatedDocumentPericopiesModalProps) {
   const { tr } = useTr();
   const {
     states: {
@@ -41,21 +37,13 @@ export function DocumentPericopiesTranslateModal({
         },
       },
     },
-    actions: { changeDocumentTargetLanguage },
   } = useAppContext();
-  const [present] = useIonToast();
 
   const [documentByPericopiesTranslate, { loading, data }] =
     useDocumentByPericopiesTranslateMutation();
 
-  const translateFn = useCallback(() => {
+  useEffect(() => {
     if (!targetLang) {
-      present({
-        message: `${tr('Please choose language!')}`,
-        duration: 1500,
-        position: 'top',
-        color: 'danger',
-      });
       return;
     }
     documentByPericopiesTranslate({
@@ -64,45 +52,14 @@ export function DocumentPericopiesTranslateModal({
         targetLang: langInfo2langInput(targetLang),
       },
     });
-  }, [
-    document.document_id,
-    documentByPericopiesTranslate,
-    present,
-    targetLang,
-    tr,
-  ]);
+  }, [document.document_id, documentByPericopiesTranslate, targetLang]);
 
-  let title = tr('Show current best translation by votes');
-  let content = tr(
-    'Click the button below to compose file from translated pericopies.',
-  );
+  let title = tr('Document translation by votes');
+  let content = tr('Click the link to download file.');
   let bottomCom = (
     <Stack gap="16px">
-      {doShowLangSelector && (
-        <LangSelector
-          title={tr('Select target language')}
-          selected={targetLang}
-          onChange={(_langTag, lang) => {
-            changeDocumentTargetLanguage(lang);
-          }}
-          onClearClick={() => changeDocumentTargetLanguage(null)}
-        />
-      )}
-      {targetLang && (
-        <Button
-          variant="contained"
-          color="blue"
-          startIcon={<NavArrowRight sx={{ fontSize: 24 }} />}
-          fullWidth
-          onClick={() => {
-            translateFn();
-          }}
-        >
-          {tr('Start')}
-        </Button>
-      )}
       <Button variant="contained" color="gray_stroke" onClick={onClose}>
-        {tr('Cancel')}
+        {tr('Close')}
       </Button>
     </Stack>
   );
@@ -173,9 +130,7 @@ export function DocumentPericopiesTranslateModal({
           <Typography variant="h2">{title}</Typography>
         </Stack>
         <Divider />
-        <Typography variant="body1" color="text.gray">
-          {content}
-        </Typography>
+        <Typography variant="body1">{content}</Typography>
       </Stack>
       {bottomCom}
     </Stack>

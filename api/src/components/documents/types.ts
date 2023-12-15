@@ -143,3 +143,9 @@ export class FileUrlOutput extends GenericOutput {
   @Field(() => String, { nullable: true }) fileUrl: string | null;
   @Field(() => String, { nullable: true }) fileName: string | null;
 }
+@ObjectType()
+export class FileUrlAndContentOutput extends GenericOutput {
+  @Field(() => String, { nullable: true }) fileUrl: string | null;
+  @Field(() => String, { nullable: true }) fileName: string | null;
+  @Field(() => String, { nullable: true }) fileContent: string | null;
+}

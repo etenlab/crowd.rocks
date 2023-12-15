@@ -283,8 +283,9 @@ type FileUploadUrlResponse {
   url: String!
 }
 
-type FileUrlOutput {
+type FileUrlAndContentOutput {
   error: ErrorType!
+  fileContent: String
   fileName: String
   fileUrl: String
 }
@@ -676,7 +677,7 @@ type Mutation {
   createQuestionOnWordRange(input: CreateQuestionOnWordRangeUpsertInput!): QuestionOnWordRangesOutput!
   createTaggingOnWordRanges(tag_names: [String!]!, word_ranges: [WordRangeInput!]!): WordRangeTagWithVotesOutput!
   deletePericopie(pericope_id: ID!): PericopeDeleteOutput!
-  documentByPericopiesTranslate(input: TranslateDocumentByPericopiesInput!): FileUrlOutput!
+  documentByPericopiesTranslate(input: TranslateDocumentByPericopiesInput!): FileUrlAndContentOutput!
   documentUpload(input: DocumentUploadInput!): DocumentUploadOutput!
   emailResponseResolver(input: EmailResponseInput!): EmailResponseOutput!
   forceMarkAndRetranslateOriginalMapsIds(originalMapsIds: [String!]!): GenericOutput!
