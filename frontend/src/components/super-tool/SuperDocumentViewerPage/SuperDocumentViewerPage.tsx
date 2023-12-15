@@ -14,6 +14,7 @@ import { Caption } from '../../common/Caption/Caption';
 import { Menu } from '../../common/icons/Menu';
 import { Cancel } from '../../common/icons/Cancel';
 import { OptionItem } from '../../common/forms/Autocomplete';
+import { globals } from '../../../services/globals';
 
 import { useGetDocumentQuery } from '../../../generated/graphql';
 import { useVotePericopeTrChangedSubscription } from '../../../hooks/useVotePericopeTrChangedSubscription';
@@ -100,6 +101,10 @@ export function SuperDocumentViewerPage() {
     );
   }
 
+  const currentUserId = globals.get_user_id();
+  const sameUser =
+    currentUserId && +document.document_id === currentUserId ? true : false;
+
   return (
     <PageLayout>
       <Box
@@ -132,7 +137,14 @@ export function SuperDocumentViewerPage() {
       </Box>
 
       <Collapse in={expand}>
-        <Box sx={{ height: '340px' }} />
+        <Box
+          sx={{
+            height:
+              !sameUser && tool.value === SuperToolKind.Pericope
+                ? '380px'
+                : '340px',
+          }}
+        />
       </Collapse>
 
       {!expand ? (

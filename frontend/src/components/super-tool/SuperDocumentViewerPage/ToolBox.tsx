@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
 
-import { Stack, Typography, Button, Divider } from '@mui/material';
+import { Stack, Typography, Button, Divider, Alert } from '@mui/material';
 
+import { globals } from '../../../services/globals';
 import { langInfo2String, subTags2LangInfo } from '../../../../../utils';
 import { downloadFromUrl } from '../../../common/utility';
 
@@ -197,6 +198,17 @@ export function ToolBox({
     },
   ].filter((item) => item.component !== null);
 
+  const currentUserId = globals.get_user_id();
+  const sameUser =
+    currentUserId && +document.document_id === currentUserId ? true : false;
+
+  const alertCom =
+    !sameUser && tool.value === SuperToolKind.Pericope ? (
+      <Alert severity="info" sx={{ padding: '0 16px', borderRadius: '10px' }}>
+        {tr('Only the owner can edit sections!')}
+      </Alert>
+    ) : null;
+
   const filterCom =
     tab === TabKind.Translation ? (
       <Stack
@@ -332,6 +344,7 @@ export function ToolBox({
           </Stack>
         </Stack>
 
+        {alertCom}
         {filterCom}
         {toolCom}
         {stringFilterCom}
