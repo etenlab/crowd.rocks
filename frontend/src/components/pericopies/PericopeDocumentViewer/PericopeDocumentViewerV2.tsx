@@ -162,7 +162,7 @@ export function PericopeDocumentViewerV2({
         customScrollParent={customScrollParent}
       />
 
-      {selectedWordEntryId ? (
+      {selectedWordEntryId && popoverCom ? (
         <Box
           sx={{
             position: 'fixed',
