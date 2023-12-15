@@ -69,7 +69,7 @@ export function DocumentViewerPage() {
           sx={{ padding: 0, justifyContent: 'flex-start' }}
           onClick={handleDownloadFile}
         >
-          {tr('Download')}
+          {tr('Download source')}
         </Button>
       ),
     },
