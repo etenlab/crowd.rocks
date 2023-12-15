@@ -2,7 +2,10 @@ import { ThemeOptions } from '@mui/material';
 
 export const designColors = {
   blue: '#476FFF',
+  blue_10: '#ECF0FF',
+  blue_20: '#EFF1F8',
   orange: '#FF5F2D',
+  orange_light: '#FFECE5',
   red: '#FF4747',
   white: '#ffffff',
   green: '#14c972',
@@ -18,9 +21,21 @@ export const colors = {
     light: designColors['blue'],
     dark: designColors['blue'],
   },
+  blue_10: {
+    light: designColors['blue_10'],
+    dark: designColors['dark'],
+  },
+  blue_20: {
+    light: designColors['blue_20'],
+    dark: designColors['gray'],
+  },
   orange: {
     light: designColors['orange'],
     dark: designColors['orange'],
+  },
+  orange_light: {
+    light: designColors['orange_light'],
+    dark: designColors['orange_light'],
   },
   red: {
     light: designColors['red'],
@@ -97,6 +112,8 @@ export function getColorPalette(mode: 'light' | 'dark'): ThemeOptions {
       },
       text: {
         blue: colors['blue'][mode],
+        blue_10: colors['blue_10'][mode],
+        blue_20: colors['blue_20'][mode],
         orange: colors['orange'][mode],
         red: colors['red'][mode],
         white: colors['white'][mode],
@@ -106,9 +123,12 @@ export function getColorPalette(mode: 'light' | 'dark'): ThemeOptions {
         gray_text: colors['gray_text'][mode],
         gray_stroke: colors['gray_stroke'][mode],
         gray_bg: colors['gray_bg'][mode],
+        orange_light: colors['orange_light'][mode],
       },
       background: {
         blue: colors['blue'][mode],
+        blue_10: colors['blue_10'][mode],
+        blue_20: colors['blue_20'][mode],
         orange: colors['orange'][mode],
         red: colors['red'][mode],
         white: colors['white'][mode],
@@ -118,6 +138,7 @@ export function getColorPalette(mode: 'light' | 'dark'): ThemeOptions {
         gray_text: colors['gray_text'][mode],
         gray_stroke: colors['gray_stroke'][mode],
         gray_bg: colors['gray_bg'][mode],
+        orange_light: colors['orange_light'][mode],
       },
     },
   };

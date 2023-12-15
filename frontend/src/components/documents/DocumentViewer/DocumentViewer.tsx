@@ -1,23 +1,26 @@
 import {
+  useRef,
   useMemo,
-  memo,
   useEffect,
   useCallback,
   useState,
   ReactNode,
   MouseEvent,
 } from 'react';
-import { Virtuoso } from 'react-virtuoso';
 import { Stack } from '@mui/material';
-import { Word, Dot } from './styled';
-import { SkeletonPage } from './SkeletonPage';
+import { Virtuoso, ListRange, VirtuosoHandle } from 'react-virtuoso';
+
+import { Dot, Word } from './styled';
+import { SkeletonRow } from './SkeletonRow';
 
 import { useGetDocumentWordEntriesByDocumentIdLazyQuery } from '../../../generated/graphql';
+
+const DOCUMENT_PAGE_REMEMBER = 'DOCUMENT_PAGE_REMEMBER';
 
 export type TempPage = {
   id: string;
   first: number;
-  after: number;
+  after: string | null;
 };
 
 export type ViewMode = 'edit' | 'view';
@@ -36,6 +39,11 @@ export type WordEntry = {
   id: string;
   wordlike_string: WordlikeString;
   parent_id?: string;
+  page: number;
+};
+
+export type DocumentViewerHandle = {
+  getTextFromRange(start: string, end: string): string;
 };
 
 export type DocumentViewerProps = {
@@ -45,18 +53,26 @@ export type DocumentViewerProps = {
     entryId: string;
     component?: ReactNode;
   }[];
-  onClickWord(entryId: string, index: number, e?: unknown): void;
+  onClickWord(
+    entryId: string,
+    order: number,
+    e: MouseEvent<HTMLDivElement>,
+  ): void;
   documentId: string;
   onChangeRange(sentence: string): void;
+  onLoadPage?(tempPage: TempPage): void;
+  customScrollParent?: HTMLElement;
 };
 
-export const DocumentViewer = memo(function DocumentViewerPure({
+export function DocumentViewer({
   documentId,
   mode,
   range,
   dots,
   onClickWord,
   onChangeRange,
+  onLoadPage,
+  customScrollParent,
 }: DocumentViewerProps) {
   const [getDocumentWordEntriesByDocumentId] =
     useGetDocumentWordEntriesByDocumentIdLazyQuery();
@@ -66,20 +82,67 @@ export const DocumentViewer = memo(function DocumentViewerPure({
   );
   const [rowWidth, setRowWidth] = useState<number>(0);
   const [requiredPage, setRequiredPage] = useState<TempPage | null>(null);
+  const [rememberedPage, setRememberedPage] = useState<{
+    after: string | null;
+    wordId: string | null;
+  } | null>(null);
+  const [viewInitialIndex, setViewInitialIndex] = useState<number | null>(null);
+
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
+
+  const calcRowWidth = useCallback(() => {
+    const bodyWidth = document.body.offsetWidth;
+
+    setRowWidth(Math.min(bodyWidth - 32, 777 - 32));
+  }, []);
 
   useEffect(() => {
-    window.addEventListener(
-      'resize',
-      function () {
-        setRowWidth(Math.min(window.screen.width - 32, 777 - 32));
-      },
-      true,
-    );
+    window.addEventListener('resize', calcRowWidth);
+    calcRowWidth();
+  }, [calcRowWidth]);
 
-    setTimeout(() => {
-      setRowWidth(window.screen.width - 50);
-    }, 2000);
-  }, []);
+  useEffect(() => {
+    if (rememberedPage && viewInitialIndex !== null && virtuosoRef.current) {
+      virtuosoRef.current.scrollToIndex({
+        index: viewInitialIndex,
+        align: 'start',
+        behavior: 'auto',
+      });
+      setViewInitialIndex(null);
+      setRememberedPage(null);
+    }
+  }, [rememberedPage, viewInitialIndex]);
+
+  useEffect(() => {
+    if (!customScrollParent) {
+      return;
+    }
+
+    const previousData = localStorage.getItem(DOCUMENT_PAGE_REMEMBER);
+
+    const after =
+      previousData && JSON.parse(previousData)[`document_id:${documentId}`]
+        ? JSON.parse(previousData)[`document_id:${documentId}`].after
+        : null;
+
+    const wordId =
+      previousData && JSON.parse(previousData)[`document_id:${documentId}`]
+        ? JSON.parse(previousData)[`document_id:${documentId}`].wordId
+        : null;
+
+    if (wordId) {
+      setRememberedPage({ after, wordId });
+      setTimeout(
+        () =>
+          setRequiredPage({
+            id: `page_${JSON.parse(after).page + 1}`,
+            after: after,
+            first: 1,
+          }),
+        1000,
+      );
+    }
+  }, [customScrollParent, documentId]);
 
   useEffect(() => {
     (async () => {
@@ -100,7 +163,7 @@ export const DocumentViewer = memo(function DocumentViewerPure({
       for (let i = 0; i < totalPages; i++) {
         pageEntriesData.push({
           id: `page_${i + 1}`,
-          after: i,
+          after: JSON.stringify({ document_id: +documentId, page: i }),
           first: 1,
         });
       }
@@ -115,7 +178,7 @@ export const DocumentViewer = memo(function DocumentViewerPure({
         variables: {
           document_id: documentId,
           first: page.first,
-          after: page.after + '',
+          after: page.after,
         },
       });
 
@@ -133,50 +196,10 @@ export const DocumentViewer = memo(function DocumentViewerPure({
               wordlike_string: item.wordlike_string.wordlike_string,
             },
             parent_id: item.parent_document_word_entry_id || undefined,
+            page: item.page,
           }),
         );
       });
-
-      const entriesMap = new Map<string, WordEntry>();
-      const childrenMap = new Map<string, string>();
-      const rootIds: string[] = [];
-
-      for (const word_entry of word_entries) {
-        entriesMap.set(word_entry.id, word_entry);
-
-        if (word_entry.parent_id) {
-          childrenMap.set(word_entry.parent_id, word_entry.id);
-        } else {
-          rootIds.push(word_entry.id);
-        }
-      }
-
-      for (const parentId of childrenMap.keys()) {
-        if (entriesMap.get(parentId)) {
-          continue;
-        }
-
-        rootIds.push(childrenMap.get(parentId)!);
-      }
-
-      const sortedEntries: WordEntry[][] = [];
-
-      for (const root of rootIds) {
-        const tempEntries: WordEntry[] = [];
-
-        let cur: string | undefined = root;
-
-        while (cur) {
-          tempEntries.push(entriesMap.get(cur)!);
-          cur = childrenMap.get(cur);
-        }
-
-        sortedEntries.push(tempEntries);
-      }
-
-      if (sortedEntries.length !== 1) {
-        alert('Error at fetching');
-      }
 
       setEntriesData((data) => {
         const refactoredData: (WordEntry[] | TempPage)[] = [];
@@ -188,7 +211,7 @@ export const DocumentViewer = memo(function DocumentViewerPure({
               item.after === page.after &&
               item.first === page.first
             ) {
-              return sortedEntries[0];
+              return word_entries;
             } else {
               return item;
             }
@@ -254,23 +277,33 @@ export const DocumentViewer = memo(function DocumentViewerPure({
       return;
     }
 
-    const timer = setTimeout(() => fetchMore(requiredPage), 1000);
+    const timer = setTimeout(() => {
+      fetchMore(requiredPage);
+      onLoadPage && onLoadPage(requiredPage);
+    }, 500);
 
     return () => {
       if (timer) {
         clearTimeout(timer);
       }
     };
-  }, [fetchMore, requiredPage]);
+  }, [fetchMore, requiredPage, onLoadPage]);
 
   const handleLoading = useCallback((tempPage: TempPage) => {
     setRequiredPage(tempPage);
   }, []);
 
-  const rows = useMemo(() => {
-    const rows: JSX.Element[] = [];
+  const rowData = useMemo(() => {
+    const rowData: {
+      row: JSX.Element;
+      after: string | null;
+      wordId: string | null;
+    }[] = [];
     const tempRow: {
-      cols: JSX.Element[];
+      cols: {
+        wordEntry: WordEntry;
+        order: number;
+      }[];
       width: number;
     } = {
       cols: [],
@@ -291,31 +324,81 @@ export const DocumentViewer = memo(function DocumentViewerPure({
     const context = canvas.getContext('2d');
 
     if (!context || rowWidth === 0) {
-      return rows;
+      return rowData;
     }
 
     const fontSize = 14;
     const fontWeight = 400;
     const fontFamily = 'Poppins';
     const padding = 6;
-    const letterSpacing = -0.28;
 
     context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
 
     let begin = false;
     let end = false;
+    let wordCounter = 0;
+
+    const getWordProps = (entry: WordEntry, order: number, padding: string) => {
+      if (entry.id === range.beginEntry) {
+        begin = true;
+      }
+
+      const dot = dotsMap.get(entry.id) || null;
+      const isDot = dot ? true : false;
+      const dotCom = dot ? dot.component : null;
+
+      let classStr = `${mode} `;
+      classStr +=
+        (begin && !end && range.endEntry) ||
+        entry.id === range.beginEntry ||
+        entry.id === range.endEntry
+          ? 'selected'
+          : '';
+      classStr += ` ${entry.id === range.beginEntry ? 'left-boundary' : ''}`;
+      classStr += ` ${entry.id === range.endEntry ? 'right-boundary' : ''}`;
+
+      const cursor = isDot ? 'pointer' : 'default';
+
+      if (entry.id === range.endEntry) {
+        end = true;
+      }
+
+      const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+        if (mode === 'view' && !isDot) {
+          return;
+        }
+
+        onClickWord(entry.id, order, e);
+      };
+
+      const wordlikeString = entry.wordlike_string.wordlike_string;
+
+      return {
+        sx: {
+          cursor,
+          padding,
+        },
+        classStr,
+        handleClick,
+        wordlikeString,
+        dotCom,
+        isDot,
+      };
+    };
 
     for (const data of entriesData) {
       if (!Array.isArray(data)) {
-        const skeletonCom = (
-          <SkeletonPage
-            tempPage={data}
-            onLoading={handleLoading}
-            height={1400}
-          />
-        );
+        for (let i = 0; i < 60; i++) {
+          const skeletonCom = (
+            <SkeletonRow tempPage={data} onLoading={handleLoading} />
+          );
 
-        rows.push(skeletonCom);
+          rowData.push({
+            row: skeletonCom,
+            after: data.after,
+            wordId: null,
+          });
+        }
         continue;
       }
 
@@ -324,60 +407,19 @@ export const DocumentViewer = memo(function DocumentViewerPure({
       for (let i = 0; i < entries.length; i++) {
         const entry = entries[i];
 
-        if (entry.id === range.beginEntry) {
-          begin = true;
+        if (rememberedPage && entry.id === rememberedPage.wordId) {
+          setViewInitialIndex(rowData.length);
         }
-
-        const dot = dotsMap.get(entry.id) || null;
-        const isDot = dot ? true : false;
-        const dotCom = dot ? dot.component : null;
-
-        let classStr = `${mode} `;
-        classStr +=
-          (begin && !end && range.endEntry) ||
-          entry.id === range.beginEntry ||
-          entry.id === range.endEntry
-            ? 'selected'
-            : '';
-        classStr += ` ${entry.id === range.beginEntry ? 'left-boundary' : ''}`;
-        classStr += ` ${entry.id === range.endEntry ? 'right-boundary' : ''}`;
-
-        const cursor = isDot ? 'pointer' : 'default';
-
-        if (entry.id === range.endEntry) {
-          end = true;
-        }
-
-        const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-          if (mode === 'view' && !isDot) {
-            return;
-          }
-
-          onClickWord(entry.id, i, e);
-        };
 
         const wordlikeString = entry.wordlike_string.wordlike_string;
 
-        const wordCom = (
-          <Word
-            key={entry.id}
-            className={classStr}
-            onClick={handleClick}
-            style={{ cursor }}
-          >
-            {wordlikeString}
-            {isDot ? dotCom || <Dot /> : null}
-          </Word>
-        );
+        const wordWidth = context.measureText(wordlikeString).width + padding;
 
-        const wordWidth = Math.ceil(
-          context.measureText(wordlikeString).width +
-            letterSpacing * (wordlikeString.length - 1) +
-            padding,
-        );
-
-        if (tempRow.width + wordWidth < rowWidth) {
-          tempRow.cols.push(wordCom);
+        if (tempRow.width + wordWidth < rowWidth - 35) {
+          tempRow.cols.push({
+            wordEntry: entry,
+            order: wordCounter,
+          });
           tempRow.width = tempRow.width + wordWidth;
         } else {
           const rowCom = (
@@ -388,13 +430,51 @@ export const DocumentViewer = memo(function DocumentViewerPure({
                 color: theme.palette.text.gray,
               })}
             >
-              {tempRow.cols}
+              {tempRow.cols.map((col) => {
+                const {
+                  sx,
+                  classStr,
+                  handleClick,
+                  wordlikeString,
+                  dotCom,
+                  isDot,
+                } = getWordProps(
+                  col.wordEntry,
+                  col.order,
+                  `0 ${
+                    3 +
+                    (rowWidth - tempRow.width - 35) / tempRow.cols.length / 2
+                  }px`,
+                );
+
+                return (
+                  <Word
+                    key={col.wordEntry.id}
+                    sx={sx}
+                    className={classStr}
+                    onClick={handleClick}
+                  >
+                    {wordlikeString}
+                    {isDot ? dotCom || <Dot /> : null}
+                  </Word>
+                );
+              })}
             </Stack>
           );
-          rows.push(rowCom);
-          tempRow.cols = [wordCom];
+
+          rowData.push({
+            row: rowCom,
+            after: JSON.stringify({
+              document_id: +documentId,
+              page: tempRow.cols[0].wordEntry.page - 1,
+            }),
+            wordId: tempRow.cols[0].wordEntry.id,
+          });
+          tempRow.cols = [{ wordEntry: entry, order: wordCounter }];
           tempRow.width = wordWidth;
         }
+
+        wordCounter++;
       }
     }
 
@@ -407,14 +487,38 @@ export const DocumentViewer = memo(function DocumentViewerPure({
             color: theme.palette.text.gray,
           })}
         >
-          {tempRow.cols}
+          {tempRow.cols.map((col) => {
+            const { sx, classStr, handleClick, wordlikeString, dotCom, isDot } =
+              getWordProps(col.wordEntry, col.order, '0 3px');
+
+            return (
+              <Word
+                key={col.wordEntry.id}
+                sx={sx}
+                className={classStr}
+                onClick={handleClick}
+              >
+                {wordlikeString}
+                {isDot ? dotCom || <Dot /> : null}
+              </Word>
+            );
+          })}
         </Stack>
       );
-      rows.push(rowCom);
+
+      rowData.push({
+        row: rowCom,
+        after: JSON.stringify({
+          document_id: +documentId,
+          page: tempRow.cols[0].wordEntry.page - 1,
+        }),
+        wordId: tempRow.cols[0].wordEntry.id,
+      });
     }
 
-    return rows;
+    return rowData;
   }, [
+    documentId,
     dots,
     entriesData,
     handleLoading,
@@ -422,14 +526,58 @@ export const DocumentViewer = memo(function DocumentViewerPure({
     onClickWord,
     range.beginEntry,
     range.endEntry,
+    rememberedPage,
     rowWidth,
   ]);
 
-  return (
-    <Virtuoso
-      style={{ height: 'calc(100vh - 160px)' }}
-      data={rows}
-      itemContent={(_index, row) => row}
-    />
+  const handleRangeChanged = useCallback(
+    (range: ListRange) => {
+      if (!rowData[range.startIndex].wordId || !customScrollParent) {
+        return;
+      }
+
+      const previousData = localStorage.getItem(DOCUMENT_PAGE_REMEMBER);
+
+      if (!previousData) {
+        localStorage.setItem(
+          DOCUMENT_PAGE_REMEMBER,
+          JSON.stringify({
+            [`document_id:${documentId}`]: {
+              after: rowData[range.startIndex].after,
+              wordId: rowData[range.startIndex].wordId,
+            },
+          }),
+        );
+      } else {
+        const data = JSON.parse(previousData);
+
+        localStorage.setItem(
+          DOCUMENT_PAGE_REMEMBER,
+          JSON.stringify({
+            ...data,
+            [`document_id:${documentId}`]: {
+              after: rowData[range.startIndex].after,
+              wordId: rowData[range.startIndex].wordId,
+            },
+          }),
+        );
+      }
+    },
+    [customScrollParent, documentId, rowData],
   );
-});
+
+  return (
+    <>
+      <Virtuoso
+        ref={virtuosoRef}
+        rangeChanged={handleRangeChanged}
+        customScrollParent={customScrollParent}
+        data={rowData}
+        itemContent={(_index, data) => data.row}
+      />
+      <div style={{ opacity: 0 }}>
+        <span style={{ fontFamily: 'Poppins' }} />
+      </div>
+    </>
+  );
+}

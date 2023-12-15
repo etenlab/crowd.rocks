@@ -1,10 +1,18 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from 'src/common/types';
+import { PageInfo } from '../common/types';
+import { DocumentWordEntry } from '../documents/types';
 
 @ObjectType()
 export class Pericope {
   @Field(() => ID) pericope_id: string;
   @Field(() => String) start_word: string;
+}
+
+@ObjectType()
+export class PericopeWithDocumentWordEntry {
+  @Field(() => ID) pericope_id: string;
+  @Field(() => DocumentWordEntry) start_word: DocumentWordEntry;
 }
 
 @ObjectType()
@@ -36,6 +44,18 @@ export class PericopiesOutput extends GenericOutput {
 }
 
 @ObjectType()
+export class PericopeWithDocumentWordEntryOutput extends GenericOutput {
+  @Field(() => PericopeWithDocumentWordEntry, { nullable: true })
+  pericope: PericopeWithDocumentWordEntry | null;
+}
+
+@ObjectType()
+export class PericopeDeleteOutput extends GenericOutput {
+  @Field(() => ID, { nullable: true })
+  pericope_id: string | null;
+}
+
+@ObjectType()
 export class PericopeVotesOutput extends GenericOutput {
   @Field(() => [PericopeVote], { nullable: 'items' })
   pericope_votes: (PericopeVote | null)[];
@@ -54,7 +74,46 @@ export class PericopeVoteStatusOutput extends GenericOutput {
 }
 
 @ObjectType()
-export class PericopeWithVotesOutput extends GenericOutput {
-  @Field(() => [PericopeWithVote], { nullable: 'items' })
-  pericope_with_votes: (PericopeWithVote | null)[];
+export class PericopeWithVotesEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => [PericopeWithVote]) node: PericopeWithVote[];
+}
+
+@ObjectType()
+export class PericopeWithVotesListConnection extends GenericOutput {
+  @Field(() => [PericopeWithVotesEdge])
+  edges: PericopeWithVotesEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
+}
+
+// minimalistic pericopies without splitting by pages and without votes
+@ObjectType()
+export class PericopeEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => Pericope) node: Pericope;
+}
+
+@ObjectType()
+export class RecomendedPericopeConnection extends GenericOutput {
+  @Field(() => [PericopeEdge])
+  edges: PericopeEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
+}
+
+@ObjectType()
+export class PericopeTextWithDescription extends GenericOutput {
+  @Field(() => ID, { nullable: true }) pericope_id: string | null;
+  @Field(() => String) pericope_text: string;
+  @Field(() => String) pericope_description_text: string;
+}
+
+@ObjectType()
+export class PericopeTagsQasCountOutput extends GenericOutput {
+  @Field(() => ID, { nullable: true }) pericope_id: string | null;
+  @Field(() => String, { nullable: true }) tags_count: number | null;
+  @Field(() => String, { nullable: true }) qas_count: number | null;
+}
+@ObjectType()
+export class RecomendedPericopiesChangedAtDocumentId extends GenericOutput {
+  @Field(() => String) documentId: string;
 }

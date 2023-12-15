@@ -20,17 +20,21 @@ import { ForumsModule } from './components/forums/forums.module';
 import { ForumFoldersModule } from './components/forum-folders/folders.module';
 import { ThreadModule } from './components/threads/threads.module';
 import { NotificationModule } from './components/notifications/notification.module';
+
 import { DocumentsModule } from './components/documents/documents.module';
+import { PericopiesModule } from './components/pericopies/pericopies.module';
+import { QuestionAndAnswersModule } from './components/question-answer/question-answer.module';
+import { TaggingsModule } from './components/tagging/tagging.module';
+
 import { FlagsModule } from './components/flag/flags.module';
 import { FileModule } from './components/file/file.module';
-import { QuestionAndAnswersModule } from './components/question-answer/question-answer.module';
-import { PericopiesModule } from './components/pericopies/pericopies.module';
 import { BotsModule } from './components/translator-bots/bots.module';
 import { PopulatorModule } from './components/populators/populator.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ScheduledTasksModule } from './scheduled-tasks/scheduledTasks.module';
 import { MiddlewareModule } from './middleware/middleware.module';
 import { HttpLoggerMiddleware } from './middleware/http-logger.middleware';
+import { PericopeTrModule } from './components/pericope-translations/pericope-tr.module';
 
 @Module({
   imports: [
@@ -62,14 +66,16 @@ import { HttpLoggerMiddleware } from './middleware/http-logger.middleware';
     MiddlewareModule,
     NotificationModule,
     DocumentsModule,
-    FlagsModule,
-    FileModule,
+    TaggingsModule,
     QuestionAndAnswersModule,
     PericopiesModule,
+    FlagsModule,
+    FileModule,
     BotsModule,
     PopulatorModule,
     ScheduleModule.forRoot(),
     ScheduledTasksModule,
+    PericopeTrModule,
   ],
   controllers: [],
   providers: [],

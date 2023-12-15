@@ -10,6 +10,7 @@ export type GetDocumentById = {
   language_code: string;
   dialect_code: string | null;
   geo_code: string | null;
+  created_by: string;
 };
 
 export function getDocumentById(document_id: number): [string, [number]] {
@@ -22,7 +23,8 @@ export function getDocumentById(document_id: number): [string, [number]] {
         d.geo_code,
         d.file_id,
         f.file_name,
-        f.file_url
+        f.file_url,
+        d.created_by
       from
         documents d
       left join files f on
@@ -93,7 +95,8 @@ export function getAllDocuments({
         d.geo_code,
         d.file_id,
         f.file_name,
-        f.file_url
+        f.file_url,
+        d.created_by
       from
         documents d
       left join files f on
@@ -173,7 +176,7 @@ export function getDocumentWordEntryByIds(ids: number[]): [string, [number[]]] {
         document_word_entry_id,
         document_id,
         wordlike_string_id,
-        parent_document_word_entry_id
+        parent_document_word_entry_id,
         page
       from document_word_entries
       where document_word_entry_id = any($1)
@@ -312,23 +315,52 @@ export function getWordRangeByBeginWordIds(
   ];
 }
 
-export function getWordRangeByDocumentId(id: number): [string, [number]] {
+export type GetWordRangeByDocumentId = {
+  word_range_id: string;
+  begin_word: string;
+  end_word: string;
+  page: string;
+};
+
+export function getWordRangeByDocumentId(
+  document_id: number,
+  first: number | null,
+  page: number,
+): [string, number[]] {
+  const returnArr: number[] = [document_id];
+  let limitStr = '';
+  let cursorStr = '';
+
+  if (page) {
+    returnArr.push(page);
+    cursorStr = `and document_word_entries.page > $${returnArr.length}`;
+  }
+
+  if (first) {
+    returnArr.push(page + first + 1);
+    limitStr = `and document_word_entries.page < $${returnArr.length}`;
+  }
+
   return [
     `
       select distinct 
         word_range_id,
         begin_word,
-        end_word
+        end_word,
+        dwes.page
       from word_ranges
       join (
-        select
-          document_word_entry_id
+        select 
+          document_word_entries.document_word_entry_id,
+          document_word_entries.page
         from document_word_entries
-        where document_id = $1
-      ) dwes
+        where document_word_entries.document_id = $1
+          ${cursorStr}
+          ${limitStr}
+      ) as dwes
       on word_ranges.begin_word = dwes.document_word_entry_id;
     `,
-    [id],
+    [...returnArr],
   ];
 }
 
@@ -371,3 +403,65 @@ export function callCreateDocumentProcedure(
     [file_id, token, language_code, dialect_code, geo_code],
   ];
 }
+
+/**
+ * not used by now (made specialized query for pericope) but might be useful
+ */
+// export type OrderedWordsFromDocument = {
+//   document_word_entry_id: string;
+//   wordlike_string: string;
+// };
+// export function getOrderedWordsFromDocumentIdSQL({
+//   documentId,
+//   start_word_id,
+//   end_word_id,
+// }: {
+//   documentId: string;
+//   start_word_id: string;
+//   end_word_id?: string | undefined;
+// }): [string, [string, string, string?]] {
+//   const params: [string, string, string?] = [documentId, start_word_id];
+
+//   let finalWrodRestrictionClause = '';
+//   if (end_word_id) {
+//     params.push(end_word_id);
+//     finalWrodRestrictionClause = `and dwe.document_id=$${params.length}`;
+//   }
+
+//   return [
+//     `
+//       WITH RECURSIVE DWE_CTE AS (
+//         SELECT
+//           document_word_entry_id,
+//           document_id,
+//           wordlike_string_id,
+//           parent_document_word_entry_id,
+//           created_at,
+//           created_by,
+//           1 AS level
+//         FROM public.document_word_entries
+//         WHERE document_word_entry_id = $2
+//         and document_id=$1
+//       --
+//         UNION
+//         SELECT
+//           dwe.document_word_entry_id,
+//           dwe.document_id,
+//           dwe.wordlike_string_id,
+//           dwe.parent_document_word_entry_id,
+//           dwe.created_at,
+//           dwe.created_by,
+//           DWE_CTE.level +1 as level
+//         FROM public.document_word_entries dwe
+//         JOIN DWE_CTE ON DWE_CTE.document_word_entry_id = dwe.parent_document_word_entry_id
+//         where true
+//         ${finalWrodRestrictionClause}
+//       )
+//       SELECT DWE_CTE.document_word_entry_id, ws.wordlike_string
+//       FROM DWE_CTE
+//       join wordlike_strings ws on DWE_CTE.wordlike_string_id = ws.wordlike_string_id
+//       order by level
+//     `,
+//     params,
+//   ];
+// }

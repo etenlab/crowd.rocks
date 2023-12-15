@@ -1,22 +1,18 @@
 import BasePage from './BasePage';
 import { RegisterDto } from '../data-objects/RegisterDto';
 
-const emailTextBox = '//ion-input[@inputmode="email"]/input';
-const userNameTextBox = '//ion-input[@id="register-avatar"]/input';
-const passwordTextBox = '//ion-input[@type="password"]/input';
 const registerNowButton = '//ion-button[@id="register-register"]';
 const registerPageTitle = "//h1[text()= 'Register']";
 
 class RegistrationPage extends BasePage {
   async fillRegistrationForm(registrationData: RegisterDto) {
-    await this.page.locator(emailTextBox).last().waitFor();
-    await this.page.locator(emailTextBox).last().fill(registrationData.email);
+    await this.page.getByLabel('Email').last().fill(registrationData.email);
     await this.page
-      .locator(userNameTextBox)
+      .getByLabel('Username')
       .last()
       .fill(registrationData.username);
     await this.page
-      .locator(passwordTextBox)
+      .getByLabel('Password')
       .last()
       .fill(registrationData.password);
   }

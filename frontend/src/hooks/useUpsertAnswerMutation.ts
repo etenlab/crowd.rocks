@@ -1,6 +1,9 @@
 import { useIonToast } from '@ionic/react';
 
-import { useUpsertAnswerMutation as useGeneratedUpsertAnswerMutation } from '../generated/graphql';
+import {
+  useUpsertAnswerMutation as useGeneratedUpsertAnswerMutation,
+  useSubscribeToAnswersAddedSubscription as useGeneratedSubscribeToAnswersAddedSubscription,
+} from '../generated/graphql';
 
 import { ErrorType } from '../generated/graphql';
 
@@ -15,24 +18,8 @@ export function useUpsertAnswerMutation() {
   const redirectOnUnauth = useUnauthorizedRedirect();
 
   return useGeneratedUpsertAnswerMutation({
-    update(cache, { data, errors }) {
-      if (
-        !errors &&
-        data &&
-        data.upsertAnswers.answers.length > 0 &&
-        data.upsertAnswers.error === ErrorType.NoError
-      ) {
-        const newAnswer = data.upsertAnswers.answers[0]!;
-
-        updateCacheWithUpsertAnswer(cache, newAnswer);
-
-        present({
-          message: tr('Success at creating new Answer!'),
-          duration: 1500,
-          position: 'top',
-          color: 'success',
-        });
-      } else {
+    update(_cache, { data, errors }) {
+      if (errors || !data || data.upsertAnswers.error !== ErrorType.NoError) {
         console.log('useUpsertAnswerMutation: ', errors);
         console.log(data?.upsertAnswers.error);
 
@@ -44,6 +31,24 @@ export function useUpsertAnswerMutation() {
           color: 'danger',
         });
         redirectOnUnauth(data?.upsertAnswers.error);
+      }
+    },
+  });
+}
+
+export function useSubscribeToAnswersAddedSubscription() {
+  return useGeneratedSubscribeToAnswersAddedSubscription({
+    onData({ client, data: result }) {
+      const { data, error } = result;
+      if (
+        !error &&
+        data &&
+        data.answersAdded.answers.length > 0 &&
+        data.answersAdded.error === ErrorType.NoError
+      ) {
+        const newAnswer = data.answersAdded.answers[0]!;
+
+        updateCacheWithUpsertAnswer(client.cache, newAnswer);
       }
     },
   });

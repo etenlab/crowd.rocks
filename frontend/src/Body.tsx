@@ -83,9 +83,19 @@ import { DocumentViewerPage } from './components/documents/DocumentViewerPage/Do
 
 import { QADocumentListPage } from './components/qa/QADocumentListPage';
 import { QADocumentViewerPage } from './components/qa/QADocumentViewerPage';
+import { AnswersPage } from './components/qa/QADocumentViewerPage/AnswersPage';
+import { NewQuestionPage } from './components/qa/QADocumentViewerPage/NewQuestionPage';
+import { QuestionDetailsPage } from './components/qa/QADocumentViewer/QuestionDetailsPage';
 
 import { PericopeDocumentListPage } from './components/pericopies/PericopeDocumentListPage';
 import { PericopeDocumentViewerPage } from './components/pericopies/PericopeDocumentViewerPage';
+
+import { TaggingDocumentListPage } from './components/tagging/TaggingDocumentListPage';
+import { TaggingDocumentViewerPage } from './components/tagging/TaggingDocumentViewerPage';
+
+import { SuperDocumentListPage } from './components/super-tool/SuperDocumentListPage/SuperDocumentListPage';
+import { SuperDocumentViewerPage } from './components/super-tool/SuperDocumentViewerPage/SuperDocumentViewerPage';
+import { SuperPericopeViewerPage } from './components/super-tool/SuperDocumentViewerPage/SuperPericopeViewerPage';
 
 import { Icons } from './components/demo/Icons';
 import { Forms } from './components/demo/Forms';
@@ -96,6 +106,12 @@ import { useColorModeContext } from './theme';
 
 import { apollo_client } from './App';
 import { DataGeneratorPage } from './components/data-generator/DataGeneratorPage';
+import { PericopeTrPage } from './components/pericope-translations/PericopeTrPage';
+import { PericopeTrDocumentListPage } from './components/pericope-translations/PericopeTrDocumentListPage';
+import { PericopiesTrList } from './components/pericope-translations/PericopiesTrListPage';
+import { PericopeTranslationPage } from './components/pericope-translations/PericopeTranslationPage/PericopeTranslationPage';
+import { TaggingDetailsPage } from './components/tagging/TaggingDocumentViewer/TaggingDetailsPage';
+// import { PericopeTranslationList } from './components/pericope-translations/PericopeTranslationPage/PericopeTranslationsList';
 
 export function Body() {
   const { tr } = useTr();
@@ -570,13 +586,78 @@ export function Body() {
             />
             <Route
               exact
+              path="/:nation_id/:language_id/:cluster_id/qa/question-details/:word_range_id"
+              component={QuestionDetailsPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/qa/answers/:question_id"
+              component={AnswersPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/qa/new-question/:begin_document_word_entry_id/:end_document_word_entry_id"
+              component={NewQuestionPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/tagging-tool"
+              component={TaggingDocumentListPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/tagging-tool/documents/:document_id"
+              component={TaggingDocumentViewerPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/tagging-tool/details/:word_range_id"
+              component={TaggingDetailsPage}
+            />
+            <Route
+              exact
               path="/:nation_id/:language_id/:cluster_id/pericopies"
               component={PericopeDocumentListPage}
             />
             <Route
               exact
+              path="/:nation_id/:language_id/:cluster_id/pericope-translations"
+              component={PericopeTrPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/pericope-translations/documents"
+              component={PericopeTrDocumentListPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/pericope-translations/for-document/:documentId"
+              component={PericopiesTrList}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/pericope-translations/pericope/:pericopeId"
+              component={PericopeTranslationPage}
+            />
+            <Route
+              exact
               path="/:nation_id/:language_id/:cluster_id/pericopies/documents/:document_id"
               component={PericopeDocumentViewerPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/super-tool/documents"
+              component={SuperDocumentListPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/super-tool/documents/:document_id"
+              component={SuperDocumentViewerPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/pericope-viewer/:pericope_id/:tool_kind"
+              component={SuperPericopeViewerPage}
             />
             <Route exact path="/demos/icons" component={Icons} />
             <Route exact path="/demos/forms" component={Forms} />

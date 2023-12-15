@@ -1,5 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import {
+  Args,
+  Query,
+  Resolver,
+  Mutation,
+  Subscription,
+  Context,
+  ID,
+  Int,
+} from '@nestjs/graphql';
+import { PubSub } from 'graphql-subscriptions';
+import { SubscriptionToken } from 'src/common/subscription-token';
+import { PUB_SUB } from 'src/pubSub.module';
+
 import { getBearer } from 'src/common/utility';
 
 import { QuestionItemsService } from './question-items.service';
@@ -14,6 +27,8 @@ import {
   AnswersOutput,
   QuestionUpsertInput,
   AnswerUpsertInput,
+  QuestionWithStatisticOutput,
+  QuestionOnWordRangesListConnection,
 } from './types';
 import { TableNameType } from 'src/common/types';
 
@@ -21,6 +36,7 @@ import { TableNameType } from 'src/common/types';
 @Resolver()
 export class QuestionAndAnswersResolver {
   constructor(
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private questionItemService: QuestionItemsService,
     private questionService: QuestionsService,
     private answerService: AnswersService,
@@ -38,17 +54,6 @@ export class QuestionAndAnswersResolver {
     );
   }
 
-  @Mutation(() => QuestionItemsOutput)
-  async upsertQuestionItems(
-    @Args('items', { type: () => [String] })
-    items: string[],
-    @Context() req: any,
-  ): Promise<QuestionItemsOutput> {
-    Logger.log('upsertQuestionItems: ', items);
-
-    return this.questionItemService.upserts(items, null, getBearer(req));
-  }
-
   @Query(() => QuestionsOutput)
   async readQuestions(
     @Args('ids', { type: () => [ID] }) ids: string[],
@@ -59,6 +64,15 @@ export class QuestionAndAnswersResolver {
       ids.map((id) => +id),
       null,
     );
+  }
+
+  @Query(() => QuestionWithStatisticOutput)
+  async getQuestionStatistic(
+    @Args('question_id', { type: () => ID }) question_id: string,
+  ): Promise<QuestionWithStatisticOutput> {
+    Logger.log('getQuestionStatistic, question_id:', question_id);
+
+    return this.questionService.getQuestionStatistic(+question_id, null);
   }
 
   @Query(() => QuestionsOutput)
@@ -79,41 +93,54 @@ export class QuestionAndAnswersResolver {
     );
   }
 
-  @Query(() => QuestionOnWordRangesOutput)
+  @Query(() => QuestionOnWordRangesListConnection)
   async getQuestionOnWordRangesByDocumentId(
     @Args('document_id', { type: () => ID })
     document_id: string,
-  ): Promise<QuestionOnWordRangesOutput> {
-    Logger.log('getQuestionOnWordRangesByDocumentId', document_id);
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<QuestionOnWordRangesListConnection> {
+    Logger.log(
+      'getQuestionOnWordRangesByDocumentId',
+      JSON.stringify({ document_id, first, after }, null, 2),
+    );
 
     return this.questionService.getQuestionOnWordRangesByDocumentId(
       +document_id,
+      first,
+      after,
       null,
     );
   }
 
-  @Mutation(() => QuestionsOutput)
-  async upsertQuestions(
-    @Args('input', { type: () => [QuestionUpsertInput] })
-    input: QuestionUpsertInput[],
-    @Context() req: any,
-  ): Promise<QuestionsOutput> {
-    Logger.log('upsertQuestions: ', input);
+  @Query(() => QuestionOnWordRangesOutput)
+  async getQuestionOnWordRangesByBeginWordEntryId(
+    @Args('begin_document_word_entry_id', { type: () => ID })
+    begin_document_word_entry_id: string,
+  ): Promise<QuestionOnWordRangesOutput> {
+    Logger.log(
+      'getQuestionOnWordRangesByBeginWordEntryId',
+      JSON.stringify({ begin_document_word_entry_id }, null, 2),
+    );
 
-    return this.questionService.upserts(input, getBearer(req) || '', null);
+    return this.questionService.getQuestionOnWordRangesByBeginWordEntryId(
+      +begin_document_word_entry_id,
+      null,
+    );
   }
 
-  @Mutation(() => QuestionOnWordRangesOutput)
-  async createQuestionOnWordRange(
-    @Args('input', { type: () => CreateQuestionOnWordRangeUpsertInput })
-    input: CreateQuestionOnWordRangeUpsertInput,
-    @Context() req: any,
+  @Query(() => QuestionOnWordRangesOutput)
+  async getQuestionOnWordRangesByWordRangeId(
+    @Args('word_range_id', { type: () => ID })
+    word_range_id: string,
   ): Promise<QuestionOnWordRangesOutput> {
-    Logger.log('upsertQuestions: ', input);
+    Logger.log(
+      'getQuestionOnWordRangesByWordRangeId',
+      JSON.stringify({ word_range_id }, null, 2),
+    );
 
-    return this.questionService.createQuestionOnWordRange(
-      input,
-      getBearer(req) || '',
+    return this.questionService.getQuestionOnWordRangesByWordRangeId(
+      +word_range_id,
       null,
     );
   }
@@ -142,6 +169,74 @@ export class QuestionAndAnswersResolver {
     );
   }
 
+  @Query(() => AnswersOutput)
+  async getAnswerByUserId(
+    @Args('question_id', { type: () => ID }) question_id: string,
+    @Args('user_id', { type: () => ID }) user_id: string,
+  ): Promise<AnswersOutput> {
+    Logger.log('getAnswerByUserId, ids:', { question_id, user_id });
+
+    return this.answerService.getAnswerByUserId(+question_id, +user_id, null);
+  }
+
+  @Mutation(() => QuestionsOutput)
+  async upsertQuestions(
+    @Args('input', { type: () => [QuestionUpsertInput] })
+    input: QuestionUpsertInput[],
+    @Context() req: any,
+  ): Promise<QuestionsOutput> {
+    Logger.log('upsertQuestions: ', input);
+
+    const newQuestions = await this.questionService.upserts(
+      input,
+      getBearer(req) || '',
+      null,
+    );
+
+    this.pubSub.publish(SubscriptionToken.questionsAdded, {
+      [SubscriptionToken.questionsAdded]: newQuestions,
+    });
+
+    return newQuestions;
+  }
+
+  @Subscription(() => QuestionsOutput, {
+    name: SubscriptionToken.questionsAdded,
+  })
+  subscribeToQuestionsAdded() {
+    return this.pubSub.asyncIterator(SubscriptionToken.questionsAdded);
+  }
+
+  @Mutation(() => QuestionOnWordRangesOutput)
+  async createQuestionOnWordRange(
+    @Args('input', { type: () => CreateQuestionOnWordRangeUpsertInput })
+    input: CreateQuestionOnWordRangeUpsertInput,
+    @Context() req: any,
+  ): Promise<QuestionOnWordRangesOutput> {
+    Logger.log('upsertQuestions: ', input);
+
+    const newQuestions = await this.questionService.createQuestionOnWordRange(
+      input,
+      getBearer(req) || '',
+      null,
+    );
+
+    this.pubSub.publish(SubscriptionToken.questionsOnWordRangeAdded, {
+      [SubscriptionToken.questionsOnWordRangeAdded]: newQuestions,
+    });
+
+    return newQuestions;
+  }
+
+  @Subscription(() => QuestionOnWordRangesOutput, {
+    name: SubscriptionToken.questionsOnWordRangeAdded,
+  })
+  subscribeToQuestionsOnWordrangeAdded() {
+    return this.pubSub.asyncIterator(
+      SubscriptionToken.questionsOnWordRangeAdded,
+    );
+  }
+
   @Mutation(() => AnswersOutput)
   async upsertAnswers(
     @Args('input', { type: () => [AnswerUpsertInput] })
@@ -150,6 +245,23 @@ export class QuestionAndAnswersResolver {
   ): Promise<AnswersOutput> {
     Logger.log('upsertAnswers: ', input);
 
-    return this.answerService.upserts(input, getBearer(req) || '', null);
+    const answersAdded = await this.answerService.upserts(
+      input,
+      getBearer(req) || '',
+      null,
+    );
+
+    this.pubSub.publish(SubscriptionToken.answersAdded, {
+      [SubscriptionToken.answersAdded]: answersAdded,
+    });
+
+    return answersAdded;
+  }
+
+  @Subscription(() => AnswersOutput, {
+    name: SubscriptionToken.answersAdded,
+  })
+  subscribeToAnswersAdded() {
+    return this.pubSub.asyncIterator(SubscriptionToken.answersAdded);
   }
 }

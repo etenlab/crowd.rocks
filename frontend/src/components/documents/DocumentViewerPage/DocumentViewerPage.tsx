@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useParams } from 'react-router';
+import { useIonViewDidEnter, useIonViewDidLeave } from '@ionic/react';
 import {
   Stack,
   Box,
@@ -21,15 +23,31 @@ import { useGetDocumentQuery } from '../../../generated/graphql';
 import { useTr } from '../../../hooks/useTr';
 
 import { DocumentViewer } from '../DocumentViewer/DocumentViewer';
+import { useAppContext } from '../../../hooks/useAppContext';
 
 export function DocumentViewerPage() {
   const { tr } = useTr();
   const { document_id } = useParams<{ document_id: string }>();
+  const {
+    states: {
+      components: { ionContentScrollElement },
+    },
+  } = useAppContext();
+
+  const [pageStatus, setPageStatus] = useState<'shown' | 'hidden' | null>(null);
 
   const { data: documentData } = useGetDocumentQuery({
     variables: {
       document_id,
     },
+  });
+
+  useIonViewDidEnter(() => {
+    setPageStatus('shown');
+  });
+
+  useIonViewDidLeave(() => {
+    setPageStatus('hidden');
   });
 
   const document = documentData ? documentData.getDocument.document : null;
@@ -51,7 +69,7 @@ export function DocumentViewerPage() {
           sx={{ padding: 0, justifyContent: 'flex-start' }}
           onClick={handleDownloadFile}
         >
-          {tr('Download')}
+          {tr('Download source')}
         </Button>
       ),
     },
@@ -99,6 +117,11 @@ export function DocumentViewerPage() {
         dots={[]}
         onClickWord={() => {}}
         onChangeRange={() => {}}
+        customScrollParent={
+          pageStatus === 'shown' && ionContentScrollElement
+            ? ionContentScrollElement
+            : undefined
+        }
       />
     </PageLayout>
   );

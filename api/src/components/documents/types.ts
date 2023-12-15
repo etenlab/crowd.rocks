@@ -1,6 +1,6 @@
 import { Field, ID, Int, InputType, ObjectType } from '@nestjs/graphql';
 import { GenericOutput } from '../../common/types';
-import { PageInfo } from '../common/types';
+import { LanguageInput, PageInfo } from '../common/types';
 
 import { WordlikeString } from '../words/types';
 
@@ -13,6 +13,7 @@ export class TextyDocument {
   @Field(() => String) language_code: string;
   @Field(() => String, { nullable: true }) dialect_code: string | null;
   @Field(() => String, { nullable: true }) geo_code: string | null;
+  @Field(() => String) created_by: string;
 }
 
 @ObjectType()
@@ -43,7 +44,7 @@ export class TextyDocumentInput {
 @ObjectType()
 export class DocumentUploadOutput extends GenericOutput {
   @Field(() => TextyDocument, { nullable: true })
-  document: TextyDocument | null;
+  document?: TextyDocument | null;
 }
 
 @InputType()
@@ -100,8 +101,51 @@ export class WordRangesOutput extends GenericOutput {
   word_ranges: (WordRange | null)[];
 }
 
+@ObjectType()
+export class WordRangesEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => [WordRange]) node: WordRange[];
+}
+
+@ObjectType()
+export class WordRangesListConnection extends GenericOutput {
+  @Field(() => [WordRangesEdge])
+  edges: WordRangesEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
+}
+
 @InputType()
-export class WordRangeUpsertInput {
+export class WordRangeInput {
   @Field(() => String) begin_document_word_entry_id: string;
   @Field(() => String) end_document_word_entry_id: string;
+}
+
+@ObjectType()
+export class TextFromRange {
+  @Field(() => String) piece_of_text: string;
+  @Field(() => ID) begin_document_word_entry_id: string;
+  @Field(() => ID) end_document_word_entry_id: string;
+}
+
+@ObjectType()
+export class TextFromRangesOutput extends GenericOutput {
+  @Field(() => [TextFromRange]) list: TextFromRange[];
+}
+
+@InputType()
+export class TranslateDocumentByPericopiesInput {
+  @Field(() => String) documentId: string;
+  @Field(() => LanguageInput) targetLang: LanguageInput;
+}
+
+@ObjectType()
+export class FileUrlOutput extends GenericOutput {
+  @Field(() => String, { nullable: true }) fileUrl: string | null;
+  @Field(() => String, { nullable: true }) fileName: string | null;
+}
+@ObjectType()
+export class FileUrlAndContentOutput extends GenericOutput {
+  @Field(() => String, { nullable: true }) fileUrl: string | null;
+  @Field(() => String, { nullable: true }) fileName: string | null;
+  @Field(() => String, { nullable: true }) fileContent: string | null;
 }

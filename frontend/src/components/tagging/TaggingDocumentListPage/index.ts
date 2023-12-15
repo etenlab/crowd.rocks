@@ -1,0 +1,1 @@
+export { TaggingDocumentListPage } from './TaggingDocumentListPage';

@@ -6,6 +6,7 @@ fragment TextyDocumentFragment on TextyDocument {
   language_code
   dialect_code
   geo_code
+  created_by
 }
 
 fragment DocumentWordEntryFragment on DocumentWordEntry {
@@ -25,6 +26,13 @@ fragment WordRangeFragment on WordRange {
   }
   end {
     ...DocumentWordEntryFragment
+  }
+}
+
+fragment WordRangesEdgeFragment on WordRangesEdge {
+  cursor
+  node {
+    ...WordRangeFragment
   }
 }
 
@@ -92,8 +100,35 @@ query GetDocumentWordEntriesByDocumentId(
   }
 }
 
-query GetWordRangesByDocumentId($document_id: ID!) {
-  getWordRangesByDocumentId(document_id: $document_id) {
+query GetDocumentTextFromRanges($ranges: [WordRangeInput!]!) {
+  getDocumentTextFromRanges(ranges: $ranges) {
+    error
+    list {
+      begin_document_word_entry_id
+      end_document_word_entry_id
+      piece_of_text
+    }
+  }
+}
+
+query GetWordRangesByDocumentId($document_id: ID!, $after: ID, $first: Int) {
+  getWordRangesByDocumentId(
+    document_id: $document_id
+    after: $after
+    first: $first
+  ) {
+    error
+    edges {
+      ...WordRangesEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+
+query ReadWordRange($id: ID!) {
+  readWordRanges(ids: [$id]) {
     error
     word_ranges {
       ...WordRangeFragment
@@ -117,5 +152,46 @@ mutation UpsertWordRange(
     word_ranges {
       ...WordRangeFragment
     }
+  }
+}
+
+mutation BotTranslateDocument(
+  $botType: BotType!
+  $documentId: String!
+  $targetLang: LanguageInput!
+) {
+  botTranslateDocument(
+    input: {
+      botType: $botType
+      documentId: $documentId
+      targetLang: $targetLang
+    }
+  ) {
+    document {
+      ...TextyDocumentFragment
+    }
+    error
+  }
+}
+
+subscription SubscribeToDocumentAdded {
+  documentAdded {
+    error
+    document {
+      ...TextyDocumentFragment
+    }
+  }
+}
+
+mutation DocumentByPericopiesTranslate(
+  $documentId: String!
+  $targetLang: LanguageInput!
+) {
+  documentByPericopiesTranslate(
+    input: { documentId: $documentId, targetLang: $targetLang }
+  ) {
+    fileUrl
+    fileName
+    fileContent
   }
 }

@@ -50,9 +50,13 @@ import {
   useTranslateMissingWordsAndPhrasesByDeepLMutation,
   useTranslateMissingWordsAndPhrasesBySmartcatMutation,
   useTranslateMissingWordsAndPhrasesByLiltMutation,
+  useTranslateWordsAndPhrasesByChatGptfakeMutation,
+  useSubscribeToGptProgressSubscription,
+  ChatGptVersion,
 } from '../../../generated/graphql';
 
 import { langInfo2String, langInfo2tag } from '../../../../../utils';
+import { ProgressCom } from './Progress';
 
 function messageHTML({
   total,
@@ -167,10 +171,23 @@ export function AIControllerPage() {
   const [translateWordsAndPhrasesByChatGpt4] =
     useTranslateWordsAndPhrasesByChatGpt4Mutation();
 
+  const [translateWordsAndPhrasesByChatGptFAKE] =
+    useTranslateWordsAndPhrasesByChatGptfakeMutation();
+
   const [translateMissingWordsAndPhrasesByGpt] =
     useTranslateMissingWordsAndPhrasesByChatGptMutation();
 
-  //
+  // translation progress bars
+  const { data: gptProgress } = useSubscribeToGptProgressSubscription();
+  const [gpt35ProgressValue, setGpt35ProgressValue] = useState<number | null>(
+    null,
+  );
+  const [gptFakeProgressValue, setGptFakeProgressValue] = useState<
+    number | null
+  >(null);
+  const [gpt4ProgressValue, setGpt4ProgressValue] = useState<number | null>(
+    null,
+  );
 
   const { data: translationResult } =
     useSubscribeToTranslationReportSubscription();
@@ -203,6 +220,32 @@ export function AIControllerPage() {
     }
     return;
   }, [getLangInfo, source, target?.lang.tag]);
+
+  useEffect(() => {
+    // console.log('subscribe chatgptProgress');
+    // console.log(gptProgress);
+    // console.log(gptProgress?.ChatGptTranslateProgress.progress);
+    if (
+      gptProgress &&
+      gptProgress.ChatGptTranslateProgress.progress >= 0 &&
+      gptProgress.ChatGptTranslateProgress.version
+    ) {
+      if (
+        gptProgress.ChatGptTranslateProgress.version === ChatGptVersion.Fake
+      ) {
+        setGptFakeProgressValue(gptProgress.ChatGptTranslateProgress.progress);
+      } else if (
+        gptProgress.ChatGptTranslateProgress.version === ChatGptVersion.Four
+      ) {
+        setGpt4ProgressValue(gptProgress.ChatGptTranslateProgress.progress);
+      } else if (
+        gptProgress.ChatGptTranslateProgress.version === ChatGptVersion.Three
+      ) {
+        setGpt35ProgressValue(gptProgress.ChatGptTranslateProgress.progress);
+      }
+    }
+    return;
+  }, [gptProgress]);
 
   useEffect(() => {
     console.log('subscriber translationResult', translationResult);
@@ -487,15 +530,7 @@ export function AIControllerPage() {
       });
       return;
     }
-    presentLoading({
-      message: messageHTML({
-        total: 1,
-        completed: 0,
-        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
-          'into',
-        )} ${langInfo2String(target)} ...`,
-      }),
-    });
+
     try {
       const { data } = await translateWordsAndPhrasesByChatGpt35({
         variables: {
@@ -507,8 +542,6 @@ export function AIControllerPage() {
           to_geo_code: target.region?.tag,
         },
       });
-
-      dismiss();
 
       if (data && data.translateWordsAndPhrasesByChatGPT35.result) {
         setResult(data.translateWordsAndPhrasesByChatGPT35.result);
@@ -524,7 +557,6 @@ export function AIControllerPage() {
         position: 'top',
         color: 'danger',
       });
-      dismiss();
     }
   };
 
@@ -554,15 +586,7 @@ export function AIControllerPage() {
       });
       return;
     }
-    presentLoading({
-      message: messageHTML({
-        total: 1,
-        completed: 0,
-        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
-          'into',
-        )} ${langInfo2String(target)} ...`,
-      }),
-    });
+
     try {
       const { data } = await translateMissingWordsAndPhrasesByGpt({
         variables: {
@@ -571,8 +595,6 @@ export function AIControllerPage() {
           version: 'gpt-3.5-turbo',
         },
       });
-
-      dismiss();
 
       if (data && data.translateMissingWordsAndPhrasesByChatGpt.result) {
         setResult(data.translateMissingWordsAndPhrasesByChatGpt.result);
@@ -588,7 +610,6 @@ export function AIControllerPage() {
         position: 'top',
         color: 'danger',
       });
-      dismiss();
     }
   };
 
@@ -619,15 +640,7 @@ export function AIControllerPage() {
       });
       return;
     }
-    presentLoading({
-      message: messageHTML({
-        total: 1,
-        completed: 0,
-        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
-          'into',
-        )} ${langInfo2String(target)} ...`,
-      }),
-    });
+
     try {
       const { data } = await translateWordsAndPhrasesByChatGpt4({
         variables: {
@@ -639,8 +652,6 @@ export function AIControllerPage() {
           to_geo_code: target.region?.tag,
         },
       });
-
-      dismiss();
 
       if (data && data.translateWordsAndPhrasesByChatGPT4.result) {
         setResult(data.translateWordsAndPhrasesByChatGPT4.result);
@@ -656,7 +667,64 @@ export function AIControllerPage() {
         position: 'top',
         color: 'danger',
       });
-      dismiss();
+    }
+  };
+
+  //ChatGPT Simulator
+  const handleTranslateChatGptFAKE = async () => {
+    if (!source) {
+      presentToast({
+        message: `${tr('Please select source language!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+
+      return;
+    }
+
+    if (!selectTarget) {
+      return;
+    }
+
+    if (!target) {
+      presentToast({
+        message: `${tr('Please select target language or unselect target!')}`,
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      return;
+    }
+    try {
+      const { data } = await translateWordsAndPhrasesByChatGptFAKE({
+        variables: {
+          from_language_code: source.lang.tag,
+          from_dialect_code: source.dialect?.tag,
+          from_geo_code: source.region?.tag,
+          to_language_code: target.lang.tag,
+          to_dialect_code: target.dialect?.tag,
+          to_geo_code: target.region?.tag,
+        },
+      });
+
+      // dismiss();
+
+      if (data && data.translateWordsAndPhrasesByChatGPTFAKE.result) {
+        setResult(data.translateWordsAndPhrasesByChatGPTFAKE.result);
+        await mapsReTranslate({
+          variables: { forLangTag: langInfo2tag(target) },
+        });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      presentToast({
+        message: tr(error?.message ? error.message : 'Unknown error'),
+        duration: 1500,
+        position: 'top',
+        color: 'danger',
+      });
+      // dismiss();
     }
   };
 
@@ -686,15 +754,7 @@ export function AIControllerPage() {
       });
       return;
     }
-    presentLoading({
-      message: messageHTML({
-        total: 1,
-        completed: 0,
-        message: `${tr('Translate')} ${langInfo2String(source)} ${tr(
-          'into',
-        )} ${langInfo2String(target)} ...`,
-      }),
-    });
+
     try {
       const { data } = await translateMissingWordsAndPhrasesByGpt({
         variables: {
@@ -703,8 +763,6 @@ export function AIControllerPage() {
           version: 'gpt-4',
         },
       });
-
-      dismiss();
 
       if (data && data.translateMissingWordsAndPhrasesByChatGpt.result) {
         setResult(data.translateMissingWordsAndPhrasesByChatGpt.result);
@@ -720,7 +778,6 @@ export function AIControllerPage() {
         position: 'top',
         color: 'danger',
       });
-      dismiss();
     }
   };
 
@@ -1256,6 +1313,17 @@ export function AIControllerPage() {
       </LoadingBoard>
     ) : null;
 
+  const gpt35ProgressCom = gpt35ProgressValue ? (
+    <ProgressCom percentValue={gpt35ProgressValue} />
+  ) : null;
+  const gpt4ProgressCom = gpt4ProgressValue ? (
+    <ProgressCom percentValue={gpt4ProgressValue} />
+  ) : null;
+
+  const gptFakeProgressCom = gptFakeProgressValue ? (
+    <ProgressCom percentValue={gptFakeProgressValue} />
+  ) : null;
+
   const disabled = batchTranslating;
 
   const AiMenu = [
@@ -1276,14 +1344,22 @@ export function AIControllerPage() {
       handleTranslateMissingFunc: handleTranslateMissingChatGpt3,
       botTitle: 'Chat GPT 3.5',
       languageLabel: !selectTarget ? '∞ languages' : '1 language', //maybe later can ask gpt 'can you translate to xyz language'
-      disabledActions: disabled || !selectTarget,
+      disabledActions:
+        disabled ||
+        !selectTarget ||
+        (gpt35ProgressValue !== null && gpt35ProgressValue < 100),
+      progress: gpt35ProgressCom,
     },
     {
       handleTranslateFunc: handleTranslateChatGpt4,
       handleTranslateMissingFunc: handleTranslateMissingChatGpt4,
       botTitle: 'Chat GPT 4',
       languageLabel: !selectTarget ? '∞ languages' : '1 language', //maybe later can ask gpt 'can you translate to xyz language'
-      disabledActions: disabled || !selectTarget,
+      disabledActions:
+        disabled ||
+        !selectTarget ||
+        (gpt4ProgressValue !== null && gpt4ProgressValue < 100),
+      progress: gpt4ProgressCom,
     },
     {
       handleTranslateFunc: handleTranslateSC,
@@ -1322,6 +1398,20 @@ export function AIControllerPage() {
           ).length + ' languages',
     },
   ];
+
+  if (import.meta.env.MODE !== 'production') {
+    AiMenu.push({
+      handleTranslateFunc: handleTranslateChatGptFAKE,
+      botTitle: 'Chat GPT FAKE',
+      languageLabel: !selectTarget ? '∞ languages' : '1 language',
+      disabledActions:
+        disabled ||
+        !selectTarget ||
+        (gptFakeProgressValue !== null && gptFakeProgressValue < 100),
+      progress: gptFakeProgressCom,
+      handleTranslateMissingFunc: handleTranslateChatGptFAKE, // fix later to add a missing word function if needed
+    });
+  }
 
   return (
     <PageLayout>
@@ -1411,6 +1501,7 @@ export function AIControllerPage() {
                 {tr('Translate Missing')}
               </IonButton>
             )}
+            {item.progress}
           </AIActionsContainer>
           <hr />
         </AIContainer>

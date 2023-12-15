@@ -12,6 +12,7 @@ type DiscussionIconButtonProps = {
   parent_id: string;
   onClick?: () => void;
   flex?: string;
+  variant?: 'text' | 'contained' | 'outlined';
 };
 
 export function DiscussionIconButton({
@@ -19,6 +20,7 @@ export function DiscussionIconButton({
   parent_table,
   flex,
   onClick,
+  variant = 'outlined',
 }: DiscussionIconButtonProps) {
   const history = useHistory();
   const { nation_id, language_id } = useParams<{
@@ -48,7 +50,7 @@ export function DiscussionIconButton({
 
   return (
     <Button
-      variant="outlined"
+      variant={variant}
       onClick={handleClick}
       sx={{
         padding: `5px ${postCountData?.getTotalPosts.total ? '10px' : ''}`,

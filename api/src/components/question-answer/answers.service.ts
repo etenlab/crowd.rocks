@@ -14,6 +14,7 @@ import {
   AnswerUpsertsProcedureOutput,
   getAnswersObjByIds,
   getAnswersObjByQuestionIds,
+  getAnswersObjByUserIdAndQuestionId,
   GetAnswersObjectRow,
 } from './sql-string';
 import { QuestionItemsService } from './question-items.service';
@@ -72,6 +73,12 @@ export class AnswersService {
           return {
             ...row,
             question_items: questionItems,
+            created_by_user: {
+              user_id: row.user_id,
+              avatar: row.avatar,
+              avatar_url: row.avatar_url,
+              is_bot: row.is_bot,
+            },
           };
         }),
       };
@@ -94,6 +101,30 @@ export class AnswersService {
         client: pgClient,
         pool: this.pg.pool,
       }).query<GetAnswersObjectRow>(...getAnswersObjByIds(ids));
+
+      return this.convertQueryResultToAnswers(res.rows, pgClient);
+    } catch (e) {
+      Logger.error(e);
+    }
+
+    return {
+      error: ErrorType.UnknownError,
+      answers: [],
+    };
+  }
+
+  async getAnswerByUserId(
+    question_id: number,
+    user_id: number,
+    pgClient: PoolClient | null,
+  ): Promise<AnswersOutput> {
+    try {
+      const res = await pgClientOrPool({
+        client: pgClient,
+        pool: this.pg.pool,
+      }).query<GetAnswersObjectRow>(
+        ...getAnswersObjByUserIdAndQuestionId({ question_id, user_id }),
+      );
 
       return this.convertQueryResultToAnswers(res.rows, pgClient);
     } catch (e) {

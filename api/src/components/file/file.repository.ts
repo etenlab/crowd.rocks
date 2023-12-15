@@ -36,7 +36,7 @@ export interface FileUpdateParams {
 export class FileRepository {
   constructor(private pg: PostgresService) {}
 
-  async find(input?: FileFindParams): Promise<IFileOutput | null> {
+  async find(input?: FileFindParams): Promise<IFileOutput> {
     if (input) {
       if (Object.keys(input.where!).length < 1) {
         Logger.error(
@@ -72,7 +72,8 @@ export class FileRepository {
         `;
 
     const resQ = await this.pg.pool.query(sqlStr, params);
-    if (resQ.rowCount === 0) return null;
+    if (resQ.rowCount === 0)
+      return { error: ErrorType.FileRecordNotFound, file: null };
 
     return {
       file: {

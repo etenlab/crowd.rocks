@@ -36,7 +36,10 @@ export enum ErrorType {
   ForumDeleteFailed = 'ForumDeleteFailed',
 
   FileNotExists = 'FileNotExists',
+  FileAlreadyExists = 'FileAlreadyExists',
+  FileRecordNotFound = 'FileRecordNotFound',
   FileSaveFailed = 'FileSaveFailed',
+  FileUpdateFailed = 'FileUpdateFailed',
   FileDeleteFailed = 'FileDeleteFailed',
   FileWithFilenameAlreadyExists = 'FileWithFilenameAlreadyExists',
   FolderIdNotDefined = 'FolderIdNotDefined',
@@ -115,9 +118,6 @@ export enum ErrorType {
   MapZippingError = 'MapZippingError',
   MapWordsAndPhrasesSearchError = 'MapWordsAndPhrasesSearchError',
 
-  DocumentIdNotProvided = 'DocumentIdNotProvided',
-  DocumentNotFound = 'DocumentNotFound',
-
   PostNotFound = 'PostNotFound',
 
   Unauthorized = 'Unauthorized',
@@ -125,24 +125,47 @@ export enum ErrorType {
   ProvidedIdIsMalformed = 'ProvidedIdIsMalformed',
   PaginationError = 'PaginationError',
 
+  DocumentIdNotProvided = 'DocumentIdNotProvided',
+  DocumentFileIdNotProvided = 'DocumentFileIdNotProvided',
+  DocumentFileReadError = 'DocumentFileReadError',
+  DocumentNotFound = 'DocumentNotFound',
   DocumentEntryReadError = 'DocumentEntryReadError',
   DocumentWordEntryInsertFailed = 'DocumentWordEntryInsertFailed',
   DocumentWordEntryAlreadyExists = 'DocumentWordEntryAlreadyExists',
   DocumentWordEntryNotFound = 'DocumentWordEntryNotFound',
   WordRangeInsertFailed = 'WordRangeInsertFailed',
+  WordRangeNotExists = 'WordRangeNotExists',
+  WordRangeTagInsertFailed = 'WordRangeTagInsertFailed',
+  WordRangeTagNotFound = 'WordRangeTagNotFound',
+  DamagedDocumentWordEntryBlock = 'DamagedDocumentWordEntryBlock',
 
   QuestionItemInsertFailed = 'QuestionItemInsertFailed',
   QuestionInsertFailed = 'QuestionInsertFailed',
   AnswerInsertFailed = 'AnswerInsertFailed',
 
   PericopeInsertFailed = 'PericopeInsertFailed',
+  PericopeTranslationInsertFailed = 'PericopeTranslationInsertFailed',
   PericopeNotFound = 'PericopeNotFound',
+  PericopeTranslationNotFound = 'PericopeTranslationNotFound',
+  PericopeBestTranslationNotFound = 'PericopeBestTranslationNotFound',
+  PericopeGetTranslationError = 'PericopeGetTranslationError',
   PericopeVoteToggleFailed = 'PericopeVoteToggleFailed',
+  PericopeTranslationVoteToggleFailed = 'PericopeTranslationVoteToggleFailed',
   BotTranslationError = 'BotTranslationError',
 
   BotTranslationBotNotFound = 'BotTranslationBotNotFound',
   BotTranslationLanguagesListError = 'BotTranslationLanguagesListError',
 }
+
+export enum ChatGPTVersion {
+  Three = 'gpt-3.5-turbo',
+  Four = 'gpt-4',
+  Fake = 'FAKE',
+}
+
+registerEnumType(ChatGPTVersion, {
+  name: 'ChatGPTVersion',
+});
 
 registerEnumType(ErrorType, {
   name: 'ErrorType',
@@ -172,9 +195,11 @@ export enum TableNameType {
   documents = 'documents',
   document_word_entries = 'document_word_entries',
   word_ranges = 'word_ranges',
+  word_range_tags = 'word_range_tags',
   original_maps = 'original_maps',
   translated_maps = 'translated_maps',
   pericopies = 'pericopies',
+  pericope_translations = 'pericope_translations',
 }
 
 registerEnumType(TableNameType, {

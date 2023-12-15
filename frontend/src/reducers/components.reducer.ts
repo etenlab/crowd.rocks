@@ -3,12 +3,16 @@ import { ReactNode } from 'react';
 import { actions } from './components.actions';
 import { type ActionType } from '.';
 
+export type ModalMode = 'standard' | 'full';
+
 export interface StateType {
-  modals: { id: string; mode: 'standard' | 'full'; component: ReactNode }[];
+  modals: { id: string; mode: ModalMode; component: ReactNode }[];
+  ionContentScrollElement: HTMLElement | null;
 }
 
 export const initialState: StateType = {
   modals: [],
+  ionContentScrollElement: null,
 };
 
 export function reducer(
@@ -22,7 +26,7 @@ export function reducer(
     case actions.ADD_MODAL: {
       const payload = action.payload as {
         id: string;
-        mode: 'standard' | 'full';
+        mode: ModalMode;
         component: ReactNode;
       };
 
@@ -44,6 +48,12 @@ export function reducer(
         modals: prevState.modals
           ? [...prevState.modals.filter((modal) => modal.id !== id)]
           : [],
+      };
+    }
+    case actions.SET_ION_CONTENT_SCROLL_ELEMENT: {
+      return {
+        ...prevState,
+        ionContentScrollElement: action.payload as HTMLElement | null,
       };
     }
     default: {

@@ -1,5 +1,5 @@
 import { ReactElement } from 'react';
-import { useIonRouter } from '@ionic/react';
+import { useHistory } from 'react-router';
 
 import { Stack, Typography, IconButton } from '@mui/material';
 import { NavArrowLeft } from '../icons/NavArrowLeft';
@@ -10,14 +10,14 @@ export type TCaptionProps = {
 };
 
 export const Caption = ({ onBackClick, children }: TCaptionProps) => {
-  const router = useIonRouter();
+  const history = useHistory();
 
   let onClickAction: () => void;
 
   if (onBackClick) {
     onClickAction = onBackClick;
   } else {
-    onClickAction = router.goBack;
+    onClickAction = history.goBack;
   }
 
   return (

@@ -13,8 +13,8 @@ import { useQuery } from '../../../hooks/useQuery';
 
 import { InfoFill } from '../../common/icons/InfoFill';
 import { AddCircle } from '../../common/icons/AddCircle';
-import { WordItemViewer } from '../../common/WordItem';
-import { MapWordOrPhraseTranslationList } from '../MapWordOrPhraseTranslation/MapWordOrPhraseTranslantionList';
+import { TranslatedTextItemViewer } from '../../common/TranslatedTextItem';
+import { MapWordOrPhraseTranslationList } from '../MapWordOrPhraseTranslation/MapWordOrPhraseTranslationList';
 import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../../../hooks/useUpsertTranslationFromWordAndDefinitionlikeStringMutation';
 
 export function MapNewTranslationConfirm() {
@@ -40,10 +40,10 @@ export function MapNewTranslationConfirm() {
     states: {
       global: {
         langauges: { targetLang },
-        maps: { tempTranslations, updatedTrDefinitionIds },
+        maps: { tempTranslations },
       },
     },
-    actions: { clearTempTranslation, setUpdatedTrDefinitionIds },
+    actions: { clearTempTranslation },
   } = useAppContext();
 
   const wordOrPhraseQ = useGetMapWordOrPhraseAsOrigByDefinitionIdQuery({
@@ -144,8 +144,6 @@ export function MapNewTranslationConfirm() {
         },
       });
 
-      setUpdatedTrDefinitionIds([...updatedTrDefinitionIds, definition_id]);
-
       clearTempTranslation(`${definition_id}:${definition_type}`);
 
       setSaving(false);
@@ -157,10 +155,8 @@ export function MapNewTranslationConfirm() {
     definition_type,
     goToTranslation,
     saving,
-    setUpdatedTrDefinitionIds,
     targetLang,
     tempTranslations,
-    updatedTrDefinitionIds,
     upsertTranslation,
   ]);
 
@@ -226,13 +222,13 @@ export function MapNewTranslationConfirm() {
       </Stack>
 
       {viewData ? (
-        <WordItemViewer
+        <TranslatedTextItemViewer
           original={{
-            word: original.value || '',
+            text: original.value || '',
             description: original.definition || '',
           }}
           viewData={{
-            word: viewData.translation,
+            text: viewData.translation,
             description: viewData.description,
           }}
         />

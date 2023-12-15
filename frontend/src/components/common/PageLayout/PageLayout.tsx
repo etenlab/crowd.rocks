@@ -1,6 +1,11 @@
-import { ReactNode, useRef, useEffect } from 'react';
+import { ReactNode, useRef } from 'react';
 
-import { IonPage, IonContent, IonHeader } from '@ionic/react';
+import {
+  IonPage,
+  IonContent,
+  IonHeader,
+  useIonViewDidEnter,
+} from '@ionic/react';
 import { Modal, FullModal } from '../modal';
 
 import { useAppContext } from '../../../hooks/useAppContext';
@@ -15,13 +20,17 @@ export function PageLayout({ children, header }: PageLayoutProps) {
     states: {
       components: { modals },
     },
-    actions: { removeModal },
+    actions: { removeModal, setIonContentScrollElement },
   } = useAppContext();
   const ref = useRef<HTMLElement | null>();
+  const contentRef = useRef<HTMLIonContentElement>(null);
 
-  useEffect(() => {
+  useIonViewDidEnter(() => {
     ref.current = document.getElementById('crowd-rock-app');
-  }, []);
+    contentRef.current
+      ?.getScrollElement()
+      .then((value) => setIonContentScrollElement(value));
+  });
 
   return (
     <IonPage>
@@ -33,27 +42,44 @@ export function PageLayout({ children, header }: PageLayoutProps) {
         </IonHeader>
       ) : null}
 
-      <IonContent>
+      <IonContent ref={contentRef}>
         <div className="page">
           <div className="section">{children}</div>
 
-          {modals.map((modal) =>
-            modal.mode === 'standard' ? (
-              <Modal
-                key={modal.id}
-                component={modal.component}
-                onClose={() => removeModal(modal.id)}
-                container={ref.current}
-              />
-            ) : (
-              <FullModal
-                key={modal.id}
-                component={modal.component}
-                onClose={() => removeModal(modal.id)}
-                container={ref.current}
-              />
-            ),
-          )}
+          {modals.map((modal) => {
+            switch (modal.mode) {
+              case 'standard': {
+                return (
+                  <Modal
+                    key={modal.id}
+                    component={modal.component}
+                    onClose={() => removeModal(modal.id)}
+                    container={ref.current}
+                  />
+                );
+              }
+              case 'full': {
+                return (
+                  <FullModal
+                    key={modal.id}
+                    component={modal.component}
+                    onClose={() => removeModal(modal.id)}
+                    container={ref.current}
+                  />
+                );
+              }
+              default: {
+                return (
+                  <Modal
+                    key={modal.id}
+                    component={modal.component}
+                    onClose={() => removeModal(modal.id)}
+                    container={ref.current}
+                  />
+                );
+              }
+            }
+          })}
         </div>
       </IonContent>
     </IonPage>

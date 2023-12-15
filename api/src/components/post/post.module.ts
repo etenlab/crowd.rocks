@@ -13,6 +13,8 @@ import { PhraseModule } from '../phrases/phrases.module';
 import { DefinitionsModule } from '../definitions/definitions.module';
 import { WordsModule } from '../words/words.module';
 import { TranslationsModule } from '../translations/translations.module';
+import { PericopiesModule } from '../pericopies/pericopies.module';
+import { PericopeTrModule } from '../pericope-translations/pericope-tr.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { TranslationsModule } from '../translations/translations.module';
     forwardRef(() => AuthenticationModule),
     forwardRef(() => UserModule),
     forwardRef(() => TranslationsModule),
+    forwardRef(() => PericopiesModule),
+    forwardRef(() => PericopeTrModule),
   ],
   providers: [
     UserReadResolver,

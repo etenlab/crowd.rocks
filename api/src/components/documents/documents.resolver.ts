@@ -1,13 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import {
   Args,
   Context,
   Int,
-  Mutation,
-  Query,
-  Resolver,
   ID,
+  Query,
+  Mutation,
+  Subscription,
+  Resolver,
 } from '@nestjs/graphql';
+import { PubSub } from 'graphql-subscriptions';
+import { SubscriptionToken } from 'src/common/subscription-token';
+import { PUB_SUB } from 'src/pubSub.module';
 
 import { ErrorType } from '../../common/types';
 import { getBearer } from '../../common/utility';
@@ -18,6 +22,7 @@ import { DocumentsService } from './documents.service';
 import { WordRangesService } from './word-ranges.service';
 
 import {
+  TextFromRangesOutput,
   DocumentUploadInput,
   DocumentUploadOutput,
   DocumentWordEntriesListConnection,
@@ -25,18 +30,24 @@ import {
   GetDocumentInput,
   GetDocumentOutput,
   WordRangesOutput,
-  WordRangeUpsertInput,
+  WordRangeInput,
+  WordRangesListConnection,
+  TranslateDocumentByPericopiesInput,
+  FileUrlAndContentOutput,
 } from './types';
 import { LanguageInput } from '../common/types';
+import { DocumentTranslateService } from './document-translation.service';
 
 @Injectable()
 @Resolver()
 export class DocumentsResolver {
   constructor(
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private authenticationService: AuthenticationService,
     private documentsSevice: DocumentsService,
     private documentWordEntriesService: DocumentWordEntriesService,
     private wordRangesService: WordRangesService,
+    private documentTranslateService: DocumentTranslateService,
   ) {}
 
   @Mutation(() => DocumentUploadOutput)
@@ -53,10 +64,16 @@ export class DocumentsResolver {
       };
     }
 
-    return this.documentsSevice.saveDocument({
+    const newDocument = await this.documentsSevice.saveDocument({
       document: input.document,
       token: getBearer(req) || '',
     });
+
+    this.pubSub.publish(SubscriptionToken.documentAdded, {
+      [SubscriptionToken.documentAdded]: newDocument,
+    });
+
+    return newDocument;
   }
 
   @Query(() => DocumentListConnection)
@@ -103,7 +120,7 @@ export class DocumentsResolver {
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
   ): Promise<DocumentWordEntriesListConnection> {
     Logger.log(
-      'getDocument',
+      'getDocumentWordEntriesByDocumentId',
       JSON.stringify({ document_id, first, after }, null, 2),
     );
 
@@ -139,23 +156,67 @@ export class DocumentsResolver {
     );
   }
 
-  @Query(() => WordRangesOutput)
+  @Query(() => WordRangesListConnection)
   async getWordRangesByDocumentId(
     @Args('document_id', { type: () => ID }) document_id: string,
-  ): Promise<WordRangesOutput> {
-    Logger.log('getWordRangesByDocumentId, id:', document_id);
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
+  ): Promise<WordRangesListConnection> {
+    Logger.log(
+      'getWordRangesByDocumentId:',
+      JSON.stringify({ document_id, first, after }, null, 2),
+    );
 
-    return this.wordRangesService.getByDocumentId(+document_id, null);
+    return this.wordRangesService.getByDocumentId(
+      +document_id,
+      first,
+      after,
+      null,
+    );
+  }
+
+  @Query(() => TextFromRangesOutput)
+  async getDocumentTextFromRanges(
+    @Args('ranges', { type: () => [WordRangeInput] }) ranges: WordRangeInput[],
+  ): Promise<TextFromRangesOutput> {
+    Logger.log('getDocumentTextFromRange:', JSON.stringify(ranges, null, 2));
+
+    return this.wordRangesService.getTextFromRanges(ranges, null);
   }
 
   @Mutation(() => WordRangesOutput)
   async upsertWordRanges(
-    @Args('input', { type: () => [WordRangeUpsertInput] })
-    input: WordRangeUpsertInput[],
+    @Args('input', { type: () => [WordRangeInput] })
+    input: WordRangeInput[],
     @Context() req: any,
   ): Promise<WordRangesOutput> {
-    Logger.log('upsertWordRanges: ', JSON.stringify(input, null, 2));
+    Logger.log(
+      'DocumentsResolver#upsertWordRanges: ',
+      JSON.stringify(input, null, 2),
+    );
 
     return this.wordRangesService.upserts(input, getBearer(req) || '', null);
+  }
+
+  @Mutation(() => FileUrlAndContentOutput)
+  async documentByPericopiesTranslate(
+    @Args('input', { type: () => TranslateDocumentByPericopiesInput })
+    input: TranslateDocumentByPericopiesInput,
+  ): Promise<FileUrlAndContentOutput> {
+    Logger.log(
+      'DocumentsResolver#documentByPericopiesTranslate: ',
+      JSON.stringify(input, null, 2),
+    );
+    return this.documentTranslateService.translateByPericopies(
+      input.documentId,
+      input.targetLang,
+    );
+  }
+
+  @Subscription(() => DocumentUploadOutput, {
+    name: SubscriptionToken.documentAdded,
+  })
+  subscribeToDocumentAdded() {
+    return this.pubSub.asyncIterator(SubscriptionToken.documentAdded);
   }
 }

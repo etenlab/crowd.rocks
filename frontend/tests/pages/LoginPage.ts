@@ -24,6 +24,7 @@ class LoginPage extends BasePage {
     await this.page.locator(emailTextBox).fill(loginData.email || '');
     await this.page.locator(passwordTextBox).fill(loginData.password || '');
     await this.page.locator(loginNowButton).first().click();
+    await this.page.waitForTimeout(3000);
   }
 
   async goToRegisterPage() {
@@ -36,6 +37,7 @@ class LoginPage extends BasePage {
   }
 
   async clickOnSendResetPasswordEmailButton() {
+    await this.page.locator(sendPasswordResetEmail).last().waitFor();
     return await this.page.locator(sendPasswordResetEmail).last().click();
   }
 
@@ -49,6 +51,7 @@ class LoginPage extends BasePage {
   }
 
   async isForgotPasswordTitleVisible() {
+    await this.page.locator(forgotPasswordPageTitle).waitFor();
     return await this.page.locator(forgotPasswordPageTitle).isVisible();
   }
 

@@ -3,9 +3,7 @@ FROM node:16
 # Create app directory
 WORKDIR /usr/src/etenlab/crowd-rocks
 
-COPY frontend /frontend/
-COPY api /api/
-COPY utils /utils/
+COPY . /
 
 ARG BUILD_MODE
 

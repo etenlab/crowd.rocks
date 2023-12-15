@@ -62,6 +62,9 @@ export class DatabaseVersionControlService {
         case 9:
           console.log('Updating database to version 10');
           await this.loadVersion10();
+        case 10:
+          console.log('Updating database to version 11');
+          await this.loadVersion11();
 
         default:
           console.error('Database version is current');
@@ -529,6 +532,71 @@ export class DatabaseVersionControlService {
 
     // set version
     await this.setVersionNumber(10);
+  }
+
+  async loadVersion11(): Promise<void> {
+    //schema
+    await this.runSqlFile('./src/core/sql/schema/v11.schema.sql');
+
+    // batch bot register
+    await this.runSqlFile(
+      './src/core/sql/authentication/batch-register-bot.sql',
+    );
+
+    // vote
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/batch_translation_vote_set-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_phrase/translation_vote_set-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/batch_translation_vote_set-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_phrase/translation_vote_set-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/batch_translation_vote_set-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/phrase_to_word/translation_vote_set-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/batch_translation_vote_set-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/translation/word_to_word/translation_vote_set-v11.sql',
+    );
+
+    // tagging
+    await this.runSqlFile(
+      './src/core/sql/tagging/word_range_tag_upsert-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/tagging/batch_word_range_tag_upsert-v11.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/tagging/word_range_tag_vote_toggle-v11.sql',
+    );
+
+    // document
+    await this.runSqlFile('./src/core/sql/document/word_range_upsert-v11.sql');
+
+    // pericopes
+    await this.runSqlFile('./src/core/sql/pericopies/pericope_upsert-v11.sql');
+    await this.runSqlFile('./src/core/sql/pericopies/pericope_delete-v11.sql');
+
+    // pericope-translations
+    await this.runSqlFile(
+      './src/core/sql/pericope-translations/pericope_translation_insert.sql',
+    );
+    await this.runSqlFile(
+      './src/core/sql/pericope-translations/pericope_translation_vote_toggle.sql',
+    );
+
+    // set version
+    await this.setVersionNumber(11);
   }
 
   async registerUser(

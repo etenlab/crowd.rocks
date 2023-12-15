@@ -1,16 +1,11 @@
 import { ObjectType, Field, InputType, ID, Int } from '@nestjs/graphql';
-import { GenericOutput, BotType } from 'src/common/types';
+import { GenericOutput, BotType, ChatGPTVersion } from 'src/common/types';
 import { LanguageInput } from 'src/components/common/types';
 
 export const LIMITS = 6000000 - 1000000;
 
 export const GOOGLE_BOT_EMAIL = 'googlebot@crowd.rocks';
 export const FAKER_BOT_EMAIL = 'faker@crowd.rocks';
-
-export enum ChatGPTVersion {
-  Three = 'gpt-3.5-turbo',
-  Four = 'gpt-4',
-}
 
 export interface ITranslator {
   translate: (
@@ -24,6 +19,12 @@ export interface ITranslator {
     token: string;
   }>;
   getLanguages(): Promise<LanguageListForBotTranslateOutput>;
+  translateFileString?: (
+    fileString: string,
+    fileName: string,
+    fromLang: LanguageInput,
+    toLang: LanguageInput,
+  ) => Promise<GenericOutput>;
 }
 
 export interface IGPTTranslator extends ITranslator {
@@ -46,9 +47,17 @@ export class LanguageForBotTranslate {
 }
 
 @ObjectType()
+export class SourceTargetLangs {
+  @Field(() => String) sourceLangCode: string;
+  @Field(() => [String]) targetLangCodes: string[];
+}
+
+@ObjectType()
 export class LanguageListForBotTranslateOutput extends GenericOutput {
   @Field(() => [LanguageForBotTranslate], { nullable: true })
   languages: LanguageForBotTranslate[] | null;
+  @Field(() => [SourceTargetLangs], { nullable: true })
+  sourceToTarget?: SourceTargetLangs[] | null;
 }
 
 @InputType()
@@ -97,7 +106,20 @@ export class TranslateAllWordsAndPhrasesByBotOutput extends GenericOutput {
   result: TranslateAllWordsAndPhrasesByBotResult | null;
 }
 
+@ObjectType()
+export class GPTTranslateProgress {
+  @Field(() => Int) progress: number;
+  @Field(() => ChatGPTVersion) version: ChatGPTVersion;
+}
+
 @InputType()
 export class ChatGPTVersionInput {
   @Field(() => String) version: ChatGPTVersion;
+}
+
+@InputType()
+export class BotTranslateDocumentInput {
+  @Field(() => BotType) botType: BotType;
+  @Field(() => String) documentId: string;
+  @Field(() => LanguageInput) targetLang: LanguageInput;
 }

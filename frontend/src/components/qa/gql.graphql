@@ -3,6 +3,12 @@ fragment QuestionItemFragment on QuestionItem {
   item
 }
 
+fragment QuestionItemWithStatisticFragment on QuestionItemWithStatistic {
+  question_item_id
+  item
+  statistic
+}
+
 fragment QuestionFragment on Question {
   question_id
   parent_table
@@ -12,7 +18,24 @@ fragment QuestionFragment on Question {
   question_items {
     ...QuestionItemFragment
   }
-  created_by
+  created_by_user {
+    ...UserFields
+  }
+  created_at
+}
+
+fragment QuestionWithStatisticFragment on QuestionWithStatistic {
+  question_id
+  parent_table
+  parent_id
+  question
+  question_type_is_multiselect
+  question_items {
+    ...QuestionItemWithStatisticFragment
+  }
+  created_by_user {
+    ...UserFields
+  }
   created_at
 }
 
@@ -23,7 +46,9 @@ fragment AnswerFragment on Answer {
   question_items {
     ...QuestionItemFragment
   }
-  created_by
+  created_by_user {
+    ...UserFields
+  }
   created_at
 }
 
@@ -36,7 +61,9 @@ fragment QuestionOnWordRangeFragment on QuestionOnWordRange {
   question_items {
     ...QuestionItemFragment
   }
-  created_by
+  created_by_user {
+    ...UserFields
+  }
   created_at
   begin {
     ...DocumentWordEntryFragment
@@ -46,8 +73,48 @@ fragment QuestionOnWordRangeFragment on QuestionOnWordRange {
   }
 }
 
-query GetQuestionOnWordRangesByDocumentId($document_id: ID!) {
-  getQuestionOnWordRangesByDocumentId(document_id: $document_id) {
+fragment QuestionOnWordRangesEdgeFragment on QuestionOnWordRangesEdge {
+  cursor
+  node {
+    ...QuestionOnWordRangeFragment
+  }
+}
+
+query GetQuestionOnWordRangesByDocumentId(
+  $document_id: ID!
+  $after: ID
+  $first: Int
+) {
+  getQuestionOnWordRangesByDocumentId(
+    document_id: $document_id
+    after: $after
+    first: $first
+  ) {
+    error
+    edges {
+      ...QuestionOnWordRangesEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+
+query GetQuestionOnWordRangesByBeginWordEntryId(
+  $begin_document_word_entry_id: ID!
+) {
+  getQuestionOnWordRangesByBeginWordEntryId(
+    begin_document_word_entry_id: $begin_document_word_entry_id
+  ) {
+    error
+    questions {
+      ...QuestionOnWordRangeFragment
+    }
+  }
+}
+
+query GetQuestionOnWordRangesByWordRangeId($word_range_id: ID!) {
+  getQuestionOnWordRangesByWordRangeId(word_range_id: $word_range_id) {
     error
     questions {
       ...QuestionOnWordRangeFragment
@@ -60,6 +127,24 @@ query GetAnswersByQuestionId($id: ID!) {
     error
     answers {
       ...AnswerFragment
+    }
+  }
+}
+
+query GetAnswerByUserId($question_id: ID!, $user_id: ID!) {
+  getAnswerByUserId(question_id: $question_id, user_id: $user_id) {
+    error
+    answers {
+      ...AnswerFragment
+    }
+  }
+}
+
+query getQuestionStatistic($question_id: ID!) {
+  getQuestionStatistic(question_id: $question_id) {
+    error
+    question_with_statistic {
+      ...QuestionWithStatisticFragment
     }
   }
 }
@@ -101,6 +186,33 @@ mutation UpsertAnswer(
       }
     ]
   ) {
+    error
+    answers {
+      ...AnswerFragment
+    }
+  }
+}
+
+subscription SubscribeToQuestionsOnWordRangeAdded {
+  questionsOnWordRangeAdded {
+    error
+    questions {
+      ...QuestionOnWordRangeFragment
+    }
+  }
+}
+
+subscription SubscribeToQuestionsAdded {
+  questionsAdded {
+    error
+    questions {
+      ...QuestionFragment
+    }
+  }
+}
+
+subscription SubscribeToAnswersAdded {
+  answersAdded {
     error
     answers {
       ...AnswerFragment

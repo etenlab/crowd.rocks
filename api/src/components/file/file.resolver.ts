@@ -44,6 +44,8 @@ export class FileResolver {
     { createReadStream, filename: file_name }: FileUpload,
     @Args({ name: 'file_type', type: () => String }) file_type: string,
     @Args({ name: 'file_size', type: () => Int }) file_size: number,
+    @Args({ name: 'returnErrorIfExists', type: () => Boolean, nullable: true })
+    returnErrorIfExists: boolean | null,
     @Context() req: any,
   ): Promise<IFileOutput> {
     const bearer = getBearer(req) || '';
@@ -53,6 +55,7 @@ export class FileResolver {
       file_type,
       bearer,
       file_size,
+      returnErrorIfExists,
     );
     console.log('[file]:', JSON.stringify(file));
     return file!;

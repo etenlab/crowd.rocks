@@ -572,7 +572,7 @@ create table pericopies(
 create table pericope_votes(
   pericope_vote_id bigserial primary key,
   user_id bigint not null references users(user_id),
-  pericope_id bigint not null references pericopies(pericope_id),
+  pericope_id bigint not null references pericopies(pericope_id) on delete cascade,
   vote bool,
   last_updated_at timestamp not null default CURRENT_TIMESTAMP,
   unique (user_id, pericope_id)
@@ -594,6 +594,8 @@ create table document_word_entry_tags (
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__document_word_entry_id__document_word_entry_tags on document_word_entry_tags (document_word_entry_id);
+create index idx__document_word_entry_tag__document_word_entry_tags on document_word_entry_tags (document_word_entry_tag);
 
 create table word_range_tags (
   word_range_tag_id bigserial primary key,
@@ -602,6 +604,8 @@ create table word_range_tags (
   created_at timestamp not null default CURRENT_TIMESTAMP,
   created_by bigint not null references users(user_id)
 );
+create index idx__word_range_id__word_range_tags on word_range_tags (word_range_id);
+create index idx__word_range_tag__word_range_tags on word_range_tags (word_range_tag);
 
 -- voting
 create table document_tags_votes(
@@ -862,3 +866,39 @@ CREATE TABLE public.translated_maps_votes (
 CREATE INDEX idx__map_id__translated_maps_votes ON public.translated_maps_votes USING btree (map_id);
 ALTER TABLE public.translated_maps_votes ADD CONSTRAINT translated_map_votes_fkey FOREIGN KEY (map_id) REFERENCES public.translated_maps(translated_map_id) ON DELETE CASCADE;
 ALTER TABLE public.translated_maps_votes ADD CONSTRAINT translated_map_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+--
+create table if not exists pericope_translations (
+  pericope_translation_id bigserial primary key,
+  pericope_id bigint not null references pericopies(pericope_id),
+  translation varchar not null,
+  language_code varchar(32) not null,
+  dialect_code varchar(32),
+  geo_code varchar(32),
+  created_at timestamp not null default CURRENT_TIMESTAMP,
+  created_by bigint not null references users(user_id)
+);
+--
+create table if not exists pericope_translations_votes(
+  pericope_translations_vote_id bigserial primary key,
+  user_id bigint not null references users(user_id),
+  pericope_translation_id bigint not null references pericope_translations(pericope_translation_id),
+  vote bool,
+  last_updated_at timestamp not null default CURRENT_TIMESTAMP
+);
+--
+CREATE table if not exists public.pericope_descriptions  (
+	pericope_description_id bigserial NOT null primary key,
+	pericope_id int8 NOT NULL,
+	description text NOT NULL,
+	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	created_by int8 NOT NULL,
+	CONSTRAINT pericope_descriptions_pericope_id_description_key UNIQUE (pericope_id, description)
+);
+CREATE INDEX idx__description__pericope_descriptions ON public.pericope_descriptions USING gin (description gin_trgm_ops);
+CREATE INDEX idx__pericope_id__pericope_descriptions ON public.pericope_descriptions USING btree (pericope_id);
+
+ALTER TABLE public.pericope_descriptions ADD CONSTRAINT pericope_descriptions_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(user_id);
+ALTER TABLE public.pericope_descriptions ADD CONSTRAINT pericope_descriptions_pericope_id_fkey FOREIGN KEY (pericope_id) REFERENCES public.pericopies(pericope_id);
+--
+CREATE INDEX idx__pericope_description_id__pericope_descriptions ON pericope_descriptions USING btree (pericope_description_id);

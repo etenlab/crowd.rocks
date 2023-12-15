@@ -7,6 +7,7 @@ import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 
 import { useGetAllDocumentsLazyQuery } from '../../../generated/graphql';
+import { useSubscribeToDocumentAddedSubscription } from '../../../hooks/useDocumentUploadMutation';
 
 import { DocumentItem } from './DocumentItem';
 
@@ -31,6 +32,7 @@ export function DocumentList({
 
   const [getAllDocuments, { data, error, loading, fetchMore }] =
     useGetAllDocumentsLazyQuery();
+  useSubscribeToDocumentAddedSubscription();
 
   useEffect(() => {
     if (language) {

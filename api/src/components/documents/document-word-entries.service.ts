@@ -96,6 +96,70 @@ export class DocumentWordEntriesService {
     };
   }
 
+  sortBlockEntries(entries: DocumentWordEntry[]): {
+    error: ErrorType;
+    entries: DocumentWordEntry[];
+  } {
+    if (entries.length === 0) {
+      return {
+        error: ErrorType.NoError,
+        entries: [],
+      };
+    }
+
+    const entriesMap = new Map<string, DocumentWordEntry>();
+    const childrenMap = new Map<string, string>();
+    const rootIds: string[] = [];
+
+    for (const entry of entries) {
+      entriesMap.set(entry.document_word_entry_id, entry);
+
+      if (entry.parent_document_word_entry_id) {
+        childrenMap.set(
+          entry.parent_document_word_entry_id,
+          entry.document_word_entry_id,
+        );
+      } else {
+        rootIds.push(entry.document_word_entry_id);
+      }
+    }
+
+    for (const parentId of childrenMap.keys()) {
+      if (entriesMap.get(parentId)) {
+        continue;
+      }
+
+      rootIds.push(childrenMap.get(parentId)!);
+    }
+
+    const sortedEntries: DocumentWordEntry[][] = [];
+
+    for (const root of rootIds) {
+      const tempEntries: DocumentWordEntry[] = [];
+
+      let cur: string | undefined = root;
+
+      while (cur) {
+        tempEntries.push(entriesMap.get(cur)!);
+        cur = childrenMap.get(cur);
+      }
+
+      sortedEntries.push(tempEntries);
+    }
+
+    if (sortedEntries.length !== 1) {
+      return {
+        error: ErrorType.DamagedDocumentWordEntryBlock,
+        entries: [],
+      };
+    } else {
+      return {
+        error: ErrorType.NoError,
+        entries: sortedEntries[0],
+      };
+    }
+  }
+
   async reads(
     ids: number[],
     pgClient: PoolClient | null,
@@ -197,7 +261,7 @@ export class DocumentWordEntriesService {
         ...getDocumentWordEntryByDocumentId(
           document_id,
           first ? first + 1 : null,
-          after ? +after : 0,
+          after ? +JSON.parse(after).page : 0,
         ),
       );
 
@@ -255,14 +319,30 @@ export class DocumentWordEntriesService {
       const tempEdges: DocumentWordEntriesEdge[] = [];
 
       const endPage = first ? first + 1 : res1.rows[0].total_pages + 1;
-      const startPage = after ? +after + 1 : 1;
+      const startPage = after ? +JSON.parse(after).page + 1 : 1;
 
       for (let i = 0; i < endPage; i++) {
-        const entries = pageMap.get(startPage + i);
+        const unsortedEntries = pageMap.get(startPage + i);
 
-        if (entries) {
+        if (unsortedEntries) {
+          const { error, entries } = this.sortBlockEntries(unsortedEntries);
+
+          if (error !== ErrorType.NoError) {
+            return {
+              error,
+              edges: [],
+              pageInfo: {
+                hasNextPage: false,
+                hasPreviousPage: false,
+                startCursor: null,
+                endCursor: null,
+                totalEdges: 0,
+              },
+            };
+          }
+
           tempEdges.push({
-            cursor: startPage + i + '',
+            cursor: JSON.stringify({ document_id, page: startPage + i }),
             node: entries,
           });
         }
@@ -301,4 +381,23 @@ export class DocumentWordEntriesService {
       },
     };
   }
+
+  /**
+   * not used by now (made specialized method for pericope) but might be useful
+   */
+  //   async getOrderedWordsFromDocumentId(params: {
+  //     documentId: string;
+  //     start_word_id: string;
+  //     end_word_id?: string | undefined;
+  //   }): Promise<OrderedWordsFromDocument[]> {
+  //     try {
+  //       const resQ = await this.pg.pool.query<OrderedWordsFromDocument>(
+  //         ...getOrderedWordsFromDocumentIdSQL(params),
+  //       );
+  //       return resQ.rows;
+  //     } catch (error) {
+  //       Logger.error(JSON.stringify(error));
+  //       return [];
+  //     }
+  //   }
 }

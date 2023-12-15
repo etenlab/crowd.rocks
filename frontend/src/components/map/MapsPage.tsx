@@ -7,7 +7,7 @@ import { MapDetails } from './MapDetails/MapDetails';
 import { MapView } from './MapDetails/MapView';
 
 import { MapWordsList } from './MapWordsTranslation/MapWordsList';
-import { MapWordOrPhraseTranslation } from './MapWordOrPhraseTranslation/MapWordOrPhraseTranslantion';
+import { MapWordOrPhraseTranslation } from './MapWordOrPhraseTranslation/MapWordOrPhraseTranslation';
 import { MapNewTranslationConfirm } from './MapWordsTranslation/MapNewTranslationConfirm';
 
 import { useAppContext } from '../../hooks/useAppContext';

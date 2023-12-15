@@ -11,7 +11,7 @@ import { useTranslationTools } from '../hooks/useTranslationTools';
 
 import { WORD_AND_PHRASE_FLAGS } from '../../flags/flagGroups';
 
-import { WordCard } from '../../common/WordCard';
+import { TextCard } from '../../common/TextCard';
 import { useToggleTranslationVoteStatusMutation } from '../../../hooks/useToggleTranslationVoteStatusMutation';
 import { StringContentTypes } from '../../../common/utility';
 
@@ -90,9 +90,9 @@ export function TranslationList({
         }
 
         return (
-          <WordCard
+          <TextCard
             key={item.key}
-            word={item.wordOrPhrase.likeString}
+            text={item.wordOrPhrase.likeString}
             description={item.definition.likeString}
             discussion={{
               parent_id: item.translation.id,

@@ -31,6 +31,8 @@ import {
   GetPostById,
   getPostsFromRefsQuery,
 } from './sql-string';
+import { PericopiesService } from '../pericopies/pericopies.service';
+import { PericopeTrService } from '../pericope-translations/pericope-tr.service';
 
 @Injectable()
 export class PostService {
@@ -48,6 +50,8 @@ export class PostService {
     private phraseToWordTranslationService: PhraseToWordTranslationsService,
     private wordToWordTranslationService: WordToWordTranslationsService,
     private wordToPhraseTranslationService: WordToPhraseTranslationsService,
+    private pericopiesService: PericopiesService,
+    private pericopeTrService: PericopeTrService,
   ) {}
 
   async read(input: PostReadInput, req: any): Promise<PostReadOutput> {
@@ -417,6 +421,8 @@ export class PostService {
         this.wordToWordTranslationService.getDiscussionTitle,
       word_to_phrase_translations:
         this.wordToPhraseTranslationService.getDiscussionTitle,
+      pericopies: this.pericopiesService.getDiscussionTitle,
+      pericope_translations: this.pericopeTrService.getDiscussionTitle,
     };
     if (parentTableToGetTitle[name]) {
       try {

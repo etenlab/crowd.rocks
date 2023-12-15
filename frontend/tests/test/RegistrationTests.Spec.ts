@@ -5,6 +5,9 @@ import LoginPO from '../pages/LoginPage';
 import HomePO from '../pages/HomePage';
 import MenuPO from '../pages/MenuPage';
 import LoginDTO from '../data-objects/LoginDto';
+import { leftMenu } from '../enums/Enums';
+import pageUrls from '../constants/PageUrls';
+test.use({ storageState: { cookies: [], origins: [] } });
 
 test('1: Verify that user is register/logout and login again successfully', async ({
   page,
@@ -12,11 +15,11 @@ test('1: Verify that user is register/logout and login again successfully', asyn
   const registerPage = new RegisterPO(page);
   const loginPage = new LoginPO(page);
   const homePage = new HomePO(page);
-  const leftMenu = new MenuPO(page);
+  const leftMenuPage = new MenuPO(page);
   const registerData = RegisterData.validRegisterData();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Verify the login header text
   expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
@@ -31,13 +34,16 @@ test('1: Verify that user is register/logout and login again successfully', asyn
   await registerPage.fillRegistrationForm(registerData);
   await registerPage.clickOnRegisterButton();
 
+  //Verify user is navigated to home page
+  expect(await homePage.isHomePageVisible()).toBeTruthy();
+
   //logout from the app
   await homePage.clickOnExpandMenu();
-  await leftMenu.clickOnLogout();
+  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Logout);
 
   //Login to the app with registered data
   await homePage.clickOnExpandMenu();
-  await leftMenu.clickOnLoginButton();
+  await leftMenuPage.clickOnLeftMenufeatureButton(leftMenu.Login);
 
   const loginData = LoginDTO;
   loginData.email = registerData.email;
@@ -56,7 +62,7 @@ test.skip('2: Verify that email field is mandatory', async ({ page }) => {
   const registerData = RegisterData.registerDataWithoutEmail();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Verify the login header text
   expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
@@ -83,7 +89,7 @@ test.skip('3: Verify that username field is mandatory', async ({ page }) => {
   const registerData = RegisterData.registerDataWithoutUserName();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Verify the login header text
   expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
@@ -112,7 +118,7 @@ test.skip('4: Verify that password field is mandatory', async ({ page }) => {
   const registerData = RegisterData.registerDataWithoutPassword();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Verify the login header text
   expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();
@@ -141,7 +147,7 @@ test.skip('5: Verify that validation shown for invalid email format', async ({
   const registerData = RegisterData.registerDataWithInvalidEmailFormat();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Verify the login header text
   expect(await loginPage.isLoginPageTitleVisible()).toBeTruthy();

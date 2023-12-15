@@ -1,4 +1,4 @@
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, MouseEventHandler } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import { useDebounce } from 'use-debounce';
 
@@ -43,7 +43,7 @@ export function AutocompleteModal({
   const [filter, setFilter] = useState<string>('');
   const [bouncedFilter] = useDebounce(filter, 500);
 
-  const handleChange = useCallback(() => {
+  const handleChange: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
     setTimeout(() => onChange(selected), 0);
     onClose();
   }, [onChange, selected, onClose]);
@@ -62,15 +62,31 @@ export function AutocompleteModal({
     [options],
   );
 
-  const filteredOptions = useMemo(
-    () =>
-      sortedOptions.filter((item) => {
-        return item.label
-          .toLowerCase()
-          .includes(bouncedFilter.toLocaleLowerCase());
-      }),
-    [sortedOptions, bouncedFilter],
-  );
+  const filteredOptions = useMemo(() => {
+    const filteredOptions = sortedOptions.filter((item) => {
+      return item.label
+        .toLowerCase()
+        .includes(bouncedFilter.toLocaleLowerCase());
+    });
+
+    if (bouncedFilter.trim() === '') {
+      return filteredOptions;
+    } else {
+      return filteredOptions.sort((a, b) => {
+        if (a.label.length > b.label.length) {
+          return 1;
+        } else if (a.label.length < b.label.length) {
+          return -1;
+        } else if (a.label > b.label) {
+          return 1;
+        } else if (a.label < b.label) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+    }
+  }, [sortedOptions, bouncedFilter]);
 
   return (
     <Stack gap="20px" sx={{ width: '100%', padding: '0 20px 30px' }}>

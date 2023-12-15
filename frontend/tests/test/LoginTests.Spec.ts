@@ -3,14 +3,18 @@ import LoginPO from '../pages/LoginPage';
 import HomePO from '../pages/HomePage';
 import RegisterPO from '../pages/RegistrationPage';
 import LoginData from '../data-factory/LoginData';
+import pageUrls from '../constants/PageUrls';
+test.use({ storageState: { cookies: [], origins: [] } });
 
-test.skip('1: Verify that user is logged in with valid data', async ({ page }) => {
+test.skip('1: Verify that user is logged in with valid data', async ({
+  page,
+}) => {
   const loginPage = new LoginPO(page);
   const homePage = new HomePO(page);
   const validLoginData = LoginData.validLoginData();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Login with valid credentials
   await loginPage.loginToApp(validLoginData);
@@ -26,7 +30,7 @@ test('2: Verify that validation message is shown when try to login with invalid 
   const invalidLoginData = LoginData.inValidLoginData();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Login with invalid credentials
   await loginPage.loginToApp(invalidLoginData);
@@ -44,7 +48,7 @@ test('3: Verify that validation message is shown for email when try to login wit
   const invalidEmailData = LoginData.inValidEmailData();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Login with invalid email
   await loginPage.loginToApp(invalidEmailData);
@@ -62,7 +66,7 @@ test('4: Verify that validation message is shown for password when try to login 
   const invalidPasswordData = LoginData.inValidPasswordData();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Login with invalid details
   await loginPage.loginToApp(invalidPasswordData);
@@ -78,7 +82,7 @@ test.skip('5: Verify that email field is mandatory', async ({ page }) => {
   const loginDataWithoutEmail = LoginData.withoutEmailData();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Login without email
   await loginPage.loginToApp(loginDataWithoutEmail);
@@ -92,7 +96,7 @@ test.skip('6: Verify that password field is mandatory', async ({ page }) => {
   const loginDataWithoutPassword = LoginData.withoutPasswordData();
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Login without password
   await loginPage.loginToApp(loginDataWithoutPassword);
@@ -108,7 +112,7 @@ test('7:Verify that user is redirected to the Register page after clicking on th
   const register = new RegisterPO(page);
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Navigate to register page
   await loginPage.goToRegisterPage();
@@ -123,7 +127,7 @@ test('8:Verify that user is redirected to the forgot password page after clickin
   const loginPage = new LoginPO(page);
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Click on the forgot password button
   await loginPage.clickOnForgotPasswordButton();
@@ -138,7 +142,7 @@ test('9:Verify that validation message is display when user clicks on the "SEND 
   const loginPage = new LoginPO(page);
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Click on the forgot password button
   await loginPage.clickOnForgotPasswordButton();
@@ -166,7 +170,7 @@ test('10:Verify that validation message is display when user clicks on the "SEND
   const loginPage = new LoginPO(page);
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Click on the forgot password button
   await loginPage.clickOnForgotPasswordButton();
@@ -194,7 +198,7 @@ test.skip('11:Verify that validation message is shown when user clicks on the "S
   const loginPage = new LoginPO(page);
 
   //Navigate to the URL
-  await page.goto('/US/en/1/login');
+  await page.goto(pageUrls.LoginPage);
 
   //Click on the forgot password button
   await loginPage.clickOnForgotPasswordButton();

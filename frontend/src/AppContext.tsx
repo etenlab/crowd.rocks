@@ -4,7 +4,10 @@ import { useIonToast } from '@ionic/react';
 import { reducer, loadPersistedStore } from './reducers/index';
 
 import { type StateType as GlobalStateType } from './reducers/global.reducer';
-import { type StateType as ComponentsStateType } from './reducers/components.reducer';
+import {
+  type StateType as ComponentsStateType,
+  type ModalMode,
+} from './reducers/components.reducer';
 import { type StateType as NonPersistentStateType } from './reducers/non-persistent.reducer';
 import {
   GetAllSiteTextDefinitionsVariable,
@@ -46,15 +49,17 @@ export interface ContextType {
     changeAppLanguage: (langInfo: LanguageInfo) => void;
     changeTranslationSourceLanguage: (langInfo: LanguageInfo | null) => void;
     changeTranslationTargetLanguage: (langInfo: LanguageInfo | null) => void;
+    changeDocumentSourceLanguage: (langInfo: LanguageInfo | null) => void;
+    changeDocumentTargetLanguage: (langInfo: LanguageInfo | null) => void;
     changeSiteTextTargetLanguage: (langInfo: LanguageInfo | null) => void;
     setSourceLanguage: (targetLanguage: LanguageInfo | null) => void;
     setTargetLanguage: (targetLanguage: LanguageInfo | null) => void;
-    setUpdatedTrDefinitionIds: (definitionIds: Array<string>) => void;
     createModal(): {
-      openModal(component: ReactNode, mode?: 'standard' | 'full'): void;
+      openModal(component: ReactNode, mode?: ModalMode): void;
       closeModal(): void;
     };
     removeModal(id: string): void;
+    setIonContentScrollElement(scrollElement: HTMLElement | null): void;
     setTempTranslation(
       key: string,
       value: { translation: string; description: string },
@@ -112,14 +117,16 @@ export function AppContextProvider({ children }: AppProviderProps) {
     setTargetLanguage,
     changeTranslationSourceLanguage,
     changeTranslationTargetLanguage,
+    changeDocumentSourceLanguage,
+    changeDocumentTargetLanguage,
     changeSiteTextTargetLanguage,
-    setUpdatedTrDefinitionIds,
     setTempTranslation,
     clearTempTranslation,
   } = useGlobal({
     dispatch,
   });
-  const { createModal, removeModal } = useGlobalComponents({ dispatch });
+  const { createModal, removeModal, setIonContentScrollElement } =
+    useGlobalComponents({ dispatch });
   const {
     addPaginationVariableForGetAllSiteTextDefinitions,
     addPaginationVariableForGetForumsList,
@@ -160,9 +167,6 @@ export function AppContextProvider({ children }: AppProviderProps) {
         data.getAllRecommendedSiteTextTranslationListByLanguage.error !==
         ErrorType.NoError
       ) {
-        console.log(
-          data.getAllRecommendedSiteTextTranslationListByLanguage.error,
-        );
         toastPresent({
           message:
             data.getAllRecommendedSiteTextTranslationListByLanguage.error,
@@ -361,10 +365,11 @@ export function AppContextProvider({ children }: AppProviderProps) {
       changeAppLanguage,
       changeTranslationSourceLanguage,
       changeTranslationTargetLanguage,
+      changeDocumentSourceLanguage,
+      changeDocumentTargetLanguage,
       changeSiteTextTargetLanguage,
       setSourceLanguage,
       setTargetLanguage,
-      setUpdatedTrDefinitionIds,
       createModal,
       removeModal,
       setTempTranslation,
@@ -374,6 +379,7 @@ export function AppContextProvider({ children }: AppProviderProps) {
       addPaginationVariableForGetForumFoldersList,
       addPaginationVariableForGetTheadsList,
       addPaginationVariableForGetAllDocuments,
+      setIonContentScrollElement,
     },
   };
 

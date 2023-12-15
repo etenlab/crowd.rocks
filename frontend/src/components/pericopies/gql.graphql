@@ -3,17 +3,54 @@ fragment PericopeFragment on Pericope {
   start_word
 }
 
+fragment PericopeWithDocumentWordEntryFragment on PericopeWithDocumentWordEntry {
+  pericope_id
+  start_word {
+    ...DocumentWordEntryFragment
+  }
+}
+
 fragment PericopeVoteStatusFragment on PericopeVoteStatus {
   pericope_id
   upvotes
   downvotes
 }
 
-query GetPericopiesByDocumentId($document_id: ID!) {
-  getPericopiesByDocumentId(document_id: $document_id) {
+fragment PericopeWithVoteFragment on PericopeWithVote {
+  pericope_id
+  start_word
+  downvotes
+  upvotes
+}
+
+fragment PericopeWithVotesEdgeFragment on PericopeWithVotesEdge {
+  cursor
+  node {
+    ...PericopeWithVoteFragment
+  }
+}
+
+query GetPericopiesByDocumentId($document_id: ID!, $first: Int, $after: ID) {
+  getPericopiesByDocumentId(
+    document_id: $document_id
+    first: $first
+    after: $after
+  ) {
     error
-    pericopies {
-      ...PericopeFragment
+    edges {
+      ...PericopeWithVotesEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+
+query GetPericopeWithDocumentWordEntry($pericope_id: ID!) {
+  getPericopeWithDocumentWordEntry(pericope_id: $pericope_id) {
+    error
+    pericope {
+      ...PericopeWithDocumentWordEntryFragment
     }
   }
 }
@@ -24,6 +61,15 @@ query GetPericopeVoteStatus($pericope_id: ID!) {
     vote_status {
       ...PericopeVoteStatusFragment
     }
+  }
+}
+
+query GetPericopeTagsQasCount($pericopeId: String!) {
+  getPericopeTagsQasCount(pericopeId: $pericopeId) {
+    error
+    pericope_id
+    tags_count
+    qas_count
   }
 }
 
@@ -41,6 +87,38 @@ mutation UpsertPericope($startWord: String!) {
     error
     pericopies {
       ...PericopeFragment
+    }
+  }
+}
+
+mutation DeletePericope($pericope_id: ID!) {
+  deletePericopie(pericope_id: $pericope_id) {
+    error
+    pericope_id
+  }
+}
+
+subscription SubscribeToPericopiesAdded {
+  pericopiesAdded {
+    error
+    pericopies {
+      ...PericopeFragment
+    }
+  }
+}
+
+subscription SubscribeToPericopieDeleted {
+  pericopeDeleted {
+    error
+    pericope_id
+  }
+}
+
+subscription SubscribeToPericopeVoteStatusToggled {
+  pericopeVoteStatusToggled {
+    error
+    vote_status {
+      ...PericopeVoteStatusFragment
     }
   }
 }

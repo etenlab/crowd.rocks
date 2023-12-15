@@ -10,6 +10,10 @@ export interface StateType {
       source: LanguageInfo | null;
       target: LanguageInfo | null;
     };
+    documentPage: {
+      source: LanguageInfo | null;
+      target: LanguageInfo | null;
+    };
     siteTextStringPage: {
       target: LanguageInfo | null;
     };
@@ -22,7 +26,6 @@ export interface StateType {
     languages: SiteTextLanguageWithTranslationInfo[];
   };
   maps: {
-    updatedTrDefinitionIds: Array<string>;
     tempTranslations: Record<
       string,
       { translation: string; description: string } | undefined
@@ -42,6 +45,10 @@ export const initialState: StateType = {
       source: null,
       target: null,
     },
+    documentPage: {
+      source: null,
+      target: null,
+    },
     siteTextStringPage: {
       target: null,
     },
@@ -54,7 +61,6 @@ export const initialState: StateType = {
     languages: [],
   },
   maps: {
-    updatedTrDefinitionIds: [],
     tempTranslations: {},
   },
 };
@@ -131,6 +137,30 @@ export function reducer(
         },
       };
     }
+    case actions.CHANGE_DOCUMENT_PAGE_SOURCE_LANGAUGE: {
+      return {
+        ...prevState,
+        langauges: {
+          ...prevState.langauges,
+          documentPage: {
+            ...prevState.langauges.documentPage,
+            source: action.payload as LanguageInfo | null,
+          },
+        },
+      };
+    }
+    case actions.CHANGE_DOCUMENT_PAGE_TARGET_LANGAUGE: {
+      return {
+        ...prevState,
+        langauges: {
+          ...prevState.langauges,
+          documentPage: {
+            ...prevState.langauges.documentPage,
+            target: action.payload as LanguageInfo | null,
+          },
+        },
+      };
+    }
     case actions.CHANGE_SITE_TEXT_STRINGS_PAGE_TARGET_LANGAUGE: {
       return {
         ...prevState,
@@ -158,15 +188,6 @@ export function reducer(
         langauges: {
           ...prevState.langauges,
           sourceLang: action.payload as LanguageInfo,
-        },
-      };
-    }
-    case actions.SET_MAP_UPDATED_TR_DEFINITION_IDS: {
-      return {
-        ...prevState,
-        maps: {
-          ...prevState.maps,
-          updatedTrDefinitionIds: action.payload as Array<string>,
         },
       };
     }

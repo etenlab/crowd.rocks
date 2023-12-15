@@ -1,11 +1,18 @@
 import { Field, ID, Int, InputType, ObjectType } from '@nestjs/graphql';
 import { GenericOutput, TableNameType } from 'src/common/types';
 import { DocumentWordEntry } from 'src/components/documents/types';
+import { User } from '../user/types';
+import { PageInfo } from '../common/types';
 
 @ObjectType()
 export class QuestionItem {
   @Field(() => ID) question_item_id: string;
   @Field(() => String) item: string;
+}
+
+@ObjectType()
+export class QuestionItemWithStatistic extends QuestionItem {
+  @Field(() => Int) statistic: number;
 }
 
 @ObjectType()
@@ -17,7 +24,20 @@ export class Question {
   @Field(() => String) question: string;
   @Field(() => [QuestionItem]) question_items: QuestionItem[];
   @Field(() => Date) created_at: Date;
-  @Field(() => String) created_by: string;
+  @Field(() => User) created_by_user: User;
+}
+
+@ObjectType()
+export class QuestionWithStatistic {
+  @Field(() => ID) question_id: string;
+  @Field(() => TableNameType) parent_table: TableNameType;
+  @Field(() => String) parent_id: string;
+  @Field(() => Boolean) question_type_is_multiselect: boolean;
+  @Field(() => String) question: string;
+  @Field(() => [QuestionItemWithStatistic])
+  question_items: QuestionItemWithStatistic[];
+  @Field(() => Date) created_at: Date;
+  @Field(() => User) created_by_user: User;
 }
 
 @ObjectType()
@@ -33,7 +53,7 @@ export class Answer {
   @Field(() => String, { nullable: true }) answer: string | null;
   @Field(() => [QuestionItem]) question_items: QuestionItem[];
   @Field(() => Date) created_at: Date;
-  @Field(() => String) created_by: string;
+  @Field(() => User) created_by_user: User;
 }
 
 @ObjectType()
@@ -49,9 +69,34 @@ export class QuestionsOutput extends GenericOutput {
 }
 
 @ObjectType()
+export class QuestionItemWithStatisticsOutput extends GenericOutput {
+  @Field(() => [QuestionItemWithStatistic], { nullable: 'items' })
+  question_item_with_statistics: (QuestionItemWithStatistic | null)[];
+}
+
+@ObjectType()
+export class QuestionWithStatisticOutput extends GenericOutput {
+  @Field(() => QuestionWithStatistic, { nullable: false })
+  question_with_statistic: QuestionWithStatistic | null;
+}
+
+@ObjectType()
 export class QuestionOnWordRangesOutput extends GenericOutput {
   @Field(() => [QuestionOnWordRange], { nullable: 'items' })
   questions: (QuestionOnWordRange | null)[];
+}
+
+@ObjectType()
+export class QuestionOnWordRangesEdge {
+  @Field(() => ID) cursor: string;
+  @Field(() => [QuestionOnWordRange]) node: QuestionOnWordRange[];
+}
+
+@ObjectType()
+export class QuestionOnWordRangesListConnection extends GenericOutput {
+  @Field(() => [QuestionOnWordRangesEdge])
+  edges: QuestionOnWordRangesEdge[];
+  @Field(() => PageInfo) pageInfo: PageInfo;
 }
 
 @ObjectType()

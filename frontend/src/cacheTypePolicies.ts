@@ -1,5 +1,37 @@
 import { TypePolicies } from '@apollo/client';
 import { relayStylePagination } from '@apollo/client/utilities';
+import {
+  PericopeWithVotesListConnection,
+  QuestionOnWordRangesListConnection,
+  WordRangeTagsListConnection,
+} from './generated/graphql';
+
+type GetPericopiesByDocumentIdMerge = Omit<
+  PericopeWithVotesListConnection,
+  'edges'
+> & {
+  edges: {
+    __ref: string;
+  }[];
+};
+
+type GetQuestionOnWordRangesByDocumentIdMerge = Omit<
+  QuestionOnWordRangesListConnection,
+  'edges'
+> & {
+  edges: {
+    __ref: string;
+  }[];
+};
+
+type GetWordRangeTagsByDocumentIdMerge = Omit<
+  WordRangeTagsListConnection,
+  'edges'
+> & {
+  edges: {
+    __ref: string;
+  }[];
+};
 
 export const typePolicies: TypePolicies = {
   Query: {
@@ -16,6 +48,109 @@ export const typePolicies: TypePolicies = {
       getForumFoldersList: relayStylePagination(['forum_id', 'filter']),
       getThreadsList: relayStylePagination(['forum_folder_id', 'filter']),
       getAllDocuments: relayStylePagination(['input']),
+      getPericopiesTr: relayStylePagination(['input']),
+      getPericopiesByDocumentId: {
+        keyArgs: ['document_id'],
+        merge(
+          existing: GetPericopiesByDocumentIdMerge | undefined,
+          incoming: GetPericopiesByDocumentIdMerge,
+        ) {
+          if (existing) {
+            const edgesMap = new Map<string, { __ref: string }>();
+
+            existing.edges.forEach((edge) => {
+              edgesMap.set(edge.__ref, edge);
+            });
+
+            incoming.edges.forEach((edge) => {
+              edgesMap.set(edge.__ref, edge);
+            });
+
+            const edges: {
+              __ref: string;
+            }[] = [];
+
+            for (const edge of edgesMap.values()) {
+              edges.push(edge);
+            }
+
+            return {
+              ...existing,
+              edges,
+            };
+          } else {
+            return { ...incoming };
+          }
+        },
+      },
+      getQuestionOnWordRangesByDocumentId: {
+        keyArgs: ['document_id'],
+        merge(
+          existing: GetQuestionOnWordRangesByDocumentIdMerge | undefined,
+          incoming: GetQuestionOnWordRangesByDocumentIdMerge,
+        ) {
+          if (existing) {
+            const edgesMap = new Map<string, { __ref: string }>();
+
+            existing.edges.forEach((edge) => {
+              edgesMap.set(edge.__ref, edge);
+            });
+
+            incoming.edges.forEach((edge) => {
+              edgesMap.set(edge.__ref, edge);
+            });
+
+            const edges: {
+              __ref: string;
+            }[] = [];
+
+            for (const edge of edgesMap.values()) {
+              edges.push(edge);
+            }
+
+            return {
+              ...existing,
+              edges,
+            };
+          } else {
+            return { ...incoming };
+          }
+        },
+      },
+      getWordRangeTagsByDocumentId: {
+        keyArgs: ['document_id'],
+        merge(
+          existing: GetWordRangeTagsByDocumentIdMerge | undefined,
+          incoming: GetWordRangeTagsByDocumentIdMerge,
+        ) {
+          if (existing) {
+            const edgesMap = new Map<string, { __ref: string }>();
+
+            existing.edges.forEach((edge) => {
+              edgesMap.set(edge.__ref, edge);
+            });
+
+            incoming.edges.forEach((edge) => {
+              edgesMap.set(edge.__ref, edge);
+            });
+
+            const edges: {
+              __ref: string;
+            }[] = [];
+
+            for (const edge of edgesMap.values()) {
+              edges.push(edge);
+            }
+
+            return {
+              ...existing,
+              edges,
+            };
+          } else {
+            return { ...incoming };
+          }
+        },
+      },
     },
   },
   WordWithDefinitions: {
@@ -135,14 +270,35 @@ export const typePolicies: TypePolicies = {
   QuestionOnWordRange: {
     keyFields: ['question_id'],
   },
+  QuestionOnWordRangesEdge: {
+    keyFields: ['cursor'],
+  },
   Answer: {
     keyFields: ['answer_id'],
   },
   Pericope: {
     keyFields: ['pericope_id'],
   },
+  PericopeWithVote: {
+    keyFields: ['pericope_id'],
+  },
+  PericopeWithVotesEdge: {
+    keyFields: ['cursor'],
+  },
   PericopeVoteStatus: {
     keyFields: ['pericope_id'],
+  },
+  WordRangeTagWithVote: {
+    keyFields: ['word_range_tag_id'],
+  },
+  WordRangeTag: {
+    keyFields: ['word_range_tag_id'],
+  },
+  WordRangeTagVoteStatus: {
+    keyFields: ['word_range_tag_id'],
+  },
+  WordRangeTagsEdge: {
+    keyFields: ['cursor'],
   },
   Forum: {
     keyFields: ['forum_id'],
@@ -167,5 +323,14 @@ export const typePolicies: TypePolicies = {
   },
   ThreadEdge: {
     keyFields: ['cursor'],
+  },
+  PericopeTextWithTranslationAndDescription: {
+    keyFields: ['pericope_id'],
+  },
+  PericopeTranslationWithVotes: {
+    keyFields: ['pericope_translation_id'],
+  },
+  PericopeTranslation: {
+    keyFields: ['pericope_translation_id'],
   },
 };

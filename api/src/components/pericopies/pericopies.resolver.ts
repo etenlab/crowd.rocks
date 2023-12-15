@@ -1,16 +1,40 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Args, Query, Resolver, Mutation, Context, ID } from '@nestjs/graphql';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import {
+  Args,
+  Query,
+  Resolver,
+  Mutation,
+  Subscription,
+  Context,
+  ID,
+  Int,
+} from '@nestjs/graphql';
+import { PubSub } from 'graphql-subscriptions';
+import { SubscriptionToken } from 'src/common/subscription-token';
+import { PUB_SUB } from 'src/pubSub.module';
+
 import { getBearer } from 'src/common/utility';
+import { GetPericopeTextInput } from '../pericope-translations/types';
 
 import { PericopeVotesService } from './pericope-votes.service';
 import { PericopiesService } from './pericopies.service';
 
-import { PericopiesOutput, PericopeVoteStatusOutput } from './types';
+import {
+  PericopiesOutput,
+  PericopeVoteStatusOutput,
+  PericopeWithVotesListConnection,
+  PericopeTextWithDescription,
+  PericopeDeleteOutput,
+  RecomendedPericopiesChangedAtDocumentId,
+  PericopeTagsQasCountOutput,
+  PericopeWithDocumentWordEntryOutput,
+} from './types';
 
 @Injectable()
 @Resolver()
 export class PericopiesResolver {
   constructor(
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
     private pericopiesService: PericopiesService,
     private pericopeVotesService: PericopeVotesService,
   ) {}
@@ -27,27 +51,36 @@ export class PericopiesResolver {
     );
   }
 
-  @Query(() => PericopiesOutput)
-  async getPericopiesByDocumentId(
-    @Args('document_id', { type: () => ID }) document_id: string,
-  ): Promise<PericopiesOutput> {
-    Logger.log('getPericopiesByDocumentId, document_id:', document_id);
+  @Query(() => PericopeWithDocumentWordEntryOutput)
+  async getPericopeWithDocumentWordEntry(
+    @Args('pericope_id', { type: () => ID }) pericope_id: string,
+  ): Promise<PericopeWithDocumentWordEntryOutput> {
+    Logger.log('getPericopeWithDocumentWordEntry, pericope_id:', pericope_id);
 
-    return this.pericopiesService.getPericopiesByDocumentId(+document_id, null);
+    return this.pericopiesService.getPericopeWithDocumentWordEntry(
+      +pericope_id,
+      null,
+    );
   }
 
-  @Mutation(() => PericopiesOutput)
-  async upsertPericopies(
-    @Args('startWords', { type: () => [String] })
-    startWords: string[],
+  @Query(() => PericopeWithVotesListConnection)
+  async getPericopiesByDocumentId(
+    @Args('document_id', { type: () => ID }) document_id: string,
+    @Args('first', { type: () => Int, nullable: true }) first: number | null,
+    @Args('after', { type: () => ID, nullable: true }) after: string | null,
     @Context() req: any,
-  ): Promise<PericopiesOutput> {
-    Logger.log('upsertPericopies: ', startWords);
+  ): Promise<PericopeWithVotesListConnection> {
+    Logger.log(
+      'getPericopiesByDocumentId',
+      JSON.stringify({ document_id, first, after }, null, 2),
+    );
 
-    return this.pericopiesService.upserts(
-      startWords.map((word) => +word),
-      getBearer(req) || '',
+    return this.pericopiesService.getPericopiesByDocumentId(
+      +document_id,
+      first,
+      after,
       null,
+      getBearer(req) || '',
     );
   }
 
@@ -69,6 +102,96 @@ export class PericopiesResolver {
     };
   }
 
+  @Mutation(() => PericopiesOutput)
+  async upsertPericopies(
+    @Args('startWords', { type: () => [String] })
+    startWords: string[],
+    @Context() req: any,
+  ): Promise<PericopiesOutput> {
+    Logger.log('upsertPericopies: ', startWords);
+
+    const newPericopies = await this.pericopiesService.upserts(
+      startWords.map((word) => +word),
+      getBearer(req) || '',
+      null,
+    );
+
+    this.pubSub.publish(SubscriptionToken.pericopiesAdded, {
+      [SubscriptionToken.pericopiesAdded]: newPericopies,
+    });
+
+    if (newPericopies.pericopies[0]?.pericope_id) {
+      const documentsData =
+        await this.pericopiesService.getDocumentIdsAndLangsOfPericopeIds([
+          newPericopies.pericopies[0]?.pericope_id,
+        ]);
+      this.pubSub.publish(SubscriptionToken.recommendedPericopiesChanged, {
+        [SubscriptionToken.recommendedPericopiesChanged]: {
+          documentId: documentsData[0].documentId,
+        },
+      });
+    }
+
+    return newPericopies;
+  }
+
+  @Subscription(() => RecomendedPericopiesChangedAtDocumentId, {
+    name: SubscriptionToken.recommendedPericopiesChanged,
+  })
+  async subscribeToRecommendedPericopiesChanged() {
+    return this.pubSub.asyncIterator(
+      SubscriptionToken.recommendedPericopiesChanged,
+    );
+  }
+
+  @Subscription(() => PericopiesOutput, {
+    name: SubscriptionToken.pericopiesAdded,
+  })
+  subscribeToPericopiesAdded() {
+    return this.pubSub.asyncIterator(SubscriptionToken.pericopiesAdded);
+  }
+
+  @Mutation(() => PericopeDeleteOutput)
+  async deletePericopie(
+    @Args('pericope_id', { type: () => ID })
+    pericope_id: string,
+    @Context() req: any,
+  ): Promise<PericopeDeleteOutput> {
+    Logger.log('deletePericopies: ', pericope_id);
+
+    const documentsData =
+      await this.pericopiesService.getDocumentIdsAndLangsOfPericopeIds([
+        pericope_id,
+      ]);
+
+    const deletedPericope = await this.pericopiesService.delete(
+      +pericope_id,
+      getBearer(req) || '',
+      null,
+    );
+
+    this.pubSub.publish(SubscriptionToken.pericopeDeleted, {
+      [SubscriptionToken.pericopeDeleted]: deletedPericope,
+    });
+
+    if (documentsData[0].documentId) {
+      this.pubSub.publish(SubscriptionToken.recommendedPericopiesChanged, {
+        [SubscriptionToken.recommendedPericopiesChanged]: {
+          documentId: documentsData[0].documentId,
+        },
+      });
+    }
+
+    return deletedPericope;
+  }
+
+  @Subscription(() => PericopeDeleteOutput, {
+    name: SubscriptionToken.pericopeDeleted,
+  })
+  subscribeToPericopeDeleted() {
+    return this.pubSub.asyncIterator(SubscriptionToken.pericopeDeleted);
+  }
+
   @Mutation(() => PericopeVoteStatusOutput)
   async togglePericopeVoteStatus(
     @Args('pericope_id', { type: () => ID })
@@ -82,11 +205,50 @@ export class PericopiesResolver {
       vote,
     });
 
-    return this.pericopeVotesService.toggleVoteStatus(
+    const newVoteStatus = await this.pericopeVotesService.toggleVoteStatus(
       +pericope_id,
       vote,
       getBearer(req) || '',
       null,
     );
+
+    this.pubSub.publish(SubscriptionToken.pericopeVoteStatusToggled, {
+      [SubscriptionToken.pericopeVoteStatusToggled]: newVoteStatus,
+    });
+
+    return newVoteStatus;
+  }
+
+  @Subscription(() => PericopeVoteStatusOutput, {
+    name: SubscriptionToken.pericopeVoteStatusToggled,
+  })
+  subscribeToPericopeVoteStatusToggled() {
+    return this.pubSub.asyncIterator(
+      SubscriptionToken.pericopeVoteStatusToggled,
+    );
+  }
+
+  @Query(() => PericopeTextWithDescription)
+  async getPericopeTextAndDesctiption(
+    @Args('input') input: GetPericopeTextInput,
+  ): Promise<PericopeTextWithDescription> {
+    Logger.log(
+      `${JSON.stringify(input)}`,
+      `PericopeResolver#getPericopeTextAndDesctiption`,
+    );
+    return this.pericopiesService.getPericopeTextWithDescription(
+      input.pericopeId,
+    );
+  }
+
+  @Query(() => PericopeTagsQasCountOutput)
+  async getPericopeTagsQasCount(
+    @Args('pericopeId') pericopeId: string,
+  ): Promise<PericopeTagsQasCountOutput> {
+    Logger.log(
+      `${JSON.stringify(pericopeId)}`,
+      `PericopeResolver#getPericopeTagsQasCount`,
+    );
+    return this.pericopiesService.getPericopeTagsQasCount(pericopeId);
   }
 }

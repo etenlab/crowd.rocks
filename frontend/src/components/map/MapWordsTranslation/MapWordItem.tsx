@@ -13,7 +13,7 @@ import { useUpsertTranslationFromWordAndDefinitionlikeStringMutation } from '../
 
 import { useMapTranslationTools } from '../hooks/useMapTranslationTools';
 import { useAppContext } from '../../../hooks/useAppContext';
-import { WordItem } from '../../common/WordItem';
+import { TranslatedTextItem } from '../../common/TranslatedTextItem';
 
 export type MapWordItemProps = {
   original: MapWordOrPhrase;
@@ -32,14 +32,10 @@ export function MapWordItem({ original }: MapWordItemProps) {
     states: {
       global: {
         langauges: { targetLang },
-        maps: { tempTranslations, updatedTrDefinitionIds },
+        maps: { tempTranslations },
       },
     },
-    actions: {
-      setTempTranslation,
-      clearTempTranslation,
-      setUpdatedTrDefinitionIds,
-    },
+    actions: { setTempTranslation, clearTempTranslation },
   } = useAppContext();
   const { getTransformedTranslations } = useMapTranslationTools();
 
@@ -131,11 +127,6 @@ export function MapWordItem({ original }: MapWordItemProps) {
           refetchQueries: [GetRecommendedTranslationFromDefinitionIdDocument],
         });
 
-        setUpdatedTrDefinitionIds([
-          ...updatedTrDefinitionIds,
-          original.o_definition_id,
-        ]);
-
         clearTempTranslation(`${original.o_definition_id}:${original.type}`);
         setSaving(false);
       }
@@ -152,8 +143,6 @@ export function MapWordItem({ original }: MapWordItemProps) {
     nation_id,
     language_id,
     upsertTranslation,
-    setUpdatedTrDefinitionIds,
-    updatedTrDefinitionIds,
     clearTempTranslation,
     getTranslationsQ,
   ]);
@@ -222,15 +211,15 @@ export function MapWordItem({ original }: MapWordItemProps) {
     }
 
     return {
-      word,
+      text: word,
       description,
     };
   }, [data, loading, error]);
 
   return (
-    <WordItem
+    <TranslatedTextItem
       original={{
-        word: original.o_like_string,
+        text: original.o_like_string,
         description: original.o_definition,
       }}
       translation={translation || undefined}
