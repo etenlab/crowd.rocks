@@ -147,8 +147,8 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
               icon={cutOutline}
             />
           ),
-          title: tr('Pericope Tool'),
-          description: tr('Split a document into periscope sections'),
+          title: tr('Sectioning Tool'),
+          description: tr('Split a document into sections'),
           isShown: () => !!settings?.isBetaTools,
         },
         {
@@ -173,10 +173,8 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
               icon={languageOutline}
             />
           ),
-          title: tr('Translate Pericopies'),
-          description: tr(
-            'Translate pericope sections defined by pericope tool',
-          ),
+          title: tr('Translate Sections'),
+          description: tr('Translate sections defined by sectioning tool'),
           isShown: () => !!settings?.isBetaTools,
         },
         {

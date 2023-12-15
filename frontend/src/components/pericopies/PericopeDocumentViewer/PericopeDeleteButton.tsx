@@ -41,7 +41,7 @@ export function PericopeDeleteButton({
     >
       <DeleteCircle sx={{ fontSize: 20 }} />
       <Typography variant="h5" sx={{ fontWeight: 600 }} color="text.orange">
-        {tr('Delete Pericope')}
+        {tr('Delete Section')}
       </Typography>
     </Stack>
   );

@@ -133,7 +133,7 @@ export function DocumentUploadModal({ onClose }: DocumentUploadModalProps) {
 
   let title = tr('Add new document');
   let content = tr(
-    'Click the button below to add a new document to use a Pericope tool.',
+    'Click the button below to add a new document to use a Sectioning tool.',
   );
   let bottomCom = (
     <Stack gap="16px">
@@ -182,7 +182,7 @@ export function DocumentUploadModal({ onClose }: DocumentUploadModalProps) {
   if (data && data.documentUpload.error === ErrorType.NoError) {
     title = tr('Great news!');
     content = tr(
-      'The document loaded successfully! Go to your uploaded documents to use pericope tool.',
+      'The document loaded successfully! Go to your uploaded documents to use Sectioning tool.',
     );
     bottomCom = (
       <Stack gap="16px">

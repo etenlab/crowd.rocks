@@ -68,6 +68,7 @@ export class PericopiesResolver {
     @Args('document_id', { type: () => ID }) document_id: string,
     @Args('first', { type: () => Int, nullable: true }) first: number | null,
     @Args('after', { type: () => ID, nullable: true }) after: string | null,
+    @Context() req: any,
   ): Promise<PericopeWithVotesListConnection> {
     Logger.log(
       'getPericopiesByDocumentId',
@@ -79,6 +80,7 @@ export class PericopiesResolver {
       first,
       after,
       null,
+      getBearer(req) || '',
     );
   }
 

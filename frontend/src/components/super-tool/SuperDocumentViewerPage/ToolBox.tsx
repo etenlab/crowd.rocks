@@ -94,7 +94,7 @@ export function ToolBox({
   const toolOptions = useMemo(
     () => [
       {
-        label: tr('Pericope'),
+        label: tr('Sections'),
         value: SuperToolKind.Pericope,
       },
       {
@@ -177,7 +177,7 @@ export function ToolBox({
           sx={{ padding: 0, justifyContent: 'flex-start' }}
           onClick={handleDownloadFile}
         >
-          {tr('Download')}
+          {tr('Download source')}
         </Button>
       ),
     },
@@ -191,7 +191,7 @@ export function ToolBox({
           sx={{ padding: 0, justifyContent: 'flex-start' }}
           onClick={handlePericopiesTranslate}
         >
-          {tr('Translate using pericopies')}
+          {tr('Show current best translation by votes')}
         </Button>
       ),
     },
