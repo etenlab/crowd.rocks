@@ -312,9 +312,10 @@ export type FileUploadUrlResponse = {
   url: Scalars['String']['output'];
 };
 
-export type FileUrlOutput = {
-  __typename?: 'FileUrlOutput';
+export type FileUrlAndContentOutput = {
+  __typename?: 'FileUrlAndContentOutput';
   error: ErrorType;
+  fileContent?: Maybe<Scalars['String']['output']>;
   fileName?: Maybe<Scalars['String']['output']>;
   fileUrl?: Maybe<Scalars['String']['output']>;
 };
@@ -749,7 +750,7 @@ export type Mutation = {
   createQuestionOnWordRange: QuestionOnWordRangesOutput;
   createTaggingOnWordRanges: WordRangeTagWithVotesOutput;
   deletePericopie: PericopeDeleteOutput;
-  documentByPericopiesTranslate: FileUrlOutput;
+  documentByPericopiesTranslate: FileUrlAndContentOutput;
   documentUpload: DocumentUploadOutput;
   emailResponseResolver: EmailResponseOutput;
   forceMarkAndRetranslateOriginalMapsIds: GenericOutput;
@@ -3638,7 +3639,7 @@ export type DocumentByPericopiesTranslateMutationVariables = Exact<{
 }>;
 
 
-export type DocumentByPericopiesTranslateMutation = { __typename?: 'Mutation', documentByPericopiesTranslate: { __typename?: 'FileUrlOutput', fileUrl?: string | null, fileName?: string | null } };
+export type DocumentByPericopiesTranslateMutation = { __typename?: 'Mutation', documentByPericopiesTranslate: { __typename?: 'FileUrlAndContentOutput', fileUrl?: string | null, fileName?: string | null, fileContent?: string | null } };
 
 export type EmailResponseMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -6914,6 +6915,7 @@ export const DocumentByPericopiesTranslateDocument = gql`
   ) {
     fileUrl
     fileName
+    fileContent
   }
 }
     `;

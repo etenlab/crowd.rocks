@@ -20,7 +20,7 @@ import { useTr } from '../../../hooks/useTr';
 import { useAppContext } from '../../../hooks/useAppContext';
 import { IonIcon } from '@ionic/react';
 import { languageOutline } from 'ionicons/icons';
-import { DocumentPericopiesTranslateModal } from '../../documents/DocumentsPage/DocumentPericopiesTranslateModal';
+import { ShowTranslatedDocumentPericopiesModal } from '../../documents/DocumentsPage/ShowTranslatedDocumentPericopiesModal';
 
 export enum TabKind {
   Document = 'document',
@@ -155,7 +155,7 @@ export function ToolBox({
 
   const handlePericopiesTranslate = () => {
     openModal(
-      <DocumentPericopiesTranslateModal
+      <ShowTranslatedDocumentPericopiesModal
         onClose={closeModal}
         document={document}
       />,

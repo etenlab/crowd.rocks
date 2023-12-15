@@ -57,7 +57,7 @@ export function PericopiesTrListPage() {
   return (
     <>
       <PageLayout>
-        <Caption>{tr('Pericopies List')}</Caption>
+        <Caption>{tr('Sections List')}</Caption>
 
         <Stack gap="14px">
           <Select

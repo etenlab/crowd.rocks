@@ -6,7 +6,7 @@ import {
   WORDS_JOINER,
 } from '../pericopies/pericopies.service';
 import { FileService } from '../file/file.service';
-import { FileUrlOutput } from './types';
+import { FileUrlAndContentOutput } from './types';
 import { Readable } from 'stream';
 import { DocumentsService } from './documents.service';
 import { putLangCodesToFileName } from '../../common/utility';
@@ -27,7 +27,7 @@ export class DocumentTranslateService {
   async translateByPericopies(
     documentId: string,
     targetLang: LanguageInput,
-  ): Promise<FileUrlOutput> {
+  ): Promise<FileUrlAndContentOutput> {
     const document = await this.documentsService.getDocument(
       Number(documentId),
     );
@@ -36,6 +36,7 @@ export class DocumentTranslateService {
         error: ErrorType.DocumentNotFound,
         fileUrl: null,
         fileName: null,
+        fileContent: null,
       };
     }
     const start_word = await this.pericopiesService.getFirstWordOfDocument(
@@ -77,7 +78,9 @@ export class DocumentTranslateService {
       );
     });
 
-    const fileContentStream = Readable.from([finalStrings.join(WORDS_JOINER)]);
+    const fileString = finalStrings.join(WORDS_JOINER);
+
+    const fileContentStream = Readable.from([fileString]);
     const newFileName = putLangCodesToFileName(
       document.document.file_name,
       targetLang,
@@ -89,6 +92,11 @@ export class DocumentTranslateService {
       newFileName,
       DEFAULT_TEXTY_FILE_MIME_TYPE,
     );
-    return { error: ErrorType.NoError, fileUrl, fileName: newFileName };
+    return {
+      error: ErrorType.NoError,
+      fileUrl,
+      fileName: newFileName,
+      fileContent: fileString,
+    };
   }
 }

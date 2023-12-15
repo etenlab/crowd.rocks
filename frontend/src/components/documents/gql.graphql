@@ -192,5 +192,6 @@ mutation DocumentByPericopiesTranslate(
   ) {
     fileUrl
     fileName
+    fileContent
   }
 }

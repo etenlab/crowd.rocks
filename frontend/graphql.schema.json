@@ -2191,7 +2191,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "FileUrlOutput",
+        "name": "FileUrlAndContentOutput",
         "description": null,
         "fields": [
           {
@@ -2206,6 +2206,18 @@
                 "name": "ErrorType",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "fileContent",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6148,7 +6160,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "FileUrlOutput",
+                "name": "FileUrlAndContentOutput",
                 "ofType": null
               }
             },
