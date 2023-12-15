@@ -254,7 +254,13 @@ export class PericopiesService {
     first: number | null,
     after: string | null,
     pgClient: PoolClient | null,
+    token: string,
   ): Promise<PericopeWithVotesListConnection> {
+    await this.findOrCreatePericopeAtDocumentBeginning(
+      String(document_id),
+      token,
+    );
+
     try {
       const res = await pgClientOrPool({
         client: pgClient,
@@ -598,5 +604,55 @@ export class PericopiesService {
         tags_count: null,
       };
     }
+  }
+
+  async findOrCreatePericopeAtDocumentBeginning(
+    documentId: string,
+    token,
+  ): Promise<string | null> {
+    const firstWordEntryId = await this.getFirstWordOfDocument(documentId);
+    if (!firstWordEntryId || !Number(firstWordEntryId)) {
+      Logger.error(
+        `First word not fount for documentID ${documentId}`,
+        'pericopiesService#createPericopeAtDocumentBeginning',
+      );
+      return null;
+    }
+    const existingPericopeId = await this.getPericopeIdByStartWordEntryId(
+      firstWordEntryId,
+    );
+    if (existingPericopeId) {
+      return existingPericopeId;
+    }
+    const newPericope = await this.upserts(
+      [Number(firstWordEntryId)],
+      token,
+      null,
+    );
+    if (!newPericope.pericopies[0]?.pericope_id) {
+      Logger.error(
+        `Error creating first Pericope for documentId ${documentId}`,
+        'pericopiesService#createPericopeAtDocumentBeginning',
+      );
+      return null;
+    }
+    return newPericope.pericopies[0]?.pericope_id;
+  }
+
+  async getPericopeIdByStartWordEntryId(
+    startWordEntryId: string,
+  ): Promise<string | null> {
+    const resQ = await this.pg.pool.query(
+      `
+      select
+        p.pericope_id
+      from
+        pericopies p
+      where
+        p.start_word = $1
+    `,
+      [startWordEntryId],
+    );
+    return resQ.rows[0]?.pericope_id || null;
   }
 }
