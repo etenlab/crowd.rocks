@@ -38,7 +38,7 @@ export function SuperDocumentViewerPage() {
 
   const [tab, setTab] = useState<TabKind>(TabKind.Document);
   const [tool, setTool] = useState<OptionItem>({
-    label: tr('Pericope'),
+    label: tr('Sections'),
     value: SuperToolKind.Pericope,
   });
   const [filter, setFilter] = useState<OptionItem<FilterKind>>({

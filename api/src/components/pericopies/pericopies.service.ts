@@ -655,4 +655,10 @@ export class PericopiesService {
     );
     return resQ.rows[0]?.pericope_id || null;
   }
+
+  getDiscussionTitle = async (id: string): Promise<string> => {
+    const pericope = await this.getPericopeTextWithDescription(id);
+    if (!pericope.pericope_text) return 'Section';
+    return `Section: "${pericope.pericope_text}"`;
+  };
 }

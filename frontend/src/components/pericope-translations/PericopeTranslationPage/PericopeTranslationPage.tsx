@@ -161,7 +161,7 @@ export function PericopeTranslationPage() {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="body1">{tr('Pericope')}</Typography>
+            <Typography variant="body1">{tr('Section')}</Typography>
             <Stack
               direction="row"
               justifyContent="space-between"

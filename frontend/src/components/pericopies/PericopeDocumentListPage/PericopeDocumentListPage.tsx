@@ -68,7 +68,7 @@ export function PericopeDocumentListPage() {
 
   return (
     <PageLayout>
-      <Caption>{tr('Pericope Tool')}</Caption>
+      <Caption>{tr('Sectioning Tool')}</Caption>
 
       <Stack gap="32px">
         <LangSelector

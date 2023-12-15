@@ -41,7 +41,7 @@ export function PericopeAddButton({
     >
       <AddCircle sx={{ fontSize: 20 }} />
       <Typography variant="h5" sx={{ fontWeight: 600 }} color="text.orange">
-        {tr('Add Pericope')}
+        {tr('Add Section')}
       </Typography>
     </Stack>
   );

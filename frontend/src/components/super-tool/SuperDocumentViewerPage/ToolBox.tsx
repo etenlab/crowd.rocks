@@ -94,7 +94,7 @@ export function ToolBox({
   const toolOptions = useMemo(
     () => [
       {
-        label: tr('Pericope'),
+        label: tr('Sections'),
         value: SuperToolKind.Pericope,
       },
       {

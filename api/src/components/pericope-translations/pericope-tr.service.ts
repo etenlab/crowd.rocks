@@ -435,4 +435,10 @@ export class PericopeTrService {
       },
     }));
   }
+
+  getDiscussionTitle = async (id: string): Promise<string> => {
+    const translation = await this.getPericopeTranslations([id]);
+    if (!translation[0]) return 'Section translation';
+    return `Section translation: "${translation[0].translation}"`;
+  };
 }

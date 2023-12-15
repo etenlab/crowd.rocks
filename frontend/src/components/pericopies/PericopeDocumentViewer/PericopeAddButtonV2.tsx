@@ -37,7 +37,7 @@ export function PericopeAddButtonV2({
       color="orange"
       fullWidth
     >
-      {tr('Add Pericope')}
+      {tr('Add Section')}
     </Button>
   );
 }
