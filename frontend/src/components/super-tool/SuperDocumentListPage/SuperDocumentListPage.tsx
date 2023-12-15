@@ -101,7 +101,7 @@ export function SuperDocumentListPage() {
 
   return (
     <PageLayout>
-      <Caption>{tr('Super Tool')}</Caption>
+      <Caption>{tr('Crowd Sourcing Translation')}</Caption>
 
       <Stack gap="32px">
         <Stack gap="16px">

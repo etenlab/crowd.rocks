@@ -15,9 +15,10 @@ export function useAddPericopeTrMutation() {
 
   return useGeneratedAddPericopeTrMutation({
     onError: (error) => {
-      console.log(error);
       present({
-        message: tr('Error with creating translation for pericope'),
+        message:
+          tr('Error with creating translation for pericope: ') +
+            error?.message || '',
         duration: 1500,
         position: 'top',
         color: 'danger',
