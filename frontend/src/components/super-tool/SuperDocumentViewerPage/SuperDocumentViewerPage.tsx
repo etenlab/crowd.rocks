@@ -11,17 +11,18 @@ import {
 
 import { PageLayout } from '../../common/PageLayout';
 import { Caption } from '../../common/Caption/Caption';
+import { Menu } from '../../common/icons/Menu';
+import { Cancel } from '../../common/icons/Cancel';
+import { OptionItem } from '../../common/forms/Autocomplete';
 
 import { useGetDocumentQuery } from '../../../generated/graphql';
+import { useVotePericopeTrChangedSubscription } from '../../../hooks/useVotePericopeTrChangedSubscription';
 import { useTr } from '../../../hooks/useTr';
-
-import { useAppContext } from '../../../hooks/useAppContext';
 import { TabKind, ToolBox, SuperToolKind, FilterKind } from './ToolBox';
-import { OptionItem } from '../../common/forms/Autocomplete';
-import { Settings } from '../../common/icons/Settings';
+import { useAppContext } from '../../../hooks/useAppContext';
+
 import { SuperDocumentViewer } from '../SuperDocumentViewer/SuperDocumentViewer';
 import { SuperPericopiesTranslator } from '../SuperPericopiesTranslator';
-import { useVotePericopeTrChangedSubscription } from '../../../hooks/useVotePericopeTrChangedSubscription';
 
 export function SuperDocumentViewerPage() {
   const { tr } = useTr();
@@ -111,7 +112,7 @@ export function SuperDocumentViewerPage() {
           width: '100%',
           maxWidth: '777px',
           background: (theme) => theme.palette.background.white,
-          padding: expand ? '30px 20px' : '0 20px',
+          padding: expand ? '30px 16px' : '0 16px',
           boxShadow: '0px 5px 14px 0px rgba(128, 136, 163, 0.20)',
         }}
       >
@@ -136,27 +137,56 @@ export function SuperDocumentViewerPage() {
 
       {!expand ? (
         <Button
-          variant="contained"
+          variant="outlined"
           onClick={handleExpand}
           sx={{
             position: 'fixed',
-            zIndex: 9,
-            bottom: 100,
-            right: matches ? `calc(50% - 390px)` : '16px',
+            zIndex: 1000,
+            top: 20,
+            right: matches ? `calc(50% - 394px)` : 0,
             borderRadius: '10px',
             padding: '10px',
             minWidth: 0,
             transform: 'translateX(-50%)',
+            background: (theme) => theme.palette.background.white,
+            '&:hover': {
+              background: (theme) => theme.palette.background.white,
+            },
           }}
           color="blue"
         >
-          <Settings />
+          <Menu />
         </Button>
-      ) : null}
+      ) : (
+        <Button
+          variant="outlined"
+          onClick={handleClose}
+          sx={{
+            position: 'fixed',
+            zIndex: 1000,
+            top: 20,
+            right: matches ? `calc(50% - 394px)` : 0,
+            borderRadius: '10px',
+            padding: '10px',
+            minWidth: 0,
+            transform: 'translateX(-50%)',
+            background: (theme) => theme.palette.background.white,
+            '&:hover': {
+              background: (theme) => theme.palette.background.white,
+            },
+          }}
+          color="blue"
+        >
+          <Cancel />
+        </Button>
+      )}
 
       <Box
-        sx={{ width: '100%', maxWidth: '777px', height: '100vh' }}
-        onClick={handleClose}
+        sx={{
+          width: '100%',
+          maxWidth: '777px',
+          height: '100vh',
+        }}
       >
         {tab === TabKind.Document ? (
           <SuperDocumentViewer

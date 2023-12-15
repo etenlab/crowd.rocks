@@ -15,7 +15,7 @@ import 'react-quill/dist/quill.snow.css';
 import { Post } from './Post';
 import { useAppContext } from '../../hooks/useAppContext';
 import { PostModal } from './PostModal';
-import { Typography } from '@mui/material';
+// import { Typography } from '@mui/material';
 
 interface DiscussionPageProps
   extends RouteComponentProps<{
@@ -113,9 +113,9 @@ export function DiscussionPage({ match }: DiscussionPageProps) {
     <PageLayout>
       <Caption onBackClick={() => router.goBack()}>{tr('Discussion')}</Caption>
 
-      <Typography variant="h3" letterSpacing="-2%">
+      {/* <Typography variant="h3" letterSpacing="-2%">
         {postData?.postsByParent.title}
-      </Typography>
+      </Typography> */}
       <AddListHeader
         title={tr('Posts')}
         onClick={() => {
