@@ -140,7 +140,7 @@ export function DocumentItem({ document, onClickItem }: DocumentItemProps) {
 
       <Tag label={langInfo2String(langInfo)} color="blue" />
 
-      <MoreHorizButton dropDownList={dropDownList} />
+      <MoreHorizButton dropDownList={dropDownList} popoverWidth="350px" />
     </Stack>
   );
 }
