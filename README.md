@@ -2,13 +2,7 @@
 
 ## Introduction
 
-crowd.rocks is a server/client version of a peer-to-peer research project.
-
-Differences:
-- No data is stored on the client. crowd.rocks is a normal server/client app that uses GraphQL.
-- No ORM.
-- No graph schema. We are using normal relational schema tables.
-- 100% Ionic components. This will be deployed on both app stores so we won't use MUI.
+crowd.rocks is a crowdsourcing translation monorepo.
 
 ## Setup
 Commands are run from each project folder (`env`, `api`, `frontend`, `infra`).
