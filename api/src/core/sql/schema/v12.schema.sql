@@ -2,17 +2,10 @@
 
 -- LAYER 1 --------------------------------------------------------------
 
-create table g1_nodes (
-  g1_node_id bigserial primary key,
-  node_type varchar(32) not null,
+create table g1_entities (
+  g1_entity_id bigserial primary key,
+  g1_entity_type varchar(32) not null,
   props jsonb
-);
-
-create table g1_relationships (
-  g1_rel_id bigserial primary key,
-  from_node bigint not null references g1_nodes(g1_node_id),
-  to_node bigint not null references g1_nodes(g1_node_id),
-  unique (from_node, to_node)
 );
 
 -- election types:
@@ -21,27 +14,26 @@ create table g1_relationships (
 -- relationship: election points to from_node, candidates point to to_node
 
 create table g1_elections (
-  election_id bigserial primary key,
-  g1_node_id bigint not null references g1_nodes(g1_node_id),
-  election_type varchar(32) not null,
-  unique (g1_node_id, election_type)
+  g1_election_id bigserial primary key,
+  g1_entity_id bigint not null references g1_entities(g1_entity_id),
+  g1_election_type varchar(32) not null,
+  unique (g1_entity_id, g1_election_type)
 );
 
 create table g1_candidates (
-  candidate_id bigserial primary key,
-  election_id bigint not null references g1_elections(election_id),
-  g1_node_id bigint not null references g1_nodes(g1_node_id),
-  unique (election_id, g1_node_id)
+  g1_candidate_id bigserial primary key,
+  g1_election_id bigint not null references g1_elections(g1_election_id),
+  g1_entity_id bigint not null references g1_entities(g1_entity_id),
+  unique (g1_election_id, g1_entity_id)
 );
 
 create table g1_votes (
-  vote_id bigserial primary key,
+  g1_vote_id bigserial primary key,
   user_id bigint not null references users(user_id),
-  candidate_id bigint not null references g1_candidates(candidate_id),
+  g1_candidate_id bigint not null references g1_candidates(g1_candidate_id),
   vote bool,
-  unique (user_id, candidate_id)
+  unique (user_id, g1_candidate_id)
 );
-
 -- LAYER 2 --------------------------------------------------------------
 
 --create table g2_nodes (
