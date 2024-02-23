@@ -34,22 +34,24 @@ create table g1_votes (
   vote bool,
   unique (user_id, g1_candidate_id)
 );
+
+-- the user table already exists but if someone wanted to copy/paste
+-- this file for stand-alone work then here is a temp user table:
+-- create table users (
+--   user_id bigserial primary key,
+--   email varchar(255) unique not null,
+--   password varchar(128) not null,
+--   created_at timestamp not null default CURRENT_TIMESTAMP
+-- );
+
 -- LAYER 2 --------------------------------------------------------------
 
+-- this is the schema we need to produce from the g1 layer:
 --create table g2_nodes (
 --  g2_node_id bigserial primary key,
 --  g2_node_type varchar(32) not null,
 --  props jsonb
 --);
-
-create materialized view g2_nodes AS
-  select
-      g1_node_id,
-      node_type,
-      props
-  from g1_nodes;
-
-refresh materialized view g2_nodes;
 
 --create table g2_relationships (
 --  g2_rel_id bigserial primary key,
@@ -60,12 +62,25 @@ refresh materialized view g2_nodes;
 --  unique (from_node, to_node, g2_rel_type)
 --);
 
-create materialized view g2_relationships AS
+-- here are the materialized views that need to have the shape above
+
+create materialized view g2_nodes AS
+  -- todo
   select
-      g1_rel_id,
-      from_node,
-      to_node
-  from g1_relationships;
+      g1_entity_id,
+      g1_entity_type,
+      props
+  from g1_entities;
+
+refresh materialized view g2_nodes;
+
+create materialized view g2_relationships AS
+  -- todo
+  select
+      g1_entity_id,
+      g1_entity_type,
+      props
+  from g1_entities;
 
 refresh materialized view g2_relationships;
 
