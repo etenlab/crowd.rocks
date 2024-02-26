@@ -2,21 +2,67 @@
 
 -- LAYER 1 --------------------------------------------------------------
 
+create type g1_entity_types as enum (
+  'Node',
+  'Relationship',
+  'Key',
+  'Value'
+);
+
+create table g2_entity_types (
+  g2_entity_type varchar(32) primary key
+);
+
+insert into  g2_entity_types (g2_entity_type)
+values 
+  -- nodes
+  ('Word'),
+  ('Person'),
+  ('Book'),
+  ('Document'),
+  ('Chapter'),
+  ('Verse'),
+
+  -- relationships
+  ('NEXT_WORD'),
+  ('NEXT_VERSE'),
+  ('NEXT_CHAPTER'),
+  ('NEXT_BOOK'),
+  ('TO_VERSE_START'),
+  ('TO_CHAPTER_START'),
+  ('TO_BOOK_START')
+;
+
+-- nodes will have a g2 entity type
+-- relationships will have a g2 entity type, from, and to
+-- keys will have a from reference to their parent entity
+-- values will have a from reference to their parent entity
+
 create table g1_entities (
   g1_entity_id bigserial primary key,
-  g1_entity_type varchar(32) not null,
+  active bool default true,
+  valid bool default true,
+  g1_entity_type g1_entity_types,
+  from_entity bigint references g1_entities(g1_entity_id), -- for relationships, keys, and values
+  to_entity bigint references g1_entities(g1_entity_id), -- for relationships
+  g2_entity_type varchar(32) references g2_entity_types(g2_entity_type), -- for nodes and rels
   props jsonb
 );
 
--- election types:
--- node-keys:    election points to node,      candidates point to keys
--- node-props:   election points to key,       candidates point to key-values
--- relationship: election points to from_node, candidates point to to_node
+create table g1_election_types (
+  g1_election_type varchar(32) primary key
+);
+
+insert into g1_election_types (g1_election_type)
+values
+  ('entity-exist'), -- election points to entity     candidate points to entity
+  ('entity-keys'),  -- election points to entity,    candidates point to keys
+  ('key-value');    -- election points to key,       candidates point to key-values
 
 create table g1_elections (
   g1_election_id bigserial primary key,
   g1_entity_id bigint not null references g1_entities(g1_entity_id),
-  g1_election_type varchar(32) not null,
+  g1_election_type varchar(32) not null references g1_election_types(g1_election_type),
   unique (g1_entity_id, g1_election_type)
 );
 
@@ -46,43 +92,25 @@ create table g1_votes (
 
 -- LAYER 2 --------------------------------------------------------------
 
--- this is the schema we need to produce from the g1 layer:
---create table g2_nodes (
---  g2_node_id bigserial primary key,
---  g2_node_type varchar(32) not null,
---  props jsonb
---);
 
---create table g2_relationships (
---  g2_rel_id bigserial primary key,
---  from_node bigint not null references g2_nodes(g2_node_id),
---  to_node bigint not null references g2_nodes(g2_node_id),
---  g2_rel_type varchar(32) not null,
---  props jsonb,
---  unique (from_node, to_node, g2_rel_type)
---);
+create table g2_nodes (
+ g1_entity_id bigint primary key,
+ active bool default true,
+ valid bool default true,
+ g2_node_type varchar(32) not null references g2_node_types(g2_node_type),
+ props jsonb
+);
 
--- here are the materialized views that need to have the shape above
-
-create materialized view g2_nodes AS
-  -- todo
-  select
-      g1_entity_id,
-      g1_entity_type,
-      props
-  from g1_entities;
-
-refresh materialized view g2_nodes;
-
-create materialized view g2_relationships AS
-  -- todo
-  select
-      g1_entity_id,
-      g1_entity_type,
-      props
-  from g1_entities;
-
-refresh materialized view g2_relationships;
+create table g2_relationships (
+ g1_entity_id bigint primary key,
+ from_node bigint not null references g2_nodes(g1_entity_id),
+ to_node bigint not null references g2_nodes(g1_entity_id),
+ active bool default true,
+ valid bool default true,
+ g2_rel_type varchar(32) not null references g2_relationship_types(g2_rel_type),
+ props jsonb,
+ unique (from_node, to_node, g2_rel_type)
+);
 
 -- LAYER 3 --------------------------------------------------------------
 
