@@ -40,45 +40,21 @@ values
 
 create table g1_entities (
   g1_entity_id bigserial primary key,
-  active bool default true,
-  valid bool default true,
-  g1_entity_type g1_entity_types,
-  from_entity bigint references g1_entities(g1_entity_id), -- for relationships, keys, and values
-  to_entity bigint references g1_entities(g1_entity_id), -- for relationships
+  active bool not null default true,
+  valid bool not null default true,
+  g1_entity_type g1_entity_types not null,
+  from_entity bigint references g1_entities(g1_entity_id), -- for rels, keys, and values
+  to_entity bigint references g1_entities(g1_entity_id), -- for rels
   g2_entity_type varchar(32) references g2_entity_types(g2_entity_type), -- for nodes and rels
   props jsonb
-);
-
-create table g1_election_types (
-  g1_election_type varchar(32) primary key
-);
-
-insert into g1_election_types (g1_election_type)
-values
-  ('entity-exist'), -- election points to entity     candidate points to entity
-  ('entity-keys'),  -- election points to entity,    candidates point to keys
-  ('key-value');    -- election points to key,       candidates point to key-values
-
-create table g1_elections (
-  g1_election_id bigserial primary key,
-  g1_entity_id bigint not null references g1_entities(g1_entity_id),
-  g1_election_type varchar(32) not null references g1_election_types(g1_election_type),
-  unique (g1_entity_id, g1_election_type)
-);
-
-create table g1_candidates (
-  g1_candidate_id bigserial primary key,
-  g1_election_id bigint not null references g1_elections(g1_election_id),
-  g1_entity_id bigint not null references g1_entities(g1_entity_id),
-  unique (g1_election_id, g1_entity_id)
 );
 
 create table g1_votes (
   g1_vote_id bigserial primary key,
   user_id bigint not null references users(user_id),
-  g1_candidate_id bigint not null references g1_candidates(g1_candidate_id),
+  g1_entity_id bigint not null references g1_entities(g1_entity_id),
   vote bool,
-  unique (user_id, g1_candidate_id)
+  unique (user_id, g1_entity_id)
 );
 
 -- the user table already exists but if someone wanted to copy/paste
