@@ -9,21 +9,26 @@ create type g1_entity_types as enum (
   'Value'
 );
 
-create table g2_entity_types (
-  g2_entity_type varchar(32) primary key
+create table g2_node_types (
+  g2_node_type varchar(32) primary key
 );
 
-insert into  g2_entity_types (g2_entity_type)
+insert into  g2_node_types (g2_node_type)
 values 
-  -- nodes
   ('Word'),
   ('Person'),
   ('Book'),
   ('Document'),
   ('Chapter'),
-  ('Verse'),
+  ('Verse')
+;
 
-  -- relationships
+create table g2_relationship_types (
+  g2_rel_type varchar(32) primary key
+);
+
+insert into  g2_relationship_types (g2_rel_type)
+values 
   ('NEXT_WORD'),
   ('NEXT_VERSE'),
   ('NEXT_CHAPTER'),
@@ -33,8 +38,8 @@ values
   ('TO_BOOK_START')
 ;
 
--- nodes will have a g2 entity type
--- relationships will have a g2 entity type, from, and to
+-- nodes will have a g2 node type
+-- relationships will have a g2 rel type, from, and to
 -- keys will have a from reference to their parent entity
 -- values will have a from reference to their parent entity
 
@@ -45,7 +50,8 @@ create table g1_entities (
   g1_entity_type g1_entity_types not null,
   from_entity bigint references g1_entities(g1_entity_id), -- for rels, keys, and values
   to_entity bigint references g1_entities(g1_entity_id), -- for rels
-  g2_entity_type varchar(32) references g2_entity_types(g2_entity_type), -- for nodes and rels
+  g2_node_type varchar(32) references g2_node_types(g2_node_type), -- for nodes 
+  g2_rel_type varchar(32) references g2_relationship_types(g2_rel_type), -- for rels
   props jsonb
 );
 
@@ -67,7 +73,6 @@ create table g1_votes (
 -- );
 
 -- LAYER 2 --------------------------------------------------------------
-
 
 create table g2_nodes (
  g1_entity_id bigint primary key,
