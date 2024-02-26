@@ -2,25 +2,20 @@
 
 drop table g2_relationships;
 drop table g2_nodes;
-drop table g2_entity_types;
-drop table g2_node_types;
-drop table g2_relationship_types;
 drop table g1_votes;
 drop table g1_entities;
-drop table g1_entity_types;
 drop type g1_entity_types;
 
 select * from g1_entities;
-select * from g1_elections;
-select * from g1_candidates;
 select * from g1_votes;
 select * from g2_nodes;
 select * from g2_relationships;
 
 call create_fake_graph_data(null);
 
-refresh materialized view g2_nodes;
-refresh materialized view g2_relationships;
+
+call g2_node_create('Word', '{"isNoun":true, "isVerb": false}'::jsonb, null, null);
+call g2_relationship_create('TO_WORD', 3, 4, '{"sequence": 42}'::jsonb, null, null);
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
