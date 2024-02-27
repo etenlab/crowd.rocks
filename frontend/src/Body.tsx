@@ -70,6 +70,7 @@ import { TranslationDetailPage } from './components/translation/TranslationDetai
 import { NewTranslationConfirmPage } from './components/translation/TranslationDetail/NewTranslationConfirmPage';
 
 import { DiscussionPage } from './components/Discussion/DiscussionPage';
+import { GrammarToolPage } from './components/grammar-tool/GrammarToolPage';
 
 import { ForumListPage } from './components/forums/ForumListPage/ForumListPage';
 import { FolderListPage } from './components/forums/FolderListPage/FolderListPage';
@@ -488,6 +489,11 @@ export function Body() {
               exact
               path="/:nation_id/:language_id/:cluster_id/dictionary-list"
               component={WordListPage}
+            />
+            <Route
+              exact
+              path="/:nation_id/:language_id/:cluster_id/grammar-tool"
+              component={GrammarToolPage}
             />
             <Route
               exact

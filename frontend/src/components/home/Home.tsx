@@ -219,6 +219,19 @@ const Home: React.FC<HomePageProps> = ({ match }: HomePageProps) => {
       isShown: () => !!settings?.isBetaTools,
       subMenu: [
         {
+          link: `/${match.params.nation_id}/${match.params.language_id}/1/grammar-tool`,
+          icon: (
+            <IonIcon
+              style={{ color: '#476FFF', minWidth: '25px', maxWidth: '25px' }}
+              size="large"
+              icon={bookOutline}
+            />
+          ),
+          title: tr('Grammar Tool'),
+          description: tr('Draw Simple Grammar Diagrams'),
+          isShown: () => !!settings?.isBetaTools,
+        },
+        {
           link: `/${match.params.nation_id}/${match.params.language_id}/1/dictionary-list`,
           icon: (
             <IonIcon
