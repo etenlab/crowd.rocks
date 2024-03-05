@@ -25,6 +25,7 @@ begin
     return;
   end if;
 
+  -- add to g2 nodes table
   -- if props are null we use the default prop, an empty object {}
   if p_props is null then 
 
@@ -39,7 +40,7 @@ begin
 
     for v_key, v_value in select * from jsonb_each (p_props)
     loop
-      call g1_key_create(4, ('"' || v_key || '"')::jsonb, v_value, v_id, v_error);
+      call g1_key_create(p_entity_id, v_key, v_value, v_id, v_error);
     end loop;
 
   end if;

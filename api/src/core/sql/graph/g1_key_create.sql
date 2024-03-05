@@ -67,7 +67,7 @@ begin
   into v_g2_id, v_props;
 
   if v_g2_id is not null then
-    update g2_relatioships
+    update g2_relationships
     set props = jsonb_concat(('{"'|| p_key || '":null}')::jsonb, props)
     where entity_id = v_g2_id;
   end if;
