@@ -23,6 +23,9 @@ create table g1_entities (
   to_entity bigint references g1_entities(entity_id), -- for rels
   node_type varchar(32), -- for nodes 
   rel_type varchar(32), -- for rels
+  -- when entity type is node/rel/key, the votes are sums of all true and false votes
+  -- when entity type is value, the votes are only the sum of the true votes
+  votes int not null default 0, 
   props jsonb -- for keys and values
 );
 
@@ -50,7 +53,7 @@ create table g2_nodes (
  active bool default true,
  valid bool default true,
  node_type varchar(32) not null,
- props jsonb
+ props jsonb default '{}'
 );
 
 create table g2_relationships (

@@ -13,6 +13,7 @@ declare
 begin
   p_error_type := 'UnknownError';
 
+  -- ensure the parent entity exists
   select entity_id
   from g1_entities
   where entity_id = p_from
@@ -23,6 +24,7 @@ begin
     return;
   end if;
 
+  -- add value to the g1 entities table
   insert into g1_entities(entity_type, from_entity, props)
   values ('Value'::g1_entity_types, p_from, p_value)
   on conflict do nothing
@@ -32,6 +34,10 @@ begin
   if p_entity_id is null then
     return;
   end if;
+
+  -- update g2 node/relationship
+
+  -- todo, must use votes table
 
   p_error_type := 'NoError';
 
