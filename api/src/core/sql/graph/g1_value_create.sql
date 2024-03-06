@@ -10,6 +10,7 @@ declare
   v_entity_id bigint;
   v_key varchar;
   v_value jsonb;
+  v_current_id bigint;
 begin
   p_error_type := 'UnknownError';
 
@@ -21,6 +22,17 @@ begin
 
   if v_entity_id is null then
     p_error_type := 'FromEntityNotFound';
+    return;
+  end if;
+
+  -- ensure the value doesn't already exist for this key
+  select entity_id
+  into v_current_id
+  from g1_entities
+  where from_entity = p_from and props = p_value;
+
+  if v_current_id is not null then
+    p_error_type := 'ValueAlreadyExistsOnParent';
     return;
   end if;
 
