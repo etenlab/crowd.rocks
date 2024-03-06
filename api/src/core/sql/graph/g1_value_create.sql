@@ -47,9 +47,8 @@ begin
     return;
   end if;
 
-  -- update g2 node/relationship
-
-  -- todo, must use votes table
+  -- update g2 node/relationship as needed
+  call g1_process_value_election(p_entity_id, p_error_type);
 
   p_error_type := 'NoError';
 
