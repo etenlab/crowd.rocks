@@ -65,6 +65,9 @@ export class DatabaseVersionControlService {
         case 10:
           console.log('Updating database to version 11');
           await this.loadVersion11();
+        case 11:
+          console.log('Updating database to version 12');
+          await this.loadVersion12();
 
         default:
           console.error('Database version is current');
@@ -597,6 +600,39 @@ export class DatabaseVersionControlService {
 
     // set version
     await this.setVersionNumber(11);
+  }
+
+  async loadVersion12(): Promise<void> {
+    // graph schema
+    await this.runSqlFile('./src/core/sql/schema/v12.schema.sql');
+
+    // graph functions
+    await this.runSqlFile(
+      './src/core/sql/graph/g1_key_create.sql',
+    );
+
+    await this.runSqlFile(
+      './src/core/sql/graph/g1_process_value_election.sql',
+    );
+
+    await this.runSqlFile(
+      './src/core/sql/graph/g1_value_create.sql',
+    );
+
+    await this.runSqlFile(
+      './src/core/sql/graph/g1_vote_create.sql',
+    );
+
+    await this.runSqlFile(
+      './src/core/sql/graph/g2_node_create.sql',
+    );
+
+    await this.runSqlFile(
+      './src/core/sql/graph/g2_relationship_create.sql',
+    );
+
+    // set version
+    await this.setVersionNumber(12);
   }
 
   async registerUser(

@@ -1,3 +1,5 @@
+-- helper file. this function is not loaded into prod
+
 create or replace procedure create_fake_graph_data(
   inout p_error_type varchar(32)
 )
