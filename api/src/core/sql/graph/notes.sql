@@ -13,14 +13,24 @@ select * from g1_votes order by g1_vote_id asc;
 select * from g2_nodes order by entity_id asc;
 select * from g2_relationships order by entity_id asc;
 
+
+select entity_id, votes, props
+from g1_entities
+where from_entity = 2
+order by votes desc, entity_id asc
+limit 1
+
 select entity_id, entity_type, from_entity, votes, props from g1_entities order by entity_id asc;
 
 call create_fake_graph_data(null);
 
 call g2_node_create('Word', null, null, null);
-call g1_key_create(1, 'key1', null, null, null);
-call g1_value_create(2, '"value1"'::jsonb, null, null);
+call g1_key_create(1, 'key2', null, null, null);
+call g1_value_create(6, '"value1"'::jsonb, null, null);
 call g1_value_create(2, '"value2"'::jsonb, null, null);
+call g1_value_create(2, 'null'::jsonb, null, null);
+
+call g1_vote_create(1, 5, false, null, null);
 
 call g1_key_create(1, 'key2', '"value1"', null, null);
 call g1_value_create(3, '"value4"', null, null);

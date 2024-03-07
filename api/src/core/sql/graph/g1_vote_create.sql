@@ -1,11 +1,3 @@
---                  Active    Inactive
---  Node            X         X
---  Relationship    X         X
---  Key             X         X
---  Value                    
---
-
-
 create or replace procedure g1_vote_create(
   in p_user_id bigint,
   in p_entity_id bigint,
