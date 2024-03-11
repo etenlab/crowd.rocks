@@ -28,7 +28,7 @@
     "@capacitor/status-bar": "5.0.5",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@eten-lab/mermaid": "^0.0.1",
+    "@eten-lab/mermaid": "^0.0.2",
     "@fontsource/poppins": "^5.0.8",
     "@fontsource/roboto": "^5.0.8",
     "@foobar404/wave": "^2.0.4",
